@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -68,6 +69,9 @@ func (_c *TeamCreate) Mutation() *TeamMutation {
 
 // Save creates the Team in the database.
 func (_c *TeamCreate) Save(ctx context.Context) (*Team, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, teamCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -93,21 +97,37 @@ func (_c *TeamCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *TeamCreate) check() error {
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Team.name"`)}
-	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := team.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Team.name": %w`, err)}
-		}
-	}
-	return nil
+var teamCreateSpec = entgen.CreateSpec[*TeamMutation]{
+	Fields: []entgen.FieldSpec[*TeamMutation]{
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Team.name"`)}
+				},
+			},
+			IsSet: func(m *TeamMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+			Validators: []func(*TeamMutation) error{
+				func(m *TeamMutation) error {
+					if v, ok := m.Name(); ok {
+						if err := team.NameValidator(v); err != nil {
+							return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Team.name": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*TeamMutation]{},
 }
 
 func (_c *TeamCreate) sqlSave(ctx context.Context) (*Team, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, teamCreateSpec); err != nil {
 		return nil, err
 	}
 	_node, _spec := _c.createSpec()
@@ -191,7 +211,10 @@ func (_c *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, teamCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				if err := entgen.CheckCreate(builder.driver.Dialect(), mutation, teamCreateSpec); err != nil {
 					return nil, err
 				}
 				builder.mutation = mutation

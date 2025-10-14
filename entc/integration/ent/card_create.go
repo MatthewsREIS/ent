@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -17,6 +18,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/spec"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -131,7 +134,9 @@ func (_c *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, cardCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -157,127 +162,293 @@ func (_c *CardCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *CardCreate) defaults() {
-	if _, ok := _c.mutation.CreateTime(); !ok {
-		v := card.DefaultCreateTime()
-		_c.mutation.SetCreateTime(v)
-	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
-		v := card.DefaultUpdateTime()
-		_c.mutation.SetUpdateTime(v)
-	}
-	if _, ok := _c.mutation.Balance(); !ok {
-		v := card.DefaultBalance
-		_c.mutation.SetBalance(v)
-	}
+var cardCreateSpec = entgen.CreateSpec[*CardMutation]{
+	Fields: []entgen.FieldSpec[*CardMutation]{
+		{
+			Name: "create_time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Card.create_time"`)}
+				},
+			},
+			IsSet: func(m *CardMutation) bool {
+				_, ok := m.CreateTime()
+				return ok
+			},
+			Default: func(m *CardMutation) error {
+				if _, ok := m.CreateTime(); !ok {
+					v := card.DefaultCreateTime()
+					m.SetCreateTime(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "update_time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Card.update_time"`)}
+				},
+			},
+			IsSet: func(m *CardMutation) bool {
+				_, ok := m.UpdateTime()
+				return ok
+			},
+			Default: func(m *CardMutation) error {
+				if _, ok := m.UpdateTime(); !ok {
+					v := card.DefaultUpdateTime()
+					m.SetUpdateTime(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "balance",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "Card.balance"`)}
+				},
+			},
+			IsSet: func(m *CardMutation) bool {
+				_, ok := m.Balance()
+				return ok
+			},
+			Default: func(m *CardMutation) error {
+				if _, ok := m.Balance(); !ok {
+					v := card.DefaultBalance
+					m.SetBalance(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "number",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
+				},
+			},
+			IsSet: func(m *CardMutation) bool {
+				_, ok := m.Number()
+				return ok
+			},
+			Validators: []func(*CardMutation) error{
+				func(m *CardMutation) error {
+					if v, ok := m.Number(); ok {
+						if err := card.NumberValidator(v); err != nil {
+							return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "name",
+			Validators: []func(*CardMutation) error{
+				func(m *CardMutation) error {
+					if v, ok := m.Name(); ok {
+						if err := card.NameValidator(v); err != nil {
+							return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*CardMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *CardCreate) check() error {
-	if _, ok := _c.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Card.create_time"`)}
-	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Card.update_time"`)}
-	}
-	if _, ok := _c.mutation.Balance(); !ok {
-		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "Card.balance"`)}
-	}
-	if _, ok := _c.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
-	}
-	if v, ok := _c.mutation.Number(); ok {
-		if err := card.NumberValidator(v); err != nil {
-			return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
-		}
-	}
-	return nil
+var cardCreateDescriptor = entbuilder.CreateDescriptor[config, Card, *CardMutation]{
+	Table: card.Table,
+	NewNode: func(cfg config) *Card {
+		return &Card{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Card, *CardMutation]{
+		Column:      card.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Card, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Card, *CardMutation]{
+		{
+			Column: card.FieldCreateTime,
+			Type:   field.TypeTime,
+			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.CreateTime(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Card, fv entbuilder.FieldValue) error {
+				node.CreateTime = fv.Node.(time.Time)
+				return nil
+			},
+		},
+
+		{
+			Column: card.FieldUpdateTime,
+			Type:   field.TypeTime,
+			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.UpdateTime(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Card, fv entbuilder.FieldValue) error {
+				node.UpdateTime = fv.Node.(time.Time)
+				return nil
+			},
+		},
+
+		{
+			Column: card.FieldBalance,
+			Type:   field.TypeFloat64,
+			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Balance(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Card, fv entbuilder.FieldValue) error {
+				node.Balance = fv.Node.(float64)
+				return nil
+			},
+		},
+
+		{
+			Column: card.FieldNumber,
+			Type:   field.TypeString,
+			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Number(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Card, fv entbuilder.FieldValue) error {
+				node.Number = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: card.FieldName,
+			Type:   field.TypeString,
+			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Name(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Card, fv entbuilder.FieldValue) error {
+				node.Name = fv.Node.(string)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Card, *CardMutation]{
+		{
+			Value: func(cfg config, m *CardMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.OwnerIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: true,
+					Table:   card.OwnerTable,
+					Columns: []string{card.OwnerColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Card, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.user_card = &ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *CardMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.SpecIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: true,
+					Table:   card.SpecTable,
+					Columns: card.SpecPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, cardCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &cardCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &cardCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Card{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.CreateTime(); ok {
-		_spec.SetField(card.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
-	}
-	if value, ok := _c.mutation.UpdateTime(); ok {
-		_spec.SetField(card.FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
-	}
-	if value, ok := _c.mutation.Balance(); ok {
-		_spec.SetField(card.FieldBalance, field.TypeFloat64, value)
-		_node.Balance = value
-	}
-	if value, ok := _c.mutation.Number(); ok {
-		_spec.SetField(card.FieldNumber, field.TypeString, value)
-		_node.Number = value
-	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(card.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   card.OwnerTable,
-			Columns: []string{card.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_card = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.SpecIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   card.SpecTable,
-			Columns: card.SpecPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -532,19 +703,24 @@ func (_c *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CardMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, cardCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, cardCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &cardCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -556,20 +732,23 @@ func (_c *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &cardCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

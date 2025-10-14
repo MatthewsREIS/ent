@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/node"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -99,6 +102,9 @@ func (_c *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (_c *NodeCreate) Save(ctx context.Context) (*Node, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, nodeCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -124,77 +130,152 @@ func (_c *NodeCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *NodeCreate) check() error {
-	return nil
+var nodeCreateSpec = entgen.CreateSpec[*NodeMutation]{
+	Fields: []entgen.FieldSpec[*NodeMutation]{
+		{
+			Name: "value",
+		},
+		{
+			Name: "updated_at",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*NodeMutation]{},
+}
+
+var nodeCreateDescriptor = entbuilder.CreateDescriptor[config, Node, *NodeMutation]{
+	Table: node.Table,
+	NewNode: func(cfg config) *Node {
+		return &Node{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Node, *NodeMutation]{
+		Column:      node.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Node, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Node, *NodeMutation]{
+		{
+			Column: node.FieldValue,
+			Type:   field.TypeInt,
+			Value: func(m *NodeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Value(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Node, fv entbuilder.FieldValue) error {
+				node.Value = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: node.FieldUpdatedAt,
+			Type:   field.TypeTime,
+			Value: func(m *NodeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.UpdatedAt(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Node, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*time.Time); ok {
+					node.UpdatedAt = v
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Node, *NodeMutation]{
+		{
+			Value: func(cfg config, m *NodeMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.PrevIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: true,
+					Table:   node.PrevTable,
+					Columns: []string{node.PrevColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Node, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.node_next = &ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *NodeMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.NextIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   node.NextTable,
+					Columns: []string{node.NextColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, nodeCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &nodeCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &nodeCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Node{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(node.Table, sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Value(); ok {
-		_spec.SetField(node.FieldValue, field.TypeInt, value)
-		_node.Value = value
-	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(node.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = &value
-	}
-	if nodes := _c.mutation.PrevIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   node.PrevTable,
-			Columns: []string{node.PrevColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.node_next = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.NextIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   node.NextTable,
-			Columns: []string{node.NextColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -428,18 +509,24 @@ func (_c *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*NodeMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, nodeCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, nodeCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &nodeCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -451,20 +538,23 @@ func (_c *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &nodeCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

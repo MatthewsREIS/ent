@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -18,6 +19,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -193,7 +196,9 @@ func (_c *FileCreate) Mutation() *FileMutation {
 
 // Save creates the File in the database.
 func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, fileCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -219,142 +224,356 @@ func (_c *FileCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *FileCreate) defaults() {
-	if _, ok := _c.mutation.Size(); !ok {
-		v := file.DefaultSize
-		_c.mutation.SetSize(v)
-	}
+var fileCreateSpec = entgen.CreateSpec[*FileMutation]{
+	Fields: []entgen.FieldSpec[*FileMutation]{
+		{
+			Name: "set_id",
+			Validators: []func(*FileMutation) error{
+				func(m *FileMutation) error {
+					if v, ok := m.SetID(); ok {
+						if err := file.SetIDValidator(v); err != nil {
+							return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "size",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
+				},
+			},
+			IsSet: func(m *FileMutation) bool {
+				_, ok := m.Size()
+				return ok
+			},
+			Default: func(m *FileMutation) error {
+				if _, ok := m.Size(); !ok {
+					v := file.DefaultSize
+					m.SetSize(v)
+				}
+				return nil
+			},
+			Validators: []func(*FileMutation) error{
+				func(m *FileMutation) error {
+					if v, ok := m.Size(); ok {
+						if err := file.SizeValidator(v); err != nil {
+							return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
+				},
+			},
+			IsSet: func(m *FileMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+		},
+		{
+			Name: "user",
+		},
+		{
+			Name: "group",
+		},
+		{
+			Name: "op",
+		},
+		{
+			Name: "field_id",
+		},
+		{
+			Name: "create_time",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*FileMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *FileCreate) check() error {
-	if v, ok := _c.mutation.SetID(); ok {
-		if err := file.SetIDValidator(v); err != nil {
-			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Size(); !ok {
-		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
-	}
-	if v, ok := _c.mutation.Size(); ok {
-		if err := file.SizeValidator(v); err != nil {
-			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
-	}
-	return nil
+var fileCreateDescriptor = entbuilder.CreateDescriptor[config, File, *FileMutation]{
+	Table: file.Table,
+	NewNode: func(cfg config) *File {
+		return &File{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, File, *FileMutation]{
+		Column:      file.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *File, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, File, *FileMutation]{
+		{
+			Column: file.FieldSetID,
+			Type:   field.TypeInt,
+			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.SetID(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *File, fv entbuilder.FieldValue) error {
+				node.SetID = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: file.FieldSize,
+			Type:   field.TypeInt,
+			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Size(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *File, fv entbuilder.FieldValue) error {
+				node.Size = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: file.FieldName,
+			Type:   field.TypeString,
+			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Name(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *File, fv entbuilder.FieldValue) error {
+				node.Name = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: file.FieldUser,
+			Type:   field.TypeString,
+			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.User(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *File, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*string); ok {
+					node.User = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: file.FieldGroup,
+			Type:   field.TypeString,
+			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Group(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *File, fv entbuilder.FieldValue) error {
+				node.Group = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: file.FieldOp,
+			Type:   field.TypeBool,
+			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.GetOp(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *File, fv entbuilder.FieldValue) error {
+				node.Op = fv.Node.(bool)
+				return nil
+			},
+		},
+
+		{
+			Column: file.FieldFieldID,
+			Type:   field.TypeInt,
+			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.FieldID(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *File, fv entbuilder.FieldValue) error {
+				node.FieldID = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: file.FieldCreateTime,
+			Type:   field.TypeTime,
+			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.CreateTime(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *File, fv entbuilder.FieldValue) error {
+				node.CreateTime = fv.Node.(time.Time)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, File, *FileMutation]{
+		{
+			Value: func(cfg config, m *FileMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.OwnerIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   file.OwnerTable,
+					Columns: []string{file.OwnerColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *File, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.user_files = &ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *FileMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.TypeIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   file.TypeTable,
+					Columns: []string{file.TypeColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *File, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.file_type_files = &ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *FileMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.FieldIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   file.FieldTable,
+					Columns: []string{file.FieldColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *FileCreate) sqlSave(ctx context.Context) (*File, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, fileCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &fileCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &fileCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
-	var (
-		_node = &File{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(file.Table, sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.SetID(); ok {
-		_spec.SetField(file.FieldSetID, field.TypeInt, value)
-		_node.SetID = value
-	}
-	if value, ok := _c.mutation.Size(); ok {
-		_spec.SetField(file.FieldSize, field.TypeInt, value)
-		_node.Size = value
-	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(file.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := _c.mutation.User(); ok {
-		_spec.SetField(file.FieldUser, field.TypeString, value)
-		_node.User = &value
-	}
-	if value, ok := _c.mutation.Group(); ok {
-		_spec.SetField(file.FieldGroup, field.TypeString, value)
-		_node.Group = value
-	}
-	if value, ok := _c.mutation.GetOp(); ok {
-		_spec.SetField(file.FieldOp, field.TypeBool, value)
-		_node.Op = value
-	}
-	if value, ok := _c.mutation.FieldID(); ok {
-		_spec.SetField(file.FieldFieldID, field.TypeInt, value)
-		_node.FieldID = value
-	}
-	if value, ok := _c.mutation.CreateTime(); ok {
-		_spec.SetField(file.FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
-	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   file.OwnerTable,
-			Columns: []string{file.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_files = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TypeIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   file.TypeTable,
-			Columns: []string{file.TypeColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.file_type_files = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.FieldIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   file.FieldTable,
-			Columns: []string{file.FieldColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -822,19 +1041,24 @@ func (_c *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FileMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, fileCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, fileCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &fileCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -846,20 +1070,23 @@ func (_c *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &fileCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

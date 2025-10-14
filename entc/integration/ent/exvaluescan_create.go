@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math/big"
@@ -16,6 +17,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -90,6 +93,9 @@ func (_c *ExValueScanCreate) Mutation() *ExValueScanMutation {
 
 // Save creates the ExValueScan in the database.
 func (_c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, exvaluescanCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -115,118 +121,302 @@ func (_c *ExValueScanCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *ExValueScanCreate) check() error {
-	if _, ok := _c.mutation.Binary(); !ok {
-		return &ValidationError{Name: "binary", err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
-	}
-	if _, ok := _c.mutation.BinaryBytes(); !ok {
-		return &ValidationError{Name: "binary_bytes", err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
-	}
-	if _, ok := _c.mutation.Text(); !ok {
-		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "ExValueScan.text"`)}
-	}
-	if _, ok := _c.mutation.Base64(); !ok {
-		return &ValidationError{Name: "base64", err: errors.New(`ent: missing required field "ExValueScan.base64"`)}
-	}
-	if _, ok := _c.mutation.Custom(); !ok {
-		return &ValidationError{Name: "custom", err: errors.New(`ent: missing required field "ExValueScan.custom"`)}
-	}
-	return nil
+var exvaluescanCreateSpec = entgen.CreateSpec[*ExValueScanMutation]{
+	Fields: []entgen.FieldSpec[*ExValueScanMutation]{
+		{
+			Name: "binary",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "binary", err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.Binary()
+				return ok
+			},
+		},
+		{
+			Name: "binary_bytes",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "binary_bytes", err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.BinaryBytes()
+				return ok
+			},
+		},
+		{
+			Name: "binary_optional",
+		},
+		{
+			Name: "text",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "ExValueScan.text"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.Text()
+				return ok
+			},
+		},
+		{
+			Name: "text_optional",
+		},
+		{
+			Name: "base64",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "base64", err: errors.New(`ent: missing required field "ExValueScan.base64"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.Base64()
+				return ok
+			},
+		},
+		{
+			Name: "custom",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "custom", err: errors.New(`ent: missing required field "ExValueScan.custom"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.Custom()
+				return ok
+			},
+		},
+		{
+			Name: "custom_optional",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*ExValueScanMutation]{},
+}
+
+var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueScan, *ExValueScanMutation]{
+	Table: exvaluescan.Table,
+	NewNode: func(cfg config) *ExValueScan {
+		return &ExValueScan{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, ExValueScan, *ExValueScanMutation]{
+		Column:      exvaluescan.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *ExValueScan, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, ExValueScan, *ExValueScanMutation]{
+		{
+			Column: exvaluescan.FieldBinary,
+			Type:   field.TypeString,
+			Value: func(m *ExValueScanMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Binary(); ok {
+					vv, err := exvaluescan.ValueScanner.Binary.Value(value)
+					if err != nil {
+						return entbuilder.FieldValue{}, false, err
+					}
+					return entbuilder.FieldValue{
+						Spec: vv,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *ExValueScan, fv entbuilder.FieldValue) error {
+				node.Binary = fv.Node.(*url.URL)
+				return nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldBinaryBytes,
+			Type:   field.TypeBytes,
+			Value: func(m *ExValueScanMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.BinaryBytes(); ok {
+					vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
+					if err != nil {
+						return entbuilder.FieldValue{}, false, err
+					}
+					return entbuilder.FieldValue{
+						Spec: vv,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *ExValueScan, fv entbuilder.FieldValue) error {
+				node.BinaryBytes = fv.Node.(*url.URL)
+				return nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldBinaryOptional,
+			Type:   field.TypeString,
+			Value: func(m *ExValueScanMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.BinaryOptional(); ok {
+					vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)
+					if err != nil {
+						return entbuilder.FieldValue{}, false, err
+					}
+					return entbuilder.FieldValue{
+						Spec: vv,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *ExValueScan, fv entbuilder.FieldValue) error {
+				node.BinaryOptional = fv.Node.(*url.URL)
+				return nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldText,
+			Type:   field.TypeString,
+			Value: func(m *ExValueScanMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Text(); ok {
+					vv, err := exvaluescan.ValueScanner.Text.Value(value)
+					if err != nil {
+						return entbuilder.FieldValue{}, false, err
+					}
+					return entbuilder.FieldValue{
+						Spec: vv,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *ExValueScan, fv entbuilder.FieldValue) error {
+				node.Text = fv.Node.(*big.Int)
+				return nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldTextOptional,
+			Type:   field.TypeString,
+			Value: func(m *ExValueScanMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.TextOptional(); ok {
+					vv, err := exvaluescan.ValueScanner.TextOptional.Value(value)
+					if err != nil {
+						return entbuilder.FieldValue{}, false, err
+					}
+					return entbuilder.FieldValue{
+						Spec: vv,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *ExValueScan, fv entbuilder.FieldValue) error {
+				node.TextOptional = fv.Node.(*big.Int)
+				return nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldBase64,
+			Type:   field.TypeString,
+			Value: func(m *ExValueScanMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Base64(); ok {
+					vv, err := exvaluescan.ValueScanner.Base64.Value(value)
+					if err != nil {
+						return entbuilder.FieldValue{}, false, err
+					}
+					return entbuilder.FieldValue{
+						Spec: vv,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *ExValueScan, fv entbuilder.FieldValue) error {
+				node.Base64 = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldCustom,
+			Type:   field.TypeString,
+			Value: func(m *ExValueScanMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Custom(); ok {
+					vv, err := exvaluescan.ValueScanner.Custom.Value(value)
+					if err != nil {
+						return entbuilder.FieldValue{}, false, err
+					}
+					return entbuilder.FieldValue{
+						Spec: vv,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *ExValueScan, fv entbuilder.FieldValue) error {
+				node.Custom = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldCustomOptional,
+			Type:   field.TypeString,
+			Value: func(m *ExValueScanMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.CustomOptional(); ok {
+					vv, err := exvaluescan.ValueScanner.CustomOptional.Value(value)
+					if err != nil {
+						return entbuilder.FieldValue{}, false, err
+					}
+					return entbuilder.FieldValue{
+						Spec: vv,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *ExValueScan, fv entbuilder.FieldValue) error {
+				node.CustomOptional = fv.Node.(string)
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *ExValueScanCreate) sqlSave(ctx context.Context) (*ExValueScan, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, exvaluescanCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec, err := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &exvaluescanCreateDescriptor)
 	if err != nil {
 		return nil, err
 	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &exvaluescanCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, error) {
-	var (
-		_node = &ExValueScan{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(exvaluescan.Table, sqlgraph.NewFieldSpec(exvaluescan.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Binary(); ok {
-		vv, err := exvaluescan.ValueScanner.Binary.Value(value)
-		if err != nil {
-			return nil, nil, err
-		}
-		_spec.SetField(exvaluescan.FieldBinary, field.TypeString, vv)
-		_node.Binary = value
-	}
-	if value, ok := _c.mutation.BinaryBytes(); ok {
-		vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
-		if err != nil {
-			return nil, nil, err
-		}
-		_spec.SetField(exvaluescan.FieldBinaryBytes, field.TypeBytes, vv)
-		_node.BinaryBytes = value
-	}
-	if value, ok := _c.mutation.BinaryOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)
-		if err != nil {
-			return nil, nil, err
-		}
-		_spec.SetField(exvaluescan.FieldBinaryOptional, field.TypeString, vv)
-		_node.BinaryOptional = value
-	}
-	if value, ok := _c.mutation.Text(); ok {
-		vv, err := exvaluescan.ValueScanner.Text.Value(value)
-		if err != nil {
-			return nil, nil, err
-		}
-		_spec.SetField(exvaluescan.FieldText, field.TypeString, vv)
-		_node.Text = value
-	}
-	if value, ok := _c.mutation.TextOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.TextOptional.Value(value)
-		if err != nil {
-			return nil, nil, err
-		}
-		_spec.SetField(exvaluescan.FieldTextOptional, field.TypeString, vv)
-		_node.TextOptional = value
-	}
-	if value, ok := _c.mutation.Base64(); ok {
-		vv, err := exvaluescan.ValueScanner.Base64.Value(value)
-		if err != nil {
-			return nil, nil, err
-		}
-		_spec.SetField(exvaluescan.FieldBase64, field.TypeString, vv)
-		_node.Base64 = value
-	}
-	if value, ok := _c.mutation.Custom(); ok {
-		vv, err := exvaluescan.ValueScanner.Custom.Value(value)
-		if err != nil {
-			return nil, nil, err
-		}
-		_spec.SetField(exvaluescan.FieldCustom, field.TypeString, vv)
-		_node.Custom = value
-	}
-	if value, ok := _c.mutation.CustomOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.CustomOptional.Value(value)
-		if err != nil {
-			return nil, nil, err
-		}
-		_spec.SetField(exvaluescan.FieldCustomOptional, field.TypeString, vv)
-		_node.CustomOptional = value
-	}
-	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -616,18 +806,21 @@ func (_c *ExValueScanCreateBulk) Save(ctx context.Context) ([]*ExValueScan, erro
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ExValueScanMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, exvaluescanCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, exvaluescanCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i], err = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &exvaluescanCreateDescriptor)
 				if err != nil {
 					return nil, err
 				}
@@ -642,20 +835,23 @@ func (_c *ExValueScanCreateBulk) Save(ctx context.Context) ([]*ExValueScan, erro
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &exvaluescanCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

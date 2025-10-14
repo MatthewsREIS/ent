@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"net"
@@ -19,6 +20,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -796,7 +799,9 @@ func (_c *FieldTypeCreate) Mutation() *FieldTypeMutation {
 
 // Save creates the FieldType in the database.
 func (_c *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, fieldtypeCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -822,419 +827,1711 @@ func (_c *FieldTypeCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *FieldTypeCreate) defaults() {
-	if _, ok := _c.mutation.LinkOther(); !ok {
-		v := fieldtype.DefaultLinkOther
-		_c.mutation.SetLinkOther(v)
-	}
-	if _, ok := _c.mutation.LinkOtherFunc(); !ok {
-		v := fieldtype.DefaultLinkOtherFunc()
-		_c.mutation.SetLinkOtherFunc(v)
-	}
-	if _, ok := _c.mutation.Dir(); !ok {
-		v := fieldtype.DefaultDir()
-		_c.mutation.SetDir(v)
-	}
-	if _, ok := _c.mutation.Str(); !ok {
-		v := fieldtype.DefaultStr()
-		_c.mutation.SetStr(v)
-	}
-	if _, ok := _c.mutation.NullStr(); !ok {
-		v := fieldtype.DefaultNullStr()
-		_c.mutation.SetNullStr(v)
-	}
-	if _, ok := _c.mutation.DeletedAt(); !ok {
-		v := fieldtype.DefaultDeletedAt()
-		_c.mutation.SetDeletedAt(v)
-	}
-	if _, ok := _c.mutation.IP(); !ok {
-		v := fieldtype.DefaultIP()
-		_c.mutation.SetIP(v)
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		v := fieldtype.DefaultRole
-		_c.mutation.SetRole(v)
-	}
-	if _, ok := _c.mutation.Pair(); !ok {
-		v := fieldtype.DefaultPair()
-		_c.mutation.SetPair(v)
-	}
-	if _, ok := _c.mutation.Vstring(); !ok {
-		v := fieldtype.DefaultVstring()
-		_c.mutation.SetVstring(v)
-	}
-	if _, ok := _c.mutation.Triple(); !ok {
-		v := fieldtype.DefaultTriple()
-		_c.mutation.SetTriple(v)
-	}
+var fieldtypeCreateSpec = entgen.CreateSpec[*FieldTypeMutation]{
+	Fields: []entgen.FieldSpec[*FieldTypeMutation]{
+		{
+			Name: "int",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int", err: errors.New(`ent: missing required field "FieldType.int"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int()
+				return ok
+			},
+		},
+		{
+			Name: "int8",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int8", err: errors.New(`ent: missing required field "FieldType.int8"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int8()
+				return ok
+			},
+		},
+		{
+			Name: "int16",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int16", err: errors.New(`ent: missing required field "FieldType.int16"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int16()
+				return ok
+			},
+		},
+		{
+			Name: "int32",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int32", err: errors.New(`ent: missing required field "FieldType.int32"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int32()
+				return ok
+			},
+		},
+		{
+			Name: "int64",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int64", err: errors.New(`ent: missing required field "FieldType.int64"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int64()
+				return ok
+			},
+		},
+		{
+			Name: "optional_int",
+		},
+		{
+			Name: "optional_int8",
+		},
+		{
+			Name: "optional_int16",
+		},
+		{
+			Name: "optional_int32",
+		},
+		{
+			Name: "optional_int64",
+		},
+		{
+			Name: "nillable_int",
+		},
+		{
+			Name: "nillable_int8",
+		},
+		{
+			Name: "nillable_int16",
+		},
+		{
+			Name: "nillable_int32",
+		},
+		{
+			Name: "nillable_int64",
+		},
+		{
+			Name: "validate_optional_int32",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.ValidateOptionalInt32(); ok {
+						if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
+							return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_uint",
+		},
+		{
+			Name: "optional_uint8",
+		},
+		{
+			Name: "optional_uint16",
+		},
+		{
+			Name: "optional_uint32",
+		},
+		{
+			Name: "optional_uint64",
+		},
+		{
+			Name: "state",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.State(); ok {
+						if err := fieldtype.StateValidator(v); err != nil {
+							return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_float",
+		},
+		{
+			Name: "optional_float32",
+		},
+		{
+			Name: "text",
+		},
+		{
+			Name: "datetime",
+		},
+		{
+			Name: "decimal",
+		},
+		{
+			Name: "link_other",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.LinkOther(); !ok {
+					v := fieldtype.DefaultLinkOther
+					m.SetLinkOther(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "link_other_func",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.LinkOtherFunc(); !ok {
+					v := fieldtype.DefaultLinkOtherFunc()
+					m.SetLinkOtherFunc(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "mac",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.MAC(); ok {
+						if err := fieldtype.MACValidator(v.String()); err != nil {
+							return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "string_array",
+		},
+		{
+			Name: "password",
+		},
+		{
+			Name: "string_scanner",
+		},
+		{
+			Name: "duration",
+		},
+		{
+			Name: "dir",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "dir", err: errors.New(`ent: missing required field "FieldType.dir"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Dir()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Dir(); !ok {
+					v := fieldtype.DefaultDir()
+					m.SetDir(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "ndir",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Ndir(); ok {
+						if err := fieldtype.NdirValidator(string(v)); err != nil {
+							return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "str",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Str(); !ok {
+					v := fieldtype.DefaultStr()
+					m.SetStr(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "null_str",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.NullStr(); !ok {
+					v := fieldtype.DefaultNullStr()
+					m.SetNullStr(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "link",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Link(); ok {
+						if err := fieldtype.LinkValidator(v.String()); err != nil {
+							return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "null_link",
+		},
+		{
+			Name: "active",
+		},
+		{
+			Name: "null_active",
+		},
+		{
+			Name: "deleted",
+		},
+		{
+			Name: "deleted_at",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.DeletedAt(); !ok {
+					v := fieldtype.DefaultDeletedAt()
+					m.SetDeletedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "raw_data",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.RawData(); ok {
+						if err := fieldtype.RawDataValidator(v); err != nil {
+							return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "sensitive",
+		},
+		{
+			Name: "ip",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.IP(); !ok {
+					v := fieldtype.DefaultIP()
+					m.SetIP(v)
+				}
+				return nil
+			},
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.IP(); ok {
+						if err := fieldtype.IPValidator([]byte(v)); err != nil {
+							return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "null_int64",
+		},
+		{
+			Name: "schema_int",
+		},
+		{
+			Name: "schema_int8",
+		},
+		{
+			Name: "schema_int64",
+		},
+		{
+			Name: "schema_float",
+		},
+		{
+			Name: "schema_float32",
+		},
+		{
+			Name: "null_float",
+		},
+		{
+			Name: "role",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "FieldType.role"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Role()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Role(); !ok {
+					v := fieldtype.DefaultRole
+					m.SetRole(v)
+				}
+				return nil
+			},
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Role(); ok {
+						if err := fieldtype.RoleValidator(v); err != nil {
+							return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "priority",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Priority(); ok {
+						if err := fieldtype.PriorityValidator(v); err != nil {
+							return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_uuid",
+		},
+		{
+			Name: "nillable_uuid",
+		},
+		{
+			Name: "strings",
+		},
+		{
+			Name: "pair",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "pair", err: errors.New(`ent: missing required field "FieldType.pair"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Pair()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Pair(); !ok {
+					v := fieldtype.DefaultPair()
+					m.SetPair(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "nil_pair",
+		},
+		{
+			Name: "vstring",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "vstring", err: errors.New(`ent: missing required field "FieldType.vstring"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Vstring()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Vstring(); !ok {
+					v := fieldtype.DefaultVstring()
+					m.SetVstring(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "triple",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "triple", err: errors.New(`ent: missing required field "FieldType.triple"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Triple()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Triple(); !ok {
+					v := fieldtype.DefaultTriple()
+					m.SetTriple(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "big_int",
+		},
+		{
+			Name: "password_other",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*FieldTypeMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *FieldTypeCreate) check() error {
-	if _, ok := _c.mutation.Int(); !ok {
-		return &ValidationError{Name: "int", err: errors.New(`ent: missing required field "FieldType.int"`)}
-	}
-	if _, ok := _c.mutation.Int8(); !ok {
-		return &ValidationError{Name: "int8", err: errors.New(`ent: missing required field "FieldType.int8"`)}
-	}
-	if _, ok := _c.mutation.Int16(); !ok {
-		return &ValidationError{Name: "int16", err: errors.New(`ent: missing required field "FieldType.int16"`)}
-	}
-	if _, ok := _c.mutation.Int32(); !ok {
-		return &ValidationError{Name: "int32", err: errors.New(`ent: missing required field "FieldType.int32"`)}
-	}
-	if _, ok := _c.mutation.Int64(); !ok {
-		return &ValidationError{Name: "int64", err: errors.New(`ent: missing required field "FieldType.int64"`)}
-	}
-	if v, ok := _c.mutation.ValidateOptionalInt32(); ok {
-		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.State(); ok {
-		if err := fieldtype.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.MAC(); ok {
-		if err := fieldtype.MACValidator(v.String()); err != nil {
-			return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Dir(); !ok {
-		return &ValidationError{Name: "dir", err: errors.New(`ent: missing required field "FieldType.dir"`)}
-	}
-	if v, ok := _c.mutation.Ndir(); ok {
-		if err := fieldtype.NdirValidator(string(v)); err != nil {
-			return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Link(); ok {
-		if err := fieldtype.LinkValidator(v.String()); err != nil {
-			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.RawData(); ok {
-		if err := fieldtype.RawDataValidator(v); err != nil {
-			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.IP(); ok {
-		if err := fieldtype.IPValidator([]byte(v)); err != nil {
-			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "FieldType.role"`)}
-	}
-	if v, ok := _c.mutation.Role(); ok {
-		if err := fieldtype.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Priority(); ok {
-		if err := fieldtype.PriorityValidator(v); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Pair(); !ok {
-		return &ValidationError{Name: "pair", err: errors.New(`ent: missing required field "FieldType.pair"`)}
-	}
-	if _, ok := _c.mutation.Vstring(); !ok {
-		return &ValidationError{Name: "vstring", err: errors.New(`ent: missing required field "FieldType.vstring"`)}
-	}
-	if _, ok := _c.mutation.Triple(); !ok {
-		return &ValidationError{Name: "triple", err: errors.New(`ent: missing required field "FieldType.triple"`)}
-	}
-	return nil
+var fieldtypeCreateDescriptor = entbuilder.CreateDescriptor[config, FieldType, *FieldTypeMutation]{
+	Table: fieldtype.Table,
+	NewNode: func(cfg config) *FieldType {
+		return &FieldType{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, FieldType, *FieldTypeMutation]{
+		Column:      fieldtype.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *FieldType, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, FieldType, *FieldTypeMutation]{
+		{
+			Column: fieldtype.FieldInt,
+			Type:   field.TypeInt,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Int(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Int = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldInt8,
+			Type:   field.TypeInt8,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Int8(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Int8 = fv.Node.(int8)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldInt16,
+			Type:   field.TypeInt16,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Int16(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Int16 = fv.Node.(int16)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldInt32,
+			Type:   field.TypeInt32,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Int32(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Int32 = fv.Node.(int32)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldInt64,
+			Type:   field.TypeInt64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Int64(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Int64 = fv.Node.(int64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt,
+			Type:   field.TypeInt,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalInt(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalInt = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt8,
+			Type:   field.TypeInt8,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalInt8(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalInt8 = fv.Node.(int8)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt16,
+			Type:   field.TypeInt16,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalInt16(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalInt16 = fv.Node.(int16)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt32,
+			Type:   field.TypeInt32,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalInt32(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalInt32 = fv.Node.(int32)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt64,
+			Type:   field.TypeInt64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalInt64(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalInt64 = fv.Node.(int64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt,
+			Type:   field.TypeInt,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NillableInt(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*int); ok {
+					node.NillableInt = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt8,
+			Type:   field.TypeInt8,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NillableInt8(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*int8); ok {
+					node.NillableInt8 = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt16,
+			Type:   field.TypeInt16,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NillableInt16(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*int16); ok {
+					node.NillableInt16 = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt32,
+			Type:   field.TypeInt32,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NillableInt32(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*int32); ok {
+					node.NillableInt32 = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt64,
+			Type:   field.TypeInt64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NillableInt64(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*int64); ok {
+					node.NillableInt64 = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldValidateOptionalInt32,
+			Type:   field.TypeInt32,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.ValidateOptionalInt32(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.ValidateOptionalInt32 = fv.Node.(int32)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint,
+			Type:   field.TypeUint,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalUint(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalUint = fv.Node.(uint)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint8,
+			Type:   field.TypeUint8,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalUint8(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalUint8 = fv.Node.(uint8)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint16,
+			Type:   field.TypeUint16,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalUint16(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalUint16 = fv.Node.(uint16)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint32,
+			Type:   field.TypeUint32,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalUint32(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalUint32 = fv.Node.(uint32)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint64,
+			Type:   field.TypeUint64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalUint64(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalUint64 = fv.Node.(uint64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldState,
+			Type:   field.TypeEnum,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.State(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.State = fv.Node.(fieldtype.State)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalFloat,
+			Type:   field.TypeFloat64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalFloat(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalFloat = fv.Node.(float64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalFloat32,
+			Type:   field.TypeFloat32,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalFloat32(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalFloat32 = fv.Node.(float32)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldText,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Text(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Text = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDatetime,
+			Type:   field.TypeTime,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Datetime(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Datetime = fv.Node.(time.Time)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDecimal,
+			Type:   field.TypeFloat64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Decimal(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Decimal = fv.Node.(float64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldLinkOther,
+			Type:   field.TypeOther,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.LinkOther(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.LinkOther = fv.Node.(*schema.Link)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldLinkOtherFunc,
+			Type:   field.TypeOther,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.LinkOtherFunc(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.LinkOtherFunc = fv.Node.(*schema.Link)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldMAC,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.MAC(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.MAC = fv.Node.(schema.MAC)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldStringArray,
+			Type:   field.TypeOther,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.StringArray(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.StringArray = fv.Node.(schema.Strings)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldPassword,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Password(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Password = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldStringScanner,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.StringScanner(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*schema.StringScanner); ok {
+					node.StringScanner = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDuration,
+			Type:   field.TypeInt64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Duration(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Duration = fv.Node.(time.Duration)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDir,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Dir(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Dir = fv.Node.(http.Dir)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNdir,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Ndir(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*http.Dir); ok {
+					node.Ndir = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldStr,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Str(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Str = fv.Node.(sql.NullString)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullStr,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NullStr(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.NullStr = fv.Node.(*sql.NullString)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldLink,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Link(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Link = fv.Node.(schema.Link)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullLink,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NullLink(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.NullLink = fv.Node.(*schema.Link)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldActive,
+			Type:   field.TypeBool,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Active(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Active = fv.Node.(schema.Status)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullActive,
+			Type:   field.TypeBool,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NullActive(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*schema.Status); ok {
+					node.NullActive = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDeleted,
+			Type:   field.TypeBool,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Deleted(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Deleted = fv.Node.(*sql.NullBool)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDeletedAt,
+			Type:   field.TypeTime,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.DeletedAt(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.DeletedAt = fv.Node.(*sql.NullTime)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldRawData,
+			Type:   field.TypeBytes,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.RawData(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.RawData = fv.Node.([]byte)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSensitive,
+			Type:   field.TypeBytes,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Sensitive(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Sensitive = fv.Node.([]byte)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldIP,
+			Type:   field.TypeBytes,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.IP(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.IP = fv.Node.(net.IP)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullInt64,
+			Type:   field.TypeInt,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NullInt64(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.NullInt64 = fv.Node.(*sql.NullInt64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaInt,
+			Type:   field.TypeInt,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.SchemaInt(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.SchemaInt = fv.Node.(schema.Int)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaInt8,
+			Type:   field.TypeInt8,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.SchemaInt8(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.SchemaInt8 = fv.Node.(schema.Int8)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaInt64,
+			Type:   field.TypeInt64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.SchemaInt64(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.SchemaInt64 = fv.Node.(schema.Int64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaFloat,
+			Type:   field.TypeFloat64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.SchemaFloat(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.SchemaFloat = fv.Node.(schema.Float64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaFloat32,
+			Type:   field.TypeFloat32,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.SchemaFloat32(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.SchemaFloat32 = fv.Node.(schema.Float32)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullFloat,
+			Type:   field.TypeFloat64,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NullFloat(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.NullFloat = fv.Node.(*sql.NullFloat64)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldRole,
+			Type:   field.TypeEnum,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Role(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Role = fv.Node.(role.Role)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldPriority,
+			Type:   field.TypeEnum,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Priority(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Priority = fv.Node.(role.Priority)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUUID,
+			Type:   field.TypeUUID,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalUUID(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.OptionalUUID = fv.Node.(uuid.UUID)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableUUID,
+			Type:   field.TypeUUID,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NillableUUID(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*uuid.UUID); ok {
+					node.NillableUUID = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldStrings,
+			Type:   field.TypeJSON,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Strings(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Strings = fv.Node.([]string)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldPair,
+			Type:   field.TypeBytes,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Pair(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Pair = fv.Node.(schema.Pair)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNilPair,
+			Type:   field.TypeBytes,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.NilPair(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.NilPair = fv.Node.(*schema.Pair)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldVstring,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Vstring(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Vstring = fv.Node.(schema.VString)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldTriple,
+			Type:   field.TypeString,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Triple(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.Triple = fv.Node.(schema.Triple)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldBigInt,
+			Type:   field.TypeInt,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.BigInt(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.BigInt = fv.Node.(schema.BigInt)
+				return nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldPasswordOther,
+			Type:   field.TypeOther,
+			Value: func(m *FieldTypeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.PasswordOther(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *FieldType, fv entbuilder.FieldValue) error {
+				node.PasswordOther = fv.Node.(schema.Password)
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, fieldtypeCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &fieldtypeCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &fieldtypeCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
-	var (
-		_node = &FieldType{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(fieldtype.Table, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Int(); ok {
-		_spec.SetField(fieldtype.FieldInt, field.TypeInt, value)
-		_node.Int = value
-	}
-	if value, ok := _c.mutation.Int8(); ok {
-		_spec.SetField(fieldtype.FieldInt8, field.TypeInt8, value)
-		_node.Int8 = value
-	}
-	if value, ok := _c.mutation.Int16(); ok {
-		_spec.SetField(fieldtype.FieldInt16, field.TypeInt16, value)
-		_node.Int16 = value
-	}
-	if value, ok := _c.mutation.Int32(); ok {
-		_spec.SetField(fieldtype.FieldInt32, field.TypeInt32, value)
-		_node.Int32 = value
-	}
-	if value, ok := _c.mutation.Int64(); ok {
-		_spec.SetField(fieldtype.FieldInt64, field.TypeInt64, value)
-		_node.Int64 = value
-	}
-	if value, ok := _c.mutation.OptionalInt(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt, field.TypeInt, value)
-		_node.OptionalInt = value
-	}
-	if value, ok := _c.mutation.OptionalInt8(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt8, field.TypeInt8, value)
-		_node.OptionalInt8 = value
-	}
-	if value, ok := _c.mutation.OptionalInt16(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt16, field.TypeInt16, value)
-		_node.OptionalInt16 = value
-	}
-	if value, ok := _c.mutation.OptionalInt32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt32, field.TypeInt32, value)
-		_node.OptionalInt32 = value
-	}
-	if value, ok := _c.mutation.OptionalInt64(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt64, field.TypeInt64, value)
-		_node.OptionalInt64 = value
-	}
-	if value, ok := _c.mutation.NillableInt(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt, field.TypeInt, value)
-		_node.NillableInt = &value
-	}
-	if value, ok := _c.mutation.NillableInt8(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt8, field.TypeInt8, value)
-		_node.NillableInt8 = &value
-	}
-	if value, ok := _c.mutation.NillableInt16(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt16, field.TypeInt16, value)
-		_node.NillableInt16 = &value
-	}
-	if value, ok := _c.mutation.NillableInt32(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt32, field.TypeInt32, value)
-		_node.NillableInt32 = &value
-	}
-	if value, ok := _c.mutation.NillableInt64(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt64, field.TypeInt64, value)
-		_node.NillableInt64 = &value
-	}
-	if value, ok := _c.mutation.ValidateOptionalInt32(); ok {
-		_spec.SetField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32, value)
-		_node.ValidateOptionalInt32 = value
-	}
-	if value, ok := _c.mutation.OptionalUint(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint, field.TypeUint, value)
-		_node.OptionalUint = value
-	}
-	if value, ok := _c.mutation.OptionalUint8(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint8, field.TypeUint8, value)
-		_node.OptionalUint8 = value
-	}
-	if value, ok := _c.mutation.OptionalUint16(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint16, field.TypeUint16, value)
-		_node.OptionalUint16 = value
-	}
-	if value, ok := _c.mutation.OptionalUint32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint32, field.TypeUint32, value)
-		_node.OptionalUint32 = value
-	}
-	if value, ok := _c.mutation.OptionalUint64(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint64, field.TypeUint64, value)
-		_node.OptionalUint64 = value
-	}
-	if value, ok := _c.mutation.State(); ok {
-		_spec.SetField(fieldtype.FieldState, field.TypeEnum, value)
-		_node.State = value
-	}
-	if value, ok := _c.mutation.OptionalFloat(); ok {
-		_spec.SetField(fieldtype.FieldOptionalFloat, field.TypeFloat64, value)
-		_node.OptionalFloat = value
-	}
-	if value, ok := _c.mutation.OptionalFloat32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalFloat32, field.TypeFloat32, value)
-		_node.OptionalFloat32 = value
-	}
-	if value, ok := _c.mutation.Text(); ok {
-		_spec.SetField(fieldtype.FieldText, field.TypeString, value)
-		_node.Text = value
-	}
-	if value, ok := _c.mutation.Datetime(); ok {
-		_spec.SetField(fieldtype.FieldDatetime, field.TypeTime, value)
-		_node.Datetime = value
-	}
-	if value, ok := _c.mutation.Decimal(); ok {
-		_spec.SetField(fieldtype.FieldDecimal, field.TypeFloat64, value)
-		_node.Decimal = value
-	}
-	if value, ok := _c.mutation.LinkOther(); ok {
-		_spec.SetField(fieldtype.FieldLinkOther, field.TypeOther, value)
-		_node.LinkOther = value
-	}
-	if value, ok := _c.mutation.LinkOtherFunc(); ok {
-		_spec.SetField(fieldtype.FieldLinkOtherFunc, field.TypeOther, value)
-		_node.LinkOtherFunc = value
-	}
-	if value, ok := _c.mutation.MAC(); ok {
-		_spec.SetField(fieldtype.FieldMAC, field.TypeString, value)
-		_node.MAC = value
-	}
-	if value, ok := _c.mutation.StringArray(); ok {
-		_spec.SetField(fieldtype.FieldStringArray, field.TypeOther, value)
-		_node.StringArray = value
-	}
-	if value, ok := _c.mutation.Password(); ok {
-		_spec.SetField(fieldtype.FieldPassword, field.TypeString, value)
-		_node.Password = value
-	}
-	if value, ok := _c.mutation.StringScanner(); ok {
-		_spec.SetField(fieldtype.FieldStringScanner, field.TypeString, value)
-		_node.StringScanner = &value
-	}
-	if value, ok := _c.mutation.Duration(); ok {
-		_spec.SetField(fieldtype.FieldDuration, field.TypeInt64, value)
-		_node.Duration = value
-	}
-	if value, ok := _c.mutation.Dir(); ok {
-		_spec.SetField(fieldtype.FieldDir, field.TypeString, value)
-		_node.Dir = value
-	}
-	if value, ok := _c.mutation.Ndir(); ok {
-		_spec.SetField(fieldtype.FieldNdir, field.TypeString, value)
-		_node.Ndir = &value
-	}
-	if value, ok := _c.mutation.Str(); ok {
-		_spec.SetField(fieldtype.FieldStr, field.TypeString, value)
-		_node.Str = value
-	}
-	if value, ok := _c.mutation.NullStr(); ok {
-		_spec.SetField(fieldtype.FieldNullStr, field.TypeString, value)
-		_node.NullStr = value
-	}
-	if value, ok := _c.mutation.Link(); ok {
-		_spec.SetField(fieldtype.FieldLink, field.TypeString, value)
-		_node.Link = value
-	}
-	if value, ok := _c.mutation.NullLink(); ok {
-		_spec.SetField(fieldtype.FieldNullLink, field.TypeString, value)
-		_node.NullLink = value
-	}
-	if value, ok := _c.mutation.Active(); ok {
-		_spec.SetField(fieldtype.FieldActive, field.TypeBool, value)
-		_node.Active = value
-	}
-	if value, ok := _c.mutation.NullActive(); ok {
-		_spec.SetField(fieldtype.FieldNullActive, field.TypeBool, value)
-		_node.NullActive = &value
-	}
-	if value, ok := _c.mutation.Deleted(); ok {
-		_spec.SetField(fieldtype.FieldDeleted, field.TypeBool, value)
-		_node.Deleted = value
-	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(fieldtype.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = value
-	}
-	if value, ok := _c.mutation.RawData(); ok {
-		_spec.SetField(fieldtype.FieldRawData, field.TypeBytes, value)
-		_node.RawData = value
-	}
-	if value, ok := _c.mutation.Sensitive(); ok {
-		_spec.SetField(fieldtype.FieldSensitive, field.TypeBytes, value)
-		_node.Sensitive = value
-	}
-	if value, ok := _c.mutation.IP(); ok {
-		_spec.SetField(fieldtype.FieldIP, field.TypeBytes, value)
-		_node.IP = value
-	}
-	if value, ok := _c.mutation.NullInt64(); ok {
-		_spec.SetField(fieldtype.FieldNullInt64, field.TypeInt, value)
-		_node.NullInt64 = value
-	}
-	if value, ok := _c.mutation.SchemaInt(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt, field.TypeInt, value)
-		_node.SchemaInt = value
-	}
-	if value, ok := _c.mutation.SchemaInt8(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt8, field.TypeInt8, value)
-		_node.SchemaInt8 = value
-	}
-	if value, ok := _c.mutation.SchemaInt64(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt64, field.TypeInt64, value)
-		_node.SchemaInt64 = value
-	}
-	if value, ok := _c.mutation.SchemaFloat(); ok {
-		_spec.SetField(fieldtype.FieldSchemaFloat, field.TypeFloat64, value)
-		_node.SchemaFloat = value
-	}
-	if value, ok := _c.mutation.SchemaFloat32(); ok {
-		_spec.SetField(fieldtype.FieldSchemaFloat32, field.TypeFloat32, value)
-		_node.SchemaFloat32 = value
-	}
-	if value, ok := _c.mutation.NullFloat(); ok {
-		_spec.SetField(fieldtype.FieldNullFloat, field.TypeFloat64, value)
-		_node.NullFloat = value
-	}
-	if value, ok := _c.mutation.Role(); ok {
-		_spec.SetField(fieldtype.FieldRole, field.TypeEnum, value)
-		_node.Role = value
-	}
-	if value, ok := _c.mutation.Priority(); ok {
-		_spec.SetField(fieldtype.FieldPriority, field.TypeEnum, value)
-		_node.Priority = value
-	}
-	if value, ok := _c.mutation.OptionalUUID(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUUID, field.TypeUUID, value)
-		_node.OptionalUUID = value
-	}
-	if value, ok := _c.mutation.NillableUUID(); ok {
-		_spec.SetField(fieldtype.FieldNillableUUID, field.TypeUUID, value)
-		_node.NillableUUID = &value
-	}
-	if value, ok := _c.mutation.Strings(); ok {
-		_spec.SetField(fieldtype.FieldStrings, field.TypeJSON, value)
-		_node.Strings = value
-	}
-	if value, ok := _c.mutation.Pair(); ok {
-		_spec.SetField(fieldtype.FieldPair, field.TypeBytes, value)
-		_node.Pair = value
-	}
-	if value, ok := _c.mutation.NilPair(); ok {
-		_spec.SetField(fieldtype.FieldNilPair, field.TypeBytes, value)
-		_node.NilPair = value
-	}
-	if value, ok := _c.mutation.Vstring(); ok {
-		_spec.SetField(fieldtype.FieldVstring, field.TypeString, value)
-		_node.Vstring = value
-	}
-	if value, ok := _c.mutation.Triple(); ok {
-		_spec.SetField(fieldtype.FieldTriple, field.TypeString, value)
-		_node.Triple = value
-	}
-	if value, ok := _c.mutation.BigInt(); ok {
-		_spec.SetField(fieldtype.FieldBigInt, field.TypeInt, value)
-		_node.BigInt = value
-	}
-	if value, ok := _c.mutation.PasswordOther(); ok {
-		_spec.SetField(fieldtype.FieldPasswordOther, field.TypeOther, value)
-		_node.PasswordOther = value
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -4185,19 +5482,24 @@ func (_c *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FieldTypeMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, fieldtypeCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, fieldtypeCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &fieldtypeCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -4209,20 +5511,23 @@ func (_c *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &fieldtypeCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

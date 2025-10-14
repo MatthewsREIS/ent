@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -68,7 +71,9 @@ func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation {
 
 // Save creates the GroupInfo in the database.
 func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, groupinfoCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -94,74 +99,145 @@ func (_c *GroupInfoCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *GroupInfoCreate) defaults() {
-	if _, ok := _c.mutation.MaxUsers(); !ok {
-		v := groupinfo.DefaultMaxUsers
-		_c.mutation.SetMaxUsers(v)
-	}
+var groupinfoCreateSpec = entgen.CreateSpec[*GroupInfoMutation]{
+	Fields: []entgen.FieldSpec[*GroupInfoMutation]{
+		{
+			Name: "desc",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
+				},
+			},
+			IsSet: func(m *GroupInfoMutation) bool {
+				_, ok := m.Desc()
+				return ok
+			},
+		},
+		{
+			Name: "max_users",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
+				},
+			},
+			IsSet: func(m *GroupInfoMutation) bool {
+				_, ok := m.MaxUsers()
+				return ok
+			},
+			Default: func(m *GroupInfoMutation) error {
+				if _, ok := m.MaxUsers(); !ok {
+					v := groupinfo.DefaultMaxUsers
+					m.SetMaxUsers(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*GroupInfoMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *GroupInfoCreate) check() error {
-	if _, ok := _c.mutation.Desc(); !ok {
-		return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
-	}
-	if _, ok := _c.mutation.MaxUsers(); !ok {
-		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
-	}
-	return nil
+var groupinfoCreateDescriptor = entbuilder.CreateDescriptor[config, GroupInfo, *GroupInfoMutation]{
+	Table: groupinfo.Table,
+	NewNode: func(cfg config) *GroupInfo {
+		return &GroupInfo{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, GroupInfo, *GroupInfoMutation]{
+		Column:      groupinfo.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *GroupInfo, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, GroupInfo, *GroupInfoMutation]{
+		{
+			Column: groupinfo.FieldDesc,
+			Type:   field.TypeString,
+			Value: func(m *GroupInfoMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Desc(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *GroupInfo, fv entbuilder.FieldValue) error {
+				node.Desc = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: groupinfo.FieldMaxUsers,
+			Type:   field.TypeInt,
+			Value: func(m *GroupInfoMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.MaxUsers(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *GroupInfo, fv entbuilder.FieldValue) error {
+				node.MaxUsers = fv.Node.(int)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, GroupInfo, *GroupInfoMutation]{
+		{
+			Value: func(cfg config, m *GroupInfoMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.GroupsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: true,
+					Table:   groupinfo.GroupsTable,
+					Columns: []string{groupinfo.GroupsColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, groupinfoCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &groupinfoCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &groupinfoCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
-	var (
-		_node = &GroupInfo{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(groupinfo.Table, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Desc(); ok {
-		_spec.SetField(groupinfo.FieldDesc, field.TypeString, value)
-		_node.Desc = value
-	}
-	if value, ok := _c.mutation.MaxUsers(); ok {
-		_spec.SetField(groupinfo.FieldMaxUsers, field.TypeInt, value)
-		_node.MaxUsers = value
-	}
-	if nodes := _c.mutation.GroupsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   groupinfo.GroupsTable,
-			Columns: []string{groupinfo.GroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -369,19 +445,24 @@ func (_c *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupInfoMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, groupinfoCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, groupinfoCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &groupinfoCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -393,20 +474,23 @@ func (_c *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &groupinfoCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -16,6 +17,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -138,7 +141,9 @@ func (_c *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, enttaskCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -164,103 +169,294 @@ func (_c *TaskCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *TaskCreate) defaults() {
-	if _, ok := _c.mutation.Priority(); !ok {
-		v := enttask.DefaultPriority
-		_c.mutation.SetPriority(v)
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := enttask.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
-	}
-	if _, ok := _c.mutation.GetOp(); !ok {
-		v := enttask.DefaultOp
-		_c.mutation.SetOpField(v)
-	}
+var enttaskCreateSpec = entgen.CreateSpec[*TaskMutation]{
+	Fields: []entgen.FieldSpec[*TaskMutation]{
+		{
+			Name: "priority",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.Priority()
+				return ok
+			},
+			Default: func(m *TaskMutation) error {
+				if _, ok := m.Priority(); !ok {
+					v := enttask.DefaultPriority
+					m.SetPriority(v)
+				}
+				return nil
+			},
+			Validators: []func(*TaskMutation) error{
+				func(m *TaskMutation) error {
+					if v, ok := m.Priority(); ok {
+						if err := v.Validate(); err != nil {
+							return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "priorities",
+		},
+		{
+			Name: "created_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.CreatedAt()
+				return ok
+			},
+			Default: func(m *TaskMutation) error {
+				if _, ok := m.CreatedAt(); !ok {
+					v := enttask.DefaultCreatedAt()
+					m.SetCreatedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "name",
+		},
+		{
+			Name: "owner",
+		},
+		{
+			Name: "order",
+		},
+		{
+			Name: "order_option",
+		},
+		{
+			Name: "op",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "op", err: errors.New(`ent: missing required field "Task.op"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.GetOp()
+				return ok
+			},
+			Default: func(m *TaskMutation) error {
+				if _, ok := m.GetOp(); !ok {
+					v := enttask.DefaultOp
+					m.SetOpField(v)
+				}
+				return nil
+			},
+			Validators: []func(*TaskMutation) error{
+				func(m *TaskMutation) error {
+					if v, ok := m.GetOp(); ok {
+						if err := enttask.OpValidator(v); err != nil {
+							return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*TaskMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *TaskCreate) check() error {
-	if _, ok := _c.mutation.Priority(); !ok {
-		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
-	}
-	if v, ok := _c.mutation.Priority(); ok {
-		if err := v.Validate(); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
-	}
-	if _, ok := _c.mutation.GetOp(); !ok {
-		return &ValidationError{Name: "op", err: errors.New(`ent: missing required field "Task.op"`)}
-	}
-	if v, ok := _c.mutation.GetOp(); ok {
-		if err := enttask.OpValidator(v); err != nil {
-			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
-		}
-	}
-	return nil
+var enttaskCreateDescriptor = entbuilder.CreateDescriptor[config, Task, *TaskMutation]{
+	Table: enttask.Table,
+	NewNode: func(cfg config) *Task {
+		return &Task{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Task, *TaskMutation]{
+		Column:      enttask.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Task, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Task, *TaskMutation]{
+		{
+			Column: enttask.FieldPriority,
+			Type:   field.TypeInt,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Priority(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Priority = fv.Node.(task.Priority)
+				return nil
+			},
+		},
+
+		{
+			Column: enttask.FieldPriorities,
+			Type:   field.TypeJSON,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Priorities(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Priorities = fv.Node.(map[string]task.Priority)
+				return nil
+			},
+		},
+
+		{
+			Column: enttask.FieldCreatedAt,
+			Type:   field.TypeTime,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.CreatedAt(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*time.Time); ok {
+					node.CreatedAt = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: enttask.FieldName,
+			Type:   field.TypeString,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Name(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Name = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: enttask.FieldOwner,
+			Type:   field.TypeString,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Owner(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Owner = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: enttask.FieldOrder,
+			Type:   field.TypeInt,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Order(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Order = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: enttask.FieldOrderOption,
+			Type:   field.TypeInt,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OrderOption(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.OrderOption = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: enttask.FieldOp,
+			Type:   field.TypeString,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.GetOp(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Op = fv.Node.(string)
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, enttaskCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &enttaskCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &enttaskCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Task{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(enttask.Table, sqlgraph.NewFieldSpec(enttask.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Priority(); ok {
-		_spec.SetField(enttask.FieldPriority, field.TypeInt, value)
-		_node.Priority = value
-	}
-	if value, ok := _c.mutation.Priorities(); ok {
-		_spec.SetField(enttask.FieldPriorities, field.TypeJSON, value)
-		_node.Priorities = value
-	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(enttask.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = &value
-	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(enttask.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := _c.mutation.Owner(); ok {
-		_spec.SetField(enttask.FieldOwner, field.TypeString, value)
-		_node.Owner = value
-	}
-	if value, ok := _c.mutation.Order(); ok {
-		_spec.SetField(enttask.FieldOrder, field.TypeInt, value)
-		_node.Order = value
-	}
-	if value, ok := _c.mutation.OrderOption(); ok {
-		_spec.SetField(enttask.FieldOrderOption, field.TypeInt, value)
-		_node.OrderOption = value
-	}
-	if value, ok := _c.mutation.GetOp(); ok {
-		_spec.SetField(enttask.FieldOp, field.TypeString, value)
-		_node.Op = value
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -694,19 +890,24 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TaskMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, enttaskCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, enttaskCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &enttaskCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -718,20 +919,23 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &enttaskCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -18,6 +19,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -146,7 +149,9 @@ func (_c *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, groupCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -172,160 +177,348 @@ func (_c *GroupCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *GroupCreate) defaults() {
-	if _, ok := _c.mutation.Active(); !ok {
-		v := group.DefaultActive
-		_c.mutation.SetActive(v)
-	}
-	if _, ok := _c.mutation.MaxUsers(); !ok {
-		v := group.DefaultMaxUsers
-		_c.mutation.SetMaxUsers(v)
-	}
+var groupCreateSpec = entgen.CreateSpec[*GroupMutation]{
+	Fields: []entgen.FieldSpec[*GroupMutation]{
+		{
+			Name: "active",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Group.active"`)}
+				},
+			},
+			IsSet: func(m *GroupMutation) bool {
+				_, ok := m.Active()
+				return ok
+			},
+			Default: func(m *GroupMutation) error {
+				if _, ok := m.Active(); !ok {
+					v := group.DefaultActive
+					m.SetActive(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "expire",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "Group.expire"`)}
+				},
+			},
+			IsSet: func(m *GroupMutation) bool {
+				_, ok := m.Expire()
+				return ok
+			},
+		},
+		{
+			Name: "type",
+			Validators: []func(*GroupMutation) error{
+				func(m *GroupMutation) error {
+					if v, ok := m.GetType(); ok {
+						if err := group.TypeValidator(v); err != nil {
+							return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Group.type": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "max_users",
+			Default: func(m *GroupMutation) error {
+				if _, ok := m.MaxUsers(); !ok {
+					v := group.DefaultMaxUsers
+					m.SetMaxUsers(v)
+				}
+				return nil
+			},
+			Validators: []func(*GroupMutation) error{
+				func(m *GroupMutation) error {
+					if v, ok := m.MaxUsers(); ok {
+						if err := group.MaxUsersValidator(v); err != nil {
+							return &ValidationError{Name: "max_users", err: fmt.Errorf(`ent: validator failed for field "Group.max_users": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
+				},
+			},
+			IsSet: func(m *GroupMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+			Validators: []func(*GroupMutation) error{
+				func(m *GroupMutation) error {
+					if v, ok := m.Name(); ok {
+						if err := group.NameValidator(v); err != nil {
+							return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*GroupMutation]{
+		{
+			Name: "info",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "info", err: errors.New(`ent: missing required edge "Group.info"`)}
+				},
+			},
+			Count: func(m *GroupMutation) int {
+				return len(m.InfoIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *GroupCreate) check() error {
-	if _, ok := _c.mutation.Active(); !ok {
-		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Group.active"`)}
-	}
-	if _, ok := _c.mutation.Expire(); !ok {
-		return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "Group.expire"`)}
-	}
-	if v, ok := _c.mutation.GetType(); ok {
-		if err := group.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Group.type": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.MaxUsers(); ok {
-		if err := group.MaxUsersValidator(v); err != nil {
-			return &ValidationError{Name: "max_users", err: fmt.Errorf(`ent: validator failed for field "Group.max_users": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
-	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := group.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
-		}
-	}
-	if len(_c.mutation.InfoIDs()) == 0 {
-		return &ValidationError{Name: "info", err: errors.New(`ent: missing required edge "Group.info"`)}
-	}
-	return nil
+var groupCreateDescriptor = entbuilder.CreateDescriptor[config, Group, *GroupMutation]{
+	Table: group.Table,
+	NewNode: func(cfg config) *Group {
+		return &Group{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Group, *GroupMutation]{
+		Column:      group.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Group, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Group, *GroupMutation]{
+		{
+			Column: group.FieldActive,
+			Type:   field.TypeBool,
+			Value: func(m *GroupMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Active(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Group, fv entbuilder.FieldValue) error {
+				node.Active = fv.Node.(bool)
+				return nil
+			},
+		},
+
+		{
+			Column: group.FieldExpire,
+			Type:   field.TypeTime,
+			Value: func(m *GroupMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Expire(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Group, fv entbuilder.FieldValue) error {
+				node.Expire = fv.Node.(time.Time)
+				return nil
+			},
+		},
+
+		{
+			Column: group.FieldType,
+			Type:   field.TypeString,
+			Value: func(m *GroupMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.GetType(); ok {
+					valueCopy := value
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: &valueCopy,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Group, fv entbuilder.FieldValue) error {
+				if v, ok := fv.Node.(*string); ok {
+					node.Type = v
+				}
+				return nil
+			},
+		},
+
+		{
+			Column: group.FieldMaxUsers,
+			Type:   field.TypeInt,
+			Value: func(m *GroupMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.MaxUsers(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Group, fv entbuilder.FieldValue) error {
+				node.MaxUsers = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: group.FieldName,
+			Type:   field.TypeString,
+			Value: func(m *GroupMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Name(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Group, fv entbuilder.FieldValue) error {
+				node.Name = fv.Node.(string)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Group, *GroupMutation]{
+		{
+			Value: func(cfg config, m *GroupMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.FilesIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   group.FilesTable,
+					Columns: []string{group.FilesColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *GroupMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.BlockedIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   group.BlockedTable,
+					Columns: []string{group.BlockedColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *GroupMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.UsersIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: true,
+					Table:   group.UsersTable,
+					Columns: group.UsersPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *GroupMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.InfoIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   group.InfoTable,
+					Columns: []string{group.InfoColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Group, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.group_info = &ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, groupCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &groupCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &groupCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Group{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(group.Table, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Active(); ok {
-		_spec.SetField(group.FieldActive, field.TypeBool, value)
-		_node.Active = value
-	}
-	if value, ok := _c.mutation.Expire(); ok {
-		_spec.SetField(group.FieldExpire, field.TypeTime, value)
-		_node.Expire = value
-	}
-	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(group.FieldType, field.TypeString, value)
-		_node.Type = &value
-	}
-	if value, ok := _c.mutation.MaxUsers(); ok {
-		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
-		_node.MaxUsers = value
-	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(group.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if nodes := _c.mutation.FilesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.FilesTable,
-			Columns: []string{group.FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.BlockedIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.BlockedTable,
-			Columns: []string{group.BlockedColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   group.UsersTable,
-			Columns: group.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.InfoIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.InfoTable,
-			Columns: []string{group.InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.group_info = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -637,19 +830,24 @@ func (_c *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, groupCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, groupCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &groupCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -661,20 +859,23 @@ func (_c *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &groupCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

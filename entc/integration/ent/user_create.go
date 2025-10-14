@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -18,6 +19,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -369,7 +372,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, userCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -395,312 +400,682 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.Last(); !ok {
-		v := user.DefaultLast
-		_c.mutation.SetLast(v)
-	}
-	if _, ok := _c.mutation.Address(); !ok {
-		v := user.DefaultAddress()
-		_c.mutation.SetAddress(v)
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		v := user.DefaultRole
-		_c.mutation.SetRole(v)
-	}
-	if _, ok := _c.mutation.Employment(); !ok {
-		v := user.DefaultEmployment
-		_c.mutation.SetEmployment(v)
-	}
+var userCreateSpec = entgen.CreateSpec[*UserMutation]{
+	Fields: []entgen.FieldSpec[*UserMutation]{
+		{
+			Name: "optional_int",
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.OptionalInt(); ok {
+						if err := user.OptionalIntValidator(v); err != nil {
+							return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "age",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Age()
+				return ok
+			},
+		},
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+		},
+		{
+			Name: "last",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "User.last"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Last()
+				return ok
+			},
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Last(); !ok {
+					v := user.DefaultLast
+					m.SetLast(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "nickname",
+		},
+		{
+			Name: "address",
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Address(); !ok {
+					v := user.DefaultAddress()
+					m.SetAddress(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "phone",
+		},
+		{
+			Name: "password",
+		},
+		{
+			Name: "role",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Role()
+				return ok
+			},
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Role(); !ok {
+					v := user.DefaultRole
+					m.SetRole(v)
+				}
+				return nil
+			},
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.Role(); ok {
+						if err := user.RoleValidator(v); err != nil {
+							return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "employment",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "employment", err: errors.New(`ent: missing required field "User.employment"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Employment()
+				return ok
+			},
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Employment(); !ok {
+					v := user.DefaultEmployment
+					m.SetEmployment(v)
+				}
+				return nil
+			},
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.Employment(); ok {
+						if err := user.EmploymentValidator(v); err != nil {
+							return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "SSOCert",
+		},
+		{
+			Name: "files_count",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*UserMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *UserCreate) check() error {
-	if v, ok := _c.mutation.OptionalInt(); ok {
-		if err := user.OptionalIntValidator(v); err != nil {
-			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
-	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
-	}
-	if _, ok := _c.mutation.Last(); !ok {
-		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "User.last"`)}
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
-	}
-	if v, ok := _c.mutation.Role(); ok {
-		if err := user.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Employment(); !ok {
-		return &ValidationError{Name: "employment", err: errors.New(`ent: missing required field "User.employment"`)}
-	}
-	if v, ok := _c.mutation.Employment(); ok {
-		if err := user.EmploymentValidator(v); err != nil {
-			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
-		}
-	}
-	return nil
+var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutation]{
+	Table: user.Table,
+	NewNode: func(cfg config) *User {
+		return &User{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, User, *UserMutation]{
+		Column:      user.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *User, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, User, *UserMutation]{
+		{
+			Column: user.FieldOptionalInt,
+			Type:   field.TypeInt,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.OptionalInt(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.OptionalInt = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldAge,
+			Type:   field.TypeInt,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Age(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Age = fv.Node.(int)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldName,
+			Type:   field.TypeString,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Name(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Name = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldLast,
+			Type:   field.TypeString,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Last(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Last = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldNickname,
+			Type:   field.TypeString,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Nickname(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Nickname = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldAddress,
+			Type:   field.TypeString,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Address(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Address = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldPhone,
+			Type:   field.TypeString,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Phone(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Phone = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldPassword,
+			Type:   field.TypeString,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Password(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Password = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldRole,
+			Type:   field.TypeEnum,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Role(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Role = fv.Node.(user.Role)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldEmployment,
+			Type:   field.TypeEnum,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Employment(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Employment = fv.Node.(user.Employment)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldSSOCert,
+			Type:   field.TypeString,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.SSOCert(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.SSOCert = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldFilesCount,
+			Type:   field.TypeInt,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.FilesCount(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.FilesCount = fv.Node.(int)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, User, *UserMutation]{
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.CardIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   user.CardTable,
+					Columns: []string{user.CardColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.PetsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   user.PetsTable,
+					Columns: []string{user.PetsColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.FilesIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   user.FilesTable,
+					Columns: []string{user.FilesColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.GroupsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: false,
+					Table:   user.GroupsTable,
+					Columns: user.GroupsPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.FriendsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: false,
+					Table:   user.FriendsTable,
+					Columns: user.FriendsPrimaryKey,
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.FollowersIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: true,
+					Table:   user.FollowersTable,
+					Columns: user.FollowersPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.FollowingIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: false,
+					Table:   user.FollowingTable,
+					Columns: user.FollowingPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.TeamIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   user.TeamTable,
+					Columns: []string{user.TeamColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.SpouseIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   user.SpouseTable,
+					Columns: []string{user.SpouseColumn},
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *User, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.user_spouse = &ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ChildrenIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: true,
+					Table:   user.ChildrenTable,
+					Columns: []string{user.ChildrenColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ParentIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   user.ParentTable,
+					Columns: []string{user.ParentColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *User, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.user_parent = &ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, userCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &userCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &userCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
-	var (
-		_node = &User{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.OptionalInt(); ok {
-		_spec.SetField(user.FieldOptionalInt, field.TypeInt, value)
-		_node.OptionalInt = value
-	}
-	if value, ok := _c.mutation.Age(); ok {
-		_spec.SetField(user.FieldAge, field.TypeInt, value)
-		_node.Age = value
-	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(user.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := _c.mutation.Last(); ok {
-		_spec.SetField(user.FieldLast, field.TypeString, value)
-		_node.Last = value
-	}
-	if value, ok := _c.mutation.Nickname(); ok {
-		_spec.SetField(user.FieldNickname, field.TypeString, value)
-		_node.Nickname = value
-	}
-	if value, ok := _c.mutation.Address(); ok {
-		_spec.SetField(user.FieldAddress, field.TypeString, value)
-		_node.Address = value
-	}
-	if value, ok := _c.mutation.Phone(); ok {
-		_spec.SetField(user.FieldPhone, field.TypeString, value)
-		_node.Phone = value
-	}
-	if value, ok := _c.mutation.Password(); ok {
-		_spec.SetField(user.FieldPassword, field.TypeString, value)
-		_node.Password = value
-	}
-	if value, ok := _c.mutation.Role(); ok {
-		_spec.SetField(user.FieldRole, field.TypeEnum, value)
-		_node.Role = value
-	}
-	if value, ok := _c.mutation.Employment(); ok {
-		_spec.SetField(user.FieldEmployment, field.TypeEnum, value)
-		_node.Employment = value
-	}
-	if value, ok := _c.mutation.SSOCert(); ok {
-		_spec.SetField(user.FieldSSOCert, field.TypeString, value)
-		_node.SSOCert = value
-	}
-	if value, ok := _c.mutation.FilesCount(); ok {
-		_spec.SetField(user.FieldFilesCount, field.TypeInt, value)
-		_node.FilesCount = value
-	}
-	if nodes := _c.mutation.CardIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.CardTable,
-			Columns: []string{user.CardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.PetsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.PetsTable,
-			Columns: []string{user.PetsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.FilesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.FilesTable,
-			Columns: []string{user.FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.GroupsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GroupsTable,
-			Columns: user.GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.FriendsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FriendsTable,
-			Columns: user.FriendsPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.FollowersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.FollowingIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TeamIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.TeamTable,
-			Columns: []string{user.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.SpouseIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.SpouseTable,
-			Columns: []string{user.SpouseColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_spouse = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.ChildrenTable,
-			Columns: []string{user.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   user.ParentTable,
-			Columns: []string{user.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_parent = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -1285,19 +1660,24 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, userCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, userCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &userCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -1309,20 +1689,23 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &userCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

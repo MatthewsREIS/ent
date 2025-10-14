@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -115,7 +116,7 @@ func (_c *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
-	if err := _c.defaults(); err != nil {
+	if err := entgen.ApplyDefaults(_c.mutation, taskCreateSpec.Fields); err != nil {
 		return nil, err
 	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
@@ -143,38 +144,73 @@ func (_c *TaskCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *TaskCreate) defaults() error {
-	if _, ok := _c.mutation.Status(); !ok {
-		v := task.DefaultStatus
-		_c.mutation.SetStatus(v)
-	}
-	return nil
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *TaskCreate) check() error {
-	if _, ok := _c.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Task.title"`)}
-	}
-	if v, ok := _c.mutation.Title(); ok {
-		if err := task.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Task.status"`)}
-	}
-	if v, ok := _c.mutation.Status(); ok {
-		if err := task.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Task.status": %w`, err)}
-		}
-	}
-	return nil
+var taskCreateSpec = entgen.CreateSpec[*TaskMutation]{
+	Fields: []entgen.FieldSpec[*TaskMutation]{
+		{
+			Name: "title",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Task.title"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.Title()
+				return ok
+			},
+			Validators: []func(*TaskMutation) error{
+				func(m *TaskMutation) error {
+					if v, ok := m.Title(); ok {
+						if err := task.TitleValidator(v); err != nil {
+							return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "description",
+		},
+		{
+			Name: "status",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Task.status"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.Status()
+				return ok
+			},
+			Default: func(m *TaskMutation) error {
+				if _, ok := m.Status(); !ok {
+					v := task.DefaultStatus
+					m.SetStatus(v)
+				}
+				return nil
+			},
+			Validators: []func(*TaskMutation) error{
+				func(m *TaskMutation) error {
+					if v, ok := m.Status(); ok {
+						if err := task.StatusValidator(v); err != nil {
+							return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Task.status": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "uuid",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*TaskMutation]{},
 }
 
 func (_c *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, taskCreateSpec); err != nil {
 		return nil, err
 	}
 	_node, _spec := _c.createSpec()
@@ -266,13 +302,15 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TaskMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, taskCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				if err := entgen.CheckCreate(builder.driver.Dialect(), mutation, taskCreateSpec); err != nil {
 					return nil, err
 				}
 				builder.mutation = mutation
