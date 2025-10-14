@@ -43,7 +43,7 @@ import (
 	{{- if and (hasField $ "Scope") ($.Scope.CreateUsesEntgen) }}
 		"entgo.io/ent/runtime/entgen"
 	{{- end }}
-	{{- if and (hasField $ "Scope") ($.Scope.CreateUsesEntbuilder) }}
+	{{- if and (hasField $ "Scope") (or ($.Scope.CreateUsesEntbuilder) ($.Scope.UpdateUsesEntbuilder)) }}
 		"entgo.io/ent/runtime/entbuilder"
 	{{- end }}
 	{{- template "import/additional" $ }}

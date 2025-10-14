@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-{{ with extend $ "Imports" $.SiblingImports }}
+{{ with extend $ "Imports" $.SiblingImports "UpdateUsesEntbuilder" (and $.Storage (eq $.Storage.Name "sql")) }}
 	{{ template "import" . }}
 {{ end }}
 

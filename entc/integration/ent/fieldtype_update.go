@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"net"
@@ -21,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -1441,6 +1443,1085 @@ func (_u *FieldTypeUpdate) check() error {
 	return nil
 }
 
+var fieldtypeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *FieldTypeMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*FieldTypeMutation]{
+		{
+			Column: fieldtype.FieldInt,
+			Type:   field.TypeInt,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldInt8,
+			Type:   field.TypeInt8,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedInt8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldInt16,
+			Type:   field.TypeInt16,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int16(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedInt16(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldInt32,
+			Type:   field.TypeInt32,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedInt32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldInt64,
+			Type:   field.TypeInt64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedInt64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt,
+			Type:   field.TypeInt,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalIntCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt8,
+			Type:   field.TypeInt8,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalInt8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalInt8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalInt8Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt16,
+			Type:   field.TypeInt16,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalInt16(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalInt16(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalInt16Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt32,
+			Type:   field.TypeInt32,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalInt32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalInt32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalInt32Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalInt64,
+			Type:   field.TypeInt64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalInt64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalInt64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalInt64Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt,
+			Type:   field.TypeInt,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NillableInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedNillableInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NillableIntCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt8,
+			Type:   field.TypeInt8,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NillableInt8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedNillableInt8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NillableInt8Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt16,
+			Type:   field.TypeInt16,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NillableInt16(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedNillableInt16(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NillableInt16Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt32,
+			Type:   field.TypeInt32,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NillableInt32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedNillableInt32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NillableInt32Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableInt64,
+			Type:   field.TypeInt64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NillableInt64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedNillableInt64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NillableInt64Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldValidateOptionalInt32,
+			Type:   field.TypeInt32,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.ValidateOptionalInt32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedValidateOptionalInt32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.ValidateOptionalInt32Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint,
+			Type:   field.TypeUint,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalUint(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalUint(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalUintCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint8,
+			Type:   field.TypeUint8,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalUint8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalUint8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalUint8Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint16,
+			Type:   field.TypeUint16,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalUint16(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalUint16(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalUint16Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint32,
+			Type:   field.TypeUint32,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalUint32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalUint32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalUint32Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUint64,
+			Type:   field.TypeUint64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalUint64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalUint64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalUint64Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldState,
+			Type:   field.TypeEnum,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.State(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.StateCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalFloat,
+			Type:   field.TypeFloat64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalFloat(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalFloat(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalFloatCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalFloat32,
+			Type:   field.TypeFloat32,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalFloat32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOptionalFloat32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalFloat32Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldText,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Text(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.TextCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDatetime,
+			Type:   field.TypeTime,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Datetime(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.DatetimeCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDecimal,
+			Type:   field.TypeFloat64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Decimal(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedDecimal(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.DecimalCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldLinkOther,
+			Type:   field.TypeOther,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.LinkOther(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.LinkOtherCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldLinkOtherFunc,
+			Type:   field.TypeOther,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.LinkOtherFunc(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.LinkOtherFuncCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldMAC,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.MAC(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.MACCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldStringArray,
+			Type:   field.TypeOther,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.StringArray(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.StringArrayCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldPassword,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Password(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.PasswordCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldStringScanner,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.StringScanner(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.StringScannerCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDuration,
+			Type:   field.TypeInt64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Duration(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedDuration(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.DurationCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDir,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Dir(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNdir,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Ndir(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NdirCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldStr,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Str(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.StrCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullStr,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NullStr(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NullStrCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldLink,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Link(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.LinkCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullLink,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NullLink(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NullLinkCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldActive,
+			Type:   field.TypeBool,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Active(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.ActiveCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullActive,
+			Type:   field.TypeBool,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NullActive(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NullActiveCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDeleted,
+			Type:   field.TypeBool,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Deleted(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.DeletedCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldDeletedAt,
+			Type:   field.TypeTime,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.DeletedAt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.DeletedAtCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldRawData,
+			Type:   field.TypeBytes,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.RawData(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.RawDataCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSensitive,
+			Type:   field.TypeBytes,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Sensitive(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.SensitiveCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldIP,
+			Type:   field.TypeBytes,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.IP(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.IPCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullInt64,
+			Type:   field.TypeInt,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NullInt64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NullInt64Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaInt,
+			Type:   field.TypeInt,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.SchemaInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedSchemaInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.SchemaIntCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaInt8,
+			Type:   field.TypeInt8,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.SchemaInt8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedSchemaInt8(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.SchemaInt8Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaInt64,
+			Type:   field.TypeInt64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.SchemaInt64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedSchemaInt64(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.SchemaInt64Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaFloat,
+			Type:   field.TypeFloat64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.SchemaFloat(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedSchemaFloat(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.SchemaFloatCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldSchemaFloat32,
+			Type:   field.TypeFloat32,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.SchemaFloat32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedSchemaFloat32(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.SchemaFloat32Cleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNullFloat,
+			Type:   field.TypeFloat64,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NullFloat(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NullFloatCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldRole,
+			Type:   field.TypeEnum,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Role(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldPriority,
+			Type:   field.TypeEnum,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Priority(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.PriorityCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldOptionalUUID,
+			Type:   field.TypeUUID,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalUUID(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.OptionalUUIDCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNillableUUID,
+			Type:   field.TypeUUID,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NillableUUID(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NillableUUIDCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldStrings,
+			Type:   field.TypeJSON,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Strings(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *FieldTypeMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedStrings(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, fieldtype.FieldStrings, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.StringsCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldPair,
+			Type:   field.TypeBytes,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Pair(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldNilPair,
+			Type:   field.TypeBytes,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.NilPair(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.NilPairCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldVstring,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Vstring(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldTriple,
+			Type:   field.TypeString,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Triple(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: fieldtype.FieldBigInt,
+			Type:   field.TypeInt,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.BigInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedBigInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.BigIntCleared()
+			},
+		},
+
+		{
+			Column: fieldtype.FieldPasswordOther,
+			Type:   field.TypeOther,
+			Set: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.PasswordOther(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *FieldTypeMutation) bool {
+				return m.PasswordOtherCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *FieldTypeMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *FieldTypeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FieldTypeUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -1459,463 +2540,8 @@ func (_u *FieldTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Int(); ok {
-		_spec.SetField(fieldtype.FieldInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedInt(); ok {
-		_spec.AddField(fieldtype.FieldInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.Int8(); ok {
-		_spec.SetField(fieldtype.FieldInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.AddedInt8(); ok {
-		_spec.AddField(fieldtype.FieldInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.Int16(); ok {
-		_spec.SetField(fieldtype.FieldInt16, field.TypeInt16, value)
-	}
-	if value, ok := _u.mutation.AddedInt16(); ok {
-		_spec.AddField(fieldtype.FieldInt16, field.TypeInt16, value)
-	}
-	if value, ok := _u.mutation.Int32(); ok {
-		_spec.SetField(fieldtype.FieldInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedInt32(); ok {
-		_spec.AddField(fieldtype.FieldInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.Int64(); ok {
-		_spec.SetField(fieldtype.FieldInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedInt64(); ok {
-		_spec.AddField(fieldtype.FieldInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.OptionalInt(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt, field.TypeInt, value)
-	}
-	if _u.mutation.OptionalIntCleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.OptionalInt8(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt8(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt8, field.TypeInt8, value)
-	}
-	if _u.mutation.OptionalInt8Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt8, field.TypeInt8)
-	}
-	if value, ok := _u.mutation.OptionalInt16(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt16, field.TypeInt16, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt16(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt16, field.TypeInt16, value)
-	}
-	if _u.mutation.OptionalInt16Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt16, field.TypeInt16)
-	}
-	if value, ok := _u.mutation.OptionalInt32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt32(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt32, field.TypeInt32, value)
-	}
-	if _u.mutation.OptionalInt32Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt32, field.TypeInt32)
-	}
-	if value, ok := _u.mutation.OptionalInt64(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt64(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt64, field.TypeInt64, value)
-	}
-	if _u.mutation.OptionalInt64Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt64, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.NillableInt(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt, field.TypeInt, value)
-	}
-	if _u.mutation.NillableIntCleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.NillableInt8(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt8(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt8, field.TypeInt8, value)
-	}
-	if _u.mutation.NillableInt8Cleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt8, field.TypeInt8)
-	}
-	if value, ok := _u.mutation.NillableInt16(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt16, field.TypeInt16, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt16(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt16, field.TypeInt16, value)
-	}
-	if _u.mutation.NillableInt16Cleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt16, field.TypeInt16)
-	}
-	if value, ok := _u.mutation.NillableInt32(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt32(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt32, field.TypeInt32, value)
-	}
-	if _u.mutation.NillableInt32Cleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt32, field.TypeInt32)
-	}
-	if value, ok := _u.mutation.NillableInt64(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt64(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt64, field.TypeInt64, value)
-	}
-	if _u.mutation.NillableInt64Cleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt64, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.ValidateOptionalInt32(); ok {
-		_spec.SetField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedValidateOptionalInt32(); ok {
-		_spec.AddField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32, value)
-	}
-	if _u.mutation.ValidateOptionalInt32Cleared() {
-		_spec.ClearField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32)
-	}
-	if value, ok := _u.mutation.OptionalUint(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint, field.TypeUint, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint, field.TypeUint, value)
-	}
-	if _u.mutation.OptionalUintCleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint, field.TypeUint)
-	}
-	if value, ok := _u.mutation.OptionalUint8(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint8, field.TypeUint8, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint8(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint8, field.TypeUint8, value)
-	}
-	if _u.mutation.OptionalUint8Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint8, field.TypeUint8)
-	}
-	if value, ok := _u.mutation.OptionalUint16(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint16, field.TypeUint16, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint16(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint16, field.TypeUint16, value)
-	}
-	if _u.mutation.OptionalUint16Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint16, field.TypeUint16)
-	}
-	if value, ok := _u.mutation.OptionalUint32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint32, field.TypeUint32, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint32(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint32, field.TypeUint32, value)
-	}
-	if _u.mutation.OptionalUint32Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint32, field.TypeUint32)
-	}
-	if value, ok := _u.mutation.OptionalUint64(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint64, field.TypeUint64, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint64(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint64, field.TypeUint64, value)
-	}
-	if _u.mutation.OptionalUint64Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint64, field.TypeUint64)
-	}
-	if value, ok := _u.mutation.State(); ok {
-		_spec.SetField(fieldtype.FieldState, field.TypeEnum, value)
-	}
-	if _u.mutation.StateCleared() {
-		_spec.ClearField(fieldtype.FieldState, field.TypeEnum)
-	}
-	if value, ok := _u.mutation.OptionalFloat(); ok {
-		_spec.SetField(fieldtype.FieldOptionalFloat, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalFloat(); ok {
-		_spec.AddField(fieldtype.FieldOptionalFloat, field.TypeFloat64, value)
-	}
-	if _u.mutation.OptionalFloatCleared() {
-		_spec.ClearField(fieldtype.FieldOptionalFloat, field.TypeFloat64)
-	}
-	if value, ok := _u.mutation.OptionalFloat32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalFloat32, field.TypeFloat32, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalFloat32(); ok {
-		_spec.AddField(fieldtype.FieldOptionalFloat32, field.TypeFloat32, value)
-	}
-	if _u.mutation.OptionalFloat32Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalFloat32, field.TypeFloat32)
-	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(fieldtype.FieldText, field.TypeString, value)
-	}
-	if _u.mutation.TextCleared() {
-		_spec.ClearField(fieldtype.FieldText, field.TypeString)
-	}
-	if value, ok := _u.mutation.Datetime(); ok {
-		_spec.SetField(fieldtype.FieldDatetime, field.TypeTime, value)
-	}
-	if _u.mutation.DatetimeCleared() {
-		_spec.ClearField(fieldtype.FieldDatetime, field.TypeTime)
-	}
-	if value, ok := _u.mutation.Decimal(); ok {
-		_spec.SetField(fieldtype.FieldDecimal, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedDecimal(); ok {
-		_spec.AddField(fieldtype.FieldDecimal, field.TypeFloat64, value)
-	}
-	if _u.mutation.DecimalCleared() {
-		_spec.ClearField(fieldtype.FieldDecimal, field.TypeFloat64)
-	}
-	if value, ok := _u.mutation.LinkOther(); ok {
-		_spec.SetField(fieldtype.FieldLinkOther, field.TypeOther, value)
-	}
-	if _u.mutation.LinkOtherCleared() {
-		_spec.ClearField(fieldtype.FieldLinkOther, field.TypeOther)
-	}
-	if value, ok := _u.mutation.LinkOtherFunc(); ok {
-		_spec.SetField(fieldtype.FieldLinkOtherFunc, field.TypeOther, value)
-	}
-	if _u.mutation.LinkOtherFuncCleared() {
-		_spec.ClearField(fieldtype.FieldLinkOtherFunc, field.TypeOther)
-	}
-	if value, ok := _u.mutation.MAC(); ok {
-		_spec.SetField(fieldtype.FieldMAC, field.TypeString, value)
-	}
-	if _u.mutation.MACCleared() {
-		_spec.ClearField(fieldtype.FieldMAC, field.TypeString)
-	}
-	if value, ok := _u.mutation.StringArray(); ok {
-		_spec.SetField(fieldtype.FieldStringArray, field.TypeOther, value)
-	}
-	if _u.mutation.StringArrayCleared() {
-		_spec.ClearField(fieldtype.FieldStringArray, field.TypeOther)
-	}
-	if value, ok := _u.mutation.Password(); ok {
-		_spec.SetField(fieldtype.FieldPassword, field.TypeString, value)
-	}
-	if _u.mutation.PasswordCleared() {
-		_spec.ClearField(fieldtype.FieldPassword, field.TypeString)
-	}
-	if value, ok := _u.mutation.StringScanner(); ok {
-		_spec.SetField(fieldtype.FieldStringScanner, field.TypeString, value)
-	}
-	if _u.mutation.StringScannerCleared() {
-		_spec.ClearField(fieldtype.FieldStringScanner, field.TypeString)
-	}
-	if value, ok := _u.mutation.Duration(); ok {
-		_spec.SetField(fieldtype.FieldDuration, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedDuration(); ok {
-		_spec.AddField(fieldtype.FieldDuration, field.TypeInt64, value)
-	}
-	if _u.mutation.DurationCleared() {
-		_spec.ClearField(fieldtype.FieldDuration, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.Dir(); ok {
-		_spec.SetField(fieldtype.FieldDir, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Ndir(); ok {
-		_spec.SetField(fieldtype.FieldNdir, field.TypeString, value)
-	}
-	if _u.mutation.NdirCleared() {
-		_spec.ClearField(fieldtype.FieldNdir, field.TypeString)
-	}
-	if value, ok := _u.mutation.Str(); ok {
-		_spec.SetField(fieldtype.FieldStr, field.TypeString, value)
-	}
-	if _u.mutation.StrCleared() {
-		_spec.ClearField(fieldtype.FieldStr, field.TypeString)
-	}
-	if value, ok := _u.mutation.NullStr(); ok {
-		_spec.SetField(fieldtype.FieldNullStr, field.TypeString, value)
-	}
-	if _u.mutation.NullStrCleared() {
-		_spec.ClearField(fieldtype.FieldNullStr, field.TypeString)
-	}
-	if value, ok := _u.mutation.Link(); ok {
-		_spec.SetField(fieldtype.FieldLink, field.TypeString, value)
-	}
-	if _u.mutation.LinkCleared() {
-		_spec.ClearField(fieldtype.FieldLink, field.TypeString)
-	}
-	if value, ok := _u.mutation.NullLink(); ok {
-		_spec.SetField(fieldtype.FieldNullLink, field.TypeString, value)
-	}
-	if _u.mutation.NullLinkCleared() {
-		_spec.ClearField(fieldtype.FieldNullLink, field.TypeString)
-	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(fieldtype.FieldActive, field.TypeBool, value)
-	}
-	if _u.mutation.ActiveCleared() {
-		_spec.ClearField(fieldtype.FieldActive, field.TypeBool)
-	}
-	if value, ok := _u.mutation.NullActive(); ok {
-		_spec.SetField(fieldtype.FieldNullActive, field.TypeBool, value)
-	}
-	if _u.mutation.NullActiveCleared() {
-		_spec.ClearField(fieldtype.FieldNullActive, field.TypeBool)
-	}
-	if value, ok := _u.mutation.Deleted(); ok {
-		_spec.SetField(fieldtype.FieldDeleted, field.TypeBool, value)
-	}
-	if _u.mutation.DeletedCleared() {
-		_spec.ClearField(fieldtype.FieldDeleted, field.TypeBool)
-	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(fieldtype.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(fieldtype.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.RawData(); ok {
-		_spec.SetField(fieldtype.FieldRawData, field.TypeBytes, value)
-	}
-	if _u.mutation.RawDataCleared() {
-		_spec.ClearField(fieldtype.FieldRawData, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.Sensitive(); ok {
-		_spec.SetField(fieldtype.FieldSensitive, field.TypeBytes, value)
-	}
-	if _u.mutation.SensitiveCleared() {
-		_spec.ClearField(fieldtype.FieldSensitive, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(fieldtype.FieldIP, field.TypeBytes, value)
-	}
-	if _u.mutation.IPCleared() {
-		_spec.ClearField(fieldtype.FieldIP, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.NullInt64(); ok {
-		_spec.SetField(fieldtype.FieldNullInt64, field.TypeInt, value)
-	}
-	if _u.mutation.NullInt64Cleared() {
-		_spec.ClearField(fieldtype.FieldNullInt64, field.TypeInt)
-	}
-	if value, ok := _u.mutation.SchemaInt(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaInt(); ok {
-		_spec.AddField(fieldtype.FieldSchemaInt, field.TypeInt, value)
-	}
-	if _u.mutation.SchemaIntCleared() {
-		_spec.ClearField(fieldtype.FieldSchemaInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.SchemaInt8(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaInt8(); ok {
-		_spec.AddField(fieldtype.FieldSchemaInt8, field.TypeInt8, value)
-	}
-	if _u.mutation.SchemaInt8Cleared() {
-		_spec.ClearField(fieldtype.FieldSchemaInt8, field.TypeInt8)
-	}
-	if value, ok := _u.mutation.SchemaInt64(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaInt64(); ok {
-		_spec.AddField(fieldtype.FieldSchemaInt64, field.TypeInt64, value)
-	}
-	if _u.mutation.SchemaInt64Cleared() {
-		_spec.ClearField(fieldtype.FieldSchemaInt64, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.SchemaFloat(); ok {
-		_spec.SetField(fieldtype.FieldSchemaFloat, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaFloat(); ok {
-		_spec.AddField(fieldtype.FieldSchemaFloat, field.TypeFloat64, value)
-	}
-	if _u.mutation.SchemaFloatCleared() {
-		_spec.ClearField(fieldtype.FieldSchemaFloat, field.TypeFloat64)
-	}
-	if value, ok := _u.mutation.SchemaFloat32(); ok {
-		_spec.SetField(fieldtype.FieldSchemaFloat32, field.TypeFloat32, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaFloat32(); ok {
-		_spec.AddField(fieldtype.FieldSchemaFloat32, field.TypeFloat32, value)
-	}
-	if _u.mutation.SchemaFloat32Cleared() {
-		_spec.ClearField(fieldtype.FieldSchemaFloat32, field.TypeFloat32)
-	}
-	if value, ok := _u.mutation.NullFloat(); ok {
-		_spec.SetField(fieldtype.FieldNullFloat, field.TypeFloat64, value)
-	}
-	if _u.mutation.NullFloatCleared() {
-		_spec.ClearField(fieldtype.FieldNullFloat, field.TypeFloat64)
-	}
-	if value, ok := _u.mutation.Role(); ok {
-		_spec.SetField(fieldtype.FieldRole, field.TypeEnum, value)
-	}
-	if value, ok := _u.mutation.Priority(); ok {
-		_spec.SetField(fieldtype.FieldPriority, field.TypeEnum, value)
-	}
-	if _u.mutation.PriorityCleared() {
-		_spec.ClearField(fieldtype.FieldPriority, field.TypeEnum)
-	}
-	if value, ok := _u.mutation.OptionalUUID(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUUID, field.TypeUUID, value)
-	}
-	if _u.mutation.OptionalUUIDCleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUUID, field.TypeUUID)
-	}
-	if value, ok := _u.mutation.NillableUUID(); ok {
-		_spec.SetField(fieldtype.FieldNillableUUID, field.TypeUUID, value)
-	}
-	if _u.mutation.NillableUUIDCleared() {
-		_spec.ClearField(fieldtype.FieldNillableUUID, field.TypeUUID)
-	}
-	if value, ok := _u.mutation.Strings(); ok {
-		_spec.SetField(fieldtype.FieldStrings, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedStrings(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, fieldtype.FieldStrings, value)
-		})
-	}
-	if _u.mutation.StringsCleared() {
-		_spec.ClearField(fieldtype.FieldStrings, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Pair(); ok {
-		_spec.SetField(fieldtype.FieldPair, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.NilPair(); ok {
-		_spec.SetField(fieldtype.FieldNilPair, field.TypeBytes, value)
-	}
-	if _u.mutation.NilPairCleared() {
-		_spec.ClearField(fieldtype.FieldNilPair, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.Vstring(); ok {
-		_spec.SetField(fieldtype.FieldVstring, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Triple(); ok {
-		_spec.SetField(fieldtype.FieldTriple, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.BigInt(); ok {
-		_spec.SetField(fieldtype.FieldBigInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedBigInt(); ok {
-		_spec.AddField(fieldtype.FieldBigInt, field.TypeInt, value)
-	}
-	if _u.mutation.BigIntCleared() {
-		_spec.ClearField(fieldtype.FieldBigInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.PasswordOther(); ok {
-		_spec.SetField(fieldtype.FieldPasswordOther, field.TypeOther, value)
-	}
-	if _u.mutation.PasswordOtherCleared() {
-		_spec.ClearField(fieldtype.FieldPasswordOther, field.TypeOther)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &fieldtypeUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -3389,463 +4015,8 @@ func (_u *FieldTypeUpdateOne) sqlSave(ctx context.Context) (_node *FieldType, er
 			}
 		}
 	}
-	if value, ok := _u.mutation.Int(); ok {
-		_spec.SetField(fieldtype.FieldInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedInt(); ok {
-		_spec.AddField(fieldtype.FieldInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.Int8(); ok {
-		_spec.SetField(fieldtype.FieldInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.AddedInt8(); ok {
-		_spec.AddField(fieldtype.FieldInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.Int16(); ok {
-		_spec.SetField(fieldtype.FieldInt16, field.TypeInt16, value)
-	}
-	if value, ok := _u.mutation.AddedInt16(); ok {
-		_spec.AddField(fieldtype.FieldInt16, field.TypeInt16, value)
-	}
-	if value, ok := _u.mutation.Int32(); ok {
-		_spec.SetField(fieldtype.FieldInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedInt32(); ok {
-		_spec.AddField(fieldtype.FieldInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.Int64(); ok {
-		_spec.SetField(fieldtype.FieldInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedInt64(); ok {
-		_spec.AddField(fieldtype.FieldInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.OptionalInt(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt, field.TypeInt, value)
-	}
-	if _u.mutation.OptionalIntCleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.OptionalInt8(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt8(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt8, field.TypeInt8, value)
-	}
-	if _u.mutation.OptionalInt8Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt8, field.TypeInt8)
-	}
-	if value, ok := _u.mutation.OptionalInt16(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt16, field.TypeInt16, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt16(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt16, field.TypeInt16, value)
-	}
-	if _u.mutation.OptionalInt16Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt16, field.TypeInt16)
-	}
-	if value, ok := _u.mutation.OptionalInt32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt32(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt32, field.TypeInt32, value)
-	}
-	if _u.mutation.OptionalInt32Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt32, field.TypeInt32)
-	}
-	if value, ok := _u.mutation.OptionalInt64(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalInt64(); ok {
-		_spec.AddField(fieldtype.FieldOptionalInt64, field.TypeInt64, value)
-	}
-	if _u.mutation.OptionalInt64Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalInt64, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.NillableInt(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt, field.TypeInt, value)
-	}
-	if _u.mutation.NillableIntCleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.NillableInt8(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt8(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt8, field.TypeInt8, value)
-	}
-	if _u.mutation.NillableInt8Cleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt8, field.TypeInt8)
-	}
-	if value, ok := _u.mutation.NillableInt16(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt16, field.TypeInt16, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt16(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt16, field.TypeInt16, value)
-	}
-	if _u.mutation.NillableInt16Cleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt16, field.TypeInt16)
-	}
-	if value, ok := _u.mutation.NillableInt32(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt32(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt32, field.TypeInt32, value)
-	}
-	if _u.mutation.NillableInt32Cleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt32, field.TypeInt32)
-	}
-	if value, ok := _u.mutation.NillableInt64(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt64(); ok {
-		_spec.AddField(fieldtype.FieldNillableInt64, field.TypeInt64, value)
-	}
-	if _u.mutation.NillableInt64Cleared() {
-		_spec.ClearField(fieldtype.FieldNillableInt64, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.ValidateOptionalInt32(); ok {
-		_spec.SetField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedValidateOptionalInt32(); ok {
-		_spec.AddField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32, value)
-	}
-	if _u.mutation.ValidateOptionalInt32Cleared() {
-		_spec.ClearField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32)
-	}
-	if value, ok := _u.mutation.OptionalUint(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint, field.TypeUint, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint, field.TypeUint, value)
-	}
-	if _u.mutation.OptionalUintCleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint, field.TypeUint)
-	}
-	if value, ok := _u.mutation.OptionalUint8(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint8, field.TypeUint8, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint8(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint8, field.TypeUint8, value)
-	}
-	if _u.mutation.OptionalUint8Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint8, field.TypeUint8)
-	}
-	if value, ok := _u.mutation.OptionalUint16(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint16, field.TypeUint16, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint16(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint16, field.TypeUint16, value)
-	}
-	if _u.mutation.OptionalUint16Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint16, field.TypeUint16)
-	}
-	if value, ok := _u.mutation.OptionalUint32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint32, field.TypeUint32, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint32(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint32, field.TypeUint32, value)
-	}
-	if _u.mutation.OptionalUint32Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint32, field.TypeUint32)
-	}
-	if value, ok := _u.mutation.OptionalUint64(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint64, field.TypeUint64, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalUint64(); ok {
-		_spec.AddField(fieldtype.FieldOptionalUint64, field.TypeUint64, value)
-	}
-	if _u.mutation.OptionalUint64Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUint64, field.TypeUint64)
-	}
-	if value, ok := _u.mutation.State(); ok {
-		_spec.SetField(fieldtype.FieldState, field.TypeEnum, value)
-	}
-	if _u.mutation.StateCleared() {
-		_spec.ClearField(fieldtype.FieldState, field.TypeEnum)
-	}
-	if value, ok := _u.mutation.OptionalFloat(); ok {
-		_spec.SetField(fieldtype.FieldOptionalFloat, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalFloat(); ok {
-		_spec.AddField(fieldtype.FieldOptionalFloat, field.TypeFloat64, value)
-	}
-	if _u.mutation.OptionalFloatCleared() {
-		_spec.ClearField(fieldtype.FieldOptionalFloat, field.TypeFloat64)
-	}
-	if value, ok := _u.mutation.OptionalFloat32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalFloat32, field.TypeFloat32, value)
-	}
-	if value, ok := _u.mutation.AddedOptionalFloat32(); ok {
-		_spec.AddField(fieldtype.FieldOptionalFloat32, field.TypeFloat32, value)
-	}
-	if _u.mutation.OptionalFloat32Cleared() {
-		_spec.ClearField(fieldtype.FieldOptionalFloat32, field.TypeFloat32)
-	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(fieldtype.FieldText, field.TypeString, value)
-	}
-	if _u.mutation.TextCleared() {
-		_spec.ClearField(fieldtype.FieldText, field.TypeString)
-	}
-	if value, ok := _u.mutation.Datetime(); ok {
-		_spec.SetField(fieldtype.FieldDatetime, field.TypeTime, value)
-	}
-	if _u.mutation.DatetimeCleared() {
-		_spec.ClearField(fieldtype.FieldDatetime, field.TypeTime)
-	}
-	if value, ok := _u.mutation.Decimal(); ok {
-		_spec.SetField(fieldtype.FieldDecimal, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedDecimal(); ok {
-		_spec.AddField(fieldtype.FieldDecimal, field.TypeFloat64, value)
-	}
-	if _u.mutation.DecimalCleared() {
-		_spec.ClearField(fieldtype.FieldDecimal, field.TypeFloat64)
-	}
-	if value, ok := _u.mutation.LinkOther(); ok {
-		_spec.SetField(fieldtype.FieldLinkOther, field.TypeOther, value)
-	}
-	if _u.mutation.LinkOtherCleared() {
-		_spec.ClearField(fieldtype.FieldLinkOther, field.TypeOther)
-	}
-	if value, ok := _u.mutation.LinkOtherFunc(); ok {
-		_spec.SetField(fieldtype.FieldLinkOtherFunc, field.TypeOther, value)
-	}
-	if _u.mutation.LinkOtherFuncCleared() {
-		_spec.ClearField(fieldtype.FieldLinkOtherFunc, field.TypeOther)
-	}
-	if value, ok := _u.mutation.MAC(); ok {
-		_spec.SetField(fieldtype.FieldMAC, field.TypeString, value)
-	}
-	if _u.mutation.MACCleared() {
-		_spec.ClearField(fieldtype.FieldMAC, field.TypeString)
-	}
-	if value, ok := _u.mutation.StringArray(); ok {
-		_spec.SetField(fieldtype.FieldStringArray, field.TypeOther, value)
-	}
-	if _u.mutation.StringArrayCleared() {
-		_spec.ClearField(fieldtype.FieldStringArray, field.TypeOther)
-	}
-	if value, ok := _u.mutation.Password(); ok {
-		_spec.SetField(fieldtype.FieldPassword, field.TypeString, value)
-	}
-	if _u.mutation.PasswordCleared() {
-		_spec.ClearField(fieldtype.FieldPassword, field.TypeString)
-	}
-	if value, ok := _u.mutation.StringScanner(); ok {
-		_spec.SetField(fieldtype.FieldStringScanner, field.TypeString, value)
-	}
-	if _u.mutation.StringScannerCleared() {
-		_spec.ClearField(fieldtype.FieldStringScanner, field.TypeString)
-	}
-	if value, ok := _u.mutation.Duration(); ok {
-		_spec.SetField(fieldtype.FieldDuration, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedDuration(); ok {
-		_spec.AddField(fieldtype.FieldDuration, field.TypeInt64, value)
-	}
-	if _u.mutation.DurationCleared() {
-		_spec.ClearField(fieldtype.FieldDuration, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.Dir(); ok {
-		_spec.SetField(fieldtype.FieldDir, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Ndir(); ok {
-		_spec.SetField(fieldtype.FieldNdir, field.TypeString, value)
-	}
-	if _u.mutation.NdirCleared() {
-		_spec.ClearField(fieldtype.FieldNdir, field.TypeString)
-	}
-	if value, ok := _u.mutation.Str(); ok {
-		_spec.SetField(fieldtype.FieldStr, field.TypeString, value)
-	}
-	if _u.mutation.StrCleared() {
-		_spec.ClearField(fieldtype.FieldStr, field.TypeString)
-	}
-	if value, ok := _u.mutation.NullStr(); ok {
-		_spec.SetField(fieldtype.FieldNullStr, field.TypeString, value)
-	}
-	if _u.mutation.NullStrCleared() {
-		_spec.ClearField(fieldtype.FieldNullStr, field.TypeString)
-	}
-	if value, ok := _u.mutation.Link(); ok {
-		_spec.SetField(fieldtype.FieldLink, field.TypeString, value)
-	}
-	if _u.mutation.LinkCleared() {
-		_spec.ClearField(fieldtype.FieldLink, field.TypeString)
-	}
-	if value, ok := _u.mutation.NullLink(); ok {
-		_spec.SetField(fieldtype.FieldNullLink, field.TypeString, value)
-	}
-	if _u.mutation.NullLinkCleared() {
-		_spec.ClearField(fieldtype.FieldNullLink, field.TypeString)
-	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(fieldtype.FieldActive, field.TypeBool, value)
-	}
-	if _u.mutation.ActiveCleared() {
-		_spec.ClearField(fieldtype.FieldActive, field.TypeBool)
-	}
-	if value, ok := _u.mutation.NullActive(); ok {
-		_spec.SetField(fieldtype.FieldNullActive, field.TypeBool, value)
-	}
-	if _u.mutation.NullActiveCleared() {
-		_spec.ClearField(fieldtype.FieldNullActive, field.TypeBool)
-	}
-	if value, ok := _u.mutation.Deleted(); ok {
-		_spec.SetField(fieldtype.FieldDeleted, field.TypeBool, value)
-	}
-	if _u.mutation.DeletedCleared() {
-		_spec.ClearField(fieldtype.FieldDeleted, field.TypeBool)
-	}
-	if value, ok := _u.mutation.DeletedAt(); ok {
-		_spec.SetField(fieldtype.FieldDeletedAt, field.TypeTime, value)
-	}
-	if _u.mutation.DeletedAtCleared() {
-		_spec.ClearField(fieldtype.FieldDeletedAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.RawData(); ok {
-		_spec.SetField(fieldtype.FieldRawData, field.TypeBytes, value)
-	}
-	if _u.mutation.RawDataCleared() {
-		_spec.ClearField(fieldtype.FieldRawData, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.Sensitive(); ok {
-		_spec.SetField(fieldtype.FieldSensitive, field.TypeBytes, value)
-	}
-	if _u.mutation.SensitiveCleared() {
-		_spec.ClearField(fieldtype.FieldSensitive, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.IP(); ok {
-		_spec.SetField(fieldtype.FieldIP, field.TypeBytes, value)
-	}
-	if _u.mutation.IPCleared() {
-		_spec.ClearField(fieldtype.FieldIP, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.NullInt64(); ok {
-		_spec.SetField(fieldtype.FieldNullInt64, field.TypeInt, value)
-	}
-	if _u.mutation.NullInt64Cleared() {
-		_spec.ClearField(fieldtype.FieldNullInt64, field.TypeInt)
-	}
-	if value, ok := _u.mutation.SchemaInt(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaInt(); ok {
-		_spec.AddField(fieldtype.FieldSchemaInt, field.TypeInt, value)
-	}
-	if _u.mutation.SchemaIntCleared() {
-		_spec.ClearField(fieldtype.FieldSchemaInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.SchemaInt8(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt8, field.TypeInt8, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaInt8(); ok {
-		_spec.AddField(fieldtype.FieldSchemaInt8, field.TypeInt8, value)
-	}
-	if _u.mutation.SchemaInt8Cleared() {
-		_spec.ClearField(fieldtype.FieldSchemaInt8, field.TypeInt8)
-	}
-	if value, ok := _u.mutation.SchemaInt64(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt64, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaInt64(); ok {
-		_spec.AddField(fieldtype.FieldSchemaInt64, field.TypeInt64, value)
-	}
-	if _u.mutation.SchemaInt64Cleared() {
-		_spec.ClearField(fieldtype.FieldSchemaInt64, field.TypeInt64)
-	}
-	if value, ok := _u.mutation.SchemaFloat(); ok {
-		_spec.SetField(fieldtype.FieldSchemaFloat, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaFloat(); ok {
-		_spec.AddField(fieldtype.FieldSchemaFloat, field.TypeFloat64, value)
-	}
-	if _u.mutation.SchemaFloatCleared() {
-		_spec.ClearField(fieldtype.FieldSchemaFloat, field.TypeFloat64)
-	}
-	if value, ok := _u.mutation.SchemaFloat32(); ok {
-		_spec.SetField(fieldtype.FieldSchemaFloat32, field.TypeFloat32, value)
-	}
-	if value, ok := _u.mutation.AddedSchemaFloat32(); ok {
-		_spec.AddField(fieldtype.FieldSchemaFloat32, field.TypeFloat32, value)
-	}
-	if _u.mutation.SchemaFloat32Cleared() {
-		_spec.ClearField(fieldtype.FieldSchemaFloat32, field.TypeFloat32)
-	}
-	if value, ok := _u.mutation.NullFloat(); ok {
-		_spec.SetField(fieldtype.FieldNullFloat, field.TypeFloat64, value)
-	}
-	if _u.mutation.NullFloatCleared() {
-		_spec.ClearField(fieldtype.FieldNullFloat, field.TypeFloat64)
-	}
-	if value, ok := _u.mutation.Role(); ok {
-		_spec.SetField(fieldtype.FieldRole, field.TypeEnum, value)
-	}
-	if value, ok := _u.mutation.Priority(); ok {
-		_spec.SetField(fieldtype.FieldPriority, field.TypeEnum, value)
-	}
-	if _u.mutation.PriorityCleared() {
-		_spec.ClearField(fieldtype.FieldPriority, field.TypeEnum)
-	}
-	if value, ok := _u.mutation.OptionalUUID(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUUID, field.TypeUUID, value)
-	}
-	if _u.mutation.OptionalUUIDCleared() {
-		_spec.ClearField(fieldtype.FieldOptionalUUID, field.TypeUUID)
-	}
-	if value, ok := _u.mutation.NillableUUID(); ok {
-		_spec.SetField(fieldtype.FieldNillableUUID, field.TypeUUID, value)
-	}
-	if _u.mutation.NillableUUIDCleared() {
-		_spec.ClearField(fieldtype.FieldNillableUUID, field.TypeUUID)
-	}
-	if value, ok := _u.mutation.Strings(); ok {
-		_spec.SetField(fieldtype.FieldStrings, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedStrings(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, fieldtype.FieldStrings, value)
-		})
-	}
-	if _u.mutation.StringsCleared() {
-		_spec.ClearField(fieldtype.FieldStrings, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Pair(); ok {
-		_spec.SetField(fieldtype.FieldPair, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.NilPair(); ok {
-		_spec.SetField(fieldtype.FieldNilPair, field.TypeBytes, value)
-	}
-	if _u.mutation.NilPairCleared() {
-		_spec.ClearField(fieldtype.FieldNilPair, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.Vstring(); ok {
-		_spec.SetField(fieldtype.FieldVstring, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Triple(); ok {
-		_spec.SetField(fieldtype.FieldTriple, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.BigInt(); ok {
-		_spec.SetField(fieldtype.FieldBigInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedBigInt(); ok {
-		_spec.AddField(fieldtype.FieldBigInt, field.TypeInt, value)
-	}
-	if _u.mutation.BigIntCleared() {
-		_spec.ClearField(fieldtype.FieldBigInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.PasswordOther(); ok {
-		_spec.SetField(fieldtype.FieldPasswordOther, field.TypeOther, value)
-	}
-	if _u.mutation.PasswordOtherCleared() {
-		_spec.ClearField(fieldtype.FieldPasswordOther, field.TypeOther)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &fieldtypeUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &FieldType{config: _u.config}

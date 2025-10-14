@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -64,6 +65,11 @@ func (_u *PCUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var pcUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PCMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*PCMutation]{},
+	Edges:  []entbuilder.UpdateEdgeDescriptor[config, *PCMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *PCUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PCUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -78,6 +84,9 @@ func (_u *PCUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &pcUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -177,6 +186,9 @@ func (_u *PCUpdateOne) sqlSave(ctx context.Context) (_node *PC, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &pcUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &PC{config: _u.config}

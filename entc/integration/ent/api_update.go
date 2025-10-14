@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/api"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -64,6 +65,11 @@ func (_u *APIUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var apiUpdateDescriptor = entbuilder.UpdateDescriptor[config, *APIMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*APIMutation]{},
+	Edges:  []entbuilder.UpdateEdgeDescriptor[config, *APIMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *APIUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *APIUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -78,6 +84,9 @@ func (_u *APIUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &apiUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -177,6 +186,9 @@ func (_u *APIUpdateOne) sqlSave(ctx context.Context) (_node *Api, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &apiUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Api{config: _u.config}

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -163,6 +165,123 @@ func (_u *NodeUpdate) defaults() {
 	}
 }
 
+var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*NodeMutation]{
+		{
+			Column: node.FieldValue,
+			Type:   field.TypeInt,
+			Set: func(m *NodeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Value(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *NodeMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedValue(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *NodeMutation) bool {
+				return m.ValueCleared()
+			},
+		},
+
+		{
+			Column: node.FieldUpdatedAt,
+			Type:   field.TypeTime,
+			Set: func(m *NodeMutation) (driver.Value, bool, error) {
+				if value, ok := m.UpdatedAt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *NodeMutation) bool {
+				return m.UpdatedAtCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *NodeMutation]{
+		{
+			Clear: func(cfg config, m *NodeMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.PrevCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2O,
+						Inverse: true,
+						Table:   node.PrevTable,
+						Columns: []string{node.PrevColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *NodeMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.PrevIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: true,
+					Table:   node.PrevTable,
+					Columns: []string{node.PrevColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *NodeMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.NextCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2O,
+						Inverse: false,
+						Table:   node.NextTable,
+						Columns: []string{node.NextColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *NodeMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.NextIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   node.NextTable,
+					Columns: []string{node.NextColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *NodeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *NodeUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -178,78 +297,8 @@ func (_u *NodeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Value(); ok {
-		_spec.SetField(node.FieldValue, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedValue(); ok {
-		_spec.AddField(node.FieldValue, field.TypeInt, value)
-	}
-	if _u.mutation.ValueCleared() {
-		_spec.ClearField(node.FieldValue, field.TypeInt)
-	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(node.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.UpdatedAtCleared() {
-		_spec.ClearField(node.FieldUpdatedAt, field.TypeTime)
-	}
-	if _u.mutation.PrevCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   node.PrevTable,
-			Columns: []string{node.PrevColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.PrevIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   node.PrevTable,
-			Columns: []string{node.PrevColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.NextCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   node.NextTable,
-			Columns: []string{node.NextColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.NextIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   node.NextTable,
-			Columns: []string{node.NextColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &nodeUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -448,78 +497,8 @@ func (_u *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Value(); ok {
-		_spec.SetField(node.FieldValue, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedValue(); ok {
-		_spec.AddField(node.FieldValue, field.TypeInt, value)
-	}
-	if _u.mutation.ValueCleared() {
-		_spec.ClearField(node.FieldValue, field.TypeInt)
-	}
-	if value, ok := _u.mutation.UpdatedAt(); ok {
-		_spec.SetField(node.FieldUpdatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.UpdatedAtCleared() {
-		_spec.ClearField(node.FieldUpdatedAt, field.TypeTime)
-	}
-	if _u.mutation.PrevCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   node.PrevTable,
-			Columns: []string{node.PrevColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.PrevIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   node.PrevTable,
-			Columns: []string{node.PrevColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.NextCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   node.NextTable,
-			Columns: []string{node.NextColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.NextIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   node.NextTable,
-			Columns: []string{node.NextColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &nodeUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Node{config: _u.config}

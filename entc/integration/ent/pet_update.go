@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -226,6 +228,170 @@ func (_u *PetUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*PetMutation]{
+		{
+			Column: pet.FieldAge,
+			Type:   field.TypeFloat64,
+			Set: func(m *PetMutation) (driver.Value, bool, error) {
+				if value, ok := m.Age(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *PetMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedAge(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: pet.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *PetMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: pet.FieldUUID,
+			Type:   field.TypeUUID,
+			Set: func(m *PetMutation) (driver.Value, bool, error) {
+				if value, ok := m.UUID(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *PetMutation) bool {
+				return m.UUIDCleared()
+			},
+		},
+
+		{
+			Column: pet.FieldNickname,
+			Type:   field.TypeString,
+			Set: func(m *PetMutation) (driver.Value, bool, error) {
+				if value, ok := m.Nickname(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *PetMutation) bool {
+				return m.NicknameCleared()
+			},
+		},
+
+		{
+			Column: pet.FieldTrained,
+			Type:   field.TypeBool,
+			Set: func(m *PetMutation) (driver.Value, bool, error) {
+				if value, ok := m.Trained(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: pet.FieldOptionalTime,
+			Type:   field.TypeTime,
+			Set: func(m *PetMutation) (driver.Value, bool, error) {
+				if value, ok := m.OptionalTime(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *PetMutation) bool {
+				return m.OptionalTimeCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *PetMutation]{
+		{
+			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.TeamCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2O,
+						Inverse: true,
+						Table:   pet.TeamTable,
+						Columns: []string{pet.TeamColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *PetMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.TeamIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: true,
+					Table:   pet.TeamTable,
+					Columns: []string{pet.TeamColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.OwnerCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.M2O,
+						Inverse: true,
+						Table:   pet.OwnerTable,
+						Columns: []string{pet.OwnerColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *PetMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.OwnerIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   pet.OwnerTable,
+					Columns: []string{pet.OwnerColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *PetUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PetUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -241,93 +407,8 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
-		_spec.SetField(pet.FieldAge, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAge(); ok {
-		_spec.AddField(pet.FieldAge, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(pet.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.UUID(); ok {
-		_spec.SetField(pet.FieldUUID, field.TypeUUID, value)
-	}
-	if _u.mutation.UUIDCleared() {
-		_spec.ClearField(pet.FieldUUID, field.TypeUUID)
-	}
-	if value, ok := _u.mutation.Nickname(); ok {
-		_spec.SetField(pet.FieldNickname, field.TypeString, value)
-	}
-	if _u.mutation.NicknameCleared() {
-		_spec.ClearField(pet.FieldNickname, field.TypeString)
-	}
-	if value, ok := _u.mutation.Trained(); ok {
-		_spec.SetField(pet.FieldTrained, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.OptionalTime(); ok {
-		_spec.SetField(pet.FieldOptionalTime, field.TypeTime, value)
-	}
-	if _u.mutation.OptionalTimeCleared() {
-		_spec.ClearField(pet.FieldOptionalTime, field.TypeTime)
-	}
-	if _u.mutation.TeamCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   pet.TeamTable,
-			Columns: []string{pet.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TeamIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   pet.TeamTable,
-			Columns: []string{pet.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.OwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &petUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -587,93 +668,8 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
-		_spec.SetField(pet.FieldAge, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAge(); ok {
-		_spec.AddField(pet.FieldAge, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(pet.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.UUID(); ok {
-		_spec.SetField(pet.FieldUUID, field.TypeUUID, value)
-	}
-	if _u.mutation.UUIDCleared() {
-		_spec.ClearField(pet.FieldUUID, field.TypeUUID)
-	}
-	if value, ok := _u.mutation.Nickname(); ok {
-		_spec.SetField(pet.FieldNickname, field.TypeString, value)
-	}
-	if _u.mutation.NicknameCleared() {
-		_spec.ClearField(pet.FieldNickname, field.TypeString)
-	}
-	if value, ok := _u.mutation.Trained(); ok {
-		_spec.SetField(pet.FieldTrained, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.OptionalTime(); ok {
-		_spec.SetField(pet.FieldOptionalTime, field.TypeTime, value)
-	}
-	if _u.mutation.OptionalTimeCleared() {
-		_spec.ClearField(pet.FieldOptionalTime, field.TypeTime)
-	}
-	if _u.mutation.TeamCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   pet.TeamTable,
-			Columns: []string{pet.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TeamIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   pet.TeamTable,
-			Columns: []string{pet.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.OwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &petUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Pet{config: _u.config}

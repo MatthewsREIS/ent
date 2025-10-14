@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -19,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -305,6 +307,294 @@ func (_u *GroupUpdate) check() error {
 	return nil
 }
 
+var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*GroupMutation]{
+		{
+			Column: group.FieldActive,
+			Type:   field.TypeBool,
+			Set: func(m *GroupMutation) (driver.Value, bool, error) {
+				if value, ok := m.Active(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: group.FieldExpire,
+			Type:   field.TypeTime,
+			Set: func(m *GroupMutation) (driver.Value, bool, error) {
+				if value, ok := m.Expire(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: group.FieldType,
+			Type:   field.TypeString,
+			Set: func(m *GroupMutation) (driver.Value, bool, error) {
+				if value, ok := m.GetType(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *GroupMutation) bool {
+				return m.TypeCleared()
+			},
+		},
+
+		{
+			Column: group.FieldMaxUsers,
+			Type:   field.TypeInt,
+			Set: func(m *GroupMutation) (driver.Value, bool, error) {
+				if value, ok := m.MaxUsers(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *GroupMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedMaxUsers(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *GroupMutation) bool {
+				return m.MaxUsersCleared()
+			},
+		},
+
+		{
+			Column: group.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *GroupMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *GroupMutation]{
+		{
+			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.FilesCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2M,
+						Inverse: false,
+						Table:   group.FilesTable,
+						Columns: []string{group.FilesColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Remove: func(cfg config, m *GroupMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.RemovedFilesIDs()
+				if len(nodes) == 0 || m.FilesCleared() {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   group.FilesTable,
+					Columns: []string{group.FilesColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+			Add: func(cfg config, m *GroupMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.FilesIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   group.FilesTable,
+					Columns: []string{group.FilesColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.BlockedCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2M,
+						Inverse: false,
+						Table:   group.BlockedTable,
+						Columns: []string{group.BlockedColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Remove: func(cfg config, m *GroupMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.RemovedBlockedIDs()
+				if len(nodes) == 0 || m.BlockedCleared() {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   group.BlockedTable,
+					Columns: []string{group.BlockedColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+			Add: func(cfg config, m *GroupMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.BlockedIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   group.BlockedTable,
+					Columns: []string{group.BlockedColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.UsersCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.M2M,
+						Inverse: true,
+						Table:   group.UsersTable,
+						Columns: group.UsersPrimaryKey,
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Remove: func(cfg config, m *GroupMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.RemovedUsersIDs()
+				if len(nodes) == 0 || m.UsersCleared() {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: true,
+					Table:   group.UsersTable,
+					Columns: group.UsersPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+			Add: func(cfg config, m *GroupMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.UsersIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: true,
+					Table:   group.UsersTable,
+					Columns: group.UsersPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.InfoCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.M2O,
+						Inverse: false,
+						Table:   group.InfoTable,
+						Columns: []string{group.InfoColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *GroupMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.InfoIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   group.InfoTable,
+					Columns: []string{group.InfoColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *GroupUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GroupUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -323,193 +613,8 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(group.FieldActive, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.Expire(); ok {
-		_spec.SetField(group.FieldExpire, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(group.FieldType, field.TypeString, value)
-	}
-	if _u.mutation.TypeCleared() {
-		_spec.ClearField(group.FieldType, field.TypeString)
-	}
-	if value, ok := _u.mutation.MaxUsers(); ok {
-		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedMaxUsers(); ok {
-		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
-	}
-	if _u.mutation.MaxUsersCleared() {
-		_spec.ClearField(group.FieldMaxUsers, field.TypeInt)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(group.FieldName, field.TypeString, value)
-	}
-	if _u.mutation.FilesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.FilesTable,
-			Columns: []string{group.FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !_u.mutation.FilesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.FilesTable,
-			Columns: []string{group.FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.FilesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.FilesTable,
-			Columns: []string{group.FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.BlockedCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.BlockedTable,
-			Columns: []string{group.BlockedColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedBlockedIDs(); len(nodes) > 0 && !_u.mutation.BlockedCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.BlockedTable,
-			Columns: []string{group.BlockedColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.BlockedIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.BlockedTable,
-			Columns: []string{group.BlockedColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   group.UsersTable,
-			Columns: group.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUsersIDs(); len(nodes) > 0 && !_u.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   group.UsersTable,
-			Columns: group.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   group.UsersTable,
-			Columns: group.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.InfoCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.InfoTable,
-			Columns: []string{group.InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.InfoIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.InfoTable,
-			Columns: []string{group.InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &groupUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -850,193 +955,8 @@ func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(group.FieldActive, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.Expire(); ok {
-		_spec.SetField(group.FieldExpire, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(group.FieldType, field.TypeString, value)
-	}
-	if _u.mutation.TypeCleared() {
-		_spec.ClearField(group.FieldType, field.TypeString)
-	}
-	if value, ok := _u.mutation.MaxUsers(); ok {
-		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedMaxUsers(); ok {
-		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
-	}
-	if _u.mutation.MaxUsersCleared() {
-		_spec.ClearField(group.FieldMaxUsers, field.TypeInt)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(group.FieldName, field.TypeString, value)
-	}
-	if _u.mutation.FilesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.FilesTable,
-			Columns: []string{group.FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !_u.mutation.FilesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.FilesTable,
-			Columns: []string{group.FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.FilesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.FilesTable,
-			Columns: []string{group.FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.BlockedCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.BlockedTable,
-			Columns: []string{group.BlockedColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedBlockedIDs(); len(nodes) > 0 && !_u.mutation.BlockedCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.BlockedTable,
-			Columns: []string{group.BlockedColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.BlockedIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   group.BlockedTable,
-			Columns: []string{group.BlockedColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   group.UsersTable,
-			Columns: group.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedUsersIDs(); len(nodes) > 0 && !_u.mutation.UsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   group.UsersTable,
-			Columns: group.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.UsersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   group.UsersTable,
-			Columns: group.UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.InfoCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.InfoTable,
-			Columns: []string{group.InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.InfoIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   group.InfoTable,
-			Columns: []string{group.InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &groupUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Group{config: _u.config}

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -94,6 +96,25 @@ func (_u *ItemUpdate) check() error {
 	return nil
 }
 
+var itemUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ItemMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*ItemMutation]{
+		{
+			Column: item.FieldText,
+			Type:   field.TypeString,
+			Set: func(m *ItemMutation) (driver.Value, bool, error) {
+				if value, ok := m.Text(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ItemMutation) bool {
+				return m.TextCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *ItemMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *ItemUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ItemUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -112,11 +133,8 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(item.FieldText, field.TypeString, value)
-	}
-	if _u.mutation.TextCleared() {
-		_spec.ClearField(item.FieldText, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &itemUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -250,11 +268,8 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(item.FieldText, field.TypeString, value)
-	}
-	if _u.mutation.TextCleared() {
-		_spec.ClearField(item.FieldText, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &itemUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Item{config: _u.config}

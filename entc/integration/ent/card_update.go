@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/spec"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -194,6 +196,151 @@ func (_u *CardUpdate) check() error {
 	return nil
 }
 
+var cardUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CardMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*CardMutation]{
+		{
+			Column: card.FieldUpdateTime,
+			Type:   field.TypeTime,
+			Set: func(m *CardMutation) (driver.Value, bool, error) {
+				if value, ok := m.UpdateTime(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: card.FieldBalance,
+			Type:   field.TypeFloat64,
+			Set: func(m *CardMutation) (driver.Value, bool, error) {
+				if value, ok := m.Balance(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *CardMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedBalance(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: card.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *CardMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *CardMutation) bool {
+				return m.NameCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *CardMutation]{
+		{
+			Clear: func(cfg config, m *CardMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.OwnerCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2O,
+						Inverse: true,
+						Table:   card.OwnerTable,
+						Columns: []string{card.OwnerColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *CardMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.OwnerIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: true,
+					Table:   card.OwnerTable,
+					Columns: []string{card.OwnerColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *CardMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.SpecCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.M2M,
+						Inverse: true,
+						Table:   card.SpecTable,
+						Columns: card.SpecPrimaryKey,
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Remove: func(cfg config, m *CardMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.RemovedSpecIDs()
+				if len(nodes) == 0 || m.SpecCleared() {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: true,
+					Table:   card.SpecTable,
+					Columns: card.SpecPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+			Add: func(cfg config, m *CardMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.SpecIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: true,
+					Table:   card.SpecTable,
+					Columns: card.SpecPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *CardUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CardUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -212,94 +359,8 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UpdateTime(); ok {
-		_spec.SetField(card.FieldUpdateTime, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.Balance(); ok {
-		_spec.SetField(card.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedBalance(); ok {
-		_spec.AddField(card.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(card.FieldName, field.TypeString, value)
-	}
-	if _u.mutation.NameCleared() {
-		_spec.ClearField(card.FieldName, field.TypeString)
-	}
-	if _u.mutation.OwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   card.OwnerTable,
-			Columns: []string{card.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   card.OwnerTable,
-			Columns: []string{card.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.SpecCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   card.SpecTable,
-			Columns: card.SpecPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedSpecIDs(); len(nodes) > 0 && !_u.mutation.SpecCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   card.SpecTable,
-			Columns: card.SpecPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.SpecIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   card.SpecTable,
-			Columns: card.SpecPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &cardUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -530,94 +591,8 @@ func (_u *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UpdateTime(); ok {
-		_spec.SetField(card.FieldUpdateTime, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.Balance(); ok {
-		_spec.SetField(card.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedBalance(); ok {
-		_spec.AddField(card.FieldBalance, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(card.FieldName, field.TypeString, value)
-	}
-	if _u.mutation.NameCleared() {
-		_spec.ClearField(card.FieldName, field.TypeString)
-	}
-	if _u.mutation.OwnerCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   card.OwnerTable,
-			Columns: []string{card.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   card.OwnerTable,
-			Columns: []string{card.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.SpecCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   card.SpecTable,
-			Columns: card.SpecPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedSpecIDs(); len(nodes) > 0 && !_u.mutation.SpecCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   card.SpecTable,
-			Columns: card.SpecPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.SpecIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   card.SpecTable,
-			Columns: card.SpecPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &cardUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Card{config: _u.config}
