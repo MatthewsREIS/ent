@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -21,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -515,99 +515,95 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	return nodes, nil
 }
 
+var fileOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[File, User, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.OwnerTable,
+			Columns: []string{file.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: user.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *File) int { return n.ID },
+	ExtractEdgeID: func(e *User) int { return e.ID },
+	ExtractNodeFK: func(n *File) *int {
+		return n.user_files
+	},
+}
+var fileTypeEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[File, FileType, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   file.TypeTable,
+			Columns: []string{file.TypeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: filetype.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *File) int { return n.ID },
+	ExtractEdgeID: func(e *FileType) int { return e.ID },
+	ExtractNodeFK: func(n *File) *int {
+		return n.file_type_files
+	},
+}
+var fileFieldEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[File, FieldType, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   file.FieldTable,
+			Columns: []string{file.FieldColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: fieldtype.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *File) int { return n.ID },
+	ExtractEdgeID: func(e *FieldType) int { return e.ID },
+	ExtractEdgeFK: func(e *FieldType) *int {
+		return e.file_field
+	},
+}
+
 func (_q *FileQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*File, init func(*File), assign func(*File, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*File)
-	for i := range nodes {
-		if nodes[i].user_files == nil {
-			continue
-		}
-		fk := *nodes[i].user_files
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_files" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &fileOwnerEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *FileQuery) loadType(ctx context.Context, query *FileTypeQuery, nodes []*File, init func(*File), assign func(*File, *FileType)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*File)
-	for i := range nodes {
-		if nodes[i].file_type_files == nil {
-			continue
-		}
-		fk := *nodes[i].file_type_files
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(filetype.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &fileTypeEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(filetype.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *FileQuery) loadField(ctx context.Context, query *FieldTypeQuery, nodes []*File, init func(*File), assign func(*File, *FieldType)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*File)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	query.withFKs = true
-	query.Where(predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(file.FieldColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.file_field
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &fileFieldEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

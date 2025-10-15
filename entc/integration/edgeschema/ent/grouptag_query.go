@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -448,62 +449,63 @@ func (_q *GroupTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Gro
 	return nodes, nil
 }
 
+var grouptagTagEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[GroupTag, Tag, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   grouptag.TagTable,
+			Columns: []string{grouptag.TagColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: tag.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *GroupTag) int { return n.ID },
+	ExtractEdgeID: func(e *Tag) int { return e.ID },
+	ExtractNodeFK: func(n *GroupTag) *int {
+		v := n.TagID
+		return &v
+	},
+}
+var grouptagGroupEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[GroupTag, Group, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   grouptag.GroupTable,
+			Columns: []string{grouptag.GroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: group.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *GroupTag) int { return n.ID },
+	ExtractEdgeID: func(e *Group) int { return e.ID },
+	ExtractNodeFK: func(n *GroupTag) *int {
+		v := n.GroupID
+		return &v
+	},
+}
+
 func (_q *GroupTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*GroupTag, init func(*GroupTag), assign func(*GroupTag, *Tag)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*GroupTag)
-	for i := range nodes {
-		fk := nodes[i].TagID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(tag.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &grouptagTagEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
+		query.Where(tag.IDIn(ids...))
+	})
 	return nil
 }
 func (_q *GroupTagQuery) loadGroup(ctx context.Context, query *GroupQuery, nodes []*GroupTag, init func(*GroupTag), assign func(*GroupTag, *Group)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*GroupTag)
-	for i := range nodes {
-		fk := nodes[i].GroupID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(group.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &grouptagGroupEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
+		query.Where(group.IDIn(ids...))
+	})
 	return nil
 }
 

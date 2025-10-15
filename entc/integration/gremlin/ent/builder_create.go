@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/builder"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // BuilderCreate is the builder for creating a Builder entity.
@@ -29,6 +30,9 @@ func (_c *BuilderCreate) Mutation() *BuilderMutation {
 
 // Save creates the Builder in the database.
 func (_c *BuilderCreate) Save(ctx context.Context) (*Builder, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, builderCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -54,13 +58,13 @@ func (_c *BuilderCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *BuilderCreate) check() error {
-	return nil
+var builderCreateSpec = entgen.CreateSpec[*BuilderMutation]{
+	Fields: []entgen.FieldSpec[*BuilderMutation]{},
+	Edges:  []entgen.EdgeSpec[*BuilderMutation]{},
 }
 
 func (_c *BuilderCreate) gremlinSave(ctx context.Context) (*Builder, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, builderCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

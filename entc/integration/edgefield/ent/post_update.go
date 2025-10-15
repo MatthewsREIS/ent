@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -109,6 +111,61 @@ func (_u *PostUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var postUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PostMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*PostMutation]{
+		{
+			Column: post.FieldText,
+			Type:   field.TypeString,
+			Set: func(m *PostMutation) (driver.Value, bool, error) {
+				if value, ok := m.Text(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *PostMutation]{
+		{
+			Clear: func(cfg config, m *PostMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.AuthorCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.M2O,
+						Inverse: false,
+						Table:   post.AuthorTable,
+						Columns: []string{post.AuthorColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *PostMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.AuthorIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   post.AuthorTable,
+					Columns: []string{post.AuthorColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(post.Table, post.Columns, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -118,37 +175,8 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(post.FieldText, field.TypeString, value)
-	}
-	if _u.mutation.AuthorCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   post.AuthorTable,
-			Columns: []string{post.AuthorColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.AuthorIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   post.AuthorTable,
-			Columns: []string{post.AuthorColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &postUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -286,37 +314,8 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(post.FieldText, field.TypeString, value)
-	}
-	if _u.mutation.AuthorCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   post.AuthorTable,
-			Columns: []string{post.AuthorColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.AuthorIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   post.AuthorTable,
-			Columns: []string{post.AuthorColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &postUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Post{config: _u.config}
 	_spec.Assign = _node.assignValues

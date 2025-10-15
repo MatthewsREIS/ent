@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -70,6 +72,22 @@ func (_u *LinkUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var linkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *LinkMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*LinkMutation]{
+		{
+			Column: link.FieldLinkInformation,
+			Type:   field.TypeJSON,
+			Set: func(m *LinkMutation) (driver.Value, bool, error) {
+				if value, ok := m.LinkInformation(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *LinkMutation]{},
+}
+
 func (_u *LinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(link.Table, link.Columns, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -79,8 +97,8 @@ func (_u *LinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.LinkInformation(); ok {
-		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &linkUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -179,8 +197,8 @@ func (_u *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.LinkInformation(); ok {
-		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &linkUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Link{config: _u.config}
 	_spec.Assign = _node.assignValues

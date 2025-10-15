@@ -8,11 +8,13 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -43,14 +45,31 @@ func (_d *LinkDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *LinkDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(link.Table, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var linkDeleteDescriptor = entbuilder.DeleteDescriptor[config, *LinkMutation]{
+	Table: link.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*LinkMutation]{
+		Column: link.FieldID,
+		Type:   field.TypeUUID,
+		Value: func(m *LinkMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *LinkMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *LinkDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &linkDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {

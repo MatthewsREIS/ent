@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -405,33 +406,34 @@ func (_q *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, e
 	return nodes, nil
 }
 
+var infoUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Info, User, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   info.UserTable,
+			Columns: []string{info.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: user.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Info) int { return n.ID },
+	ExtractEdgeID: func(e *User) int { return e.ID },
+	ExtractNodeFK: func(n *Info) *int {
+		v := n.ID
+		return &v
+	},
+}
+
 func (_q *InfoQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Info, init func(*Info), assign func(*Info, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Info)
-	for i := range nodes {
-		fk := nodes[i].ID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &infoUserEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
+		query.Where(user.IDIn(ids...))
+	})
 	return nil
 }
 

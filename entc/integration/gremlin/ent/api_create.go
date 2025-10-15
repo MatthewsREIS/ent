@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/api"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // APICreate is the builder for creating a Api entity.
@@ -29,6 +30,9 @@ func (_c *APICreate) Mutation() *APIMutation {
 
 // Save creates the Api in the database.
 func (_c *APICreate) Save(ctx context.Context) (*Api, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, apiCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -54,13 +58,13 @@ func (_c *APICreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *APICreate) check() error {
-	return nil
+var apiCreateSpec = entgen.CreateSpec[*APIMutation]{
+	Fields: []entgen.FieldSpec[*APIMutation]{},
+	Edges:  []entgen.EdgeSpec[*APIMutation]{},
 }
 
 func (_c *APICreate) gremlinSave(ctx context.Context) (*Api, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, apiCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

@@ -875,11 +875,26 @@ func (e *NotFoundError) Error() string {
 type DeleteSpec struct {
 	Node      *NodeSpec
 	Predicate func(*sql.Selector)
+	Modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewDeleteSpec creates a new node deletion spec.
 func NewDeleteSpec(table string, id *FieldSpec) *DeleteSpec {
 	return &DeleteSpec{Node: &NodeSpec{Table: table, ID: id}}
+}
+
+// AddModifier adds a new statement modifier to the delete spec.
+func (d *DeleteSpec) AddModifier(m func(*sql.DeleteBuilder)) {
+	if m != nil {
+		d.Modifiers = append(d.Modifiers, m)
+	}
+}
+
+// AddModifiers appends a list of statement modifiers to the delete spec.
+func (d *DeleteSpec) AddModifiers(m ...func(*sql.DeleteBuilder)) {
+	for i := range m {
+		d.AddModifier(m[i])
+	}
 }
 
 // DeleteNodes applies the DeleteSpec on the graph.
@@ -894,7 +909,13 @@ func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int
 	if pred := spec.Predicate; pred != nil {
 		pred(selector)
 	}
-	query, args := builder.Delete(spec.Node.Table).Schema(spec.Node.Schema).FromSelect(selector).Query()
+	deleter := builder.Delete(spec.Node.Table).Schema(spec.Node.Schema).FromSelect(selector)
+	for i := range spec.Modifiers {
+		if spec.Modifiers[i] != nil {
+			spec.Modifiers[i](deleter)
+		}
+	}
+	query, args := deleter.Query()
 	if err := drv.Exec(ctx, query, args, &res); err != nil {
 		return 0, err
 	}

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -90,6 +92,22 @@ func (_u *ParentUpdate) check() error {
 	return nil
 }
 
+var parentUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ParentMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*ParentMutation]{
+		{
+			Column: parent.FieldByAdoption,
+			Type:   field.TypeBool,
+			Set: func(m *ParentMutation) (driver.Value, bool, error) {
+				if value, ok := m.ByAdoption(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *ParentMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *ParentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ParentUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -108,8 +126,8 @@ func (_u *ParentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.ByAdoption(); ok {
-		_spec.SetField(parent.FieldByAdoption, field.TypeBool, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &parentUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.Node.Schema = _u.schemaConfig.Parent
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
@@ -240,8 +258,8 @@ func (_u *ParentUpdateOne) sqlSave(ctx context.Context) (_node *Parent, err erro
 			}
 		}
 	}
-	if value, ok := _u.mutation.ByAdoption(); ok {
-		_spec.SetField(parent.FieldByAdoption, field.TypeBool, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &parentUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.Node.Schema = _u.schemaConfig.Parent
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)

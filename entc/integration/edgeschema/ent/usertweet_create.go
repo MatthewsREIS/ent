@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -17,6 +18,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -71,7 +74,9 @@ func (_c *UserTweetCreate) Mutation() *UserTweetMutation {
 
 // Save creates the UserTweet in the database.
 func (_c *UserTweetCreate) Save(ctx context.Context) (*UserTweet, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, usertweetCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -97,97 +102,204 @@ func (_c *UserTweetCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *UserTweetCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := usertweet.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
-	}
+var usertweetCreateSpec = entgen.CreateSpec[*UserTweetMutation]{
+	Fields: []entgen.FieldSpec[*UserTweetMutation]{
+		{
+			Name: "created_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "UserTweet.created_at"`)}
+				},
+			},
+			IsSet: func(m *UserTweetMutation) bool {
+				_, ok := m.CreatedAt()
+				return ok
+			},
+			Default: func(m *UserTweetMutation) error {
+				if _, ok := m.CreatedAt(); !ok {
+					v := usertweet.DefaultCreatedAt()
+					m.SetCreatedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "user_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "UserTweet.user_id"`)}
+				},
+			},
+			IsSet: func(m *UserTweetMutation) bool {
+				_, ok := m.UserID()
+				return ok
+			},
+		},
+		{
+			Name: "tweet_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "UserTweet.tweet_id"`)}
+				},
+			},
+			IsSet: func(m *UserTweetMutation) bool {
+				_, ok := m.TweetID()
+				return ok
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*UserTweetMutation]{
+		{
+			Name: "user",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "UserTweet.user"`)}
+				},
+			},
+			Count: func(m *UserTweetMutation) int {
+				return len(m.UserIDs())
+			},
+		},
+		{
+			Name: "tweet",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "UserTweet.tweet"`)}
+				},
+			},
+			Count: func(m *UserTweetMutation) int {
+				return len(m.TweetIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *UserTweetCreate) check() error {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "UserTweet.created_at"`)}
-	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "UserTweet.user_id"`)}
-	}
-	if _, ok := _c.mutation.TweetID(); !ok {
-		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "UserTweet.tweet_id"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "UserTweet.user"`)}
-	}
-	if len(_c.mutation.TweetIDs()) == 0 {
-		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "UserTweet.tweet"`)}
-	}
-	return nil
+var usertweetCreateDescriptor = entbuilder.CreateDescriptor[config, UserTweet, *UserTweetMutation]{
+	Table: usertweet.Table,
+	NewNode: func(cfg config) *UserTweet {
+		return &UserTweet{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, UserTweet, *UserTweetMutation]{
+		Column:      usertweet.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *UserTweet, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, UserTweet, *UserTweetMutation]{
+		{
+			Column: usertweet.FieldCreatedAt,
+			Type:   field.TypeTime,
+			Value: func(m *UserTweetMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.CreatedAt(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *UserTweet, fv entbuilder.FieldValue) error {
+				node.CreatedAt = fv.Node.(time.Time)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, UserTweet, *UserTweetMutation]{
+		{
+			Value: func(cfg config, m *UserTweetMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.UserIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   usertweet.UserTable,
+					Columns: []string{usertweet.UserColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *UserTweet, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.UserID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *UserTweetMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.TweetIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   usertweet.TweetTable,
+					Columns: []string{usertweet.TweetColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *UserTweet, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.TweetID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *UserTweetCreate) sqlSave(ctx context.Context) (*UserTweet, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, usertweetCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &usertweetCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &usertweetCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
-	var (
-		_node = &UserTweet{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(usertweet.Table, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(usertweet.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   usertweet.UserTable,
-			Columns: []string{usertweet.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TweetIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   usertweet.TweetTable,
-			Columns: []string{usertweet.TweetColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.TweetID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -408,19 +520,24 @@ func (_c *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserTweetMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, usertweetCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, usertweetCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &usertweetCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -432,20 +549,23 @@ func (_c *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &usertweetCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

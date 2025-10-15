@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -160,6 +162,142 @@ func (_u *BlobUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*BlobMutation]{
+		{
+			Column: blob.FieldUUID,
+			Type:   field.TypeUUID,
+			Set: func(m *BlobMutation) (driver.Value, bool, error) {
+				if value, ok := m.UUID(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: blob.FieldCount,
+			Type:   field.TypeInt,
+			Set: func(m *BlobMutation) (driver.Value, bool, error) {
+				if value, ok := m.Count(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *BlobMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedCount(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *BlobMutation]{
+		{
+			Clear: func(cfg config, m *BlobMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.ParentCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2O,
+						Inverse: false,
+						Table:   blob.ParentTable,
+						Columns: []string{blob.ParentColumn},
+						Bidi:    true,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *BlobMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.ParentIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   blob.ParentTable,
+					Columns: []string{blob.ParentColumn},
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *BlobMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.LinksCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.M2M,
+						Inverse: false,
+						Table:   blob.LinksTable,
+						Columns: blob.LinksPrimaryKey,
+						Bidi:    true,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Remove: func(cfg config, m *BlobMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.RemovedLinksIDs()
+				if len(nodes) == 0 || m.LinksCleared() {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: false,
+					Table:   blob.LinksTable,
+					Columns: blob.LinksPrimaryKey,
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+			Add: func(cfg config, m *BlobMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.LinksIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: false,
+					Table:   blob.LinksTable,
+					Columns: blob.LinksPrimaryKey,
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
+					},
+				}
+				createE := &BlobLinkCreate{config: cfg, mutation: newBlobLinkMutation(cfg, OpCreate)}
+
+				createE.defaults()
+				_, specE := createE.createSpec()
+				edge.Target.Fields = specE.Fields
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(blob.Table, blob.Columns, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -169,100 +307,8 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UUID(); ok {
-		_spec.SetField(blob.FieldUUID, field.TypeUUID, value)
-	}
-	if value, ok := _u.mutation.Count(); ok {
-		_spec.SetField(blob.FieldCount, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedCount(); ok {
-		_spec.AddField(blob.FieldCount, field.TypeInt, value)
-	}
-	if _u.mutation.ParentCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   blob.ParentTable,
-			Columns: []string{blob.ParentColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   blob.ParentTable,
-			Columns: []string{blob.ParentColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LinksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   blob.LinksTable,
-			Columns: blob.LinksPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLinksIDs(); len(nodes) > 0 && !_u.mutation.LinksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   blob.LinksTable,
-			Columns: blob.LinksPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LinksIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   blob.LinksTable,
-			Columns: blob.LinksPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &blobUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -451,100 +497,8 @@ func (_u *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UUID(); ok {
-		_spec.SetField(blob.FieldUUID, field.TypeUUID, value)
-	}
-	if value, ok := _u.mutation.Count(); ok {
-		_spec.SetField(blob.FieldCount, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedCount(); ok {
-		_spec.AddField(blob.FieldCount, field.TypeInt, value)
-	}
-	if _u.mutation.ParentCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   blob.ParentTable,
-			Columns: []string{blob.ParentColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   blob.ParentTable,
-			Columns: []string{blob.ParentColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.LinksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   blob.LinksTable,
-			Columns: blob.LinksPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedLinksIDs(); len(nodes) > 0 && !_u.mutation.LinksCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   blob.LinksTable,
-			Columns: blob.LinksPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.LinksIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   blob.LinksTable,
-			Columns: blob.LinksPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &blobUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Blob{config: _u.config}
 	_spec.Assign = _node.assignValues

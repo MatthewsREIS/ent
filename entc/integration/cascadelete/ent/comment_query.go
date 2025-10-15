@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -405,33 +406,34 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 	return nodes, nil
 }
 
+var commentPostEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Comment, Post, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   comment.PostTable,
+			Columns: []string{comment.PostColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: post.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Comment) int { return n.ID },
+	ExtractEdgeID: func(e *Post) int { return e.ID },
+	ExtractNodeFK: func(n *Comment) *int {
+		v := n.PostID
+		return &v
+	},
+}
+
 func (_q *CommentQuery) loadPost(ctx context.Context, query *PostQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Post)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Comment)
-	for i := range nodes {
-		fk := nodes[i].PostID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(post.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "post_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &commentPostEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
+		query.Where(post.IDIn(ids...))
+	})
 	return nil
 }
 

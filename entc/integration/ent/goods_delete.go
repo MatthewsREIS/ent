@@ -8,19 +8,22 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/goods"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // GoodsDelete is the builder for deleting a Goods entity.
 type GoodsDelete struct {
 	config
-	hooks    []Hook
-	mutation *GoodsMutation
+	hooks     []Hook
+	mutation  *GoodsMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the GoodsDelete builder.
@@ -43,15 +46,33 @@ func (_d *GoodsDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *GoodsDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(goods.Table, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var goodsDeleteDescriptor = entbuilder.DeleteDescriptor[config, *GoodsMutation]{
+	Table: goods.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*GoodsMutation]{
+		Column: goods.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *GoodsMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *GoodsMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *GoodsDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &goodsDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

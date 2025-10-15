@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -19,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -450,63 +450,64 @@ func (_q *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 	return nodes, nil
 }
 
+var postAuthorEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, User, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   post.AuthorTable,
+			Columns: []string{post.AuthorColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: user.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Post) int { return n.ID },
+	ExtractEdgeID: func(e *User) int { return e.ID },
+	ExtractNodeFK: func(n *Post) *int {
+		v := n.AuthorID
+		return &v
+	},
+}
+var postCommentsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, Comment, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   post.CommentsTable,
+			Columns: []string{post.CommentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: comment.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Post) int { return n.ID },
+	ExtractEdgeID: func(e *Comment) int { return e.ID },
+	ExtractEdgeFK: func(e *Comment) *int {
+		v := e.PostID
+		return &v
+	},
+}
+
 func (_q *PostQuery) loadAuthor(ctx context.Context, query *UserQuery, nodes []*Post, init func(*Post), assign func(*Post, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Post)
-	for i := range nodes {
-		fk := nodes[i].AuthorID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "author_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &postAuthorEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
+		query.Where(user.IDIn(ids...))
+	})
 	return nil
 }
 func (_q *PostQuery) loadComments(ctx context.Context, query *CommentQuery, nodes []*Post, init func(*Post), assign func(*Post, *Comment)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Post)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(comment.FieldPostID)
 	}
-	query.Where(predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(post.CommentsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.PostID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "post_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &postCommentsEdgeLoadDescriptor, query, nodes, init, assign)
 	return nil
 }
 

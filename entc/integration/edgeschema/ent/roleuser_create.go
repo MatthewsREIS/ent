@@ -17,6 +17,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -71,7 +73,9 @@ func (_c *RoleUserCreate) Mutation() *RoleUserMutation {
 
 // Save creates the RoleUser in the database.
 func (_c *RoleUserCreate) Save(ctx context.Context) (*RoleUser, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, roleuserCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -97,93 +101,192 @@ func (_c *RoleUserCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *RoleUserCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := roleuser.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
-	}
+var roleuserCreateSpec = entgen.CreateSpec[*RoleUserMutation]{
+	Fields: []entgen.FieldSpec[*RoleUserMutation]{
+		{
+			Name: "created_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RoleUser.created_at"`)}
+				},
+			},
+			IsSet: func(m *RoleUserMutation) bool {
+				_, ok := m.CreatedAt()
+				return ok
+			},
+			Default: func(m *RoleUserMutation) error {
+				if _, ok := m.CreatedAt(); !ok {
+					v := roleuser.DefaultCreatedAt()
+					m.SetCreatedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "role_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "role_id", err: errors.New(`ent: missing required field "RoleUser.role_id"`)}
+				},
+			},
+			IsSet: func(m *RoleUserMutation) bool {
+				_, ok := m.RoleID()
+				return ok
+			},
+		},
+		{
+			Name: "user_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "RoleUser.user_id"`)}
+				},
+			},
+			IsSet: func(m *RoleUserMutation) bool {
+				_, ok := m.UserID()
+				return ok
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*RoleUserMutation]{
+		{
+			Name: "role",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "role", err: errors.New(`ent: missing required edge "RoleUser.role"`)}
+				},
+			},
+			Count: func(m *RoleUserMutation) int {
+				return len(m.RoleIDs())
+			},
+		},
+		{
+			Name: "user",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RoleUser.user"`)}
+				},
+			},
+			Count: func(m *RoleUserMutation) int {
+				return len(m.UserIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *RoleUserCreate) check() error {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "RoleUser.created_at"`)}
-	}
-	if _, ok := _c.mutation.RoleID(); !ok {
-		return &ValidationError{Name: "role_id", err: errors.New(`ent: missing required field "RoleUser.role_id"`)}
-	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "RoleUser.user_id"`)}
-	}
-	if len(_c.mutation.RoleIDs()) == 0 {
-		return &ValidationError{Name: "role", err: errors.New(`ent: missing required edge "RoleUser.role"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "RoleUser.user"`)}
-	}
-	return nil
+var roleuserCreateDescriptor = entbuilder.CreateDescriptor[config, RoleUser, *RoleUserMutation]{
+	Table: roleuser.Table,
+	NewNode: func(cfg config) *RoleUser {
+		return &RoleUser{config: cfg}
+	},
+	Fields: []entbuilder.FieldDescriptor[config, RoleUser, *RoleUserMutation]{
+		{
+			Column: roleuser.FieldCreatedAt,
+			Type:   field.TypeTime,
+			Value: func(m *RoleUserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.CreatedAt(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *RoleUser, fv entbuilder.FieldValue) error {
+				node.CreatedAt = fv.Node.(time.Time)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, RoleUser, *RoleUserMutation]{
+		{
+			Value: func(cfg config, m *RoleUserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.RoleIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   roleuser.RoleTable,
+					Columns: []string{roleuser.RoleColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *RoleUser, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.RoleID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *RoleUserMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.UserIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   roleuser.UserTable,
+					Columns: []string{roleuser.UserColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *RoleUser, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.UserID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *RoleUserCreate) sqlSave(ctx context.Context) (*RoleUser, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, roleuserCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &roleuserCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &roleuserCreateDescriptor); err != nil {
+		return nil, err
+	}
+	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *RoleUserCreate) createSpec() (*RoleUser, *sqlgraph.CreateSpec) {
-	var (
-		_node = &RoleUser{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(roleuser.Table, nil)
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(roleuser.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if nodes := _c.mutation.RoleIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   roleuser.RoleTable,
-			Columns: []string{roleuser.RoleColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.RoleID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   roleuser.UserTable,
-			Columns: []string{roleuser.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -386,19 +489,24 @@ func (_c *RoleUserCreateBulk) Save(ctx context.Context) ([]*RoleUser, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RoleUserMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, roleuserCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, roleuserCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &roleuserCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -410,15 +518,22 @@ func (_c *RoleUserCreateBulk) Save(ctx context.Context) ([]*RoleUser, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &roleuserCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

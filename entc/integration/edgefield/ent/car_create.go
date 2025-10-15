@@ -8,11 +8,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -74,7 +77,9 @@ func (_c *CarCreate) Mutation() *CarMutation {
 
 // Save creates the Car in the database.
 func (_c *CarCreate) Save(ctx context.Context) (*Car, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, carCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -100,72 +105,128 @@ func (_c *CarCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *CarCreate) defaults() {
-	if _, ok := _c.mutation.ID(); !ok {
-		v := car.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var carCreateSpec = entgen.CreateSpec[*CarMutation]{
+	Fields: []entgen.FieldSpec[*CarMutation]{
+		{
+			Name: "number",
+		},
+		{
+			Name: "id",
+			Default: func(m *CarMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := car.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*CarMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *CarCreate) check() error {
-	return nil
+var carCreateDescriptor = entbuilder.CreateDescriptor[config, Car, *CarMutation]{
+	Table: car.Table,
+	NewNode: func(cfg config) *Car {
+		return &Car{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Car, *CarMutation]{
+		Column:      car.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *CarMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Car, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(node *Car, value driver.Value) error {
+			switch v := value.(type) {
+			case *uuid.UUID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case uuid.UUID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Car, *CarMutation]{
+		{
+			Column: car.FieldNumber,
+			Type:   field.TypeString,
+			Value: func(m *CarMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Number(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Car, fv entbuilder.FieldValue) error {
+				node.Number = fv.Node.(string)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Car, *CarMutation]{
+		{
+			Value: func(cfg config, m *CarMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.RentalsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   car.RentalsTable,
+					Columns: []string{car.RentalsColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, carCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &carCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &carCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Car{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(car.Table, sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID))
-	)
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.Number(); ok {
-		_spec.SetField(car.FieldNumber, field.TypeString, value)
-		_node.Number = value
-	}
-	if nodes := _c.mutation.RentalsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   car.RentalsTable,
-			Columns: []string{car.RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // CarCreateBulk is the builder for creating many Car entities in bulk.
@@ -185,19 +246,24 @@ func (_c *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CarMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, carCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, carCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &carCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -208,16 +274,23 @@ func (_c *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &carCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

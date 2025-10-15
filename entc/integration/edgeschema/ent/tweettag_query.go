@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -449,62 +450,63 @@ func (_q *TweetTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Twe
 	return nodes, nil
 }
 
+var tweettagTagEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[TweetTag, Tag, uuid.UUID, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tweettag.TagTable,
+			Columns: []string{tweettag.TagColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: tag.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *TweetTag) uuid.UUID { return n.ID },
+	ExtractEdgeID: func(e *Tag) int { return e.ID },
+	ExtractNodeFK: func(n *TweetTag) *int {
+		v := n.TagID
+		return &v
+	},
+}
+var tweettagTweetEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[TweetTag, Tweet, uuid.UUID, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   tweettag.TweetTable,
+			Columns: []string{tweettag.TweetColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: tweet.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *TweetTag) uuid.UUID { return n.ID },
+	ExtractEdgeID: func(e *Tweet) int { return e.ID },
+	ExtractNodeFK: func(n *TweetTag) *int {
+		v := n.TweetID
+		return &v
+	},
+}
+
 func (_q *TweetTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*TweetTag, init func(*TweetTag), assign func(*TweetTag, *Tag)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*TweetTag)
-	for i := range nodes {
-		fk := nodes[i].TagID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(tag.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &tweettagTagEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
+		query.Where(tag.IDIn(ids...))
+	})
 	return nil
 }
 func (_q *TweetTagQuery) loadTweet(ctx context.Context, query *TweetQuery, nodes []*TweetTag, init func(*TweetTag), assign func(*TweetTag, *Tweet)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*TweetTag)
-	for i := range nodes {
-		fk := nodes[i].TweetID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(tweet.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &tweettagTweetEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
+		query.Where(tweet.IDIn(ids...))
+	})
 	return nil
 }
 

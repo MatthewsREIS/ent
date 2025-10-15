@@ -8,19 +8,22 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // PCDelete is the builder for deleting a PC entity.
 type PCDelete struct {
 	config
-	hooks    []Hook
-	mutation *PCMutation
+	hooks     []Hook
+	mutation  *PCMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the PCDelete builder.
@@ -43,15 +46,33 @@ func (_d *PCDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *PCDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(pc.Table, sqlgraph.NewFieldSpec(pc.FieldID, field.TypeInt))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var pcDeleteDescriptor = entbuilder.DeleteDescriptor[config, *PCMutation]{
+	Table: pc.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*PCMutation]{
+		Column: pc.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *PCMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *PCMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *PCDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &pcDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

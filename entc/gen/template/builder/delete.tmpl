@@ -11,7 +11,9 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-{{ template "import" $ }}
+{{ with extend $ "Imports" $.SiblingImports "DeleteUsesEntbuilder" (and $.Storage (eq $.Storage.Name "sql")) }}
+	{{ template "import" . }}
+{{ end }}
 
 import (
 	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
@@ -26,6 +28,10 @@ type {{ $builder }} struct {
 	config
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
+	{{- $tmpl := printf "dialect/%s/delete/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
 }
 
 // Where appends a list predicates to the {{ $builder }} builder.

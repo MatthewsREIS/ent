@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -137,7 +138,9 @@ func (_c *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, enttaskCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -163,48 +166,109 @@ func (_c *TaskCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *TaskCreate) defaults() {
-	if _, ok := _c.mutation.Priority(); !ok {
-		v := enttask.DefaultPriority
-		_c.mutation.SetPriority(v)
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := enttask.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
-	}
-	if _, ok := _c.mutation.GetOp(); !ok {
-		v := enttask.DefaultOp
-		_c.mutation.SetOpField(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *TaskCreate) check() error {
-	if _, ok := _c.mutation.Priority(); !ok {
-		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
-	}
-	if v, ok := _c.mutation.Priority(); ok {
-		if err := v.Validate(); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
-	}
-	if _, ok := _c.mutation.GetOp(); !ok {
-		return &ValidationError{Name: "op", err: errors.New(`ent: missing required field "Task.op"`)}
-	}
-	if v, ok := _c.mutation.GetOp(); ok {
-		if err := enttask.OpValidator(v); err != nil {
-			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
-		}
-	}
-	return nil
+var enttaskCreateSpec = entgen.CreateSpec[*TaskMutation]{
+	Fields: []entgen.FieldSpec[*TaskMutation]{
+		{
+			Name: "priority",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.Priority()
+				return ok
+			},
+			Default: func(m *TaskMutation) error {
+				if _, ok := m.Priority(); !ok {
+					v := enttask.DefaultPriority
+					m.SetPriority(v)
+				}
+				return nil
+			},
+			Validators: []func(*TaskMutation) error{
+				func(m *TaskMutation) error {
+					if v, ok := m.Priority(); ok {
+						if err := v.Validate(); err != nil {
+							return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "priorities",
+		},
+		{
+			Name: "created_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.CreatedAt()
+				return ok
+			},
+			Default: func(m *TaskMutation) error {
+				if _, ok := m.CreatedAt(); !ok {
+					v := enttask.DefaultCreatedAt()
+					m.SetCreatedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "name",
+		},
+		{
+			Name: "owner",
+		},
+		{
+			Name: "order",
+		},
+		{
+			Name: "order_option",
+		},
+		{
+			Name: "op",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "op", err: errors.New(`ent: missing required field "Task.op"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.GetOp()
+				return ok
+			},
+			Default: func(m *TaskMutation) error {
+				if _, ok := m.GetOp(); !ok {
+					v := enttask.DefaultOp
+					m.SetOpField(v)
+				}
+				return nil
+			},
+			Validators: []func(*TaskMutation) error{
+				func(m *TaskMutation) error {
+					if v, ok := m.GetOp(); ok {
+						if err := enttask.OpValidator(v); err != nil {
+							return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*TaskMutation]{},
 }
 
 func (_c *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, enttaskCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

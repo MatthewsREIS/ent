@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -96,7 +99,9 @@ func (_c *NoteCreate) Mutation() *NoteMutation {
 
 // Save creates the Note in the database.
 func (_c *NoteCreate) Save(ctx context.Context) (*Note, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, noteCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -122,95 +127,161 @@ func (_c *NoteCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *NoteCreate) defaults() {
-	if _, ok := _c.mutation.ID(); !ok {
-		v := note.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var noteCreateSpec = entgen.CreateSpec[*NoteMutation]{
+	Fields: []entgen.FieldSpec[*NoteMutation]{
+		{
+			Name: "text",
+		},
+		{
+			Name: "id",
+			Default: func(m *NoteMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := note.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+			Validators: []func(*NoteMutation) error{
+				func(m *NoteMutation) error {
+					if v, ok := m.ID(); ok {
+						if err := note.IDValidator(string(v)); err != nil {
+							return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Note.id": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*NoteMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *NoteCreate) check() error {
-	if v, ok := _c.mutation.ID(); ok {
-		if err := note.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Note.id": %w`, err)}
-		}
-	}
-	return nil
+var noteCreateDescriptor = entbuilder.CreateDescriptor[config, Note, *NoteMutation]{
+	Table: note.Table,
+	NewNode: func(cfg config) *Note {
+		return &Note{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Note, *NoteMutation]{
+		Column:      note.FieldID,
+		Type:        field.TypeString,
+		UserDefined: true,
+		Value: func(m *NoteMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Note, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(schema.NoteID)
+			return nil
+		},
+		AssignGenerated: func(node *Note, value driver.Value) error {
+			if v, ok := value.(schema.NoteID); ok {
+				node.ID = v
+				return nil
+			}
+			return fmt.Errorf("unexpected Note.ID type: %T", value)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Note, *NoteMutation]{
+		{
+			Column: note.FieldText,
+			Type:   field.TypeString,
+			Value: func(m *NoteMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Text(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Note, fv entbuilder.FieldValue) error {
+				node.Text = fv.Node.(string)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Note, *NoteMutation]{
+		{
+			Value: func(cfg config, m *NoteMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ParentIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   note.ParentTable,
+					Columns: []string{note.ParentColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Note, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]schema.NoteID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.note_children = &ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *NoteMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ChildrenIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   note.ChildrenTable,
+					Columns: []string{note.ChildrenColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, noteCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &noteCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(schema.NoteID); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Note.ID type: %T", _spec.ID.Value)
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &noteCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Note{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(note.Table, sqlgraph.NewFieldSpec(note.FieldID, field.TypeString))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := _c.mutation.Text(); ok {
-		_spec.SetField(note.FieldText, field.TypeString, value)
-		_node.Text = value
-	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   note.ParentTable,
-			Columns: []string{note.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.note_children = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   note.ChildrenTable,
-			Columns: []string{note.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -405,19 +476,24 @@ func (_c *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*NoteMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, noteCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, noteCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &noteCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -429,16 +505,23 @@ func (_c *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &noteCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

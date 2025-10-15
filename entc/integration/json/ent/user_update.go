@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/json/ent/predicate"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -301,6 +303,262 @@ func (_u *UserUpdate) check() error {
 	return nil
 }
 
+var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*UserMutation]{
+		{
+			Column: user.FieldT,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.T(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.TCleared()
+			},
+		},
+
+		{
+			Column: user.FieldURL,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.URL(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.URLCleared()
+			},
+		},
+
+		{
+			Column: user.FieldURLs,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.URLs(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedURLs(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldURLs, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.URLsCleared()
+			},
+		},
+
+		{
+			Column: user.FieldRaw,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Raw(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedRaw(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldRaw, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.RawCleared()
+			},
+		},
+
+		{
+			Column: user.FieldDirs,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Dirs(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedDirs(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldDirs, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: user.FieldInts,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Ints(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedInts(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldInts, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.IntsCleared()
+			},
+		},
+
+		{
+			Column: user.FieldFloats,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Floats(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedFloats(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldFloats, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.FloatsCleared()
+			},
+		},
+
+		{
+			Column: user.FieldStrings,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Strings(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedStrings(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldStrings, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.StringsCleared()
+			},
+		},
+
+		{
+			Column: user.FieldIntsValidate,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.IntsValidate(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedIntsValidate(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldIntsValidate, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.IntsValidateCleared()
+			},
+		},
+
+		{
+			Column: user.FieldFloatsValidate,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.FloatsValidate(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedFloatsValidate(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldFloatsValidate, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.FloatsValidateCleared()
+			},
+		},
+
+		{
+			Column: user.FieldStringsValidate,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.StringsValidate(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Append: func(m *UserMutation) (func(*sql.UpdateBuilder), bool, error) {
+				if value, ok := m.AppendedStringsValidate(); ok {
+					return func(u *sql.UpdateBuilder) {
+						sqljson.Append(u, user.FieldStringsValidate, value)
+					}, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.StringsValidateCleared()
+			},
+		},
+
+		{
+			Column: user.FieldAddr,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Addr(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.AddrCleared()
+			},
+		},
+
+		{
+			Column: user.FieldUnknown,
+			Type:   field.TypeJSON,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Unknown(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.UnknownCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *UserMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *UserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -319,125 +577,8 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.T(); ok {
-		_spec.SetField(user.FieldT, field.TypeJSON, value)
-	}
-	if _u.mutation.TCleared() {
-		_spec.ClearField(user.FieldT, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.URL(); ok {
-		_spec.SetField(user.FieldURL, field.TypeJSON, value)
-	}
-	if _u.mutation.URLCleared() {
-		_spec.ClearField(user.FieldURL, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.URLs(); ok {
-		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedURLs(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldURLs, value)
-		})
-	}
-	if _u.mutation.URLsCleared() {
-		_spec.ClearField(user.FieldURLs, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Raw(); ok {
-		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedRaw(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldRaw, value)
-		})
-	}
-	if _u.mutation.RawCleared() {
-		_spec.ClearField(user.FieldRaw, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Dirs(); ok {
-		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedDirs(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldDirs, value)
-		})
-	}
-	if value, ok := _u.mutation.Ints(); ok {
-		_spec.SetField(user.FieldInts, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedInts(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldInts, value)
-		})
-	}
-	if _u.mutation.IntsCleared() {
-		_spec.ClearField(user.FieldInts, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Floats(); ok {
-		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedFloats(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldFloats, value)
-		})
-	}
-	if _u.mutation.FloatsCleared() {
-		_spec.ClearField(user.FieldFloats, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Strings(); ok {
-		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedStrings(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldStrings, value)
-		})
-	}
-	if _u.mutation.StringsCleared() {
-		_spec.ClearField(user.FieldStrings, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.IntsValidate(); ok {
-		_spec.SetField(user.FieldIntsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedIntsValidate(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldIntsValidate, value)
-		})
-	}
-	if _u.mutation.IntsValidateCleared() {
-		_spec.ClearField(user.FieldIntsValidate, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.FloatsValidate(); ok {
-		_spec.SetField(user.FieldFloatsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedFloatsValidate(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldFloatsValidate, value)
-		})
-	}
-	if _u.mutation.FloatsValidateCleared() {
-		_spec.ClearField(user.FieldFloatsValidate, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.StringsValidate(); ok {
-		_spec.SetField(user.FieldStringsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedStringsValidate(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldStringsValidate, value)
-		})
-	}
-	if _u.mutation.StringsValidateCleared() {
-		_spec.ClearField(user.FieldStringsValidate, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Addr(); ok {
-		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
-	}
-	if _u.mutation.AddrCleared() {
-		_spec.ClearField(user.FieldAddr, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Unknown(); ok {
-		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
-	}
-	if _u.mutation.UnknownCleared() {
-		_spec.ClearField(user.FieldUnknown, field.TypeJSON)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -773,125 +914,8 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.T(); ok {
-		_spec.SetField(user.FieldT, field.TypeJSON, value)
-	}
-	if _u.mutation.TCleared() {
-		_spec.ClearField(user.FieldT, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.URL(); ok {
-		_spec.SetField(user.FieldURL, field.TypeJSON, value)
-	}
-	if _u.mutation.URLCleared() {
-		_spec.ClearField(user.FieldURL, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.URLs(); ok {
-		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedURLs(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldURLs, value)
-		})
-	}
-	if _u.mutation.URLsCleared() {
-		_spec.ClearField(user.FieldURLs, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Raw(); ok {
-		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedRaw(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldRaw, value)
-		})
-	}
-	if _u.mutation.RawCleared() {
-		_spec.ClearField(user.FieldRaw, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Dirs(); ok {
-		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedDirs(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldDirs, value)
-		})
-	}
-	if value, ok := _u.mutation.Ints(); ok {
-		_spec.SetField(user.FieldInts, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedInts(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldInts, value)
-		})
-	}
-	if _u.mutation.IntsCleared() {
-		_spec.ClearField(user.FieldInts, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Floats(); ok {
-		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedFloats(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldFloats, value)
-		})
-	}
-	if _u.mutation.FloatsCleared() {
-		_spec.ClearField(user.FieldFloats, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Strings(); ok {
-		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedStrings(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldStrings, value)
-		})
-	}
-	if _u.mutation.StringsCleared() {
-		_spec.ClearField(user.FieldStrings, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.IntsValidate(); ok {
-		_spec.SetField(user.FieldIntsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedIntsValidate(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldIntsValidate, value)
-		})
-	}
-	if _u.mutation.IntsValidateCleared() {
-		_spec.ClearField(user.FieldIntsValidate, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.FloatsValidate(); ok {
-		_spec.SetField(user.FieldFloatsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedFloatsValidate(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldFloatsValidate, value)
-		})
-	}
-	if _u.mutation.FloatsValidateCleared() {
-		_spec.ClearField(user.FieldFloatsValidate, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.StringsValidate(); ok {
-		_spec.SetField(user.FieldStringsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedStringsValidate(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, user.FieldStringsValidate, value)
-		})
-	}
-	if _u.mutation.StringsValidateCleared() {
-		_spec.ClearField(user.FieldStringsValidate, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Addr(); ok {
-		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
-	}
-	if _u.mutation.AddrCleared() {
-		_spec.ClearField(user.FieldAddr, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Unknown(); ok {
-		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
-	}
-	if _u.mutation.UnknownCleared() {
-		_spec.ClearField(user.FieldUnknown, field.TypeJSON)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &User{config: _u.config}

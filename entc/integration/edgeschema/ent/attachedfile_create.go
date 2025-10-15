@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -17,6 +18,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -77,7 +80,9 @@ func (_c *AttachedFileCreate) Mutation() *AttachedFileMutation {
 
 // Save creates the AttachedFile in the database.
 func (_c *AttachedFileCreate) Save(ctx context.Context) (*AttachedFile, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, attachedfileCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -103,97 +108,204 @@ func (_c *AttachedFileCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *AttachedFileCreate) defaults() {
-	if _, ok := _c.mutation.AttachTime(); !ok {
-		v := attachedfile.DefaultAttachTime()
-		_c.mutation.SetAttachTime(v)
-	}
+var attachedfileCreateSpec = entgen.CreateSpec[*AttachedFileMutation]{
+	Fields: []entgen.FieldSpec[*AttachedFileMutation]{
+		{
+			Name: "attach_time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "attach_time", err: errors.New(`ent: missing required field "AttachedFile.attach_time"`)}
+				},
+			},
+			IsSet: func(m *AttachedFileMutation) bool {
+				_, ok := m.AttachTime()
+				return ok
+			},
+			Default: func(m *AttachedFileMutation) error {
+				if _, ok := m.AttachTime(); !ok {
+					v := attachedfile.DefaultAttachTime()
+					m.SetAttachTime(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "f_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "f_id", err: errors.New(`ent: missing required field "AttachedFile.f_id"`)}
+				},
+			},
+			IsSet: func(m *AttachedFileMutation) bool {
+				_, ok := m.FID()
+				return ok
+			},
+		},
+		{
+			Name: "proc_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "proc_id", err: errors.New(`ent: missing required field "AttachedFile.proc_id"`)}
+				},
+			},
+			IsSet: func(m *AttachedFileMutation) bool {
+				_, ok := m.ProcID()
+				return ok
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*AttachedFileMutation]{
+		{
+			Name: "fi",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "fi", err: errors.New(`ent: missing required edge "AttachedFile.fi"`)}
+				},
+			},
+			Count: func(m *AttachedFileMutation) int {
+				return len(m.FiIDs())
+			},
+		},
+		{
+			Name: "proc",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "proc", err: errors.New(`ent: missing required edge "AttachedFile.proc"`)}
+				},
+			},
+			Count: func(m *AttachedFileMutation) int {
+				return len(m.ProcIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *AttachedFileCreate) check() error {
-	if _, ok := _c.mutation.AttachTime(); !ok {
-		return &ValidationError{Name: "attach_time", err: errors.New(`ent: missing required field "AttachedFile.attach_time"`)}
-	}
-	if _, ok := _c.mutation.FID(); !ok {
-		return &ValidationError{Name: "f_id", err: errors.New(`ent: missing required field "AttachedFile.f_id"`)}
-	}
-	if _, ok := _c.mutation.ProcID(); !ok {
-		return &ValidationError{Name: "proc_id", err: errors.New(`ent: missing required field "AttachedFile.proc_id"`)}
-	}
-	if len(_c.mutation.FiIDs()) == 0 {
-		return &ValidationError{Name: "fi", err: errors.New(`ent: missing required edge "AttachedFile.fi"`)}
-	}
-	if len(_c.mutation.ProcIDs()) == 0 {
-		return &ValidationError{Name: "proc", err: errors.New(`ent: missing required edge "AttachedFile.proc"`)}
-	}
-	return nil
+var attachedfileCreateDescriptor = entbuilder.CreateDescriptor[config, AttachedFile, *AttachedFileMutation]{
+	Table: attachedfile.Table,
+	NewNode: func(cfg config) *AttachedFile {
+		return &AttachedFile{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, AttachedFile, *AttachedFileMutation]{
+		Column:      attachedfile.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *AttachedFile, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, AttachedFile, *AttachedFileMutation]{
+		{
+			Column: attachedfile.FieldAttachTime,
+			Type:   field.TypeTime,
+			Value: func(m *AttachedFileMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.AttachTime(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *AttachedFile, fv entbuilder.FieldValue) error {
+				node.AttachTime = fv.Node.(time.Time)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, AttachedFile, *AttachedFileMutation]{
+		{
+			Value: func(cfg config, m *AttachedFileMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.FiIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   attachedfile.FiTable,
+					Columns: []string{attachedfile.FiColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *AttachedFile, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.FID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *AttachedFileMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ProcIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   attachedfile.ProcTable,
+					Columns: []string{attachedfile.ProcColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *AttachedFile, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.ProcID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *AttachedFileCreate) sqlSave(ctx context.Context) (*AttachedFile, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, attachedfileCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &attachedfileCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &attachedfileCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec) {
-	var (
-		_node = &AttachedFile{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(attachedfile.Table, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.AttachTime(); ok {
-		_spec.SetField(attachedfile.FieldAttachTime, field.TypeTime, value)
-		_node.AttachTime = value
-	}
-	if nodes := _c.mutation.FiIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   attachedfile.FiTable,
-			Columns: []string{attachedfile.FiColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.FID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ProcIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   attachedfile.ProcTable,
-			Columns: []string{attachedfile.ProcColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ProcID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -414,19 +526,24 @@ func (_c *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, er
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AttachedFileMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, attachedfileCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, attachedfileCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &attachedfileCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -438,20 +555,23 @@ func (_c *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, er
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &attachedfileCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

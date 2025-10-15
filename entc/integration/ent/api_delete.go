@@ -8,19 +8,22 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/api"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // APIDelete is the builder for deleting a Api entity.
 type APIDelete struct {
 	config
-	hooks    []Hook
-	mutation *APIMutation
+	hooks     []Hook
+	mutation  *APIMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the APIDelete builder.
@@ -43,15 +46,33 @@ func (_d *APIDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *APIDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(api.Table, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var apiDeleteDescriptor = entbuilder.DeleteDescriptor[config, *APIMutation]{
+	Table: api.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*APIMutation]{
+		Column: api.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *APIMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *APIMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *APIDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &apiDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/revision"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -39,6 +42,9 @@ func (_c *RevisionCreate) Mutation() *RevisionMutation {
 
 // Save creates the Revision in the database.
 func (_c *RevisionCreate) Save(ctx context.Context) (*Revision, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, revisionCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -64,45 +70,66 @@ func (_c *RevisionCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *RevisionCreate) check() error {
-	return nil
+var revisionCreateSpec = entgen.CreateSpec[*RevisionMutation]{
+	Fields: []entgen.FieldSpec[*RevisionMutation]{
+		{
+			Name: "id",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*RevisionMutation]{},
+}
+
+var revisionCreateDescriptor = entbuilder.CreateDescriptor[config, Revision, *RevisionMutation]{
+	Table: revision.Table,
+	NewNode: func(cfg config) *Revision {
+		return &Revision{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Revision, *RevisionMutation]{
+		Column:      revision.FieldID,
+		Type:        field.TypeString,
+		UserDefined: true,
+		Value: func(m *RevisionMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Revision, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(string)
+			return nil
+		},
+		AssignGenerated: func(node *Revision, value driver.Value) error {
+			if v, ok := value.(string); ok {
+				node.ID = v
+				return nil
+			}
+			return fmt.Errorf("unexpected Revision.ID type: %T", value)
+			return nil
+		},
+	},
 }
 
 func (_c *RevisionCreate) sqlSave(ctx context.Context) (*Revision, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, revisionCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &revisionCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Revision.ID type: %T", _spec.ID.Value)
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &revisionCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *RevisionCreate) createSpec() (*Revision, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Revision{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(revision.Table, sqlgraph.NewFieldSpec(revision.FieldID, field.TypeString))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -252,18 +279,24 @@ func (_c *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RevisionMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, revisionCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, revisionCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &revisionCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -275,16 +308,23 @@ func (_c *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &revisionCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

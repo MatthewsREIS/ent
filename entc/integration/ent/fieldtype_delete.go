@@ -8,19 +8,22 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // FieldTypeDelete is the builder for deleting a FieldType entity.
 type FieldTypeDelete struct {
 	config
-	hooks    []Hook
-	mutation *FieldTypeMutation
+	hooks     []Hook
+	mutation  *FieldTypeMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the FieldTypeDelete builder.
@@ -43,15 +46,33 @@ func (_d *FieldTypeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *FieldTypeDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(fieldtype.Table, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var fieldtypeDeleteDescriptor = entbuilder.DeleteDescriptor[config, *FieldTypeMutation]{
+	Table: fieldtype.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*FieldTypeMutation]{
+		Column: fieldtype.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *FieldTypeMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *FieldTypeMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *FieldTypeDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &fieldtypeDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

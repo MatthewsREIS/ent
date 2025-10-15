@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -209,79 +211,172 @@ var taskCreateSpec = entgen.CreateSpec[*TaskMutation]{
 	Edges: []entgen.EdgeSpec[*TaskMutation]{},
 }
 
+var taskCreateDescriptor = entbuilder.CreateDescriptor[config, Task, *TaskMutation]{
+	Table: task.Table,
+	NewNode: func(cfg config) *Task {
+		return &Task{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Task, *TaskMutation]{
+		Column:      task.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Task, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Task, *TaskMutation]{
+		{
+			Column: task.FieldTitle,
+			Type:   field.TypeString,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Title(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Title = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: task.FieldDescription,
+			Type:   field.TypeString,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Description(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Description = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: task.FieldStatus,
+			Type:   field.TypeEnum,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Status(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.Status = fv.Node.(task.Status)
+				return nil
+			},
+		},
+
+		{
+			Column: task.FieldUUID,
+			Type:   field.TypeUUID,
+			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.UUID(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Task, fv entbuilder.FieldValue) error {
+				node.UUID = fv.Node.(uuid.UUID)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Task, *TaskMutation]{
+		{
+			Value: func(cfg config, m *TaskMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.TeamsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: false,
+					Table:   task.TeamsTable,
+					Columns: task.TeamsPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *TaskMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.OwnerIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   task.OwnerTable,
+					Columns: []string{task.OwnerColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Task, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.user_tasks = &ids[0]
+				return nil
+			},
+		},
+	},
+}
+
 func (_c *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
 	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, taskCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &taskCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &taskCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Task{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(task.Table, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
-	)
-	if value, ok := _c.mutation.Title(); ok {
-		_spec.SetField(task.FieldTitle, field.TypeString, value)
-		_node.Title = value
-	}
-	if value, ok := _c.mutation.Description(); ok {
-		_spec.SetField(task.FieldDescription, field.TypeString, value)
-		_node.Description = value
-	}
-	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(task.FieldStatus, field.TypeEnum, value)
-		_node.Status = value
-	}
-	if value, ok := _c.mutation.UUID(); ok {
-		_spec.SetField(task.FieldUUID, field.TypeUUID, value)
-		_node.UUID = value
-	}
-	if nodes := _c.mutation.TeamsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   task.TeamsTable,
-			Columns: task.TeamsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   task.OwnerTable,
-			Columns: []string{task.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_tasks = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // TaskCreateBulk is the builder for creating many Task entities in bulk.
@@ -301,7 +396,7 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TaskMutation)
 				if !ok {
@@ -310,12 +405,15 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 				if err := entgen.ApplyDefaults(mutation, taskCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				if err := entgen.CheckCreate(builder.driver.Dialect(), mutation, taskCreateSpec); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, taskCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &taskCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -326,20 +424,23 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &taskCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

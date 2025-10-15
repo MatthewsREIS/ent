@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -413,36 +414,33 @@ func (_q *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	return nodes, nil
 }
 
+var carOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Car, Pet, int, string]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   car.OwnerTable,
+			Columns: []string{car.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: pet.FieldID,
+					Type:   field.TypeString,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Car) int { return n.ID },
+	ExtractEdgeID: func(e *Pet) string { return e.ID },
+	ExtractNodeFK: func(n *Car) *string {
+		return n.pet_cars
+	},
+}
+
 func (_q *CarQuery) loadOwner(ctx context.Context, query *PetQuery, nodes []*Car, init func(*Car), assign func(*Car, *Pet)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Car)
-	for i := range nodes {
-		if nodes[i].pet_cars == nil {
-			continue
-		}
-		fk := *nodes[i].pet_cars
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(pet.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "pet_cars" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &carOwnerEdgeLoadDescriptor, query, nodes, assign, func(ids []string) {
+		query.Where(pet.IDIn(ids...))
+	})
 	return nil
 }
 

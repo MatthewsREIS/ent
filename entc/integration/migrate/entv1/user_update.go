@@ -8,6 +8,7 @@ package entv1
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv1/car"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv1/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -415,6 +417,349 @@ func (_u *UserUpdate) check() error {
 	return nil
 }
 
+var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*UserMutation]{
+		{
+			Column: user.FieldAge,
+			Type:   field.TypeInt32,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Age(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedAge(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: user.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: user.FieldDescription,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Description(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.DescriptionCleared()
+			},
+		},
+
+		{
+			Column: user.FieldNickname,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Nickname(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: user.FieldAddress,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Address(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.AddressCleared()
+			},
+		},
+
+		{
+			Column: user.FieldRenamed,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Renamed(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.RenamedCleared()
+			},
+		},
+
+		{
+			Column: user.FieldOldToken,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.OldToken(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: user.FieldBlob,
+			Type:   field.TypeBytes,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Blob(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.BlobCleared()
+			},
+		},
+
+		{
+			Column: user.FieldState,
+			Type:   field.TypeEnum,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.State(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.StateCleared()
+			},
+		},
+
+		{
+			Column: user.FieldStatus,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Status(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.StatusCleared()
+			},
+		},
+
+		{
+			Column: user.FieldWorkplace,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Workplace(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.WorkplaceCleared()
+			},
+		},
+
+		{
+			Column: user.FieldDropOptional,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.DropOptional(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserMutation) bool {
+				return m.DropOptionalCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *UserMutation]{
+		{
+			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.ParentCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.M2O,
+						Inverse: true,
+						Table:   user.ParentTable,
+						Columns: []string{user.ParentColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *UserMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.ParentIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   user.ParentTable,
+					Columns: []string{user.ParentColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.ChildrenCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2M,
+						Inverse: false,
+						Table:   user.ChildrenTable,
+						Columns: []string{user.ChildrenColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Remove: func(cfg config, m *UserMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.RemovedChildrenIDs()
+				if len(nodes) == 0 || m.ChildrenCleared() {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   user.ChildrenTable,
+					Columns: []string{user.ChildrenColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+			Add: func(cfg config, m *UserMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.ChildrenIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   user.ChildrenTable,
+					Columns: []string{user.ChildrenColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.SpouseCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2O,
+						Inverse: false,
+						Table:   user.SpouseTable,
+						Columns: []string{user.SpouseColumn},
+						Bidi:    true,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *UserMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.SpouseIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   user.SpouseTable,
+					Columns: []string{user.SpouseColumn},
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.CarCleared() {
+					edge := &sqlgraph.EdgeSpec{
+						Rel:     sqlgraph.O2O,
+						Inverse: false,
+						Table:   user.CarTable,
+						Columns: []string{user.CarColumn},
+						Bidi:    false,
+						Target: &sqlgraph.EdgeTarget{
+							IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
+						},
+					}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *UserMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.CarIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   user.CarTable,
+					Columns: []string{user.CarColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
+					},
+				}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -427,200 +772,8 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
-		_spec.SetField(user.FieldAge, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedAge(); ok {
-		_spec.AddField(user.FieldAge, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(user.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(user.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.DescriptionCleared() {
-		_spec.ClearField(user.FieldDescription, field.TypeString)
-	}
-	if value, ok := _u.mutation.Nickname(); ok {
-		_spec.SetField(user.FieldNickname, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Address(); ok {
-		_spec.SetField(user.FieldAddress, field.TypeString, value)
-	}
-	if _u.mutation.AddressCleared() {
-		_spec.ClearField(user.FieldAddress, field.TypeString)
-	}
-	if value, ok := _u.mutation.Renamed(); ok {
-		_spec.SetField(user.FieldRenamed, field.TypeString, value)
-	}
-	if _u.mutation.RenamedCleared() {
-		_spec.ClearField(user.FieldRenamed, field.TypeString)
-	}
-	if value, ok := _u.mutation.OldToken(); ok {
-		_spec.SetField(user.FieldOldToken, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Blob(); ok {
-		_spec.SetField(user.FieldBlob, field.TypeBytes, value)
-	}
-	if _u.mutation.BlobCleared() {
-		_spec.ClearField(user.FieldBlob, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.State(); ok {
-		_spec.SetField(user.FieldState, field.TypeEnum, value)
-	}
-	if _u.mutation.StateCleared() {
-		_spec.ClearField(user.FieldState, field.TypeEnum)
-	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(user.FieldStatus, field.TypeString, value)
-	}
-	if _u.mutation.StatusCleared() {
-		_spec.ClearField(user.FieldStatus, field.TypeString)
-	}
-	if value, ok := _u.mutation.Workplace(); ok {
-		_spec.SetField(user.FieldWorkplace, field.TypeString, value)
-	}
-	if _u.mutation.WorkplaceCleared() {
-		_spec.ClearField(user.FieldWorkplace, field.TypeString)
-	}
-	if value, ok := _u.mutation.DropOptional(); ok {
-		_spec.SetField(user.FieldDropOptional, field.TypeString, value)
-	}
-	if _u.mutation.DropOptionalCleared() {
-		_spec.ClearField(user.FieldDropOptional, field.TypeString)
-	}
-	if _u.mutation.ParentCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   user.ParentTable,
-			Columns: []string{user.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   user.ParentTable,
-			Columns: []string{user.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.ChildrenCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ChildrenTable,
-			Columns: []string{user.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ChildrenTable,
-			Columns: []string{user.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ChildrenTable,
-			Columns: []string{user.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.SpouseCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.SpouseTable,
-			Columns: []string{user.SpouseColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.SpouseIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.SpouseTable,
-			Columns: []string{user.SpouseColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.CarCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.CarTable,
-			Columns: []string{user.CarColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.CarIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.CarTable,
-			Columns: []string{user.CarColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -1067,200 +1220,8 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
-		_spec.SetField(user.FieldAge, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.AddedAge(); ok {
-		_spec.AddField(user.FieldAge, field.TypeInt32, value)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(user.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(user.FieldDescription, field.TypeString, value)
-	}
-	if _u.mutation.DescriptionCleared() {
-		_spec.ClearField(user.FieldDescription, field.TypeString)
-	}
-	if value, ok := _u.mutation.Nickname(); ok {
-		_spec.SetField(user.FieldNickname, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Address(); ok {
-		_spec.SetField(user.FieldAddress, field.TypeString, value)
-	}
-	if _u.mutation.AddressCleared() {
-		_spec.ClearField(user.FieldAddress, field.TypeString)
-	}
-	if value, ok := _u.mutation.Renamed(); ok {
-		_spec.SetField(user.FieldRenamed, field.TypeString, value)
-	}
-	if _u.mutation.RenamedCleared() {
-		_spec.ClearField(user.FieldRenamed, field.TypeString)
-	}
-	if value, ok := _u.mutation.OldToken(); ok {
-		_spec.SetField(user.FieldOldToken, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Blob(); ok {
-		_spec.SetField(user.FieldBlob, field.TypeBytes, value)
-	}
-	if _u.mutation.BlobCleared() {
-		_spec.ClearField(user.FieldBlob, field.TypeBytes)
-	}
-	if value, ok := _u.mutation.State(); ok {
-		_spec.SetField(user.FieldState, field.TypeEnum, value)
-	}
-	if _u.mutation.StateCleared() {
-		_spec.ClearField(user.FieldState, field.TypeEnum)
-	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(user.FieldStatus, field.TypeString, value)
-	}
-	if _u.mutation.StatusCleared() {
-		_spec.ClearField(user.FieldStatus, field.TypeString)
-	}
-	if value, ok := _u.mutation.Workplace(); ok {
-		_spec.SetField(user.FieldWorkplace, field.TypeString, value)
-	}
-	if _u.mutation.WorkplaceCleared() {
-		_spec.ClearField(user.FieldWorkplace, field.TypeString)
-	}
-	if value, ok := _u.mutation.DropOptional(); ok {
-		_spec.SetField(user.FieldDropOptional, field.TypeString, value)
-	}
-	if _u.mutation.DropOptionalCleared() {
-		_spec.ClearField(user.FieldDropOptional, field.TypeString)
-	}
-	if _u.mutation.ParentCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   user.ParentTable,
-			Columns: []string{user.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   user.ParentTable,
-			Columns: []string{user.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.ChildrenCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ChildrenTable,
-			Columns: []string{user.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ChildrenTable,
-			Columns: []string{user.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ChildrenTable,
-			Columns: []string{user.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.SpouseCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.SpouseTable,
-			Columns: []string{user.SpouseColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.SpouseIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.SpouseTable,
-			Columns: []string{user.SpouseColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.CarCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.CarTable,
-			Columns: []string{user.CarColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.CarIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.CarTable,
-			Columns: []string{user.CarColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues

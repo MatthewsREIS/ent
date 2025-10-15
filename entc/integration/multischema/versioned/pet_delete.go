@@ -8,20 +8,23 @@ package versioned
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/versioned/internal"
 	"entgo.io/ent/entc/integration/multischema/versioned/pet"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	config
-	hooks    []Hook
-	mutation *PetMutation
+	hooks     []Hook
+	mutation  *PetMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the PetDelete builder.
@@ -44,17 +47,37 @@ func (_d *PetDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *PetDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(pet.Table, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt))
-	_spec.Node.Schema = _d.schemaConfig.Pet
-	ctx = internal.NewSchemaConfigContext(ctx, _d.schemaConfig)
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var petDeleteDescriptor = entbuilder.DeleteDescriptor[config, *PetMutation]{
+	Table: pet.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*PetMutation]{
+		Column: pet.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *PetMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Schema: func(cfg config, _ *PetMutation) (string, bool) {
+		return cfg.schemaConfig.Pet, true
+	},
+	Predicates: func(m *PetMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *PetDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &petDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	ctx = internal.NewSchemaConfigContext(ctx, _d.schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

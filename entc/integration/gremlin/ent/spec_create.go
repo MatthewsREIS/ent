@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // SpecCreate is the builder for creating a Spec entity.
@@ -44,6 +45,9 @@ func (_c *SpecCreate) Mutation() *SpecMutation {
 
 // Save creates the Spec in the database.
 func (_c *SpecCreate) Save(ctx context.Context) (*Spec, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, specCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -69,13 +73,13 @@ func (_c *SpecCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *SpecCreate) check() error {
-	return nil
+var specCreateSpec = entgen.CreateSpec[*SpecMutation]{
+	Fields: []entgen.FieldSpec[*SpecMutation]{},
+	Edges:  []entgen.EdgeSpec[*SpecMutation]{},
 }
 
 func (_c *SpecCreate) gremlinSave(ctx context.Context) (*Spec, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, specCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

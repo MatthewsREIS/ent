@@ -8,6 +8,7 @@ package versioned
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/versioned/group"
 	"entgo.io/ent/entc/integration/migrate/versioned/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -77,6 +79,22 @@ func (_u *GroupUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*GroupMutation]{
+		{
+			Column: group.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *GroupMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *GroupMutation]{},
+}
+
 func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(group.Table, group.Columns, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -86,8 +104,8 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(group.FieldName, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &groupUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -194,8 +212,8 @@ func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(group.FieldName, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &groupUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Group{config: _u.config}
 	_spec.Assign = _node.assignValues

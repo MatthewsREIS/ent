@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // ItemCreate is the builder for creating a Item entity.
@@ -60,7 +61,9 @@ func (_c *ItemCreate) Mutation() *ItemMutation {
 
 // Save creates the Item in the database.
 func (_c *ItemCreate) Save(ctx context.Context) (*Item, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, itemCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -86,31 +89,47 @@ func (_c *ItemCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *ItemCreate) defaults() {
-	if _, ok := _c.mutation.ID(); !ok {
-		v := item.DefaultID()
-		_c.mutation.SetID(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *ItemCreate) check() error {
-	if v, ok := _c.mutation.Text(); ok {
-		if err := item.TextValidator(v); err != nil {
-			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.ID(); ok {
-		if err := item.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
-		}
-	}
-	return nil
+var itemCreateSpec = entgen.CreateSpec[*ItemMutation]{
+	Fields: []entgen.FieldSpec[*ItemMutation]{
+		{
+			Name: "text",
+			Validators: []func(*ItemMutation) error{
+				func(m *ItemMutation) error {
+					if v, ok := m.Text(); ok {
+						if err := item.TextValidator(v); err != nil {
+							return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "id",
+			Default: func(m *ItemMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := item.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+			Validators: []func(*ItemMutation) error{
+				func(m *ItemMutation) error {
+					if v, ok := m.ID(); ok {
+						if err := item.IDValidator(v); err != nil {
+							return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*ItemMutation]{},
 }
 
 func (_c *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, itemCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

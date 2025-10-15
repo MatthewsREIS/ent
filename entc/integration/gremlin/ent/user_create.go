@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -366,7 +367,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, userCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -392,63 +395,158 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.Last(); !ok {
-		v := user.DefaultLast
-		_c.mutation.SetLast(v)
-	}
-	if _, ok := _c.mutation.Address(); !ok {
-		v := user.DefaultAddress()
-		_c.mutation.SetAddress(v)
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		v := user.DefaultRole
-		_c.mutation.SetRole(v)
-	}
-	if _, ok := _c.mutation.Employment(); !ok {
-		v := user.DefaultEmployment
-		_c.mutation.SetEmployment(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *UserCreate) check() error {
-	if v, ok := _c.mutation.OptionalInt(); ok {
-		if err := user.OptionalIntValidator(v); err != nil {
-			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
-	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
-	}
-	if _, ok := _c.mutation.Last(); !ok {
-		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "User.last"`)}
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
-	}
-	if v, ok := _c.mutation.Role(); ok {
-		if err := user.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Employment(); !ok {
-		return &ValidationError{Name: "employment", err: errors.New(`ent: missing required field "User.employment"`)}
-	}
-	if v, ok := _c.mutation.Employment(); ok {
-		if err := user.EmploymentValidator(v); err != nil {
-			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
-		}
-	}
-	return nil
+var userCreateSpec = entgen.CreateSpec[*UserMutation]{
+	Fields: []entgen.FieldSpec[*UserMutation]{
+		{
+			Name: "optional_int",
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.OptionalInt(); ok {
+						if err := user.OptionalIntValidator(v); err != nil {
+							return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "age",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Age()
+				return ok
+			},
+		},
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+		},
+		{
+			Name: "last",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "User.last"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Last()
+				return ok
+			},
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Last(); !ok {
+					v := user.DefaultLast
+					m.SetLast(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "nickname",
+		},
+		{
+			Name: "address",
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Address(); !ok {
+					v := user.DefaultAddress()
+					m.SetAddress(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "phone",
+		},
+		{
+			Name: "password",
+		},
+		{
+			Name: "role",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Role()
+				return ok
+			},
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Role(); !ok {
+					v := user.DefaultRole
+					m.SetRole(v)
+				}
+				return nil
+			},
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.Role(); ok {
+						if err := user.RoleValidator(v); err != nil {
+							return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "employment",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "employment", err: errors.New(`ent: missing required field "User.employment"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Employment()
+				return ok
+			},
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Employment(); !ok {
+					v := user.DefaultEmployment
+					m.SetEmployment(v)
+				}
+				return nil
+			},
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.Employment(); ok {
+						if err := user.EmploymentValidator(v); err != nil {
+							return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "SSOCert",
+		},
+		{
+			Name: "files_count",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*UserMutation]{},
 }
 
 func (_c *UserCreate) gremlinSave(ctx context.Context) (*User, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, userCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

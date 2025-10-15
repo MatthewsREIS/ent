@@ -8,20 +8,23 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // FriendshipDelete is the builder for deleting a Friendship entity.
 type FriendshipDelete struct {
 	config
-	hooks    []Hook
-	mutation *FriendshipMutation
+	hooks     []Hook
+	mutation  *FriendshipMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the FriendshipDelete builder.
@@ -44,17 +47,37 @@ func (_d *FriendshipDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *FriendshipDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(friendship.Table, sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt))
-	_spec.Node.Schema = _d.schemaConfig.Friendship
-	ctx = internal.NewSchemaConfigContext(ctx, _d.schemaConfig)
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var friendshipDeleteDescriptor = entbuilder.DeleteDescriptor[config, *FriendshipMutation]{
+	Table: friendship.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*FriendshipMutation]{
+		Column: friendship.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *FriendshipMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Schema: func(cfg config, _ *FriendshipMutation) (string, bool) {
+		return cfg.schemaConfig.Friendship, true
+	},
+	Predicates: func(m *FriendshipMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *FriendshipDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &friendshipDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	ctx = internal.NewSchemaConfigContext(ctx, _d.schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

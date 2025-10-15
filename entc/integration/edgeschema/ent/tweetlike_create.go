@@ -17,6 +17,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -71,7 +73,7 @@ func (_c *TweetLikeCreate) Mutation() *TweetLikeMutation {
 
 // Save creates the TweetLike in the database.
 func (_c *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
-	if err := _c.defaults(); err != nil {
+	if err := entgen.ApplyDefaults(_c.mutation, tweetlikeCreateSpec.Fields); err != nil {
 		return nil, err
 	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
@@ -99,97 +101,195 @@ func (_c *TweetLikeCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *TweetLikeCreate) defaults() error {
-	if _, ok := _c.mutation.LikedAt(); !ok {
-		if tweetlike.DefaultLikedAt == nil {
-			return fmt.Errorf("ent: uninitialized tweetlike.DefaultLikedAt (forgotten import ent/runtime?)")
-		}
-		v := tweetlike.DefaultLikedAt()
-		_c.mutation.SetLikedAt(v)
-	}
-	return nil
+var tweetlikeCreateSpec = entgen.CreateSpec[*TweetLikeMutation]{
+	Fields: []entgen.FieldSpec[*TweetLikeMutation]{
+		{
+			Name: "liked_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "liked_at", err: errors.New(`ent: missing required field "TweetLike.liked_at"`)}
+				},
+			},
+			IsSet: func(m *TweetLikeMutation) bool {
+				_, ok := m.LikedAt()
+				return ok
+			},
+			Default: func(m *TweetLikeMutation) error {
+				if _, ok := m.LikedAt(); !ok {
+					if tweetlike.DefaultLikedAt == nil {
+						return fmt.Errorf("ent: uninitialized tweetlike.DefaultLikedAt (forgotten import ent/runtime?)")
+					}
+					v := tweetlike.DefaultLikedAt()
+					m.SetLikedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "user_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "TweetLike.user_id"`)}
+				},
+			},
+			IsSet: func(m *TweetLikeMutation) bool {
+				_, ok := m.UserID()
+				return ok
+			},
+		},
+		{
+			Name: "tweet_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "TweetLike.tweet_id"`)}
+				},
+			},
+			IsSet: func(m *TweetLikeMutation) bool {
+				_, ok := m.TweetID()
+				return ok
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*TweetLikeMutation]{
+		{
+			Name: "tweet",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "TweetLike.tweet"`)}
+				},
+			},
+			Count: func(m *TweetLikeMutation) int {
+				return len(m.TweetIDs())
+			},
+		},
+		{
+			Name: "user",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "TweetLike.user"`)}
+				},
+			},
+			Count: func(m *TweetLikeMutation) int {
+				return len(m.UserIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *TweetLikeCreate) check() error {
-	if _, ok := _c.mutation.LikedAt(); !ok {
-		return &ValidationError{Name: "liked_at", err: errors.New(`ent: missing required field "TweetLike.liked_at"`)}
-	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "TweetLike.user_id"`)}
-	}
-	if _, ok := _c.mutation.TweetID(); !ok {
-		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "TweetLike.tweet_id"`)}
-	}
-	if len(_c.mutation.TweetIDs()) == 0 {
-		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "TweetLike.tweet"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "TweetLike.user"`)}
-	}
-	return nil
+var tweetlikeCreateDescriptor = entbuilder.CreateDescriptor[config, TweetLike, *TweetLikeMutation]{
+	Table: tweetlike.Table,
+	NewNode: func(cfg config) *TweetLike {
+		return &TweetLike{config: cfg}
+	},
+	Fields: []entbuilder.FieldDescriptor[config, TweetLike, *TweetLikeMutation]{
+		{
+			Column: tweetlike.FieldLikedAt,
+			Type:   field.TypeTime,
+			Value: func(m *TweetLikeMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.LikedAt(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *TweetLike, fv entbuilder.FieldValue) error {
+				node.LikedAt = fv.Node.(time.Time)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, TweetLike, *TweetLikeMutation]{
+		{
+			Value: func(cfg config, m *TweetLikeMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.TweetIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   tweetlike.TweetTable,
+					Columns: []string{tweetlike.TweetColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *TweetLike, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.TweetID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *TweetLikeMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.UserIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   tweetlike.UserTable,
+					Columns: []string{tweetlike.UserColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *TweetLike, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.UserID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *TweetLikeCreate) sqlSave(ctx context.Context) (*TweetLike, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, tweetlikeCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &tweetlikeCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &tweetlikeCreateDescriptor); err != nil {
+		return nil, err
+	}
+	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
-	var (
-		_node = &TweetLike{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(tweetlike.Table, nil)
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.LikedAt(); ok {
-		_spec.SetField(tweetlike.FieldLikedAt, field.TypeTime, value)
-		_node.LikedAt = value
-	}
-	if nodes := _c.mutation.TweetIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweetlike.TweetTable,
-			Columns: []string{tweetlike.TweetColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.TweetID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweetlike.UserTable,
-			Columns: []string{tweetlike.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -392,19 +492,24 @@ func (_c *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TweetLikeMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, tweetlikeCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, tweetlikeCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &tweetlikeCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -416,15 +521,22 @@ func (_c *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &tweetlikeCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

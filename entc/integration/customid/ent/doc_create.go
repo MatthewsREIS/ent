@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -111,7 +114,9 @@ func (_c *DocCreate) Mutation() *DocMutation {
 
 // Save creates the Doc in the database.
 func (_c *DocCreate) Save(ctx context.Context) (*Doc, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, docCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -137,111 +142,193 @@ func (_c *DocCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *DocCreate) defaults() {
-	if _, ok := _c.mutation.ID(); !ok {
-		v := doc.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var docCreateSpec = entgen.CreateSpec[*DocMutation]{
+	Fields: []entgen.FieldSpec[*DocMutation]{
+		{
+			Name: "text",
+		},
+		{
+			Name: "id",
+			Default: func(m *DocMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := doc.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+			Validators: []func(*DocMutation) error{
+				func(m *DocMutation) error {
+					if v, ok := m.ID(); ok {
+						if err := doc.IDValidator(string(v)); err != nil {
+							return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Doc.id": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*DocMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *DocCreate) check() error {
-	if v, ok := _c.mutation.ID(); ok {
-		if err := doc.IDValidator(string(v)); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Doc.id": %w`, err)}
-		}
-	}
-	return nil
+var docCreateDescriptor = entbuilder.CreateDescriptor[config, Doc, *DocMutation]{
+	Table: doc.Table,
+	NewNode: func(cfg config) *Doc {
+		return &Doc{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Doc, *DocMutation]{
+		Column:      doc.FieldID,
+		Type:        field.TypeString,
+		UserDefined: true,
+		Value: func(m *DocMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Doc, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(schema.DocID)
+			return nil
+		},
+		AssignGenerated: func(node *Doc, value driver.Value) error {
+			switch v := value.(type) {
+			case *schema.DocID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case schema.DocID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Doc, *DocMutation]{
+		{
+			Column: doc.FieldText,
+			Type:   field.TypeString,
+			Value: func(m *DocMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Text(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *Doc, fv entbuilder.FieldValue) error {
+				node.Text = fv.Node.(string)
+				return nil
+			},
+		},
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Doc, *DocMutation]{
+		{
+			Value: func(cfg config, m *DocMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ParentIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   doc.ParentTable,
+					Columns: []string{doc.ParentColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Doc, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]schema.DocID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.doc_children = &ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *DocMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ChildrenIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   doc.ChildrenTable,
+					Columns: []string{doc.ChildrenColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *DocMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.RelatedIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: false,
+					Table:   doc.RelatedTable,
+					Columns: doc.RelatedPrimaryKey,
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *DocCreate) sqlSave(ctx context.Context) (*Doc, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, docCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &docCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*schema.DocID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &docCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Doc{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(doc.Table, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.Text(); ok {
-		_spec.SetField(doc.FieldText, field.TypeString, value)
-		_node.Text = value
-	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   doc.ParentTable,
-			Columns: []string{doc.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.doc_children = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   doc.ChildrenTable,
-			Columns: []string{doc.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.RelatedIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   doc.RelatedTable,
-			Columns: doc.RelatedPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -436,19 +523,24 @@ func (_c *DocCreateBulk) Save(ctx context.Context) ([]*Doc, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DocMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, docCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, docCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &docCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -460,16 +552,23 @@ func (_c *DocCreateBulk) Save(ctx context.Context) ([]*Doc, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &docCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

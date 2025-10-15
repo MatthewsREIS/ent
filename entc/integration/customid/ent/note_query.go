@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -457,67 +457,60 @@ func (_q *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 	return nodes, nil
 }
 
+var noteParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Note, Note, schema.NoteID, schema.NoteID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   note.ParentTable,
+			Columns: []string{note.ParentColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: note.FieldID,
+					Type:   field.TypeString,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Note) schema.NoteID { return n.ID },
+	ExtractEdgeID: func(e *Note) schema.NoteID { return e.ID },
+	ExtractNodeFK: func(n *Note) *schema.NoteID {
+		return n.note_children
+	},
+}
+var noteChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Note, Note, schema.NoteID, schema.NoteID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   note.ChildrenTable,
+			Columns: []string{note.ChildrenColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: note.FieldID,
+					Type:   field.TypeString,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Note) schema.NoteID { return n.ID },
+	ExtractEdgeID: func(e *Note) schema.NoteID { return e.ID },
+	ExtractEdgeFK: func(e *Note) *schema.NoteID {
+		return e.note_children
+	},
+}
+
 func (_q *NoteQuery) loadParent(ctx context.Context, query *NoteQuery, nodes []*Note, init func(*Note), assign func(*Note, *Note)) error {
-	ids := make([]schema.NoteID, 0, len(nodes))
-	nodeids := make(map[schema.NoteID][]*Note)
-	for i := range nodes {
-		if nodes[i].note_children == nil {
-			continue
-		}
-		fk := *nodes[i].note_children
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(note.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "note_children" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &noteParentEdgeLoadDescriptor, query, nodes, assign, func(ids []schema.NoteID) {
+		query.Where(note.IDIn(ids...))
+	})
 	return nil
 }
 func (_q *NoteQuery) loadChildren(ctx context.Context, query *NoteQuery, nodes []*Note, init func(*Note), assign func(*Note, *Note)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[schema.NoteID]*Note)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	query.withFKs = true
-	query.Where(predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(note.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.note_children
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "note_children" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "note_children" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &noteChildrenEdgeLoadDescriptor, query, nodes, init, assign)
 	return nil
 }
 

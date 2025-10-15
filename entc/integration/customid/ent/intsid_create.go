@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -73,6 +76,9 @@ func (_c *IntSIDCreate) Mutation() *IntSIDMutation {
 
 // Save creates the IntSID in the database.
 func (_c *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, intsidCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -98,78 +104,131 @@ func (_c *IntSIDCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *IntSIDCreate) check() error {
-	return nil
+var intsidCreateSpec = entgen.CreateSpec[*IntSIDMutation]{
+	Fields: []entgen.FieldSpec[*IntSIDMutation]{
+		{
+			Name: "id",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*IntSIDMutation]{},
+}
+
+var intsidCreateDescriptor = entbuilder.CreateDescriptor[config, IntSID, *IntSIDMutation]{
+	Table: intsid.Table,
+	NewNode: func(cfg config) *IntSID {
+		return &IntSID{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, IntSID, *IntSIDMutation]{
+		Column:      intsid.FieldID,
+		Type:        field.TypeInt64,
+		UserDefined: true,
+		Value: func(m *IntSIDMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *IntSID, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(sid.ID)
+			return nil
+		},
+		AssignGenerated: func(node *IntSID, value driver.Value) error {
+			switch v := value.(type) {
+			case *sid.ID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case sid.ID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Edges: []entbuilder.EdgeDescriptor[config, IntSID, *IntSIDMutation]{
+		{
+			Value: func(cfg config, m *IntSIDMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ParentIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   intsid.ParentTable,
+					Columns: []string{intsid.ParentColumn},
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *IntSID, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]sid.ID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.int_sid_parent = &ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *IntSIDMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ChildrenIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: true,
+					Table:   intsid.ChildrenTable,
+					Columns: []string{intsid.ChildrenColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *IntSIDCreate) sqlSave(ctx context.Context) (*IntSID, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, intsidCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &intsidCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*sid.ID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &intsidCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
-	var (
-		_node = &IntSID{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(intsid.Table, sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   intsid.ParentTable,
-			Columns: []string{intsid.ParentColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.int_sid_parent = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   intsid.ChildrenTable,
-			Columns: []string{intsid.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -314,18 +373,24 @@ func (_c *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*IntSIDMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, intsidCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, intsidCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &intsidCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -337,21 +402,23 @@ func (_c *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &intsidCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					if err := nodes[i].ID.Scan(specs[i].ID.Value); err != nil {
-						return nil, err
-					}
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

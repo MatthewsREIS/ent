@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -392,36 +393,33 @@ func (_q *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	return nodes, nil
 }
 
+var sessionDeviceEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Session, Device, schema.ID, schema.ID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   session.DeviceTable,
+			Columns: []string{session.DeviceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: device.FieldID,
+					Type:   field.TypeBytes,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Session) schema.ID { return n.ID },
+	ExtractEdgeID: func(e *Device) schema.ID { return e.ID },
+	ExtractNodeFK: func(n *Session) *schema.ID {
+		return n.device_sessions
+	},
+}
+
 func (_q *SessionQuery) loadDevice(ctx context.Context, query *DeviceQuery, nodes []*Session, init func(*Session), assign func(*Session, *Device)) error {
-	ids := make([]schema.ID, 0, len(nodes))
-	nodeids := make(map[schema.ID][]*Session)
-	for i := range nodes {
-		if nodes[i].device_sessions == nil {
-			continue
-		}
-		fk := *nodes[i].device_sessions
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(device.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &sessionDeviceEdgeLoadDescriptor, query, nodes, assign, func(ids []schema.ID) {
+		query.Where(device.IDIn(ids...))
+	})
 	return nil
 }
 

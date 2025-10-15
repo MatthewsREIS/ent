@@ -165,10 +165,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		}
 	{{- end }}
 	{{- with $e.Through }}
-		{{- if .HasDefault }}
-			createE := &{{ .CreateName }}{config: {{ $receiver }}.config, mutation: new{{ .MutationName }}({{ $receiver }}.config, OpCreate)}
-			{{- /* Skip error handling here as this check was already handled. */}}
-			{{ if or .NumHooks .NumPolicy }}_ = {{ end }}createE.defaults()
+        {{- if .HasDefault }}
+            createE := &{{ .CreateName }}{config: {{ $receiver }}.config, mutation: new{{ .MutationName }}({{ $receiver }}.config, OpCreate)}
+            {{/* Skip error handling here as this check was already handled. */}}
+            {{ if or .NumHooks .NumPolicy }}_ = {{ end }}
+            createE.defaults()
 			_, specE := createE.createSpec()
 			edge.Target.Fields = specE.Fields
 			{{- if and .HasOneFieldID .ID.Default }}
@@ -295,7 +296,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 {{- if $e.Through }}
 {{- if $e.Through.HasDefault }}
 			createE := &{{ $e.Through.CreateName }}{config: cfg, mutation: new{{ $e.Through.MutationName }}(cfg, OpCreate)}
-{{- if or $e.Through.NumHooks $e.Through.NumPolicy }}			_ = {{ end }}createE.defaults()
+            {{ if or $e.Through.NumHooks $e.Through.NumPolicy }}			_ = {{ end }}
+            createE.defaults()
 			_, specE := createE.createSpec()
 			edge.Target.Fields = specE.Fields
 {{- if and $e.Through.HasOneFieldID $e.Through.ID.Default }}

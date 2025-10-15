@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -19,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -431,35 +431,35 @@ func (_q *FileTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fil
 	return nodes, nil
 }
 
+var filetypeFilesEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[FileType, File, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   filetype.FilesTable,
+			Columns: []string{filetype.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: file.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *FileType) int { return n.ID },
+	ExtractEdgeID: func(e *File) int { return e.ID },
+	ExtractEdgeFK: func(e *File) *int {
+		return e.file_type_files
+	},
+}
+
 func (_q *FileTypeQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*FileType, init func(*FileType), assign func(*FileType, *File)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*FileType)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	query.withFKs = true
-	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(filetype.FilesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.file_type_files
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &filetypeFilesEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

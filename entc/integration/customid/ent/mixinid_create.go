@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -60,7 +63,9 @@ func (_c *MixinIDCreate) Mutation() *MixinIDMutation {
 
 // Save creates the MixinID in the database.
 func (_c *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, mixinidCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -86,67 +91,146 @@ func (_c *MixinIDCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *MixinIDCreate) defaults() {
-	if _, ok := _c.mutation.ID(); !ok {
-		v := mixinid.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var mixinidCreateSpec = entgen.CreateSpec[*MixinIDMutation]{
+	Fields: []entgen.FieldSpec[*MixinIDMutation]{
+		{
+			Name: "some_field",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "some_field", err: errors.New(`ent: missing required field "MixinID.some_field"`)}
+				},
+			},
+			IsSet: func(m *MixinIDMutation) bool {
+				_, ok := m.SomeField()
+				return ok
+			},
+		},
+		{
+			Name: "mixin_field",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "mixin_field", err: errors.New(`ent: missing required field "MixinID.mixin_field"`)}
+				},
+			},
+			IsSet: func(m *MixinIDMutation) bool {
+				_, ok := m.MixinField()
+				return ok
+			},
+		},
+		{
+			Name: "id",
+			Default: func(m *MixinIDMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := mixinid.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*MixinIDMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *MixinIDCreate) check() error {
-	if _, ok := _c.mutation.SomeField(); !ok {
-		return &ValidationError{Name: "some_field", err: errors.New(`ent: missing required field "MixinID.some_field"`)}
-	}
-	if _, ok := _c.mutation.MixinField(); !ok {
-		return &ValidationError{Name: "mixin_field", err: errors.New(`ent: missing required field "MixinID.mixin_field"`)}
-	}
-	return nil
+var mixinidCreateDescriptor = entbuilder.CreateDescriptor[config, MixinID, *MixinIDMutation]{
+	Table: mixinid.Table,
+	NewNode: func(cfg config) *MixinID {
+		return &MixinID{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, MixinID, *MixinIDMutation]{
+		Column:      mixinid.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *MixinIDMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *MixinID, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(node *MixinID, value driver.Value) error {
+			switch v := value.(type) {
+			case *uuid.UUID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case uuid.UUID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, MixinID, *MixinIDMutation]{
+		{
+			Column: mixinid.FieldSomeField,
+			Type:   field.TypeString,
+			Value: func(m *MixinIDMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.SomeField(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *MixinID, fv entbuilder.FieldValue) error {
+				node.SomeField = fv.Node.(string)
+				return nil
+			},
+		},
+
+		{
+			Column: mixinid.FieldMixinField,
+			Type:   field.TypeString,
+			Value: func(m *MixinIDMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.MixinField(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *MixinID, fv entbuilder.FieldValue) error {
+				node.MixinField = fv.Node.(string)
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, mixinidCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &mixinidCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &mixinidCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
-	var (
-		_node = &MixinID{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(mixinid.Table, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.SomeField(); ok {
-		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
-		_node.SomeField = value
-	}
-	if value, ok := _c.mutation.MixinField(); ok {
-		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
-		_node.MixinField = value
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -354,19 +438,24 @@ func (_c *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MixinIDMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, mixinidCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, mixinidCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &mixinidCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -378,16 +467,23 @@ func (_c *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &mixinidCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

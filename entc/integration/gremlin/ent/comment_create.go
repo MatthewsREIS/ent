@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/entc/integration/gremlin/ent/comment"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -101,6 +102,9 @@ func (_c *CommentCreate) Mutation() *CommentMutation {
 
 // Save creates the Comment in the database.
 func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, commentCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -126,19 +130,52 @@ func (_c *CommentCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *CommentCreate) check() error {
-	if _, ok := _c.mutation.UniqueInt(); !ok {
-		return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "Comment.unique_int"`)}
-	}
-	if _, ok := _c.mutation.UniqueFloat(); !ok {
-		return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "Comment.unique_float"`)}
-	}
-	return nil
+var commentCreateSpec = entgen.CreateSpec[*CommentMutation]{
+	Fields: []entgen.FieldSpec[*CommentMutation]{
+		{
+			Name: "unique_int",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "Comment.unique_int"`)}
+				},
+			},
+			IsSet: func(m *CommentMutation) bool {
+				_, ok := m.UniqueInt()
+				return ok
+			},
+		},
+		{
+			Name: "unique_float",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "Comment.unique_float"`)}
+				},
+			},
+			IsSet: func(m *CommentMutation) bool {
+				_, ok := m.UniqueFloat()
+				return ok
+			},
+		},
+		{
+			Name: "nillable_int",
+		},
+		{
+			Name: "table",
+		},
+		{
+			Name: "dir",
+		},
+		{
+			Name: "client",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*CommentMutation]{},
 }
 
 func (_c *CommentCreate) gremlinSave(ctx context.Context) (*Comment, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, commentCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

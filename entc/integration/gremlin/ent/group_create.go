@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -145,7 +146,9 @@ func (_c *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, groupCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -171,52 +174,116 @@ func (_c *GroupCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *GroupCreate) defaults() {
-	if _, ok := _c.mutation.Active(); !ok {
-		v := group.DefaultActive
-		_c.mutation.SetActive(v)
-	}
-	if _, ok := _c.mutation.MaxUsers(); !ok {
-		v := group.DefaultMaxUsers
-		_c.mutation.SetMaxUsers(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *GroupCreate) check() error {
-	if _, ok := _c.mutation.Active(); !ok {
-		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Group.active"`)}
-	}
-	if _, ok := _c.mutation.Expire(); !ok {
-		return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "Group.expire"`)}
-	}
-	if v, ok := _c.mutation.GetType(); ok {
-		if err := group.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Group.type": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.MaxUsers(); ok {
-		if err := group.MaxUsersValidator(v); err != nil {
-			return &ValidationError{Name: "max_users", err: fmt.Errorf(`ent: validator failed for field "Group.max_users": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
-	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := group.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
-		}
-	}
-	if len(_c.mutation.InfoIDs()) == 0 {
-		return &ValidationError{Name: "info", err: errors.New(`ent: missing required edge "Group.info"`)}
-	}
-	return nil
+var groupCreateSpec = entgen.CreateSpec[*GroupMutation]{
+	Fields: []entgen.FieldSpec[*GroupMutation]{
+		{
+			Name: "active",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Group.active"`)}
+				},
+			},
+			IsSet: func(m *GroupMutation) bool {
+				_, ok := m.Active()
+				return ok
+			},
+			Default: func(m *GroupMutation) error {
+				if _, ok := m.Active(); !ok {
+					v := group.DefaultActive
+					m.SetActive(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "expire",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "expire", err: errors.New(`ent: missing required field "Group.expire"`)}
+				},
+			},
+			IsSet: func(m *GroupMutation) bool {
+				_, ok := m.Expire()
+				return ok
+			},
+		},
+		{
+			Name: "type",
+			Validators: []func(*GroupMutation) error{
+				func(m *GroupMutation) error {
+					if v, ok := m.GetType(); ok {
+						if err := group.TypeValidator(v); err != nil {
+							return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Group.type": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "max_users",
+			Default: func(m *GroupMutation) error {
+				if _, ok := m.MaxUsers(); !ok {
+					v := group.DefaultMaxUsers
+					m.SetMaxUsers(v)
+				}
+				return nil
+			},
+			Validators: []func(*GroupMutation) error{
+				func(m *GroupMutation) error {
+					if v, ok := m.MaxUsers(); ok {
+						if err := group.MaxUsersValidator(v); err != nil {
+							return &ValidationError{Name: "max_users", err: fmt.Errorf(`ent: validator failed for field "Group.max_users": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
+				},
+			},
+			IsSet: func(m *GroupMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+			Validators: []func(*GroupMutation) error{
+				func(m *GroupMutation) error {
+					if v, ok := m.Name(); ok {
+						if err := group.NameValidator(v); err != nil {
+							return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*GroupMutation]{
+		{
+			Name: "info",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "info", err: errors.New(`ent: missing required edge "Group.info"`)}
+				},
+			},
+			Count: func(m *GroupMutation) int {
+				return len(m.InfoIDs())
+			},
+		},
+	},
 }
 
 func (_c *GroupCreate) gremlinSave(ctx context.Context) (*Group, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, groupCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

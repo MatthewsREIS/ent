@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +18,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/entc/integration/json/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -120,7 +123,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, userCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -146,117 +151,378 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.Dirs(); !ok {
-		v := user.DefaultDirs()
-		_c.mutation.SetDirs(v)
-	}
-	if _, ok := _c.mutation.Ints(); !ok {
-		v := user.DefaultInts
-		_c.mutation.SetInts(v)
-	}
+var userCreateSpec = entgen.CreateSpec[*UserMutation]{
+	Fields: []entgen.FieldSpec[*UserMutation]{
+		{
+			Name: "t",
+		},
+		{
+			Name: "url",
+		},
+		{
+			Name: "URLs",
+		},
+		{
+			Name: "raw",
+		},
+		{
+			Name: "dirs",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "dirs", err: errors.New(`ent: missing required field "User.dirs"`)}
+				},
+			},
+			IsSet: func(m *UserMutation) bool {
+				_, ok := m.Dirs()
+				return ok
+			},
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Dirs(); !ok {
+					v := user.DefaultDirs()
+					m.SetDirs(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "ints",
+			Default: func(m *UserMutation) error {
+				if _, ok := m.Ints(); !ok {
+					v := user.DefaultInts
+					m.SetInts(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "floats",
+		},
+		{
+			Name: "strings",
+		},
+		{
+			Name: "ints_validate",
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.IntsValidate(); ok {
+						if err := user.IntsValidateValidator(v); err != nil {
+							return &ValidationError{Name: "ints_validate", err: fmt.Errorf(`ent: validator failed for field "User.ints_validate": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "floats_validate",
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.FloatsValidate(); ok {
+						if err := user.FloatsValidateValidator(v); err != nil {
+							return &ValidationError{Name: "floats_validate", err: fmt.Errorf(`ent: validator failed for field "User.floats_validate": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "strings_validate",
+			Validators: []func(*UserMutation) error{
+				func(m *UserMutation) error {
+					if v, ok := m.StringsValidate(); ok {
+						if err := user.StringsValidateValidator(v); err != nil {
+							return &ValidationError{Name: "strings_validate", err: fmt.Errorf(`ent: validator failed for field "User.strings_validate": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "addr",
+		},
+		{
+			Name: "unknown",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*UserMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.Dirs(); !ok {
-		return &ValidationError{Name: "dirs", err: errors.New(`ent: missing required field "User.dirs"`)}
-	}
-	if v, ok := _c.mutation.IntsValidate(); ok {
-		if err := user.IntsValidateValidator(v); err != nil {
-			return &ValidationError{Name: "ints_validate", err: fmt.Errorf(`ent: validator failed for field "User.ints_validate": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.FloatsValidate(); ok {
-		if err := user.FloatsValidateValidator(v); err != nil {
-			return &ValidationError{Name: "floats_validate", err: fmt.Errorf(`ent: validator failed for field "User.floats_validate": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.StringsValidate(); ok {
-		if err := user.StringsValidateValidator(v); err != nil {
-			return &ValidationError{Name: "strings_validate", err: fmt.Errorf(`ent: validator failed for field "User.strings_validate": %w`, err)}
-		}
-	}
-	return nil
+var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutation]{
+	Table: user.Table,
+	NewNode: func(cfg config) *User {
+		return &User{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, User, *UserMutation]{
+		Column:      user.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *User, value driver.Value) error {
+			id := value.(int64)
+			node.ID = int(id)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, User, *UserMutation]{
+		{
+			Column: user.FieldT,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.T(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.T = fv.Node.(*schema.T)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldURL,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.URL(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.URL = fv.Node.(*url.URL)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldURLs,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.URLs(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.URLs = fv.Node.([]*url.URL)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldRaw,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Raw(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Raw = fv.Node.(json.RawMessage)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldDirs,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Dirs(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Dirs = fv.Node.([]http.Dir)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldInts,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Ints(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Ints = fv.Node.([]int)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldFloats,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Floats(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Floats = fv.Node.([]float64)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldStrings,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Strings(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Strings = fv.Node.([]string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldIntsValidate,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.IntsValidate(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.IntsValidate = fv.Node.([]int)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldFloatsValidate,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.FloatsValidate(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.FloatsValidate = fv.Node.([]float64)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldStringsValidate,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.StringsValidate(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.StringsValidate = fv.Node.([]string)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldAddr,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Addr(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Addr = fv.Node.(schema.Addr)
+				return nil
+			},
+		},
+
+		{
+			Column: user.FieldUnknown,
+			Type:   field.TypeJSON,
+			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+				if value, ok := m.Unknown(); ok {
+					return entbuilder.FieldValue{
+						Spec: value,
+						Node: value,
+					}, true, nil
+				}
+				return entbuilder.FieldValue{}, false, nil
+			},
+			Assign: func(node *User, fv entbuilder.FieldValue) error {
+				node.Unknown = fv.Node.(any)
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, userCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &userCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &userCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
-	var (
-		_node = &User{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	)
-	if value, ok := _c.mutation.T(); ok {
-		_spec.SetField(user.FieldT, field.TypeJSON, value)
-		_node.T = value
-	}
-	if value, ok := _c.mutation.URL(); ok {
-		_spec.SetField(user.FieldURL, field.TypeJSON, value)
-		_node.URL = value
-	}
-	if value, ok := _c.mutation.URLs(); ok {
-		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
-		_node.URLs = value
-	}
-	if value, ok := _c.mutation.Raw(); ok {
-		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
-		_node.Raw = value
-	}
-	if value, ok := _c.mutation.Dirs(); ok {
-		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
-		_node.Dirs = value
-	}
-	if value, ok := _c.mutation.Ints(); ok {
-		_spec.SetField(user.FieldInts, field.TypeJSON, value)
-		_node.Ints = value
-	}
-	if value, ok := _c.mutation.Floats(); ok {
-		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
-		_node.Floats = value
-	}
-	if value, ok := _c.mutation.Strings(); ok {
-		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
-		_node.Strings = value
-	}
-	if value, ok := _c.mutation.IntsValidate(); ok {
-		_spec.SetField(user.FieldIntsValidate, field.TypeJSON, value)
-		_node.IntsValidate = value
-	}
-	if value, ok := _c.mutation.FloatsValidate(); ok {
-		_spec.SetField(user.FieldFloatsValidate, field.TypeJSON, value)
-		_node.FloatsValidate = value
-	}
-	if value, ok := _c.mutation.StringsValidate(); ok {
-		_spec.SetField(user.FieldStringsValidate, field.TypeJSON, value)
-		_node.StringsValidate = value
-	}
-	if value, ok := _c.mutation.Addr(); ok {
-		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
-		_node.Addr = value
-	}
-	if value, ok := _c.mutation.Unknown(); ok {
-		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
-		_node.Unknown = value
-	}
-	return _node, _spec
 }
 
 // UserCreateBulk is the builder for creating many User entities in bulk.
@@ -276,19 +542,24 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.ApplyDefaults(mutation, userCreateSpec.Fields); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, userCreateSpec); err != nil {
+					return nil, err
+				}
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &userCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -299,20 +570,23 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &userCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

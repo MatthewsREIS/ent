@@ -8,7 +8,6 @@ package entv2
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -407,35 +407,32 @@ func (_q *BlogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blog, e
 	return nodes, nil
 }
 
+var blogAdminsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Blog, User, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   blog.AdminsTable,
+			Columns: []string{blog.AdminsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: user.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Blog) int { return n.ID },
+	ExtractEdgeID: func(e *User) int { return e.ID },
+	ExtractEdgeFK: func(e *User) *int {
+		return e.blog_admins
+	},
+}
+
 func (_q *BlogQuery) loadAdmins(ctx context.Context, query *UserQuery, nodes []*Blog, init func(*Blog), assign func(*Blog, *User)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Blog)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	query.withFKs = true
-	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(blog.AdminsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.blog_admins
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "blog_admins" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "blog_admins" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &blogAdminsEdgeLoadDescriptor, query, nodes, init, assign)
 	return nil
 }
 

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -91,6 +93,33 @@ func (_u *MixinIDUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var mixinidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MixinIDMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*MixinIDMutation]{
+		{
+			Column: mixinid.FieldSomeField,
+			Type:   field.TypeString,
+			Set: func(m *MixinIDMutation) (driver.Value, bool, error) {
+				if value, ok := m.SomeField(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: mixinid.FieldMixinField,
+			Type:   field.TypeString,
+			Set: func(m *MixinIDMutation) (driver.Value, bool, error) {
+				if value, ok := m.MixinField(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *MixinIDMutation]{},
+}
+
 func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(mixinid.Table, mixinid.Columns, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -100,11 +129,8 @@ func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.SomeField(); ok {
-		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.MixinField(); ok {
-		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &mixinidUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -225,11 +251,8 @@ func (_u *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err er
 			}
 		}
 	}
-	if value, ok := _u.mutation.SomeField(); ok {
-		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.MixinField(); ok {
-		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &mixinidUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &MixinID{config: _u.config}
 	_spec.Assign = _node.assignValues

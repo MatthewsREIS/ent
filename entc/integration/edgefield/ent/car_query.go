@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -416,34 +416,35 @@ func (_q *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	return nodes, nil
 }
 
-func (_q *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes []*Car, init func(*Car), assign func(*Car, *Rental)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Car)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
+var carRentalsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Car, Rental, uuid.UUID, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   car.RentalsTable,
+			Columns: []string{car.RentalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: rental.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
 		}
-	}
+	},
+	ExtractNodeID: func(n *Car) uuid.UUID { return n.ID },
+	ExtractEdgeID: func(e *Rental) int { return e.ID },
+	ExtractEdgeFK: func(e *Rental) *uuid.UUID {
+		v := e.CarID
+		return &v
+	},
+}
+
+func (_q *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes []*Car, init func(*Car), assign func(*Car, *Rental)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(rental.FieldCarID)
 	}
-	query.Where(predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(car.RentalsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.CarID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "car_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &carRentalsEdgeLoadDescriptor, query, nodes, init, assign)
 	return nil
 }
 

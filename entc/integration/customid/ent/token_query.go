@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -414,36 +415,33 @@ func (_q *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 	return nodes, nil
 }
 
+var tokenAccountEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Token, Account, sid.ID, sid.ID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   token.AccountTable,
+			Columns: []string{token.AccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: account.FieldID,
+					Type:   field.TypeOther,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Token) sid.ID { return n.ID },
+	ExtractEdgeID: func(e *Account) sid.ID { return e.ID },
+	ExtractNodeFK: func(n *Token) *sid.ID {
+		return n.account_token
+	},
+}
+
 func (_q *TokenQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*Token, init func(*Token), assign func(*Token, *Account)) error {
-	ids := make([]sid.ID, 0, len(nodes))
-	nodeids := make(map[sid.ID][]*Token)
-	for i := range nodes {
-		if nodes[i].account_token == nil {
-			continue
-		}
-		fk := *nodes[i].account_token
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(account.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "account_token" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &tokenAccountEdgeLoadDescriptor, query, nodes, assign, func(ids []sid.ID) {
+		query.Where(account.IDIn(ids...))
+	})
 	return nil
 }
 

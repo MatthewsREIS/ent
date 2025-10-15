@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/exvaluescan"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // ExValueScanCreate is the builder for creating a ExValueScan entity.
@@ -88,6 +89,9 @@ func (_c *ExValueScanCreate) Mutation() *ExValueScanMutation {
 
 // Save creates the ExValueScan in the database.
 func (_c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, exvaluescanCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -113,28 +117,88 @@ func (_c *ExValueScanCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *ExValueScanCreate) check() error {
-	if _, ok := _c.mutation.Binary(); !ok {
-		return &ValidationError{Name: "binary", err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
-	}
-	if _, ok := _c.mutation.BinaryBytes(); !ok {
-		return &ValidationError{Name: "binary_bytes", err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
-	}
-	if _, ok := _c.mutation.Text(); !ok {
-		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "ExValueScan.text"`)}
-	}
-	if _, ok := _c.mutation.Base64(); !ok {
-		return &ValidationError{Name: "base64", err: errors.New(`ent: missing required field "ExValueScan.base64"`)}
-	}
-	if _, ok := _c.mutation.Custom(); !ok {
-		return &ValidationError{Name: "custom", err: errors.New(`ent: missing required field "ExValueScan.custom"`)}
-	}
-	return nil
+var exvaluescanCreateSpec = entgen.CreateSpec[*ExValueScanMutation]{
+	Fields: []entgen.FieldSpec[*ExValueScanMutation]{
+		{
+			Name: "binary",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "binary", err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.Binary()
+				return ok
+			},
+		},
+		{
+			Name: "binary_bytes",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "binary_bytes", err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.BinaryBytes()
+				return ok
+			},
+		},
+		{
+			Name: "binary_optional",
+		},
+		{
+			Name: "text",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "ExValueScan.text"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.Text()
+				return ok
+			},
+		},
+		{
+			Name: "text_optional",
+		},
+		{
+			Name: "base64",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "base64", err: errors.New(`ent: missing required field "ExValueScan.base64"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.Base64()
+				return ok
+			},
+		},
+		{
+			Name: "custom",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "custom", err: errors.New(`ent: missing required field "ExValueScan.custom"`)}
+				},
+			},
+			IsSet: func(m *ExValueScanMutation) bool {
+				_, ok := m.Custom()
+				return ok
+			},
+		},
+		{
+			Name: "custom_optional",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*ExValueScanMutation]{},
 }
 
 func (_c *ExValueScanCreate) gremlinSave(ctx context.Context) (*ExValueScan, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, exvaluescanCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

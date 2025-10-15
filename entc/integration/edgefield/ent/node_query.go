@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/node"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -447,60 +447,64 @@ func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 	return nodes, nil
 }
 
+var nodePrevEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   node.PrevTable,
+			Columns: []string{node.PrevColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: node.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Node) int { return n.ID },
+	ExtractEdgeID: func(e *Node) int { return e.ID },
+	ExtractNodeFK: func(n *Node) *int {
+		v := n.PrevID
+		return &v
+	},
+}
+var nodeNextEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   node.NextTable,
+			Columns: []string{node.NextColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Column: node.FieldID,
+					Type:   field.TypeInt,
+				},
+			},
+		}
+	},
+	ExtractNodeID: func(n *Node) int { return n.ID },
+	ExtractEdgeID: func(e *Node) int { return e.ID },
+	ExtractEdgeFK: func(e *Node) *int {
+		v := e.PrevID
+		return &v
+	},
+}
+
 func (_q *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Node)
-	for i := range nodes {
-		fk := nodes[i].PrevID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(node.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "prev_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &nodePrevEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
+		query.Where(node.IDIn(ids...))
+	})
 	return nil
 }
 func (_q *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Node)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(node.FieldPrevID)
 	}
-	query.Where(predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(node.NextColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.PrevID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "prev_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2O(ctx, &nodeNextEdgeLoadDescriptor, query, nodes, assign)
 	return nil
 }
 
