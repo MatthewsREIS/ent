@@ -166,7 +166,7 @@ var petCreateDescriptor = entbuilder.CreateDescriptor[config, Pet, *PetMutation]
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.Pet
+				edge.Schema = cfg.schemaConfig.Pet
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}

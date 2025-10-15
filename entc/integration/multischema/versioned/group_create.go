@@ -159,7 +159,7 @@ var groupCreateDescriptor = entbuilder.CreateDescriptor[config, Group, *GroupMut
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.GroupUsers
+				edge.Schema = cfg.schemaConfig.GroupUsers
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}

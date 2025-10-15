@@ -223,7 +223,7 @@ var parentCreateDescriptor = entbuilder.CreateDescriptor[config, Parent, *Parent
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.Parent
+				edge.Schema = cfg.schemaConfig.Parent
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -255,7 +255,7 @@ var parentCreateDescriptor = entbuilder.CreateDescriptor[config, Parent, *Parent
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.Parent
+				edge.Schema = cfg.schemaConfig.Parent
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}

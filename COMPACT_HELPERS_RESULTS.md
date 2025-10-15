@@ -82,6 +82,7 @@ entbuilder.SimpleField[config, User, *UserMutation, int](
 2. Edge loading error messages: Removed `n.ID` references for edge schemas without ID fields
 3. Through-table defaults: Temporarily disabled (old `defaults()` and `createSpec()` methods don't exist)
 4. Duplicate imports: Fixed in `task_delete.go`
+5. Multischema support: Fixed create edge descriptors to inline EdgeSpec creation and access schema config via `cfg` parameter instead of builder receiver (which doesn't exist in descriptor context)
 
 ## Conclusion
 
@@ -110,4 +111,7 @@ This approach achieves the optimization goals:
 
 **Remaining work:**
 - Reimplement through-table edge defaults using descriptors
-- Consider applying same pattern to update/query/delete builders for consistency
+
+**Completed:**
+- ✅ Extended EdgeSpec helper pattern to update/query builders for consistency
+- ✅ Fixed multischema schema config compatibility with descriptor pattern

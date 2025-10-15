@@ -236,7 +236,7 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.Pet
+				edge.Schema = cfg.schemaConfig.Pet
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -260,7 +260,7 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.GroupUsers
+				edge.Schema = cfg.schemaConfig.GroupUsers
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -284,7 +284,7 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.Friendship
+				edge.Schema = cfg.schemaConfig.Friendship
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -308,7 +308,7 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.UserFollowing
+				edge.Schema = cfg.schemaConfig.UserFollowing
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -332,7 +332,7 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.UserFollowing
+				edge.Schema = cfg.schemaConfig.UserFollowing
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -356,7 +356,7 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.Friendship
+				edge.Schema = cfg.schemaConfig.Friendship
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}

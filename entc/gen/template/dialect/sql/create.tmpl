@@ -304,9 +304,34 @@ entbuilder.SimpleField[config, {{ $.Name }}, *{{ $.MutationName }}, {{ $f.Type }
 		if len(nodes) == 0 {
 			return entbuilder.EdgeValue{}, false, nil
 		}
-{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
-		{{ template "dialect/sql/defedge" . }}
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.{{ $e.Rel.Type }},
+			Inverse: {{ $e.IsInverse }},
+			Table:   {{ $.Package }}.{{ $e.TableConstant }},
+			Columns: {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $.Package }}.{{ $e.ColumnConstant }} }{{ end }},
+			Bidi:    {{ $e.Bidi }},
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, field.{{ $e.Type.ID.Type.ConstName }}),
+			},
+		}
+{{- if $.FeatureEnabled "sql/schemaconfig" }}
+	{{- $schema := $e.Type.Name }}
+	{{- if $e.OwnFK }}
+		{{- $schema = $.Name }}
+	{{- else if $e.M2M }}
+		{{- if $e.Through }}
+			{{- $schema = $e.Through.Name }}
+		{{- else if $e.Inverse }}
+			{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
+		{{- else }}
+			{{- $schema = print $.Name $e.StructField }}
+		{{- end }}
+	{{- end }}
+		edge.Schema = cfg.schemaConfig.{{ $schema }}
 {{- end }}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 	},
 {{- if $e.OwnFK }}

@@ -259,7 +259,7 @@ var friendshipCreateDescriptor = entbuilder.CreateDescriptor[config, Friendship,
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.Friendship
+				edge.Schema = cfg.schemaConfig.Friendship
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -291,7 +291,7 @@ var friendshipCreateDescriptor = entbuilder.CreateDescriptor[config, Friendship,
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				edge.Schema = _c.schemaConfig.Friendship
+				edge.Schema = cfg.schemaConfig.Friendship
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
