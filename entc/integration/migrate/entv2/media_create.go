@@ -134,59 +134,27 @@ var mediaCreateDescriptor = entbuilder.CreateDescriptor[config, Media, *MediaMut
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Media, *MediaMutation]{
-		{
-			Column: media.FieldSource,
-			Type:   field.TypeString,
-			Value: func(m *MediaMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Source(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Media, fv entbuilder.FieldValue) error {
-				node.Source = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: media.FieldSourceURI,
-			Type:   field.TypeString,
-			Value: func(m *MediaMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.SourceURI(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Media, fv entbuilder.FieldValue) error {
-				node.SourceURI = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Media, *MediaMutation, string](
+			media.FieldSource,
+			field.TypeString,
+			(*MediaMutation).Source,
+			func(n *Media, v string) { n.Source = v },
+		),
 
-		{
-			Column: media.FieldText,
-			Type:   field.TypeString,
-			Value: func(m *MediaMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Text(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Media, fv entbuilder.FieldValue) error {
-				node.Text = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Media, *MediaMutation, string](
+			media.FieldSourceURI,
+			field.TypeString,
+			(*MediaMutation).SourceURI,
+			func(n *Media, v string) { n.SourceURI = v },
+		),
+
+		entbuilder.SimpleField[config, Media, *MediaMutation, string](
+			media.FieldText,
+			field.TypeString,
+			(*MediaMutation).Text,
+			func(n *Media, v string) { n.Text = v },
+		),
 	},
 }
 

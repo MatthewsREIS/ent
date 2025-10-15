@@ -126,23 +126,13 @@ var postCreateDescriptor = entbuilder.CreateDescriptor[config, Post, *PostMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Post, *PostMutation]{
-		{
-			Column: post.FieldText,
-			Type:   field.TypeString,
-			Value: func(m *PostMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Text(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Post, fv entbuilder.FieldValue) error {
-				node.Text = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Post, *PostMutation, string](
+			post.FieldText,
+			field.TypeString,
+			(*PostMutation).Text,
+			func(n *Post, v string) { n.Text = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Post, *PostMutation]{
 		{

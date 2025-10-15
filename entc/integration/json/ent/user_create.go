@@ -267,239 +267,97 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, User, *UserMutation]{
-		{
-			Column: user.FieldT,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.T(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.T = fv.Node.(*schema.T)
-				return nil
-			},
-		},
 
-		{
-			Column: user.FieldURL,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.URL(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.URL = fv.Node.(*url.URL)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, *schema.T](
+			user.FieldT,
+			field.TypeJSON,
+			(*UserMutation).T,
+			func(n *User, v *schema.T) { n.T = v },
+		),
 
-		{
-			Column: user.FieldURLs,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.URLs(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.URLs = fv.Node.([]*url.URL)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, *url.URL](
+			user.FieldURL,
+			field.TypeJSON,
+			(*UserMutation).URL,
+			func(n *User, v *url.URL) { n.URL = v },
+		),
 
-		{
-			Column: user.FieldRaw,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Raw(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Raw = fv.Node.(json.RawMessage)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []*url.URL](
+			user.FieldURLs,
+			field.TypeJSON,
+			(*UserMutation).URLs,
+			func(n *User, v []*url.URL) { n.URLs = v },
+		),
 
-		{
-			Column: user.FieldDirs,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Dirs(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Dirs = fv.Node.([]http.Dir)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, json.RawMessage](
+			user.FieldRaw,
+			field.TypeJSON,
+			(*UserMutation).Raw,
+			func(n *User, v json.RawMessage) { n.Raw = v },
+		),
 
-		{
-			Column: user.FieldInts,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Ints(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Ints = fv.Node.([]int)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []http.Dir](
+			user.FieldDirs,
+			field.TypeJSON,
+			(*UserMutation).Dirs,
+			func(n *User, v []http.Dir) { n.Dirs = v },
+		),
 
-		{
-			Column: user.FieldFloats,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Floats(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Floats = fv.Node.([]float64)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []int](
+			user.FieldInts,
+			field.TypeJSON,
+			(*UserMutation).Ints,
+			func(n *User, v []int) { n.Ints = v },
+		),
 
-		{
-			Column: user.FieldStrings,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Strings(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Strings = fv.Node.([]string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []float64](
+			user.FieldFloats,
+			field.TypeJSON,
+			(*UserMutation).Floats,
+			func(n *User, v []float64) { n.Floats = v },
+		),
 
-		{
-			Column: user.FieldIntsValidate,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.IntsValidate(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.IntsValidate = fv.Node.([]int)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []string](
+			user.FieldStrings,
+			field.TypeJSON,
+			(*UserMutation).Strings,
+			func(n *User, v []string) { n.Strings = v },
+		),
 
-		{
-			Column: user.FieldFloatsValidate,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.FloatsValidate(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.FloatsValidate = fv.Node.([]float64)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []int](
+			user.FieldIntsValidate,
+			field.TypeJSON,
+			(*UserMutation).IntsValidate,
+			func(n *User, v []int) { n.IntsValidate = v },
+		),
 
-		{
-			Column: user.FieldStringsValidate,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.StringsValidate(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.StringsValidate = fv.Node.([]string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []float64](
+			user.FieldFloatsValidate,
+			field.TypeJSON,
+			(*UserMutation).FloatsValidate,
+			func(n *User, v []float64) { n.FloatsValidate = v },
+		),
 
-		{
-			Column: user.FieldAddr,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Addr(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Addr = fv.Node.(schema.Addr)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []string](
+			user.FieldStringsValidate,
+			field.TypeJSON,
+			(*UserMutation).StringsValidate,
+			func(n *User, v []string) { n.StringsValidate = v },
+		),
 
-		{
-			Column: user.FieldUnknown,
-			Type:   field.TypeJSON,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Unknown(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Unknown = fv.Node.(any)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, schema.Addr](
+			user.FieldAddr,
+			field.TypeJSON,
+			(*UserMutation).Addr,
+			func(n *User, v schema.Addr) { n.Addr = v },
+		),
+
+		entbuilder.SimpleField[config, User, *UserMutation, any](
+			user.FieldUnknown,
+			field.TypeJSON,
+			(*UserMutation).Unknown,
+			func(n *User, v any) { n.Unknown = v },
+		),
 	},
 }
 

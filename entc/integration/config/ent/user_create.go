@@ -136,41 +136,20 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, User, *UserMutation]{
-		{
-			Column: user.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: user.FieldLabel,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Label(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Label = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldName,
+			field.TypeString,
+			(*UserMutation).Name,
+			func(n *User, v string) { n.Name = v },
+		),
+
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldLabel,
+			field.TypeString,
+			(*UserMutation).Label,
+			func(n *User, v string) { n.Label = v },
+		),
 	},
 }
 

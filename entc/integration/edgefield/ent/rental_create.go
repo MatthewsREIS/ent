@@ -195,23 +195,13 @@ var rentalCreateDescriptor = entbuilder.CreateDescriptor[config, Rental, *Rental
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Rental, *RentalMutation]{
-		{
-			Column: rental.FieldDate,
-			Type:   field.TypeTime,
-			Value: func(m *RentalMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Date(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Rental, fv entbuilder.FieldValue) error {
-				node.Date = fv.Node.(time.Time)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Rental, *RentalMutation, time.Time](
+			rental.FieldDate,
+			field.TypeTime,
+			(*RentalMutation).Date,
+			func(n *Rental, v time.Time) { n.Date = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Rental, *RentalMutation]{
 		{

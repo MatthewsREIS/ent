@@ -202,23 +202,13 @@ var attachedfileCreateDescriptor = entbuilder.CreateDescriptor[config, AttachedF
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, AttachedFile, *AttachedFileMutation]{
-		{
-			Column: attachedfile.FieldAttachTime,
-			Type:   field.TypeTime,
-			Value: func(m *AttachedFileMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.AttachTime(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *AttachedFile, fv entbuilder.FieldValue) error {
-				node.AttachTime = fv.Node.(time.Time)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, AttachedFile, *AttachedFileMutation, time.Time](
+			attachedfile.FieldAttachTime,
+			field.TypeTime,
+			(*AttachedFileMutation).AttachTime,
+			func(n *AttachedFile, v time.Time) { n.AttachTime = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, AttachedFile, *AttachedFileMutation]{
 		{

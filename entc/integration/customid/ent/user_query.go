@@ -617,23 +617,55 @@ var userPetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Pet, int, s
 }
 
 func (_q *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*User, init func(*User), assign func(*User, *Group)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &userGroupsEdgeLoadDescriptor, query, nodes, init, assign, [2]int{1, 0})
+	return entbuilder.LoadEdgeM2M(ctx, &userGroupsEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Group, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Group](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userParentEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &userParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &userChildrenEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userChildrenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*User, init func(*User), assign func(*User, *Pet)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &userPetsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userPetsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

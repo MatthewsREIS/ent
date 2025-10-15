@@ -432,7 +432,10 @@ var blogAdminsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Blog, User, int
 
 func (_q *BlogQuery) loadAdmins(ctx context.Context, query *UserQuery, nodes []*Blog, init func(*Blog), assign func(*Blog, *User)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &blogAdminsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &blogAdminsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

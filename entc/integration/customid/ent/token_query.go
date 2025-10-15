@@ -439,9 +439,11 @@ var tokenAccountEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Token, Accoun
 }
 
 func (_q *TokenQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*Token, init func(*Token), assign func(*Token, *Account)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &tokenAccountEdgeLoadDescriptor, query, nodes, assign, func(ids []sid.ID) {
-		query.Where(account.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &tokenAccountEdgeLoadDescriptor, nodes, assign,
+		func(ids []sid.ID) {
+			query.Where(account.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

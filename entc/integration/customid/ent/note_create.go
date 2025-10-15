@@ -186,23 +186,13 @@ var noteCreateDescriptor = entbuilder.CreateDescriptor[config, Note, *NoteMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Note, *NoteMutation]{
-		{
-			Column: note.FieldText,
-			Type:   field.TypeString,
-			Value: func(m *NoteMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Text(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Note, fv entbuilder.FieldValue) error {
-				node.Text = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Note, *NoteMutation, string](
+			note.FieldText,
+			field.TypeString,
+			(*NoteMutation).Text,
+			func(n *Note, v string) { n.Text = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Note, *NoteMutation]{
 		{

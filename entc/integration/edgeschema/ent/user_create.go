@@ -261,23 +261,13 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, User, *UserMutation]{
-		{
-			Column: user.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldName,
+			field.TypeString,
+			(*UserMutation).Name,
+			func(n *User, v string) { n.Name = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, User, *UserMutation]{
 		{
@@ -299,11 +289,6 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &UserGroupCreate{config: _c.config, mutation: newUserGroupMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},
@@ -327,11 +312,6 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &FriendshipCreate{config: _c.config, mutation: newFriendshipMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},
@@ -355,12 +335,6 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &RelationshipCreate{config: _c.config, mutation: newRelationshipMutation(_c.config, OpCreate)}
-
-				_ =
-					createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},
@@ -384,12 +358,6 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &TweetLikeCreate{config: _c.config, mutation: newTweetLikeMutation(_c.config, OpCreate)}
-
-				_ =
-					createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},
@@ -413,11 +381,6 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &UserTweetCreate{config: _c.config, mutation: newUserTweetMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},
@@ -441,11 +404,6 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &RoleUserCreate{config: _c.config, mutation: newRoleUserMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},

@@ -497,15 +497,19 @@ var usertweetTweetEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[UserTweet, 
 }
 
 func (_q *UserTweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*UserTweet, init func(*UserTweet), assign func(*UserTweet, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &usertweetUserEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &usertweetUserEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *UserTweetQuery) loadTweet(ctx context.Context, query *TweetQuery, nodes []*UserTweet, init func(*UserTweet), assign func(*UserTweet, *Tweet)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &usertweetTweetEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(tweet.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &usertweetTweetEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(tweet.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

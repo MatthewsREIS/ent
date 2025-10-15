@@ -184,23 +184,13 @@ var bloblinkCreateDescriptor = entbuilder.CreateDescriptor[config, BlobLink, *Bl
 		return &BlobLink{config: cfg}
 	},
 	Fields: []entbuilder.FieldDescriptor[config, BlobLink, *BlobLinkMutation]{
-		{
-			Column: bloblink.FieldCreatedAt,
-			Type:   field.TypeTime,
-			Value: func(m *BlobLinkMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.CreatedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *BlobLink, fv entbuilder.FieldValue) error {
-				node.CreatedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, BlobLink, *BlobLinkMutation, time.Time](
+			bloblink.FieldCreatedAt,
+			field.TypeTime,
+			(*BlobLinkMutation).CreatedAt,
+			func(n *BlobLink, v time.Time) { n.CreatedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, BlobLink, *BlobLinkMutation]{
 		{

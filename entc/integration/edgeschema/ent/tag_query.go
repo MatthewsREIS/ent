@@ -642,25 +642,79 @@ var tagGroupTagsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Tag, GroupTag
 }
 
 func (_q *TagQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Tweet)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &tagTweetsEdgeLoadDescriptor, query, nodes, init, assign, [2]int{0, 1})
+	return entbuilder.LoadEdgeM2M(ctx, &tagTweetsEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Tweet, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Tweet](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *TagQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Group)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &tagGroupsEdgeLoadDescriptor, query, nodes, init, assign, [2]int{0, 1})
+	return entbuilder.LoadEdgeM2M(ctx, &tagGroupsEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Group, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Group](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *TagQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *TweetTag)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(tweettag.FieldTagID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &tagTweetTagsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &tagTweetTagsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *TagQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *GroupTag)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(grouptag.FieldTagID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &tagGroupTagsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &tagGroupTagsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

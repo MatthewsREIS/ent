@@ -228,77 +228,34 @@ var taskCreateDescriptor = entbuilder.CreateDescriptor[config, Task, *TaskMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Task, *TaskMutation]{
-		{
-			Column: task.FieldTitle,
-			Type:   field.TypeString,
-			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Title(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Task, fv entbuilder.FieldValue) error {
-				node.Title = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: task.FieldDescription,
-			Type:   field.TypeString,
-			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Description(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Task, fv entbuilder.FieldValue) error {
-				node.Description = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Task, *TaskMutation, string](
+			task.FieldTitle,
+			field.TypeString,
+			(*TaskMutation).Title,
+			func(n *Task, v string) { n.Title = v },
+		),
 
-		{
-			Column: task.FieldStatus,
-			Type:   field.TypeEnum,
-			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Status(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Task, fv entbuilder.FieldValue) error {
-				node.Status = fv.Node.(task.Status)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Task, *TaskMutation, string](
+			task.FieldDescription,
+			field.TypeString,
+			(*TaskMutation).Description,
+			func(n *Task, v string) { n.Description = v },
+		),
 
-		{
-			Column: task.FieldUUID,
-			Type:   field.TypeUUID,
-			Value: func(m *TaskMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.UUID(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Task, fv entbuilder.FieldValue) error {
-				node.UUID = fv.Node.(uuid.UUID)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Task, *TaskMutation, task.Status](
+			task.FieldStatus,
+			field.TypeEnum,
+			(*TaskMutation).Status,
+			func(n *Task, v task.Status) { n.Status = v },
+		),
+
+		entbuilder.SimpleField[config, Task, *TaskMutation, uuid.UUID](
+			task.FieldUUID,
+			field.TypeUUID,
+			(*TaskMutation).UUID,
+			func(n *Task, v uuid.UUID) { n.UUID = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Task, *TaskMutation]{
 		{

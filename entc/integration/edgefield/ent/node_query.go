@@ -495,16 +495,21 @@ var nodeNextEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, 
 }
 
 func (_q *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &nodePrevEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(node.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &nodePrevEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(node.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(node.FieldPrevID)
 	}
-	return entbuilder.LoadEdgeO2O(ctx, &nodeNextEdgeLoadDescriptor, query, nodes, assign)
+	return entbuilder.LoadEdgeO2O(ctx, &nodeNextEdgeLoadDescriptor, nodes, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

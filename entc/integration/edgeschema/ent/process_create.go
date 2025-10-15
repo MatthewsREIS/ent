@@ -136,11 +136,6 @@ var processCreateDescriptor = entbuilder.CreateDescriptor[config, Process, *Proc
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &AttachedFileCreate{config: _c.config, mutation: newAttachedFileMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},

@@ -498,15 +498,19 @@ var rentalCarEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Rental, Car, int
 }
 
 func (_q *RentalQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Rental, init func(*Rental), assign func(*Rental, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &rentalUserEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &rentalUserEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *RentalQuery) loadCar(ctx context.Context, query *CarQuery, nodes []*Rental, init func(*Rental), assign func(*Rental, *Car)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &rentalCarEdgeLoadDescriptor, query, nodes, assign, func(ids []uuid.UUID) {
-		query.Where(car.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &rentalCarEdgeLoadDescriptor, nodes, assign,
+		func(ids []uuid.UUID) {
+			query.Where(car.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

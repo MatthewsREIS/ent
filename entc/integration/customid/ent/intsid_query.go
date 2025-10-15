@@ -481,14 +481,19 @@ var intsidChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[IntSID, Int
 }
 
 func (_q *IntSIDQuery) loadParent(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &intsidParentEdgeLoadDescriptor, query, nodes, assign, func(ids []sid.ID) {
-		query.Where(intsid.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &intsidParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []sid.ID) {
+			query.Where(intsid.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *IntSIDQuery) loadChildren(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &intsidChildrenEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &intsidChildrenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

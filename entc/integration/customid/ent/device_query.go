@@ -482,14 +482,19 @@ var deviceSessionsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Device, Ses
 }
 
 func (_q *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &deviceActiveSessionEdgeLoadDescriptor, query, nodes, assign, func(ids []schema.ID) {
-		query.Where(session.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &deviceActiveSessionEdgeLoadDescriptor, nodes, assign,
+		func(ids []schema.ID) {
+			query.Where(session.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &deviceSessionsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &deviceSessionsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

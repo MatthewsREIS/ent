@@ -616,24 +616,55 @@ var petBestFriendEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, Pet, st
 }
 
 func (_q *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &petOwnerEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &petOwnerEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *PetQuery) loadCars(ctx context.Context, query *CarQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *Car)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &petCarsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &petCarsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *PetQuery) loadFriends(ctx context.Context, query *PetQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *Pet)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &petFriendsEdgeLoadDescriptor, query, nodes, init, assign, [2]int{0, 1})
+	return entbuilder.LoadEdgeM2M(ctx, &petFriendsEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Pet, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Pet](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *PetQuery) loadBestFriend(ctx context.Context, query *PetQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *Pet)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &petBestFriendEdgeLoadDescriptor, query, nodes, assign, func(ids []string) {
-		query.Where(pet.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &petBestFriendEdgeLoadDescriptor, nodes, assign,
+		func(ids []string) {
+			query.Where(pet.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

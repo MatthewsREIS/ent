@@ -185,23 +185,13 @@ var tweetCreateDescriptor = entbuilder.CreateDescriptor[config, Tweet, *TweetMut
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Tweet, *TweetMutation]{
-		{
-			Column: tweet.FieldText,
-			Type:   field.TypeString,
-			Value: func(m *TweetMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Text(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Tweet, fv entbuilder.FieldValue) error {
-				node.Text = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Tweet, *TweetMutation, string](
+			tweet.FieldText,
+			field.TypeString,
+			(*TweetMutation).Text,
+			func(n *Tweet, v string) { n.Text = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Tweet, *TweetMutation]{
 		{
@@ -223,12 +213,6 @@ var tweetCreateDescriptor = entbuilder.CreateDescriptor[config, Tweet, *TweetMut
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &TweetLikeCreate{config: _c.config, mutation: newTweetLikeMutation(_c.config, OpCreate)}
-
-				_ =
-					createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},
@@ -252,11 +236,6 @@ var tweetCreateDescriptor = entbuilder.CreateDescriptor[config, Tweet, *TweetMut
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &UserTweetCreate{config: _c.config, mutation: newUserTweetMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},
@@ -279,14 +258,6 @@ var tweetCreateDescriptor = entbuilder.CreateDescriptor[config, Tweet, *TweetMut
 				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
-				}
-				createE := &TweetTagCreate{config: _c.config, mutation: newTweetTagMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
-				if specE.ID.Value != nil {
-					edge.Target.Fields = append(edge.Target.Fields, specE.ID)
 				}
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},

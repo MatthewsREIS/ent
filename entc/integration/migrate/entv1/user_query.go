@@ -631,25 +631,35 @@ var userCarEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Car, int, in
 }
 
 func (_q *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userParentEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &userParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &userChildrenEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userChildrenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadSpouse(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userSpouseEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &userSpouseEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadCar(ctx context.Context, query *CarQuery, nodes []*User, init func(*User), assign func(*User, *Car)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2O(ctx, &userCarEdgeLoadDescriptor, query, nodes, assign)
+	return entbuilder.LoadEdgeO2O(ctx, &userCarEdgeLoadDescriptor, nodes, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

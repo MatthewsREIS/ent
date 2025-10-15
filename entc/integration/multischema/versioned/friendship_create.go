@@ -227,41 +227,20 @@ var friendshipCreateDescriptor = entbuilder.CreateDescriptor[config, Friendship,
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Friendship, *FriendshipMutation]{
-		{
-			Column: friendship.FieldWeight,
-			Type:   field.TypeInt,
-			Value: func(m *FriendshipMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Weight(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Friendship, fv entbuilder.FieldValue) error {
-				node.Weight = fv.Node.(int)
-				return nil
-			},
-		},
 
-		{
-			Column: friendship.FieldCreatedAt,
-			Type:   field.TypeTime,
-			Value: func(m *FriendshipMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.CreatedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Friendship, fv entbuilder.FieldValue) error {
-				node.CreatedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Friendship, *FriendshipMutation, int](
+			friendship.FieldWeight,
+			field.TypeInt,
+			(*FriendshipMutation).Weight,
+			func(n *Friendship, v int) { n.Weight = v },
+		),
+
+		entbuilder.SimpleField[config, Friendship, *FriendshipMutation, time.Time](
+			friendship.FieldCreatedAt,
+			field.TypeTime,
+			(*FriendshipMutation).CreatedAt,
+			func(n *Friendship, v time.Time) { n.CreatedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Friendship, *FriendshipMutation]{
 		{

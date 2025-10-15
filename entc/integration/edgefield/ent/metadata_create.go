@@ -194,23 +194,13 @@ var metadataCreateDescriptor = entbuilder.CreateDescriptor[config, Metadata, *Me
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Metadata, *MetadataMutation]{
-		{
-			Column: metadata.FieldAge,
-			Type:   field.TypeInt,
-			Value: func(m *MetadataMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Age(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Metadata, fv entbuilder.FieldValue) error {
-				node.Age = fv.Node.(int)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Metadata, *MetadataMutation, int](
+			metadata.FieldAge,
+			field.TypeInt,
+			(*MetadataMutation).Age,
+			func(n *Metadata, v int) { n.Age = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Metadata, *MetadataMutation]{
 		{

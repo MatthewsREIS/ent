@@ -121,23 +121,13 @@ var fileCreateDescriptor = entbuilder.CreateDescriptor[config, File, *FileMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, File, *FileMutation]{
-		{
-			Column: file.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *FileMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *File, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, File, *FileMutation, string](
+			file.FieldName,
+			field.TypeString,
+			(*FileMutation).Name,
+			func(n *File, v string) { n.Name = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, File, *FileMutation]{
 		{

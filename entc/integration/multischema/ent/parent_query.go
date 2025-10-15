@@ -510,15 +510,19 @@ var parentParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Parent, User,
 }
 
 func (_q *ParentQuery) loadChild(ctx context.Context, query *UserQuery, nodes []*Parent, init func(*Parent), assign func(*Parent, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &parentChildEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &parentChildEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *ParentQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*Parent, init func(*Parent), assign func(*Parent, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &parentParentEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &parentParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

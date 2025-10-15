@@ -162,41 +162,20 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, User, *UserMutation]{
-		{
-			Column: user.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: user.FieldAge,
-			Type:   field.TypeUint,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Age(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Age = fv.Node.(uint)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldName,
+			field.TypeString,
+			(*UserMutation).Name,
+			func(n *User, v string) { n.Name = v },
+		),
+
+		entbuilder.SimpleField[config, User, *UserMutation, uint](
+			user.FieldAge,
+			field.TypeUint,
+			(*UserMutation).Age,
+			func(n *User, v uint) { n.Age = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, User, *UserMutation]{
 		{

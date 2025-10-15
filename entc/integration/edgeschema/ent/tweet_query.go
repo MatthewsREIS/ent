@@ -757,15 +757,87 @@ var tweetTweetTagsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Tweet, Twee
 }
 
 func (_q *TweetQuery) loadLikedUsers(ctx context.Context, query *UserQuery, nodes []*Tweet, init func(*Tweet), assign func(*Tweet, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &tweetLikedUsersEdgeLoadDescriptor, query, nodes, init, assign, [2]int{1, 0})
+	return entbuilder.LoadEdgeM2M(ctx, &tweetLikedUsersEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *TweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Tweet, init func(*Tweet), assign func(*Tweet, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &tweetUserEdgeLoadDescriptor, query, nodes, init, assign, [2]int{1, 0})
+	return entbuilder.LoadEdgeM2M(ctx, &tweetUserEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *TweetQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Tweet, init func(*Tweet), assign func(*Tweet, *Tag)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &tweetTagsEdgeLoadDescriptor, query, nodes, init, assign, [2]int{1, 0})
+	return entbuilder.LoadEdgeM2M(ctx, &tweetTagsEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Tag, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Tag](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *TweetQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, nodes []*Tweet, init func(*Tweet), assign func(*Tweet, *TweetLike)) error {
@@ -791,7 +863,7 @@ func (_q *TweetQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, node
 	for _, n := range neighbors {
 		node, ok := nodeids[n.TweetID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "tweet_id" returned %v for node %v`, n.TweetID, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "tweet_id" returned %v`, n.TweetID)
 		}
 		assign(node, n)
 	}
@@ -801,14 +873,20 @@ func (_q *TweetQuery) loadTweetUser(ctx context.Context, query *UserTweetQuery, 
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(usertweet.FieldTweetID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &tweetTweetUserEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &tweetTweetUserEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *TweetQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, nodes []*Tweet, init func(*Tweet), assign func(*Tweet, *TweetTag)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(tweettag.FieldTweetID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &tweetTweetTagsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &tweetTweetTagsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

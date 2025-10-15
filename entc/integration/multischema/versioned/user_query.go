@@ -809,30 +809,132 @@ func (_q *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(pet.FieldOwnerID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userPetsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userPetsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*User, init func(*User), assign func(*User, *Group)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &userGroupsEdgeLoadDescriptor, query, nodes, init, assign, [2]int{1, 0})
+	return entbuilder.LoadEdgeM2M(ctx, &userGroupsEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Group, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Group](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &userFriendsEdgeLoadDescriptor, query, nodes, init, assign, [2]int{0, 1})
+	return entbuilder.LoadEdgeM2M(ctx, &userFriendsEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *UserQuery) loadFollowers(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &userFollowersEdgeLoadDescriptor, query, nodes, init, assign, [2]int{1, 0})
+	return entbuilder.LoadEdgeM2M(ctx, &userFollowersEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *UserQuery) loadFollowing(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &userFollowingEdgeLoadDescriptor, query, nodes, init, assign, [2]int{0, 1})
+	return entbuilder.LoadEdgeM2M(ctx, &userFollowingEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery, nodes []*User, init func(*User), assign func(*User, *Friendship)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(friendship.FieldUserID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userFriendshipsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userFriendshipsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

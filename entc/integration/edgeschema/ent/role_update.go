@@ -208,11 +208,6 @@ var roleUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				createE := &RoleUserCreate{config: cfg, mutation: newRoleUserMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

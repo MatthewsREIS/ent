@@ -239,95 +239,41 @@ var cardCreateDescriptor = entbuilder.CreateDescriptor[config, Card, *CardMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Card, *CardMutation]{
-		{
-			Column: card.FieldNumber,
-			Type:   field.TypeString,
-			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Number(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Card, fv entbuilder.FieldValue) error {
-				node.Number = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: card.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Card, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Card, *CardMutation, string](
+			card.FieldNumber,
+			field.TypeString,
+			(*CardMutation).Number,
+			func(n *Card, v string) { n.Number = v },
+		),
 
-		{
-			Column: card.FieldCreatedAt,
-			Type:   field.TypeTime,
-			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.CreatedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Card, fv entbuilder.FieldValue) error {
-				node.CreatedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Card, *CardMutation, string](
+			card.FieldName,
+			field.TypeString,
+			(*CardMutation).Name,
+			func(n *Card, v string) { n.Name = v },
+		),
 
-		{
-			Column: card.FieldInHook,
-			Type:   field.TypeString,
-			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.InHook(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Card, fv entbuilder.FieldValue) error {
-				node.InHook = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Card, *CardMutation, time.Time](
+			card.FieldCreatedAt,
+			field.TypeTime,
+			(*CardMutation).CreatedAt,
+			func(n *Card, v time.Time) { n.CreatedAt = v },
+		),
 
-		{
-			Column: card.FieldExpiredAt,
-			Type:   field.TypeTime,
-			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.ExpiredAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Card, fv entbuilder.FieldValue) error {
-				node.ExpiredAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Card, *CardMutation, string](
+			card.FieldInHook,
+			field.TypeString,
+			(*CardMutation).InHook,
+			func(n *Card, v string) { n.InHook = v },
+		),
+
+		entbuilder.SimpleField[config, Card, *CardMutation, time.Time](
+			card.FieldExpiredAt,
+			field.TypeTime,
+			(*CardMutation).ExpiredAt,
+			func(n *Card, v time.Time) { n.ExpiredAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Card, *CardMutation]{
 		{

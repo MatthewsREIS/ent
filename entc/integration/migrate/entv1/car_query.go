@@ -416,9 +416,11 @@ var carOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Car, User, int, i
 }
 
 func (_q *CarQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Car, init func(*Car), assign func(*Car, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &carOwnerEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &carOwnerEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

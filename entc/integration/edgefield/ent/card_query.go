@@ -431,9 +431,11 @@ var cardOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Card, User, int,
 }
 
 func (_q *CardQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Card, init func(*Card), assign func(*Card, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &cardOwnerEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &cardOwnerEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

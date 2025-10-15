@@ -263,43 +263,37 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 
 {{ define "dialect/sql/create/descriptor/field" }}
 {{- $f := $.Scope.Field -}}
-{
-	Column: {{ $.Package }}.{{ $f.Constant }},
-	Type: field.{{ $f.Type.ConstName }},
-	Value: func(m *{{ $.MutationName }}) (entbuilder.FieldValue, bool, error) {
-		if value, ok := m.{{ $f.MutationGet }}(); ok {
-{{- if $f.HasValueScanner }}
-			vv, err := {{ $f.ValueFunc }}(value)
-			if err != nil {
-				return entbuilder.FieldValue{}, false, err
-			}
-{{- end }}
-{{- if $f.NillableValue }}
-			valueCopy := value
-			return entbuilder.FieldValue{
-				Spec: {{ if $f.HasValueScanner }}vv{{ else }}value{{ end }},
-				Node: &valueCopy,
-			}, true, nil
+{{- if and $f.HasValueScanner $f.NillableValue }}
+entbuilder.NillableFieldWithScanner[config, {{ $.Name }}, *{{ $.MutationName }}, {{ $f.Type }}](
+	{{ $.Package }}.{{ $f.Constant }},
+	field.{{ $f.Type.ConstName }},
+	(*{{ $.MutationName }}).{{ $f.MutationGet }},
+	{{ $f.ValueFunc }},
+	func(n *{{ $.Name }}, v *{{ $f.Type }}) { n.{{ $f.StructField }} = v },
+),
+{{- else if $f.HasValueScanner }}
+entbuilder.FieldWithScanner[config, {{ $.Name }}, *{{ $.MutationName }}, {{ $f.Type }}](
+	{{ $.Package }}.{{ $f.Constant }},
+	field.{{ $f.Type.ConstName }},
+	(*{{ $.MutationName }}).{{ $f.MutationGet }},
+	{{ $f.ValueFunc }},
+	func(n *{{ $.Name }}, v {{ $f.Type }}) { n.{{ $f.StructField }} = v },
+),
+{{- else if $f.NillableValue }}
+entbuilder.NillableField[config, {{ $.Name }}, *{{ $.MutationName }}, {{ $f.Type }}](
+	{{ $.Package }}.{{ $f.Constant }},
+	field.{{ $f.Type.ConstName }},
+	(*{{ $.MutationName }}).{{ $f.MutationGet }},
+	func(n *{{ $.Name }}, v *{{ $f.Type }}) { n.{{ $f.StructField }} = v },
+),
 {{- else }}
-			return entbuilder.FieldValue{
-				Spec: {{ if $f.HasValueScanner }}vv{{ else }}value{{ end }},
-				Node: value,
-			}, true, nil
+entbuilder.SimpleField[config, {{ $.Name }}, *{{ $.MutationName }}, {{ $f.Type }}](
+	{{ $.Package }}.{{ $f.Constant }},
+	field.{{ $f.Type.ConstName }},
+	(*{{ $.MutationName }}).{{ $f.MutationGet }},
+	func(n *{{ $.Name }}, v {{ $f.Type }}) { n.{{ $f.StructField }} = v },
+),
 {{- end }}
-		}
-		return entbuilder.FieldValue{}, false, nil
-	},
-	Assign: func(node *{{ $.Name }}, fv entbuilder.FieldValue) error {
-{{- if $f.NillableValue }}
-		if v, ok := fv.Node.(*{{ $f.Type }}); ok {
-			node.{{ $f.StructField }} = v
-		}
-{{- else }}
-		node.{{ $f.StructField }} = fv.Node.({{ $f.Type }})
-{{- end }}
-		return nil
-	},
-},
 {{ end }}
 
 {{ define "dialect/sql/create/descriptor/edge" }}

@@ -498,16 +498,21 @@ var postCommentsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, Comment
 }
 
 func (_q *PostQuery) loadAuthor(ctx context.Context, query *UserQuery, nodes []*Post, init func(*Post), assign func(*Post, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &postAuthorEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &postAuthorEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *PostQuery) loadComments(ctx context.Context, query *CommentQuery, nodes []*Post, init func(*Post), assign func(*Post, *Comment)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(comment.FieldPostID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &postCommentsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &postCommentsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

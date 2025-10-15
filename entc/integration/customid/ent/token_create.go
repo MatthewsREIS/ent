@@ -188,23 +188,13 @@ var tokenCreateDescriptor = entbuilder.CreateDescriptor[config, Token, *TokenMut
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Token, *TokenMutation]{
-		{
-			Column: token.FieldBody,
-			Type:   field.TypeString,
-			Value: func(m *TokenMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Body(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Token, fv entbuilder.FieldValue) error {
-				node.Body = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Token, *TokenMutation, string](
+			token.FieldBody,
+			field.TypeString,
+			(*TokenMutation).Body,
+			func(n *Token, v string) { n.Body = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Token, *TokenMutation]{
 		{

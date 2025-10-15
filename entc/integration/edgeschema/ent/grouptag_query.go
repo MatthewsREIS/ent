@@ -497,15 +497,19 @@ var grouptagGroupEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[GroupTag, Gr
 }
 
 func (_q *GroupTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*GroupTag, init func(*GroupTag), assign func(*GroupTag, *Tag)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &grouptagTagEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(tag.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &grouptagTagEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(tag.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *GroupTagQuery) loadGroup(ctx context.Context, query *GroupQuery, nodes []*GroupTag, init func(*GroupTag), assign func(*GroupTag, *Group)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &grouptagGroupEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(group.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &grouptagGroupEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(group.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

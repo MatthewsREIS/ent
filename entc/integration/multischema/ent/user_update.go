@@ -521,11 +521,6 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				createE := &FriendshipCreate{config: cfg, mutation: newFriendshipMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -644,11 +639,6 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				createE := &ParentCreate{config: cfg, mutation: newParentMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

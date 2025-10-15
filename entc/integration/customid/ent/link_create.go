@@ -161,23 +161,13 @@ var linkCreateDescriptor = entbuilder.CreateDescriptor[config, Link, *LinkMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Link, *LinkMutation]{
-		{
-			Column: link.FieldLinkInformation,
-			Type:   field.TypeJSON,
-			Value: func(m *LinkMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.LinkInformation(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Link, fv entbuilder.FieldValue) error {
-				node.LinkInformation = fv.Node.(map[string]schema.LinkInformation)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Link, *LinkMutation, map[string]schema.LinkInformation](
+			link.FieldLinkInformation,
+			field.TypeJSON,
+			(*LinkMutation).LinkInformation,
+			func(n *Link, v map[string]schema.LinkInformation) { n.LinkInformation = v },
+		),
 	},
 }
 

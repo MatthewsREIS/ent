@@ -431,9 +431,11 @@ var infoUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Info, User, int, 
 }
 
 func (_q *InfoQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Info, init func(*Info), assign func(*Info, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &infoUserEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &infoUserEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

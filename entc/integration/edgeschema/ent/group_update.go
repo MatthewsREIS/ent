@@ -293,11 +293,6 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				createE := &UserGroupCreate{config: cfg, mutation: newUserGroupMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

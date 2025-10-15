@@ -929,48 +929,70 @@ func (_q *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(pet.FieldOwnerID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userPetsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userPetsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userParentEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &userParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(user.FieldParentID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userChildrenEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userChildrenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadSpouse(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userSpouseEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &userSpouseEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*User, init func(*User), assign func(*User, *Card)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(card.FieldOwnerID)
 	}
-	return entbuilder.LoadEdgeO2O(ctx, &userCardEdgeLoadDescriptor, query, nodes, assign)
+	return entbuilder.LoadEdgeO2O(ctx, &userCardEdgeLoadDescriptor, nodes, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadMetadata(ctx context.Context, query *MetadataQuery, nodes []*User, init func(*User), assign func(*User, *Metadata)) error {
-	return entbuilder.LoadEdgeO2O(ctx, &userMetadataEdgeLoadDescriptor, query, nodes, assign)
+	return entbuilder.LoadEdgeO2O(ctx, &userMetadataEdgeLoadDescriptor, nodes, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadInfo(ctx context.Context, query *InfoQuery, nodes []*User, init func(*User), assign func(*User, *Info)) error {
-	return entbuilder.LoadEdgeO2M(ctx, &userInfoEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userInfoEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *UserQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes []*User, init func(*User), assign func(*User, *Rental)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(rental.FieldUserID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userRentalsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userRentalsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

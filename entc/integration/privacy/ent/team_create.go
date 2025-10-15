@@ -145,23 +145,13 @@ var teamCreateDescriptor = entbuilder.CreateDescriptor[config, Team, *TeamMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Team, *TeamMutation]{
-		{
-			Column: team.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *TeamMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Team, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Team, *TeamMutation, string](
+			team.FieldName,
+			field.TypeString,
+			(*TeamMutation).Name,
+			func(n *Team, v string) { n.Name = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Team, *TeamMutation]{
 		{

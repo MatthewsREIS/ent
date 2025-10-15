@@ -142,23 +142,13 @@ var blogCreateDescriptor = entbuilder.CreateDescriptor[config, Blog, *BlogMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Blog, *BlogMutation]{
-		{
-			Column: blog.FieldOid,
-			Type:   field.TypeInt,
-			Value: func(m *BlogMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Oid(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Blog, fv entbuilder.FieldValue) error {
-				node.Oid = fv.Node.(int)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Blog, *BlogMutation, int](
+			blog.FieldOid,
+			field.TypeInt,
+			(*BlogMutation).Oid,
+			func(n *Blog, v int) { n.Oid = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Blog, *BlogMutation]{
 		{

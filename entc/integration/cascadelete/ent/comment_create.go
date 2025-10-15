@@ -141,23 +141,13 @@ var commentCreateDescriptor = entbuilder.CreateDescriptor[config, Comment, *Comm
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Comment, *CommentMutation]{
-		{
-			Column: comment.FieldText,
-			Type:   field.TypeString,
-			Value: func(m *CommentMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Text(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Comment, fv entbuilder.FieldValue) error {
-				node.Text = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Comment, *CommentMutation, string](
+			comment.FieldText,
+			field.TypeString,
+			(*CommentMutation).Text,
+			func(n *Comment, v string) { n.Text = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Comment, *CommentMutation]{
 		{

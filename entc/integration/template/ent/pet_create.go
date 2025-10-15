@@ -141,44 +141,20 @@ var petCreateDescriptor = entbuilder.CreateDescriptor[config, Pet, *PetMutation]
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Pet, *PetMutation]{
-		{
-			Column: pet.FieldAge,
-			Type:   field.TypeInt,
-			Value: func(m *PetMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Age(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Pet, fv entbuilder.FieldValue) error {
-				node.Age = fv.Node.(int)
-				return nil
-			},
-		},
 
-		{
-			Column: pet.FieldLicensedAt,
-			Type:   field.TypeTime,
-			Value: func(m *PetMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.LicensedAt(); ok {
-					valueCopy := value
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: &valueCopy,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Pet, fv entbuilder.FieldValue) error {
-				if v, ok := fv.Node.(*time.Time); ok {
-					node.LicensedAt = v
-				}
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Pet, *PetMutation, int](
+			pet.FieldAge,
+			field.TypeInt,
+			(*PetMutation).Age,
+			func(n *Pet, v int) { n.Age = v },
+		),
+
+		entbuilder.NillableField[config, Pet, *PetMutation, time.Time](
+			pet.FieldLicensedAt,
+			field.TypeTime,
+			(*PetMutation).LicensedAt,
+			func(n *Pet, v *time.Time) { n.LicensedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Pet, *PetMutation]{
 		{

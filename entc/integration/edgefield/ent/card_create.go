@@ -123,23 +123,13 @@ var cardCreateDescriptor = entbuilder.CreateDescriptor[config, Card, *CardMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Card, *CardMutation]{
-		{
-			Column: card.FieldNumber,
-			Type:   field.TypeString,
-			Value: func(m *CardMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Number(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Card, fv entbuilder.FieldValue) error {
-				node.Number = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Card, *CardMutation, string](
+			card.FieldNumber,
+			field.TypeString,
+			(*CardMutation).Number,
+			func(n *Card, v string) { n.Number = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Card, *CardMutation]{
 		{

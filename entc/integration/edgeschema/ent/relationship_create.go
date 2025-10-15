@@ -205,23 +205,13 @@ var relationshipCreateDescriptor = entbuilder.CreateDescriptor[config, Relations
 		return &Relationship{config: cfg}
 	},
 	Fields: []entbuilder.FieldDescriptor[config, Relationship, *RelationshipMutation]{
-		{
-			Column: relationship.FieldWeight,
-			Type:   field.TypeInt,
-			Value: func(m *RelationshipMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Weight(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Relationship, fv entbuilder.FieldValue) error {
-				node.Weight = fv.Node.(int)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Relationship, *RelationshipMutation, int](
+			relationship.FieldWeight,
+			field.TypeInt,
+			(*RelationshipMutation).Weight,
+			func(n *Relationship, v int) { n.Weight = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Relationship, *RelationshipMutation]{
 		{

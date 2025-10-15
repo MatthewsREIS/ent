@@ -170,23 +170,13 @@ var tagCreateDescriptor = entbuilder.CreateDescriptor[config, Tag, *TagMutation]
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Tag, *TagMutation]{
-		{
-			Column: tag.FieldValue,
-			Type:   field.TypeString,
-			Value: func(m *TagMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Value(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Tag, fv entbuilder.FieldValue) error {
-				node.Value = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Tag, *TagMutation, string](
+			tag.FieldValue,
+			field.TypeString,
+			(*TagMutation).Value,
+			func(n *Tag, v string) { n.Value = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Tag, *TagMutation]{
 		{
@@ -207,14 +197,6 @@ var tagCreateDescriptor = entbuilder.CreateDescriptor[config, Tag, *TagMutation]
 				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
-				}
-				createE := &TweetTagCreate{config: _c.config, mutation: newTweetTagMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
-				if specE.ID.Value != nil {
-					edge.Target.Fields = append(edge.Target.Fields, specE.ID)
 				}
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},

@@ -573,18 +573,47 @@ var docRelatedEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Doc, Doc, schem
 }
 
 func (_q *DocQuery) loadParent(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &docParentEdgeLoadDescriptor, query, nodes, assign, func(ids []schema.DocID) {
-		query.Where(doc.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &docParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []schema.DocID) {
+			query.Where(doc.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *DocQuery) loadChildren(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &docChildrenEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &docChildrenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *DocQuery) loadRelated(ctx context.Context, query *DocQuery, nodes []*Doc, init func(*Doc), assign func(*Doc, *Doc)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &docRelatedEdgeLoadDescriptor, query, nodes, init, assign, [2]int{0, 1})
+	return entbuilder.LoadEdgeM2M(ctx, &docRelatedEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Doc, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Doc](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 

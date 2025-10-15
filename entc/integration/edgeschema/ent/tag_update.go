@@ -294,14 +294,6 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 					},
 				}
-				createE := &TweetTagCreate{config: cfg, mutation: newTweetTagMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
-				if specE.ID.Value != nil {
-					edge.Target.Fields = append(edge.Target.Fields, specE.ID)
-				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

@@ -433,7 +433,10 @@ var accountTokenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Account, Toke
 
 func (_q *AccountQuery) loadToken(ctx context.Context, query *TokenQuery, nodes []*Account, init func(*Account), assign func(*Account, *Token)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &accountTokenEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &accountTokenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

@@ -271,95 +271,41 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, User, *UserMutation]{
-		{
-			Column: user.FieldVersion,
-			Type:   field.TypeInt,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Version(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Version = fv.Node.(int)
-				return nil
-			},
-		},
 
-		{
-			Column: user.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, int](
+			user.FieldVersion,
+			field.TypeInt,
+			(*UserMutation).Version,
+			func(n *User, v int) { n.Version = v },
+		),
 
-		{
-			Column: user.FieldWorth,
-			Type:   field.TypeUint,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Worth(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Worth = fv.Node.(uint)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldName,
+			field.TypeString,
+			(*UserMutation).Name,
+			func(n *User, v string) { n.Name = v },
+		),
 
-		{
-			Column: user.FieldPassword,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Password(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Password = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, uint](
+			user.FieldWorth,
+			field.TypeUint,
+			(*UserMutation).Worth,
+			func(n *User, v uint) { n.Worth = v },
+		),
 
-		{
-			Column: user.FieldActive,
-			Type:   field.TypeBool,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Active(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Active = fv.Node.(bool)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldPassword,
+			field.TypeString,
+			(*UserMutation).Password,
+			func(n *User, v string) { n.Password = v },
+		),
+
+		entbuilder.SimpleField[config, User, *UserMutation, bool](
+			user.FieldActive,
+			field.TypeBool,
+			(*UserMutation).Active,
+			func(n *User, v bool) { n.Active = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, User, *UserMutation]{
 		{

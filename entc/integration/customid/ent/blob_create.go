@@ -236,41 +236,20 @@ var blobCreateDescriptor = entbuilder.CreateDescriptor[config, Blob, *BlobMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Blob, *BlobMutation]{
-		{
-			Column: blob.FieldUUID,
-			Type:   field.TypeUUID,
-			Value: func(m *BlobMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.UUID(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Blob, fv entbuilder.FieldValue) error {
-				node.UUID = fv.Node.(uuid.UUID)
-				return nil
-			},
-		},
 
-		{
-			Column: blob.FieldCount,
-			Type:   field.TypeInt,
-			Value: func(m *BlobMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Count(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Blob, fv entbuilder.FieldValue) error {
-				node.Count = fv.Node.(int)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Blob, *BlobMutation, uuid.UUID](
+			blob.FieldUUID,
+			field.TypeUUID,
+			(*BlobMutation).UUID,
+			func(n *Blob, v uuid.UUID) { n.UUID = v },
+		),
+
+		entbuilder.SimpleField[config, Blob, *BlobMutation, int](
+			blob.FieldCount,
+			field.TypeInt,
+			(*BlobMutation).Count,
+			func(n *Blob, v int) { n.Count = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Blob, *BlobMutation]{
 		{
@@ -323,11 +302,6 @@ var blobCreateDescriptor = entbuilder.CreateDescriptor[config, Blob, *BlobMutati
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &BlobLinkCreate{config: _c.config, mutation: newBlobLinkMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},

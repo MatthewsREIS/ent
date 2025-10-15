@@ -198,23 +198,13 @@ var parentCreateDescriptor = entbuilder.CreateDescriptor[config, Parent, *Parent
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Parent, *ParentMutation]{
-		{
-			Column: parent.FieldByAdoption,
-			Type:   field.TypeBool,
-			Value: func(m *ParentMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.ByAdoption(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Parent, fv entbuilder.FieldValue) error {
-				node.ByAdoption = fv.Node.(bool)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Parent, *ParentMutation, bool](
+			parent.FieldByAdoption,
+			field.TypeBool,
+			(*ParentMutation).ByAdoption,
+			func(n *Parent, v bool) { n.ByAdoption = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Parent, *ParentMutation]{
 		{

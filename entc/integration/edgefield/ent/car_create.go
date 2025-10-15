@@ -163,23 +163,13 @@ var carCreateDescriptor = entbuilder.CreateDescriptor[config, Car, *CarMutation]
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Car, *CarMutation]{
-		{
-			Column: car.FieldNumber,
-			Type:   field.TypeString,
-			Value: func(m *CarMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Number(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Car, fv entbuilder.FieldValue) error {
-				node.Number = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Car, *CarMutation, string](
+			car.FieldNumber,
+			field.TypeString,
+			(*CarMutation).Number,
+			func(n *Car, v string) { n.Number = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Car, *CarMutation]{
 		{

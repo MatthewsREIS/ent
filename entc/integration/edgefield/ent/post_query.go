@@ -430,9 +430,11 @@ var postAuthorEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, User, int
 }
 
 func (_q *PostQuery) loadAuthor(ctx context.Context, query *UserQuery, nodes []*Post, init func(*Post), assign func(*Post, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &postAuthorEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &postAuthorEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

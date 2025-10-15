@@ -516,13 +516,39 @@ var taskOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Task, User, int,
 }
 
 func (_q *TaskQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*Task, init func(*Task), assign func(*Task, *Team)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &taskTeamsEdgeLoadDescriptor, query, nodes, init, assign, [2]int{0, 1})
+	return entbuilder.LoadEdgeM2M(ctx, &taskTeamsEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Team, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Team](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *TaskQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Task, init func(*Task), assign func(*Task, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &taskOwnerEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &taskOwnerEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

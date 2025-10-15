@@ -156,41 +156,20 @@ var roleCreateDescriptor = entbuilder.CreateDescriptor[config, Role, *RoleMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Role, *RoleMutation]{
-		{
-			Column: role.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *RoleMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Role, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: role.FieldCreatedAt,
-			Type:   field.TypeTime,
-			Value: func(m *RoleMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.CreatedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Role, fv entbuilder.FieldValue) error {
-				node.CreatedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Role, *RoleMutation, string](
+			role.FieldName,
+			field.TypeString,
+			(*RoleMutation).Name,
+			func(n *Role, v string) { n.Name = v },
+		),
+
+		entbuilder.SimpleField[config, Role, *RoleMutation, time.Time](
+			role.FieldCreatedAt,
+			field.TypeTime,
+			(*RoleMutation).CreatedAt,
+			func(n *Role, v time.Time) { n.CreatedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Role, *RoleMutation]{
 		{
@@ -212,11 +191,6 @@ var roleCreateDescriptor = entbuilder.CreateDescriptor[config, Role, *RoleMutati
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &RoleUserCreate{config: _c.config, mutation: newRoleUserMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},

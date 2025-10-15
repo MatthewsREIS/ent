@@ -442,221 +442,90 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, User, *UserMutation]{
-		{
-			Column: user.FieldAge,
-			Type:   field.TypeInt32,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Age(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Age = fv.Node.(int32)
-				return nil
-			},
-		},
 
-		{
-			Column: user.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, int32](
+			user.FieldAge,
+			field.TypeInt32,
+			(*UserMutation).Age,
+			func(n *User, v int32) { n.Age = v },
+		),
 
-		{
-			Column: user.FieldDescription,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Description(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Description = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldName,
+			field.TypeString,
+			(*UserMutation).Name,
+			func(n *User, v string) { n.Name = v },
+		),
 
-		{
-			Column: user.FieldNickname,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Nickname(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Nickname = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldDescription,
+			field.TypeString,
+			(*UserMutation).Description,
+			func(n *User, v string) { n.Description = v },
+		),
 
-		{
-			Column: user.FieldAddress,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Address(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Address = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldNickname,
+			field.TypeString,
+			(*UserMutation).Nickname,
+			func(n *User, v string) { n.Nickname = v },
+		),
 
-		{
-			Column: user.FieldRenamed,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Renamed(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Renamed = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldAddress,
+			field.TypeString,
+			(*UserMutation).Address,
+			func(n *User, v string) { n.Address = v },
+		),
 
-		{
-			Column: user.FieldOldToken,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.OldToken(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.OldToken = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldRenamed,
+			field.TypeString,
+			(*UserMutation).Renamed,
+			func(n *User, v string) { n.Renamed = v },
+		),
 
-		{
-			Column: user.FieldBlob,
-			Type:   field.TypeBytes,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Blob(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Blob = fv.Node.([]byte)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldOldToken,
+			field.TypeString,
+			(*UserMutation).OldToken,
+			func(n *User, v string) { n.OldToken = v },
+		),
 
-		{
-			Column: user.FieldState,
-			Type:   field.TypeEnum,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.State(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.State = fv.Node.(user.State)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, []byte](
+			user.FieldBlob,
+			field.TypeBytes,
+			(*UserMutation).Blob,
+			func(n *User, v []byte) { n.Blob = v },
+		),
 
-		{
-			Column: user.FieldStatus,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Status(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Status = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, user.State](
+			user.FieldState,
+			field.TypeEnum,
+			(*UserMutation).State,
+			func(n *User, v user.State) { n.State = v },
+		),
 
-		{
-			Column: user.FieldWorkplace,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Workplace(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.Workplace = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldStatus,
+			field.TypeString,
+			(*UserMutation).Status,
+			func(n *User, v string) { n.Status = v },
+		),
 
-		{
-			Column: user.FieldDropOptional,
-			Type:   field.TypeString,
-			Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.DropOptional(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *User, fv entbuilder.FieldValue) error {
-				node.DropOptional = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldWorkplace,
+			field.TypeString,
+			(*UserMutation).Workplace,
+			func(n *User, v string) { n.Workplace = v },
+		),
+
+		entbuilder.SimpleField[config, User, *UserMutation, string](
+			user.FieldDropOptional,
+			field.TypeString,
+			(*UserMutation).DropOptional,
+			func(n *User, v string) { n.DropOptional = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, User, *UserMutation]{
 		{

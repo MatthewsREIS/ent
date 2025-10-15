@@ -210,23 +210,13 @@ var docCreateDescriptor = entbuilder.CreateDescriptor[config, Doc, *DocMutation]
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Doc, *DocMutation]{
-		{
-			Column: doc.FieldText,
-			Type:   field.TypeString,
-			Value: func(m *DocMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Text(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Doc, fv entbuilder.FieldValue) error {
-				node.Text = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Doc, *DocMutation, string](
+			doc.FieldText,
+			field.TypeString,
+			(*DocMutation).Text,
+			func(n *Doc, v string) { n.Text = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Doc, *DocMutation]{
 		{

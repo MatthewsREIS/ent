@@ -159,23 +159,13 @@ var nodeCreateDescriptor = entbuilder.CreateDescriptor[config, Node, *NodeMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Node, *NodeMutation]{
-		{
-			Column: node.FieldValue,
-			Type:   field.TypeInt,
-			Value: func(m *NodeMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Value(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Node, fv entbuilder.FieldValue) error {
-				node.Value = fv.Node.(int)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Node, *NodeMutation, int](
+			node.FieldValue,
+			field.TypeInt,
+			(*NodeMutation).Value,
+			func(n *Node, v int) { n.Value = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Node, *NodeMutation]{
 		{

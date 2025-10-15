@@ -475,11 +475,6 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 					},
 				}
-				createE := &UserGroupCreate{config: cfg, mutation: newUserGroupMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -539,11 +534,6 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				createE := &FriendshipCreate{config: cfg, mutation: newFriendshipMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -603,11 +593,6 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
-				createE := &RelationshipCreate{config: cfg, mutation: newRelationshipMutation(cfg, OpCreate)}
-				_ =
-					createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -667,11 +652,6 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 					},
 				}
-				createE := &TweetLikeCreate{config: cfg, mutation: newTweetLikeMutation(cfg, OpCreate)}
-				_ =
-					createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -731,11 +711,6 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 					},
 				}
-				createE := &UserTweetCreate{config: cfg, mutation: newUserTweetMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -795,11 +770,6 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
 					},
 				}
-				createE := &RoleUserCreate{config: cfg, mutation: newRoleUserMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

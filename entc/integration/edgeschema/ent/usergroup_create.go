@@ -196,23 +196,13 @@ var usergroupCreateDescriptor = entbuilder.CreateDescriptor[config, UserGroup, *
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, UserGroup, *UserGroupMutation]{
-		{
-			Column: usergroup.FieldJoinedAt,
-			Type:   field.TypeTime,
-			Value: func(m *UserGroupMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.JoinedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *UserGroup, fv entbuilder.FieldValue) error {
-				node.JoinedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, UserGroup, *UserGroupMutation, time.Time](
+			usergroup.FieldJoinedAt,
+			field.TypeTime,
+			(*UserGroupMutation).JoinedAt,
+			func(n *UserGroup, v time.Time) { n.JoinedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, UserGroup, *UserGroupMutation]{
 		{

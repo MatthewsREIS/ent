@@ -497,15 +497,19 @@ var usergroupGroupEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[UserGroup, 
 }
 
 func (_q *UserGroupQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*UserGroup, init func(*UserGroup), assign func(*UserGroup, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &usergroupUserEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &usergroupUserEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *UserGroupQuery) loadGroup(ctx context.Context, query *GroupQuery, nodes []*UserGroup, init func(*UserGroup), assign func(*UserGroup, *Group)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &usergroupGroupEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(group.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &usergroupGroupEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(group.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

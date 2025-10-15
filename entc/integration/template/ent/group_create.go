@@ -103,23 +103,13 @@ var groupCreateDescriptor = entbuilder.CreateDescriptor[config, Group, *GroupMut
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Group, *GroupMutation]{
-		{
-			Column: group.FieldMaxUsers,
-			Type:   field.TypeInt,
-			Value: func(m *GroupMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.MaxUsers(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Group, fv entbuilder.FieldValue) error {
-				node.MaxUsers = fv.Node.(int)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Group, *GroupMutation, int](
+			group.FieldMaxUsers,
+			field.TypeInt,
+			(*GroupMutation).MaxUsers,
+			func(n *Group, v int) { n.MaxUsers = v },
+		),
 	},
 }
 

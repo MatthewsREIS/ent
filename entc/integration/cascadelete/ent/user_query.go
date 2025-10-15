@@ -435,7 +435,10 @@ func (_q *UserQuery) loadPosts(ctx context.Context, query *PostQuery, nodes []*U
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(post.FieldAuthorID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userPostsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &userPostsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

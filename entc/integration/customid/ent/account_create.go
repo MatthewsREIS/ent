@@ -179,23 +179,13 @@ var accountCreateDescriptor = entbuilder.CreateDescriptor[config, Account, *Acco
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Account, *AccountMutation]{
-		{
-			Column: account.FieldEmail,
-			Type:   field.TypeString,
-			Value: func(m *AccountMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Email(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Account, fv entbuilder.FieldValue) error {
-				node.Email = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Account, *AccountMutation, string](
+			account.FieldEmail,
+			field.TypeString,
+			(*AccountMutation).Email,
+			func(n *Account, v string) { n.Email = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Account, *AccountMutation]{
 		{

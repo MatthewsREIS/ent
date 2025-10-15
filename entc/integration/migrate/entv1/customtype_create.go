@@ -100,23 +100,13 @@ var customtypeCreateDescriptor = entbuilder.CreateDescriptor[config, CustomType,
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, CustomType, *CustomTypeMutation]{
-		{
-			Column: customtype.FieldCustom,
-			Type:   field.TypeString,
-			Value: func(m *CustomTypeMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Custom(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *CustomType, fv entbuilder.FieldValue) error {
-				node.Custom = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, CustomType, *CustomTypeMutation, string](
+			customtype.FieldCustom,
+			field.TypeString,
+			(*CustomTypeMutation).Custom,
+			func(n *CustomType, v string) { n.Custom = v },
+		),
 	},
 }
 

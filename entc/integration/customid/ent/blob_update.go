@@ -284,11 +284,6 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
 					},
 				}
-				createE := &BlobLinkCreate{config: cfg, mutation: newBlobLinkMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

@@ -431,9 +431,11 @@ var commentPostEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Comment, Post,
 }
 
 func (_q *CommentQuery) loadPost(ctx context.Context, query *PostQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Post)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &commentPostEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(post.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &commentPostEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(post.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

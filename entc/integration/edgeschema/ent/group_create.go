@@ -184,23 +184,13 @@ var groupCreateDescriptor = entbuilder.CreateDescriptor[config, Group, *GroupMut
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Group, *GroupMutation]{
-		{
-			Column: group.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *GroupMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Group, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Group, *GroupMutation, string](
+			group.FieldName,
+			field.TypeString,
+			(*GroupMutation).Name,
+			func(n *Group, v string) { n.Name = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Group, *GroupMutation]{
 		{
@@ -222,11 +212,6 @@ var groupCreateDescriptor = entbuilder.CreateDescriptor[config, Group, *GroupMut
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
-				createE := &UserGroupCreate{config: _c.config, mutation: newUserGroupMutation(_c.config, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
 			},
 		},

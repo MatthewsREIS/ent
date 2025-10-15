@@ -503,14 +503,19 @@ var noteChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Note, Note, s
 }
 
 func (_q *NoteQuery) loadParent(ctx context.Context, query *NoteQuery, nodes []*Note, init func(*Note), assign func(*Note, *Note)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &noteParentEdgeLoadDescriptor, query, nodes, assign, func(ids []schema.NoteID) {
-		query.Where(note.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &noteParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []schema.NoteID) {
+			query.Where(note.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *NoteQuery) loadChildren(ctx context.Context, query *NoteQuery, nodes []*Note, init func(*Note), assign func(*Note, *Note)) error {
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &noteChildrenEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &noteChildrenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

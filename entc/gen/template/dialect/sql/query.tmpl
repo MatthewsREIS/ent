@@ -367,14 +367,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 					{{- if $fk.Field.Nillable }}
 						fk := n.{{ $fk.StructField }}
 						if fk == nil {
-							return fmt.Errorf(`foreign-key "{{ $fk.Field.Name }}" is nil for node %v`, n.ID)
+							return fmt.Errorf(`foreign-key "{{ $fk.Field.Name }}" is nil for edge node`)
 						}
 						node, ok := nodeids[*fk]
 					{{- else }}
 						node, ok := nodeids[n.{{ $fk.StructField }}]
 					{{- end }}
 					if !ok {
-						return fmt.Errorf(`unexpected referenced foreign-key "{{ $fk.Field.Name }}" returned %v for node %v`, {{ if $fk.Field.Nillable }}*{{ end }}n.{{ $fk.StructField }}, n.ID)
+						return fmt.Errorf(`unexpected referenced foreign-key "{{ $fk.Field.Name }}" returned %v`, {{ if $fk.Field.Nillable }}*{{ end }}n.{{ $fk.StructField }})
 					}
 					assign(node, n)
 				}

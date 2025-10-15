@@ -514,11 +514,59 @@ var teamUsersEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Team, User, int,
 }
 
 func (_q *TeamQuery) loadTasks(ctx context.Context, query *TaskQuery, nodes []*Team, init func(*Team), assign func(*Team, *Task)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &teamTasksEdgeLoadDescriptor, query, nodes, init, assign, [2]int{1, 0})
+	return entbuilder.LoadEdgeM2M(ctx, &teamTasksEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Task, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Task](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *TeamQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*Team, init func(*Team), assign func(*Team, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &teamUsersEdgeLoadDescriptor, query, nodes, init, assign, [2]int{1, 0})
+	return entbuilder.LoadEdgeM2M(ctx, &teamUsersEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 

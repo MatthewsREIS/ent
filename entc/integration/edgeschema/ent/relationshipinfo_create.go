@@ -105,23 +105,13 @@ var relationshipinfoCreateDescriptor = entbuilder.CreateDescriptor[config, Relat
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, RelationshipInfo, *RelationshipInfoMutation]{
-		{
-			Column: relationshipinfo.FieldText,
-			Type:   field.TypeString,
-			Value: func(m *RelationshipInfoMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Text(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *RelationshipInfo, fv entbuilder.FieldValue) error {
-				node.Text = fv.Node.(string)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, RelationshipInfo, *RelationshipInfoMutation, string](
+			relationshipinfo.FieldText,
+			field.TypeString,
+			(*RelationshipInfoMutation).Text,
+			func(n *RelationshipInfo, v string) { n.Text = v },
+		),
 	},
 }
 

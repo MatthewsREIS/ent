@@ -553,13 +553,39 @@ var blobLinksEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Blob, Blob, uuid
 }
 
 func (_q *BlobQuery) loadParent(ctx context.Context, query *BlobQuery, nodes []*Blob, init func(*Blob), assign func(*Blob, *Blob)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &blobParentEdgeLoadDescriptor, query, nodes, assign, func(ids []uuid.UUID) {
-		query.Where(blob.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &blobParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []uuid.UUID) {
+			query.Where(blob.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *BlobQuery) loadLinks(ctx context.Context, query *BlobQuery, nodes []*Blob, init func(*Blob), assign func(*Blob, *Blob)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &blobLinksEdgeLoadDescriptor, query, nodes, init, assign, [2]int{0, 1})
+	return entbuilder.LoadEdgeM2M(ctx, &blobLinksEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.prepareQuery,
+		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Blob, error) {
+			hooks := make([]queryHook, len(modifiers))
+			for i := range modifiers {
+				hooks[i] = modifiers[i]
+			}
+			return query.sqlAll(ctx, hooks...)
+		},
+		func(ctx context.Context, q, qr, inters any) (any, error) {
+			// Wrap the entbuilder.querierFunc into an ent.Querier
+			querierFn, ok := qr.(interface {
+				Query(context.Context, any) (any, error)
+			})
+			if !ok {
+				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			}
+			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
+				return querierFn.Query(ctx, query)
+			})
+			return withInterceptors[[]*Blob](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
+		},
+		query,
+		query.inters)
 	return nil
 }
 func (_q *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, nodes []*Blob, init func(*Blob), assign func(*Blob, *BlobLink)) error {
@@ -585,7 +611,7 @@ func (_q *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, no
 	for _, n := range neighbors {
 		node, ok := nodeids[n.BlobID]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "blob_id" returned %v for node %v`, n.BlobID, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "blob_id" returned %v`, n.BlobID)
 		}
 		assign(node, n)
 	}

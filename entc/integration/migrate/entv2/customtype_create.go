@@ -135,59 +135,27 @@ var customtypeCreateDescriptor = entbuilder.CreateDescriptor[config, CustomType,
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, CustomType, *CustomTypeMutation]{
-		{
-			Column: customtype.FieldCustom,
-			Type:   field.TypeString,
-			Value: func(m *CustomTypeMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Custom(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *CustomType, fv entbuilder.FieldValue) error {
-				node.Custom = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: customtype.FieldTz0,
-			Type:   field.TypeTime,
-			Value: func(m *CustomTypeMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Tz0(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *CustomType, fv entbuilder.FieldValue) error {
-				node.Tz0 = fv.Node.(time.Time)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, CustomType, *CustomTypeMutation, string](
+			customtype.FieldCustom,
+			field.TypeString,
+			(*CustomTypeMutation).Custom,
+			func(n *CustomType, v string) { n.Custom = v },
+		),
 
-		{
-			Column: customtype.FieldTz3,
-			Type:   field.TypeTime,
-			Value: func(m *CustomTypeMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Tz3(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *CustomType, fv entbuilder.FieldValue) error {
-				node.Tz3 = fv.Node.(time.Time)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, CustomType, *CustomTypeMutation, time.Time](
+			customtype.FieldTz0,
+			field.TypeTime,
+			(*CustomTypeMutation).Tz0,
+			func(n *CustomType, v time.Time) { n.Tz0 = v },
+		),
+
+		entbuilder.SimpleField[config, CustomType, *CustomTypeMutation, time.Time](
+			customtype.FieldTz3,
+			field.TypeTime,
+			(*CustomTypeMutation).Tz3,
+			func(n *CustomType, v time.Time) { n.Tz3 = v },
+		),
 	},
 }
 

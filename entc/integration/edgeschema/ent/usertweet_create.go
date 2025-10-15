@@ -196,23 +196,13 @@ var usertweetCreateDescriptor = entbuilder.CreateDescriptor[config, UserTweet, *
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, UserTweet, *UserTweetMutation]{
-		{
-			Column: usertweet.FieldCreatedAt,
-			Type:   field.TypeTime,
-			Value: func(m *UserTweetMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.CreatedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *UserTweet, fv entbuilder.FieldValue) error {
-				node.CreatedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, UserTweet, *UserTweetMutation, time.Time](
+			usertweet.FieldCreatedAt,
+			field.TypeTime,
+			(*UserTweetMutation).CreatedAt,
+			func(n *UserTweet, v time.Time) { n.CreatedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, UserTweet, *UserTweetMutation]{
 		{

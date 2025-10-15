@@ -444,7 +444,10 @@ func (_q *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes [
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(rental.FieldCarID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &carRentalsEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &carRentalsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

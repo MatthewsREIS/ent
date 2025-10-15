@@ -208,59 +208,27 @@ var carCreateDescriptor = entbuilder.CreateDescriptor[config, Car, *CarMutation]
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Car, *CarMutation]{
-		{
-			Column: car.FieldBeforeID,
-			Type:   field.TypeFloat64,
-			Value: func(m *CarMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.BeforeID(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Car, fv entbuilder.FieldValue) error {
-				node.BeforeID = fv.Node.(float64)
-				return nil
-			},
-		},
 
-		{
-			Column: car.FieldAfterID,
-			Type:   field.TypeFloat64,
-			Value: func(m *CarMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.AfterID(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Car, fv entbuilder.FieldValue) error {
-				node.AfterID = fv.Node.(float64)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Car, *CarMutation, float64](
+			car.FieldBeforeID,
+			field.TypeFloat64,
+			(*CarMutation).BeforeID,
+			func(n *Car, v float64) { n.BeforeID = v },
+		),
 
-		{
-			Column: car.FieldModel,
-			Type:   field.TypeString,
-			Value: func(m *CarMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Model(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Car, fv entbuilder.FieldValue) error {
-				node.Model = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Car, *CarMutation, float64](
+			car.FieldAfterID,
+			field.TypeFloat64,
+			(*CarMutation).AfterID,
+			func(n *Car, v float64) { n.AfterID = v },
+		),
+
+		entbuilder.SimpleField[config, Car, *CarMutation, string](
+			car.FieldModel,
+			field.TypeString,
+			(*CarMutation).Model,
+			func(n *Car, v string) { n.Model = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Car, *CarMutation]{
 		{

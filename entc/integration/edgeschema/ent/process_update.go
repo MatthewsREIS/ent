@@ -193,11 +193,6 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 					},
 				}
-				createE := &AttachedFileCreate{config: cfg, mutation: newAttachedFileMutation(cfg, OpCreate)}
-
-				createE.defaults()
-				_, specE := createE.createSpec()
-				edge.Target.Fields = specE.Fields
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

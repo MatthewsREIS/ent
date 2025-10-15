@@ -244,23 +244,13 @@ var tweettagCreateDescriptor = entbuilder.CreateDescriptor[config, TweetTag, *Tw
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, TweetTag, *TweetTagMutation]{
-		{
-			Column: tweettag.FieldAddedAt,
-			Type:   field.TypeTime,
-			Value: func(m *TweetTagMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.AddedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *TweetTag, fv entbuilder.FieldValue) error {
-				node.AddedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, TweetTag, *TweetTagMutation, time.Time](
+			tweettag.FieldAddedAt,
+			field.TypeTime,
+			(*TweetTagMutation).AddedAt,
+			func(n *TweetTag, v time.Time) { n.AddedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, TweetTag, *TweetTagMutation]{
 		{

@@ -187,23 +187,13 @@ var tweetlikeCreateDescriptor = entbuilder.CreateDescriptor[config, TweetLike, *
 		return &TweetLike{config: cfg}
 	},
 	Fields: []entbuilder.FieldDescriptor[config, TweetLike, *TweetLikeMutation]{
-		{
-			Column: tweetlike.FieldLikedAt,
-			Type:   field.TypeTime,
-			Value: func(m *TweetLikeMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.LikedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *TweetLike, fv entbuilder.FieldValue) error {
-				node.LikedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, TweetLike, *TweetLikeMutation, time.Time](
+			tweetlike.FieldLikedAt,
+			field.TypeTime,
+			(*TweetLikeMutation).LikedAt,
+			func(n *TweetLike, v time.Time) { n.LikedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, TweetLike, *TweetLikeMutation]{
 		{

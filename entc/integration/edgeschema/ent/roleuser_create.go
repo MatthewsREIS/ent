@@ -184,23 +184,13 @@ var roleuserCreateDescriptor = entbuilder.CreateDescriptor[config, RoleUser, *Ro
 		return &RoleUser{config: cfg}
 	},
 	Fields: []entbuilder.FieldDescriptor[config, RoleUser, *RoleUserMutation]{
-		{
-			Column: roleuser.FieldCreatedAt,
-			Type:   field.TypeTime,
-			Value: func(m *RoleUserMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.CreatedAt(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *RoleUser, fv entbuilder.FieldValue) error {
-				node.CreatedAt = fv.Node.(time.Time)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, RoleUser, *RoleUserMutation, time.Time](
+			roleuser.FieldCreatedAt,
+			field.TypeTime,
+			(*RoleUserMutation).CreatedAt,
+			func(n *RoleUser, v time.Time) { n.CreatedAt = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, RoleUser, *RoleUserMutation]{
 		{

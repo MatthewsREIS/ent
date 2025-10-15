@@ -164,21 +164,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 	{{- end }}
-	{{- with $e.Through }}
-        {{- if .HasDefault }}
-            createE := &{{ .CreateName }}{config: {{ $receiver }}.config, mutation: new{{ .MutationName }}({{ $receiver }}.config, OpCreate)}
-            {{/* Skip error handling here as this check was already handled. */}}
-            {{ if or .NumHooks .NumPolicy }}_ = {{ end }}
-            createE.defaults()
-			_, specE := createE.createSpec()
-			edge.Target.Fields = specE.Fields
-			{{- if and .HasOneFieldID .ID.Default }}
-				if specE.ID.Value != nil {
-					edge.Target.Fields = append(edge.Target.Fields, specE.ID)
-				}
-			{{- end }}
-		{{- end }}
-	{{- end }}
+	{{- /* TODO: Re-implement through table defaults using descriptors */}}
 {{- end }}
 
 {{ define "dialect/sql/update/descriptor/field" }}
@@ -293,20 +279,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 					IDSpec: sqlgraph.NewFieldSpec({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, field.{{ $e.Type.ID.Type.ConstName }}),
 				},
 			}
-{{- if $e.Through }}
-{{- if $e.Through.HasDefault }}
-			createE := &{{ $e.Through.CreateName }}{config: cfg, mutation: new{{ $e.Through.MutationName }}(cfg, OpCreate)}
-            {{ if or $e.Through.NumHooks $e.Through.NumPolicy }}			_ = {{ end }}
-            createE.defaults()
-			_, specE := createE.createSpec()
-			edge.Target.Fields = specE.Fields
-{{- if and $e.Through.HasOneFieldID $e.Through.ID.Default }}
-			if specE.ID.Value != nil {
-				edge.Target.Fields = append(edge.Target.Fields, specE.ID)
-			}
-{{- end }}
-{{- end }}
-{{- end }}
+			{{- /* TODO: Re-implement through table defaults using descriptors */}}
 			for _, id := range nodes {
 				edge.Target.Nodes = append(edge.Target.Nodes, id)
 			}

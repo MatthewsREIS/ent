@@ -570,22 +570,29 @@ var metadataParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Metadata, M
 }
 
 func (_q *MetadataQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &metadataUserEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &metadataUserEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *MetadataQuery) loadChildren(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(metadata.FieldParentID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &metadataChildrenEdgeLoadDescriptor, query, nodes, init, assign)
+	return entbuilder.LoadEdgeO2M(ctx, &metadataChildrenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 func (_q *MetadataQuery) loadParent(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &metadataParentEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(metadata.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &metadataParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(metadata.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

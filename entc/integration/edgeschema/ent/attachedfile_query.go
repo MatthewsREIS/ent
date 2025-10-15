@@ -497,15 +497,19 @@ var attachedfileProcEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[AttachedF
 }
 
 func (_q *AttachedFileQuery) loadFi(ctx context.Context, query *FileQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *File)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &attachedfileFiEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(file.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &attachedfileFiEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(file.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *AttachedFileQuery) loadProc(ctx context.Context, query *ProcessQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *Process)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &attachedfileProcEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(process.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &attachedfileProcEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(process.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

@@ -431,9 +431,11 @@ var petOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, User, int, i
 }
 
 func (_q *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &petOwnerEdgeLoadDescriptor, query, nodes, assign, func(ids []int) {
-		query.Where(user.IDIn(ids...))
-	})
+	return entbuilder.LoadEdgeM2O(ctx, &petOwnerEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

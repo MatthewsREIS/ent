@@ -143,23 +143,13 @@ var infoCreateDescriptor = entbuilder.CreateDescriptor[config, Info, *InfoMutati
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Info, *InfoMutation]{
-		{
-			Column: info.FieldContent,
-			Type:   field.TypeJSON,
-			Value: func(m *InfoMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Content(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Info, fv entbuilder.FieldValue) error {
-				node.Content = fv.Node.(json.RawMessage)
-				return nil
-			},
-		},
+
+		entbuilder.SimpleField[config, Info, *InfoMutation, json.RawMessage](
+			info.FieldContent,
+			field.TypeJSON,
+			(*InfoMutation).Content,
+			func(n *Info, v json.RawMessage) { n.Content = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Info, *InfoMutation]{
 		{

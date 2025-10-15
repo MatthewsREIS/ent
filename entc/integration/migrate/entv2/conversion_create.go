@@ -236,167 +236,69 @@ var conversionCreateDescriptor = entbuilder.CreateDescriptor[config, Conversion,
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Conversion, *ConversionMutation]{
-		{
-			Column: conversion.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: conversion.FieldInt8ToString,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Int8ToString(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Int8ToString = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldName,
+			field.TypeString,
+			(*ConversionMutation).Name,
+			func(n *Conversion, v string) { n.Name = v },
+		),
 
-		{
-			Column: conversion.FieldUint8ToString,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Uint8ToString(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Uint8ToString = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldInt8ToString,
+			field.TypeString,
+			(*ConversionMutation).Int8ToString,
+			func(n *Conversion, v string) { n.Int8ToString = v },
+		),
 
-		{
-			Column: conversion.FieldInt16ToString,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Int16ToString(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Int16ToString = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldUint8ToString,
+			field.TypeString,
+			(*ConversionMutation).Uint8ToString,
+			func(n *Conversion, v string) { n.Uint8ToString = v },
+		),
 
-		{
-			Column: conversion.FieldUint16ToString,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Uint16ToString(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Uint16ToString = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldInt16ToString,
+			field.TypeString,
+			(*ConversionMutation).Int16ToString,
+			func(n *Conversion, v string) { n.Int16ToString = v },
+		),
 
-		{
-			Column: conversion.FieldInt32ToString,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Int32ToString(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Int32ToString = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldUint16ToString,
+			field.TypeString,
+			(*ConversionMutation).Uint16ToString,
+			func(n *Conversion, v string) { n.Uint16ToString = v },
+		),
 
-		{
-			Column: conversion.FieldUint32ToString,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Uint32ToString(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Uint32ToString = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldInt32ToString,
+			field.TypeString,
+			(*ConversionMutation).Int32ToString,
+			func(n *Conversion, v string) { n.Int32ToString = v },
+		),
 
-		{
-			Column: conversion.FieldInt64ToString,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Int64ToString(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Int64ToString = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldUint32ToString,
+			field.TypeString,
+			(*ConversionMutation).Uint32ToString,
+			func(n *Conversion, v string) { n.Uint32ToString = v },
+		),
 
-		{
-			Column: conversion.FieldUint64ToString,
-			Type:   field.TypeString,
-			Value: func(m *ConversionMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Uint64ToString(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Conversion, fv entbuilder.FieldValue) error {
-				node.Uint64ToString = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldInt64ToString,
+			field.TypeString,
+			(*ConversionMutation).Int64ToString,
+			func(n *Conversion, v string) { n.Int64ToString = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldUint64ToString,
+			field.TypeString,
+			(*ConversionMutation).Uint64ToString,
+			func(n *Conversion, v string) { n.Uint64ToString = v },
+		),
 	},
 }
 

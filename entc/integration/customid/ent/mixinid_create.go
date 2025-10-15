@@ -172,41 +172,20 @@ var mixinidCreateDescriptor = entbuilder.CreateDescriptor[config, MixinID, *Mixi
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, MixinID, *MixinIDMutation]{
-		{
-			Column: mixinid.FieldSomeField,
-			Type:   field.TypeString,
-			Value: func(m *MixinIDMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.SomeField(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *MixinID, fv entbuilder.FieldValue) error {
-				node.SomeField = fv.Node.(string)
-				return nil
-			},
-		},
 
-		{
-			Column: mixinid.FieldMixinField,
-			Type:   field.TypeString,
-			Value: func(m *MixinIDMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.MixinField(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *MixinID, fv entbuilder.FieldValue) error {
-				node.MixinField = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, MixinID, *MixinIDMutation, string](
+			mixinid.FieldSomeField,
+			field.TypeString,
+			(*MixinIDMutation).SomeField,
+			func(n *MixinID, v string) { n.SomeField = v },
+		),
+
+		entbuilder.SimpleField[config, MixinID, *MixinIDMutation, string](
+			mixinid.FieldMixinField,
+			field.TypeString,
+			(*MixinIDMutation).MixinField,
+			func(n *MixinID, v string) { n.MixinField = v },
+		),
 	},
 }
 

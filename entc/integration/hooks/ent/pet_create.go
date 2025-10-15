@@ -138,41 +138,20 @@ var petCreateDescriptor = entbuilder.CreateDescriptor[config, Pet, *PetMutation]
 	},
 
 	Fields: []entbuilder.FieldDescriptor[config, Pet, *PetMutation]{
-		{
-			Column: pet.FieldDeleteTime,
-			Type:   field.TypeTime,
-			Value: func(m *PetMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.DeleteTime(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Pet, fv entbuilder.FieldValue) error {
-				node.DeleteTime = fv.Node.(time.Time)
-				return nil
-			},
-		},
 
-		{
-			Column: pet.FieldName,
-			Type:   field.TypeString,
-			Value: func(m *PetMutation) (entbuilder.FieldValue, bool, error) {
-				if value, ok := m.Name(); ok {
-					return entbuilder.FieldValue{
-						Spec: value,
-						Node: value,
-					}, true, nil
-				}
-				return entbuilder.FieldValue{}, false, nil
-			},
-			Assign: func(node *Pet, fv entbuilder.FieldValue) error {
-				node.Name = fv.Node.(string)
-				return nil
-			},
-		},
+		entbuilder.SimpleField[config, Pet, *PetMutation, time.Time](
+			pet.FieldDeleteTime,
+			field.TypeTime,
+			(*PetMutation).DeleteTime,
+			func(n *Pet, v time.Time) { n.DeleteTime = v },
+		),
+
+		entbuilder.SimpleField[config, Pet, *PetMutation, string](
+			pet.FieldName,
+			field.TypeString,
+			(*PetMutation).Name,
+			func(n *Pet, v string) { n.Name = v },
+		),
 	},
 	Edges: []entbuilder.EdgeDescriptor[config, Pet, *PetMutation]{
 		{
