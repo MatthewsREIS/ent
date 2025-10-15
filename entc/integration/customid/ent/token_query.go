@@ -417,19 +417,15 @@ func (_q *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 
 var tokenAccountEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Token, Account, sid.ID, sid.ID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   token.AccountTable,
-			Columns: []string{token.AccountColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: account.FieldID,
-					Type:   field.TypeOther,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        token.AccountTable,
+			Columns:      token.AccountColumn,
+			Bidi:         false,
+			TargetColumn: account.FieldID,
+			TargetType:   field.TypeOther,
+		})
 	},
 	ExtractNodeID: func(n *Token) sid.ID { return n.ID },
 	ExtractEdgeID: func(e *Account) sid.ID { return e.ID },

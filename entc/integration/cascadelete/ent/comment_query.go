@@ -408,19 +408,15 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 
 var commentPostEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Comment, Post, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   comment.PostTable,
-			Columns: []string{comment.PostColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: post.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        comment.PostTable,
+			Columns:      comment.PostColumn,
+			Bidi:         false,
+			TargetColumn: post.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Comment) int { return n.ID },
 	ExtractEdgeID: func(e *Post) int { return e.ID },

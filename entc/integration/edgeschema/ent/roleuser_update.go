@@ -160,17 +160,15 @@ var roleuserUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleUserMuta
 		{
 			Clear: func(cfg config, m *RoleUserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.RoleCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   roleuser.RoleTable,
-						Columns: []string{roleuser.RoleColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        roleuser.RoleTable,
+						Columns:      roleuser.RoleColumn,
+						Bidi:         false,
+						TargetColumn: role.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -179,16 +177,15 @@ var roleuserUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleUserMuta
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   roleuser.RoleTable,
-					Columns: []string{roleuser.RoleColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        roleuser.RoleTable,
+					Columns:      roleuser.RoleColumn,
+					Bidi:         false,
+					TargetColumn: role.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -199,17 +196,15 @@ var roleuserUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleUserMuta
 		{
 			Clear: func(cfg config, m *RoleUserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   roleuser.UserTable,
-						Columns: []string{roleuser.UserColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        roleuser.UserTable,
+						Columns:      roleuser.UserColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -218,16 +213,15 @@ var roleuserUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleUserMuta
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   roleuser.UserTable,
-					Columns: []string{roleuser.UserColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        roleuser.UserTable,
+					Columns:      roleuser.UserColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

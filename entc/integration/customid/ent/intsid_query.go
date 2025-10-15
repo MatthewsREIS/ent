@@ -437,19 +437,15 @@ func (_q *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntSI
 
 var intsidParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[IntSID, IntSID, sid.ID, sid.ID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   intsid.ParentTable,
-			Columns: []string{intsid.ParentColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: intsid.FieldID,
-					Type:   field.TypeInt64,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        intsid.ParentTable,
+			Columns:      intsid.ParentColumn,
+			Bidi:         true,
+			TargetColumn: intsid.FieldID,
+			TargetType:   field.TypeInt64,
+		})
 	},
 	ExtractNodeID: func(n *IntSID) sid.ID { return n.ID },
 	ExtractEdgeID: func(e *IntSID) sid.ID { return e.ID },
@@ -459,19 +455,15 @@ var intsidParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[IntSID, IntSI
 }
 var intsidChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[IntSID, IntSID, sid.ID, sid.ID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   intsid.ChildrenTable,
-			Columns: []string{intsid.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: intsid.FieldID,
-					Type:   field.TypeInt64,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      true,
+			Table:        intsid.ChildrenTable,
+			Columns:      intsid.ChildrenColumn,
+			Bidi:         false,
+			TargetColumn: intsid.FieldID,
+			TargetType:   field.TypeInt64,
+		})
 	},
 	ExtractNodeID: func(n *IntSID) sid.ID { return n.ID },
 	ExtractEdgeID: func(e *IntSID) sid.ID { return e.ID },

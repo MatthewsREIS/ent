@@ -898,19 +898,15 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 
 var userGroupsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Group, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GroupsTable,
-			Columns: user.GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: group.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        user.GroupsTable,
+			Columns:      user.GroupsPrimaryKey,
+			Bidi:         false,
+			TargetColumn: group.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *Group) int { return e.ID },
@@ -925,19 +921,15 @@ var userGroupsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Group, in
 }
 var userFriendsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FriendsTable,
-			Columns: user.FriendsPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        user.FriendsTable,
+			Columns:      user.FriendsPrimaryKey,
+			Bidi:         true,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },
@@ -952,19 +944,15 @@ var userFriendsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, in
 }
 var userRelativesEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.RelativesTable,
-			Columns: user.RelativesPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        user.RelativesTable,
+			Columns:      user.RelativesPrimaryKey,
+			Bidi:         true,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },
@@ -979,19 +967,15 @@ var userRelativesEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, 
 }
 var userLikedTweetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Tweet, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.LikedTweetsTable,
-			Columns: user.LikedTweetsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: tweet.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        user.LikedTweetsTable,
+			Columns:      user.LikedTweetsPrimaryKey,
+			Bidi:         false,
+			TargetColumn: tweet.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *Tweet) int { return e.ID },
@@ -1006,19 +990,15 @@ var userLikedTweetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Twee
 }
 var userTweetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Tweet, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.TweetsTable,
-			Columns: user.TweetsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: tweet.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        user.TweetsTable,
+			Columns:      user.TweetsPrimaryKey,
+			Bidi:         false,
+			TargetColumn: tweet.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *Tweet) int { return e.ID },
@@ -1033,19 +1013,15 @@ var userTweetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Tweet, in
 }
 var userRolesEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Role, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.RolesTable,
-			Columns: user.RolesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: role.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        user.RolesTable,
+			Columns:      user.RolesPrimaryKey,
+			Bidi:         false,
+			TargetColumn: role.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *Role) int { return e.ID },
@@ -1060,19 +1036,15 @@ var userRolesEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Role, int,
 }
 var userJoinedGroupsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, UserGroup, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.JoinedGroupsTable,
-			Columns: []string{user.JoinedGroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: usergroup.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      true,
+			Table:        user.JoinedGroupsTable,
+			Columns:      user.JoinedGroupsColumn,
+			Bidi:         false,
+			TargetColumn: usergroup.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *UserGroup) int { return e.ID },
@@ -1083,19 +1055,15 @@ var userJoinedGroupsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Use
 }
 var userFriendshipsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Friendship, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.FriendshipsTable,
-			Columns: []string{user.FriendshipsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: friendship.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      true,
+			Table:        user.FriendshipsTable,
+			Columns:      user.FriendshipsColumn,
+			Bidi:         false,
+			TargetColumn: friendship.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *Friendship) int { return e.ID },
@@ -1106,19 +1074,15 @@ var userFriendshipsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Frie
 }
 var userUserTweetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, UserTweet, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   user.UserTweetsTable,
-			Columns: []string{user.UserTweetsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: usertweet.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      true,
+			Table:        user.UserTweetsTable,
+			Columns:      user.UserTweetsColumn,
+			Bidi:         false,
+			TargetColumn: usertweet.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *UserTweet) int { return e.ID },

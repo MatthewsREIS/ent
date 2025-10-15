@@ -409,19 +409,15 @@ func (_q *BlogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blog, e
 
 var blogAdminsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Blog, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   blog.AdminsTable,
-			Columns: []string{blog.AdminsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        blog.AdminsTable,
+			Columns:      blog.AdminsColumn,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Blog) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },

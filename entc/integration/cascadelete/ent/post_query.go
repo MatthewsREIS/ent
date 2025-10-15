@@ -452,19 +452,15 @@ func (_q *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 
 var postAuthorEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   post.AuthorTable,
-			Columns: []string{post.AuthorColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        post.AuthorTable,
+			Columns:      post.AuthorColumn,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Post) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },
@@ -475,19 +471,15 @@ var postAuthorEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, User, int
 }
 var postCommentsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, Comment, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   post.CommentsTable,
-			Columns: []string{post.CommentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: comment.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        post.CommentsTable,
+			Columns:      post.CommentsColumn,
+			Bidi:         false,
+			TargetColumn: comment.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Post) int { return n.ID },
 	ExtractEdgeID: func(e *Comment) int { return e.ID },

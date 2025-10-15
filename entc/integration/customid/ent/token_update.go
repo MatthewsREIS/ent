@@ -128,17 +128,15 @@ var tokenUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TokenMutation]{
 		{
 			Clear: func(cfg config, m *TokenMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.AccountCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: true,
-						Table:   token.AccountTable,
-						Columns: []string{token.AccountColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        token.AccountTable,
+						Columns:      token.AccountColumn,
+						Bidi:         false,
+						TargetColumn: account.FieldID,
+						TargetType:   field.TypeOther,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -147,16 +145,15 @@ var tokenUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TokenMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: true,
-					Table:   token.AccountTable,
-					Columns: []string{token.AccountColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        token.AccountTable,
+					Columns:      token.AccountColumn,
+					Bidi:         false,
+					TargetColumn: account.FieldID,
+					TargetType:   field.TypeOther,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

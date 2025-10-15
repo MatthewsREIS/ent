@@ -144,17 +144,15 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 		{
 			Clear: func(cfg config, m *ProcessMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FilesCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: false,
-						Table:   process.FilesTable,
-						Columns: process.FilesPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      false,
+						Table:        process.FilesTable,
+						Columns:      process.FilesPrimaryKey,
+						Bidi:         false,
+						TargetColumn: file.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -163,16 +161,15 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 				if len(nodes) == 0 || m.FilesCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   process.FilesTable,
-					Columns: process.FilesPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        process.FilesTable,
+					Columns:      process.FilesPrimaryKey,
+					Bidi:         false,
+					TargetColumn: file.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -183,16 +180,15 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   process.FilesTable,
-					Columns: process.FilesPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        process.FilesTable,
+					Columns:      process.FilesPrimaryKey,
+					Bidi:         false,
+					TargetColumn: file.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -203,17 +199,15 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 		{
 			Clear: func(cfg config, m *ProcessMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.AttachedFilesCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: true,
-						Table:   process.AttachedFilesTable,
-						Columns: []string{process.AttachedFilesColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      true,
+						Table:        process.AttachedFilesTable,
+						Columns:      process.AttachedFilesColumn,
+						Bidi:         false,
+						TargetColumn: attachedfile.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -222,16 +216,15 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 				if len(nodes) == 0 || m.AttachedFilesCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   process.AttachedFilesTable,
-					Columns: []string{process.AttachedFilesColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        process.AttachedFilesTable,
+					Columns:      process.AttachedFilesColumn,
+					Bidi:         false,
+					TargetColumn: attachedfile.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -242,16 +235,15 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   process.AttachedFilesTable,
-					Columns: []string{process.AttachedFilesColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        process.AttachedFilesTable,
+					Columns:      process.AttachedFilesColumn,
+					Bidi:         false,
+					TargetColumn: attachedfile.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

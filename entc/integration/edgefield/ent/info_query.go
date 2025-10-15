@@ -408,19 +408,15 @@ func (_q *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, e
 
 var infoUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Info, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   info.UserTable,
-			Columns: []string{info.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        info.UserTable,
+			Columns:      info.UserColumn,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Info) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },

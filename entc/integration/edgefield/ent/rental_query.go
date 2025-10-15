@@ -452,19 +452,15 @@ func (_q *RentalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Renta
 
 var rentalUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Rental, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   rental.UserTable,
-			Columns: []string{rental.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        rental.UserTable,
+			Columns:      rental.UserColumn,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Rental) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },
@@ -475,19 +471,15 @@ var rentalUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Rental, User, i
 }
 var rentalCarEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Rental, Car, int, uuid.UUID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   rental.CarTable,
-			Columns: []string{rental.CarColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: car.FieldID,
-					Type:   field.TypeUUID,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        rental.CarTable,
+			Columns:      rental.CarColumn,
+			Bidi:         false,
+			TargetColumn: car.FieldID,
+			TargetType:   field.TypeUUID,
+		})
 	},
 	ExtractNodeID: func(n *Rental) int { return n.ID },
 	ExtractEdgeID: func(e *Car) uuid.UUID { return e.ID },

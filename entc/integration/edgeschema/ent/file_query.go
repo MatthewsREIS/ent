@@ -409,19 +409,15 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 
 var fileProcessesEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[File, Process, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   file.ProcessesTable,
-			Columns: file.ProcessesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: process.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      true,
+			Table:        file.ProcessesTable,
+			Columns:      file.ProcessesPrimaryKey,
+			Bidi:         false,
+			TargetColumn: process.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *File) int { return n.ID },
 	ExtractEdgeID: func(e *Process) int { return e.ID },

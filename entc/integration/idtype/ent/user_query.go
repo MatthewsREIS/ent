@@ -501,19 +501,15 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 
 var userSpouseEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, uint64, uint64]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   user.SpouseTable,
-			Columns: []string{user.SpouseColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeUint64,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2O,
+			Inverse:      false,
+			Table:        user.SpouseTable,
+			Columns:      user.SpouseColumn,
+			Bidi:         true,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeUint64,
+		})
 	},
 	ExtractNodeID: func(n *User) uint64 { return n.ID },
 	ExtractEdgeID: func(e *User) uint64 { return e.ID },
@@ -523,19 +519,15 @@ var userSpouseEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, uin
 }
 var userFollowersEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, uint64, uint64]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeUint64,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      true,
+			Table:        user.FollowersTable,
+			Columns:      user.FollowersPrimaryKey,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeUint64,
+		})
 	},
 	ExtractNodeID: func(n *User) uint64 { return n.ID },
 	ExtractEdgeID: func(e *User) uint64 { return e.ID },
@@ -550,19 +542,15 @@ var userFollowersEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, 
 }
 var userFollowingEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, uint64, uint64]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeUint64,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        user.FollowingTable,
+			Columns:      user.FollowingPrimaryKey,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeUint64,
+		})
 	},
 	ExtractNodeID: func(n *User) uint64 { return n.ID },
 	ExtractEdgeID: func(e *User) uint64 { return e.ID },

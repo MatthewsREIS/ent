@@ -244,17 +244,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UsersCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: true,
-						Table:   group.UsersTable,
-						Columns: group.UsersPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      true,
+						Table:        group.UsersTable,
+						Columns:      group.UsersPrimaryKey,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -263,16 +261,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 				if len(nodes) == 0 || m.UsersCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   group.UsersTable,
-					Columns: group.UsersPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        group.UsersTable,
+					Columns:      group.UsersPrimaryKey,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -283,16 +280,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   group.UsersTable,
-					Columns: group.UsersPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        group.UsersTable,
+					Columns:      group.UsersPrimaryKey,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -303,17 +299,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TagsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: true,
-						Table:   group.TagsTable,
-						Columns: group.TagsPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      true,
+						Table:        group.TagsTable,
+						Columns:      group.TagsPrimaryKey,
+						Bidi:         false,
+						TargetColumn: tag.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -322,16 +316,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 				if len(nodes) == 0 || m.TagsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   group.TagsTable,
-					Columns: group.TagsPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        group.TagsTable,
+					Columns:      group.TagsPrimaryKey,
+					Bidi:         false,
+					TargetColumn: tag.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -342,16 +335,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   group.TagsTable,
-					Columns: group.TagsPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        group.TagsTable,
+					Columns:      group.TagsPrimaryKey,
+					Bidi:         false,
+					TargetColumn: tag.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -362,17 +354,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.JoinedUsersCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: true,
-						Table:   group.JoinedUsersTable,
-						Columns: []string{group.JoinedUsersColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      true,
+						Table:        group.JoinedUsersTable,
+						Columns:      group.JoinedUsersColumn,
+						Bidi:         false,
+						TargetColumn: usergroup.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -381,16 +371,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 				if len(nodes) == 0 || m.JoinedUsersCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   group.JoinedUsersTable,
-					Columns: []string{group.JoinedUsersColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        group.JoinedUsersTable,
+					Columns:      group.JoinedUsersColumn,
+					Bidi:         false,
+					TargetColumn: usergroup.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -401,16 +390,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   group.JoinedUsersTable,
-					Columns: []string{group.JoinedUsersColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        group.JoinedUsersTable,
+					Columns:      group.JoinedUsersColumn,
+					Bidi:         false,
+					TargetColumn: usergroup.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -421,17 +409,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupTagsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: true,
-						Table:   group.GroupTagsTable,
-						Columns: []string{group.GroupTagsColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      true,
+						Table:        group.GroupTagsTable,
+						Columns:      group.GroupTagsColumn,
+						Bidi:         false,
+						TargetColumn: grouptag.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -440,16 +426,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 				if len(nodes) == 0 || m.GroupTagsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   group.GroupTagsTable,
-					Columns: []string{group.GroupTagsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        group.GroupTagsTable,
+					Columns:      group.GroupTagsColumn,
+					Bidi:         false,
+					TargetColumn: grouptag.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -460,16 +445,15 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   group.GroupTagsTable,
-					Columns: []string{group.GroupTagsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        group.GroupTagsTable,
+					Columns:      group.GroupTagsColumn,
+					Bidi:         false,
+					TargetColumn: grouptag.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

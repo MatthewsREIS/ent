@@ -160,17 +160,15 @@ var bloblinkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobLinkMuta
 		{
 			Clear: func(cfg config, m *BlobLinkMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.BlobCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   bloblink.BlobTable,
-						Columns: []string{bloblink.BlobColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        bloblink.BlobTable,
+						Columns:      bloblink.BlobColumn,
+						Bidi:         false,
+						TargetColumn: blob.FieldID,
+						TargetType:   field.TypeUUID,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -179,16 +177,15 @@ var bloblinkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobLinkMuta
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   bloblink.BlobTable,
-					Columns: []string{bloblink.BlobColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        bloblink.BlobTable,
+					Columns:      bloblink.BlobColumn,
+					Bidi:         false,
+					TargetColumn: blob.FieldID,
+					TargetType:   field.TypeUUID,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -199,17 +196,15 @@ var bloblinkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobLinkMuta
 		{
 			Clear: func(cfg config, m *BlobLinkMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.LinkCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   bloblink.LinkTable,
-						Columns: []string{bloblink.LinkColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        bloblink.LinkTable,
+						Columns:      bloblink.LinkColumn,
+						Bidi:         false,
+						TargetColumn: blob.FieldID,
+						TargetType:   field.TypeUUID,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -218,16 +213,15 @@ var bloblinkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobLinkMuta
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   bloblink.LinkTable,
-					Columns: []string{bloblink.LinkColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        bloblink.LinkTable,
+					Columns:      bloblink.LinkColumn,
+					Bidi:         false,
+					TargetColumn: blob.FieldID,
+					TargetType:   field.TypeUUID,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

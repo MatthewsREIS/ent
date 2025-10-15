@@ -114,23 +114,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 		{{- $descriptor := printf "%s%sEdgeLoadDescriptor" $.Package $e.StructField }}
 		var {{ $descriptor }} = entbuilder.EdgeLoadDescriptor[{{ $.Name }}, {{ $e.Type.Name }}, {{ $.ID.Type }}, {{ $e.Type.ID.Type }}]{
 		EdgeSpec: func() *sqlgraph.EdgeSpec {
-			return &sqlgraph.EdgeSpec{
-				Rel:     sqlgraph.{{ $e.Rel.Type }},
-				Inverse: {{ $e.IsInverse }},
-				Table:   {{ $.Package }}.{{ $e.TableConstant }},
-				{{- if $e.M2M }}
-				Columns: {{ $.Package }}.{{ $e.PKConstant }},
-				{{- else }}
-				Columns: []string{ {{ $.Package }}.{{ $e.ColumnConstant }} },
-				{{- end }}
-				Bidi:    {{ $e.Bidi }},
-				Target: &sqlgraph.EdgeTarget{
-					IDSpec: &sqlgraph.FieldSpec{
-						Column: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
-						Type:   field.{{ $e.Type.ID.Type.ConstName }},
-					},
-				},
-			}
+			return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+				Rel:          sqlgraph.{{ $e.Rel.Type }},
+				Inverse:      {{ $e.IsInverse }},
+				Table:        {{ $.Package }}.{{ $e.TableConstant }},
+				Columns:      {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}{{ $.Package }}.{{ $e.ColumnConstant }}{{ end }},
+				Bidi:         {{ $e.Bidi }},
+				TargetColumn: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
+				TargetType:   field.{{ $e.Type.ID.Type.ConstName }},
+			})
 		},
 		ExtractNodeID: func(n *{{ $.Name }}) {{ $.ID.Type }} { return n.ID },
 		ExtractEdgeID: func(e *{{ $e.Type.Name }}) {{ $e.Type.ID.Type }} { return e.ID },

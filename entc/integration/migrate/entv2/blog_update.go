@@ -146,17 +146,15 @@ var blogUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlogMutation]{
 		{
 			Clear: func(cfg config, m *BlogMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.AdminsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: false,
-						Table:   blog.AdminsTable,
-						Columns: []string{blog.AdminsColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      false,
+						Table:        blog.AdminsTable,
+						Columns:      blog.AdminsColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -165,16 +163,15 @@ var blogUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlogMutation]{
 				if len(nodes) == 0 || m.AdminsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   blog.AdminsTable,
-					Columns: []string{blog.AdminsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        blog.AdminsTable,
+					Columns:      blog.AdminsColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -185,16 +182,15 @@ var blogUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlogMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   blog.AdminsTable,
-					Columns: []string{blog.AdminsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        blog.AdminsTable,
+					Columns:      blog.AdminsColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

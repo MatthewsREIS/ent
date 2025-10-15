@@ -245,17 +245,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 		{
 			Clear: func(cfg config, m *TagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TweetsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: false,
-						Table:   tag.TweetsTable,
-						Columns: tag.TweetsPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      false,
+						Table:        tag.TweetsTable,
+						Columns:      tag.TweetsPrimaryKey,
+						Bidi:         false,
+						TargetColumn: tweet.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -264,16 +262,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 				if len(nodes) == 0 || m.TweetsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   tag.TweetsTable,
-					Columns: tag.TweetsPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        tag.TweetsTable,
+					Columns:      tag.TweetsPrimaryKey,
+					Bidi:         false,
+					TargetColumn: tweet.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -284,16 +281,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   tag.TweetsTable,
-					Columns: tag.TweetsPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        tag.TweetsTable,
+					Columns:      tag.TweetsPrimaryKey,
+					Bidi:         false,
+					TargetColumn: tweet.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -304,17 +300,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 		{
 			Clear: func(cfg config, m *TagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: false,
-						Table:   tag.GroupsTable,
-						Columns: tag.GroupsPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      false,
+						Table:        tag.GroupsTable,
+						Columns:      tag.GroupsPrimaryKey,
+						Bidi:         false,
+						TargetColumn: group.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -323,16 +317,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 				if len(nodes) == 0 || m.GroupsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   tag.GroupsTable,
-					Columns: tag.GroupsPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        tag.GroupsTable,
+					Columns:      tag.GroupsPrimaryKey,
+					Bidi:         false,
+					TargetColumn: group.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -343,16 +336,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   tag.GroupsTable,
-					Columns: tag.GroupsPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        tag.GroupsTable,
+					Columns:      tag.GroupsPrimaryKey,
+					Bidi:         false,
+					TargetColumn: group.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -363,17 +355,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 		{
 			Clear: func(cfg config, m *TagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TweetTagsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: true,
-						Table:   tag.TweetTagsTable,
-						Columns: []string{tag.TweetTagsColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      true,
+						Table:        tag.TweetTagsTable,
+						Columns:      tag.TweetTagsColumn,
+						Bidi:         false,
+						TargetColumn: tweettag.FieldID,
+						TargetType:   field.TypeUUID,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -382,16 +372,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 				if len(nodes) == 0 || m.TweetTagsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   tag.TweetTagsTable,
-					Columns: []string{tag.TweetTagsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        tag.TweetTagsTable,
+					Columns:      tag.TweetTagsColumn,
+					Bidi:         false,
+					TargetColumn: tweettag.FieldID,
+					TargetType:   field.TypeUUID,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -402,16 +391,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   tag.TweetTagsTable,
-					Columns: []string{tag.TweetTagsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        tag.TweetTagsTable,
+					Columns:      tag.TweetTagsColumn,
+					Bidi:         false,
+					TargetColumn: tweettag.FieldID,
+					TargetType:   field.TypeUUID,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -422,17 +410,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 		{
 			Clear: func(cfg config, m *TagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupTagsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: true,
-						Table:   tag.GroupTagsTable,
-						Columns: []string{tag.GroupTagsColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      true,
+						Table:        tag.GroupTagsTable,
+						Columns:      tag.GroupTagsColumn,
+						Bidi:         false,
+						TargetColumn: grouptag.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -441,16 +427,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 				if len(nodes) == 0 || m.GroupTagsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   tag.GroupTagsTable,
-					Columns: []string{tag.GroupTagsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        tag.GroupTagsTable,
+					Columns:      tag.GroupTagsColumn,
+					Bidi:         false,
+					TargetColumn: grouptag.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -461,16 +446,15 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   tag.GroupTagsTable,
-					Columns: []string{tag.GroupTagsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        tag.GroupTagsTable,
+					Columns:      tag.GroupTagsColumn,
+					Bidi:         false,
+					TargetColumn: grouptag.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

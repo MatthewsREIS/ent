@@ -97,17 +97,15 @@ var sessionUpdateDescriptor = entbuilder.UpdateDescriptor[config, *SessionMutati
 		{
 			Clear: func(cfg config, m *SessionMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.DeviceCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: true,
-						Table:   session.DeviceTable,
-						Columns: []string{session.DeviceColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        session.DeviceTable,
+						Columns:      session.DeviceColumn,
+						Bidi:         false,
+						TargetColumn: device.FieldID,
+						TargetType:   field.TypeBytes,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -116,16 +114,15 @@ var sessionUpdateDescriptor = entbuilder.UpdateDescriptor[config, *SessionMutati
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: true,
-					Table:   session.DeviceTable,
-					Columns: []string{session.DeviceColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        session.DeviceTable,
+					Columns:      session.DeviceColumn,
+					Bidi:         false,
+					TargetColumn: device.FieldID,
+					TargetType:   field.TypeBytes,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

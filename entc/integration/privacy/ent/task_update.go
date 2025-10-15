@@ -268,17 +268,15 @@ var taskUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TaskMutation]{
 		{
 			Clear: func(cfg config, m *TaskMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TeamsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: false,
-						Table:   task.TeamsTable,
-						Columns: task.TeamsPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      false,
+						Table:        task.TeamsTable,
+						Columns:      task.TeamsPrimaryKey,
+						Bidi:         false,
+						TargetColumn: team.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -287,16 +285,15 @@ var taskUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TaskMutation]{
 				if len(nodes) == 0 || m.TeamsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   task.TeamsTable,
-					Columns: task.TeamsPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        task.TeamsTable,
+					Columns:      task.TeamsPrimaryKey,
+					Bidi:         false,
+					TargetColumn: team.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -307,16 +304,15 @@ var taskUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TaskMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   task.TeamsTable,
-					Columns: task.TeamsPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        task.TeamsTable,
+					Columns:      task.TeamsPrimaryKey,
+					Bidi:         false,
+					TargetColumn: team.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -327,17 +323,15 @@ var taskUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TaskMutation]{
 		{
 			Clear: func(cfg config, m *TaskMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.OwnerCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: true,
-						Table:   task.OwnerTable,
-						Columns: []string{task.OwnerColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        task.OwnerTable,
+						Columns:      task.OwnerColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -346,16 +340,15 @@ var taskUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TaskMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: true,
-					Table:   task.OwnerTable,
-					Columns: []string{task.OwnerColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        task.OwnerTable,
+					Columns:      task.OwnerColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

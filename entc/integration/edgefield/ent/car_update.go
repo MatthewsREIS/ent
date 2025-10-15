@@ -142,17 +142,15 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 		{
 			Clear: func(cfg config, m *CarMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.RentalsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: false,
-						Table:   car.RentalsTable,
-						Columns: []string{car.RentalsColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      false,
+						Table:        car.RentalsTable,
+						Columns:      car.RentalsColumn,
+						Bidi:         false,
+						TargetColumn: rental.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -161,16 +159,15 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 				if len(nodes) == 0 || m.RentalsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   car.RentalsTable,
-					Columns: []string{car.RentalsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        car.RentalsTable,
+					Columns:      car.RentalsColumn,
+					Bidi:         false,
+					TargetColumn: rental.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -181,16 +178,15 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   car.RentalsTable,
-					Columns: []string{car.RentalsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        car.RentalsTable,
+					Columns:      car.RentalsColumn,
+					Bidi:         false,
+					TargetColumn: rental.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

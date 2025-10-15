@@ -202,17 +202,15 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 		{
 			Clear: func(cfg config, m *MetadataMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2O,
-						Inverse: true,
-						Table:   metadata.UserTable,
-						Columns: []string{metadata.UserColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2O,
+						Inverse:      true,
+						Table:        metadata.UserTable,
+						Columns:      metadata.UserColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -221,16 +219,15 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2O,
-					Inverse: true,
-					Table:   metadata.UserTable,
-					Columns: []string{metadata.UserColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2O,
+					Inverse:      true,
+					Table:        metadata.UserTable,
+					Columns:      metadata.UserColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -241,17 +238,15 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 		{
 			Clear: func(cfg config, m *MetadataMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ChildrenCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: true,
-						Table:   metadata.ChildrenTable,
-						Columns: []string{metadata.ChildrenColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      true,
+						Table:        metadata.ChildrenTable,
+						Columns:      metadata.ChildrenColumn,
+						Bidi:         false,
+						TargetColumn: metadata.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -260,16 +255,15 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 				if len(nodes) == 0 || m.ChildrenCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   metadata.ChildrenTable,
-					Columns: []string{metadata.ChildrenColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        metadata.ChildrenTable,
+					Columns:      metadata.ChildrenColumn,
+					Bidi:         false,
+					TargetColumn: metadata.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -280,16 +274,15 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   metadata.ChildrenTable,
-					Columns: []string{metadata.ChildrenColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        metadata.ChildrenTable,
+					Columns:      metadata.ChildrenColumn,
+					Bidi:         false,
+					TargetColumn: metadata.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -300,17 +293,15 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 		{
 			Clear: func(cfg config, m *MetadataMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   metadata.ParentTable,
-						Columns: []string{metadata.ParentColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        metadata.ParentTable,
+						Columns:      metadata.ParentColumn,
+						Bidi:         false,
+						TargetColumn: metadata.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -319,16 +310,15 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   metadata.ParentTable,
-					Columns: []string{metadata.ParentColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        metadata.ParentTable,
+					Columns:      metadata.ParentColumn,
+					Bidi:         false,
+					TargetColumn: metadata.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

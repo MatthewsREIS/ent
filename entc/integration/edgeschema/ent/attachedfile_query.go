@@ -451,19 +451,15 @@ func (_q *AttachedFileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 
 var attachedfileFiEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[AttachedFile, File, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   attachedfile.FiTable,
-			Columns: []string{attachedfile.FiColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: file.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        attachedfile.FiTable,
+			Columns:      attachedfile.FiColumn,
+			Bidi:         false,
+			TargetColumn: file.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *AttachedFile) int { return n.ID },
 	ExtractEdgeID: func(e *File) int { return e.ID },
@@ -474,19 +470,15 @@ var attachedfileFiEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[AttachedFil
 }
 var attachedfileProcEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[AttachedFile, Process, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   attachedfile.ProcTable,
-			Columns: []string{attachedfile.ProcColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: process.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        attachedfile.ProcTable,
+			Columns:      attachedfile.ProcColumn,
+			Bidi:         false,
+			TargetColumn: process.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *AttachedFile) int { return n.ID },
 	ExtractEdgeID: func(e *Process) int { return e.ID },

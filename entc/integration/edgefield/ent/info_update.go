@@ -130,17 +130,15 @@ var infoUpdateDescriptor = entbuilder.UpdateDescriptor[config, *InfoMutation]{
 		{
 			Clear: func(cfg config, m *InfoMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   info.UserTable,
-						Columns: []string{info.UserColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        info.UserTable,
+						Columns:      info.UserColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -149,16 +147,15 @@ var infoUpdateDescriptor = entbuilder.UpdateDescriptor[config, *InfoMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   info.UserTable,
-					Columns: []string{info.UserColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        info.UserTable,
+					Columns:      info.UserColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

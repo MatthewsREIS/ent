@@ -408,19 +408,15 @@ func (_q *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 
 var cardOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Card, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   card.OwnerTable,
-			Columns: []string{card.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2O,
+			Inverse:      true,
+			Table:        card.OwnerTable,
+			Columns:      card.OwnerColumn,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Card) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },

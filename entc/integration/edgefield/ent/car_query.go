@@ -418,19 +418,15 @@ func (_q *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 
 var carRentalsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Car, Rental, uuid.UUID, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   car.RentalsTable,
-			Columns: []string{car.RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: rental.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        car.RentalsTable,
+			Columns:      car.RentalsColumn,
+			Bidi:         false,
+			TargetColumn: rental.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Car) uuid.UUID { return n.ID },
 	ExtractEdgeID: func(e *Rental) int { return e.ID },

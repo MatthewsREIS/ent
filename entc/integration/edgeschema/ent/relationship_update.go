@@ -203,17 +203,15 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 		{
 			Clear: func(cfg config, m *RelationshipMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   relationship.UserTable,
-						Columns: []string{relationship.UserColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        relationship.UserTable,
+						Columns:      relationship.UserColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -222,16 +220,15 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   relationship.UserTable,
-					Columns: []string{relationship.UserColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        relationship.UserTable,
+					Columns:      relationship.UserColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -242,17 +239,15 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 		{
 			Clear: func(cfg config, m *RelationshipMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.RelativeCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   relationship.RelativeTable,
-						Columns: []string{relationship.RelativeColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        relationship.RelativeTable,
+						Columns:      relationship.RelativeColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -261,16 +256,15 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   relationship.RelativeTable,
-					Columns: []string{relationship.RelativeColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        relationship.RelativeTable,
+					Columns:      relationship.RelativeColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -281,17 +275,15 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 		{
 			Clear: func(cfg config, m *RelationshipMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.InfoCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   relationship.InfoTable,
-						Columns: []string{relationship.InfoColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        relationship.InfoTable,
+						Columns:      relationship.InfoColumn,
+						Bidi:         false,
+						TargetColumn: relationshipinfo.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -300,16 +292,15 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   relationship.InfoTable,
-					Columns: []string{relationship.InfoColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        relationship.InfoTable,
+					Columns:      relationship.InfoColumn,
+					Bidi:         false,
+					TargetColumn: relationshipinfo.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

@@ -196,17 +196,15 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 		{
 			Clear: func(cfg config, m *BlobMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2O,
-						Inverse: false,
-						Table:   blob.ParentTable,
-						Columns: []string{blob.ParentColumn},
-						Bidi:    true,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2O,
+						Inverse:      false,
+						Table:        blob.ParentTable,
+						Columns:      blob.ParentColumn,
+						Bidi:         true,
+						TargetColumn: blob.FieldID,
+						TargetType:   field.TypeUUID,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -215,16 +213,15 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2O,
-					Inverse: false,
-					Table:   blob.ParentTable,
-					Columns: []string{blob.ParentColumn},
-					Bidi:    true,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2O,
+					Inverse:      false,
+					Table:        blob.ParentTable,
+					Columns:      blob.ParentColumn,
+					Bidi:         true,
+					TargetColumn: blob.FieldID,
+					TargetType:   field.TypeUUID,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -235,17 +232,15 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 		{
 			Clear: func(cfg config, m *BlobMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.LinksCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: false,
-						Table:   blob.LinksTable,
-						Columns: blob.LinksPrimaryKey,
-						Bidi:    true,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      false,
+						Table:        blob.LinksTable,
+						Columns:      blob.LinksPrimaryKey,
+						Bidi:         true,
+						TargetColumn: blob.FieldID,
+						TargetType:   field.TypeUUID,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -254,16 +249,15 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 				if len(nodes) == 0 || m.LinksCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   blob.LinksTable,
-					Columns: blob.LinksPrimaryKey,
-					Bidi:    true,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        blob.LinksTable,
+					Columns:      blob.LinksPrimaryKey,
+					Bidi:         true,
+					TargetColumn: blob.FieldID,
+					TargetType:   field.TypeUUID,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -274,16 +268,15 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   blob.LinksTable,
-					Columns: blob.LinksPrimaryKey,
-					Bidi:    true,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        blob.LinksTable,
+					Columns:      blob.LinksPrimaryKey,
+					Bidi:         true,
+					TargetColumn: blob.FieldID,
+					TargetType:   field.TypeUUID,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

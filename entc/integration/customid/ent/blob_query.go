@@ -504,19 +504,15 @@ func (_q *BlobQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blob, e
 
 var blobParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Blob, Blob, uuid.UUID, uuid.UUID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   blob.ParentTable,
-			Columns: []string{blob.ParentColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: blob.FieldID,
-					Type:   field.TypeUUID,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2O,
+			Inverse:      false,
+			Table:        blob.ParentTable,
+			Columns:      blob.ParentColumn,
+			Bidi:         true,
+			TargetColumn: blob.FieldID,
+			TargetType:   field.TypeUUID,
+		})
 	},
 	ExtractNodeID: func(n *Blob) uuid.UUID { return n.ID },
 	ExtractEdgeID: func(e *Blob) uuid.UUID { return e.ID },
@@ -526,19 +522,15 @@ var blobParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Blob, Blob, uui
 }
 var blobLinksEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Blob, Blob, uuid.UUID, uuid.UUID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   blob.LinksTable,
-			Columns: blob.LinksPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: blob.FieldID,
-					Type:   field.TypeUUID,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        blob.LinksTable,
+			Columns:      blob.LinksPrimaryKey,
+			Bidi:         true,
+			TargetColumn: blob.FieldID,
+			TargetType:   field.TypeUUID,
+		})
 	},
 	ExtractNodeID: func(n *Blob) uuid.UUID { return n.ID },
 	ExtractEdgeID: func(e *Blob) uuid.UUID { return e.ID },

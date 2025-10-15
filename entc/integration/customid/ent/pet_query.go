@@ -523,19 +523,15 @@ func (_q *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 
 var petOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, User, string, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        pet.OwnerTable,
+			Columns:      pet.OwnerColumn,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Pet) string { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },
@@ -545,19 +541,15 @@ var petOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, User, string
 }
 var petCarsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, Car, string, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   pet.CarsTable,
-			Columns: []string{pet.CarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: car.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        pet.CarsTable,
+			Columns:      pet.CarsColumn,
+			Bidi:         false,
+			TargetColumn: car.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Pet) string { return n.ID },
 	ExtractEdgeID: func(e *Car) int { return e.ID },
@@ -567,19 +559,15 @@ var petCarsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, Car, string, 
 }
 var petFriendsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, Pet, string, string]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   pet.FriendsTable,
-			Columns: pet.FriendsPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: pet.FieldID,
-					Type:   field.TypeString,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        pet.FriendsTable,
+			Columns:      pet.FriendsPrimaryKey,
+			Bidi:         true,
+			TargetColumn: pet.FieldID,
+			TargetType:   field.TypeString,
+		})
 	},
 	ExtractNodeID: func(n *Pet) string { return n.ID },
 	ExtractEdgeID: func(e *Pet) string { return e.ID },
@@ -594,19 +582,15 @@ var petFriendsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, Pet, strin
 }
 var petBestFriendEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, Pet, string, string]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   pet.BestFriendTable,
-			Columns: []string{pet.BestFriendColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: pet.FieldID,
-					Type:   field.TypeString,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2O,
+			Inverse:      false,
+			Table:        pet.BestFriendTable,
+			Columns:      pet.BestFriendColumn,
+			Bidi:         true,
+			TargetColumn: pet.FieldID,
+			TargetType:   field.TypeString,
+		})
 	},
 	ExtractNodeID: func(n *Pet) string { return n.ID },
 	ExtractEdgeID: func(e *Pet) string { return e.ID },

@@ -96,17 +96,15 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 		{
 			Clear: func(cfg config, m *CarMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.OwnerCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2O,
-						Inverse: true,
-						Table:   car.OwnerTable,
-						Columns: []string{car.OwnerColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2O,
+						Inverse:      true,
+						Table:        car.OwnerTable,
+						Columns:      car.OwnerColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -115,16 +113,15 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2O,
-					Inverse: true,
-					Table:   car.OwnerTable,
-					Columns: []string{car.OwnerColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2O,
+					Inverse:      true,
+					Table:        car.OwnerTable,
+					Columns:      car.OwnerColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

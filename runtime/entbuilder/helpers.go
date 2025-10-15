@@ -3,6 +3,7 @@ package entbuilder
 import (
 	"database/sql/driver"
 
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
 
@@ -124,6 +125,44 @@ func NillableFieldWithScanner[C, N, M, T any](
 				setter(node, v)
 			}
 			return nil
+		},
+	}
+}
+
+// EdgeSpecParams holds the parameters needed to create an EdgeSpec.
+// This helper type reduces code duplication when creating sqlgraph.EdgeSpec instances.
+type EdgeSpecParams struct {
+	Rel          sqlgraph.Rel
+	Inverse      bool
+	Table        string
+	Columns      interface{} // []string for O2M/O2O/M2O, or string slice for M2M primary keys
+	Bidi         bool
+	TargetColumn string
+	TargetType   field.Type
+}
+
+// NewEdgeSpec creates a sqlgraph.EdgeSpec from the given parameters.
+// This reduces ~10 lines of repetitive EdgeSpec creation to a single function call.
+func NewEdgeSpec(params EdgeSpecParams) *sqlgraph.EdgeSpec {
+	var columns []string
+	switch v := params.Columns.(type) {
+	case []string:
+		columns = v
+	case string:
+		columns = []string{v}
+	}
+
+	return &sqlgraph.EdgeSpec{
+		Rel:     params.Rel,
+		Inverse: params.Inverse,
+		Table:   params.Table,
+		Columns: columns,
+		Bidi:    params.Bidi,
+		Target: &sqlgraph.EdgeTarget{
+			IDSpec: &sqlgraph.FieldSpec{
+				Column: params.TargetColumn,
+				Type:   params.TargetType,
+			},
 		},
 	}
 }

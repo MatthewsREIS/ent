@@ -132,17 +132,15 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 		{
 			Clear: func(cfg config, m *IntSIDMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   intsid.ParentTable,
-						Columns: []string{intsid.ParentColumn},
-						Bidi:    true,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        intsid.ParentTable,
+						Columns:      intsid.ParentColumn,
+						Bidi:         true,
+						TargetColumn: intsid.FieldID,
+						TargetType:   field.TypeInt64,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -151,16 +149,15 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   intsid.ParentTable,
-					Columns: []string{intsid.ParentColumn},
-					Bidi:    true,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        intsid.ParentTable,
+					Columns:      intsid.ParentColumn,
+					Bidi:         true,
+					TargetColumn: intsid.FieldID,
+					TargetType:   field.TypeInt64,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -171,17 +168,15 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 		{
 			Clear: func(cfg config, m *IntSIDMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ChildrenCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: true,
-						Table:   intsid.ChildrenTable,
-						Columns: []string{intsid.ChildrenColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      true,
+						Table:        intsid.ChildrenTable,
+						Columns:      intsid.ChildrenColumn,
+						Bidi:         false,
+						TargetColumn: intsid.FieldID,
+						TargetType:   field.TypeInt64,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -190,16 +185,15 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 				if len(nodes) == 0 || m.ChildrenCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   intsid.ChildrenTable,
-					Columns: []string{intsid.ChildrenColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        intsid.ChildrenTable,
+					Columns:      intsid.ChildrenColumn,
+					Bidi:         false,
+					TargetColumn: intsid.FieldID,
+					TargetType:   field.TypeInt64,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -210,16 +204,15 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: true,
-					Table:   intsid.ChildrenTable,
-					Columns: []string{intsid.ChildrenColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        intsid.ChildrenTable,
+					Columns:      intsid.ChildrenColumn,
+					Bidi:         false,
+					TargetColumn: intsid.FieldID,
+					TargetType:   field.TypeInt64,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

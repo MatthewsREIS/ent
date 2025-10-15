@@ -180,17 +180,15 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 		{
 			Clear: func(cfg config, m *TeamMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TasksCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: true,
-						Table:   team.TasksTable,
-						Columns: team.TasksPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      true,
+						Table:        team.TasksTable,
+						Columns:      team.TasksPrimaryKey,
+						Bidi:         false,
+						TargetColumn: task.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -199,16 +197,15 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 				if len(nodes) == 0 || m.TasksCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   team.TasksTable,
-					Columns: team.TasksPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        team.TasksTable,
+					Columns:      team.TasksPrimaryKey,
+					Bidi:         false,
+					TargetColumn: task.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -219,16 +216,15 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   team.TasksTable,
-					Columns: team.TasksPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        team.TasksTable,
+					Columns:      team.TasksPrimaryKey,
+					Bidi:         false,
+					TargetColumn: task.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -239,17 +235,15 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 		{
 			Clear: func(cfg config, m *TeamMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UsersCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: true,
-						Table:   team.UsersTable,
-						Columns: team.UsersPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      true,
+						Table:        team.UsersTable,
+						Columns:      team.UsersPrimaryKey,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -258,16 +252,15 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 				if len(nodes) == 0 || m.UsersCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   team.UsersTable,
-					Columns: team.UsersPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        team.UsersTable,
+					Columns:      team.UsersPrimaryKey,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -278,16 +271,15 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   team.UsersTable,
-					Columns: team.UsersPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        team.UsersTable,
+					Columns:      team.UsersPrimaryKey,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

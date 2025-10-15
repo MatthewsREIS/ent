@@ -165,17 +165,15 @@ var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
 		{
 			Clear: func(cfg config, m *NodeMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.PrevCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2O,
-						Inverse: true,
-						Table:   node.PrevTable,
-						Columns: []string{node.PrevColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2O,
+						Inverse:      true,
+						Table:        node.PrevTable,
+						Columns:      node.PrevColumn,
+						Bidi:         false,
+						TargetColumn: node.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -184,16 +182,15 @@ var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2O,
-					Inverse: true,
-					Table:   node.PrevTable,
-					Columns: []string{node.PrevColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2O,
+					Inverse:      true,
+					Table:        node.PrevTable,
+					Columns:      node.PrevColumn,
+					Bidi:         false,
+					TargetColumn: node.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -204,17 +201,15 @@ var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
 		{
 			Clear: func(cfg config, m *NodeMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.NextCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2O,
-						Inverse: false,
-						Table:   node.NextTable,
-						Columns: []string{node.NextColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2O,
+						Inverse:      false,
+						Table:        node.NextTable,
+						Columns:      node.NextColumn,
+						Bidi:         false,
+						TargetColumn: node.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -223,16 +218,15 @@ var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2O,
-					Inverse: false,
-					Table:   node.NextTable,
-					Columns: []string{node.NextColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2O,
+					Inverse:      false,
+					Table:        node.NextTable,
+					Columns:      node.NextColumn,
+					Bidi:         false,
+					TargetColumn: node.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

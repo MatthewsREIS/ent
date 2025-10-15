@@ -451,19 +451,15 @@ func (_q *UserGroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Us
 
 var usergroupUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[UserGroup, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   usergroup.UserTable,
-			Columns: []string{usergroup.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: user.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        usergroup.UserTable,
+			Columns:      usergroup.UserColumn,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *UserGroup) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },
@@ -474,19 +470,15 @@ var usergroupUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[UserGroup, U
 }
 var usergroupGroupEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[UserGroup, Group, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   usergroup.GroupTable,
-			Columns: []string{usergroup.GroupColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: group.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        usergroup.GroupTable,
+			Columns:      usergroup.GroupColumn,
+			Bidi:         false,
+			TargetColumn: group.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *UserGroup) int { return n.ID },
 	ExtractEdgeID: func(e *Group) int { return e.ID },

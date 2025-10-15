@@ -167,17 +167,15 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 		{
 			Clear: func(cfg config, m *NoteMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: true,
-						Table:   note.ParentTable,
-						Columns: []string{note.ParentColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        note.ParentTable,
+						Columns:      note.ParentColumn,
+						Bidi:         false,
+						TargetColumn: note.FieldID,
+						TargetType:   field.TypeString,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -186,16 +184,15 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: true,
-					Table:   note.ParentTable,
-					Columns: []string{note.ParentColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        note.ParentTable,
+					Columns:      note.ParentColumn,
+					Bidi:         false,
+					TargetColumn: note.FieldID,
+					TargetType:   field.TypeString,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -206,17 +203,15 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 		{
 			Clear: func(cfg config, m *NoteMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ChildrenCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: false,
-						Table:   note.ChildrenTable,
-						Columns: []string{note.ChildrenColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      false,
+						Table:        note.ChildrenTable,
+						Columns:      note.ChildrenColumn,
+						Bidi:         false,
+						TargetColumn: note.FieldID,
+						TargetType:   field.TypeString,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -225,16 +220,15 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 				if len(nodes) == 0 || m.ChildrenCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   note.ChildrenTable,
-					Columns: []string{note.ChildrenColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        note.ChildrenTable,
+					Columns:      note.ChildrenColumn,
+					Bidi:         false,
+					TargetColumn: note.FieldID,
+					TargetType:   field.TypeString,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -245,16 +239,15 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   note.ChildrenTable,
-					Columns: []string{note.ChildrenColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(note.FieldID, field.TypeString),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        note.ChildrenTable,
+					Columns:      note.ChildrenColumn,
+					Bidi:         false,
+					TargetColumn: note.FieldID,
+					TargetType:   field.TypeString,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

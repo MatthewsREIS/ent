@@ -160,17 +160,15 @@ var usertweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserTweetMu
 		{
 			Clear: func(cfg config, m *UserTweetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   usertweet.UserTable,
-						Columns: []string{usertweet.UserColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        usertweet.UserTable,
+						Columns:      usertweet.UserColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -179,16 +177,15 @@ var usertweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserTweetMu
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   usertweet.UserTable,
-					Columns: []string{usertweet.UserColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        usertweet.UserTable,
+					Columns:      usertweet.UserColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -199,17 +196,15 @@ var usertweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserTweetMu
 		{
 			Clear: func(cfg config, m *UserTweetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TweetCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: false,
-						Table:   usertweet.TweetTable,
-						Columns: []string{usertweet.TweetColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      false,
+						Table:        usertweet.TweetTable,
+						Columns:      usertweet.TweetColumn,
+						Bidi:         false,
+						TargetColumn: tweet.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -218,16 +213,15 @@ var usertweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserTweetMu
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: false,
-					Table:   usertweet.TweetTable,
-					Columns: []string{usertweet.TweetColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      false,
+					Table:        usertweet.TweetTable,
+					Columns:      usertweet.TweetColumn,
+					Bidi:         false,
+					TargetColumn: tweet.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

@@ -449,19 +449,15 @@ func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 
 var nodePrevEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   node.PrevTable,
-			Columns: []string{node.PrevColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: node.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2O,
+			Inverse:      true,
+			Table:        node.PrevTable,
+			Columns:      node.PrevColumn,
+			Bidi:         false,
+			TargetColumn: node.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Node) int { return n.ID },
 	ExtractEdgeID: func(e *Node) int { return e.ID },
@@ -472,19 +468,15 @@ var nodePrevEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, 
 }
 var nodeNextEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   node.NextTable,
-			Columns: []string{node.NextColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: node.FieldID,
-					Type:   field.TypeInt,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2O,
+			Inverse:      false,
+			Table:        node.NextTable,
+			Columns:      node.NextColumn,
+			Bidi:         false,
+			TargetColumn: node.FieldID,
+			TargetType:   field.TypeInt,
+		})
 	},
 	ExtractNodeID: func(n *Node) int { return n.ID },
 	ExtractEdgeID: func(e *Node) int { return e.ID },

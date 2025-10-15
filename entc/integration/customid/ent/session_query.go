@@ -395,19 +395,15 @@ func (_q *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 
 var sessionDeviceEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Session, Device, schema.ID, schema.ID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: device.FieldID,
-					Type:   field.TypeBytes,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        session.DeviceTable,
+			Columns:      session.DeviceColumn,
+			Bidi:         false,
+			TargetColumn: device.FieldID,
+			TargetType:   field.TypeBytes,
+		})
 	},
 	ExtractNodeID: func(n *Session) schema.ID { return n.ID },
 	ExtractEdgeID: func(e *Device) schema.ID { return e.ID },

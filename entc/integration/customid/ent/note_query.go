@@ -459,19 +459,15 @@ func (_q *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 
 var noteParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Note, Note, schema.NoteID, schema.NoteID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   note.ParentTable,
-			Columns: []string{note.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: note.FieldID,
-					Type:   field.TypeString,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        note.ParentTable,
+			Columns:      note.ParentColumn,
+			Bidi:         false,
+			TargetColumn: note.FieldID,
+			TargetType:   field.TypeString,
+		})
 	},
 	ExtractNodeID: func(n *Note) schema.NoteID { return n.ID },
 	ExtractEdgeID: func(e *Note) schema.NoteID { return e.ID },
@@ -481,19 +477,15 @@ var noteParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Note, Note, sch
 }
 var noteChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Note, Note, schema.NoteID, schema.NoteID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   note.ChildrenTable,
-			Columns: []string{note.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: note.FieldID,
-					Type:   field.TypeString,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        note.ChildrenTable,
+			Columns:      note.ChildrenColumn,
+			Bidi:         false,
+			TargetColumn: note.FieldID,
+			TargetType:   field.TypeString,
+		})
 	},
 	ExtractNodeID: func(n *Note) schema.NoteID { return n.ID },
 	ExtractEdgeID: func(e *Note) schema.NoteID { return e.ID },

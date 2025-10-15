@@ -194,17 +194,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.OwnerCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: true,
-						Table:   pet.OwnerTable,
-						Columns: []string{pet.OwnerColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        pet.OwnerTable,
+						Columns:      pet.OwnerColumn,
+						Bidi:         false,
+						TargetColumn: user.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -213,16 +211,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: true,
-					Table:   pet.OwnerTable,
-					Columns: []string{pet.OwnerColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        pet.OwnerTable,
+					Columns:      pet.OwnerColumn,
+					Bidi:         false,
+					TargetColumn: user.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -233,17 +230,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.CarsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: false,
-						Table:   pet.CarsTable,
-						Columns: []string{pet.CarsColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      false,
+						Table:        pet.CarsTable,
+						Columns:      pet.CarsColumn,
+						Bidi:         false,
+						TargetColumn: car.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -252,16 +247,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 				if len(nodes) == 0 || m.CarsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   pet.CarsTable,
-					Columns: []string{pet.CarsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        pet.CarsTable,
+					Columns:      pet.CarsColumn,
+					Bidi:         false,
+					TargetColumn: car.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -272,16 +266,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   pet.CarsTable,
-					Columns: []string{pet.CarsColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        pet.CarsTable,
+					Columns:      pet.CarsColumn,
+					Bidi:         false,
+					TargetColumn: car.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -292,17 +285,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FriendsCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: false,
-						Table:   pet.FriendsTable,
-						Columns: pet.FriendsPrimaryKey,
-						Bidi:    true,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeString),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      false,
+						Table:        pet.FriendsTable,
+						Columns:      pet.FriendsPrimaryKey,
+						Bidi:         true,
+						TargetColumn: pet.FieldID,
+						TargetType:   field.TypeString,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -311,16 +302,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 				if len(nodes) == 0 || m.FriendsCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   pet.FriendsTable,
-					Columns: pet.FriendsPrimaryKey,
-					Bidi:    true,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeString),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        pet.FriendsTable,
+					Columns:      pet.FriendsPrimaryKey,
+					Bidi:         true,
+					TargetColumn: pet.FieldID,
+					TargetType:   field.TypeString,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -331,16 +321,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: false,
-					Table:   pet.FriendsTable,
-					Columns: pet.FriendsPrimaryKey,
-					Bidi:    true,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeString),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      false,
+					Table:        pet.FriendsTable,
+					Columns:      pet.FriendsPrimaryKey,
+					Bidi:         true,
+					TargetColumn: pet.FieldID,
+					TargetType:   field.TypeString,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -351,17 +340,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.BestFriendCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2O,
-						Inverse: false,
-						Table:   pet.BestFriendTable,
-						Columns: []string{pet.BestFriendColumn},
-						Bidi:    true,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeString),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2O,
+						Inverse:      false,
+						Table:        pet.BestFriendTable,
+						Columns:      pet.BestFriendColumn,
+						Bidi:         true,
+						TargetColumn: pet.FieldID,
+						TargetType:   field.TypeString,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -370,16 +357,15 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2O,
-					Inverse: false,
-					Table:   pet.BestFriendTable,
-					Columns: []string{pet.BestFriendColumn},
-					Bidi:    true,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeString),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2O,
+					Inverse:      false,
+					Table:        pet.BestFriendTable,
+					Columns:      pet.BestFriendColumn,
+					Bidi:         true,
+					TargetColumn: pet.FieldID,
+					TargetType:   field.TypeString,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

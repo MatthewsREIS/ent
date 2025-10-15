@@ -144,17 +144,15 @@ var accountUpdateDescriptor = entbuilder.UpdateDescriptor[config, *AccountMutati
 		{
 			Clear: func(cfg config, m *AccountMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TokenCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.O2M,
-						Inverse: false,
-						Table:   account.TokenTable,
-						Columns: []string{account.TokenColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      false,
+						Table:        account.TokenTable,
+						Columns:      account.TokenColumn,
+						Bidi:         false,
+						TargetColumn: token.FieldID,
+						TargetType:   field.TypeOther,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -163,16 +161,15 @@ var accountUpdateDescriptor = entbuilder.UpdateDescriptor[config, *AccountMutati
 				if len(nodes) == 0 || m.TokenCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   account.TokenTable,
-					Columns: []string{account.TokenColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        account.TokenTable,
+					Columns:      account.TokenColumn,
+					Bidi:         false,
+					TargetColumn: token.FieldID,
+					TargetType:   field.TypeOther,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -183,16 +180,15 @@ var accountUpdateDescriptor = entbuilder.UpdateDescriptor[config, *AccountMutati
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.O2M,
-					Inverse: false,
-					Table:   account.TokenTable,
-					Columns: []string{account.TokenColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        account.TokenTable,
+					Columns:      account.TokenColumn,
+					Bidi:         false,
+					TargetColumn: token.FieldID,
+					TargetType:   field.TypeOther,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

@@ -133,17 +133,15 @@ var fileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *FileMutation]{
 		{
 			Clear: func(cfg config, m *FileMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ProcessesCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2M,
-						Inverse: true,
-						Table:   file.ProcessesTable,
-						Columns: file.ProcessesPrimaryKey,
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2M,
+						Inverse:      true,
+						Table:        file.ProcessesTable,
+						Columns:      file.ProcessesPrimaryKey,
+						Bidi:         false,
+						TargetColumn: process.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -152,16 +150,15 @@ var fileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *FileMutation]{
 				if len(nodes) == 0 || m.ProcessesCleared() {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   file.ProcessesTable,
-					Columns: file.ProcessesPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        file.ProcessesTable,
+					Columns:      file.ProcessesPrimaryKey,
+					Bidi:         false,
+					TargetColumn: process.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -172,16 +169,15 @@ var fileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *FileMutation]{
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2M,
-					Inverse: true,
-					Table:   file.ProcessesTable,
-					Columns: file.ProcessesPrimaryKey,
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2M,
+					Inverse:      true,
+					Table:        file.ProcessesTable,
+					Columns:      file.ProcessesPrimaryKey,
+					Bidi:         false,
+					TargetColumn: process.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

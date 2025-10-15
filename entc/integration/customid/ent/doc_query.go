@@ -502,19 +502,15 @@ func (_q *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 
 var docParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Doc, Doc, schema.DocID, schema.DocID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   doc.ParentTable,
-			Columns: []string{doc.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: doc.FieldID,
-					Type:   field.TypeString,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        doc.ParentTable,
+			Columns:      doc.ParentColumn,
+			Bidi:         false,
+			TargetColumn: doc.FieldID,
+			TargetType:   field.TypeString,
+		})
 	},
 	ExtractNodeID: func(n *Doc) schema.DocID { return n.ID },
 	ExtractEdgeID: func(e *Doc) schema.DocID { return e.ID },
@@ -524,19 +520,15 @@ var docParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Doc, Doc, schema
 }
 var docChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Doc, Doc, schema.DocID, schema.DocID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   doc.ChildrenTable,
-			Columns: []string{doc.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: doc.FieldID,
-					Type:   field.TypeString,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        doc.ChildrenTable,
+			Columns:      doc.ChildrenColumn,
+			Bidi:         false,
+			TargetColumn: doc.FieldID,
+			TargetType:   field.TypeString,
+		})
 	},
 	ExtractNodeID: func(n *Doc) schema.DocID { return n.ID },
 	ExtractEdgeID: func(e *Doc) schema.DocID { return e.ID },
@@ -546,19 +538,15 @@ var docChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Doc, Doc, sche
 }
 var docRelatedEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Doc, Doc, schema.DocID, schema.DocID]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   doc.RelatedTable,
-			Columns: doc.RelatedPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Column: doc.FieldID,
-					Type:   field.TypeString,
-				},
-			},
-		}
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2M,
+			Inverse:      false,
+			Table:        doc.RelatedTable,
+			Columns:      doc.RelatedPrimaryKey,
+			Bidi:         true,
+			TargetColumn: doc.FieldID,
+			TargetType:   field.TypeString,
+		})
 	},
 	ExtractNodeID: func(n *Doc) schema.DocID { return n.ID },
 	ExtractEdgeID: func(e *Doc) schema.DocID { return e.ID },

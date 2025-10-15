@@ -130,17 +130,15 @@ var commentUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CommentMutati
 		{
 			Clear: func(cfg config, m *CommentMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.PostCleared() {
-					edge := &sqlgraph.EdgeSpec{
-						Rel:     sqlgraph.M2O,
-						Inverse: true,
-						Table:   comment.PostTable,
-						Columns: []string{comment.PostColumn},
-						Bidi:    false,
-						Target: &sqlgraph.EdgeTarget{
-							IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt),
-						},
-					}
-					return edge, true, nil
+					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        comment.PostTable,
+						Columns:      comment.PostColumn,
+						Bidi:         false,
+						TargetColumn: post.FieldID,
+						TargetType:   field.TypeInt,
+					}), true, nil
 				}
 				return nil, false, nil
 			},
@@ -149,16 +147,15 @@ var commentUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CommentMutati
 				if len(nodes) == 0 {
 					return nil, nil
 				}
-				edge := &sqlgraph.EdgeSpec{
-					Rel:     sqlgraph.M2O,
-					Inverse: true,
-					Table:   comment.PostTable,
-					Columns: []string{comment.PostColumn},
-					Bidi:    false,
-					Target: &sqlgraph.EdgeTarget{
-						IDSpec: sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt),
-					},
-				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        comment.PostTable,
+					Columns:      comment.PostColumn,
+					Bidi:         false,
+					TargetColumn: post.FieldID,
+					TargetType:   field.TypeInt,
+				})
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
