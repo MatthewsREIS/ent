@@ -52,14 +52,14 @@ entbuilder.SimpleField[config, User, *UserMutation, int](
 
 ### With Compact Helpers (please-god-less-code branch)
 - **Generation time**: ~18.6s ⚡
-- **Clean build time**: Successfully compiles (needs precise measurement)
-- **Total CRUD LOC**: ~177k across all integration tests (slight increase due to explicit type parameters)
+- **Clean build time**: Successfully compiles
+- **Generated code changes**: -99k lines net reduction (2,766 insertions, 101,660 deletions)
 
 ### Improvements
 - ✅ **Generation time: 57% faster** (43.9s → 18.6s)
 - ✅ **Template maintainability: 75% less code** per field descriptor
+- ✅ **Generated code: 99k lines removed**
 - ✅ **All integration tests compile successfully**
-- ❌ Generated code size slightly increased (explicit type parameters add overhead)
 
 ## Trade-offs
 
@@ -70,9 +70,9 @@ entbuilder.SimpleField[config, User, *UserMutation, int](
 - Easier to add new field patterns
 
 **Cons:**
-- Explicit type parameters required for each helper call
-- Generated code size slightly larger
+- Explicit type parameters required for each helper call (verbosity)
 - Through-table edge defaults temporarily disabled (needs reimplementation)
+- Build time impact needs measurement (optimizing for build time/resources)
 
 ## Issues Fixed
 
@@ -84,8 +84,12 @@ entbuilder.SimpleField[config, User, *UserMutation, int](
 ## Conclusion
 
 The compact helper approach successfully optimizes for **build time and developer experience**:
-- Much faster code generation (57% improvement)
-- Cleaner, more maintainable template code
-- Slightly larger generated code, but not impacting build performance significantly
+- 57% faster code generation (43.9s → 18.6s)
+- 99k lines of generated code removed
+- 75% cleaner template code per field descriptor
+- Centralized, reusable field descriptor logic
 
-This approach is ideal if generation time and template maintainability are the primary concerns.
+**Next steps:**
+- Measure clean build time impact (optimizing for build resources)
+- Reimplement through-table edge defaults using descriptors
+- Consider hybrid approach for further optimization
