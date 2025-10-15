@@ -195,6 +195,34 @@ var tagCreateDescriptor = entbuilder.CreateDescriptor[config, Tag, *TagMutation]
 						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 					},
 				}
+				// Apply through-table defaults for TweetTag
+				throughMut := newTweetTagMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, tweettagCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range tweettagCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
+				// Apply through-table ID default if present
+				if tweettagCreateDescriptor.ID.UserDefined {
+					if idFv, ok, err := tweettagCreateDescriptor.ID.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: tweettagCreateDescriptor.ID.Column,
+							Type:   tweettagCreateDescriptor.ID.Type,
+							Value:  idFv.Spec,
+						})
+					}
+				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}

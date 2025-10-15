@@ -133,6 +133,22 @@ var processCreateDescriptor = entbuilder.CreateDescriptor[config, Process, *Proc
 						IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
 					},
 				}
+				// Apply through-table defaults for AttachedFile
+				throughMut := newAttachedFileMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, attachedfileCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range attachedfileCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}

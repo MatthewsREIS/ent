@@ -52,7 +52,9 @@ entbuilder.SimpleField[config, User, *UserMutation, int](
 
 ### With Compact Helpers (please-god-less-code branch)
 - **Generation time**: ~18.6s ⚡
+- **Generation memory**: ~214 MB peak RSS (multischema test)
 - **Clean build time**: ~11.8s (average of 3 runs: 11.882s, 11.763s, 11.763s)
+- **Clean build memory**: ~242 MB peak RSS (cascadelete test)
 - **Generated code changes**: -99k lines net reduction (2,766 insertions, 101,660 deletions)
 
 ### Improvements
@@ -74,13 +76,12 @@ entbuilder.SimpleField[config, User, *UserMutation, int](
 
 **Cons:**
 - Explicit type parameters required for each helper call (verbosity in generated code)
-- Through-table edge defaults temporarily disabled (needs reimplementation)
 
 ## Issues Fixed
 
 1. Scanner function signatures: Changed from `func(T) (any, error)` to `func(T) (driver.Value, error)`
 2. Edge loading error messages: Removed `n.ID` references for edge schemas without ID fields
-3. Through-table defaults: Temporarily disabled (old `defaults()` and `createSpec()` methods don't exist)
+3. Through-table defaults: Reimplemented using descriptors - creates temporary mutation, applies defaults via `entgen.ApplyDefaults`, extracts field values from descriptors, and adds them to EdgeSpec
 4. Duplicate imports: Fixed in `task_delete.go`
 5. Multischema support: Fixed create edge descriptors to inline EdgeSpec creation and access schema config via `cfg` parameter instead of builder receiver (which doesn't exist in descriptor context)
 
@@ -109,9 +110,8 @@ This approach achieves the optimization goals:
 
 **Recommendation**: This approach can be merged as-is. The hybrid approach may offer marginal gains but at the cost of significantly more complexity.
 
-**Remaining work:**
-- Reimplement through-table edge defaults using descriptors
-
 **Completed:**
 - ✅ Extended EdgeSpec helper pattern to update/query builders for consistency
 - ✅ Fixed multischema schema config compatibility with descriptor pattern
+- ✅ Reimplemented through-table edge defaults using descriptors
+- ✅ Measured memory consumption: ~214 MB for generation, ~242 MB for clean build

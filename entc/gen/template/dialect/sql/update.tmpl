@@ -164,7 +164,40 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 	{{- end }}
-	{{- /* TODO: Re-implement through table defaults using descriptors */}}
+	{{- with $e.Through }}
+		{{- if .HasDefault }}
+			// Apply through-table defaults for {{ .Name }}
+			throughMut := new{{ .MutationName }}({{ $receiver }}.config, OpCreate)
+			if err := entgen.ApplyDefaults(throughMut, {{ .Package }}CreateSpec.Fields); err != nil {
+				return err
+			}
+			for _, fd := range {{ .Package }}CreateDescriptor.Fields {
+				if fv, ok, err := fd.Value(throughMut); err != nil {
+					return err
+				} else if ok {
+					edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+						Column: fd.Column,
+						Type:   fd.Type,
+						Value:  fv.Spec,
+					})
+				}
+			}
+			{{- if and .HasOneFieldID .ID.Default }}
+			// Apply through-table ID default if present
+			if {{ .Package }}CreateDescriptor.ID.UserDefined {
+				if idFv, ok, err := {{ .Package }}CreateDescriptor.ID.Value(throughMut); err != nil {
+					return err
+				} else if ok {
+					edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+						Column: {{ .Package }}CreateDescriptor.ID.Column,
+						Type:   {{ .Package }}CreateDescriptor.ID.Type,
+						Value:  idFv.Spec,
+					})
+				}
+			}
+			{{- end }}
+		{{- end }}
+	{{- end }}
 {{- end }}
 
 {{ define "dialect/sql/update/descriptor/field" }}
@@ -275,7 +308,40 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 				TargetColumn: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
 				TargetType:   field.{{ $e.Type.ID.Type.ConstName }},
 			})
-			{{- /* TODO: Re-implement through table defaults using descriptors */}}
+{{- with $e.Through }}
+	{{- if .HasDefault }}
+			// Apply through-table defaults for {{ .Name }}
+			throughMut := new{{ .MutationName }}(cfg, OpCreate)
+			if err := entgen.ApplyDefaults(throughMut, {{ .Package }}CreateSpec.Fields); err != nil {
+				return nil, err
+			}
+			for _, fd := range {{ .Package }}CreateDescriptor.Fields {
+				if fv, ok, err := fd.Value(throughMut); err != nil {
+					return nil, err
+				} else if ok {
+					edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+						Column: fd.Column,
+						Type:   fd.Type,
+						Value:  fv.Spec,
+					})
+				}
+			}
+		{{- if and .HasOneFieldID .ID.Default }}
+			// Apply through-table ID default if present
+			if {{ .Package }}CreateDescriptor.ID.UserDefined {
+				if idFv, ok, err := {{ .Package }}CreateDescriptor.ID.Value(throughMut); err != nil {
+					return nil, err
+				} else if ok {
+					edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+						Column: {{ .Package }}CreateDescriptor.ID.Column,
+						Type:   {{ .Package }}CreateDescriptor.ID.Type,
+						Value:  idFv.Spec,
+					})
+				}
+			}
+		{{- end }}
+	{{- end }}
+{{- end }}
 			for _, id := range nodes {
 				edge.Target.Nodes = append(edge.Target.Nodes, id)
 			}

@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -289,6 +290,22 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for UserGroup
+				throughMut := newUserGroupMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, usergroupCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range usergroupCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

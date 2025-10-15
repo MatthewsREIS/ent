@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -204,6 +205,22 @@ var roleUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for RoleUser
+				throughMut := newRoleUserMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, roleuserCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range roleuserCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

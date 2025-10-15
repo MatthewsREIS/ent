@@ -329,6 +329,40 @@ entbuilder.SimpleField[config, {{ $.Name }}, *{{ $.MutationName }}, {{ $f.Type }
 	{{- end }}
 		edge.Schema = cfg.schemaConfig.{{ $schema }}
 {{- end }}
+{{- with $e.Through }}
+	{{- if .HasDefault }}
+		// Apply through-table defaults for {{ .Name }}
+		throughMut := new{{ .MutationName }}(cfg, OpCreate)
+		if err := entgen.ApplyDefaults(throughMut, {{ .Package }}CreateSpec.Fields); err != nil {
+			return entbuilder.EdgeValue{}, false, err
+		}
+		for _, fd := range {{ .Package }}CreateDescriptor.Fields {
+			if fv, ok, err := fd.Value(throughMut); err != nil {
+				return entbuilder.EdgeValue{}, false, err
+			} else if ok {
+				edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+					Column: fd.Column,
+					Type:   fd.Type,
+					Value:  fv.Spec,
+				})
+			}
+		}
+		{{- if and .HasOneFieldID .ID.Default }}
+		// Apply through-table ID default if present
+		if {{ .Package }}CreateDescriptor.ID.UserDefined {
+			if idFv, ok, err := {{ .Package }}CreateDescriptor.ID.Value(throughMut); err != nil {
+				return entbuilder.EdgeValue{}, false, err
+			} else if ok {
+				edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+					Column: {{ .Package }}CreateDescriptor.ID.Column,
+					Type:   {{ .Package }}CreateDescriptor.ID.Type,
+					Value:  idFv.Spec,
+				})
+			}
+		}
+		{{- end }}
+	{{- end }}
+{{- end }}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

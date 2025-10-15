@@ -209,6 +209,22 @@ var groupCreateDescriptor = entbuilder.CreateDescriptor[config, Group, *GroupMut
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
+				// Apply through-table defaults for UserGroup
+				throughMut := newUserGroupMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, usergroupCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range usergroupCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}

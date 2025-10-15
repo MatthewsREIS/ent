@@ -286,6 +286,22 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 					},
 				}
+				// Apply through-table defaults for UserGroup
+				throughMut := newUserGroupMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, usergroupCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range usergroupCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -308,6 +324,22 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 					Target: &sqlgraph.EdgeTarget{
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
+				}
+				// Apply through-table defaults for Friendship
+				throughMut := newFriendshipMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, friendshipCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range friendshipCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
 				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
@@ -332,6 +364,22 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 					},
 				}
+				// Apply through-table defaults for Relationship
+				throughMut := newRelationshipMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, relationshipCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range relationshipCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -354,6 +402,22 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 					Target: &sqlgraph.EdgeTarget{
 						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 					},
+				}
+				// Apply through-table defaults for TweetLike
+				throughMut := newTweetLikeMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, tweetlikeCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range tweetlikeCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
 				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
@@ -378,6 +442,22 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 					},
 				}
+				// Apply through-table defaults for UserTweet
+				throughMut := newUserTweetMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, usertweetCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range usertweetCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -400,6 +480,22 @@ var userCreateDescriptor = entbuilder.CreateDescriptor[config, User, *UserMutati
 					Target: &sqlgraph.EdgeTarget{
 						IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
 					},
+				}
+				// Apply through-table defaults for RoleUser
+				throughMut := newRoleUserMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, roleuserCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range roleuserCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
 				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)

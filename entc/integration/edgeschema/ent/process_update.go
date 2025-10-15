@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -189,6 +190,22 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 					TargetColumn: file.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for AttachedFile
+				throughMut := newAttachedFileMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, attachedfileCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range attachedfileCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -290,6 +291,34 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 					TargetColumn: tweet.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for TweetTag
+				throughMut := newTweetTagMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, tweettagCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range tweettagCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
+				// Apply through-table ID default if present
+				if tweettagCreateDescriptor.ID.UserDefined {
+					if idFv, ok, err := tweettagCreateDescriptor.ID.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: tweettagCreateDescriptor.ID.Column,
+							Type:   tweettagCreateDescriptor.ID.Type,
+							Value:  idFv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

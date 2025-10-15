@@ -23,6 +23,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -471,6 +472,22 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: group.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for UserGroup
+				throughMut := newUserGroupMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, usergroupCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range usergroupCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -526,6 +543,22 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for Friendship
+				throughMut := newFriendshipMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, friendshipCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range friendshipCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -581,6 +614,22 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for Relationship
+				throughMut := newRelationshipMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, relationshipCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range relationshipCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -636,6 +685,22 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: tweet.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for TweetLike
+				throughMut := newTweetLikeMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, tweetlikeCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range tweetlikeCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -691,6 +756,22 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: tweet.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for UserTweet
+				throughMut := newUserTweetMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, usertweetCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range usertweetCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -746,6 +827,22 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: role.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				// Apply through-table defaults for RoleUser
+				throughMut := newRoleUserMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, roleuserCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range roleuserCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
