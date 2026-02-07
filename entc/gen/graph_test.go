@@ -7,9 +7,12 @@ package gen
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"slices"
+	"sort"
+	"strings"
 	"testing"
 
 	"entgo.io/ent/dialect/entsql"
@@ -728,4 +731,200 @@ func TestEdgeFieldCollation(t *testing.T) {
 	col, ok := postTable.Column("author_id")
 	require.True(t, ok)
 	require.Equal(t, "utf8mb4_bin", col.Collation)
+}
+
+func TestGraph_Gen_SplitOffByDefault(t *testing.T) {
+	require := require.New(t)
+	target := filepath.Join(t.TempDir(), "ent")
+	user, pet := splitSchemas()
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Target:  target,
+		Storage: drivers[0],
+	}, user, pet)
+	require.NoError(err)
+	require.NoError(graph.Gen())
+
+	_, err = os.Stat(filepath.Join(target, "user_query.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "user_query_base.go"))
+	require.True(os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(target, "user_query_part01_user.go"))
+	require.True(os.IsNotExist(err))
+}
+
+func TestGraph_Gen_SplitIncludeTemplateName(t *testing.T) {
+	require := require.New(t)
+	target := filepath.Join(t.TempDir(), "ent")
+	ext := MustParse(NewTemplate("gqlNode").Parse(`
+package {{ base $.Package }}
+
+{{ range $n := $.Nodes }}
+func {{ $n.Name }}GQLNode() {}
+{{ end }}
+`))
+	user, pet := splitSchemas()
+	graph, err := NewGraph(&Config{
+		Package:   "entc/gen",
+		Target:    target,
+		Storage:   drivers[0],
+		Templates: []*Template{ext},
+		Split:     &SplitConfig{},
+	}, user, pet)
+	require.NoError(err)
+	require.NoError(graph.Gen())
+
+	_, err = os.Stat(filepath.Join(target, "gql_node.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "gql_node_base.go"))
+	require.True(os.IsNotExist(err))
+
+	graph.Split = &SplitConfig{
+		Include: []string{"gqlNode"},
+	}
+	require.NoError(graph.Gen())
+	_, err = os.Stat(filepath.Join(target, "gql_node.go"))
+	require.True(os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(target, "gql_node_base.go"))
+	require.NoError(err)
+	parts, err := splitPartFiles(target, "gql_node_part")
+	require.NoError(err)
+	require.NotEmpty(parts)
+}
+
+func TestGraph_Gen_SplitDeterministicCleanupAndBuild(t *testing.T) {
+	require := require.New(t)
+	mod := t.TempDir()
+	target := filepath.Join(mod, "ent")
+	require.NoError(os.MkdirAll(target, 0755))
+
+	wd, err := os.Getwd()
+	require.NoError(err)
+	repoRoot := filepath.Clean(filepath.Join(wd, "..", ".."))
+	goMod := fmt.Sprintf(`module splitgen
+
+go 1.23
+
+require entgo.io/ent v0.0.0
+
+replace entgo.io/ent => %s
+`, repoRoot)
+	require.NoError(os.WriteFile(filepath.Join(mod, "go.mod"), []byte(goMod), 0644))
+	require.NoError(os.MkdirAll(filepath.Join(mod, ".gotmp"), 0755))
+
+	user, pet := splitSchemas()
+	graph, err := NewGraph(&Config{
+		Package: "splitgen/ent",
+		Target:  target,
+		Storage: drivers[0],
+		Split:   &SplitConfig{},
+	}, user, pet)
+	require.NoError(err)
+	require.NoError(graph.Gen())
+	first := splitSnapshot(t, target)
+	require.NotEmpty(first)
+
+	require.NoError(graph.Gen())
+	second := splitSnapshot(t, target)
+	require.Equal(first, second)
+
+	userOnly := &load.Schema{
+		Name: "User",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+	}
+	graph, err = NewGraph(&Config{
+		Package: "splitgen/ent",
+		Target:  target,
+		Storage: drivers[0],
+		Split:   &SplitConfig{},
+	}, userOnly)
+	require.NoError(err)
+	require.NoError(graph.Gen())
+	_, err = os.Stat(filepath.Join(target, "pet_query_part01_pet.go"))
+	require.True(os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(target, "pet_query_base.go"))
+	require.True(os.IsNotExist(err))
+
+	cmd := exec.Command("go", "test", "-mod=mod", "./...")
+	cmd.Dir = mod
+	cmd.Env = append(os.Environ(),
+		"GOWORK=off",
+		"GOTMPDIR=.gotmp",
+	)
+	out, err := cmd.CombinedOutput()
+	require.NoErrorf(err, "go test output:\n%s", out)
+}
+
+func splitSchemas() (*load.Schema, *load.Schema) {
+	user := &load.Schema{
+		Name: "User",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Edges: []*load.Edge{
+			{Name: "pets", Type: "Pet"},
+		},
+	}
+	pet := &load.Schema{
+		Name: "Pet",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Edges: []*load.Edge{
+			{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
+		},
+	}
+	return user, pet
+}
+
+func splitSnapshot(t *testing.T, root string) map[string]string {
+	t.Helper()
+	snapshot := make(map[string]string)
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		name := d.Name()
+		if !strings.HasSuffix(name, "_base.go") && !strings.Contains(name, "_part") {
+			return nil
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		snapshot[filepath.ToSlash(rel)] = string(content)
+		return nil
+	})
+	require.NoError(t, err)
+	return snapshot
+}
+
+func splitPartFiles(root, prefix string) ([]string, error) {
+	var files []string
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		if strings.HasPrefix(d.Name(), prefix) && strings.HasSuffix(d.Name(), ".go") {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	sort.Strings(files)
+	return files, nil
 }

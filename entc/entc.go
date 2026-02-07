@@ -164,6 +164,28 @@ func BuildTags(tags ...string) Option {
 	return BuildFlags("-tags", strings.Join(tags, ","))
 }
 
+// Split enables and configures optional file splitting for generated Go files.
+func Split(opts ...gen.SplitOption) Option {
+	return func(cfg *gen.Config) error {
+		split := &gen.SplitConfig{}
+		if cfg.Split != nil {
+			*split = *cfg.Split
+			split.Include = append([]string(nil), cfg.Split.Include...)
+			split.Exclude = append([]string(nil), cfg.Split.Exclude...)
+		}
+		for _, opt := range opts {
+			if err := opt(split); err != nil {
+				return err
+			}
+		}
+		if err := split.Normalize(); err != nil {
+			return err
+		}
+		cfg.Split = split
+		return nil
+	}
+}
+
 // TemplateFiles parses the named files and associates the resulting templates
 // with codegen templates.
 func TemplateFiles(filenames ...string) Option {
