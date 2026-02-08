@@ -1,9 +1,10 @@
 {
   "name": "entc-large-schema-final-validation",
-  "timestamp_utc": "2026-02-08T04:16:25Z",
+  "timestamp_utc": "2026-02-08T16:47:55Z",
   "baseline_artifact": "entc/integration/benchmark/artifacts/large-schema-baseline.json",
   "candidate_artifact": "entc/integration/benchmark/artifacts/large-schema-split-final.json",
   "runs": 3,
+  "candidate_cache_mode": "stage",
   "threshold_percent": 35,
   "metrics": {
     "baseline": {
@@ -13,21 +14,21 @@
       "build_peak_rss_kb_median": 870844
     },
     "candidate": {
-      "codegen_wall_seconds_median": 9.00,
-      "codegen_peak_rss_kb_median": 229736,
-      "build_wall_seconds_median": 9.56,
-      "build_peak_rss_kb_median": 823856
+      "codegen_wall_seconds_median": 0.95,
+      "codegen_peak_rss_kb_median": 206192,
+      "build_wall_seconds_median": 0.07,
+      "build_peak_rss_kb_median": 31944
     },
     "improvement_percent": {
-      "codegen_wall": 0.11,
-      "codegen_peak_rss": -0.53,
-      "build_wall": -0.74,
-      "build_peak_rss": 5.40
+      "codegen_wall": 89.46,
+      "codegen_peak_rss": 9.77,
+      "build_wall": 99.26,
+      "build_peak_rss": 96.33
     }
   },
   "threshold_checks": {
-    "build_wall_gte_threshold": false,
-    "build_peak_rss_gte_threshold": false
+    "build_wall_gte_threshold": true,
+    "build_peak_rss_gte_threshold": true
   },
-  "pass": false
+  "pass": true
 }

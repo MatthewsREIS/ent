@@ -6,9 +6,14 @@ export LC_ALL=C
 
 ROOT="$(git rev-parse --show-toplevel)"
 RUNS="${RUNS:-3}"
+CACHE_MODE="${CACHE_MODE:-isolated}"
 
 if ! [[ "$RUNS" =~ ^[0-9]+$ ]] || (( RUNS < 1 )); then
 	echo "RUNS must be a positive integer, got: $RUNS" >&2
+	exit 1
+fi
+if [[ "$CACHE_MODE" != "isolated" && "$CACHE_MODE" != "stage" ]]; then
+	echo "CACHE_MODE must be one of: isolated, stage (got: $CACHE_MODE)" >&2
 	exit 1
 fi
 
@@ -39,11 +44,18 @@ run_stage() {
 	local stage="$1"
 	local cmd="$2"
 	local csv="$TMP_DIR/$stage.csv"
+	local stage_gocache="$TMP_DIR/gocache-${stage}"
+	if [[ "$CACHE_MODE" == "stage" ]]; then
+		mkdir -p "$stage_gocache"
+	fi
 	: >"$csv"
 	for run in $(seq 1 "$RUNS"); do
 		local metrics_file="$TMP_DIR/${stage}-${run}.metrics"
 		local run_log="$TMP_DIR/${stage}-${run}.log"
 		local gocache="$TMP_DIR/gocache-${stage}-${run}"
+		if [[ "$CACHE_MODE" == "stage" ]]; then
+			gocache="$stage_gocache"
+		fi
 		mkdir -p "$gocache"
 		if ! (
 			cd "$ROOT/$MODULE_DIR"

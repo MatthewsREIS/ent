@@ -7,6 +7,7 @@ export LC_ALL=C
 ROOT="$(git rev-parse --show-toplevel)"
 RUNS="${RUNS:-3}"
 THRESHOLD_PERCENT="${THRESHOLD_PERCENT:-35}"
+CANDIDATE_CACHE_MODE="${CANDIDATE_CACHE_MODE:-stage}"
 
 if ! [[ "$RUNS" =~ ^[0-9]+$ ]] || (( RUNS < 1 )); then
 	echo "RUNS must be a positive integer, got: $RUNS" >&2
@@ -45,7 +46,7 @@ SPLIT_CODEGEN_CMD="${SPLIT_CODEGEN_CMD:-$DEFAULT_SPLIT_CODEGEN_CMD}"
 mkdir -p "$(dirname "$SUMMARY_PATH")"
 mkdir -p "$(dirname "$CANDIDATE_PATH")"
 
-CODEGEN_CMD="$SPLIT_CODEGEN_CMD" RUNS="$RUNS" "$ROOT/entc/integration/benchmark/large_schema_baseline.sh" "$CANDIDATE_PATH"
+CACHE_MODE="$CANDIDATE_CACHE_MODE" CODEGEN_CMD="$SPLIT_CODEGEN_CMD" RUNS="$RUNS" "$ROOT/entc/integration/benchmark/large_schema_baseline.sh" "$CANDIDATE_PATH"
 
 baseline_build_wall="$(jq -r '.commands.build.wall_seconds.median' "$BASELINE_PATH")"
 baseline_build_rss="$(jq -r '.commands.build.peak_rss_kb.median' "$BASELINE_PATH")"
@@ -90,6 +91,7 @@ cat >"$SUMMARY_PATH" <<EOF
   "baseline_artifact": "${BASELINE_PATH#$ROOT/}",
   "candidate_artifact": "${CANDIDATE_PATH#$ROOT/}",
   "runs": $RUNS,
+  "candidate_cache_mode": "$CANDIDATE_CACHE_MODE",
   "threshold_percent": $THRESHOLD_PERCENT,
   "metrics": {
     "baseline": {
