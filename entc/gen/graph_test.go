@@ -563,8 +563,8 @@ func TestGraph_Gen(t *testing.T) {
 		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
 		require.NoError(err)
 	}
-	// Ensure CUD builder files were generated in sub-packages.
-	for _, name := range []string{"create", "update", "delete"} {
+	// Ensure CUD builder and client files were generated in sub-packages.
+	for _, name := range []string{"create", "update", "delete", "client"} {
 		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
 		require.NoError(err)
 		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
@@ -618,8 +618,8 @@ func TestGraph_Gen(t *testing.T) {
 		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
 		require.Error(err)
 	}
-	// Ensure CUD builder files were generated in sub-packages for t1 but not t2.
-	for _, name := range []string{"create", "update", "delete"} {
+	// Ensure CUD builder and client files were generated in sub-packages for t1 but not t2.
+	for _, name := range []string{"create", "update", "delete", "client"} {
 		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
 		require.NoError(err)
 		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))

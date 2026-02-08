@@ -72,6 +72,12 @@ var (
 			},
 		},
 		{
+			Name: "client/type",
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/client.go", t.PackageDir())
+			},
+		},
+		{
 			Name:   "query",
 			Format: pkgf("%s_query.go"),
 			ExtendPatterns: []string{
