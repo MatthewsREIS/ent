@@ -23,9 +23,9 @@ var (
 	legacyGraphTemplates = GraphTemplates
 
 	splitCompatTypeTemplates  = withSplitTypeTemplates(Templates)
-	splitCompatGraphTemplates = withSplitGraphTemplates(GraphTemplates)
+	splitCompatGraphTemplates = withSplitGraphTemplates(GraphTemplates, SplitModeCompat)
 	splitNativeTypeTemplates  = withSplitTypeTemplates(Templates)
-	splitNativeGraphTemplates = withSplitGraphTemplates(GraphTemplates)
+	splitNativeGraphTemplates = withSplitGraphTemplates(GraphTemplates, SplitModeNative)
 )
 
 func (m SplitMode) valid() bool {

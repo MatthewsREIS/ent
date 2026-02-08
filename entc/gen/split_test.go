@@ -395,6 +395,35 @@ func TestSplitEntQLFacadeGuardrails(t *testing.T) {
 	require.NotContains(t, string(code), "schemaGraph.EvalP(")
 }
 
+func TestSplitNativeMigrationMapGenerated(t *testing.T) {
+	t.Parallel()
+
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package:   "entc/gen",
+		Target:    target,
+		Storage:   drivers[0],
+		IDType:    &field.TypeInfo{Type: field.TypeInt},
+		SplitMode: SplitModeNative,
+		Features: []Feature{
+			FeatureSplitPackages,
+			FeatureEntQL,
+		},
+	}, splitTestSchemas()...)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	mappingCode, err := os.ReadFile(filepath.Join(target, "internal", "split", "native", "migration_map_v1.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(mappingCode), `const MigrationMapVersion = "v1"`)
+	require.Contains(t, string(mappingCode), `"entc/gen/entql.go":`)
+	require.Contains(t, string(mappingCode), `"entc/gen/internal/split/entql/entql.go"`)
+	require.Contains(t, string(mappingCode), `"entc/gen/user_query.go":`)
+	require.Contains(t, string(mappingCode), `"entc/gen/internal/split/type/user/query.go"`)
+	require.Contains(t, string(mappingCode), `"entc/gen/mutation.go#User":`)
+	require.Contains(t, string(mappingCode), `"entc/gen/internal/split/type/user/mutation.go"`)
+}
+
 func splitTestSchemas() []*load.Schema {
 	return []*load.Schema{
 		{

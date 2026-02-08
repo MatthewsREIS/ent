@@ -50,7 +50,7 @@ func withSplitTypeTemplates(base []TypeTemplate) []TypeTemplate {
 	return templates
 }
 
-func withSplitGraphTemplates(base []GraphTemplate) []GraphTemplate {
+func withSplitGraphTemplates(base []GraphTemplate, mode SplitMode) []GraphTemplate {
 	templates := make([]GraphTemplate, 0, len(base)+1)
 	for _, tmpl := range base {
 		if tmpl.Name == "entql" {
@@ -70,5 +70,11 @@ func withSplitGraphTemplates(base []GraphTemplate) []GraphTemplate {
 			return !g.featureEnabled(FeatureEntQL)
 		},
 	})
+	if mode == SplitModeNative {
+		templates = append(templates, GraphTemplate{
+			Name:   "split/native/migration-map",
+			Format: filepath.Join("internal", "split", "native", "migration_map_v1.go"),
+		})
+	}
 	return templates
 }
