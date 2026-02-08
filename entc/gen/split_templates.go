@@ -49,3 +49,26 @@ func withSplitTypeTemplates(base []TypeTemplate) []TypeTemplate {
 	templates = append(templates, splitTypeTemplates...)
 	return templates
 }
+
+func withSplitGraphTemplates(base []GraphTemplate) []GraphTemplate {
+	templates := make([]GraphTemplate, 0, len(base)+1)
+	for _, tmpl := range base {
+		if tmpl.Name == "entql" {
+			templates = append(templates, GraphTemplate{
+				Name:   "split/entql/facade",
+				Format: tmpl.Format,
+				Skip:   tmpl.Skip,
+			})
+			continue
+		}
+		templates = append(templates, tmpl)
+	}
+	templates = append(templates, GraphTemplate{
+		Name:   "split/entql/internal",
+		Format: filepath.Join("internal", "split", "entql", "entql.go"),
+		Skip: func(g *Graph) bool {
+			return !g.featureEnabled(FeatureEntQL)
+		},
+	})
+	return templates
+}

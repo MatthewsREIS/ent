@@ -273,3 +273,39 @@ func TestGraphSplitBridgeFacade(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, string(clientCode), "entbridge.Neighbors(")
 }
+
+func TestGraphSplitEntQLIsolation(t *testing.T) {
+	t.Parallel()
+
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Target:  target,
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+		Features: []Feature{
+			FeatureSplitPackages,
+			FeatureEntQL,
+		},
+	}, []*load.Schema{
+		{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+		},
+	}...)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	rootCode, err := os.ReadFile(filepath.Join(target, "entql.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(rootCode), "entqlinternal.NewUserFilter(")
+	require.Contains(t, string(rootCode), "type UserFilter = entqlinternal.UserFilter")
+	require.NotContains(t, string(rootCode), "var schemaGraph =")
+
+	internalCode, err := os.ReadFile(filepath.Join(target, "internal", "split", "entql", "entql.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(internalCode), "var schemaGraph =")
+	require.Contains(t, string(internalCode), "type UserFilter struct {")
+}
