@@ -197,6 +197,14 @@ var (
 	}
 	// template files that were deleted and should be removed by the codegen.
 	deletedTemplates = []string{"context.go"}
+	// deletedTypeTemplates holds per-type file patterns that were replaced by
+	// sub-package equivalents and should be cleaned up during generation.
+	// For example, "%s_create.go" was replaced by "%s/create.go".
+	deletedTypeTemplates = []string{
+		"%s_create.go",
+		"%s_update.go",
+		"%s_delete.go",
+	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
 		"client/additional/*",

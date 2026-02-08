@@ -292,6 +292,16 @@ func generate(g *Graph) error {
 			log.Printf("remove old file %s: %s\n", filepath.Join(g.Target, n), err)
 		}
 	}
+	// Remove stale root-level per-type files from old template layout
+	// (e.g. user_create.go replaced by user/create.go).
+	for _, n := range g.Nodes {
+		for _, pattern := range deletedTypeTemplates {
+			name := fmt.Sprintf(pattern, n.PackageDir())
+			if err := os.Remove(filepath.Join(g.Target, name)); err != nil && !os.IsNotExist(err) {
+				log.Printf("remove old file %s: %s\n", filepath.Join(g.Target, name), err)
+			}
+		}
+	}
 	// We can't run "imports" on files when the state is not completed.
 	// Because, "goimports" will drop undefined package. Therefore, it
 	// is suspended to the end of the writing.
@@ -1116,8 +1126,17 @@ func cleanOldNodes(assets assets, target string) {
 				log.Printf("remove old file %s: %s\n", filepath.Join(target, t.Format(typ)), err)
 			}
 		}
-		err := os.Remove(filepath.Join(target, typ.PackageDir()))
-		if err != nil && !os.IsNotExist(err) {
+		// Remove stale root-level files from old template layout
+		// (e.g. user_create.go replaced by user/create.go).
+		for _, pattern := range deletedTypeTemplates {
+			name := fmt.Sprintf(pattern, typ.PackageDir())
+			if err := os.Remove(filepath.Join(target, name)); err != nil && !os.IsNotExist(err) {
+				log.Printf("remove old file %s: %s\n", filepath.Join(target, name), err)
+			}
+		}
+		// Use RemoveAll to remove the sub-package directory and all
+		// its contents (create.go, update.go, delete.go, client.go, etc.).
+		if err := os.RemoveAll(filepath.Join(target, typ.PackageDir())); err != nil {
 			log.Printf("remove old dir %s: %s\n", filepath.Join(target, typ.PackageDir()), err)
 		}
 	}

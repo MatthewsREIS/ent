@@ -625,6 +625,46 @@ func TestGraph_Gen(t *testing.T) {
 		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
 		require.Error(err)
 	}
+	// Ensure the deleted type's sub-package directory was removed.
+	_, err = os.Stat(filepath.Join(target, "t2"))
+	require.True(os.IsNotExist(err))
+	_, err = os.Stat(filepath.Join(target, "t3"))
+	require.True(os.IsNotExist(err))
+}
+
+func TestGraph_Gen_CleanStaleRootFiles(t *testing.T) {
+	require := require.New(t)
+	target := filepath.Join(t.TempDir(), "ent")
+	require.NoError(os.MkdirAll(target, os.ModePerm))
+	schemas := []*load.Schema{
+		{Name: "User"},
+		{Name: "Pet"},
+	}
+	// Simulate old layout: create stale root-level CUD files
+	// that would have existed before the sub-package migration.
+	for _, name := range []string{"user_create.go", "user_update.go", "user_delete.go", "pet_create.go", "pet_update.go", "pet_delete.go"} {
+		require.NoError(os.WriteFile(filepath.Join(target, name), []byte("package ent"), 0644))
+	}
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Target:  target,
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+	}, schemas...)
+	require.NoError(err)
+	require.NoError(graph.Gen())
+	// Ensure new sub-package files were generated.
+	for _, typ := range []string{"user", "pet"} {
+		for _, name := range []string{"create", "update", "delete", "client"} {
+			_, err := os.Stat(filepath.Join(target, typ, name+".go"))
+			require.NoError(err)
+		}
+	}
+	// Ensure stale root-level CUD files were cleaned up.
+	for _, name := range []string{"user_create.go", "user_update.go", "user_delete.go", "pet_create.go", "pet_update.go", "pet_delete.go"} {
+		_, err := os.Stat(filepath.Join(target, name))
+		require.True(os.IsNotExist(err), "stale file %s should have been removed", name)
+	}
 }
 
 func ensureStructTag(name string) Hook {
