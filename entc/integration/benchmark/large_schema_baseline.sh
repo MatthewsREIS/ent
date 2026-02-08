@@ -21,8 +21,8 @@ fi
 MODULE_DIR="entc/integration"
 FIXTURE_PATH="entc/integration/ent/schema"
 PACKAGE_PATH="entc/integration/ent"
-CODEGEN_CMD="go generate ./ent"
-BUILD_CMD="go build ./ent"
+CODEGEN_CMD="${CODEGEN_CMD:-go generate ./ent}"
+BUILD_CMD="${BUILD_CMD:-go build ./ent}"
 
 TMP_DIR="$(mktemp -d)"
 cleanup() {

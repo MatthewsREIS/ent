@@ -19,6 +19,20 @@ Optional output path override:
 RUNS=3 ./entc/integration/benchmark/large_schema_baseline.sh entc/integration/benchmark/artifacts/large-schema-baseline.json
 ```
 
+## Final validation command
+
+Run split-packages validation against the committed baseline:
+
+```bash
+RUNS=3 ./entc/integration/benchmark/large_schema_final_validation.sh
+```
+
+Optional arguments:
+
+1. baseline artifact path
+2. summary artifact path
+3. candidate artifact path
+
 ## Baseline artifact
 
 The harness writes JSON with:

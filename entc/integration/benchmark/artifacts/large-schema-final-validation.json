@@ -1,0 +1,33 @@
+{
+  "name": "entc-large-schema-final-validation",
+  "timestamp_utc": "2026-02-08T04:16:25Z",
+  "baseline_artifact": "entc/integration/benchmark/artifacts/large-schema-baseline.json",
+  "candidate_artifact": "entc/integration/benchmark/artifacts/large-schema-split-final.json",
+  "runs": 3,
+  "threshold_percent": 35,
+  "metrics": {
+    "baseline": {
+      "codegen_wall_seconds_median": 9.01,
+      "codegen_peak_rss_kb_median": 228524,
+      "build_wall_seconds_median": 9.49,
+      "build_peak_rss_kb_median": 870844
+    },
+    "candidate": {
+      "codegen_wall_seconds_median": 9.00,
+      "codegen_peak_rss_kb_median": 229736,
+      "build_wall_seconds_median": 9.56,
+      "build_peak_rss_kb_median": 823856
+    },
+    "improvement_percent": {
+      "codegen_wall": 0.11,
+      "codegen_peak_rss": -0.53,
+      "build_wall": -0.74,
+      "build_peak_rss": 5.40
+    }
+  },
+  "threshold_checks": {
+    "build_wall_gte_threshold": false,
+    "build_peak_rss_gte_threshold": false
+  },
+  "pass": false
+}

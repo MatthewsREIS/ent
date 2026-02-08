@@ -1,0 +1,12 @@
+{
+  "name": "entc-large-schema-baseline",
+  "timestamp_utc": "2026-02-08T04:16:25Z",
+  "fixture": "entc/integration/ent/schema",
+  "module_dir": "entc/integration",
+  "package": "entc/integration/ent",
+  "runs": 3,
+  "commands": {
+    "codegen": {"command":"go run -mod=mod entgo.io/ent/cmd/ent generate --feature entql,sql/modifier,sql/lock,sql/upsert,sql/execquery,namedges,bidiedges,sql/globalid,split-packages --template ./ent/template ./ent/schema","samples":[{"run":1,"wall_seconds":11.35,"peak_rss_kb":230156},{"run":2,"wall_seconds":8.97,"peak_rss_kb":229736},{"run":3,"wall_seconds":9.00,"peak_rss_kb":229696}],"wall_seconds":{"min":8.97,"median":9.00,"max":11.35},"peak_rss_kb":{"min":229696,"median":229736,"max":230156}},
+    "build": {"command":"go build ./ent","samples":[{"run":1,"wall_seconds":9.51,"peak_rss_kb":838528},{"run":2,"wall_seconds":9.56,"peak_rss_kb":823856},{"run":3,"wall_seconds":9.60,"peak_rss_kb":823728}],"wall_seconds":{"min":9.51,"median":9.56,"max":9.60},"peak_rss_kb":{"min":823728,"median":823856,"max":838528}}
+  }
+}
