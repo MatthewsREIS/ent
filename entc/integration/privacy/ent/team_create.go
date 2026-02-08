@@ -20,7 +20,7 @@ import (
 
 // TeamCreate is the builder for creating a Team entity.
 type TeamCreate struct {
-	config
+	Config
 	mutation *TeamMutation
 	hooks    []Hook
 }
@@ -126,7 +126,7 @@ func (_c *TeamCreate) sqlSave(ctx context.Context) (*Team, error) {
 
 func (_c *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Team{config: _c.config}
+		_node = &Team{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(team.Table, sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.Name(); ok {
@@ -170,7 +170,7 @@ func (_c *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 
 // TeamCreateBulk is the builder for creating many Team entities in bulk.
 type TeamCreateBulk struct {
-	config
+	Config
 	err      error
 	builders []*TeamCreate
 }

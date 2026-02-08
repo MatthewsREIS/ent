@@ -21,7 +21,7 @@ import (
 
 // TaskCreate is the builder for creating a Task entity.
 type TaskCreate struct {
-	config
+	Config
 	mutation *TaskMutation
 	hooks    []Hook
 }
@@ -193,7 +193,7 @@ func (_c *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
 
 func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Task{config: _c.config}
+		_node = &Task{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(task.Table, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.Title(); ok {
@@ -250,7 +250,7 @@ func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 
 // TaskCreateBulk is the builder for creating many Task entities in bulk.
 type TaskCreateBulk struct {
-	config
+	Config
 	err      error
 	builders []*TaskCreate
 }

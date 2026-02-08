@@ -25,7 +25,7 @@ import (
 
 // TeamQuery is the builder for querying Team entities.
 type TeamQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []team.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *TeamQuery) Order(o ...team.OrderOption) *TeamQuery {
 
 // QueryTasks chains the current query on the "tasks" edge.
 func (_q *TeamQuery) QueryTasks() *TaskQuery {
-	query := (&TaskClient{config: _q.config}).Query()
+	query := (&TaskClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -92,7 +92,7 @@ func (_q *TeamQuery) QueryTasks() *TaskQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (_q *TeamQuery) QueryUsers() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -299,7 +299,7 @@ func (_q *TeamQuery) Clone() *TeamQuery {
 		return nil
 	}
 	return &TeamQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]team.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -315,7 +315,7 @@ func (_q *TeamQuery) Clone() *TeamQuery {
 // WithTasks tells the query-builder to eager-load the nodes that are connected to
 // the "tasks" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TeamQuery) WithTasks(opts ...func(*TaskQuery)) *TeamQuery {
-	query := (&TaskClient{config: _q.config}).Query()
+	query := (&TaskClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -326,7 +326,7 @@ func (_q *TeamQuery) WithTasks(opts ...func(*TaskQuery)) *TeamQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TeamQuery) WithUsers(opts ...func(*UserQuery)) *TeamQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -427,7 +427,7 @@ func (_q *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 		return (*Team).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Team{config: _q.config}
+		node := &Team{Config: _q.Config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)

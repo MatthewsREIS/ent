@@ -19,7 +19,7 @@ import (
 
 // Task is the model entity for the Task schema.
 type Task struct {
-	config `json:"-"`
+	Config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Title holds the value of the "title" field.
@@ -148,29 +148,29 @@ func (_m *Task) Value(name string) (ent.Value, error) {
 
 // QueryTeams queries the "teams" edge of the Task entity.
 func (_m *Task) QueryTeams() *TeamQuery {
-	return NewTaskClient(_m.config).QueryTeams(_m)
+	return NewTaskClient(_m.Config).QueryTeams(_m)
 }
 
 // QueryOwner queries the "owner" edge of the Task entity.
 func (_m *Task) QueryOwner() *UserQuery {
-	return NewTaskClient(_m.config).QueryOwner(_m)
+	return NewTaskClient(_m.Config).QueryOwner(_m)
 }
 
 // Update returns a builder for updating this Task.
 // Note that you need to call Task.Unwrap() before calling this method if this Task
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (_m *Task) Update() *TaskUpdateOne {
-	return NewTaskClient(_m.config).UpdateOne(_m)
+	return NewTaskClient(_m.Config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Task entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (_m *Task) Unwrap() *Task {
-	_tx, ok := _m.config.driver.(*txDriver)
+	_tx, ok := _m.Config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Task is not a transactional entity")
 	}
-	_m.config.driver = _tx.drv
+	_m.Config.driver = _tx.drv
 	return _m
 }
 

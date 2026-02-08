@@ -18,7 +18,7 @@ import (
 
 // TaskDelete is the builder for deleting a Task entity.
 type TaskDelete struct {
-	config
+	Config
 	hooks    []Hook
 	mutation *TaskMutation
 }

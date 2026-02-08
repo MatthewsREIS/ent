@@ -92,6 +92,18 @@ var (
 				"meta/additional/*",
 			},
 		},
+		{
+			Name:   "mutation/type",
+			Cond:   notView,
+			Format: pkgf("%s_mutation.go"),
+		},
+		{
+			Name: "dialect/sql/entql/type",
+			Cond: func(t *Type) bool {
+				return t.featureEnabled(FeatureEntQL)
+			},
+			Format: pkgf("%s_entql.go"),
+		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
 	GraphTemplates = []GraphTemplate{
