@@ -259,11 +259,15 @@ func generate(g *Graph) error {
 			if tmpl.Cond != nil && !tmpl.Cond(n) {
 				continue
 			}
+			format := tmpl.Format(n)
+			if dir := filepath.Dir(format); dir != "." {
+				assets.addDir(filepath.Join(g.Config.Target, dir))
+			}
 			b := bytes.NewBuffer(nil)
 			if err := engine.ExecuteTemplate(b, tmpl.Name, n); err != nil {
 				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 			}
-			assets.add(filepath.Join(g.Config.Target, tmpl.Format(n)), b.Bytes())
+			assets.add(filepath.Join(g.Config.Target, format), b.Bytes())
 		}
 	}
 	for _, tmpl := range append(graphTemplates, external...) {

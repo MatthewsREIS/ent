@@ -22,10 +22,9 @@ var (
 	legacyTypeTemplates  = Templates
 	legacyGraphTemplates = GraphTemplates
 
-	// Split modes are scaffolded to legacy templates for now.
-	splitCompatTypeTemplates  = Templates
+	splitCompatTypeTemplates  = withSplitTypeTemplates(Templates)
 	splitCompatGraphTemplates = GraphTemplates
-	splitNativeTypeTemplates  = Templates
+	splitNativeTypeTemplates  = withSplitTypeTemplates(Templates)
 	splitNativeGraphTemplates = GraphTemplates
 )
 

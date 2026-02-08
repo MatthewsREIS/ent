@@ -103,6 +103,9 @@ var (
 		Stage:       Experimental,
 		Default:     false,
 		Description: "Generates code using split package layouts to reduce package size and compile pressure",
+		cleanup: func(c *Config) error {
+			return removeAll(filepath.Join(c.Target, "internal", "split"))
+		},
 	}
 
 	// featureMultiSchema indicates that ent/schema is annotated with multiple schemas.
@@ -255,4 +258,23 @@ func remove(dir, file string) error {
 		return os.Remove(dir)
 	}
 	return nil
+}
+
+// removeAll removes dir recursively (if exists) and removes its parent if empty.
+func removeAll(dir string) error {
+	if err := os.RemoveAll(dir); err != nil {
+		return err
+	}
+	parent := filepath.Dir(dir)
+	infos, err := os.ReadDir(parent)
+	switch {
+	case os.IsNotExist(err):
+		return nil
+	case err != nil:
+		return err
+	case len(infos) == 0:
+		return os.Remove(parent)
+	default:
+		return nil
+	}
 }

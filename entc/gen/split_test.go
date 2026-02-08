@@ -5,7 +5,17 @@
 package gen
 
 import (
+	"go/parser"
+	"go/token"
+	"os"
+	"path"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
+
+	"entgo.io/ent/entc/load"
+	"entgo.io/ent/schema/field"
 
 	"github.com/stretchr/testify/require"
 )
@@ -161,5 +171,57 @@ func TestGraphGenerationTemplates(t *testing.T) {
 			require.Equal(t, tt.wantType, ttmpl[0].Name)
 			require.Equal(t, tt.wantGraph, gtmpl[0].Name)
 		})
+	}
+}
+
+func TestGraphSplitTypePackages(t *testing.T) {
+	t.Parallel()
+
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package:  "entc/gen",
+		Target:   target,
+		Storage:  drivers[0],
+		IDType:   &field.TypeInfo{Type: field.TypeInt},
+		Features: []Feature{FeatureSplitPackages},
+	}, []*load.Schema{
+		{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+		},
+		{
+			Name: "Pet",
+			Fields: []*load.Field{
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+		},
+	}...)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	internalPrefix := path.Join(graph.Config.Package, "internal", "split", "type")
+	files := []string{"model.go", "query.go", "create.go", "update.go", "delete.go", "mutation.go"}
+	for _, n := range graph.Nodes {
+		for _, file := range files {
+			path := filepath.Join(target, "internal", "split", "type", n.PackageDir(), file)
+			_, err := os.Stat(path)
+			require.NoErrorf(t, err, "expected split internal file %s", path)
+
+			f, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.ImportsOnly)
+			require.NoError(t, err)
+			for _, imp := range f.Imports {
+				impPath, err := strconv.Unquote(imp.Path.Value)
+				require.NoError(t, err)
+				require.Falsef(
+					t,
+					strings.HasPrefix(impPath, internalPrefix),
+					"unexpected split sibling import %q in %s",
+					impPath,
+					path,
+				)
+			}
+		}
 	}
 }
