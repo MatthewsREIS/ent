@@ -298,8 +298,8 @@ func (s *selector) ScanX(ctx context.Context, v any) {
 {{ end }}
 
 
-// withHooks invokes the builder operation with the given hooks, if any.
-func withHooks[V Value, M any, PM interface {
+// WithHooks invokes the builder operation with the given hooks, if any.
+func WithHooks[V Value, M any, PM interface {
 	*M
 	Mutation
 }](ctx context.Context, exec func(context.Context) (V, error), mutation PM, hooks []Hook) (value V, err error) {

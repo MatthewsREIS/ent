@@ -556,11 +556,18 @@ func TestGraph_Gen(t *testing.T) {
 		_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, name))
 		require.NoError(err)
 	}
-	// Ensure entity files were generated.
-	for _, format := range []string{"%s", "%s_create", "%s_update", "%s_delete", "%s_query"} {
+	// Ensure entity files were generated (root-level).
+	for _, format := range []string{"%s", "%s_query"} {
 		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
 		require.NoError(err)
 		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
+		require.NoError(err)
+	}
+	// Ensure CUD builder files were generated in sub-packages.
+	for _, name := range []string{"create", "update", "delete"} {
+		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
+		require.NoError(err)
+		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
 		require.NoError(err)
 	}
 	_, err = os.Stat(filepath.Join(target, "external.go"))
@@ -604,11 +611,18 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(err)
 	require.NotNil(graph)
 	require.NoError(graph.Gen())
-	// Ensure entity files were generated.
-	for _, format := range []string{"%s", "%s_create", "%s_update", "%s_delete", "%s_query"} {
+	// Ensure entity files were generated for t1 but not t2.
+	for _, format := range []string{"%s", "%s_query"} {
 		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
 		require.NoError(err)
 		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
+		require.Error(err)
+	}
+	// Ensure CUD builder files were generated in sub-packages for t1 but not t2.
+	for _, name := range []string{"create", "update", "delete"} {
+		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
+		require.NoError(err)
+		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
 		require.Error(err)
 	}
 }

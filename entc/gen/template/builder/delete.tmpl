@@ -9,13 +9,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "delete" }}
 {{ $pkg := base $.Config.Package }}
 
-{{ template "header" $ }}
+{{ with extend $ "Package" $.Package }}
+	{{ template "header" . }}
+{{ end }}
 
 {{ template "import" $ }}
-
-import (
-	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
-)
 
 {{ $builder := $.DeleteName }}
 {{ $receiver := $.DeleteReceiver }}
@@ -36,7 +34,7 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
+	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -9,7 +9,9 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "update" }}
 {{ $pkg := base $.Config.Package }}
 
-{{ template "header" $ }}
+{{ with extend $ "Package" $.Package }}
+	{{ template "header" . }}
+{{ end }}
 
 {{ with extend $ "Imports" $.SiblingImports }}
 	{{ template "import" . }}
@@ -51,7 +53,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -129,7 +131,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -206,15 +208,6 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} {
 			{{ $mutation }}.{{ $idsFunc }}(ids...)
 			return {{ $receiver }}
-		}
-		{{ $func := print "Remove" $e.StructField }}
-		// {{ $func }} removes "{{ $e.Name }}" edges to {{ $e.Type.Name }} entities.
-		func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v ...*{{ $e.Type.Name }}) *{{ $builder }} {
-			ids := make([]{{ $e.Type.ID.Type }}, len(v))
-			for i := range v {
-				ids[i] = v[i].ID
-			}
-			return {{ $receiver }}.{{ $idsFunc }}(ids...)
 		}
 	{{ end }}
 {{ end }}

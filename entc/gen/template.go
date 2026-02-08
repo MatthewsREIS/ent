@@ -47,23 +47,29 @@ var (
 	// Templates holds the template information for a file that the graph is generating.
 	Templates = []TypeTemplate{
 		{
-			Name:   "create",
-			Cond:   notView,
-			Format: pkgf("%s_create.go"),
+			Name: "create",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/create.go", t.PackageDir())
+			},
 			ExtendPatterns: []string{
 				"dialect/*/create/fields/additional/*",
 				"dialect/*/create_bulk/fields/additional/*",
 			},
 		},
 		{
-			Name:   "update",
-			Cond:   notView,
-			Format: pkgf("%s_update.go"),
+			Name: "update",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/update.go", t.PackageDir())
+			},
 		},
 		{
-			Name:   "delete",
-			Cond:   notView,
-			Format: pkgf("%s_delete.go"),
+			Name: "delete",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/delete.go", t.PackageDir())
+			},
 		},
 		{
 			Name:   "query",

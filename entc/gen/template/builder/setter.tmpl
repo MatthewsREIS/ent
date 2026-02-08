@@ -99,19 +99,6 @@ in the LICENSE file in the root directory of this source tree.
 			return {{ $receiver }}
 		}
 	{{ end }}
-	{{ $func := print (pascal $op) $e.StructField }}
-	// {{ $func }} {{ $op }}s the "{{ $e.Name }}" edge{{if not $e.Unique}}s{{ end }} to the {{ $e.Type.Name }} entity.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
-		{{ if $e.Unique -}}
-			return {{ $receiver }}.{{ $idsFunc }}(v.ID)
-		{{- else -}}
-			ids := make([]{{ $e.Type.ID.Type }}, len(v))
-			for i := range v {
-				ids[i] = v[i].ID
-			}
-			return {{ $receiver }}.{{ $idsFunc }}(ids...)
-		{{- end }}
-	}
 {{ end }}
 
 // Mutation returns the {{ $.MutationName }} object of the builder.
