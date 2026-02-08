@@ -97,6 +97,14 @@ var (
 		},
 	}
 
+	// FeatureSplitPackages provides a feature-flag for split-package codegen.
+	FeatureSplitPackages = Feature{
+		Name:        "split-packages",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Generates code using split package layouts to reduce package size and compile pressure",
+	}
+
 	// featureMultiSchema indicates that ent/schema is annotated with multiple schemas.
 	// This feature-flag is enabled by default by the storage driver and exists to pass
 	// this info to the templates.
@@ -168,6 +176,7 @@ var (
 		FeatureBidiEdgeRefs,
 		FeatureSnapshot,
 		FeatureSchemaConfig,
+		FeatureSplitPackages,
 		FeatureLock,
 		FeatureModifier,
 		FeatureExecQuery,

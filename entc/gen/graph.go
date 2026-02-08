@@ -73,6 +73,10 @@ type (
 		// For example, the PrivacyFeature.
 		Features []Feature
 
+		// SplitMode controls the generation mode for the split-packages feature.
+		// Supported values are: legacy, compat and native.
+		SplitMode SplitMode
+
 		// Hooks holds an optional list of Hooks to apply on the graph before/after the code-generation.
 		Hooks []Hook
 
@@ -244,21 +248,25 @@ func generate(g *Graph) error {
 		assets   assets
 		external []GraphTemplate
 	)
-	templates, external = g.templates()
+	typeTemplates, graphTemplates, err := g.generationTemplates()
+	if err != nil {
+		return err
+	}
+	engine, external := g.templates()
 	for _, n := range g.Nodes {
 		assets.addDir(filepath.Join(g.Config.Target, n.PackageDir()))
-		for _, tmpl := range Templates {
+		for _, tmpl := range typeTemplates {
 			if tmpl.Cond != nil && !tmpl.Cond(n) {
 				continue
 			}
 			b := bytes.NewBuffer(nil)
-			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
+			if err := engine.ExecuteTemplate(b, tmpl.Name, n); err != nil {
 				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 			}
 			assets.add(filepath.Join(g.Config.Target, tmpl.Format(n)), b.Bytes())
 		}
 	}
-	for _, tmpl := range append(GraphTemplates, external...) {
+	for _, tmpl := range append(graphTemplates, external...) {
 		if tmpl.Skip != nil && tmpl.Skip(g) {
 			continue
 		}
@@ -266,7 +274,7 @@ func generate(g *Graph) error {
 			assets.addDir(filepath.Join(g.Config.Target, dir))
 		}
 		b := bytes.NewBuffer(nil)
-		if err := templates.ExecuteTemplate(b, tmpl.Name, g); err != nil {
+		if err := engine.ExecuteTemplate(b, tmpl.Name, g); err != nil {
 			return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 		}
 		assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes())
