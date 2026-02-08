@@ -39,7 +39,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if 
 	{{ $mutation }}.done = true
 	{{- if $one }}
 		{{- $r := $.Receiver }}
-		{{ $r }} := &{{ $.Name }}{config: {{ $receiver }}.config}
+		{{ $r }} := &{{ $.Name }}{Config: {{ $receiver }}.Config}
 		if err := {{ $r }}.FromResponse(res); err != nil {
 			return nil, err
 		}

@@ -54,7 +54,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 		return (*{{ $.Name }}).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &{{ $.Name }}{config: {{ $receiver }}.config}
+		node := &{{ $.Name }}{Config: {{ $receiver }}.Config}
 		nodes = append(nodes, node)
 		{{- with $.Edges }}
 			node.Edges.loadedTypes = loadedTypes

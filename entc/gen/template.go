@@ -100,6 +100,10 @@ var (
 			Format: "ent.go",
 		},
 		{
+			Name:   "config",
+			Format: "config.go",
+		},
+		{
 			Name:   "client",
 			Format: "client.go",
 			ExtendPatterns: []string{
@@ -168,7 +172,7 @@ var (
 		},
 	}
 	// template files that were deleted and should be removed by the codegen.
-	deletedTemplates = []string{"config.go", "context.go"}
+	deletedTemplates = []string{"context.go"}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
 		"client/additional/*",

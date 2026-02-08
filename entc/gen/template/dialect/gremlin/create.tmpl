@@ -23,7 +23,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.N
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &{{ $.Name }}{config: {{ $receiver }}.config}
+	rnode := &{{ $.Name }}{Config: {{ $receiver }}.Config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}

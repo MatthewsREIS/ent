@@ -162,7 +162,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		{{- end }}
 	{{- end }}
 	{{- if $one }}
-		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
+		_node = &{{ $.Name }}{Config: {{ $receiver }}.Config}
 		_spec.Assign = _node.assignValues
 		_spec.ScanValues = _node.scanValues
 	{{- end }}
@@ -209,7 +209,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 	{{- end }}
 	{{- with $e.Through }}
 		{{- if .HasDefault }}
-			createE := &{{ .CreateName }}{config: {{ $receiver }}.config, mutation: new{{ .MutationName }}({{ $receiver }}.config, OpCreate)}
+			createE := &{{ .CreateName }}{Config: {{ $receiver }}.Config, mutation: new{{ .MutationName }}({{ $receiver }}.Config, OpCreate)}
 			{{- /* Skip error handling here as this check was already handled. */}}
 			{{ if or .NumHooks .NumPolicy }}_ = {{ end }}createE.defaults()
 			_, specE := createE.createSpec()

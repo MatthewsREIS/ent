@@ -292,7 +292,8 @@ func TestBuilderField(t *testing.T) {
 	}{
 		{"active", "active"},
 		{"type", "_type"},
-		{"config", "_config"},
+		{"config", "config"},
+		{"Config", "_Config"},
 		{"SSOCert", "_SSOCert"},
 		{"driver", "_driver"},
 	}

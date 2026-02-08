@@ -18,11 +18,11 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := c.config
+	cfg := c.Config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		ctx: ctx,
-		config: cfg,
+		Config: cfg,
 		{{- range $n := $.Nodes }}
 			{{ $n.Name }}: New{{ $n.ClientName }}(cfg),
 		{{- end }}

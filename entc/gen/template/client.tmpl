@@ -9,7 +9,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "client/init" }}
 // Client is the client that holds all ent builders.
 type Client struct {
-	config
+	Config
 	{{- if $.SupportMigrate }}
 		// Schema is the client for creating, migrating and dropping schema.
 		Schema *migrate.Schema
@@ -28,7 +28,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	client := &Client{config: newConfig(opts...)}
+	client := &Client{Config: NewConfig(opts...)}
 	client.init()
 	return client
 }
@@ -38,7 +38,7 @@ func (c *Client) init() {
 		c.Schema = migrate.NewSchema(c.driver)
 	{{- end }}
 	{{- range $n := $.Nodes }}
-    	c.{{ $n.Name }} = New{{ $n.ClientName }}(c.config)
+    	c.{{ $n.Name }} = New{{ $n.ClientName }}(c.Config)
 	{{- end }}
 }
 {{ end }}
@@ -53,7 +53,6 @@ func (c *Client) init() {
 
 import (
 	"context"
-	"log"
 
 	"{{ $.Config.Package }}/migrate"
 	{{ range $n := $.Nodes }}
@@ -70,89 +69,6 @@ import (
 )
 
 {{ template "client/init" $ }}
-
-type (
-	// config is the configuration for the client and its builder.
-	config struct {
-		// driver used for executing database requests.
-		driver dialect.Driver
-		// debug enable a debug logging.
-		debug bool
-		// log used for logging on debug mode.
-		log func(...any)
-		// hooks to execute on mutations.
-		hooks *hooks
-		// interceptors to execute on queries.
-		inters *inters
-		{{- /* Additional dependency fields. */}}
-		{{- range $dep := $deps }}
-			{{ $dep.Field }} {{ $dep.Type }}
-		{{- end }}
-		{{- /* Support adding config fields from both global or dialect-specific templates. */}}
-		{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
-			{{- with $tmpls := matchTemplate (print $prefix "config/fields/*") }}
-				{{- range $tmpl := $tmpls }}
-					{{ xtemplate $tmpl $ }}
-				{{- end }}
-			{{- end }}
-		{{- end }}
-	}
-	// Option function to configure the client.
-	Option func(*config)
-)
-
-// newConfig creates a new config for the client.
-func newConfig(opts ...Option) config {
-	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
-	{{- with $tmpls := matchTemplate "config/init/fields/*" }}
-		{{- range $tmpl := $tmpls }}
-			{{- xtemplate $tmpl $ }}
-		{{- end }}
-	{{- end }}
-	cfg.options(opts...)
-	return cfg
-}
-
-// options applies the options on the config object.
-func (c *config) options(opts ...Option) {
-	for _, opt := range opts {
-		opt(c)
-	}
-	if c.debug {
-		c.driver = dialect.Debug(c.driver, c.log)
-	}
-}
-
-// Debug enables debug logging on the ent.Driver.
-func Debug() Option {
-	return func(c *config) {
-		c.debug = true
-	}
-}
-
-// Log sets the logging function for debug mode.
-func Log(fn func(...any)) Option {
-	return func(c *config) {
-		c.log = fn
-	}
-}
-
-// Driver configures the client driver.
-func Driver(driver dialect.Driver) Option {
-	return func(c *config) {
-		c.driver = driver
-	}
-}
-
-{{- /* Additional dependency options reside on the config object. */}}
-{{- range $dep := $deps }}
-	// {{ $dep.Option }} configures the {{ $dep.Field }}.
-	func {{ $dep.Option }}(v {{ $dep.Type }}) Option {
-		return func(c *config) {
-			c.{{ $dep.Field }} = v
-		}
-	}
-{{- end }}
 
 // Open opens a database/sql.DB specified by the driver name and
 // the data source name, and returns a new client attached to it.
@@ -180,11 +96,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("{{ $pkg }}: starting a transaction: %w", err)
 	}
-	cfg := c.config
+	cfg := c.Config
 	cfg.driver = tx
 	return &Tx{
 		ctx: ctx,
-		config: cfg,
+		Config: cfg,
 		{{- range $n := $.Nodes }}
 			{{ $n.Name }}: New{{ $n.ClientName }}(cfg),
 		{{- end }}
@@ -208,9 +124,9 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := c.config
+	cfg := c.Config
 	cfg.driver = dialect.Debug(c.driver, c.log)
-	client := &Client{config: cfg}
+	client := &Client{Config: cfg}
 	client.init()
 	return client
 }
@@ -281,14 +197,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 {{ $client := $n.ClientName }}
 // {{ $client }} is a client for the {{ $n.Name }} schema.
 type {{ $client }} struct {
-	config
+	Config
 }
 
 {{ $rec := $n.Receiver }}{{ if eq $rec "c" }}{{ $rec = printf "%.2s" $n.Name | lower }}{{ end }}
 
 // New{{ $client }} returns a client for the {{ $n.Name }} from the given config.
-func New{{ $client }}(c config) *{{ $client }} {
-	return &{{ $client }}{config: c}
+func New{{ $client }}(c Config) *{{ $client }} {
+	return &{{ $client }}{Config: c}
 }
 
 {{- if not $n.IsView }}
@@ -308,13 +224,13 @@ func (c *{{ $client }}) Intercept(interceptors ...Interceptor) {
 {{- if not $n.IsView }}
 // Create returns a builder for creating a {{ $n.Name }} entity.
 func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
-	mutation := new{{ $n.MutationName }}(c.config, OpCreate)
-	return &{{ $n.CreateName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	mutation := new{{ $n.MutationName }}(c.Config, OpCreate)
+	return &{{ $n.CreateName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // CreateBulk returns a builder for creating a bulk of {{ $n.Name }} entities.
 func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.CreateName }}) *{{ $n.CreateBulkName }} {
-	return &{{ $n.CreateBulkName }}{config: c.config, builders: builders}
+	return &{{ $n.CreateBulkName }}{Config: c.Config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
@@ -330,40 +246,40 @@ func (c *{{ $client }}) MapCreateBulk(slice any, setFunc func(*{{ $n.CreateName 
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &{{ $n.CreateBulkName }}{config: c.config, builders: builders}
+	return &{{ $n.CreateBulkName }}{Config: c.Config, builders: builders}
 }
 
 // Update returns an update builder for {{ $n.Name }}.
 func (c *{{ $client }}) Update() *{{ $n.UpdateName }} {
-	mutation := new{{ $n.MutationName }}(c.config, OpUpdate)
-	return &{{ $n.UpdateName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	mutation := new{{ $n.MutationName }}(c.Config, OpUpdate)
+	return &{{ $n.UpdateName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
 func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneName }} {
 	{{- if $n.HasOneFieldID }}
-		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
+		mutation := new{{ $n.MutationName }}(c.Config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
 	{{- else }}
-		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne)
+		mutation := new{{ $n.MutationName }}(c.Config, OpUpdateOne)
 		{{- range $id := $n.EdgeSchema.ID }}
 			mutation.{{ $id.BuilderField }} = &{{ $rec }}.{{ $id.StructField }}
 		{{- end }}
 	{{- end }}
-	return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 }
 
 {{ with $n.HasOneFieldID }}
 	// UpdateOneID returns an update builder for the given id.
 	func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.UpdateOneName }} {
-		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne, {{ print "with" $n.Name "ID" }}(id))
-		return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+		mutation := new{{ $n.MutationName }}(c.Config, OpUpdateOne, {{ print "with" $n.Name "ID" }}(id))
+		return &{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 	}
 {{ end }}
 
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
-	mutation := new{{ $n.MutationName }}(c.config, OpDelete)
-	return &{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
+	mutation := new{{ $n.MutationName }}(c.Config, OpDelete)
+	return &{{ $n.DeleteName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 }
 
 {{ with $n.HasOneFieldID }}
@@ -386,7 +302,7 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	return &{{ $n.QueryName }}{
-		config: c.config,
+		Config: c.Config,
 		ctx: &QueryContext{Type: {{ $n.TypeName }} },
 		inters: c.Interceptors(),
 		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
@@ -420,7 +336,7 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 // Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
 func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
 	{{- if $n.HasOneFieldID }}
-		query := (&{{ $e.Type.ClientName }}{config: c.config}).Query()
+		query := (&{{ $e.Type.ClientName }}{Config: c.Config}).Query()
 		query.path = func(context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
 			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
 				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
@@ -464,13 +380,13 @@ func (c *{{ $client }}) Interceptors() []Interceptor {
 func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&{{ $n.CreateName }}{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&{{ $n.CreateName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&{{ $n.UpdateName }}{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&{{ $n.UpdateName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&{{ $n.DeleteName }}{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&{{ $n.DeleteName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("{{ $pkg }}: unknown {{ $n.Name }} mutation op: %q", m.Op())
 	}
@@ -500,20 +416,6 @@ type (
 	}
 )
 
-{{- /* Support adding config options from both global or dialect-specific templates. */}}
-{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
-	{{- with $tmpls := matchTemplate (print $prefix "config/options/*") }}
-		{{- range $tmpl := $tmpls }}
-			{{ xtemplate $tmpl $ }}
-		{{- end }}
-	{{- end }}
-{{- end }}
-
-{{- with $tmpls := matchTemplate "config/additional/*" "config/additional/*/*" }}
-	{{- range $tmpl := $tmpls }}
-		{{- xtemplate $tmpl $ }}
-	{{- end }}
-{{- end }}
 {{ end }}
 
 {{/* A template that can be overridden in order to add additional fields to the client.*/}}

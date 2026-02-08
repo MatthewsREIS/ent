@@ -19,7 +19,7 @@ import (
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
-	config
+	Config
 	{{- range $n := $.Nodes }}
 		// {{ $n.Name }} is the client for interacting with the {{ $n.Name }} builders.
 		{{ $n.Name }} *{{ $n.ClientName }}
@@ -72,7 +72,7 @@ type Tx struct {
 	{{- $onFuncs := print "on" $func }}
 	// {{ $func }} {{ lower $func }}s the transaction.
 	func (tx *Tx) {{ $func }}() error {
-		txDriver := tx.config.driver.(*txDriver)
+		txDriver := tx.Config.driver.(*txDriver)
 		var fn {{ $iface }} = {{ $func }}Func(func(context.Context, *Tx) error {
 			return txDriver.tx.{{ $func }}()
 		})
@@ -87,7 +87,7 @@ type Tx struct {
 
 	// On{{ $func }} adds a hook to call on {{ lower $func }}.
 	func (tx *Tx) On{{ $func }}(f {{ $func }}Hook) {
-		txDriver := tx.config.driver.(*txDriver)
+		txDriver := tx.Config.driver.(*txDriver)
 		txDriver.mu.Lock()
 		txDriver.{{ $onFuncs }} = append(txDriver.{{ $onFuncs }}, f)
 		txDriver.mu.Unlock()
@@ -97,7 +97,7 @@ type Tx struct {
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
 	tx.clientOnce.Do(func() {
-		tx.client = &Client{config: tx.config}
+		tx.client = &Client{Config: tx.Config}
 		tx.client.init()
 	})
 	return tx.client
@@ -105,7 +105,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	{{- range $n := $.Nodes }}
-		tx.{{ $n.Name }} = New{{ $n.ClientName }}(tx.config)
+		tx.{{ $n.Name }} = New{{ $n.ClientName }}(tx.Config)
 	{{- end }}
 }
 

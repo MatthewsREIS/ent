@@ -2298,7 +2298,7 @@ var (
 		"As",
 		"Asc",
 		"Client",
-		"config",
+		"Config",
 		"Count",
 		"Debug",
 		"Desc",
@@ -2323,7 +2323,7 @@ var (
 	)
 	// private fields used by the different builders.
 	privateField = names(
-		"config",
+		"Config",
 		"ctx",
 		"done",
 		"hooks",

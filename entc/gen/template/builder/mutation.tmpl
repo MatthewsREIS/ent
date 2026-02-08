@@ -44,7 +44,7 @@ const (
 {{ $mutation := $n.MutationName }}
 // {{ $mutation }} represents an operation that mutates the {{ $n.Name }} nodes in the graph.
 type {{ $mutation }} struct {
-	config
+	Config
 	op Op
 	typ string
 	{{- with $n.HasOneFieldID }}
@@ -87,9 +87,9 @@ var _ ent.Mutation = (*{{ $mutation }})(nil)
 type {{ $mutationOption }} func(*{{ $mutation }})
 
 // new{{ $mutation }} creates new mutation for the {{ $n.Name }} entity.
-func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mutation }} {
+func new{{ $mutation }}(c Config, op Op, opts ...{{ $mutationOption }}) *{{ $mutation }} {
 	m := &{{ $mutation }}{
-		config: c,
+		Config: c,
 		op: op,
 		typ: {{ $n.TypeName }},
 		clearedFields: make(map[string]struct{}),
@@ -139,7 +139,7 @@ func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mut
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
 func (m {{ $mutation }}) Client() *Client {
-	client := &Client{config: m.config}
+	client := &Client{Config: m.Config}
 	client.init()
 	return client
 }
@@ -150,7 +150,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 	if 	_, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("{{ $pkg }}: mutation is not running in a transaction")
 	}
-	tx := &Tx{config: m.config}
+	tx := &Tx{Config: m.Config}
 	tx.init()
 	return tx, nil
 }
