@@ -21,7 +21,6 @@ import (
 // All update, update-one and query builders implement this interface.
 type predicateAdder interface {
 	addPredicate(func(s *sql.Selector))
-	AddEntQLPredicate(func(s *sql.Selector))
 }
 
 {{ range $n := $.Nodes }}
@@ -35,14 +34,9 @@ type predicateAdder interface {
 		{{ $receiver }}.predicates = append({{ $receiver }}.predicates, pred)
 	}
 
-	// AddEntQLPredicate forwards EntQL predicates to the query builder.
-	func ({{ $receiver }} *{{ $builder }}) AddEntQLPredicate(pred func(s *sql.Selector)) {
-		{{ $receiver }}.addPredicate(pred)
-	}
-
 	// Filter returns a Filter implementation to apply filters on the {{ $builder }} builder.
 	func ({{ $receiver }} *{{ $builder }}) Filter() *{{ $filter }} {
-		return entqlinternal.New{{ $filter }}({{ $receiver }})
+		return entqlinternal.New{{ $filter }}({{ $receiver }}.addPredicate)
 	}
 
 	{{- if not $n.IsView }}
@@ -51,14 +45,9 @@ type predicateAdder interface {
 			m.predicates = append(m.predicates, pred)
 		}
 
-		// AddEntQLPredicate forwards EntQL predicates to the mutation builder.
-		func (m *{{ $mutation }}) AddEntQLPredicate(pred func(s *sql.Selector)) {
-			m.addPredicate(pred)
-		}
-
 		// Filter returns an entql.Where implementation to apply filters on the {{ $mutation }} builder.
 		func (m *{{ $mutation }}) Filter() *{{ $filter }} {
-			return entqlinternal.New{{ $filter }}(m)
+			return entqlinternal.New{{ $filter }}(m.addPredicate)
 		}
 	{{- end }}
 
@@ -140,27 +129,22 @@ var schemaGraph = func() *sqlgraph.Schema {
 	return graph
 }()
 
-// PredicateAdder wraps EntQL predicate additions for builders.
-type PredicateAdder interface {
-	AddEntQLPredicate(func(s *sql.Selector))
-}
-
 {{ range $i, $n := $.Nodes }}
 	{{ $filter := print $n.FilterName }}
 
 	// {{ $filter }} provides a generic filtering capability at runtime.
 	type {{ $filter }} struct {
-		predicateAdder PredicateAdder
+		addPredicate func(func(s *sql.Selector))
 	}
 
 	// New{{ $filter }} creates a new split EntQL filter.
-	func New{{ $filter }}(predicateAdder PredicateAdder) *{{ $filter }} {
-		return &{{ $filter }}{predicateAdder: predicateAdder}
+	func New{{ $filter }}(addPredicate func(func(s *sql.Selector))) *{{ $filter }} {
+		return &{{ $filter }}{addPredicate: addPredicate}
 	}
 
 	// Where applies the entql predicate on the query filter.
 	func (f *{{ $filter }}) Where(p entql.P) {
-		f.predicateAdder.AddEntQLPredicate(func(s *sql.Selector) {
+		f.addPredicate(func(s *sql.Selector) {
 			if err := schemaGraph.EvalP(schemaGraph.Nodes[{{ $i }}].Type, p, s); err != nil {
 				s.AddError(err)
 			}

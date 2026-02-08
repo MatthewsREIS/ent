@@ -5,10 +5,12 @@
 package gen
 
 import (
+	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"os"
-	"path"
+	pathpkg "path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -201,7 +203,7 @@ func TestGraphSplitTypePackages(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	internalPrefix := path.Join(graph.Config.Package, "internal", "split", "type")
+	internalPrefix := pathpkg.Join(graph.Config.Package, "internal", "split", "type")
 	files := []string{"model.go", "query.go", "create.go", "update.go", "delete.go", "mutation.go"}
 	for _, n := range graph.Nodes {
 		for _, file := range files {
@@ -308,4 +310,281 @@ func TestGraphSplitEntQLIsolation(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, string(internalCode), "var schemaGraph =")
 	require.Contains(t, string(internalCode), "type UserFilter struct {")
+}
+
+func TestSplitImportGraphAcyclic(t *testing.T) {
+	t.Parallel()
+
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Target:  target,
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+		Features: []Feature{
+			FeatureSplitPackages,
+			FeatureEntQL,
+		},
+	}, splitTestSchemas()...)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	imports := generatedImportGraph(t, target, graph.Config.Package)
+	cycle := findImportCycle(imports)
+	require.Emptyf(t, cycle, "import cycle detected: %s", strings.Join(cycle, " -> "))
+}
+
+func TestSplitCompatPublicAPIsParity(t *testing.T) {
+	t.Parallel()
+
+	legacyTarget := filepath.Join(t.TempDir(), "legacy")
+	compatTarget := filepath.Join(t.TempDir(), "compat")
+
+	legacy, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Target:  legacyTarget,
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+		Features: []Feature{
+			FeatureEntQL,
+		},
+	}, splitTestSchemas()...)
+	require.NoError(t, err)
+	require.NoError(t, legacy.Gen())
+
+	compat, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Target:  compatTarget,
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+		Features: []Feature{
+			FeatureSplitPackages,
+			FeatureEntQL,
+		},
+	}, splitTestSchemas()...)
+	require.NoError(t, err)
+	require.NoError(t, compat.Gen())
+
+	legacySymbols := exportedRootSymbols(t, legacyTarget)
+	compatSymbols := exportedRootSymbols(t, compatTarget)
+	require.Equal(t, legacySymbols, compatSymbols)
+}
+
+func TestSplitEntQLFacadeGuardrails(t *testing.T) {
+	t.Parallel()
+
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Target:  target,
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+		Features: []Feature{
+			FeatureSplitPackages,
+			FeatureEntQL,
+		},
+	}, splitTestSchemas()...)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	code, err := os.ReadFile(filepath.Join(target, "entql.go"))
+	require.NoError(t, err)
+	const maxFacadeLines = 120
+	require.LessOrEqual(t, strings.Count(string(code), "\n")+1, maxFacadeLines)
+	require.NotContains(t, string(code), "var schemaGraph =")
+	require.NotContains(t, string(code), "schemaGraph.EvalP(")
+}
+
+func splitTestSchemas() []*load.Schema {
+	return []*load.Schema{
+		{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+			Edges: []*load.Edge{
+				{Name: "pets", Type: "Pet"},
+			},
+		},
+		{
+			Name: "Pet",
+			Fields: []*load.Field{
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
+			},
+		},
+	}
+}
+
+func generatedImportGraph(t *testing.T, target, basePkg string) map[string][]string {
+	t.Helper()
+	graph := make(map[string][]string)
+	require.NoError(t, filepath.WalkDir(target, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+		dir := filepath.Dir(path)
+		rel, err := filepath.Rel(target, dir)
+		if err != nil {
+			return err
+		}
+		pkg := basePkg
+		if rel != "." {
+			pkg = pathpkg.Join(basePkg, filepath.ToSlash(rel))
+		}
+		if _, ok := graph[pkg]; !ok {
+			graph[pkg] = nil
+		}
+		f, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.ImportsOnly)
+		if err != nil {
+			return err
+		}
+		for _, imp := range f.Imports {
+			impPath, err := strconv.Unquote(imp.Path.Value)
+			if err != nil {
+				return err
+			}
+			if !strings.HasPrefix(impPath, basePkg) || impPath == pkg {
+				continue
+			}
+			graph[pkg] = append(graph[pkg], impPath)
+		}
+		return nil
+	}))
+	for pkg := range graph {
+		graph[pkg] = dedupe(graph[pkg])
+	}
+	return graph
+}
+
+func findImportCycle(graph map[string][]string) []string {
+	const (
+		unvisited = iota
+		visiting
+		visited
+	)
+	state := make(map[string]int, len(graph))
+	stack := make([]string, 0, len(graph))
+	var dfs func(string) []string
+	dfs = func(node string) []string {
+		state[node] = visiting
+		stack = append(stack, node)
+		for _, next := range graph[node] {
+			switch state[next] {
+			case unvisited:
+				if cycle := dfs(next); len(cycle) > 0 {
+					return cycle
+				}
+			case visiting:
+				start := 0
+				for i := len(stack) - 1; i >= 0; i-- {
+					if stack[i] == next {
+						start = i
+						break
+					}
+				}
+				cycle := append([]string{}, stack[start:]...)
+				cycle = append(cycle, next)
+				return cycle
+			}
+		}
+		state[node] = visited
+		stack = stack[:len(stack)-1]
+		return nil
+	}
+	for node := range graph {
+		if state[node] == unvisited {
+			if cycle := dfs(node); len(cycle) > 0 {
+				return cycle
+			}
+		}
+	}
+	return nil
+}
+
+func exportedRootSymbols(t *testing.T, dir string) map[string]struct{} {
+	t.Helper()
+	symbols := make(map[string]struct{})
+	entries, err := os.ReadDir(dir)
+	require.NoError(t, err)
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".go") {
+			continue
+		}
+		path := filepath.Join(dir, entry.Name())
+		file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.SkipObjectResolution)
+		require.NoError(t, err)
+		for _, decl := range file.Decls {
+			switch decl := decl.(type) {
+			case *ast.GenDecl:
+				for _, spec := range decl.Specs {
+					switch spec := spec.(type) {
+					case *ast.TypeSpec:
+						if ast.IsExported(spec.Name.Name) {
+							symbols["type:"+spec.Name.Name] = struct{}{}
+						}
+					case *ast.ValueSpec:
+						for _, name := range spec.Names {
+							if ast.IsExported(name.Name) {
+								prefix := "var:"
+								if decl.Tok == token.CONST {
+									prefix = "const:"
+								}
+								symbols[prefix+name.Name] = struct{}{}
+							}
+						}
+					}
+				}
+			case *ast.FuncDecl:
+				if !ast.IsExported(decl.Name.Name) {
+					continue
+				}
+				if decl.Recv == nil {
+					symbols["func:"+decl.Name.Name] = struct{}{}
+					continue
+				}
+				recv := receiverName(decl.Recv.List[0].Type)
+				// In split-compat mode, filter methods are provided through type aliases
+				// to internal implementations and therefore do not have local declarations.
+				if strings.HasSuffix(recv, "Filter") {
+					continue
+				}
+				symbols["method:"+recv+"."+decl.Name.Name] = struct{}{}
+			}
+		}
+	}
+	return symbols
+}
+
+func receiverName(expr ast.Expr) string {
+	switch expr := expr.(type) {
+	case *ast.Ident:
+		return expr.Name
+	case *ast.StarExpr:
+		if id, ok := expr.X.(*ast.Ident); ok {
+			return id.Name
+		}
+	}
+	return "unknown"
+}
+
+func dedupe(values []string) []string {
+	if len(values) == 0 {
+		return values
+	}
+	seen := make(map[string]struct{}, len(values))
+	deduped := make([]string, 0, len(values))
+	for _, value := range values {
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		deduped = append(deduped, value)
+	}
+	return deduped
 }
