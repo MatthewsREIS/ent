@@ -318,6 +318,69 @@ func TestEdge(t *testing.T) {
 	require.Equal(t, "user_groups", groups.Label())
 }
 
+func TestType_RootPackageImport(t *testing.T) {
+	tests := []struct {
+		name    string
+		pkg     string
+		wantPkg string
+	}{
+		{"User", "github.com/org/project/ent", "github.com/org/project/ent"},
+		{"User", "myapp/ent", "myapp/ent"},
+		{"User", "ent", "ent"},
+		{"User", "github.com/deep/nested/path/ent", "github.com/deep/nested/path/ent"},
+	}
+	for _, tt := range tests {
+		typ := &Type{
+			Config: &Config{Package: tt.pkg},
+			Name:   tt.name,
+		}
+		require.Equal(t, tt.wantPkg, typ.RootPackageImport())
+	}
+}
+
+func TestType_RootPackageAlias(t *testing.T) {
+	tests := []struct {
+		name      string
+		pkg       string
+		wantAlias string
+	}{
+		{"User", "github.com/org/project/ent", "ent"},
+		{"User", "myapp/ent", "ent"},
+		{"User", "ent", "ent"},
+		{"User", "github.com/org/project/generated", "generated"},
+		{"User", "myapp/db", "db"},
+	}
+	for _, tt := range tests {
+		typ := &Type{
+			Config: &Config{Package: tt.pkg},
+			Name:   tt.name,
+		}
+		require.Equal(t, tt.wantAlias, typ.RootPackageAlias())
+	}
+}
+
+func TestType_SubPackageImport(t *testing.T) {
+	tests := []struct {
+		name    string
+		pkg     string
+		wantPkg string
+	}{
+		{"User", "github.com/org/project/ent", "github.com/org/project/ent/user"},
+		{"UserInfo", "github.com/org/project/ent", "github.com/org/project/ent/userinfo"},
+		{"User", "myapp/ent", "myapp/ent/user"},
+		{"User", "ent", "ent/user"},
+		{"PHBOrg", "github.com/org/project/ent", "github.com/org/project/ent/phborg"},
+		{"HTTPCode", "myapp/db", "myapp/db/httpcode"},
+	}
+	for _, tt := range tests {
+		typ := &Type{
+			Config: &Config{Package: tt.pkg},
+			Name:   tt.name,
+		}
+		require.Equal(t, tt.wantPkg, typ.SubPackageImport())
+	}
+}
+
 func TestValidSchemaName(t *testing.T) {
 	err := ValidSchemaName("Config")
 	require.Error(t, err)
