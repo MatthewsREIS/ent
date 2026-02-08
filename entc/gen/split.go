@@ -302,10 +302,10 @@ func splitGoByType(path string, file assetFile, types []splitType) (map[string]a
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
-	for i, key := range keys {
-		partPath := fmt.Sprintf("%s_part%02d_%s.go", basePathPrefix, i+1, key)
+	for _, key := range keys {
+		partPath := fmt.Sprintf("%s_%s.go", basePathPrefix, key)
 		partMeta := file.meta
-		partMeta.Output = fmt.Sprintf("%s_part%02d_%s.go", baseOutputPrefix, i+1, key)
+		partMeta.Output = fmt.Sprintf("%s_%s.go", baseOutputPrefix, key)
 		partMeta.Origin = originPath
 		files[partPath] = assetFile{
 			content: splitFileContent(prologue, importDecls, typedDecls[key]),
@@ -575,6 +575,7 @@ func cleanupSplitFamily(origin string, keep map[string]struct{}) error {
 		origin,
 		prefix + "_base.go",
 		prefix + "_part*.go",
+		prefix + "_*.go",
 	}
 	seen := make(map[string]struct{})
 	for _, pattern := range patterns {

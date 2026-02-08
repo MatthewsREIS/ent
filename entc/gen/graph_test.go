@@ -749,7 +749,7 @@ func TestGraph_Gen_SplitOffByDefault(t *testing.T) {
 	require.NoError(err)
 	_, err = os.Stat(filepath.Join(target, "user_query_base.go"))
 	require.True(os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(target, "user_query_part01_user.go"))
+	_, err = os.Stat(filepath.Join(target, "user_query_user.go"))
 	require.True(os.IsNotExist(err))
 }
 
@@ -787,7 +787,7 @@ func {{ $n.Name }}GQLNode() {}
 	require.True(os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(target, "gql_node_base.go"))
 	require.NoError(err)
-	parts, err := splitPartFiles(target, "gql_node_part")
+	parts, err := splitTypeFiles(target, "gql_node")
 	require.NoError(err)
 	require.NotEmpty(parts)
 }
@@ -821,6 +821,8 @@ replace entgo.io/ent => %s
 	}, user, pet)
 	require.NoError(err)
 	require.NoError(graph.Gen())
+	// Warm up goimports path resolution against freshly generated local packages.
+	require.NoError(graph.Gen())
 	first := splitSnapshot(t, target)
 	require.NotEmpty(first)
 
@@ -842,7 +844,7 @@ replace entgo.io/ent => %s
 	}, userOnly)
 	require.NoError(err)
 	require.NoError(graph.Gen())
-	_, err = os.Stat(filepath.Join(target, "pet_query_part01_pet.go"))
+	_, err = os.Stat(filepath.Join(target, "pet_query_pet.go"))
 	require.True(os.IsNotExist(err))
 	_, err = os.Stat(filepath.Join(target, "pet_query_base.go"))
 	require.True(os.IsNotExist(err))
@@ -890,7 +892,7 @@ func splitSnapshot(t *testing.T, root string) map[string]string {
 			return nil
 		}
 		name := d.Name()
-		if !strings.HasSuffix(name, "_base.go") && !strings.Contains(name, "_part") {
+		if !strings.HasSuffix(name, "_base.go") && !isSplitTypeFile(root, path) {
 			return nil
 		}
 		rel, err := filepath.Rel(root, path)
@@ -908,7 +910,7 @@ func splitSnapshot(t *testing.T, root string) map[string]string {
 	return snapshot
 }
 
-func splitPartFiles(root, prefix string) ([]string, error) {
+func splitTypeFiles(root, prefix string) ([]string, error) {
 	var files []string
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -917,7 +919,9 @@ func splitPartFiles(root, prefix string) ([]string, error) {
 		if d.IsDir() {
 			return nil
 		}
-		if strings.HasPrefix(d.Name(), prefix) && strings.HasSuffix(d.Name(), ".go") {
+		if strings.HasPrefix(d.Name(), prefix+"_") &&
+			strings.HasSuffix(d.Name(), ".go") &&
+			!strings.HasSuffix(d.Name(), "_base.go") {
 			files = append(files, path)
 		}
 		return nil
@@ -927,4 +931,31 @@ func splitPartFiles(root, prefix string) ([]string, error) {
 	}
 	sort.Strings(files)
 	return files, nil
+}
+
+func isSplitTypeFile(root, path string) bool {
+	if !strings.HasSuffix(path, ".go") {
+		return false
+	}
+	rel, err := filepath.Rel(root, path)
+	if err != nil {
+		return false
+	}
+	dir := filepath.Dir(rel)
+	name := filepath.Base(rel)
+	if strings.HasSuffix(name, "_base.go") {
+		return false
+	}
+	suffix := strings.TrimSuffix(name, ".go")
+	idx := strings.LastIndexByte(suffix, '_')
+	if idx <= 0 || idx == len(suffix)-1 {
+		return false
+	}
+	baseName := suffix[:idx] + "_base.go"
+	basePath := baseName
+	if dir != "." {
+		basePath = filepath.Join(dir, baseName)
+	}
+	_, statErr := os.Stat(filepath.Join(root, basePath))
+	return statErr == nil
 }

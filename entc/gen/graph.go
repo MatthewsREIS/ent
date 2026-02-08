@@ -1131,7 +1131,7 @@ func cleanOldNodes(assets assets, target string) {
 			hasModel = true
 		}
 		if !hasModel {
-			for _, pattern := range []string{path + "_base.go", path + "_part*.go"} {
+			for _, pattern := range []string{path + "_base.go", path + "_part*.go", path + "_*.go"} {
 				matches, err := filepath.Glob(pattern)
 				if err == nil && len(matches) > 0 {
 					hasModel = true
@@ -1169,6 +1169,11 @@ func queryTemplateNode(name string) (string, bool) {
 		if idx > 0 {
 			return name[:idx], true
 		}
+	case strings.Contains(name, "_query_") && strings.HasSuffix(name, ".go"):
+		idx := strings.Index(name, "_query_")
+		if idx > 0 {
+			return name[:idx], true
+		}
 	}
 	return "", false
 }
@@ -1181,7 +1186,7 @@ func removeSplitFamily(origin string) error {
 		return nil
 	}
 	prefix := strings.TrimSuffix(origin, ".go")
-	for _, pattern := range []string{prefix + "_base.go", prefix + "_part*.go"} {
+	for _, pattern := range []string{prefix + "_base.go", prefix + "_part*.go", prefix + "_*.go"} {
 		paths, err := filepath.Glob(pattern)
 		if err != nil {
 			return err
