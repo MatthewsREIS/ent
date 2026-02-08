@@ -107,6 +107,9 @@ var (
 			{
 				Name:   "split/bridge",
 				Format: "internal/split/bridge/bridge.go",
+				Skip: func(g *Graph) bool {
+					return g.Config.SplitMode == SplitModeNative
+				},
 			},
 		},
 		cleanup: func(c *Config) error {

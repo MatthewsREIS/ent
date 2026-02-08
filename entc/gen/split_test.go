@@ -285,6 +285,7 @@ func TestGraphSplitEntQLIsolation(t *testing.T) {
 		Target:  target,
 		Storage: drivers[0],
 		IDType:  &field.TypeInfo{Type: field.TypeInt},
+		SplitMode: SplitModeCompat,
 		Features: []Feature{
 			FeatureSplitPackages,
 			FeatureEntQL,
@@ -310,6 +311,75 @@ func TestGraphSplitEntQLIsolation(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, string(internalCode), "var schemaGraph =")
 	require.Contains(t, string(internalCode), "type UserFilter struct {")
+}
+
+func TestGraphSplitNativeNoBridgeFacade(t *testing.T) {
+	t.Parallel()
+
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package:   "entc/gen",
+		Target:    target,
+		Storage:   drivers[0],
+		IDType:    &field.TypeInfo{Type: field.TypeInt},
+		SplitMode: SplitModeNative,
+		Features: []Feature{
+			FeatureSplitPackages,
+		},
+	}, splitTestSchemas()...)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	bridgePath := filepath.Join(target, "internal", "split", "bridge", "bridge.go")
+	_, err = os.Stat(bridgePath)
+	require.Error(t, err)
+	require.True(t, os.IsNotExist(err))
+
+	userQueryCode, err := os.ReadFile(filepath.Join(target, "user_query.go"))
+	require.NoError(t, err)
+	require.NotContains(t, string(userQueryCode), "entbridge.SetNeighbors(")
+	require.Contains(t, string(userQueryCode), "sqlgraph.SetNeighbors(")
+
+	clientCode, err := os.ReadFile(filepath.Join(target, "client.go"))
+	require.NoError(t, err)
+	require.NotContains(t, string(clientCode), "entbridge.Neighbors(")
+	require.Contains(t, string(clientCode), "sqlgraph.Neighbors(")
+}
+
+func TestGraphSplitNativeEntQLInline(t *testing.T) {
+	t.Parallel()
+
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package:   "entc/gen",
+		Target:    target,
+		Storage:   drivers[0],
+		IDType:    &field.TypeInfo{Type: field.TypeInt},
+		SplitMode: SplitModeNative,
+		Features: []Feature{
+			FeatureSplitPackages,
+			FeatureEntQL,
+		},
+	}, []*load.Schema{
+		{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+		},
+	}...)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	rootCode, err := os.ReadFile(filepath.Join(target, "entql.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(rootCode), "var schemaGraph =")
+	require.NotContains(t, string(rootCode), "entqlinternal.")
+
+	internalPath := filepath.Join(target, "internal", "split", "entql", "entql.go")
+	_, err = os.Stat(internalPath)
+	require.Error(t, err)
+	require.True(t, os.IsNotExist(err))
 }
 
 func TestSplitImportGraphAcyclic(t *testing.T) {
@@ -417,11 +487,12 @@ func TestSplitNativeMigrationMapGenerated(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, string(mappingCode), `const MigrationMapVersion = "v1"`)
 	require.Contains(t, string(mappingCode), `"entc/gen/entql.go":`)
-	require.Contains(t, string(mappingCode), `"entc/gen/internal/split/entql/entql.go"`)
+	require.Contains(t, string(mappingCode), `"entc/gen/entql.go",`)
 	require.Contains(t, string(mappingCode), `"entc/gen/user_query.go":`)
 	require.Contains(t, string(mappingCode), `"entc/gen/internal/split/type/user/query.go"`)
 	require.Contains(t, string(mappingCode), `"entc/gen/mutation.go#User":`)
 	require.Contains(t, string(mappingCode), `"entc/gen/internal/split/type/user/mutation.go"`)
+	require.NotContains(t, string(mappingCode), `"internal/split/bridge/bridge.go"`)
 }
 
 func splitTestSchemas() []*load.Schema {

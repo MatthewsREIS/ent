@@ -17,7 +17,7 @@ const MigrationMapVersion = "v1"
 // CompatToNative maps compat API/file locations to native split-package locations.
 // Optional compatibility shims can use this table to resolve symbols and files.
 var CompatToNative = map[string]string{
-	"{{ $.Config.Package }}/entql.go": "{{ $.Config.Package }}/internal/split/entql/entql.go",
+	"{{ $.Config.Package }}/entql.go": "{{ $.Config.Package }}/entql.go",
 	{{- range $n := $.Nodes }}
 		"{{ $.Config.Package }}/{{ $n.PackageDir }}.go": "{{ $.Config.Package }}/internal/split/type/{{ $n.PackageDir }}/model.go",
 		"{{ $.Config.Package }}/{{ $n.PackageDir }}_query.go": "{{ $.Config.Package }}/internal/split/type/{{ $n.PackageDir }}/query.go",
@@ -26,12 +26,6 @@ var CompatToNative = map[string]string{
 			"{{ $.Config.Package }}/{{ $n.PackageDir }}_update.go": "{{ $.Config.Package }}/internal/split/type/{{ $n.PackageDir }}/update.go",
 			"{{ $.Config.Package }}/{{ $n.PackageDir }}_delete.go": "{{ $.Config.Package }}/internal/split/type/{{ $n.PackageDir }}/delete.go",
 			"{{ $.Config.Package }}/mutation.go#{{ $n.Name }}": "{{ $.Config.Package }}/internal/split/type/{{ $n.PackageDir }}/mutation.go",
-		{{- end }}
-		{{- range $e := $n.Edges }}
-			"{{ $.Config.Package }}/{{ $n.PackageDir }}_query.go#Query{{ pascal $e.Name }}": "{{ $.Config.Package }}/internal/split/bridge/bridge.go",
-			{{- if $n.HasOneFieldID }}
-				"{{ $.Config.Package }}/client.go#Query{{ pascal $e.Name }}{{ $n.Name }}": "{{ $.Config.Package }}/internal/split/bridge/bridge.go",
-			{{- end }}
 		{{- end }}
 	{{- end }}
 }

@@ -51,9 +51,9 @@ func withSplitTypeTemplates(base []TypeTemplate) []TypeTemplate {
 }
 
 func withSplitGraphTemplates(base []GraphTemplate, mode SplitMode) []GraphTemplate {
-	templates := make([]GraphTemplate, 0, len(base)+1)
+	templates := make([]GraphTemplate, 0, len(base)+2)
 	for _, tmpl := range base {
-		if tmpl.Name == "entql" {
+		if mode == SplitModeCompat && tmpl.Name == "entql" {
 			templates = append(templates, GraphTemplate{
 				Name:   "split/entql/facade",
 				Format: tmpl.Format,
@@ -63,13 +63,15 @@ func withSplitGraphTemplates(base []GraphTemplate, mode SplitMode) []GraphTempla
 		}
 		templates = append(templates, tmpl)
 	}
-	templates = append(templates, GraphTemplate{
-		Name:   "split/entql/internal",
-		Format: filepath.Join("internal", "split", "entql", "entql.go"),
-		Skip: func(g *Graph) bool {
-			return !g.featureEnabled(FeatureEntQL)
-		},
-	})
+	if mode == SplitModeCompat {
+		templates = append(templates, GraphTemplate{
+			Name:   "split/entql/internal",
+			Format: filepath.Join("internal", "split", "entql", "entql.go"),
+			Skip: func(g *Graph) bool {
+				return !g.featureEnabled(FeatureEntQL)
+			},
+		})
+	}
 	if mode == SplitModeNative {
 		templates = append(templates, GraphTemplate{
 			Name:   "split/native/migration-map",
