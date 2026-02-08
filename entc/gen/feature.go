@@ -103,6 +103,12 @@ var (
 		Stage:       Experimental,
 		Default:     false,
 		Description: "Generates code using split package layouts to reduce package size and compile pressure",
+		GraphTemplates: []GraphTemplate{
+			{
+				Name:   "split/bridge",
+				Format: "internal/split/bridge/bridge.go",
+			},
+		},
 		cleanup: func(c *Config) error {
 			return removeAll(filepath.Join(c.Target, "internal", "split"))
 		},

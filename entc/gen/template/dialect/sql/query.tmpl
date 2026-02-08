@@ -401,28 +401,47 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	{{- $e := $.Scope.Edge }} {{/* the edge we need to generate the path to. */}}
 	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver }}
-	selector := {{ $receiver }}.sqlQuery(ctx)
-	if err := selector.Err(); err != nil {
-		return nil, err
-	}
-	step := sqlgraph.NewStep(
-		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ if $n.HasCompositeID }}{{ $e.ColumnConstant }}{{ else }}{{ $n.ID.Constant }}{{ end }}, selector),
-		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }}),
-		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
+	{{- if $.FeatureEnabled "split-packages" }}
+		{{ $ident }}, err = entbridge.SetNeighbors(
+			{{ $receiver }}.sqlQuery(ctx),
+			{{ $receiver }}.driver.Dialect(),
+			{{ $n.Package }}.Table,
+			{{ $n.Package }}.{{ if $n.HasCompositeID }}{{ $e.ColumnConstant }}{{ else }}{{ $n.ID.Constant }}{{ end }},
+			{{ $e.Type.Package }}.Table,
+			{{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }},
+			{{ $n.Package }}.{{ $e.TableConstant }},
+			sqlgraph.{{ $e.Rel.Type }},
+			{{ $e.IsInverse }},
 			{{- if $e.M2M -}}
-				{{ $n.Package }}.{{ $e.PKConstant }}...
+				{{ $n.Package }}.{{ $e.PKConstant }}...,
 			{{- else -}}
-				{{ $n.Package }}.{{ $e.ColumnConstant }}
+				{{ $n.Package }}.{{ $e.ColumnConstant }},
 			{{- end -}}
-		),
-	)
-	{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
-	{{- with $tmpls := matchTemplate "dialect/sql/query/path/*" }}
-		{{- range $tmpl := $tmpls }}
-			{{- xtemplate $tmpl $ }}
+		)
+	{{- else }}
+		selector := {{ $receiver }}.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ if $n.HasCompositeID }}{{ $e.ColumnConstant }}{{ else }}{{ $n.ID.Constant }}{{ end }}, selector),
+			sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }}),
+			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
+				{{- if $e.M2M -}}
+					{{ $n.Package }}.{{ $e.PKConstant }}...
+				{{- else -}}
+					{{ $n.Package }}.{{ $e.ColumnConstant }}
+				{{- end -}}
+			),
+		)
+		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+		{{- with $tmpls := matchTemplate "dialect/sql/query/path/*" }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $ }}
+			{{- end }}
 		{{- end }}
+		{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
 	{{- end }}
-	{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
 {{/* query/from defines the query generation for an edge query from a given node. */}}
@@ -432,24 +451,43 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	{{- $ident := $.Scope.Ident -}}
 	{{- $receiver := $.Scope.Receiver -}}
 	id := {{ $receiver }}.ID
-	step := sqlgraph.NewStep(
-		sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
-		sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }}),
-		sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
+	{{- if $.FeatureEnabled "split-packages" }}
+		{{ $ident }} = entbridge.Neighbors(
+			{{ $receiver }}.driver.Dialect(),
+			{{ $n.Package }}.Table,
+			{{ $n.Package }}.{{ $n.ID.Constant }},
+			id,
+			{{ $e.Type.Package }}.Table,
+			{{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }},
+			{{ $n.Package }}.{{ $e.TableConstant }},
+			sqlgraph.{{ $e.Rel.Type }},
+			{{ $e.IsInverse }},
 			{{- if $e.M2M -}}
-				{{ $n.Package }}.{{ $e.PKConstant }}...
+				{{ $n.Package }}.{{ $e.PKConstant }}...,
 			{{- else -}}
-				{{ $n.Package }}.{{ $e.ColumnConstant }}
+				{{ $n.Package }}.{{ $e.ColumnConstant }},
 			{{- end -}}
-		),
-	)
-	{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
-	{{- with $tmpls := matchTemplate "dialect/sql/query/from/*" }}
-		{{- range $tmpl := $tmpls }}
-			{{- xtemplate $tmpl $ }}
+		)
+	{{- else }}
+		step := sqlgraph.NewStep(
+			sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ $n.ID.Constant }}, id),
+			sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }}),
+			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
+				{{- if $e.M2M -}}
+					{{ $n.Package }}.{{ $e.PKConstant }}...
+				{{- else -}}
+					{{ $n.Package }}.{{ $e.ColumnConstant }}
+				{{- end -}}
+			),
+		)
+		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
+		{{- with $tmpls := matchTemplate "dialect/sql/query/from/*" }}
+			{{- range $tmpl := $tmpls }}
+				{{- xtemplate $tmpl $ }}
+			{{- end }}
 		{{- end }}
+		{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
 	{{- end }}
-	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
 {{ end }}
 
 {{ define "dialect/sql/query/eagerloading/m2massign" }}

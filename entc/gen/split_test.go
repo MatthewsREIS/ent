@@ -225,3 +225,51 @@ func TestGraphSplitTypePackages(t *testing.T) {
 		}
 	}
 }
+
+func TestGraphSplitBridgeFacade(t *testing.T) {
+	t.Parallel()
+
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package:  "entc/gen",
+		Target:   target,
+		Storage:  drivers[0],
+		IDType:   &field.TypeInfo{Type: field.TypeInt},
+		Features: []Feature{FeatureSplitPackages},
+	}, []*load.Schema{
+		{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+			Edges: []*load.Edge{
+				{Name: "pets", Type: "Pet"},
+			},
+		},
+		{
+			Name: "Pet",
+			Fields: []*load.Field{
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+			},
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "pets", Inverse: true, Unique: true},
+			},
+		},
+	}...)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	bridgePath := filepath.Join(target, "internal", "split", "bridge", "bridge.go")
+	bridgeCode, err := os.ReadFile(bridgePath)
+	require.NoError(t, err)
+	require.Contains(t, string(bridgeCode), "func SetNeighbors(")
+	require.Contains(t, string(bridgeCode), "func Neighbors(")
+
+	userQueryCode, err := os.ReadFile(filepath.Join(target, "user_query.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(userQueryCode), "entbridge.SetNeighbors(")
+
+	clientCode, err := os.ReadFile(filepath.Join(target, "client.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(clientCode), "entbridge.Neighbors(")
+}
