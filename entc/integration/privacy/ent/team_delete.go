@@ -18,7 +18,7 @@ import (
 
 // TeamDelete is the builder for deleting a Team entity.
 type TeamDelete struct {
-	Config
+	config
 	hooks    []Hook
 	mutation *TeamMutation
 }

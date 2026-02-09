@@ -22,7 +22,7 @@ import (
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
-	Config
+	config
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -286,7 +286,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 
 // UserUpdateOne is the builder for updating a single User entity.
 type UserUpdateOne struct {
-	Config
+	config
 	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
@@ -561,7 +561,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &User{Config: _u.Config}
+	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {

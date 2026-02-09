@@ -23,7 +23,7 @@ import (
 
 // TaskUpdate is the builder for updating Task entities.
 type TaskUpdate struct {
-	Config
+	config
 	hooks    []Hook
 	mutation *TaskMutation
 }
@@ -328,7 +328,7 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 
 // TaskUpdateOne is the builder for updating a single Task entity.
 type TaskUpdateOne struct {
-	Config
+	config
 	fields   []string
 	hooks    []Hook
 	mutation *TaskMutation
@@ -644,7 +644,7 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Task{Config: _u.Config}
+	_node = &Task{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {

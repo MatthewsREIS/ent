@@ -20,7 +20,7 @@ import (
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
-	Config
+	config
 	mutation *UserMutation
 	hooks    []Hook
 }
@@ -140,7 +140,7 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 
 func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
-		_node = &User{Config: _c.Config}
+		_node = &User{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	)
 	if value, ok := _c.mutation.Name(); ok {
@@ -188,7 +188,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 
 // UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
-	Config
+	config
 	err      error
 	builders []*UserCreate
 }

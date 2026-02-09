@@ -10,10 +10,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 
 	"entgo.io/ent"
 	"entgo.io/ent/entc/integration/privacy/ent/migrate"
+
+	"net/http"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -25,7 +28,7 @@ import (
 
 // Client is the client that holds all ent builders.
 type Client struct {
-	Config
+	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
 	// Task is the client for interacting with the Task builders.
@@ -38,16 +41,80 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	client := &Client{Config: NewConfig(opts...)}
+	client := &Client{config: newConfig(opts...)}
 	client.init()
 	return client
 }
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Task = NewTaskClient(c.Config)
-	c.Team = NewTeamClient(c.Config)
-	c.User = NewUserClient(c.Config)
+	c.Task = NewTaskClient(c.config)
+	c.Team = NewTeamClient(c.config)
+	c.User = NewUserClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters     *inters
+		HTTPClient *http.Client
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// newConfig creates a new config for the client.
+func newConfig(opts ...Option) config {
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
+	cfg.options(opts...)
+	return cfg
+}
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
+}
+
+// HTTPClient configures the HTTPClient.
+func HTTPClient(v *http.Client) Option {
+	return func(c *config) {
+		c.HTTPClient = v
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -79,11 +146,11 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := c.Config
+	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
 		ctx:    ctx,
-		Config: cfg,
+		config: cfg,
 		Task:   NewTaskClient(cfg),
 		Team:   NewTeamClient(cfg),
 		User:   NewUserClient(cfg),
@@ -101,11 +168,11 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := c.Config
+	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
 		ctx:    ctx,
-		Config: cfg,
+		config: cfg,
 		Task:   NewTaskClient(cfg),
 		Team:   NewTeamClient(cfg),
 		User:   NewUserClient(cfg),
@@ -122,9 +189,9 @@ func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
 	}
-	cfg := c.Config
+	cfg := c.config
 	cfg.driver = dialect.Debug(c.driver, c.log)
-	client := &Client{Config: cfg}
+	client := &Client{config: cfg}
 	client.init()
 	return client
 }
@@ -166,12 +233,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 
 // TaskClient is a client for the Task schema.
 type TaskClient struct {
-	Config
+	config
 }
 
 // NewTaskClient returns a client for the Task from the given config.
-func NewTaskClient(c Config) *TaskClient {
-	return &TaskClient{Config: c}
+func NewTaskClient(c config) *TaskClient {
+	return &TaskClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
@@ -188,13 +255,13 @@ func (c *TaskClient) Intercept(interceptors ...Interceptor) {
 
 // Create returns a builder for creating a Task entity.
 func (c *TaskClient) Create() *TaskCreate {
-	mutation := newTaskMutation(c.Config, OpCreate)
-	return &TaskCreate{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTaskMutation(c.config, OpCreate)
+	return &TaskCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // CreateBulk returns a builder for creating a bulk of Task entities.
 func (c *TaskClient) CreateBulk(builders ...*TaskCreate) *TaskCreateBulk {
-	return &TaskCreateBulk{Config: c.Config, builders: builders}
+	return &TaskCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
@@ -209,31 +276,31 @@ func (c *TaskClient) MapCreateBulk(slice any, setFunc func(*TaskCreate, int)) *T
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &TaskCreateBulk{Config: c.Config, builders: builders}
+	return &TaskCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Task.
 func (c *TaskClient) Update() *TaskUpdate {
-	mutation := newTaskMutation(c.Config, OpUpdate)
-	return &TaskUpdate{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTaskMutation(c.config, OpUpdate)
+	return &TaskUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
 func (c *TaskClient) UpdateOne(_m *Task) *TaskUpdateOne {
-	mutation := newTaskMutation(c.Config, OpUpdateOne, withTask(_m))
-	return &TaskUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTaskMutation(c.config, OpUpdateOne, withTask(_m))
+	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *TaskClient) UpdateOneID(id int) *TaskUpdateOne {
-	mutation := newTaskMutation(c.Config, OpUpdateOne, withTaskID(id))
-	return &TaskUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTaskMutation(c.config, OpUpdateOne, withTaskID(id))
+	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for Task.
 func (c *TaskClient) Delete() *TaskDelete {
-	mutation := newTaskMutation(c.Config, OpDelete)
-	return &TaskDelete{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTaskMutation(c.config, OpDelete)
+	return &TaskDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
@@ -252,7 +319,7 @@ func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 // Query returns a query builder for Task.
 func (c *TaskClient) Query() *TaskQuery {
 	return &TaskQuery{
-		Config: c.Config,
+		config: c.config,
 		ctx:    &QueryContext{Type: TypeTask},
 		inters: c.Interceptors(),
 	}
@@ -274,7 +341,7 @@ func (c *TaskClient) GetX(ctx context.Context, id int) *Task {
 
 // QueryTeams queries the teams edge of a Task.
 func (c *TaskClient) QueryTeams(_m *Task) *TeamQuery {
-	query := (&TeamClient{Config: c.Config}).Query()
+	query := (&TeamClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
@@ -290,7 +357,7 @@ func (c *TaskClient) QueryTeams(_m *Task) *TeamQuery {
 
 // QueryOwner queries the owner edge of a Task.
 func (c *TaskClient) QueryOwner(_m *Task) *UserQuery {
-	query := (&UserClient{Config: c.Config}).Query()
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
@@ -318,13 +385,13 @@ func (c *TaskClient) Interceptors() []Interceptor {
 func (c *TaskClient) mutate(ctx context.Context, m *TaskMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&TaskCreate{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&TaskCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&TaskUpdate{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&TaskUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&TaskUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&TaskDelete{Config: c.Config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&TaskDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Task mutation op: %q", m.Op())
 	}
@@ -332,12 +399,12 @@ func (c *TaskClient) mutate(ctx context.Context, m *TaskMutation) (Value, error)
 
 // TeamClient is a client for the Team schema.
 type TeamClient struct {
-	Config
+	config
 }
 
 // NewTeamClient returns a client for the Team from the given config.
-func NewTeamClient(c Config) *TeamClient {
-	return &TeamClient{Config: c}
+func NewTeamClient(c config) *TeamClient {
+	return &TeamClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
@@ -354,13 +421,13 @@ func (c *TeamClient) Intercept(interceptors ...Interceptor) {
 
 // Create returns a builder for creating a Team entity.
 func (c *TeamClient) Create() *TeamCreate {
-	mutation := newTeamMutation(c.Config, OpCreate)
-	return &TeamCreate{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTeamMutation(c.config, OpCreate)
+	return &TeamCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // CreateBulk returns a builder for creating a bulk of Team entities.
 func (c *TeamClient) CreateBulk(builders ...*TeamCreate) *TeamCreateBulk {
-	return &TeamCreateBulk{Config: c.Config, builders: builders}
+	return &TeamCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
@@ -375,31 +442,31 @@ func (c *TeamClient) MapCreateBulk(slice any, setFunc func(*TeamCreate, int)) *T
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &TeamCreateBulk{Config: c.Config, builders: builders}
+	return &TeamCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for Team.
 func (c *TeamClient) Update() *TeamUpdate {
-	mutation := newTeamMutation(c.Config, OpUpdate)
-	return &TeamUpdate{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTeamMutation(c.config, OpUpdate)
+	return &TeamUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
 func (c *TeamClient) UpdateOne(_m *Team) *TeamUpdateOne {
-	mutation := newTeamMutation(c.Config, OpUpdateOne, withTeam(_m))
-	return &TeamUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTeamMutation(c.config, OpUpdateOne, withTeam(_m))
+	return &TeamUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *TeamClient) UpdateOneID(id int) *TeamUpdateOne {
-	mutation := newTeamMutation(c.Config, OpUpdateOne, withTeamID(id))
-	return &TeamUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTeamMutation(c.config, OpUpdateOne, withTeamID(id))
+	return &TeamUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for Team.
 func (c *TeamClient) Delete() *TeamDelete {
-	mutation := newTeamMutation(c.Config, OpDelete)
-	return &TeamDelete{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newTeamMutation(c.config, OpDelete)
+	return &TeamDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
@@ -418,7 +485,7 @@ func (c *TeamClient) DeleteOneID(id int) *TeamDeleteOne {
 // Query returns a query builder for Team.
 func (c *TeamClient) Query() *TeamQuery {
 	return &TeamQuery{
-		Config: c.Config,
+		config: c.config,
 		ctx:    &QueryContext{Type: TypeTeam},
 		inters: c.Interceptors(),
 	}
@@ -440,7 +507,7 @@ func (c *TeamClient) GetX(ctx context.Context, id int) *Team {
 
 // QueryTasks queries the tasks edge of a Team.
 func (c *TeamClient) QueryTasks(_m *Team) *TaskQuery {
-	query := (&TaskClient{Config: c.Config}).Query()
+	query := (&TaskClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
@@ -456,7 +523,7 @@ func (c *TeamClient) QueryTasks(_m *Team) *TaskQuery {
 
 // QueryUsers queries the users edge of a Team.
 func (c *TeamClient) QueryUsers(_m *Team) *UserQuery {
-	query := (&UserClient{Config: c.Config}).Query()
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
@@ -484,13 +551,13 @@ func (c *TeamClient) Interceptors() []Interceptor {
 func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&TeamCreate{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&TeamCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&TeamUpdate{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&TeamUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&TeamUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&TeamUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&TeamDelete{Config: c.Config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&TeamDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Team mutation op: %q", m.Op())
 	}
@@ -498,12 +565,12 @@ func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error)
 
 // UserClient is a client for the User schema.
 type UserClient struct {
-	Config
+	config
 }
 
 // NewUserClient returns a client for the User from the given config.
-func NewUserClient(c Config) *UserClient {
-	return &UserClient{Config: c}
+func NewUserClient(c config) *UserClient {
+	return &UserClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
@@ -520,13 +587,13 @@ func (c *UserClient) Intercept(interceptors ...Interceptor) {
 
 // Create returns a builder for creating a User entity.
 func (c *UserClient) Create() *UserCreate {
-	mutation := newUserMutation(c.Config, OpCreate)
-	return &UserCreate{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newUserMutation(c.config, OpCreate)
+	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // CreateBulk returns a builder for creating a bulk of User entities.
 func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
-	return &UserCreateBulk{Config: c.Config, builders: builders}
+	return &UserCreateBulk{config: c.config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
@@ -541,31 +608,31 @@ func (c *UserClient) MapCreateBulk(slice any, setFunc func(*UserCreate, int)) *U
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &UserCreateBulk{Config: c.Config, builders: builders}
+	return &UserCreateBulk{config: c.config, builders: builders}
 }
 
 // Update returns an update builder for User.
 func (c *UserClient) Update() *UserUpdate {
-	mutation := newUserMutation(c.Config, OpUpdate)
-	return &UserUpdate{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newUserMutation(c.config, OpUpdate)
+	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
 func (c *UserClient) UpdateOne(_m *User) *UserUpdateOne {
-	mutation := newUserMutation(c.Config, OpUpdateOne, withUser(_m))
-	return &UserUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(_m))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
 func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	mutation := newUserMutation(c.Config, OpUpdateOne, withUserID(id))
-	return &UserUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
+	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // Delete returns a delete builder for User.
 func (c *UserClient) Delete() *UserDelete {
-	mutation := newUserMutation(c.Config, OpDelete)
-	return &UserDelete{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	mutation := newUserMutation(c.config, OpDelete)
+	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
@@ -584,7 +651,7 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 // Query returns a query builder for User.
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
-		Config: c.Config,
+		config: c.config,
 		ctx:    &QueryContext{Type: TypeUser},
 		inters: c.Interceptors(),
 	}
@@ -606,7 +673,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryTeams queries the teams edge of a User.
 func (c *UserClient) QueryTeams(_m *User) *TeamQuery {
-	query := (&TeamClient{Config: c.Config}).Query()
+	query := (&TeamClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
@@ -622,7 +689,7 @@ func (c *UserClient) QueryTeams(_m *User) *TeamQuery {
 
 // QueryTasks queries the tasks edge of a User.
 func (c *UserClient) QueryTasks(_m *User) *TaskQuery {
-	query := (&TaskClient{Config: c.Config}).Query()
+	query := (&TaskClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
@@ -650,13 +717,13 @@ func (c *UserClient) Interceptors() []Interceptor {
 func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&UserCreate{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&UserUpdate{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&UserUpdateOne{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&UserDelete{Config: c.Config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
 	}

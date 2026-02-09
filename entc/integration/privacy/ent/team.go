@@ -17,7 +17,7 @@ import (
 
 // Team is the model entity for the Team schema.
 type Team struct {
-	Config `json:"-"`
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
@@ -108,29 +108,29 @@ func (_m *Team) Value(name string) (ent.Value, error) {
 
 // QueryTasks queries the "tasks" edge of the Team entity.
 func (_m *Team) QueryTasks() *TaskQuery {
-	return NewTeamClient(_m.Config).QueryTasks(_m)
+	return NewTeamClient(_m.config).QueryTasks(_m)
 }
 
 // QueryUsers queries the "users" edge of the Team entity.
 func (_m *Team) QueryUsers() *UserQuery {
-	return NewTeamClient(_m.Config).QueryUsers(_m)
+	return NewTeamClient(_m.config).QueryUsers(_m)
 }
 
 // Update returns a builder for updating this Team.
 // Note that you need to call Team.Unwrap() before calling this method if this Team
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (_m *Team) Update() *TeamUpdateOne {
-	return NewTeamClient(_m.Config).UpdateOne(_m)
+	return NewTeamClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Team entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
 func (_m *Team) Unwrap() *Team {
-	_tx, ok := _m.Config.driver.(*txDriver)
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Team is not a transactional entity")
 	}
-	_m.Config.driver = _tx.drv
+	_m.config.driver = _tx.drv
 	return _m
 }
 

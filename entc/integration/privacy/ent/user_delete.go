@@ -18,7 +18,7 @@ import (
 
 // UserDelete is the builder for deleting a User entity.
 type UserDelete struct {
-	Config
+	config
 	hooks    []Hook
 	mutation *UserMutation
 }

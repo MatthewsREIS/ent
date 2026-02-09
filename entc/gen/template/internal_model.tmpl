@@ -16,6 +16,8 @@ import (
 	"fmt"
 	"strings"
 
+	// Guardrail: internal model package must remain import-cycle safe and must not import
+	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	{{- if $.HasOneFieldID }}
@@ -85,6 +87,16 @@ type {{ $edgesType }} struct {
 	loadedTypes [{{ len . }}]bool
 	{{- /* Additional fields to add by the user. */}}
 	{{- template "model/edges/fields/additional" $ }}
+}
+
+// SetLoadedTypes sets the loaded types state for eager-loading.
+func (e *{{ $edgesType }}) SetLoadedTypes(lt [{{ len . }}]bool) {
+	e.loadedTypes = lt
+}
+
+// IsLoaded returns whether the edge at the given index was loaded.
+func (e {{ $edgesType }}) IsLoaded(idx int) bool {
+	return e.loadedTypes[idx]
 }
 
 {{- range $i, $e := . }}
@@ -265,4 +277,19 @@ func ({{ $receiver }} *{{ $.Name }}) AssignValues(columns []string, values []any
 func ({{ $receiver }} *{{ $.Name }}) {{ $.ValueName }}(name string) (ent.Value, error) {
 	return {{ $receiver }}.selectValues.Get(name)
 }
+
+{{- /* Exported accessors for unexported FK fields, used by sub-package create builders and root queries. */ -}}
+{{- range $fk := $.UnexportedForeignKeys }}
+{{- $f := $fk.Field }}
+// Set{{ pascal $fk.StructField }} sets the {{ $fk.StructField }} foreign key.
+func ({{ $receiver }} *{{ $.Name }}) Set{{ pascal $fk.StructField }}(v {{ $f.Type }}) {
+	{{ $receiver }}.{{ $fk.StructField }} = {{ if $f.Nillable }}&{{ end }}v
+}
+
+// Get{{ pascal $fk.StructField }} returns the {{ $fk.StructField }} foreign key value.
+func ({{ $receiver }} *{{ $.Name }}) Get{{ pascal $fk.StructField }}() {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {
+	return {{ $receiver }}.{{ $fk.StructField }}
+}
+{{- end }}
+
 {{ end }}
