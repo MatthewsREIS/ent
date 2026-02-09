@@ -135,6 +135,7 @@ func fieldOps(f *Field) (ops []Op) {
 	default:
 		ops = numericOps
 	}
+	ops = append([]Op(nil), ops...)
 	if f.Optional {
 		ops = append(ops, nillableOps...)
 	}
