@@ -26,9 +26,9 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, {{ $receiver}}.Drv, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{msg: err.Error(), wrap: err}
+		err = &ConstraintError{Msg: err.Error(), Wrap: err}
 	}
 	{{ $mutation }}.done = true
 	return affected, err

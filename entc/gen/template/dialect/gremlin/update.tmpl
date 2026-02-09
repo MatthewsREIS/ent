@@ -24,13 +24,13 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if 
 	{{- if $one }}
 		id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
 		if !ok {
-			return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
+			return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", Err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
 		}
 		query, bindings := {{ $receiver }}.gremlin(id).Query()
 	{{- else }}
 		query, bindings := {{ $receiver }}.gremlin().Query()
 	{{- end }}
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := {{ $receiver }}.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return {{ $zero }}, err
 	}
 	if err, ok := isConstantError(res); ok {
@@ -181,7 +181,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			{{- if not $one }}
 				constraints = append(constraints, &constraint{
 					pred: rv.Count(),
-					test: __.Is(p.GT(1)).Constant(&ConstraintError{msg: "update traversal contains more than one vertex"}),
+					test: __.Is(p.GT(1)).Constant(&ConstraintError{Msg: "update traversal contains more than one vertex"}),
 				})
 			{{- end }}
 			v = constraints[0].pred.Coalesce(constraints[0].test, v)

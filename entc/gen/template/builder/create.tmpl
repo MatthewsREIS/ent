@@ -34,6 +34,11 @@ type {{ $builder }} struct {
 	{{- end }}
 }
 
+// New{{ $builder }} returns a new {{ $builder }} initialized with the given config, hooks, and mutation.
+func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *{{ $builder }} {
+	return &{{ $builder }}{Config: c, hooks: hooks, mutation: mutation}
+}
+
 {{ with extend $ "Receiver" $receiver "Builder" $builder }}
 	{{ template "setter" . }}
 {{ end }}
@@ -107,11 +112,11 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 			{{- if $n }}
 				{{- $partially := ne $n (len $.Config.Storage.Dialects) }}
 				{{- if $partially }}
-					switch {{ $receiver }}.driver.Dialect() {
+					switch {{ $receiver }}.Drv.Dialect() {
 					case {{ join $dialects ", " }}:
 				{{- end }}
 					if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
-						return &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: missing required field "{{ $.Name }}.{{ $f.Name }}"`)}
+						return &ValidationError{Name: "{{ $f.Name }}", Err: errors.New(`{{ $pkg }}: missing required field "{{ $.Name }}.{{ $f.Name }}"`)}
 					}
 				{{- if $partially }}
 					}
@@ -122,7 +127,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 		{{- with or $f.Validators $f.IsEnum $isValidator }}
 			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				if err := {{ if or $f.Validators $f.IsEnum }}{{ $.PackageQualifier }}{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
-					return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
+					return &ValidationError{Name: "{{ $f.Name }}", Err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 				}
 			}
 		{{- end }}
@@ -130,7 +135,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- range $e := $.EdgesWithID }}
 		{{- if not $e.Optional }}
 			if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
-				return &ValidationError{Name: "{{ $e.Name }}", err: errors.New(`{{ $pkg }}: missing required edge "{{ $.Name }}.{{ $e.Name }}"`)}
+				return &ValidationError{Name: "{{ $e.Name }}", Err: errors.New(`{{ $pkg }}: missing required edge "{{ $.Name }}.{{ $e.Name }}"`)}
 			}
 		{{- end }}
 	{{- end }}
@@ -162,6 +167,16 @@ type {{ $bulk }} struct {
 	{{- if hasTemplate $tmpl }}
 		{{- xtemplate $tmpl . }}
 	{{- end }}
+}
+
+// New{{ $bulk }} returns a new {{ $bulk }} initialized with the given config and builders.
+func New{{ $bulk }}(c Config, builders []*{{ $builder }}) *{{ $bulk }} {
+	return &{{ $bulk }}{Config: c, builders: builders}
+}
+
+// New{{ $bulk }}Err returns a new {{ $bulk }} that returns the given error on Save.
+func New{{ $bulk }}Err(err error) *{{ $bulk }} {
+	return &{{ $bulk }}{err: err}
 }
 
 {{/* If the storage driver supports bulk creation */}}

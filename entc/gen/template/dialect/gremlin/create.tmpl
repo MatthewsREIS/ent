@@ -17,7 +17,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.N
 	}
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlin().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := {{ $receiver }}.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {

@@ -1,0 +1,84 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{ define "shared" }}
+
+{{ with extend $ "Package" $.Package }}
+	{{ template "header" . }}
+{{ end }}
+
+import (
+	"context"
+
+	"{{ $.Config.Package }}/internal"
+)
+
+// Type aliases for types shared between the root package and sub-packages.
+type (
+	Op               = internal.Op
+	Config           = internal.Config
+	Option           = internal.Option
+	Hook             = internal.Hook
+	Value            = internal.Value
+	Query            = internal.Query
+	QueryContext     = internal.QueryContext
+	Querier          = internal.Querier
+	QuerierFunc      = internal.QuerierFunc
+	Interceptor      = internal.Interceptor
+	InterceptFunc    = internal.InterceptFunc
+	Traverser        = internal.Traverser
+	TraverseFunc     = internal.TraverseFunc
+	Mutator          = internal.Mutator
+	Mutation         = internal.Mutation
+	MutateFunc       = internal.MutateFunc
+	ValidationError  = internal.ValidationError
+	NotFoundError    = internal.NotFoundError
+	NotSingularError = internal.NotSingularError
+	NotLoadedError   = internal.NotLoadedError
+	ConstraintError  = internal.ConstraintError
+)
+
+const (
+	// Operation types.
+	OpCreate    = internal.OpCreate
+	OpDelete    = internal.OpDelete
+	OpDeleteOne = internal.OpDeleteOne
+	OpUpdate    = internal.OpUpdate
+	OpUpdateOne = internal.OpUpdateOne
+
+	// {{ $.TypeName }} holds the string denoting the {{ lower $.Name }} type in the database.
+	{{ $.TypeName }} = "{{ $.Name }}"
+)
+
+// WithHooks invokes the builder operation with the given hooks, if any.
+func WithHooks[V Value, M any, PM interface {
+	*M
+	Mutation
+}](ctx context.Context, exec func(context.Context) (V, error), mutation PM, hooks []Hook) (value V, err error) {
+	return internal.WithHooks[V, M, PM](ctx, exec, mutation, hooks)
+}
+
+// Model type aliases from internal.
+type {{ $.Name }} = internal.{{ $.Name }}
+{{- with $.Edges }}
+type {{ $.Name }}Edges = internal.{{ $.Name }}Edges
+{{- end }}
+type {{ plural $.Name }} = internal.{{ plural $.Name }}
+
+// Mutation type aliases and constructors from internal.
+type {{ $.MutationName }} = internal.{{ $.MutationName }}
+type {{ $.MutationName }}Option = internal.{{ $.MutationName }}Option
+
+var New{{ $.MutationName }} = internal.New{{ $.MutationName }}
+{{- with $.HasOneFieldID }}
+var With{{ $.Name }}ID = internal.With{{ $.Name }}ID
+var With{{ $.Name }} = internal.With{{ $.Name }}
+var With{{ $.Name }}IDsFunc = internal.With{{ $.Name }}IDsFunc
+{{- end }}
+
+{{ end }}

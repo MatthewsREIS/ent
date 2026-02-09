@@ -119,8 +119,9 @@ const (
 	{{ else }}
 		{{/* Omit the package name from the type. */}}
 		{{ $enum = trimPackage $f.Type.String $.Package }}
-		// {{ $enum }} defines the type for the "{{ $f.Name }}" enum field.
-		type {{ $enum }} string
+		{{ $internalEnum := printf "%s%s" $.Name $enum }}
+		// {{ $enum }} is an alias for the enum type defined in the internal package.
+		type {{ $enum }} = internal.{{ $internalEnum }}
 
 		{{- if $f.Default }}
 			{{- /*  Find the enum that holds the default value. */ -}}
@@ -138,10 +139,6 @@ const (
 				{{ $e.Name }} {{ $enum }} = "{{ $e.Value }}"
 			{{-  end }}
 		)
-
-		func ({{ $receiver }} {{ $enum }}) String() string {
-			return string({{ $receiver }})
-		}
 	{{ end }}
 
 

@@ -8,24 +8,23 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "mutation" }}
 
-{{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
 import (
-	"entgo.io/ent"
+	"{{ $.Config.Package }}/internal"
 )
 
 const (
 	// Operation types.
-	OpCreate	= ent.OpCreate
-	OpDelete	= ent.OpDelete
-	OpDeleteOne	= ent.OpDeleteOne
-	OpUpdate	= ent.OpUpdate
-	OpUpdateOne	= ent.OpUpdateOne
+	OpCreate    = internal.OpCreate
+	OpDelete    = internal.OpDelete
+	OpDeleteOne = internal.OpDeleteOne
+	OpUpdate    = internal.OpUpdate
+	OpUpdateOne = internal.OpUpdateOne
 
 	// Node types.
 	{{- range $n := $.Nodes }}
-		{{ $n.TypeName }} = "{{ $n.Name }}"
+		{{ $n.TypeName }} = internal.{{ $n.TypeName }}
 	{{- end }}
 )
 

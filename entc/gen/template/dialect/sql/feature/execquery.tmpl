@@ -18,7 +18,7 @@ in the LICENSE file in the root directory of this source tree.
         // ExecContext allows calling the underlying ExecContext method of the driver if it is supported by it.
         // See, database/sql#DB.ExecContext for more information.
         func (c *Config) ExecContext(ctx context.Context, query string, args ...any) (stdsql.Result, error) {
-        	ex, ok := c.driver.(interface {
+        	ex, ok := c.Drv.(interface {
         		ExecContext(context.Context, string, ...any) (stdsql.Result, error)
         	})
         	if !ok {
@@ -30,7 +30,7 @@ in the LICENSE file in the root directory of this source tree.
         // QueryContext allows calling the underlying QueryContext method of the driver if it is supported by it.
         // See, database/sql#DB.QueryContext for more information.
         func (c *Config) QueryContext(ctx context.Context, query string, args ...any) (*stdsql.Rows, error) {
-        	q, ok := c.driver.(interface {
+        	q, ok := c.Drv.(interface {
         		QueryContext(context.Context, string, ...any) (*stdsql.Rows, error)
         	})
         	if !ok {

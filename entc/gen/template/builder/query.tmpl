@@ -98,7 +98,7 @@ func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{ {{ $.Package }}.Label}
+		return nil, &NotFoundError{Label: {{ $.Package }}.Label}
 	}
 	return nodes[0], nil
 }
@@ -121,7 +121,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 			return
 		}
 		if len(ids) == 0 {
-			err = &NotFoundError{ {{ $.Package }}.Label}
+			err = &NotFoundError{Label: {{ $.Package }}.Label}
 			return
 		}
 		return ids[0], nil
@@ -149,9 +149,9 @@ func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }},
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{ {{ $.Package }}.Label}
+		return nil, &NotFoundError{Label: {{ $.Package }}.Label}
 	default:
-		return nil, &NotSingularError{ {{ $.Package }}.Label}
+		return nil, &NotSingularError{Label: {{ $.Package }}.Label}
 	}
 }
 
@@ -177,9 +177,9 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 		case 1:
 			id = ids[0]
 		case 0:
-			err = &NotFoundError{ {{ $.Package }}.Label}
+			err = &NotFoundError{Label: {{ $.Package }}.Label}
 		default:
-			err = &NotSingularError{ {{ $.Package }}.Label}
+			err = &NotSingularError{Label: {{ $.Package }}.Label}
 		}
 		return
 	}

@@ -228,7 +228,7 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 	// Exec executes the UPSERT query and returns the inserted/updated ID.
 	func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 		{{- if and $udfID (not $.ID.Type.Numeric) }}
-			if u.create.driver.Dialect() == dialect.MySQL {
+			if u.create.Drv.Dialect() == dialect.MySQL {
 				// In case of "ON CONFLICT", there is no way to get back non-numeric ID
 				// fields from the database since MySQL does not support the RETURNING clause.
 				return id, errors.New("{{ $pkg }}: {{ $upsertOne }}.ID is not supported by MySQL driver. Use {{ $upsertOne }}.Exec instead")

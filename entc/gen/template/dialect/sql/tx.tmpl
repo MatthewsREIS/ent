@@ -9,17 +9,17 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/txoptions" }}
 // BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
-	if _, ok := c.driver.(*txDriver); ok {
+	if _, ok := c.Drv.(*txDriver); ok {
 		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
-	tx, err := c.driver.(interface {
+	tx, err := c.Drv.(interface {
 		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
 	}).BeginTx(ctx, opts)
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
 	cfg := c.Config
-	cfg.driver = &txDriver{tx: tx, drv: c.driver}
+	cfg.Drv = &txDriver{tx: tx, drv: c.Drv}
 	return &Tx{
 		ctx: ctx,
 		Config: cfg,

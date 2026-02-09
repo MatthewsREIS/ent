@@ -21,9 +21,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 			return nil, err
 		}
 	{{- end }}
-	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.Drv, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
-			err = &ConstraintError{msg: err.Error(), wrap: err}
+			err = &ConstraintError{Msg: err.Error(), Wrap: err}
 		}
 		return nil, err
 	}
@@ -183,9 +183,9 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 						{{- end }}
 					{{- end }}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, {{ $receiver }}.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, {{ $receiver }}.Drv, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
-							err = &ConstraintError{msg: err.Error(), wrap: err}
+							err = &ConstraintError{Msg: err.Error(), Wrap: err}
 						}
 					}
 				}

@@ -31,7 +31,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, root *{{ $.Q
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := {{ $receiver }}.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := {{ $receiver }}.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

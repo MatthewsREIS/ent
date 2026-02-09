@@ -28,6 +28,11 @@ type {{ $builder }} struct {
 	{{- template "update/fields" $ -}}
 }
 
+// New{{ $builder }} returns a new {{ $builder }} initialized with the given config, hooks, and mutation.
+func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *{{ $builder }} {
+	return &{{ $builder }}{Config: c, hooks: hooks, mutation: mutation}
+}
+
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
 	{{ $mutation }}.Where(ps...)
@@ -96,6 +101,11 @@ type {{ $onebuilder }} struct {
 	Config
 	fields []string
 	{{- template "update/fields" $ }}
+}
+
+// New{{ $onebuilder }} returns a new {{ $onebuilder }} initialized with the given config, hooks, and mutation.
+func New{{ $onebuilder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *{{ $onebuilder }} {
+	return &{{ $onebuilder }}{Config: c, hooks: hooks, mutation: mutation}
 }
 
 {{ with extend $ "Receiver" $receiver "Builder" $onebuilder }}
@@ -251,7 +261,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			{{- with and (not $f.Immutable) (or $f.Validators $f.IsEnum $isValidator) }}
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					if err := {{ if or $f.Validators $f.IsEnum }}{{ $.PackageQualifier }}{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
-						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
+						return &ValidationError{Name: "{{ $f.Name }}", Err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 					}
 				}
 			{{- end }}

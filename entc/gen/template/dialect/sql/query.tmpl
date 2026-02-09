@@ -51,7 +51,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 		}
 	{{- end }}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*{{ $.Name }}).scanValues(nil, columns)
+		return (*{{ $.Name }}).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &{{ $.Name }}{Config: {{ $receiver }}.Config}
@@ -59,7 +59,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 		{{- with $.Edges }}
 			node.Edges.loadedTypes = loadedTypes
 		{{- end }}
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	{{- /* Allow mutating the sqlgraph.QuerySpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/query/spec/*" }}
@@ -70,7 +70,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, {{ $receiver }}.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -280,7 +280,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 			_spec.Unique = {{ $receiver }}.ctx.Unique != nil && *{{ $receiver }}.ctx.Unique
 		}
 	{{- end }}
-	return sqlgraph.CountNodes(ctx, {{ $receiver }}.driver, _spec)
+	return sqlgraph.CountNodes(ctx, {{ $receiver }}.Drv, _spec)
 }
 
 func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
@@ -357,7 +357,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	{{- $builderV := "builder" }}{{ if eq $.Package $builderV }}{{ $builderV = "builderC" }}{{ end }}
-	{{ $builderV }} := sql.Dialect({{ $receiver }}.driver.Dialect())
+	{{ $builderV }} := sql.Dialect({{ $receiver }}.Drv.Dialect())
 	t1 := {{ $builderV }}.Table({{ $.Package }}.Table)
 	columns := {{ $receiver }}.ctx.Fields
 	if len(columns) == 0 {
@@ -422,7 +422,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.driver.Dialect(), step)
+	{{ $ident }} = sqlgraph.SetNeighbors({{ $receiver }}.Drv.Dialect(), step)
 {{ end }}
 
 {{/* query/from defines the query generation for an edge query from a given node. */}}
@@ -449,7 +449,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.driver.Dialect(), step)
+	{{ $ident }} = sqlgraph.Neighbors({{ $receiver }}.Drv.Dialect(), step)
 {{ end }}
 
 {{ define "dialect/sql/query/eagerloading/m2massign" }}
@@ -468,7 +468,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	{{- $receiver := $.Scope.Receiver }}
 	for _, f := range {{ $receiver }}.ctx.Fields {
 		if !{{ $.Package }}.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
 		}
 	}
 {{- end }}

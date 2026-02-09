@@ -28,11 +28,11 @@ in the LICENSE file in the root directory of this source tree.
                 // loaded in eager-loading with this name.
                 func ({{ $receiver }} *{{ $.Name }}) Named{{ $e.StructField }}(name string) ([]*{{ $e.Type.Name }}, error) {
                     if {{ $receiver }}.Edges.named{{ $e.StructField }} == nil {
-                        return nil, &NotLoadedError{edge: name}
+                        return nil, &NotLoadedError{Edge: name}
                     }
                     nodes, ok := {{ $receiver }}.Edges.named{{ $e.StructField }}[name]
                     if !ok {
-                        return nil, &NotLoadedError{edge: name}
+                        return nil, &NotLoadedError{Edge: name}
                     }
                     return nodes, nil
                 }

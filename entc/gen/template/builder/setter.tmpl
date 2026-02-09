@@ -23,8 +23,9 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ range $f := $fields }}
 	{{ $func := print "Set" $f.StructField }}
+	{{ $ft := $f.Type.String }}{{ if and $.Scope.InSubPackage $f.IsEnum }}{{ $ft = trimPackage $f.Type.String $.Package }}{{ end }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $f.Type }}) *{{ $builder }} {
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $ft }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $updater $f.SupportsMutationAdd }}
 			{{ $receiver }}.mutation.{{ $f.MutationReset }}()
@@ -40,7 +41,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $skipNillable := false }}{{ range $fields }}{{ if and (ne .Name $f.Name) (eq .MutationSet $nillableFunc) }}{{ $skipNillable = true }}{{ break }}{{ end }}{{ end }}
 	{{ if and (not $f.Type.Nillable) (not $skipNillable) (or $nillableC $nillableU) }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}(v *{{ $f.Type }}) *{{ $builder }} {
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}(v *{{ $ft }}) *{{ $builder }} {
 			if v != nil {
 				{{ $receiver }}.{{ $func }}(*v)
 			}

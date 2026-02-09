@@ -48,6 +48,28 @@ var (
 	// Templates holds the template information for a file that the graph is generating.
 	Templates = []TypeTemplate{
 		{
+			Name:   "internal/model",
+			Cond:   notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("internal/%s_model.go", t.PackageDir())
+			},
+		},
+		{
+			Name:   "internal/mutation",
+			Cond:   notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("internal/%s_mutation.go", t.PackageDir())
+			},
+		},
+		{
+			Name:   "shared",
+			Cond:   notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/shared.go", t.PackageDir())
+			},
+			SubPackage: true,
+		},
+		{
 			Name: "create",
 			Cond: notView,
 			Format: func(t *Type) string {
@@ -121,6 +143,10 @@ var (
 	}
 	// GraphTemplates holds the templates applied on the graph.
 	GraphTemplates = []GraphTemplate{
+		{
+			Name:   "internal/types",
+			Format: "internal/types.go",
+		},
 		{
 			Name:   "base",
 			Format: "ent.go",
