@@ -9,9 +9,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "client/type" }}
 {{ $pkg := base $.Config.Package }}
 
-{{ with extend $ "Package" $.Package }}
-	{{ template "header" . }}
-{{ end }}
+{{ template "header" $ }}
 
 {{ with extend $ "Imports" $.SiblingImports }}
 	{{ template "import" . }}
@@ -20,6 +18,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $n := $ }}
 {{ $client := $n.ClientName }}
 {{ $rec := $n.Receiver }}{{ if eq $rec "c" }}{{ $rec = printf "%.2s" $n.Name | lower }}{{ end }}
+{{ $q := $n.PackageQualifier }}
 
 // {{ $client }} is a client for the {{ $n.Name }} schema.
 type {{ $client }} struct {
@@ -47,40 +46,40 @@ func (c *{{ $client }}) Intercept(interceptors ...Interceptor) {
 
 {{- if not $n.IsView }}
 // Create returns a builder for creating a {{ $n.Name }} entity.
-func (c *{{ $client }}) Create() *{{ $n.CreateName }} {
+func (c *{{ $client }}) Create() *{{ $q }}{{ $n.CreateName }} {
 	mutation := new{{ $n.MutationName }}(c.Config, OpCreate)
-	return &{{ $n.CreateName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $q }}{{ $n.CreateName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // CreateBulk returns a builder for creating a bulk of {{ $n.Name }} entities.
-func (c *{{ $client }}) CreateBulk(builders ...*{{ $n.CreateName }}) *{{ $n.CreateBulkName }} {
-	return &{{ $n.CreateBulkName }}{Config: c.Config, builders: builders}
+func (c *{{ $client }}) CreateBulk(builders ...*{{ $q }}{{ $n.CreateName }}) *{{ $q }}{{ $n.CreateBulkName }} {
+	return &{{ $q }}{{ $n.CreateBulkName }}{Config: c.Config, builders: builders}
 }
 
 // MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
 // a builder and applies setFunc on it.
-func (c *{{ $client }}) MapCreateBulk(slice any, setFunc func(*{{ $n.CreateName }}, int)) *{{ $n.CreateBulkName }} {
+func (c *{{ $client }}) MapCreateBulk(slice any, setFunc func(*{{ $q }}{{ $n.CreateName }}, int)) *{{ $q }}{{ $n.CreateBulkName }} {
 	{{- /* This check should be replaced with type-parameter method, if it will be supported by Go. */}}
 	rv := reflect.ValueOf(slice)
 	if rv.Kind() != reflect.Slice {
-		return &{{ $n.CreateBulkName }}{err: fmt.Errorf("calling to {{ $client }}.MapCreateBulk with wrong type %T, need slice", slice)}
+		return &{{ $q }}{{ $n.CreateBulkName }}{err: fmt.Errorf("calling to {{ $client }}.MapCreateBulk with wrong type %T, need slice", slice)}
 	}
-	builders := make([]*{{ $n.CreateName }}, rv.Len())
+	builders := make([]*{{ $q }}{{ $n.CreateName }}, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		builders[i] = c.Create()
 		setFunc(builders[i], i)
 	}
-	return &{{ $n.CreateBulkName }}{Config: c.Config, builders: builders}
+	return &{{ $q }}{{ $n.CreateBulkName }}{Config: c.Config, builders: builders}
 }
 
 // Update returns an update builder for {{ $n.Name }}.
-func (c *{{ $client }}) Update() *{{ $n.UpdateName }} {
+func (c *{{ $client }}) Update() *{{ $q }}{{ $n.UpdateName }} {
 	mutation := new{{ $n.MutationName }}(c.Config, OpUpdate)
-	return &{{ $n.UpdateName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $q }}{{ $n.UpdateName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneName }} {
+func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.UpdateOneName }} {
 	{{- if $n.HasOneFieldID }}
 		mutation := new{{ $n.MutationName }}(c.Config, OpUpdateOne, {{ print "with" $n.Name }}({{ $rec }}))
 	{{- else }}
@@ -89,36 +88,36 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneNam
 			mutation.{{ $id.BuilderField }} = &{{ $rec }}.{{ $id.StructField }}
 		{{- end }}
 	{{- end }}
-	return &{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $q }}{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 }
 
 {{ with $n.HasOneFieldID }}
 	// UpdateOneID returns an update builder for the given id.
-	func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $n.UpdateOneName }} {
+	func (c *{{ $client }}) UpdateOneID(id {{ $n.ID.Type }}) *{{ $q }}{{ $n.UpdateOneName }} {
 		mutation := new{{ $n.MutationName }}(c.Config, OpUpdateOne, {{ print "with" $n.Name "ID" }}(id))
-		return &{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+		return &{{ $q }}{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 	}
 {{ end }}
 
 // Delete returns a delete builder for {{ $n.Name }}.
-func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
+func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
 	mutation := new{{ $n.MutationName }}(c.Config, OpDelete)
-	return &{{ $n.DeleteName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
+	return &{{ $q }}{{ $n.DeleteName }}{Config: c.Config, hooks: c.Hooks(), mutation: mutation}
 }
 
 {{ with $n.HasOneFieldID }}
 	// DeleteOne returns a builder for deleting the given entity.
-	func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $n.DeleteOneName }} {
+	func (c *{{ $client }}) DeleteOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.DeleteOneName }} {
 		return c.DeleteOneID({{ $rec }}.ID)
 	}
 
 	// DeleteOneID returns a builder for deleting the given entity by its id.
-	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }} {
+	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $q }}{{ $n.DeleteOneName }} {
 		{{- $builder := "builder" }}{{ if eq $n.Package $builder }}{{ $builder = "builderC" }}{{ end }}
 		{{ $builder }} := c.Delete().Where({{ $n.Package }}.ID(id))
 		{{ $builder }}.mutation.id = &id
 		{{ $builder }}.mutation.op = OpDeleteOne
-		return &{{ $n.DeleteOneName }}{ {{ $builder }} }
+		return &{{ $q }}{{ $n.DeleteOneName }}{ {{ $builder }} }
 	}
 {{ end }}
 {{- end }} {{/* End of if not IsView. */}}
@@ -204,13 +203,13 @@ func (c *{{ $client }}) Interceptors() []Interceptor {
 func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
-		return (&{{ $n.CreateName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&{{ $q }}{{ $n.CreateName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdate:
-		return (&{{ $n.UpdateName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&{{ $q }}{{ $n.UpdateName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpUpdateOne:
-		return (&{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+		return (&{{ $q }}{{ $n.UpdateOneName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Save(ctx)
 	case OpDelete, OpDeleteOne:
-		return (&{{ $n.DeleteName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+		return (&{{ $q }}{{ $n.DeleteName }}{Config: c.Config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("{{ $pkg }}: unknown {{ $n.Name }} mutation op: %q", m.Op())
 	}

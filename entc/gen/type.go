@@ -945,6 +945,21 @@ func (t Type) ValueName() string {
 	return "GetValue"
 }
 
+// PackageQualifier returns the package qualifier prefix for referencing this
+// type's sub-package symbols. For root-level templates it returns "pkg." (e.g. "task.").
+// This is overridden by typeScope to return "" when generating inside the sub-package.
+func (t Type) PackageQualifier() string {
+	return t.Package() + "."
+}
+
+// BuilderImports returns the entity imports needed by CUD builder templates.
+// For root-level templates it returns SiblingImports(). This is overridden by
+// typeScope to return nil when generating inside the sub-package (no entity
+// imports needed since same-package symbols are unqualified).
+func (t Type) BuilderImports() []struct{ Alias, Path string } {
+	return t.SiblingImports()
+}
+
 // SiblingImports returns all sibling packages that are needed for the different builders.
 func (t Type) SiblingImports() []struct{ Alias, Path string } {
 	var (

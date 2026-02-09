@@ -67,7 +67,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.CreateSpec{{ if $.HasValueScanner }}, error{{ end }}) {
 	var (
 		_node = &{{ $.Name }}{Config: {{ $receiver }}.Config}
-		_spec = sqlgraph.NewCreateSpec({{ $.Package }}.Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
+		_spec = sqlgraph.NewCreateSpec({{ $.PackageQualifier }}Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.PackageQualifier }}{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
 	)
 	{{- /* Allow mutating the sqlgraph.CreateSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/create/spec/*" }}
@@ -88,9 +88,9 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 				if err != nil {
 					return nil, nil, err
 				}
-				_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
+				_spec.SetField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
 			{{- else }}
-				_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+				_spec.SetField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
 			{{- end }}
 			_node.{{ $f.StructField }} = {{ if $f.NillableValue }}&{{ end }}value
 		}

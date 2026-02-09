@@ -32,6 +32,7 @@ type (
 		Cond           func(*Type) bool   // condition to apply the template.
 		Format         func(*Type) string // file name format.
 		ExtendPatterns []string           // extend patterns.
+		SubPackage     bool               // template outputs to per-entity sub-package.
 	}
 	// GraphTemplate specifies a template that is executed with
 	// the Graph object.
@@ -56,26 +57,27 @@ var (
 				"dialect/*/create/fields/additional/*",
 				"dialect/*/create_bulk/fields/additional/*",
 			},
+			SubPackage: true,
 		},
 		{
-			Name: "update",
-			Cond: notView,
+			Name:   "update",
+			Cond:   notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/update.go", t.PackageDir())
 			},
+			SubPackage: true,
 		},
 		{
-			Name: "delete",
-			Cond: notView,
+			Name:   "delete",
+			Cond:   notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/delete.go", t.PackageDir())
 			},
+			SubPackage: true,
 		},
 		{
-			Name: "client/type",
-			Format: func(t *Type) string {
-				return fmt.Sprintf("%s/client.go", t.PackageDir())
-			},
+			Name:   "client/type",
+			Format: pkgf("%s_client.go"),
 		},
 		{
 			Name:   "query",
@@ -204,6 +206,7 @@ var (
 		"%s_create.go",
 		"%s_update.go",
 		"%s_delete.go",
+		"%s/client.go",
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{

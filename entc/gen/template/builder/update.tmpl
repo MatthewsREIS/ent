@@ -13,7 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "Imports" $.SiblingImports }}
+{{ with extend $ "Imports" $.BuilderImports }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -228,11 +228,11 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			{{- if $f.UpdateDefault }}
 				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {{ if $f.Optional }} && !{{ $mutation }}.{{ $f.StructField }}Cleared() {{ end }} {
 					{{- if $runtimeRequired }}
-						if {{ $.Package }}.{{ $f.UpdateDefaultName }} == nil {
-							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
+						if {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }} == nil {
+							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
-					v := {{ $.Package }}.{{ $f.UpdateDefaultName }}()
+					v := {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }}()
 					{{ $mutation }}.{{ $f.MutationSet }}(v)
 				}
 			{{- end }}
@@ -250,7 +250,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			{{- $isValidator := and ($f.HasGoType) ($f.Type.Validator) }}
 			{{- with and (not $f.Immutable) (or $f.Validators $f.IsEnum $isValidator) }}
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-					if err := {{ if or $f.Validators $f.IsEnum }}{{ $.Package }}.{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
+					if err := {{ if or $f.Validators $f.IsEnum }}{{ $.PackageQualifier }}{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
 						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 					}
 				}

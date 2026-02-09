@@ -265,6 +265,26 @@ type typeScope struct {
 	Scope map[any]any
 }
 
+// PackageQualifier returns the package qualifier. When InSubPackage is set in
+// scope (the template generates code inside the entity's own sub-package), it
+// returns "" since symbols are accessed unqualified. Otherwise delegates to Type.
+func (t *typeScope) PackageQualifier() string {
+	if t.Scope["InSubPackage"] == true {
+		return ""
+	}
+	return t.Type.PackageQualifier()
+}
+
+// BuilderImports returns the entity imports needed by CUD builder templates.
+// When InSubPackage is set, returns nil (no entity imports needed — same-package
+// symbols don't need imports and sibling references are inlined).
+func (t *typeScope) BuilderImports() []struct{ Alias, Path string } {
+	if t.Scope["InSubPackage"] == true {
+		return nil
+	}
+	return t.Type.BuilderImports()
+}
+
 // graphScope wraps the Graph object with extended scope.
 type graphScope struct {
 	*Graph

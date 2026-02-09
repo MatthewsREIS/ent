@@ -36,12 +36,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			return _node, err
 		}
 	{{- end }}
-	_spec := sqlgraph.NewUpdateSpec({{ $.Package }}.Table, {{ $.Package }}.Columns,
+	_spec := sqlgraph.NewUpdateSpec({{ $.PackageQualifier }}Table, {{ $.PackageQualifier }}Columns,
 		{{- if $.HasOneFieldID -}}
-			sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }})
+			sqlgraph.NewFieldSpec({{ $.PackageQualifier }}{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }})
 		{{- else -}}
 			{{- range $id := $.EdgeSchema.ID -}}
-				sqlgraph.NewFieldSpec({{ $.Package }}.{{ $id.Constant }}, field.{{ $id.Type.ConstName }}),
+				sqlgraph.NewFieldSpec({{ $.PackageQualifier }}{{ $id.Constant }}, field.{{ $id.Type.ConstName }}),
 			{{- end -}}
 		{{- end }})
 	{{- if $one }}
@@ -53,12 +53,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			_spec.Node.ID.Value = id
 			if fields := {{ $receiver }}.fields; len(fields) > 0 {
 				_spec.Node.Columns = make([]string, 0, len(fields))
-				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
+				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.PackageQualifier }}{{ $.ID.Constant }})
 				for _, f := range fields {
-					if !{{ $.Package }}.ValidColumn(f) {
+					if !{{ $.PackageQualifier }}ValidColumn(f) {
 						return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
 					}
-					if f != {{ $.Package }}.{{ $.ID.Constant }} {
+					if f != {{ $.PackageQualifier }}{{ $.ID.Constant }} {
 						_spec.Node.Columns = append(_spec.Node.Columns, f)
 					}
 				}
@@ -74,7 +74,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			if fields := {{ $receiver }}.fields; len(fields) > 0 {
 				_spec.Node.Columns = make([]string, len(fields))
 				for i, f := range fields {
-					if !{{ $.Package }}.ValidColumn(f) {
+					if !{{ $.PackageQualifier }}ValidColumn(f) {
 						return nil, &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
 					}
 					_spec.Node.Columns[i] = f
@@ -97,9 +97,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 						if err != nil {
 							return {{ $zero }}, err
 						}
-						_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
+						_spec.SetField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
 					{{- else }}
-						_spec.SetField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+						_spec.SetField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
 					{{- end }}
 				}
 				{{- if $f.SupportsMutationAdd }}
@@ -109,23 +109,23 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 							if err != nil {
 								return {{ $zero }}, err
 							}
-							_spec.AddField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
+							_spec.AddField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
 						{{- else }}
-							_spec.AddField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
+							_spec.AddField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
 						{{- end }}
 					}
 				{{- end }}
 				{{- if $f.SupportsMutationAppend }}
 					if value, ok := {{ $mutation }}.{{ $f.MutationAppended }}(); ok {
 						_spec.AddModifier(func(u *sql.UpdateBuilder) {
-							sqljson.Append(u, {{ $.Package }}.{{ $f.Constant }}, value)
+							sqljson.Append(u, {{ $.PackageQualifier }}{{ $f.Constant }}, value)
 						})
 					}
 				{{- end }}
 			{{- end }}
 			{{- if $f.Optional }}
 				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
-					_spec.ClearField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }})
+					_spec.ClearField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }})
 				}
 			{{- end }}
 	{{- end }}
@@ -172,7 +172,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		if _node, err = sqlgraph.UpdateNodes(ctx, {{ $receiver }}.driver, _spec); err != nil {
 	{{- end }}
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{ {{ $.Package }}.Label}
+			err = &NotFoundError{ {{ $.PackageQualifier }}Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -189,11 +189,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 	edge := &sqlgraph.EdgeSpec{
 		Rel: sqlgraph.{{ $e.Rel.Type }},
 		Inverse: {{ $e.IsInverse }},
-		Table: {{ $.Package }}.{{ $e.TableConstant }},
-		Columns: {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $.Package }}.{{ $e.ColumnConstant }} }{{ end }},
+		Table: {{ $.PackageQualifier }}{{ $e.TableConstant }},
+		Columns: {{ if $e.M2M }}{{ $.PackageQualifier }}{{ $e.PKConstant }}{{ else }}[]string{ {{ $.PackageQualifier }}{{ $e.ColumnConstant }} }{{ end }},
 		Bidi: {{ $e.Bidi }},
 		Target: &sqlgraph.EdgeTarget{
+			{{- if $.Scope.InSubPackage }}
+			IDSpec: sqlgraph.NewFieldSpec("{{ $e.Type.ID.StorageKey }}", field.{{ $e.Type.ID.Type.ConstName }}),
+			{{- else }}
 			IDSpec: sqlgraph.NewFieldSpec({{ $e.Type.Package }}.{{ $e.Type.ID.Constant }}, field.{{ $e.Type.ID.Type.ConstName }}),
+			{{- end }}
 		},
 	}
 	{{- /* Allow mutating the sqlgraph.EdgeSpec by ent extensions or user templates.*/}}

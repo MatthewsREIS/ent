@@ -252,7 +252,11 @@ func generate(g *Graph) error {
 				continue
 			}
 			b := bytes.NewBuffer(nil)
-			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
+			var data any = n
+			if tmpl.SubPackage {
+				data = &typeScope{Type: n, Scope: map[any]any{"InSubPackage": true}}
+			}
+			if err := templates.ExecuteTemplate(b, tmpl.Name, data); err != nil {
 				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 			}
 			assets.add(filepath.Join(g.Config.Target, tmpl.Format(n)), b.Bytes())
