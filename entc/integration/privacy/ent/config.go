@@ -27,4 +27,3 @@ var (
 	// Driver configures the client driver.
 	Driver = internal.Driver
 )
-var HTTPClient = internal.HTTPClient

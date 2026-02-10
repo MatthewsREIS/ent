@@ -12,8 +12,6 @@ import (
 	"fmt"
 	"log"
 
-	"net/http"
-
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 )
@@ -49,8 +47,7 @@ type (
 		// Hooks to execute on mutations.
 		Hooks *Hooks
 		// Inters are interceptors to execute on queries.
-		Inters     *Inters
-		HTTPClient *http.Client
+		Inters *Inters
 	}
 	// Option function to configure the client.
 	Option func(*Config)
@@ -96,13 +93,6 @@ func Log(fn func(...any)) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *Config) {
 		c.Drv = driver
-	}
-}
-
-// HTTPClient configures the HTTPClient.
-func HTTPClient(v *http.Client) Option {
-	return func(c *Config) {
-		c.HTTPClient = v
 	}
 }
 
