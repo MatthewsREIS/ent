@@ -563,11 +563,16 @@ func TestGraph_Gen(t *testing.T) {
 		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
 		require.NoError(err)
 	}
-	// Ensure CUD builder and client files were generated in sub-packages.
-	for _, name := range []string{"create", "update", "delete", "client"} {
+	// Ensure CUD builder files were generated in sub-packages.
+	for _, name := range []string{"create", "update", "delete"} {
 		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
 		require.NoError(err)
 		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
+		require.NoError(err)
+	}
+	// Ensure client files were generated in the root target.
+	for _, name := range []string{"t1_client.go", "t2_client.go"} {
+		_, err := os.Stat(filepath.Join(target, name))
 		require.NoError(err)
 	}
 	_, err = os.Stat(filepath.Join(target, "external.go"))
@@ -596,8 +601,9 @@ func TestGraph_Gen(t *testing.T) {
 	// Rerun codegen without any feature-flags.
 	graph.Features = nil
 	require.NoError(graph.Gen())
-	_, err = os.Stat(filepath.Join(target, "internal"))
-	require.True(os.IsNotExist(err))
+	// Internal base assets are still generated without feature-flags.
+	_, err = os.Stat(filepath.Join(target, "internal", "types.go"))
+	require.NoError(err)
 
 	schemas = schemas[:1]
 	graph, err = NewGraph(&Config{
@@ -618,13 +624,18 @@ func TestGraph_Gen(t *testing.T) {
 		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
 		require.Error(err)
 	}
-	// Ensure CUD builder and client files were generated in sub-packages for t1 but not t2.
-	for _, name := range []string{"create", "update", "delete", "client"} {
+	// Ensure CUD builder files were generated in sub-packages for t1 but not t2.
+	for _, name := range []string{"create", "update", "delete"} {
 		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
 		require.NoError(err)
 		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
 		require.Error(err)
 	}
+	// Ensure client files were generated in the root target for t1 but not t2.
+	_, err = os.Stat(filepath.Join(target, "t1_client.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "t2_client.go"))
+	require.Error(err)
 	// Ensure the deleted type's sub-package directory was removed.
 	_, err = os.Stat(filepath.Join(target, "t2"))
 	require.True(os.IsNotExist(err))
@@ -653,17 +664,26 @@ func TestGraph_Gen_CleanStaleRootFiles(t *testing.T) {
 	}, schemas...)
 	require.NoError(err)
 	require.NoError(graph.Gen())
-	// Ensure new sub-package files were generated.
+	// Ensure new CUD sub-package files were generated.
 	for _, typ := range []string{"user", "pet"} {
-		for _, name := range []string{"create", "update", "delete", "client"} {
+		for _, name := range []string{"create", "update", "delete"} {
 			_, err := os.Stat(filepath.Join(target, typ, name+".go"))
 			require.NoError(err)
 		}
 	}
-	// Ensure stale root-level CUD files were cleaned up.
-	for _, name := range []string{"user_create.go", "user_update.go", "user_delete.go", "pet_create.go", "pet_update.go", "pet_delete.go"} {
+	// Ensure client files were generated in the root target.
+	for _, name := range []string{"user_client.go", "pet_client.go"} {
 		_, err := os.Stat(filepath.Join(target, name))
-		require.True(os.IsNotExist(err), "stale file %s should have been removed", name)
+		require.NoError(err)
+	}
+	// Ensure stale root-level CUD files were replaced with stubs for active types.
+	for _, name := range []string{"user_create.go", "user_update.go", "user_delete.go", "pet_create.go", "pet_update.go", "pet_delete.go"} {
+		path := filepath.Join(target, name)
+		_, err := os.Stat(path)
+		require.NoError(err)
+		content, err := os.ReadFile(path)
+		require.NoError(err)
+		require.Contains(string(content), "package ")
 	}
 }
 
