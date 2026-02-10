@@ -23,7 +23,7 @@ import (
 
 // IntSIDQuery is the builder for querying IntSID entities.
 type IntSIDQuery struct {
-	config
+	Config
 	ctx          *QueryContext
 	order        []intsid.OrderOption
 	inters       []Interceptor
@@ -69,7 +69,7 @@ func (_q *IntSIDQuery) Order(o ...intsid.OrderOption) *IntSIDQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *IntSIDQuery) QueryParent() *IntSIDQuery {
-	query := (&IntSIDClient{config: _q.config}).Query()
+	query := (&IntSIDClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *IntSIDQuery) QueryParent() *IntSIDQuery {
 			sqlgraph.To(intsid.Table, intsid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, intsid.ParentTable, intsid.ParentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -91,7 +91,7 @@ func (_q *IntSIDQuery) QueryParent() *IntSIDQuery {
 
 // QueryChildren chains the current query on the "children" edge.
 func (_q *IntSIDQuery) QueryChildren() *IntSIDQuery {
-	query := (&IntSIDClient{config: _q.config}).Query()
+	query := (&IntSIDClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (_q *IntSIDQuery) QueryChildren() *IntSIDQuery {
 			sqlgraph.To(intsid.Table, intsid.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, intsid.ChildrenTable, intsid.ChildrenColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -119,7 +119,7 @@ func (_q *IntSIDQuery) First(ctx context.Context) (*IntSID, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{intsid.Label}
+		return nil, &NotFoundError{Label: intsid.Label}
 	}
 	return nodes[0], nil
 }
@@ -141,7 +141,7 @@ func (_q *IntSIDQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{intsid.Label}
+		err = &NotFoundError{Label: intsid.Label}
 		return
 	}
 	return ids[0], nil
@@ -168,9 +168,9 @@ func (_q *IntSIDQuery) Only(ctx context.Context) (*IntSID, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{intsid.Label}
+		return nil, &NotFoundError{Label: intsid.Label}
 	default:
-		return nil, &NotSingularError{intsid.Label}
+		return nil, &NotSingularError{Label: intsid.Label}
 	}
 }
 
@@ -195,9 +195,9 @@ func (_q *IntSIDQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{intsid.Label}
+		err = &NotFoundError{Label: intsid.Label}
 	default:
-		err = &NotSingularError{intsid.Label}
+		err = &NotSingularError{Label: intsid.Label}
 	}
 	return
 }
@@ -298,7 +298,7 @@ func (_q *IntSIDQuery) Clone() *IntSIDQuery {
 		return nil
 	}
 	return &IntSIDQuery{
-		config:       _q.config,
+		Config:       _q.Config,
 		ctx:          _q.ctx.Clone(),
 		order:        append([]intsid.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
@@ -314,7 +314,7 @@ func (_q *IntSIDQuery) Clone() *IntSIDQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *IntSIDQuery) WithParent(opts ...func(*IntSIDQuery)) *IntSIDQuery {
-	query := (&IntSIDClient{config: _q.config}).Query()
+	query := (&IntSIDClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +325,7 @@ func (_q *IntSIDQuery) WithParent(opts ...func(*IntSIDQuery)) *IntSIDQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *IntSIDQuery) WithChildren(opts ...func(*IntSIDQuery)) *IntSIDQuery {
-	query := (&IntSIDClient{config: _q.config}).Query()
+	query := (&IntSIDClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -372,7 +372,7 @@ func (_q *IntSIDQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !intsid.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -402,18 +402,18 @@ func (_q *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntSI
 		_spec.Node.Columns = append(_spec.Node.Columns, intsid.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*IntSID).scanValues(nil, columns)
+		return (*IntSID).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &IntSID{config: _q.config}
+		node := &IntSID{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -439,10 +439,10 @@ func (_q *IntSIDQuery) loadParent(ctx context.Context, query *IntSIDQuery, nodes
 	ids := make([]sid.ID, 0, len(nodes))
 	nodeids := make(map[sid.ID][]*IntSID)
 	for i := range nodes {
-		if nodes[i].int_sid_parent == nil {
+		if nodes[i].GetIntSidParent() == nil {
 			continue
 		}
-		fk := *nodes[i].int_sid_parent
+		fk := *nodes[i].GetIntSidParent()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -486,7 +486,7 @@ func (_q *IntSIDQuery) loadChildren(ctx context.Context, query *IntSIDQuery, nod
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.int_sid_parent
+		fk := n.GetIntSidParent()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "int_sid_parent" is nil for node %v`, n.ID)
 		}
@@ -505,7 +505,7 @@ func (_q *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {
@@ -549,7 +549,7 @@ func (_q *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *IntSIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(intsid.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -621,7 +621,7 @@ func (_g *IntSIDGroupBy) sqlScan(ctx context.Context, root *IntSIDQuery, v any) 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -663,7 +663,7 @@ func (_s *IntSIDSelect) sqlScan(ctx context.Context, root *IntSIDQuery, v any) e
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

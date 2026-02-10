@@ -22,7 +22,7 @@ import (
 
 // APIQuery is the builder for querying Api entities.
 type APIQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []api.OrderOption
 	inters     []Interceptor
@@ -72,7 +72,7 @@ func (_q *APIQuery) First(ctx context.Context) (*Api, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{api.Label}
+		return nil, &NotFoundError{Label: api.Label}
 	}
 	return nodes[0], nil
 }
@@ -94,7 +94,7 @@ func (_q *APIQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{api.Label}
+		err = &NotFoundError{Label: api.Label}
 		return
 	}
 	return ids[0], nil
@@ -121,9 +121,9 @@ func (_q *APIQuery) Only(ctx context.Context) (*Api, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{api.Label}
+		return nil, &NotFoundError{Label: api.Label}
 	default:
-		return nil, &NotSingularError{api.Label}
+		return nil, &NotSingularError{Label: api.Label}
 	}
 }
 
@@ -148,9 +148,9 @@ func (_q *APIQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{api.Label}
+		err = &NotFoundError{Label: api.Label}
 	default:
-		err = &NotSingularError{api.Label}
+		err = &NotSingularError{Label: api.Label}
 	}
 	return
 }
@@ -251,7 +251,7 @@ func (_q *APIQuery) Clone() *APIQuery {
 		return nil
 	}
 	return &APIQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]api.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -302,7 +302,7 @@ func (_q *APIQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !api.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -321,12 +321,12 @@ func (_q *APIQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Api, err
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Api).scanValues(nil, columns)
+		return (*Api).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Api{config: _q.config}
+		node := &Api{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -334,7 +334,7 @@ func (_q *APIQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Api, err
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -352,7 +352,7 @@ func (_q *APIQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *APIQuery) querySpec() *sqlgraph.QuerySpec {
@@ -396,7 +396,7 @@ func (_q *APIQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *APIQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(api.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -434,7 +434,7 @@ func (_q *APIQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *APIQuery) ForUpdate(opts ...sql.LockOption) *APIQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -447,7 +447,7 @@ func (_q *APIQuery) ForUpdate(opts ...sql.LockOption) *APIQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *APIQuery) ForShare(opts ...sql.LockOption) *APIQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -503,7 +503,7 @@ func (_g *APIGroupBy) sqlScan(ctx context.Context, root *APIQuery, v any) error 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -545,7 +545,7 @@ func (_s *APISelect) sqlScan(ctx context.Context, root *APIQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

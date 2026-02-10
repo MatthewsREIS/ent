@@ -56,6 +56,14 @@ import (
 			{{- $seen = set $seen $pkg true }}
 		{{- end }}
 	{{- end }}
+	{{- range $e := $.EdgesWithID }}
+		{{- $pkg := $e.Type.ID.Type.PkgPath }}
+		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) }}
+			{{- $name := $e.Type.ID.Type.PkgName }}
+			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
+			{{- $seen = set $seen $pkg true }}
+		{{- end }}
+	{{- end }}
 {{- end }}
 
 {{/* A template for allowing additional imports by ent extensions or user templates.*/}}

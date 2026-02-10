@@ -20,6 +20,9 @@ import (
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	{{- if $.HasValueScanner }}
+		"entgo.io/ent/schema/field"
+	{{- end }}
 	{{- if $.HasOneFieldID }}
 		{{- with $.ID.Type.PkgPath }}
 			{{- $name := $.ID.Type.PkgName }}
@@ -29,8 +32,10 @@ import (
 	{{- $seen := dict }}
 	{{- range $f := $.Fields }}
 		{{- $pkg := $f.Type.PkgPath }}
-		{{- /* Skip entity sub-package imports to avoid cycles (enums are defined locally in internal). */ -}}
-		{{- if and $pkg (not (hasKey $seen $pkg)) (not (hasPrefix $pkg (printf "%s/" $.Config.Package))) }}
+		{{- /* Skip generated entity sub-packages to avoid cycles, but allow schema package imports. */ -}}
+		{{- $isSchemaPkg := or (hasSuffix $pkg "/schema") (hasPrefix $pkg (printf "%s/schema/" $.Config.Package)) -}}
+		{{- $isGeneratedSubPkg := and (hasPrefix $pkg (printf "%s/" $.Config.Package)) (not $isSchemaPkg) -}}
+		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (not $isGeneratedSubPkg) }}
 			{{- $name := $f.Type.PkgName }}
 			{{ if ne $name (base $pkg) }}{{ $name }} {{ end }}"{{ $pkg }}"
 			{{- $seen = set $seen $pkg true }}
@@ -44,6 +49,17 @@ import (
 		{{- xtemplate $tmpl $ }}
 	{{- end }}
 {{- end }}
+{{- if $.HasValueScanner }}
+
+var {{ $.Name }}ValueScanner struct {
+	{{- range $f := $.Fields }}
+		{{- if $f.HasValueScanner }}
+			{{ $f.StructField }} field.TypeValueScanner[{{ $f.Type }}]
+		{{- end }}
+	{{- end }}
+}
+{{- end }}
+
 type {{ $.Name }} struct {
 	Config {{ template "model/omittags" $ }}
 	{{- if $.HasOneFieldID }}
@@ -69,6 +85,8 @@ type {{ $.Name }} struct {
 	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}
 	{{- if hasTemplate $tmpl }}
 		{{- xtemplate $tmpl . }}
+	{{- else }}
+		selectValues sql.SelectValues
 	{{- end }}
 	{{- /* Additional fields to add by the user. */}}
 	{{- template "model/fields/additional" $ }}
@@ -160,6 +178,11 @@ type {{ $slice }} []*{{ $.Name }}
 	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
+{{- if eq $.Storage.Name "gremlin" }}
+{{ with extend $ "Receiver" $.Receiver }}
+	{{ xtemplate "dialect/gremlin/decode/one" . }}
+{{ end }}
+{{- end }}
 {{ end }}
 
 {{/*
@@ -172,7 +195,7 @@ Inlines field/edge name strings instead of referencing sub-package constants.
 {{ $ctypes := dict }}
 {{ if $.HasOneFieldID }}
 	{{ $idscantype := $.ID.NewScanType }}
-	{{ $ctypes = set $ctypes $idscantype (list $.ID.Name) }}
+	{{ $ctypes = set $ctypes $idscantype (list $.ID.StorageKey) }}
 {{ end }}
 {{ range $f := $.Fields }}
 	{{- if $f.HasValueScanner }}
@@ -182,7 +205,7 @@ Inlines field/edge name strings instead of referencing sub-package constants.
 	{{ if hasKey $ctypes $f.NewScanType }}
 		{{ $names = get $ctypes $f.NewScanType }}
 	{{ end }}
-	{{ $names = append $names $f.Name }}
+	{{ $names = append $names $f.StorageKey }}
 	{{ $ctypes = set $ctypes $f.NewScanType $names }}
 {{ end }}
 
@@ -197,14 +220,16 @@ func (*{{ $.Name }}) ScanValues(columns []string) ([]any, error) {
 			{{- end }}
 			{{- range $f := $.Fields }}
 				{{- if $f.HasValueScanner }}
-					case "{{ $f.Name }}":
-						values[i] = {{ $f.ScanValueFunc }}()
+					case "{{ $f.StorageKey }}":
+					values[i] = {{ $.Name }}ValueScanner.{{ $f.StructField }}.ScanValue()
 				{{- end }}
 			{{- end }}
-			{{- range $i, $fk := $.UnexportedForeignKeys }}
-				{{- $f := $fk.Field }}
-				case "{{ $f.Name }}": // {{ $fk.StructField }}
-					values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
+			{{- if eq $.Storage.Name "sql" }}
+				{{- range $i, $fk := $.UnexportedForeignKeys }}
+					{{- $f := $fk.Field }}
+					case "{{ $f.StorageKey }}": // {{ $fk.StructField }}
+						values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
+				{{- end }}
 			{{- end }}
 			default:
 				values[i] = new(sql.UnknownType)
@@ -222,7 +247,7 @@ func ({{ $receiver }} *{{ $.Name }}) AssignValues(columns []string, values []any
 	for i := range columns {
 		switch columns[i] {
 		{{- if $.HasOneFieldID }}
-			case "{{ $.ID.Name }}":
+			case "{{ $.ID.StorageKey }}":
 				{{- if or $.ID.IsString $.ID.IsBytes $.ID.HasGoType }}
 					{{- with extend $ "Idx" "i" "Field" $.ID "Rec" $receiver }}
 						{{ template "dialect/sql/decode/field" . }}
@@ -236,12 +261,18 @@ func ({{ $receiver }} *{{ $.Name }}) AssignValues(columns []string, values []any
 				{{- end }}
 		{{- end }}
 		{{- range  $f := $.Fields }}
-			case "{{ $f.Name }}":
+			case "{{ $f.StorageKey }}":
 				{{- if and ($f.IsEnum) (not $f.HasGoType) }}
 					if value, ok := values[i].(*sql.NullString); !ok {
 						return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[i])
 					} else if value.Valid {
 						{{ $receiver }}.{{ $f.StructField }} = {{ $.Name }}{{ trimPackage $f.Type.String $.Package }}(value.String)
+					}
+				{{- else if $f.HasValueScanner }}
+					if value, err := {{ $.Name }}ValueScanner.{{ $f.StructField }}.FromValue(values[i]); err != nil {
+						return err
+					} else {
+						{{ $receiver }}.{{ $f.StructField }} = value
 					}
 				{{- else }}
 					{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver }}
@@ -249,21 +280,23 @@ func ({{ $receiver }} *{{ $.Name }}) AssignValues(columns []string, values []any
 					{{- end }}
 				{{- end }}
 		{{- end }}
-		{{- range $i, $fk := $.UnexportedForeignKeys }}
-			{{- $f := $fk.Field }}
-			case {{ if $fk.UserDefined }}"{{ $.ID.Name }}"{{ else }}"{{ $f.Name }}"{{ end }}:
-				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsBytes $f.HasGoType)) }}
-					{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
-						{{ template "dialect/sql/decode/field" . }}
+		{{- if eq $.Storage.Name "sql" }}
+			{{- range $i, $fk := $.UnexportedForeignKeys }}
+				{{- $f := $fk.Field }}
+				case {{ if $fk.UserDefined }}"{{ $.ID.StorageKey }}"{{ else }}"{{ $f.StorageKey }}"{{ end }}:
+					{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsBytes $f.HasGoType)) }}
+						{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
+							{{ template "dialect/sql/decode/field" . }}
+						{{- end }}
+					{{- else }}
+						if value, ok := values[i].(*sql.NullInt64); !ok {
+							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
+						} else if value.Valid {
+							{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
+							{{ if and $f.Nillable (not $f.Type.Nillable) }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
+						}
 					{{- end }}
-				{{- else }}
-					if value, ok := values[i].(*sql.NullInt64); !ok {
-						return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
-					} else if value.Valid {
-						{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
-						{{ if and $f.Nillable (not $f.Type.Nillable) }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
-					}
-				{{- end }}
+			{{- end }}
 		{{- end }}
 		default:
 			{{ $receiver }}.selectValues.Set(columns[i], values[i])
@@ -279,6 +312,7 @@ func ({{ $receiver }} *{{ $.Name }}) {{ $.ValueName }}(name string) (ent.Value, 
 }
 
 {{- /* Exported accessors for unexported FK fields, used by sub-package create builders and root queries. */ -}}
+{{- if eq $.Storage.Name "sql" }}
 {{- range $fk := $.UnexportedForeignKeys }}
 {{- $f := $fk.Field }}
 // Set{{ pascal $fk.StructField }} sets the {{ $fk.StructField }} foreign key.
@@ -290,6 +324,7 @@ func ({{ $receiver }} *{{ $.Name }}) Set{{ pascal $fk.StructField }}(v {{ $f.Typ
 func ({{ $receiver }} *{{ $.Name }}) Get{{ pascal $fk.StructField }}() {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {
 	return {{ $receiver }}.{{ $fk.StructField }}
 }
+{{- end }}
 {{- end }}
 
 {{ end }}

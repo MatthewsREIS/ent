@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	intpkg "entgo.io/ent/entc/integration/gremlin/ent/internal"
 	"entgo.io/ent/entc/integration/gremlin/ent/item"
 	"entgo.io/ent/entc/integration/gremlin/ent/license"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
@@ -68,27 +69,35 @@ func init() {
 	// exvaluescanDescBinary is the schema descriptor for binary field.
 	exvaluescanDescBinary := exvaluescanFields[0].Descriptor()
 	exvaluescan.ValueScanner.Binary = exvaluescanDescBinary.ValueScanner.(field.TypeValueScanner[*url.URL])
+	intpkg.ExValueScanValueScanner.Binary = exvaluescanDescBinary.ValueScanner.(field.TypeValueScanner[*url.URL])
 	// exvaluescanDescBinaryBytes is the schema descriptor for binary_bytes field.
 	exvaluescanDescBinaryBytes := exvaluescanFields[1].Descriptor()
 	exvaluescan.ValueScanner.BinaryBytes = exvaluescanDescBinaryBytes.ValueScanner.(field.TypeValueScanner[*url.URL])
+	intpkg.ExValueScanValueScanner.BinaryBytes = exvaluescanDescBinaryBytes.ValueScanner.(field.TypeValueScanner[*url.URL])
 	// exvaluescanDescBinaryOptional is the schema descriptor for binary_optional field.
 	exvaluescanDescBinaryOptional := exvaluescanFields[2].Descriptor()
 	exvaluescan.ValueScanner.BinaryOptional = exvaluescanDescBinaryOptional.ValueScanner.(field.TypeValueScanner[*url.URL])
+	intpkg.ExValueScanValueScanner.BinaryOptional = exvaluescanDescBinaryOptional.ValueScanner.(field.TypeValueScanner[*url.URL])
 	// exvaluescanDescText is the schema descriptor for text field.
 	exvaluescanDescText := exvaluescanFields[3].Descriptor()
 	exvaluescan.ValueScanner.Text = exvaluescanDescText.ValueScanner.(field.TypeValueScanner[*big.Int])
+	intpkg.ExValueScanValueScanner.Text = exvaluescanDescText.ValueScanner.(field.TypeValueScanner[*big.Int])
 	// exvaluescanDescTextOptional is the schema descriptor for text_optional field.
 	exvaluescanDescTextOptional := exvaluescanFields[4].Descriptor()
 	exvaluescan.ValueScanner.TextOptional = exvaluescanDescTextOptional.ValueScanner.(field.TypeValueScanner[*big.Int])
+	intpkg.ExValueScanValueScanner.TextOptional = exvaluescanDescTextOptional.ValueScanner.(field.TypeValueScanner[*big.Int])
 	// exvaluescanDescBase64 is the schema descriptor for base64 field.
 	exvaluescanDescBase64 := exvaluescanFields[5].Descriptor()
 	exvaluescan.ValueScanner.Base64 = exvaluescanDescBase64.ValueScanner.(field.TypeValueScanner[string])
+	intpkg.ExValueScanValueScanner.Base64 = exvaluescanDescBase64.ValueScanner.(field.TypeValueScanner[string])
 	// exvaluescanDescCustom is the schema descriptor for custom field.
 	exvaluescanDescCustom := exvaluescanFields[6].Descriptor()
 	exvaluescan.ValueScanner.Custom = exvaluescanDescCustom.ValueScanner.(field.TypeValueScanner[string])
+	intpkg.ExValueScanValueScanner.Custom = exvaluescanDescCustom.ValueScanner.(field.TypeValueScanner[string])
 	// exvaluescanDescCustomOptional is the schema descriptor for custom_optional field.
 	exvaluescanDescCustomOptional := exvaluescanFields[7].Descriptor()
 	exvaluescan.ValueScanner.CustomOptional = exvaluescanDescCustomOptional.ValueScanner.(field.TypeValueScanner[string])
+	intpkg.ExValueScanValueScanner.CustomOptional = exvaluescanDescCustomOptional.ValueScanner.(field.TypeValueScanner[string])
 	fieldtypeFields := schema.FieldType{}.Fields()
 	_ = fieldtypeFields
 	// fieldtypeDescInt64 is the schema descriptor for int64 field.

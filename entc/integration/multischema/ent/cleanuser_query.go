@@ -21,7 +21,7 @@ import (
 
 // CleanUserQuery is the builder for querying CleanUser entities.
 type CleanUserQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []cleanuser.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *CleanUserQuery) First(ctx context.Context) (*CleanUser, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{cleanuser.Label}
+		return nil, &NotFoundError{Label: cleanuser.Label}
 	}
 	return nodes[0], nil
 }
@@ -97,9 +97,9 @@ func (_q *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{cleanuser.Label}
+		return nil, &NotFoundError{Label: cleanuser.Label}
 	default:
-		return nil, &NotSingularError{cleanuser.Label}
+		return nil, &NotSingularError{Label: cleanuser.Label}
 	}
 }
 
@@ -178,7 +178,7 @@ func (_q *CleanUserQuery) Clone() *CleanUserQuery {
 		return nil
 	}
 	return &CleanUserQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]cleanuser.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -251,7 +251,7 @@ func (_q *CleanUserQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !cleanuser.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -270,22 +270,23 @@ func (_q *CleanUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cl
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*CleanUser).scanValues(nil, columns)
+		return (*CleanUser).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &CleanUser{config: _q.config}
+		node := &CleanUser{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
-	_spec.Node.Schema = _q.schemaConfig.CleanUser
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	_spec.Node.Schema = schemaConfig.CleanUser
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -296,8 +297,9 @@ func (_q *CleanUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cl
 
 func (_q *CleanUserQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
-	_spec.Node.Schema = _q.schemaConfig.CleanUser
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	_spec.Node.Schema = schemaConfig.CleanUser
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
 	}
@@ -305,7 +307,7 @@ func (_q *CleanUserQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
@@ -346,7 +348,7 @@ func (_q *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *CleanUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(cleanuser.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -360,8 +362,9 @@ func (_q *CleanUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	t1.Schema(_q.schemaConfig.CleanUser)
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	t1.Schema(schemaConfig.CleanUser)
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	selector.WithContext(ctx)
 	for _, m := range _q.modifiers {
 		m(selector)
@@ -430,7 +433,7 @@ func (_g *CleanUserGroupBy) sqlScan(ctx context.Context, root *CleanUserQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -472,7 +475,7 @@ func (_s *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -74,7 +74,13 @@ func (c *{{ $client }}) MapCreateBulk(slice any, setFunc func(*{{ $q }}{{ $n.Cre
 
 // Update returns an update builder for {{ $n.Name }}.
 func (c *{{ $client }}) Update() *{{ $q }}{{ $n.UpdateName }} {
+	{{- if $n.HasOneFieldID }}
+	mutation := New{{ $n.MutationName }}(c.Config, OpUpdate, With{{ $n.Name }}IDsFunc(func(ctx context.Context, ps ...predicate.{{ $n.Name }}) ([]{{ $n.ID.Type }}, error) {
+		return c.Query().Where(ps...).IDs(ctx)
+	}))
+	{{- else }}
 	mutation := New{{ $n.MutationName }}(c.Config, OpUpdate)
+	{{- end }}
 	return {{ $q }}New{{ $n.UpdateName }}(c.Config, c.Hooks(), mutation)
 }
 
@@ -85,7 +91,7 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.Upda
 	{{- else }}
 		mutation := New{{ $n.MutationName }}(c.Config, OpUpdateOne)
 		{{- range $id := $n.EdgeSchema.ID }}
-			mutation.{{ $id.BuilderField }} = &{{ $rec }}.{{ $id.StructField }}
+			mutation.{{ $id.MutationSet }}({{ $rec }}.{{ $id.StructField }})
 		{{- end }}
 	{{- end }}
 	return {{ $q }}New{{ $n.UpdateOneName }}(c.Config, c.Hooks(), mutation)
@@ -101,7 +107,13 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.Upda
 
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
+	{{- if $n.HasOneFieldID }}
+	mutation := New{{ $n.MutationName }}(c.Config, OpDelete, With{{ $n.Name }}IDsFunc(func(ctx context.Context, ps ...predicate.{{ $n.Name }}) ([]{{ $n.ID.Type }}, error) {
+		return c.Query().Where(ps...).IDs(ctx)
+	}))
+	{{- else }}
 	mutation := New{{ $n.MutationName }}(c.Config, OpDelete)
+	{{- end }}
 	return {{ $q }}New{{ $n.DeleteName }}(c.Config, c.Hooks(), mutation)
 }
 

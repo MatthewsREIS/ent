@@ -600,39 +600,39 @@ func queryFilter(q ent.Query) (Filter, error) {
 func mutationFilter(m ent.Mutation) (Filter, error) {
 	switch m := m.(type) {
 	case *ent.AttachedFileMutation:
-		return m.Filter(), nil
+		return ent.NewAttachedFileFilterForMutation(m), nil
 	case *ent.FileMutation:
-		return m.Filter(), nil
+		return ent.NewFileFilterForMutation(m), nil
 	case *ent.FriendshipMutation:
-		return m.Filter(), nil
+		return ent.NewFriendshipFilterForMutation(m), nil
 	case *ent.GroupMutation:
-		return m.Filter(), nil
+		return ent.NewGroupFilterForMutation(m), nil
 	case *ent.GroupTagMutation:
-		return m.Filter(), nil
+		return ent.NewGroupTagFilterForMutation(m), nil
 	case *ent.ProcessMutation:
-		return m.Filter(), nil
+		return ent.NewProcessFilterForMutation(m), nil
 	case *ent.RelationshipMutation:
-		return m.Filter(), nil
+		return ent.NewRelationshipFilterForMutation(m), nil
 	case *ent.RelationshipInfoMutation:
-		return m.Filter(), nil
+		return ent.NewRelationshipInfoFilterForMutation(m), nil
 	case *ent.RoleMutation:
-		return m.Filter(), nil
+		return ent.NewRoleFilterForMutation(m), nil
 	case *ent.RoleUserMutation:
-		return m.Filter(), nil
+		return ent.NewRoleUserFilterForMutation(m), nil
 	case *ent.TagMutation:
-		return m.Filter(), nil
+		return ent.NewTagFilterForMutation(m), nil
 	case *ent.TweetMutation:
-		return m.Filter(), nil
+		return ent.NewTweetFilterForMutation(m), nil
 	case *ent.TweetLikeMutation:
-		return m.Filter(), nil
+		return ent.NewTweetLikeFilterForMutation(m), nil
 	case *ent.TweetTagMutation:
-		return m.Filter(), nil
+		return ent.NewTweetTagFilterForMutation(m), nil
 	case *ent.UserMutation:
-		return m.Filter(), nil
+		return ent.NewUserFilterForMutation(m), nil
 	case *ent.UserGroupMutation:
-		return m.Filter(), nil
+		return ent.NewUserGroupFilterForMutation(m), nil
 	case *ent.UserTweetMutation:
-		return m.Filter(), nil
+		return ent.NewUserTweetFilterForMutation(m), nil
 	default:
 		return nil, Denyf("ent/privacy: unexpected mutation type %T for mutation filter", m)
 	}

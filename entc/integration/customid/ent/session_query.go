@@ -23,7 +23,7 @@ import (
 
 // SessionQuery is the builder for querying Session entities.
 type SessionQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []session.OrderOption
 	inters     []Interceptor
@@ -68,7 +68,7 @@ func (_q *SessionQuery) Order(o ...session.OrderOption) *SessionQuery {
 
 // QueryDevice chains the current query on the "device" edge.
 func (_q *SessionQuery) QueryDevice() *DeviceQuery {
-	query := (&DeviceClient{config: _q.config}).Query()
+	query := (&DeviceClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -82,7 +82,7 @@ func (_q *SessionQuery) QueryDevice() *DeviceQuery {
 			sqlgraph.To(device.Table, device.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, session.DeviceTable, session.DeviceColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -96,7 +96,7 @@ func (_q *SessionQuery) First(ctx context.Context) (*Session, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{session.Label}
+		return nil, &NotFoundError{Label: session.Label}
 	}
 	return nodes[0], nil
 }
@@ -118,7 +118,7 @@ func (_q *SessionQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{session.Label}
+		err = &NotFoundError{Label: session.Label}
 		return
 	}
 	return ids[0], nil
@@ -145,9 +145,9 @@ func (_q *SessionQuery) Only(ctx context.Context) (*Session, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{session.Label}
+		return nil, &NotFoundError{Label: session.Label}
 	default:
-		return nil, &NotSingularError{session.Label}
+		return nil, &NotSingularError{Label: session.Label}
 	}
 }
 
@@ -172,9 +172,9 @@ func (_q *SessionQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{session.Label}
+		err = &NotFoundError{Label: session.Label}
 	default:
-		err = &NotSingularError{session.Label}
+		err = &NotSingularError{Label: session.Label}
 	}
 	return
 }
@@ -275,7 +275,7 @@ func (_q *SessionQuery) Clone() *SessionQuery {
 		return nil
 	}
 	return &SessionQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]session.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -290,7 +290,7 @@ func (_q *SessionQuery) Clone() *SessionQuery {
 // WithDevice tells the query-builder to eager-load the nodes that are connected to
 // the "device" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *SessionQuery) WithDevice(opts ...func(*DeviceQuery)) *SessionQuery {
-	query := (&DeviceClient{config: _q.config}).Query()
+	query := (&DeviceClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -337,7 +337,7 @@ func (_q *SessionQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !session.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -366,18 +366,18 @@ func (_q *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 		_spec.Node.Columns = append(_spec.Node.Columns, session.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Session).scanValues(nil, columns)
+		return (*Session).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Session{config: _q.config}
+		node := &Session{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -396,10 +396,10 @@ func (_q *SessionQuery) loadDevice(ctx context.Context, query *DeviceQuery, node
 	ids := make([]schema.ID, 0, len(nodes))
 	nodeids := make(map[schema.ID][]*Session)
 	for i := range nodes {
-		if nodes[i].device_sessions == nil {
+		if nodes[i].GetDeviceSessions() == nil {
 			continue
 		}
-		fk := *nodes[i].device_sessions
+		fk := *nodes[i].GetDeviceSessions()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -431,7 +431,7 @@ func (_q *SessionQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *SessionQuery) querySpec() *sqlgraph.QuerySpec {
@@ -475,7 +475,7 @@ func (_q *SessionQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *SessionQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(session.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -547,7 +547,7 @@ func (_g *SessionGroupBy) sqlScan(ctx context.Context, root *SessionQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -589,7 +589,7 @@ func (_s *SessionSelect) sqlScan(ctx context.Context, root *SessionQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

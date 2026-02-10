@@ -32,7 +32,7 @@ import (
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
-	config
+	Config
 	ctx              *QueryContext
 	order            []user.OrderOption
 	inters           []Interceptor
@@ -87,7 +87,7 @@ func (_q *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 
 // QueryGroups chains the current query on the "groups" edge.
 func (_q *UserQuery) QueryGroups() *GroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -101,7 +101,7 @@ func (_q *UserQuery) QueryGroups() *GroupQuery {
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -109,7 +109,7 @@ func (_q *UserQuery) QueryGroups() *GroupQuery {
 
 // QueryFriends chains the current query on the "friends" edge.
 func (_q *UserQuery) QueryFriends() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -123,7 +123,7 @@ func (_q *UserQuery) QueryFriends() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -131,7 +131,7 @@ func (_q *UserQuery) QueryFriends() *UserQuery {
 
 // QueryRelatives chains the current query on the "relatives" edge.
 func (_q *UserQuery) QueryRelatives() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -145,7 +145,7 @@ func (_q *UserQuery) QueryRelatives() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.RelativesTable, user.RelativesPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -153,7 +153,7 @@ func (_q *UserQuery) QueryRelatives() *UserQuery {
 
 // QueryLikedTweets chains the current query on the "liked_tweets" edge.
 func (_q *UserQuery) QueryLikedTweets() *TweetQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -167,7 +167,7 @@ func (_q *UserQuery) QueryLikedTweets() *TweetQuery {
 			sqlgraph.To(tweet.Table, tweet.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.LikedTweetsTable, user.LikedTweetsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -175,7 +175,7 @@ func (_q *UserQuery) QueryLikedTweets() *TweetQuery {
 
 // QueryTweets chains the current query on the "tweets" edge.
 func (_q *UserQuery) QueryTweets() *TweetQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -189,7 +189,7 @@ func (_q *UserQuery) QueryTweets() *TweetQuery {
 			sqlgraph.To(tweet.Table, tweet.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.TweetsTable, user.TweetsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -197,7 +197,7 @@ func (_q *UserQuery) QueryTweets() *TweetQuery {
 
 // QueryRoles chains the current query on the "roles" edge.
 func (_q *UserQuery) QueryRoles() *RoleQuery {
-	query := (&RoleClient{config: _q.config}).Query()
+	query := (&RoleClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -211,7 +211,7 @@ func (_q *UserQuery) QueryRoles() *RoleQuery {
 			sqlgraph.To(role.Table, role.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.RolesTable, user.RolesPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -219,7 +219,7 @@ func (_q *UserQuery) QueryRoles() *RoleQuery {
 
 // QueryJoinedGroups chains the current query on the "joined_groups" edge.
 func (_q *UserQuery) QueryJoinedGroups() *UserGroupQuery {
-	query := (&UserGroupClient{config: _q.config}).Query()
+	query := (&UserGroupClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -233,7 +233,7 @@ func (_q *UserQuery) QueryJoinedGroups() *UserGroupQuery {
 			sqlgraph.To(usergroup.Table, usergroup.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.JoinedGroupsTable, user.JoinedGroupsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -241,7 +241,7 @@ func (_q *UserQuery) QueryJoinedGroups() *UserGroupQuery {
 
 // QueryFriendships chains the current query on the "friendships" edge.
 func (_q *UserQuery) QueryFriendships() *FriendshipQuery {
-	query := (&FriendshipClient{config: _q.config}).Query()
+	query := (&FriendshipClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -255,7 +255,7 @@ func (_q *UserQuery) QueryFriendships() *FriendshipQuery {
 			sqlgraph.To(friendship.Table, friendship.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.FriendshipsTable, user.FriendshipsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -263,7 +263,7 @@ func (_q *UserQuery) QueryFriendships() *FriendshipQuery {
 
 // QueryRelationship chains the current query on the "relationship" edge.
 func (_q *UserQuery) QueryRelationship() *RelationshipQuery {
-	query := (&RelationshipClient{config: _q.config}).Query()
+	query := (&RelationshipClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -277,7 +277,7 @@ func (_q *UserQuery) QueryRelationship() *RelationshipQuery {
 			sqlgraph.To(relationship.Table, relationship.UserColumn),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.RelationshipTable, user.RelationshipColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -285,7 +285,7 @@ func (_q *UserQuery) QueryRelationship() *RelationshipQuery {
 
 // QueryLikes chains the current query on the "likes" edge.
 func (_q *UserQuery) QueryLikes() *TweetLikeQuery {
-	query := (&TweetLikeClient{config: _q.config}).Query()
+	query := (&TweetLikeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -299,7 +299,7 @@ func (_q *UserQuery) QueryLikes() *TweetLikeQuery {
 			sqlgraph.To(tweetlike.Table, tweetlike.UserColumn),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.LikesTable, user.LikesColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -307,7 +307,7 @@ func (_q *UserQuery) QueryLikes() *TweetLikeQuery {
 
 // QueryUserTweets chains the current query on the "user_tweets" edge.
 func (_q *UserQuery) QueryUserTweets() *UserTweetQuery {
-	query := (&UserTweetClient{config: _q.config}).Query()
+	query := (&UserTweetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -321,7 +321,7 @@ func (_q *UserQuery) QueryUserTweets() *UserTweetQuery {
 			sqlgraph.To(usertweet.Table, usertweet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.UserTweetsTable, user.UserTweetsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -329,7 +329,7 @@ func (_q *UserQuery) QueryUserTweets() *UserTweetQuery {
 
 // QueryRolesUsers chains the current query on the "roles_users" edge.
 func (_q *UserQuery) QueryRolesUsers() *RoleUserQuery {
-	query := (&RoleUserClient{config: _q.config}).Query()
+	query := (&RoleUserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -343,7 +343,7 @@ func (_q *UserQuery) QueryRolesUsers() *RoleUserQuery {
 			sqlgraph.To(roleuser.Table, roleuser.UserColumn),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.RolesUsersTable, user.RolesUsersColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -357,7 +357,7 @@ func (_q *UserQuery) First(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{Label: user.Label}
 	}
 	return nodes[0], nil
 }
@@ -379,7 +379,7 @@ func (_q *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{Label: user.Label}
 		return
 	}
 	return ids[0], nil
@@ -406,9 +406,9 @@ func (_q *UserQuery) Only(ctx context.Context) (*User, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{Label: user.Label}
 	default:
-		return nil, &NotSingularError{user.Label}
+		return nil, &NotSingularError{Label: user.Label}
 	}
 }
 
@@ -433,9 +433,9 @@ func (_q *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{Label: user.Label}
 	default:
-		err = &NotSingularError{user.Label}
+		err = &NotSingularError{Label: user.Label}
 	}
 	return
 }
@@ -536,7 +536,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:           _q.config,
+		Config:           _q.Config,
 		ctx:              _q.ctx.Clone(),
 		order:            append([]user.OrderOption{}, _q.order...),
 		inters:           append([]Interceptor{}, _q.inters...),
@@ -562,7 +562,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -573,7 +573,7 @@ func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
 // WithFriends tells the query-builder to eager-load the nodes that are connected to
 // the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -584,7 +584,7 @@ func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
 // WithRelatives tells the query-builder to eager-load the nodes that are connected to
 // the "relatives" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRelatives(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -595,7 +595,7 @@ func (_q *UserQuery) WithRelatives(opts ...func(*UserQuery)) *UserQuery {
 // WithLikedTweets tells the query-builder to eager-load the nodes that are connected to
 // the "liked_tweets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithLikedTweets(opts ...func(*TweetQuery)) *UserQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -606,7 +606,7 @@ func (_q *UserQuery) WithLikedTweets(opts ...func(*TweetQuery)) *UserQuery {
 // WithTweets tells the query-builder to eager-load the nodes that are connected to
 // the "tweets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithTweets(opts ...func(*TweetQuery)) *UserQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -617,7 +617,7 @@ func (_q *UserQuery) WithTweets(opts ...func(*TweetQuery)) *UserQuery {
 // WithRoles tells the query-builder to eager-load the nodes that are connected to
 // the "roles" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRoles(opts ...func(*RoleQuery)) *UserQuery {
-	query := (&RoleClient{config: _q.config}).Query()
+	query := (&RoleClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -628,7 +628,7 @@ func (_q *UserQuery) WithRoles(opts ...func(*RoleQuery)) *UserQuery {
 // WithJoinedGroups tells the query-builder to eager-load the nodes that are connected to
 // the "joined_groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithJoinedGroups(opts ...func(*UserGroupQuery)) *UserQuery {
-	query := (&UserGroupClient{config: _q.config}).Query()
+	query := (&UserGroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -639,7 +639,7 @@ func (_q *UserQuery) WithJoinedGroups(opts ...func(*UserGroupQuery)) *UserQuery 
 // WithFriendships tells the query-builder to eager-load the nodes that are connected to
 // the "friendships" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery {
-	query := (&FriendshipClient{config: _q.config}).Query()
+	query := (&FriendshipClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -650,7 +650,7 @@ func (_q *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery 
 // WithRelationship tells the query-builder to eager-load the nodes that are connected to
 // the "relationship" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRelationship(opts ...func(*RelationshipQuery)) *UserQuery {
-	query := (&RelationshipClient{config: _q.config}).Query()
+	query := (&RelationshipClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -661,7 +661,7 @@ func (_q *UserQuery) WithRelationship(opts ...func(*RelationshipQuery)) *UserQue
 // WithLikes tells the query-builder to eager-load the nodes that are connected to
 // the "likes" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithLikes(opts ...func(*TweetLikeQuery)) *UserQuery {
-	query := (&TweetLikeClient{config: _q.config}).Query()
+	query := (&TweetLikeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -672,7 +672,7 @@ func (_q *UserQuery) WithLikes(opts ...func(*TweetLikeQuery)) *UserQuery {
 // WithUserTweets tells the query-builder to eager-load the nodes that are connected to
 // the "user_tweets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithUserTweets(opts ...func(*UserTweetQuery)) *UserQuery {
-	query := (&UserTweetClient{config: _q.config}).Query()
+	query := (&UserTweetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -683,7 +683,7 @@ func (_q *UserQuery) WithUserTweets(opts ...func(*UserTweetQuery)) *UserQuery {
 // WithRolesUsers tells the query-builder to eager-load the nodes that are connected to
 // the "roles_users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRolesUsers(opts ...func(*RoleUserQuery)) *UserQuery {
-	query := (&RoleUserClient{config: _q.config}).Query()
+	query := (&RoleUserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -752,7 +752,7 @@ func (_q *UserQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !user.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -791,18 +791,18 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*User).scanValues(nil, columns)
+		return (*User).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &User{config: _q.config}
+		node := &User{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -1448,7 +1448,7 @@ func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
@@ -1492,7 +1492,7 @@ func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(user.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -1564,7 +1564,7 @@ func (_g *UserGroupBy) sqlScan(ctx context.Context, root *UserQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -1606,7 +1606,7 @@ func (_s *UserSelect) sqlScan(ctx context.Context, root *UserQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

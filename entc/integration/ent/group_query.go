@@ -26,7 +26,7 @@ import (
 
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
-	config
+	Config
 	ctx              *QueryContext
 	order            []group.OrderOption
 	inters           []Interceptor
@@ -78,7 +78,7 @@ func (_q *GroupQuery) Order(o ...group.OrderOption) *GroupQuery {
 
 // QueryFiles chains the current query on the "files" edge.
 func (_q *GroupQuery) QueryFiles() *FileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -92,7 +92,7 @@ func (_q *GroupQuery) QueryFiles() *FileQuery {
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, group.FilesTable, group.FilesColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -100,7 +100,7 @@ func (_q *GroupQuery) QueryFiles() *FileQuery {
 
 // QueryBlocked chains the current query on the "blocked" edge.
 func (_q *GroupQuery) QueryBlocked() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -114,7 +114,7 @@ func (_q *GroupQuery) QueryBlocked() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, group.BlockedTable, group.BlockedColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -122,7 +122,7 @@ func (_q *GroupQuery) QueryBlocked() *UserQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (_q *GroupQuery) QueryUsers() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -136,7 +136,7 @@ func (_q *GroupQuery) QueryUsers() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -144,7 +144,7 @@ func (_q *GroupQuery) QueryUsers() *UserQuery {
 
 // QueryInfo chains the current query on the "info" edge.
 func (_q *GroupQuery) QueryInfo() *GroupInfoQuery {
-	query := (&GroupInfoClient{config: _q.config}).Query()
+	query := (&GroupInfoClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -158,7 +158,7 @@ func (_q *GroupQuery) QueryInfo() *GroupInfoQuery {
 			sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, group.InfoTable, group.InfoColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -172,7 +172,7 @@ func (_q *GroupQuery) First(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{group.Label}
+		return nil, &NotFoundError{Label: group.Label}
 	}
 	return nodes[0], nil
 }
@@ -194,7 +194,7 @@ func (_q *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{group.Label}
+		err = &NotFoundError{Label: group.Label}
 		return
 	}
 	return ids[0], nil
@@ -221,9 +221,9 @@ func (_q *GroupQuery) Only(ctx context.Context) (*Group, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{group.Label}
+		return nil, &NotFoundError{Label: group.Label}
 	default:
-		return nil, &NotSingularError{group.Label}
+		return nil, &NotSingularError{Label: group.Label}
 	}
 }
 
@@ -248,9 +248,9 @@ func (_q *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{group.Label}
+		err = &NotFoundError{Label: group.Label}
 	default:
-		err = &NotSingularError{group.Label}
+		err = &NotSingularError{Label: group.Label}
 	}
 	return
 }
@@ -351,7 +351,7 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 		return nil
 	}
 	return &GroupQuery{
-		config:      _q.config,
+		Config:      _q.Config,
 		ctx:         _q.ctx.Clone(),
 		order:       append([]group.OrderOption{}, _q.order...),
 		inters:      append([]Interceptor{}, _q.inters...),
@@ -370,7 +370,7 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -381,7 +381,7 @@ func (_q *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
 // WithBlocked tells the query-builder to eager-load the nodes that are connected to
 // the "blocked" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -392,7 +392,7 @@ func (_q *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -403,7 +403,7 @@ func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 // WithInfo tells the query-builder to eager-load the nodes that are connected to
 // the "info" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
-	query := (&GroupInfoClient{config: _q.config}).Query()
+	query := (&GroupInfoClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -472,7 +472,7 @@ func (_q *GroupQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !group.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -504,13 +504,13 @@ func (_q *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 		_spec.Node.Columns = append(_spec.Node.Columns, group.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Group).scanValues(nil, columns)
+		return (*Group).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Group{config: _q.config}
+		node := &Group{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -518,7 +518,7 @@ func (_q *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -553,22 +553,22 @@ func (_q *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 	}
 	for name, query := range _q.withNamedFiles {
 		if err := _q.loadFiles(ctx, query, nodes,
-			func(n *Group) { n.appendNamedFiles(name) },
-			func(n *Group, e *File) { n.appendNamedFiles(name, e) }); err != nil {
+			func(n *Group) { n.AppendNamedFiles(name) },
+			func(n *Group, e *File) { n.AppendNamedFiles(name, e) }); err != nil {
 			return nil, err
 		}
 	}
 	for name, query := range _q.withNamedBlocked {
 		if err := _q.loadBlocked(ctx, query, nodes,
-			func(n *Group) { n.appendNamedBlocked(name) },
-			func(n *Group, e *User) { n.appendNamedBlocked(name, e) }); err != nil {
+			func(n *Group) { n.AppendNamedBlocked(name) },
+			func(n *Group, e *User) { n.AppendNamedBlocked(name, e) }); err != nil {
 			return nil, err
 		}
 	}
 	for name, query := range _q.withNamedUsers {
 		if err := _q.loadUsers(ctx, query, nodes,
-			func(n *Group) { n.appendNamedUsers(name) },
-			func(n *Group, e *User) { n.appendNamedUsers(name, e) }); err != nil {
+			func(n *Group) { n.AppendNamedUsers(name) },
+			func(n *Group, e *User) { n.AppendNamedUsers(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -594,7 +594,7 @@ func (_q *GroupQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.group_files
+		fk := n.GetGroupFiles()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "group_files" is nil for node %v`, n.ID)
 		}
@@ -625,7 +625,7 @@ func (_q *GroupQuery) loadBlocked(ctx context.Context, query *UserQuery, nodes [
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.group_blocked
+		fk := n.GetGroupBlocked()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "group_blocked" is nil for node %v`, n.ID)
 		}
@@ -702,10 +702,10 @@ func (_q *GroupQuery) loadInfo(ctx context.Context, query *GroupInfoQuery, nodes
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Group)
 	for i := range nodes {
-		if nodes[i].group_info == nil {
+		if nodes[i].GetGroupInfo() == nil {
 			continue
 		}
-		fk := *nodes[i].group_info
+		fk := *nodes[i].GetGroupInfo()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -740,7 +740,7 @@ func (_q *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *GroupQuery) querySpec() *sqlgraph.QuerySpec {
@@ -784,7 +784,7 @@ func (_q *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(group.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -822,7 +822,7 @@ func (_q *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *GroupQuery) ForUpdate(opts ...sql.LockOption) *GroupQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -835,7 +835,7 @@ func (_q *GroupQuery) ForUpdate(opts ...sql.LockOption) *GroupQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *GroupQuery) ForShare(opts ...sql.LockOption) *GroupQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -853,7 +853,7 @@ func (_q *GroupQuery) Modify(modifiers ...func(s *sql.Selector)) *GroupSelect {
 // WithNamedFiles tells the query-builder to eager-load the nodes that are connected to the "files"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *GroupQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -867,7 +867,7 @@ func (_q *GroupQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *Gro
 // WithNamedBlocked tells the query-builder to eager-load the nodes that are connected to the "blocked"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithNamedBlocked(name string, opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -881,7 +881,7 @@ func (_q *GroupQuery) WithNamedBlocked(name string, opts ...func(*UserQuery)) *G
 // WithNamedUsers tells the query-builder to eager-load the nodes that are connected to the "users"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithNamedUsers(name string, opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -933,7 +933,7 @@ func (_g *GroupGroupBy) sqlScan(ctx context.Context, root *GroupQuery, v any) er
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -975,7 +975,7 @@ func (_s *GroupSelect) sqlScan(ctx context.Context, root *GroupQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

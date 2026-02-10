@@ -217,7 +217,7 @@ func TestSQLite(t *testing.T) {
 	SanityV2(t, drv.Dialect(), client)
 	u := client.User.Create().SetAge(1).SetName("x").SetNickname("x'").SetPhone("y").SaveX(ctx)
 	idRange(t, client.Blog.Create().SetOid(1).SaveX(ctx).ID, 0, 1<<32)
-	idRange(t, client.Car.Create().SetOwner(u).SaveX(ctx).ID, 1<<32-1, 2<<32)
+	idRange(t, client.Car.Create().SetOwnerID(u.ID).SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
 	idRange(t, client.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
@@ -488,7 +488,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
 
 	u := clientv2.User.Create().SetAge(1).SetName("foo").SetNickname("nick_foo").SetPhone("phone").SaveX(ctx)
-	idRange(t, clientv2.Car.Create().SetOwner(u).SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, clientv2.Car.Create().SetOwnerID(u.ID).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, clientv2.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
@@ -521,9 +521,9 @@ func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 	require.Error(t, err)
 
 	// Blob type limited to 255.
-	u = u.Update().SetBlob([]byte("hello")).SaveX(ctx)
+	u = client.User.UpdateOne(u).SetBlob([]byte("hello")).SaveX(ctx)
 	require.Equal(t, "hello", string(u.Blob))
-	err = u.Update().SetBlob(make([]byte, 256)).Exec(ctx)
+	err = client.User.UpdateOne(u).SetBlob(make([]byte, 256)).Exec(ctx)
 	require.True(t, strings.Contains(t.Name(), "Postgres") || err != nil, "blob should be limited on SQLite and MySQL")
 
 	// Invalid enum value.
@@ -593,13 +593,13 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	require.Equal(t, 1, u.Age)
 	require.Equal(t, "bar", u.Name)
 	require.Equal(t, []byte("{}"), u.Buffer)
-	u = u.Update().SetBuffer([]byte("[]")).SaveX(ctx)
+	u = client.User.UpdateOne(u).SetBuffer([]byte("[]")).SaveX(ctx)
 	require.Equal(t, []byte("[]"), u.Buffer)
 	require.Equal(t, user.StateLoggedOut, u.State)
 
-	err := u.Update().SetState(user.State("boring")).Exec(ctx)
+	err := client.User.UpdateOne(u).SetState(user.State("boring")).Exec(ctx)
 	require.Error(t, err, "invalid enum value")
-	u = u.Update().SetState(user.StateOnline).SaveX(ctx)
+	u = client.User.UpdateOne(u).SetState(user.StateOnline).SaveX(ctx)
 	require.Equal(t, user.StateOnline, u.State)
 
 	err = client.User.Create().SetAge(1).SetName("foobarbazqux").SetNickname("nick_bar").SetPhone("200").Exec(ctx)
@@ -618,7 +618,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	)
 
 	// Blob type was extended.
-	u, err = u.Update().SetBlob(make([]byte, 256)).SetState(user.StateLoggedOut).Save(ctx)
+	u, err = client.User.UpdateOne(u).SetBlob(make([]byte, 256)).SetState(user.StateLoggedOut).Save(ctx)
 	require.NoError(t, err, "data type blob was extended in v2")
 	require.Equal(t, make([]byte, 256), u.Blob)
 

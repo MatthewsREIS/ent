@@ -26,7 +26,7 @@ import (
 
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
-	config
+	Config
 	ctx            *QueryContext
 	order          []file.OrderOption
 	inters         []Interceptor
@@ -75,7 +75,7 @@ func (_q *FileQuery) Order(o ...file.OrderOption) *FileQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (_q *FileQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -89,7 +89,7 @@ func (_q *FileQuery) QueryOwner() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, file.OwnerTable, file.OwnerColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -97,7 +97,7 @@ func (_q *FileQuery) QueryOwner() *UserQuery {
 
 // QueryType chains the current query on the "type" edge.
 func (_q *FileQuery) QueryType() *FileTypeQuery {
-	query := (&FileTypeClient{config: _q.config}).Query()
+	query := (&FileTypeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -111,7 +111,7 @@ func (_q *FileQuery) QueryType() *FileTypeQuery {
 			sqlgraph.To(filetype.Table, filetype.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -119,7 +119,7 @@ func (_q *FileQuery) QueryType() *FileTypeQuery {
 
 // QueryField chains the current query on the "field" edge.
 func (_q *FileQuery) QueryField() *FieldTypeQuery {
-	query := (&FieldTypeClient{config: _q.config}).Query()
+	query := (&FieldTypeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -133,7 +133,7 @@ func (_q *FileQuery) QueryField() *FieldTypeQuery {
 			sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, file.FieldTable, file.FieldColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -147,7 +147,7 @@ func (_q *FileQuery) First(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{file.Label}
+		return nil, &NotFoundError{Label: file.Label}
 	}
 	return nodes[0], nil
 }
@@ -169,7 +169,7 @@ func (_q *FileQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{file.Label}
+		err = &NotFoundError{Label: file.Label}
 		return
 	}
 	return ids[0], nil
@@ -196,9 +196,9 @@ func (_q *FileQuery) Only(ctx context.Context) (*File, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{file.Label}
+		return nil, &NotFoundError{Label: file.Label}
 	default:
-		return nil, &NotSingularError{file.Label}
+		return nil, &NotSingularError{Label: file.Label}
 	}
 }
 
@@ -223,9 +223,9 @@ func (_q *FileQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{file.Label}
+		err = &NotFoundError{Label: file.Label}
 	default:
-		err = &NotSingularError{file.Label}
+		err = &NotSingularError{Label: file.Label}
 	}
 	return
 }
@@ -326,7 +326,7 @@ func (_q *FileQuery) Clone() *FileQuery {
 		return nil
 	}
 	return &FileQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]file.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -344,7 +344,7 @@ func (_q *FileQuery) Clone() *FileQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -355,7 +355,7 @@ func (_q *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
 // WithType tells the query-builder to eager-load the nodes that are connected to
 // the "type" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
-	query := (&FileTypeClient{config: _q.config}).Query()
+	query := (&FileTypeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -366,7 +366,7 @@ func (_q *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 // WithField tells the query-builder to eager-load the nodes that are connected to
 // the "field" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
-	query := (&FieldTypeClient{config: _q.config}).Query()
+	query := (&FieldTypeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -435,7 +435,7 @@ func (_q *FileQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !file.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -466,13 +466,13 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 		_spec.Node.Columns = append(_spec.Node.Columns, file.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*File).scanValues(nil, columns)
+		return (*File).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &File{config: _q.config}
+		node := &File{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -480,7 +480,7 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -507,8 +507,8 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	}
 	for name, query := range _q.withNamedField {
 		if err := _q.loadField(ctx, query, nodes,
-			func(n *File) { n.appendNamedField(name) },
-			func(n *File, e *FieldType) { n.appendNamedField(name, e) }); err != nil {
+			func(n *File) { n.AppendNamedField(name) },
+			func(n *File, e *FieldType) { n.AppendNamedField(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -519,10 +519,10 @@ func (_q *FileQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*F
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*File)
 	for i := range nodes {
-		if nodes[i].user_files == nil {
+		if nodes[i].GetUserFiles() == nil {
 			continue
 		}
-		fk := *nodes[i].user_files
+		fk := *nodes[i].GetUserFiles()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -551,10 +551,10 @@ func (_q *FileQuery) loadType(ctx context.Context, query *FileTypeQuery, nodes [
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*File)
 	for i := range nodes {
-		if nodes[i].file_type_files == nil {
+		if nodes[i].GetFileTypeFiles() == nil {
 			continue
 		}
-		fk := *nodes[i].file_type_files
+		fk := *nodes[i].GetFileTypeFiles()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -598,7 +598,7 @@ func (_q *FileQuery) loadField(ctx context.Context, query *FieldTypeQuery, nodes
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.file_field
+		fk := n.GetFileField()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
 		}
@@ -620,7 +620,7 @@ func (_q *FileQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *FileQuery) querySpec() *sqlgraph.QuerySpec {
@@ -664,7 +664,7 @@ func (_q *FileQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(file.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -702,7 +702,7 @@ func (_q *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *FileQuery) ForUpdate(opts ...sql.LockOption) *FileQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -715,7 +715,7 @@ func (_q *FileQuery) ForUpdate(opts ...sql.LockOption) *FileQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *FileQuery) ForShare(opts ...sql.LockOption) *FileQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -733,7 +733,7 @@ func (_q *FileQuery) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
 // WithNamedField tells the query-builder to eager-load the nodes that are connected to the "field"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithNamedField(name string, opts ...func(*FieldTypeQuery)) *FileQuery {
-	query := (&FieldTypeClient{config: _q.config}).Query()
+	query := (&FieldTypeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -785,7 +785,7 @@ func (_g *FileGroupBy) sqlScan(ctx context.Context, root *FileQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -827,7 +827,7 @@ func (_s *FileSelect) sqlScan(ctx context.Context, root *FileQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

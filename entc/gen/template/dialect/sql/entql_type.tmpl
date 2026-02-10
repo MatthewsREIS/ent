@@ -30,8 +30,8 @@ import (
 {{ $mutation := $n.MutationName }}
 {{ $filter := print $n.FilterName }}
 
-// addPredicate implements the predicateAdder interface.
-func ({{ $receiver }} *{{ $builder }}) addPredicate(pred func(s *sql.Selector)) {
+// AddPredicate implements the predicateAdder interface.
+func ({{ $receiver }} *{{ $builder }}) AddPredicate(pred func(s *sql.Selector)) {
 	{{ $receiver }}.predicates = append({{ $receiver }}.predicates, pred)
 }
 
@@ -41,13 +41,8 @@ func ({{ $receiver }} *{{ $builder }}) Filter() *{{ $filter }} {
 }
 
 {{- if not $n.IsView }}
-		// addPredicate implements the predicateAdder interface.
-		func (m *{{ $mutation }}) addPredicate(pred func(s *sql.Selector)) {
-			m.predicates = append(m.predicates, pred)
-		}
-
-		// Filter returns an entql.Where implementation to apply filters on the {{ $mutation }} builder.
-		func (m *{{ $mutation }}) Filter() *{{ $filter }} {
+		// New{{ $filter }}ForMutation creates a new {{ $filter }} for the given mutation.
+		func New{{ $filter }}ForMutation(m *{{ $mutation }}) *{{ $filter }} {
 			return &{{ $filter }}{Config: m.Config, predicateAdder: m}
 		}
 {{- end }}
@@ -60,7 +55,7 @@ type {{ $filter }} struct {
 
 // Where applies the entql predicate on the query filter.
 func (f *{{ $filter }}) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
+	f.AddPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP("{{ $n.Name }}", p, s); err != nil {
 			s.AddError(err)
 		}

@@ -7,68 +7,24 @@
 package ent
 
 import (
-	"log"
-
-	"entgo.io/ent/dialect"
+	"entgo.io/ent/entc/integration/privacy/ent/internal"
 )
 
 type (
 	// Config is the configuration for the client and its builder.
-	Config struct {
-		// driver used for executing database requests.
-		driver dialect.Driver
-		// debug enable a debug logging.
-		debug bool
-		// log used for logging on debug mode.
-		log func(...any)
-		// hooks to execute on mutations.
-		hooks *hooks
-		// interceptors to execute on queries.
-		inters *inters
-	}
+	Config = internal.Config
 	// Option function to configure the client.
-	Option func(*Config)
+	Option = internal.Option
 )
 
-// Driver returns the Config's dialect driver.
-func (c Config) Driver() dialect.Driver {
-	return c.driver
-}
-
-// NewConfig creates a new Config for the client.
-func NewConfig(opts ...Option) Config {
-	cfg := Config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
-	cfg.options(opts...)
-	return cfg
-}
-
-// options applies the options on the Config object.
-func (c *Config) options(opts ...Option) {
-	for _, opt := range opts {
-		opt(c)
-	}
-	if c.debug {
-		c.driver = dialect.Debug(c.driver, c.log)
-	}
-}
-
-// Debug enables debug logging on the ent.Driver.
-func Debug() Option {
-	return func(c *Config) {
-		c.debug = true
-	}
-}
-
-// Log sets the logging function for debug mode.
-func Log(fn func(...any)) Option {
-	return func(c *Config) {
-		c.log = fn
-	}
-}
-
-// Driver configures the client driver.
-func Driver(driver dialect.Driver) Option {
-	return func(c *Config) {
-		c.driver = driver
-	}
-}
+var (
+	// NewConfig creates a new Config for the client.
+	NewConfig = internal.NewConfig
+	// Debug enables debug logging on the ent.Driver.
+	Debug = internal.Debug
+	// Log sets the logging function for debug mode.
+	Log = internal.Log
+	// Driver configures the client driver.
+	Driver = internal.Driver
+)
+var HTTPClient = internal.HTTPClient

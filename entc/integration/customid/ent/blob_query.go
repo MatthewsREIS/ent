@@ -24,7 +24,7 @@ import (
 
 // BlobQuery is the builder for querying Blob entities.
 type BlobQuery struct {
-	config
+	Config
 	ctx           *QueryContext
 	order         []blob.OrderOption
 	inters        []Interceptor
@@ -71,7 +71,7 @@ func (_q *BlobQuery) Order(o ...blob.OrderOption) *BlobQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *BlobQuery) QueryParent() *BlobQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := (&BlobClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -85,7 +85,7 @@ func (_q *BlobQuery) QueryParent() *BlobQuery {
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, blob.ParentTable, blob.ParentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -93,7 +93,7 @@ func (_q *BlobQuery) QueryParent() *BlobQuery {
 
 // QueryLinks chains the current query on the "links" edge.
 func (_q *BlobQuery) QueryLinks() *BlobQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := (&BlobClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -107,7 +107,7 @@ func (_q *BlobQuery) QueryLinks() *BlobQuery {
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, blob.LinksTable, blob.LinksPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -115,7 +115,7 @@ func (_q *BlobQuery) QueryLinks() *BlobQuery {
 
 // QueryBlobLinks chains the current query on the "blob_links" edge.
 func (_q *BlobQuery) QueryBlobLinks() *BlobLinkQuery {
-	query := (&BlobLinkClient{config: _q.config}).Query()
+	query := (&BlobLinkClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -129,7 +129,7 @@ func (_q *BlobQuery) QueryBlobLinks() *BlobLinkQuery {
 			sqlgraph.To(bloblink.Table, bloblink.BlobColumn),
 			sqlgraph.Edge(sqlgraph.O2M, true, blob.BlobLinksTable, blob.BlobLinksColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -143,7 +143,7 @@ func (_q *BlobQuery) First(ctx context.Context) (*Blob, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{blob.Label}
+		return nil, &NotFoundError{Label: blob.Label}
 	}
 	return nodes[0], nil
 }
@@ -165,7 +165,7 @@ func (_q *BlobQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{blob.Label}
+		err = &NotFoundError{Label: blob.Label}
 		return
 	}
 	return ids[0], nil
@@ -192,9 +192,9 @@ func (_q *BlobQuery) Only(ctx context.Context) (*Blob, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{blob.Label}
+		return nil, &NotFoundError{Label: blob.Label}
 	default:
-		return nil, &NotSingularError{blob.Label}
+		return nil, &NotSingularError{Label: blob.Label}
 	}
 }
 
@@ -219,9 +219,9 @@ func (_q *BlobQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{blob.Label}
+		err = &NotFoundError{Label: blob.Label}
 	default:
-		err = &NotSingularError{blob.Label}
+		err = &NotSingularError{Label: blob.Label}
 	}
 	return
 }
@@ -322,7 +322,7 @@ func (_q *BlobQuery) Clone() *BlobQuery {
 		return nil
 	}
 	return &BlobQuery{
-		config:        _q.config,
+		Config:        _q.Config,
 		ctx:           _q.ctx.Clone(),
 		order:         append([]blob.OrderOption{}, _q.order...),
 		inters:        append([]Interceptor{}, _q.inters...),
@@ -339,7 +339,7 @@ func (_q *BlobQuery) Clone() *BlobQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := (&BlobClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -350,7 +350,7 @@ func (_q *BlobQuery) WithParent(opts ...func(*BlobQuery)) *BlobQuery {
 // WithLinks tells the query-builder to eager-load the nodes that are connected to
 // the "links" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := (&BlobClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -361,7 +361,7 @@ func (_q *BlobQuery) WithLinks(opts ...func(*BlobQuery)) *BlobQuery {
 // WithBlobLinks tells the query-builder to eager-load the nodes that are connected to
 // the "blob_links" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlobQuery) WithBlobLinks(opts ...func(*BlobLinkQuery)) *BlobQuery {
-	query := (&BlobLinkClient{config: _q.config}).Query()
+	query := (&BlobLinkClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -430,7 +430,7 @@ func (_q *BlobQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !blob.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -461,18 +461,18 @@ func (_q *BlobQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blob, e
 		_spec.Node.Columns = append(_spec.Node.Columns, blob.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Blob).scanValues(nil, columns)
+		return (*Blob).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Blob{config: _q.config}
+		node := &Blob{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -505,10 +505,10 @@ func (_q *BlobQuery) loadParent(ctx context.Context, query *BlobQuery, nodes []*
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*Blob)
 	for i := range nodes {
-		if nodes[i].blob_parent == nil {
+		if nodes[i].GetBlobParent() == nil {
 			continue
 		}
-		fk := *nodes[i].blob_parent
+		fk := *nodes[i].GetBlobParent()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -631,7 +631,7 @@ func (_q *BlobQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *BlobQuery) querySpec() *sqlgraph.QuerySpec {
@@ -675,7 +675,7 @@ func (_q *BlobQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *BlobQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(blob.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -747,7 +747,7 @@ func (_g *BlobGroupBy) sqlScan(ctx context.Context, root *BlobQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -789,7 +789,7 @@ func (_s *BlobSelect) sqlScan(ctx context.Context, root *BlobQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -25,6 +25,12 @@ import (
 	{{- range $dep := $deps }}
 		{{ $dep.Type.PkgName }} "{{ $dep.Type.PkgPath }}"
 	{{- end }}
+	{{- /* Additional imports from features and extensions. */}}
+	{{- with $tmpls := matchTemplate "import/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -62,6 +68,14 @@ type (
 		{{- range $dep := $deps }}
 			{{ $dep.Field }} {{ $dep.Type }}
 		{{- end }}
+		{{- /* Support adding config fields from both global or dialect-specific templates. */}}
+		{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
+			{{- with $tmpls := matchTemplate (print $prefix "config/fields/*") }}
+				{{- range $tmpl := $tmpls }}
+					{{ xtemplate $tmpl $ }}
+				{{- end }}
+			{{- end }}
+		{{- end }}
 	}
 	// Option function to configure the client.
 	Option func(*Config)
@@ -75,6 +89,11 @@ func (c Config) Driver() dialect.Driver {
 // NewConfig creates a new Config for the client.
 func NewConfig(opts ...Option) Config {
 	cfg := Config{LogFn: log.Println, Hooks: &Hooks{}, Inters: &Inters{}}
+	{{- with $tmpls := matchTemplate "config/init/fields/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
 	cfg.options(opts...)
 	return cfg
 }
@@ -303,5 +322,11 @@ const (
 	{{ $n.TypeName }} = "{{ $n.Name }}"
 	{{- end }}
 )
+
+{{- with $tmpls := matchTemplate "config/additional/*" "config/additional/*/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 {{ end }}

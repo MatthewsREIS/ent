@@ -15,8 +15,8 @@ import (
 	"entgo.io/ent/entql"
 )
 
-// addPredicate implements the predicateAdder interface.
-func (_q *TaskQuery) addPredicate(pred func(s *sql.Selector)) {
+// AddPredicate implements the predicateAdder interface.
+func (_q *TaskQuery) AddPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
 
@@ -25,13 +25,8 @@ func (_q *TaskQuery) Filter() *TaskFilter {
 	return &TaskFilter{Config: _q.Config, predicateAdder: _q}
 }
 
-// addPredicate implements the predicateAdder interface.
-func (m *TaskMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
-}
-
-// Filter returns an entql.Where implementation to apply filters on the TaskMutation builder.
-func (m *TaskMutation) Filter() *TaskFilter {
+// NewTaskFilterForMutation creates a new TaskFilter for the given mutation.
+func NewTaskFilterForMutation(m *TaskMutation) *TaskFilter {
 	return &TaskFilter{Config: m.Config, predicateAdder: m}
 }
 
@@ -43,7 +38,7 @@ type TaskFilter struct {
 
 // Where applies the entql predicate on the query filter.
 func (f *TaskFilter) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
+	f.AddPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP("Task", p, s); err != nil {
 			s.AddError(err)
 		}

@@ -27,6 +27,10 @@ type Noder interface {
 	Node(context.Context) (*Node, error)
 }
 
+type noderFunc func(context.Context) (*Node, error)
+
+func (f noderFunc) Node(ctx context.Context) (*Node, error) { return f(ctx) }
+
 // Node in the graph.
 type Node struct {
 	ID     int      `json:"id,omitemty"`      // node id.
@@ -49,106 +53,6 @@ type Edge struct {
 	IDs  []int  `json:"ids,omitempty"`  // node ids (where this edge point to).
 }
 
-func (_m *Group) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     _m.ID,
-		Type:   "Group",
-		Fields: make([]*Field, 1),
-		Edges:  make([]*Edge, 0),
-	}
-	var buf []byte
-	if buf, err = json.Marshal(_m.MaxUsers); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "int",
-		Name:  "MaxUsers",
-		Value: string(buf),
-	}
-	return node, nil
-}
-
-func (_m *Pet) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     _m.ID,
-		Type:   "Pet",
-		Fields: make([]*Field, 2),
-		Edges:  make([]*Edge, 1),
-	}
-	var buf []byte
-	if buf, err = json.Marshal(_m.Age); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "int",
-		Name:  "Age",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(_m.LicensedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[1] = &Field{
-		Type:  "time.Time",
-		Name:  "LicensedAt",
-		Value: string(buf),
-	}
-	var ids []int
-	ids, err = _m.QueryOwner().
-		Select(user.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[0] = &Edge{
-		IDs:  ids,
-		Type: "User",
-		Name: "Owner",
-	}
-	return node, nil
-}
-
-func (_m *User) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     _m.ID,
-		Type:   "User",
-		Fields: make([]*Field, 1),
-		Edges:  make([]*Edge, 2),
-	}
-	var buf []byte
-	if buf, err = json.Marshal(_m.Name); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "string",
-		Name:  "Name",
-		Value: string(buf),
-	}
-	var ids []int
-	ids, err = _m.QueryPets().
-		Select(pet.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[0] = &Edge{
-		IDs:  ids,
-		Type: "Pet",
-		Name: "Pets",
-	}
-	ids, err = _m.QueryFriends().
-		Select(user.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[1] = &Edge{
-		IDs:  ids,
-		Type: "User",
-		Name: "Friends",
-	}
-	return node, nil
-}
-
 func (c *Client) Node(ctx context.Context, id int) (*Node, error) {
 	n, err := c.Noder(ctx, id)
 	if err != nil {
@@ -158,13 +62,13 @@ func (c *Client) Node(ctx context.Context, id int) (*Node, error) {
 }
 
 func (c *Client) Noder(ctx context.Context, id int) (Noder, error) {
-	tables, err := c.tables.Load(ctx, c.driver)
+	tables, err := c.tables.Load(ctx, c.Drv)
 	if err != nil {
 		return nil, err
 	}
 	idx := id / (1<<32 - 1)
 	if idx < 0 || idx >= len(tables) {
-		return nil, fmt.Errorf("cannot resolve table from id %v: %w", id, &NotFoundError{"invalid/unknown"})
+		return nil, fmt.Errorf("cannot resolve table from id %v: %w", id, &NotFoundError{Label: "invalid/unknown"})
 	}
 	return c.noder(ctx, tables[idx], id)
 }
@@ -176,21 +80,115 @@ func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
 		if err != nil {
 			return nil, err
 		}
-		return n, nil
+		return noderFunc(func(ctx context.Context) (*Node, error) {
+			node := &Node{
+				ID:     n.ID,
+				Type:   "Group",
+				Fields: make([]*Field, 1),
+				Edges:  make([]*Edge, 0),
+			}
+			var buf []byte
+			if buf, err = json.Marshal(n.MaxUsers); err != nil {
+				return nil, err
+			}
+			node.Fields[0] = &Field{
+				Type:  "int",
+				Name:  "MaxUsers",
+				Value: string(buf),
+			}
+			return node, nil
+		}), nil
 	case pet.Table:
 		n, err := c.Pet.Get(ctx, id)
 		if err != nil {
 			return nil, err
 		}
-		return n, nil
+		return noderFunc(func(ctx context.Context) (*Node, error) {
+			node := &Node{
+				ID:     n.ID,
+				Type:   "Pet",
+				Fields: make([]*Field, 2),
+				Edges:  make([]*Edge, 1),
+			}
+			var buf []byte
+			if buf, err = json.Marshal(n.Age); err != nil {
+				return nil, err
+			}
+			node.Fields[0] = &Field{
+				Type:  "int",
+				Name:  "Age",
+				Value: string(buf),
+			}
+			if buf, err = json.Marshal(n.LicensedAt); err != nil {
+				return nil, err
+			}
+			node.Fields[1] = &Field{
+				Type:  "time.Time",
+				Name:  "LicensedAt",
+				Value: string(buf),
+			}
+			var ids []int
+			ids, err = c.Pet.QueryOwner(n).
+				Select(user.FieldID).
+				Ints(ctx)
+			if err != nil {
+				return nil, err
+			}
+			node.Edges[0] = &Edge{
+				IDs:  ids,
+				Type: "User",
+				Name: "Owner",
+			}
+			return node, nil
+		}), nil
 	case user.Table:
 		n, err := c.User.Get(ctx, id)
 		if err != nil {
 			return nil, err
 		}
-		return n, nil
+		return noderFunc(func(ctx context.Context) (*Node, error) {
+			node := &Node{
+				ID:     n.ID,
+				Type:   "User",
+				Fields: make([]*Field, 1),
+				Edges:  make([]*Edge, 2),
+			}
+			var buf []byte
+			if buf, err = json.Marshal(n.Name); err != nil {
+				return nil, err
+			}
+			node.Fields[0] = &Field{
+				Type:  "string",
+				Name:  "Name",
+				Value: string(buf),
+			}
+			var ids []int
+			ids, err = c.User.QueryPets(n).
+				Select(pet.FieldID).
+				Ints(ctx)
+			if err != nil {
+				return nil, err
+			}
+			node.Edges[0] = &Edge{
+				IDs:  ids,
+				Type: "Pet",
+				Name: "Pets",
+			}
+			ids, err = c.User.QueryFriends(n).
+				Select(user.FieldID).
+				Ints(ctx)
+			if err != nil {
+				return nil, err
+			}
+			node.Edges[1] = &Edge{
+				IDs:  ids,
+				Type: "User",
+				Name: "Friends",
+			}
+			return node, nil
+		}), nil
 	default:
-		return nil, fmt.Errorf("cannot resolve noder from table %q: %w", tbl, &NotFoundError{"invalid/unknown"})
+		return nil, fmt.Errorf("cannot resolve noder from table %q: %w", tbl, &NotFoundError{Label: "invalid/unknown"})
 	}
 }
 

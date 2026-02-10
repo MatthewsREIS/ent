@@ -296,13 +296,19 @@ func generate(g *Graph) error {
 			log.Printf("remove old file %s: %s\n", filepath.Join(g.Target, n), err)
 		}
 	}
-	// Remove stale root-level per-type files from old template layout
-	// (e.g. user_create.go replaced by user/create.go).
+	// Overwrite stale root-level per-type files from old template layout
+	// with empty stubs (e.g. user_create.go replaced by user/create.go).
+	// We write stubs instead of deleting because go generate iterates
+	// all package files and would fail if a file disappears mid-run.
+	stub := []byte("package " + filepath.Base(g.Package) + "\n")
 	for _, n := range g.Nodes {
 		for _, pattern := range deletedTypeTemplates {
 			name := fmt.Sprintf(pattern, n.PackageDir())
-			if err := os.Remove(filepath.Join(g.Target, name)); err != nil && !os.IsNotExist(err) {
-				log.Printf("remove old file %s: %s\n", filepath.Join(g.Target, name), err)
+			p := filepath.Join(g.Target, name)
+			if _, err := os.Stat(p); err == nil {
+				if err := os.WriteFile(p, stub, 0644); err != nil {
+					log.Printf("stub old file %s: %s\n", p, err)
+				}
 			}
 		}
 	}

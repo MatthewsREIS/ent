@@ -22,7 +22,7 @@ import (
 
 // OtherQuery is the builder for querying Other entities.
 type OtherQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []other.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *OtherQuery) First(ctx context.Context) (*Other, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{other.Label}
+		return nil, &NotFoundError{Label: other.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *OtherQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{other.Label}
+		err = &NotFoundError{Label: other.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *OtherQuery) Only(ctx context.Context) (*Other, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{other.Label}
+		return nil, &NotFoundError{Label: other.Label}
 	default:
-		return nil, &NotSingularError{other.Label}
+		return nil, &NotSingularError{Label: other.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *OtherQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{other.Label}
+		err = &NotFoundError{Label: other.Label}
 	default:
-		err = &NotSingularError{other.Label}
+		err = &NotSingularError{Label: other.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *OtherQuery) Clone() *OtherQuery {
 		return nil
 	}
 	return &OtherQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]other.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -300,7 +300,7 @@ func (_q *OtherQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !other.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -319,17 +319,17 @@ func (_q *OtherQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Other,
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Other).scanValues(nil, columns)
+		return (*Other).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Other{config: _q.config}
+		node := &Other{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -344,7 +344,7 @@ func (_q *OtherQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *OtherQuery) querySpec() *sqlgraph.QuerySpec {
@@ -388,7 +388,7 @@ func (_q *OtherQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *OtherQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(other.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -460,7 +460,7 @@ func (_g *OtherGroupBy) sqlScan(ctx context.Context, root *OtherQuery, v any) er
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -502,7 +502,7 @@ func (_s *OtherSelect) sqlScan(ctx context.Context, root *OtherQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

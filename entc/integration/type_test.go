@@ -145,7 +145,7 @@ func Types(t *testing.T, client *ent.Client) {
 		SetRawData(make([]byte, 2)).
 		Exec(ctx)
 	require.Error(err, "MinLen validator should reject this operation")
-	ft = ft.Update().
+	ft = client.FieldType.UpdateOne(ft).
 		SetInt(1).
 		SetInt8(math.MaxInt8).
 		SetInt16(math.MaxInt16).

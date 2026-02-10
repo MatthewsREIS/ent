@@ -57,7 +57,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 		node := &{{ $.Name }}{Config: {{ $receiver }}.Config}
 		nodes = append(nodes, node)
 		{{- with $.Edges }}
-			node.Edges.loadedTypes = loadedTypes
+			node.Edges.SetLoadedTypes(loadedTypes)
 		{{- end }}
 		return node.AssignValues(columns, values)
 	}
@@ -87,7 +87,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 						{{ printf "%s = %s" $lhs $rhs }}
 						{{- $idx := $e.Ref.Index }}
 						{{- /* Set only in case this type was not loaded explicitly (without custom options). */}}
-						if !e.Edges.loadedTypes[{{ $idx }}] {
+						if !e.Edges.IsLoaded({{ $idx }}) {
 							e.Edges.{{ $e.Ref.StructField }} = n
 						}
 					}); err != nil {
@@ -187,11 +187,27 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 			for i := range nodes {
 				{{- $fk := $e.ForeignKey }}
 				{{- if $fk.Field.Nillable }}
-					if nodes[i].{{ $fk.StructField }} == nil {
-						continue
-					}
+					{{- if and $.Scope.InSubPackage (eq (pascal $fk.StructField) $fk.StructField) }}
+						if nodes[i].{{ $fk.StructField }} == nil {
+							continue
+						}
+					{{- else if eq (pascal $fk.StructField) $fk.StructField }}
+						if nodes[i].{{ $fk.StructField }} == nil {
+							continue
+						}
+					{{- else }}
+						if nodes[i].Get{{ pascal $fk.StructField }}() == nil {
+							continue
+						}
+					{{- end }}
 				{{- end }}
-				fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].{{ $fk.StructField }}
+				{{- if and $.Scope.InSubPackage (eq (pascal $fk.StructField) $fk.StructField) }}
+					fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].{{ $fk.StructField }}
+				{{- else if eq (pascal $fk.StructField) $fk.StructField }}
+					fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].{{ $fk.StructField }}
+				{{- else }}
+					fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].Get{{ pascal $fk.StructField }}()
+				{{- end }}
 				if _, ok := nodeids[fk]; !ok {
 					ids = append(ids, fk)
 				}
@@ -244,7 +260,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 			}
 			for _, n := range neighbors {
 				{{- $fk := $e.ForeignKey }}
-				fk := n.{{ $fk.StructField }}
+				{{- if and $.Scope.InSubPackage (eq (pascal $fk.StructField) $fk.StructField) }}
+					fk := n.{{ $fk.StructField }}
+				{{- else if eq (pascal $fk.StructField) $fk.StructField }}
+					fk := n.{{ $fk.StructField }}
+				{{- else }}
+					fk := n.Get{{ pascal $fk.StructField }}()
+				{{- end }}
 				{{- if $fk.Field.Nillable }}
 					if fk == nil {
 						return fmt.Errorf(`foreign-key "{{ $fk.Field.Name }}" is nil for node %v`, n.ID)

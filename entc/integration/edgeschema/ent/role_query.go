@@ -24,7 +24,7 @@ import (
 
 // RoleQuery is the builder for querying Role entities.
 type RoleQuery struct {
-	config
+	Config
 	ctx            *QueryContext
 	order          []role.OrderOption
 	inters         []Interceptor
@@ -69,7 +69,7 @@ func (_q *RoleQuery) Order(o ...role.OrderOption) *RoleQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (_q *RoleQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *RoleQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, role.UserTable, role.UserPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -91,7 +91,7 @@ func (_q *RoleQuery) QueryUser() *UserQuery {
 
 // QueryRolesUsers chains the current query on the "roles_users" edge.
 func (_q *RoleQuery) QueryRolesUsers() *RoleUserQuery {
-	query := (&RoleUserClient{config: _q.config}).Query()
+	query := (&RoleUserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (_q *RoleQuery) QueryRolesUsers() *RoleUserQuery {
 			sqlgraph.To(roleuser.Table, roleuser.RoleColumn),
 			sqlgraph.Edge(sqlgraph.O2M, true, role.RolesUsersTable, role.RolesUsersColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -119,7 +119,7 @@ func (_q *RoleQuery) First(ctx context.Context) (*Role, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{role.Label}
+		return nil, &NotFoundError{Label: role.Label}
 	}
 	return nodes[0], nil
 }
@@ -141,7 +141,7 @@ func (_q *RoleQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{role.Label}
+		err = &NotFoundError{Label: role.Label}
 		return
 	}
 	return ids[0], nil
@@ -168,9 +168,9 @@ func (_q *RoleQuery) Only(ctx context.Context) (*Role, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{role.Label}
+		return nil, &NotFoundError{Label: role.Label}
 	default:
-		return nil, &NotSingularError{role.Label}
+		return nil, &NotSingularError{Label: role.Label}
 	}
 }
 
@@ -195,9 +195,9 @@ func (_q *RoleQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{role.Label}
+		err = &NotFoundError{Label: role.Label}
 	default:
-		err = &NotSingularError{role.Label}
+		err = &NotSingularError{Label: role.Label}
 	}
 	return
 }
@@ -298,7 +298,7 @@ func (_q *RoleQuery) Clone() *RoleQuery {
 		return nil
 	}
 	return &RoleQuery{
-		config:         _q.config,
+		Config:         _q.Config,
 		ctx:            _q.ctx.Clone(),
 		order:          append([]role.OrderOption{}, _q.order...),
 		inters:         append([]Interceptor{}, _q.inters...),
@@ -314,7 +314,7 @@ func (_q *RoleQuery) Clone() *RoleQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RoleQuery) WithUser(opts ...func(*UserQuery)) *RoleQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +325,7 @@ func (_q *RoleQuery) WithUser(opts ...func(*UserQuery)) *RoleQuery {
 // WithRolesUsers tells the query-builder to eager-load the nodes that are connected to
 // the "roles_users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RoleQuery) WithRolesUsers(opts ...func(*RoleUserQuery)) *RoleQuery {
-	query := (&RoleUserClient{config: _q.config}).Query()
+	query := (&RoleUserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -394,7 +394,7 @@ func (_q *RoleQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !role.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -417,18 +417,18 @@ func (_q *RoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Role, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Role).scanValues(nil, columns)
+		return (*Role).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Role{config: _q.config}
+		node := &Role{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -549,7 +549,7 @@ func (_q *RoleQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *RoleQuery) querySpec() *sqlgraph.QuerySpec {
@@ -593,7 +593,7 @@ func (_q *RoleQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *RoleQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(role.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -665,7 +665,7 @@ func (_g *RoleGroupBy) sqlScan(ctx context.Context, root *RoleQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -707,7 +707,7 @@ func (_s *RoleSelect) sqlScan(ctx context.Context, root *RoleQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

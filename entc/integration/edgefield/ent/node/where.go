@@ -57,11 +57,6 @@ func IDLTE(id int) predicate.Node {
 	return predicate.Node(sql.FieldLTE(FieldID, id))
 }
 
-// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
-func Value(v int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldValue, v))
-}
-
 // PrevID applies equality check predicate on the "prev_id" field. It's identical to PrevIDEQ.
 func PrevID(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldPrevID, v))

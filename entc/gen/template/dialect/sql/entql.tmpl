@@ -77,10 +77,10 @@ var schemaGraph = func() *sqlgraph.Schema {
 	return graph
 }()
 
-// predicateAdder wraps the addPredicate method.
+// predicateAdder wraps the AddPredicate method.
 // All update, update-one and query builders implement this interface.
 type predicateAdder interface {
-	addPredicate(func(s *sql.Selector))
+	AddPredicate(func(s *sql.Selector))
 }
 
 {{ end }}

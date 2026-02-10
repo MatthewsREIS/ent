@@ -7,7 +7,7 @@ in the LICENSE file in the root directory of this source tree.
 {{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
 
 {{ define "dialect/gremlin/update" }}
-{{ $pkg := $.Scope.Package }}
+{{ $pkg := base $.Config.Package }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation" }}
@@ -36,7 +36,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) ({{- if 
 	if err, ok := isConstantError(res); ok {
 		return {{ $zero }}, err
 	}
-	{{ $mutation }}.done = true
+	{{ $mutation }}.SetDone()
 	{{- if $one }}
 		{{- $r := $.Receiver }}
 		{{ $r }} := &{{ $.Name }}{Config: {{ $receiver }}.Config}
@@ -62,8 +62,8 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		v := g.V(id)
 	{{- /* general update for N vertices */}}
 	{{- else }}
-		v := g.V().HasLabel({{ $.Package }}.Label)
-		for _, p := range {{ $mutation }}.predicates {
+		v := g.V().HasLabel(Label)
+		for _, p := range {{ $mutation }}.MutationPredicates() {
 			p(v)
 		}
 	{{- end }}
@@ -79,22 +79,22 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				{{- if $f.Unique }}
 					constraints = append(constraints, &constraint{
-						pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, value).Count(),
-						test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, value)),
+						pred: g.V().Has(Label, {{ $f.Constant }}, value).Count(),
+						test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(Label, {{ $f.Constant }}, value)),
 					})
 				{{- end }}
-				v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, value)
+				v.Property(dsl.Single, {{ $f.Constant }}, value)
 			}
 			{{- if $f.SupportsMutationAdd }}
 				if value, ok := {{ $mutation }}.Added{{ $f.StructField }}(); ok {
 					{{- if $f.Unique }}
-						addValue := rv.Clone().Union(__.Values({{ $.Package }}.{{ $f.Constant }}), __.Constant(value)).Sum().Next()
+						addValue := rv.Clone().Union(__.Values({{ $f.Constant }}), __.Constant(value)).Sum().Next()
 						constraints = append(constraints, &constraint{
-							pred: g.V().Has({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, addValue).Count(),
-							test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField({{ $.Package }}.Label, {{ $.Package }}.{{ $f.Constant }}, fmt.Sprintf("+= %v", value))),
+							pred: g.V().Has(Label, {{ $f.Constant }}, addValue).Count(),
+							test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(Label, {{ $f.Constant }}, fmt.Sprintf("+= %v", value))),
 						})
 					{{- end }}
-					v.Property(dsl.Single, {{ $.Package }}.{{ $f.Constant }}, __.Union(__.Values({{ $.Package }}.{{ $f.Constant }}), __.Constant(value)).Sum())
+					v.Property(dsl.Single, {{ $f.Constant }}, __.Union(__.Values({{ $f.Constant }}), __.Constant(value)).Sum())
 				}
 			{{- end }}
 		{{- end }}
@@ -105,7 +105,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		{{- range $f := $.MutationFields }}
 			{{- if $f.Optional }}
 				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
-					properties = append(properties, {{ $.Package }}.{{ $f.Constant }})
+					properties = append(properties, {{ $f.Constant }})
 				}
 			{{- end }}
 		{{- end }}
@@ -115,10 +115,14 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- end }}
 	{{- range $e := $.Edges }}
 		{{- $direction := "In" }}
-		{{- $name := printf "%s.%s" $.Package $e.LabelConstant }}
+		{{- $name := $e.LabelConstant }}
 		{{- if $e.IsInverse }}
 			{{- $direction = "Out" }}
-			{{- $name = printf "%s.%s" $e.Type.Package $e.LabelConstant }}
+			{{- if eq $e.Type.Name $.Name }}
+				{{- $name = $e.LabelConstant }}
+			{{- else }}
+				{{- $name = printf "%s.%s" $e.Type.Package $e.LabelConstant }}
+			{{- end }}
 		{{- end }}
 		{{- /* remove edges */}}
 		{{- if $e.Unique }}
@@ -146,16 +150,16 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 			{{- if $e.Bidi }}
 				constraints = append(constraints, &constraint{
 					pred: rv.Clone().Both({{ $name }}).Count(),
-					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge({{ $.Package }}.Label, {{ $name }}, id)),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(Label, {{ $name }}, id)),
 				})
 				constraints = append(constraints, &constraint{
 					pred: g.E().HasLabel({{ $name }}).Where(__.Or(__.InV().HasID(id), __.OutV().HasID(id))).Count(),
-					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge({{ $.Package }}.Label, {{ $name }}, id)),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(Label, {{ $name }}, id)),
 				})
 			{{- else }}
 				constraints = append(constraints, &constraint{
 					pred: g.E().HasLabel({{ $name }}).{{ $direction }}V().HasID(id).Count(),
-					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge({{ $.Package }}.Label, {{ $name }}, id)),
+					test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(Label, {{ $name }}, id)),
 				})
 			{{- end }}
 		{{- end }}

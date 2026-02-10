@@ -24,7 +24,7 @@ import (
 
 // AccountQuery is the builder for querying Account entities.
 type AccountQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []account.OrderOption
 	inters     []Interceptor
@@ -68,7 +68,7 @@ func (_q *AccountQuery) Order(o ...account.OrderOption) *AccountQuery {
 
 // QueryToken chains the current query on the "token" edge.
 func (_q *AccountQuery) QueryToken() *TokenQuery {
-	query := (&TokenClient{config: _q.config}).Query()
+	query := (&TokenClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -82,7 +82,7 @@ func (_q *AccountQuery) QueryToken() *TokenQuery {
 			sqlgraph.To(token.Table, token.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, account.TokenTable, account.TokenColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -96,7 +96,7 @@ func (_q *AccountQuery) First(ctx context.Context) (*Account, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{account.Label}
+		return nil, &NotFoundError{Label: account.Label}
 	}
 	return nodes[0], nil
 }
@@ -118,7 +118,7 @@ func (_q *AccountQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{account.Label}
+		err = &NotFoundError{Label: account.Label}
 		return
 	}
 	return ids[0], nil
@@ -145,9 +145,9 @@ func (_q *AccountQuery) Only(ctx context.Context) (*Account, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{account.Label}
+		return nil, &NotFoundError{Label: account.Label}
 	default:
-		return nil, &NotSingularError{account.Label}
+		return nil, &NotSingularError{Label: account.Label}
 	}
 }
 
@@ -172,9 +172,9 @@ func (_q *AccountQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{account.Label}
+		err = &NotFoundError{Label: account.Label}
 	default:
-		err = &NotSingularError{account.Label}
+		err = &NotSingularError{Label: account.Label}
 	}
 	return
 }
@@ -275,7 +275,7 @@ func (_q *AccountQuery) Clone() *AccountQuery {
 		return nil
 	}
 	return &AccountQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]account.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -290,7 +290,7 @@ func (_q *AccountQuery) Clone() *AccountQuery {
 // WithToken tells the query-builder to eager-load the nodes that are connected to
 // the "token" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *AccountQuery) WithToken(opts ...func(*TokenQuery)) *AccountQuery {
-	query := (&TokenClient{config: _q.config}).Query()
+	query := (&TokenClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -359,7 +359,7 @@ func (_q *AccountQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !account.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -381,18 +381,18 @@ func (_q *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Account).scanValues(nil, columns)
+		return (*Account).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Account{config: _q.config}
+		node := &Account{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -427,7 +427,7 @@ func (_q *AccountQuery) loadToken(ctx context.Context, query *TokenQuery, nodes 
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.account_token
+		fk := n.GetAccountToken()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "account_token" is nil for node %v`, n.ID)
 		}
@@ -446,7 +446,7 @@ func (_q *AccountQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *AccountQuery) querySpec() *sqlgraph.QuerySpec {
@@ -490,7 +490,7 @@ func (_q *AccountQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *AccountQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(account.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -562,7 +562,7 @@ func (_g *AccountGroupBy) sqlScan(ctx context.Context, root *AccountQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -604,7 +604,7 @@ func (_s *AccountSelect) sqlScan(ctx context.Context, root *AccountQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

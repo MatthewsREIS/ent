@@ -22,7 +22,7 @@ import (
 
 // GoodsQuery is the builder for querying Goods entities.
 type GoodsQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []goods.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *GoodsQuery) First(ctx context.Context) (*Goods, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{goods.Label}
+		return nil, &NotFoundError{Label: goods.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *GoodsQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{goods.Label}
+		err = &NotFoundError{Label: goods.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *GoodsQuery) Only(ctx context.Context) (*Goods, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{goods.Label}
+		return nil, &NotFoundError{Label: goods.Label}
 	default:
-		return nil, &NotSingularError{goods.Label}
+		return nil, &NotSingularError{Label: goods.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *GoodsQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{goods.Label}
+		err = &NotFoundError{Label: goods.Label}
 	default:
-		err = &NotSingularError{goods.Label}
+		err = &NotSingularError{Label: goods.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *GoodsQuery) Clone() *GoodsQuery {
 		return nil
 	}
 	return &GoodsQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]goods.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -321,7 +321,7 @@ func (_q *GoodsQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Go
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms GoodsSlice
@@ -329,7 +329,7 @@ func (_q *GoodsQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Go
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -337,7 +337,7 @@ func (_q *GoodsQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Go
 func (_q *GoodsQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -413,7 +413,7 @@ func (_g *GoodsGroupBy) gremlinScan(ctx context.Context, root *GoodsQuery, v any
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -466,7 +466,7 @@ func (_s *GoodsSelect) gremlinScan(ctx context.Context, root *GoodsQuery, v any)
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

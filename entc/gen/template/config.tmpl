@@ -40,4 +40,15 @@ var (
 	var {{ $dep.Option }} = internal.{{ $dep.Option }}
 {{- end }}
 
+{{- /* Support adding config options from both global or dialect-specific templates. */}}
+{{- /* This includes SchemaConfig, AlternateSchema, DefaultSchemaConfig (via dialect/sql/config/options/*) */}}
+{{- /* and any user-defined config options (via config/options/*). */}}
+{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
+	{{- with $tmpls := matchTemplate (print $prefix "config/options/*") }}
+		{{- range $tmpl := $tmpls }}
+			{{ xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
 {{ end }}

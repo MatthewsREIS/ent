@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/migrate/entv2/internal"
 )
 
 const (
@@ -167,8 +168,8 @@ var (
 	DefaultDropOptional func() string
 )
 
-// MixedEnum defines the type for the "mixed_enum" enum field.
-type MixedEnum string
+// MixedEnum is an alias for the enum type defined in the internal package.
+type MixedEnum = internal.UserMixedEnum
 
 // MixedEnumOn is the default value of the MixedEnum enum.
 const DefaultMixedEnum = MixedEnumOn
@@ -178,10 +179,6 @@ const (
 	MixedEnumOn  MixedEnum = "on"
 	MixedEnumOff MixedEnum = "off"
 )
-
-func (me MixedEnum) String() string {
-	return string(me)
-}
 
 // MixedEnumValidator is a validator for the "mixed_enum" field enum values. It is called by the builders before save.
 func MixedEnumValidator(me MixedEnum) error {
@@ -193,8 +190,8 @@ func MixedEnumValidator(me MixedEnum) error {
 	}
 }
 
-// State defines the type for the "state" enum field.
-type State string
+// State is an alias for the enum type defined in the internal package.
+type State = internal.UserState
 
 // StateLoggedIn is the default value of the State enum.
 const DefaultState = StateLoggedIn
@@ -206,10 +203,6 @@ const (
 	StateOnline    State = "online"
 )
 
-func (s State) String() string {
-	return string(s)
-}
-
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
 	switch s {
@@ -220,18 +213,14 @@ func StateValidator(s State) error {
 	}
 }
 
-// Status defines the type for the "status" enum field.
-type Status string
+// Status is an alias for the enum type defined in the internal package.
+type Status = internal.UserStatus
 
 // Status values.
 const (
 	StatusDone    Status = "done"
 	StatusPending Status = "pending"
 )
-
-func (s Status) String() string {
-	return string(s)
-}
 
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {

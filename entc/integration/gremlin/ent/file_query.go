@@ -24,7 +24,7 @@ import (
 
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []file.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *FileQuery) Order(o ...file.OrderOption) *FileQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (_q *FileQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (_q *FileQuery) QueryOwner() *UserQuery {
 
 // QueryType chains the current query on the "type" edge.
 func (_q *FileQuery) QueryType() *FileTypeQuery {
-	query := (&FileTypeClient{config: _q.config}).Query()
+	query := (&FileTypeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -98,7 +98,7 @@ func (_q *FileQuery) QueryType() *FileTypeQuery {
 
 // QueryField chains the current query on the "field" edge.
 func (_q *FileQuery) QueryField() *FieldTypeQuery {
-	query := (&FieldTypeClient{config: _q.config}).Query()
+	query := (&FieldTypeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -118,7 +118,7 @@ func (_q *FileQuery) First(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{file.Label}
+		return nil, &NotFoundError{Label: file.Label}
 	}
 	return nodes[0], nil
 }
@@ -140,7 +140,7 @@ func (_q *FileQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{file.Label}
+		err = &NotFoundError{Label: file.Label}
 		return
 	}
 	return ids[0], nil
@@ -167,9 +167,9 @@ func (_q *FileQuery) Only(ctx context.Context) (*File, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{file.Label}
+		return nil, &NotFoundError{Label: file.Label}
 	default:
-		return nil, &NotSingularError{file.Label}
+		return nil, &NotSingularError{Label: file.Label}
 	}
 }
 
@@ -194,9 +194,9 @@ func (_q *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{file.Label}
+		err = &NotFoundError{Label: file.Label}
 	default:
-		err = &NotSingularError{file.Label}
+		err = &NotSingularError{Label: file.Label}
 	}
 	return
 }
@@ -297,7 +297,7 @@ func (_q *FileQuery) Clone() *FileQuery {
 		return nil
 	}
 	return &FileQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]file.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -314,7 +314,7 @@ func (_q *FileQuery) Clone() *FileQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +325,7 @@ func (_q *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
 // WithType tells the query-builder to eager-load the nodes that are connected to
 // the "type" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
-	query := (&FileTypeClient{config: _q.config}).Query()
+	query := (&FileTypeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -336,7 +336,7 @@ func (_q *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 // WithField tells the query-builder to eager-load the nodes that are connected to
 // the "field" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
-	query := (&FieldTypeClient{config: _q.config}).Query()
+	query := (&FieldTypeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -426,7 +426,7 @@ func (_q *FileQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Fil
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Files
@@ -434,7 +434,7 @@ func (_q *FileQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Fil
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -442,7 +442,7 @@ func (_q *FileQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Fil
 func (_q *FileQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -518,7 +518,7 @@ func (_g *FileGroupBy) gremlinScan(ctx context.Context, root *FileQuery, v any) 
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -571,7 +571,7 @@ func (_s *FileSelect) gremlinScan(ctx context.Context, root *FileQuery, v any) e
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

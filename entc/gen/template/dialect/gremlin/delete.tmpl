@@ -17,14 +17,14 @@ func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, err
 	if err := {{ $receiver }}.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	{{ $mutation }}.done = true
+	{{ $mutation }}.SetDone()
 	return res.ReadInt()
 }
 
 
 func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel({{ $.Package }}.Label)
-	for _, p := range {{ $mutation }}.predicates {
+	t := g.V().HasLabel(Label)
+	for _, p := range {{ $mutation }}.MutationPredicates() {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

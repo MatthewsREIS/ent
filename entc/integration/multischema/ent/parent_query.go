@@ -23,7 +23,7 @@ import (
 
 // ParentQuery is the builder for querying Parent entities.
 type ParentQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []parent.OrderOption
 	inters     []Interceptor
@@ -69,7 +69,7 @@ func (_q *ParentQuery) Order(o ...parent.OrderOption) *ParentQuery {
 
 // QueryChild chains the current query on the "child" edge.
 func (_q *ParentQuery) QueryChild() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,10 +83,10 @@ func (_q *ParentQuery) QueryChild() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, parent.ChildTable, parent.ChildColumn),
 		)
-		schemaConfig := _q.schemaConfig
+		schemaConfig := _q.Config.SchemaConfig()
 		step.To.Schema = schemaConfig.User
 		step.Edge.Schema = schemaConfig.Parent
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -94,7 +94,7 @@ func (_q *ParentQuery) QueryChild() *UserQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *ParentQuery) QueryParent() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -108,10 +108,10 @@ func (_q *ParentQuery) QueryParent() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, parent.ParentTable, parent.ParentColumn),
 		)
-		schemaConfig := _q.schemaConfig
+		schemaConfig := _q.Config.SchemaConfig()
 		step.To.Schema = schemaConfig.User
 		step.Edge.Schema = schemaConfig.Parent
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -125,7 +125,7 @@ func (_q *ParentQuery) First(ctx context.Context) (*Parent, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{parent.Label}
+		return nil, &NotFoundError{Label: parent.Label}
 	}
 	return nodes[0], nil
 }
@@ -147,7 +147,7 @@ func (_q *ParentQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{parent.Label}
+		err = &NotFoundError{Label: parent.Label}
 		return
 	}
 	return ids[0], nil
@@ -174,9 +174,9 @@ func (_q *ParentQuery) Only(ctx context.Context) (*Parent, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{parent.Label}
+		return nil, &NotFoundError{Label: parent.Label}
 	default:
-		return nil, &NotSingularError{parent.Label}
+		return nil, &NotSingularError{Label: parent.Label}
 	}
 }
 
@@ -201,9 +201,9 @@ func (_q *ParentQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{parent.Label}
+		err = &NotFoundError{Label: parent.Label}
 	default:
-		err = &NotSingularError{parent.Label}
+		err = &NotSingularError{Label: parent.Label}
 	}
 	return
 }
@@ -304,7 +304,7 @@ func (_q *ParentQuery) Clone() *ParentQuery {
 		return nil
 	}
 	return &ParentQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]parent.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -321,7 +321,7 @@ func (_q *ParentQuery) Clone() *ParentQuery {
 // WithChild tells the query-builder to eager-load the nodes that are connected to
 // the "child" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ParentQuery) WithChild(opts ...func(*UserQuery)) *ParentQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -332,7 +332,7 @@ func (_q *ParentQuery) WithChild(opts ...func(*UserQuery)) *ParentQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ParentQuery) WithParent(opts ...func(*UserQuery)) *ParentQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -401,7 +401,7 @@ func (_q *ParentQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !parent.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -424,23 +424,24 @@ func (_q *ParentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Paren
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Parent).scanValues(nil, columns)
+		return (*Parent).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Parent{config: _q.config}
+		node := &Parent{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
-	_spec.Node.Schema = _q.schemaConfig.Parent
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	_spec.Node.Schema = schemaConfig.Parent
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -522,8 +523,9 @@ func (_q *ParentQuery) loadParent(ctx context.Context, query *UserQuery, nodes [
 
 func (_q *ParentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
-	_spec.Node.Schema = _q.schemaConfig.Parent
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	_spec.Node.Schema = schemaConfig.Parent
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
 	}
@@ -531,7 +533,7 @@ func (_q *ParentQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *ParentQuery) querySpec() *sqlgraph.QuerySpec {
@@ -581,7 +583,7 @@ func (_q *ParentQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *ParentQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(parent.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -595,8 +597,9 @@ func (_q *ParentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	t1.Schema(_q.schemaConfig.Parent)
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	t1.Schema(schemaConfig.Parent)
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	selector.WithContext(ctx)
 	for _, m := range _q.modifiers {
 		m(selector)
@@ -665,7 +668,7 @@ func (_g *ParentGroupBy) sqlScan(ctx context.Context, root *ParentQuery, v any) 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -707,7 +710,7 @@ func (_s *ParentSelect) sqlScan(ctx context.Context, root *ParentQuery, v any) e
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

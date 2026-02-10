@@ -22,7 +22,7 @@ import (
 
 // TaskQuery is the builder for querying Task entities.
 type TaskQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []enttask.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *TaskQuery) First(ctx context.Context) (*Task, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{enttask.Label}
+		return nil, &NotFoundError{Label: enttask.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *TaskQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{enttask.Label}
+		err = &NotFoundError{Label: enttask.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *TaskQuery) Only(ctx context.Context) (*Task, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{enttask.Label}
+		return nil, &NotFoundError{Label: enttask.Label}
 	default:
-		return nil, &NotSingularError{enttask.Label}
+		return nil, &NotSingularError{Label: enttask.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *TaskQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{enttask.Label}
+		err = &NotFoundError{Label: enttask.Label}
 	default:
-		err = &NotSingularError{enttask.Label}
+		err = &NotSingularError{Label: enttask.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *TaskQuery) Clone() *TaskQuery {
 		return nil
 	}
 	return &TaskQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]enttask.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -343,7 +343,7 @@ func (_q *TaskQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Tas
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Tasks
@@ -351,7 +351,7 @@ func (_q *TaskQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Tas
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -359,7 +359,7 @@ func (_q *TaskQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Tas
 func (_q *TaskQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -435,7 +435,7 @@ func (_g *TaskGroupBy) gremlinScan(ctx context.Context, root *TaskQuery, v any) 
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -488,7 +488,7 @@ func (_s *TaskSelect) gremlinScan(ctx context.Context, root *TaskQuery, v any) e
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

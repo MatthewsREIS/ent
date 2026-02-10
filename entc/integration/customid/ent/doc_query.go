@@ -23,7 +23,7 @@ import (
 
 // DocQuery is the builder for querying Doc entities.
 type DocQuery struct {
-	config
+	Config
 	ctx          *QueryContext
 	order        []doc.OrderOption
 	inters       []Interceptor
@@ -70,7 +70,7 @@ func (_q *DocQuery) Order(o ...doc.OrderOption) *DocQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *DocQuery) QueryParent() *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := (&DocClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (_q *DocQuery) QueryParent() *DocQuery {
 			sqlgraph.To(doc.Table, doc.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, doc.ParentTable, doc.ParentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -92,7 +92,7 @@ func (_q *DocQuery) QueryParent() *DocQuery {
 
 // QueryChildren chains the current query on the "children" edge.
 func (_q *DocQuery) QueryChildren() *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := (&DocClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -106,7 +106,7 @@ func (_q *DocQuery) QueryChildren() *DocQuery {
 			sqlgraph.To(doc.Table, doc.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, doc.ChildrenTable, doc.ChildrenColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -114,7 +114,7 @@ func (_q *DocQuery) QueryChildren() *DocQuery {
 
 // QueryRelated chains the current query on the "related" edge.
 func (_q *DocQuery) QueryRelated() *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := (&DocClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -128,7 +128,7 @@ func (_q *DocQuery) QueryRelated() *DocQuery {
 			sqlgraph.To(doc.Table, doc.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, doc.RelatedTable, doc.RelatedPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -142,7 +142,7 @@ func (_q *DocQuery) First(ctx context.Context) (*Doc, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{doc.Label}
+		return nil, &NotFoundError{Label: doc.Label}
 	}
 	return nodes[0], nil
 }
@@ -164,7 +164,7 @@ func (_q *DocQuery) FirstID(ctx context.Context) (id schema.DocID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{doc.Label}
+		err = &NotFoundError{Label: doc.Label}
 		return
 	}
 	return ids[0], nil
@@ -191,9 +191,9 @@ func (_q *DocQuery) Only(ctx context.Context) (*Doc, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{doc.Label}
+		return nil, &NotFoundError{Label: doc.Label}
 	default:
-		return nil, &NotSingularError{doc.Label}
+		return nil, &NotSingularError{Label: doc.Label}
 	}
 }
 
@@ -218,9 +218,9 @@ func (_q *DocQuery) OnlyID(ctx context.Context) (id schema.DocID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{doc.Label}
+		err = &NotFoundError{Label: doc.Label}
 	default:
-		err = &NotSingularError{doc.Label}
+		err = &NotSingularError{Label: doc.Label}
 	}
 	return
 }
@@ -321,7 +321,7 @@ func (_q *DocQuery) Clone() *DocQuery {
 		return nil
 	}
 	return &DocQuery{
-		config:       _q.config,
+		Config:       _q.Config,
 		ctx:          _q.ctx.Clone(),
 		order:        append([]doc.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
@@ -338,7 +338,7 @@ func (_q *DocQuery) Clone() *DocQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *DocQuery) WithParent(opts ...func(*DocQuery)) *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := (&DocClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -349,7 +349,7 @@ func (_q *DocQuery) WithParent(opts ...func(*DocQuery)) *DocQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *DocQuery) WithChildren(opts ...func(*DocQuery)) *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := (&DocClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -360,7 +360,7 @@ func (_q *DocQuery) WithChildren(opts ...func(*DocQuery)) *DocQuery {
 // WithRelated tells the query-builder to eager-load the nodes that are connected to
 // the "related" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *DocQuery) WithRelated(opts ...func(*DocQuery)) *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := (&DocClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -429,7 +429,7 @@ func (_q *DocQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !doc.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -460,18 +460,18 @@ func (_q *DocQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Doc, err
 		_spec.Node.Columns = append(_spec.Node.Columns, doc.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Doc).scanValues(nil, columns)
+		return (*Doc).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Doc{config: _q.config}
+		node := &Doc{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -504,10 +504,10 @@ func (_q *DocQuery) loadParent(ctx context.Context, query *DocQuery, nodes []*Do
 	ids := make([]schema.DocID, 0, len(nodes))
 	nodeids := make(map[schema.DocID][]*Doc)
 	for i := range nodes {
-		if nodes[i].doc_children == nil {
+		if nodes[i].GetDocChildren() == nil {
 			continue
 		}
-		fk := *nodes[i].doc_children
+		fk := *nodes[i].GetDocChildren()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -551,7 +551,7 @@ func (_q *DocQuery) loadChildren(ctx context.Context, query *DocQuery, nodes []*
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.doc_children
+		fk := n.GetDocChildren()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "doc_children" is nil for node %v`, n.ID)
 		}
@@ -631,7 +631,7 @@ func (_q *DocQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *DocQuery) querySpec() *sqlgraph.QuerySpec {
@@ -675,7 +675,7 @@ func (_q *DocQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *DocQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(doc.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -747,7 +747,7 @@ func (_g *DocGroupBy) sqlScan(ctx context.Context, root *DocQuery, v any) error 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -789,7 +789,7 @@ func (_s *DocSelect) sqlScan(ctx context.Context, root *DocQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

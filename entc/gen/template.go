@@ -48,22 +48,22 @@ var (
 	// Templates holds the template information for a file that the graph is generating.
 	Templates = []TypeTemplate{
 		{
-			Name:   "internal/model",
-			Cond:   notView,
+			Name: "internal/model",
+			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("internal/%s_model.go", t.PackageDir())
 			},
 		},
 		{
-			Name:   "internal/mutation",
-			Cond:   notView,
+			Name: "internal/mutation",
+			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("internal/%s_mutation.go", t.PackageDir())
 			},
 		},
 		{
-			Name:   "shared",
-			Cond:   notView,
+			Name: "shared",
+			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/shared.go", t.PackageDir())
 			},
@@ -82,16 +82,16 @@ var (
 			SubPackage: true,
 		},
 		{
-			Name:   "update",
-			Cond:   notView,
+			Name: "update",
+			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/update.go", t.PackageDir())
 			},
 			SubPackage: true,
 		},
 		{
-			Name:   "delete",
-			Cond:   notView,
+			Name: "delete",
+			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/delete.go", t.PackageDir())
 			},

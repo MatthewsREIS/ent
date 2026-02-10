@@ -58,8 +58,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		{{- end }}
 	{{- end }}
 	{{- if $.HasOneFieldID }}
-		{{ $mutation }}.{{ $.ID.BuilderField }} = &_node.{{ $.ID.StructField }}
-		{{ $mutation }}.done = true
+		{{ $mutation }}.SetMutationID(&_node.{{ $.ID.StructField }})
+		{{ $mutation }}.SetDone()
 	{{- end }}
 	return _node, nil
 }
@@ -84,7 +84,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	{{- range $f := $.MutationFields }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			{{- if $f.HasValueScanner }}
-				vv, err := {{ $f.ValueFunc }}(value)
+				vv, err := {{ trimPackage $f.ValueFunc $.Package }}(value)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -102,13 +102,32 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			{{- end }}
 			{{- if $e.OwnFK }}
 				{{- $fk := $e.ForeignKey }}
-				_node.{{ $fk.StructField }} = {{ if $fk.Field.NillableValue }}&{{ end }}nodes[0]
+				{{- if $.Scope.InSubPackage }}
+					{{- if eq (pascal $fk.StructField) $fk.StructField }}
+						_node.{{ $fk.StructField }} = {{ if $fk.Field.Nillable }}&{{ end }}nodes[0]
+					{{- end }}
+				{{- else }}
+					_node.Set{{ pascal $fk.StructField }}(nodes[0])
+				{{- end }}
 			{{- end }}
 			_spec.Edges = append(_spec.Edges, edge)
 		}
 	{{- end }}
 	return _node, _spec{{ if $.HasValueScanner }}, nil{{ end }}
 }
+
+{{- if and $.Scope.InSubPackage ($.IsEdgeSchema) ($.HasDefault) }}
+
+// ThroughDefaults returns a CreateSpec with default values applied,
+// for use by sibling packages constructing edge specs for Through edges.
+func ThroughDefaults(c Config) *sqlgraph.CreateSpec {
+	m := New{{ $.MutationName }}(c, OpCreate)
+	b := &{{ $builder }}{Config: c, mutation: m}
+	b.defaults()
+	_, spec{{ if $.HasValueScanner }}, _{{ end }} := b.createSpec()
+	return spec
+}
+{{- end }}
 
 {{- /* Allow adding methods to the create-builder by ent extensions or user templates.*/}}
 {{- with $tmpls := matchTemplate "dialect/sql/create/additional/*" }}
@@ -193,7 +212,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 					return nil, err
 				}
 				{{- if $.HasOneFieldID }}
-					mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
+					mutation.SetMutationID(&nodes[i].{{ $.ID.StructField }})
 					{{- if or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther }}
 						{{- /* Do nothing, because these 4 types must be supplied by the user. */ -}}
 					{{- else if or $.ID.Type.ValueScanner }}
@@ -209,7 +228,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 						}
 					{{- end }}
 				{{- end }}
-				mutation.done = true
+				mutation.SetDone()
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

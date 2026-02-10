@@ -24,7 +24,7 @@ import (
 
 // TweetTagQuery is the builder for querying TweetTag entities.
 type TweetTagQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []tweettag.OrderOption
 	inters     []Interceptor
@@ -69,7 +69,7 @@ func (_q *TweetTagQuery) Order(o ...tweettag.OrderOption) *TweetTagQuery {
 
 // QueryTag chains the current query on the "tag" edge.
 func (_q *TweetTagQuery) QueryTag() *TagQuery {
-	query := (&TagClient{config: _q.config}).Query()
+	query := (&TagClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *TweetTagQuery) QueryTag() *TagQuery {
 			sqlgraph.To(tag.Table, tag.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, tweettag.TagTable, tweettag.TagColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -91,7 +91,7 @@ func (_q *TweetTagQuery) QueryTag() *TagQuery {
 
 // QueryTweet chains the current query on the "tweet" edge.
 func (_q *TweetTagQuery) QueryTweet() *TweetQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (_q *TweetTagQuery) QueryTweet() *TweetQuery {
 			sqlgraph.To(tweet.Table, tweet.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, tweettag.TweetTable, tweettag.TweetColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -119,7 +119,7 @@ func (_q *TweetTagQuery) First(ctx context.Context) (*TweetTag, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{tweettag.Label}
+		return nil, &NotFoundError{Label: tweettag.Label}
 	}
 	return nodes[0], nil
 }
@@ -141,7 +141,7 @@ func (_q *TweetTagQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) 
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{tweettag.Label}
+		err = &NotFoundError{Label: tweettag.Label}
 		return
 	}
 	return ids[0], nil
@@ -168,9 +168,9 @@ func (_q *TweetTagQuery) Only(ctx context.Context) (*TweetTag, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{tweettag.Label}
+		return nil, &NotFoundError{Label: tweettag.Label}
 	default:
-		return nil, &NotSingularError{tweettag.Label}
+		return nil, &NotSingularError{Label: tweettag.Label}
 	}
 }
 
@@ -195,9 +195,9 @@ func (_q *TweetTagQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{tweettag.Label}
+		err = &NotFoundError{Label: tweettag.Label}
 	default:
-		err = &NotSingularError{tweettag.Label}
+		err = &NotSingularError{Label: tweettag.Label}
 	}
 	return
 }
@@ -298,7 +298,7 @@ func (_q *TweetTagQuery) Clone() *TweetTagQuery {
 		return nil
 	}
 	return &TweetTagQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]tweettag.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -314,7 +314,7 @@ func (_q *TweetTagQuery) Clone() *TweetTagQuery {
 // WithTag tells the query-builder to eager-load the nodes that are connected to
 // the "tag" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetTagQuery) WithTag(opts ...func(*TagQuery)) *TweetTagQuery {
-	query := (&TagClient{config: _q.config}).Query()
+	query := (&TagClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +325,7 @@ func (_q *TweetTagQuery) WithTag(opts ...func(*TagQuery)) *TweetTagQuery {
 // WithTweet tells the query-builder to eager-load the nodes that are connected to
 // the "tweet" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetTagQuery) WithTweet(opts ...func(*TweetQuery)) *TweetTagQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -394,7 +394,7 @@ func (_q *TweetTagQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !tweettag.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -417,18 +417,18 @@ func (_q *TweetTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Twe
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*TweetTag).scanValues(nil, columns)
+		return (*TweetTag).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &TweetTag{config: _q.config}
+		node := &TweetTag{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -514,7 +514,7 @@ func (_q *TweetTagQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *TweetTagQuery) querySpec() *sqlgraph.QuerySpec {
@@ -564,7 +564,7 @@ func (_q *TweetTagQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *TweetTagQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(tweettag.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -636,7 +636,7 @@ func (_g *TweetTagGroupBy) sqlScan(ctx context.Context, root *TweetTagQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -678,7 +678,7 @@ func (_s *TweetTagSelect) sqlScan(ctx context.Context, root *TweetTagQuery, v an
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

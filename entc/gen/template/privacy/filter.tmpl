@@ -58,7 +58,7 @@ func mutationFilter(m {{ $pkg }}.Mutation) (Filter, error) {
 	switch m := m.(type) {
 	{{- range $n := $.MutableNodes }}
 		case *{{ $pkg }}.{{ $n.MutationName }}:
-			return m.Filter(), nil
+			return {{ $pkg }}.New{{ $n.FilterName }}ForMutation(m), nil
 	{{- end }}
 	default:
 		return nil, Denyf("{{ $pkg }}/privacy: unexpected mutation type %T for mutation filter", m)

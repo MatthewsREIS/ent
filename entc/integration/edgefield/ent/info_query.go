@@ -22,7 +22,7 @@ import (
 
 // InfoQuery is the builder for querying Info entities.
 type InfoQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []info.OrderOption
 	inters     []Interceptor
@@ -66,7 +66,7 @@ func (_q *InfoQuery) Order(o ...info.OrderOption) *InfoQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (_q *InfoQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -80,7 +80,7 @@ func (_q *InfoQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, info.UserTable, info.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -94,7 +94,7 @@ func (_q *InfoQuery) First(ctx context.Context) (*Info, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{info.Label}
+		return nil, &NotFoundError{Label: info.Label}
 	}
 	return nodes[0], nil
 }
@@ -116,7 +116,7 @@ func (_q *InfoQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{info.Label}
+		err = &NotFoundError{Label: info.Label}
 		return
 	}
 	return ids[0], nil
@@ -143,9 +143,9 @@ func (_q *InfoQuery) Only(ctx context.Context) (*Info, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{info.Label}
+		return nil, &NotFoundError{Label: info.Label}
 	default:
-		return nil, &NotSingularError{info.Label}
+		return nil, &NotSingularError{Label: info.Label}
 	}
 }
 
@@ -170,9 +170,9 @@ func (_q *InfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{info.Label}
+		err = &NotFoundError{Label: info.Label}
 	default:
-		err = &NotSingularError{info.Label}
+		err = &NotSingularError{Label: info.Label}
 	}
 	return
 }
@@ -273,7 +273,7 @@ func (_q *InfoQuery) Clone() *InfoQuery {
 		return nil
 	}
 	return &InfoQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]info.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -288,7 +288,7 @@ func (_q *InfoQuery) Clone() *InfoQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *InfoQuery) WithUser(opts ...func(*UserQuery)) *InfoQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -357,7 +357,7 @@ func (_q *InfoQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !info.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -379,18 +379,18 @@ func (_q *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Info).scanValues(nil, columns)
+		return (*Info).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Info{config: _q.config}
+		node := &Info{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -441,7 +441,7 @@ func (_q *InfoQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *InfoQuery) querySpec() *sqlgraph.QuerySpec {
@@ -485,7 +485,7 @@ func (_q *InfoQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *InfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(info.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -557,7 +557,7 @@ func (_g *InfoGroupBy) sqlScan(ctx context.Context, root *InfoQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -599,7 +599,7 @@ func (_s *InfoSelect) sqlScan(ctx context.Context, root *InfoQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

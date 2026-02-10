@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/privacy/ent/internal"
 )
 
 const (
@@ -95,8 +96,8 @@ var (
 	TitleValidator func(string) error
 )
 
-// Status defines the type for the "status" enum field.
-type Status string
+// Status is an alias for the enum type defined in the internal package.
+type Status = internal.TaskStatus
 
 // StatusPlanned is the default value of the Status enum.
 const DefaultStatus = StatusPlanned
@@ -107,10 +108,6 @@ const (
 	StatusInProgress Status = "in_progress"
 	StatusClosed     Status = "closed"
 )
-
-func (s Status) String() string {
-	return string(s)
-}
 
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {

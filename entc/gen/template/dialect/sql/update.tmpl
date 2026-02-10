@@ -82,7 +82,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			}
 		{{- end }}
 	{{- end }}
-	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
+	if ps := {{ $mutation }}.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -93,7 +93,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- if $f.HasValueScanner }}
-						vv, err := {{ $f.ValueFunc }}(value)
+						vv, err := {{ trimPackage $f.ValueFunc $.Package }}(value)
 						if err != nil {
 							return {{ $zero }}, err
 						}
@@ -105,7 +105,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 				{{- if $f.SupportsMutationAdd }}
 					if value, ok := {{ $mutation }}.{{ $f.MutationAdded }}(); ok {
 						{{- if $f.HasValueScanner }}
-							vv, err := {{ $f.ValueFunc }}(value)
+							vv, err := {{ trimPackage $f.ValueFunc $.Package }}(value)
 							if err != nil {
 								return {{ $zero }}, err
 							}
@@ -178,7 +178,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		}
 		return {{ $zero }}, err
 	}
-	{{ $mutation }}.done = true
+	{{ $mutation }}.SetDone()
 	return _node, nil
 }
 {{ end }}
@@ -213,10 +213,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 	{{- end }}
 	{{- with $e.Through }}
 		{{- if .HasDefault }}
+			{{- if $.Scope.InSubPackage }}
+			specE := {{ .PackageDir }}.ThroughDefaults({{ $receiver }}.Config)
+			{{- else }}
 			createE := &{{ .CreateName }}{Config: {{ $receiver }}.Config, mutation: new{{ .MutationName }}({{ $receiver }}.Config, OpCreate)}
 			{{- /* Skip error handling here as this check was already handled. */}}
 			{{ if or .NumHooks .NumPolicy }}_ = {{ end }}createE.defaults()
 			_, specE := createE.createSpec()
+			{{- end }}
 			edge.Target.Fields = specE.Fields
 			{{- if and .HasOneFieldID .ID.Default }}
 				if specE.ID.Value != nil {

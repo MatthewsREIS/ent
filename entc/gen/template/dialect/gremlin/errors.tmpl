@@ -10,12 +10,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/gremlin/errors" }}
 {{ $pkg := base $.Config.Package }}
 
-// Code implements the dsl.Node interface.
-func (e ConstraintError) Code() (string, []any) {
-	return strconv.Quote(e.prefix() + e.Msg), nil
+type gremlinConstraintError struct {
+	Msg string
 }
 
-func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
+func (e *gremlinConstraintError) UnmarshalGraphson(b []byte) error {
 	var v [1]*string
 	if err := graphson.Unmarshal(b, &v); err != nil {
 		return err
@@ -23,15 +22,12 @@ func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
 	if v[0] == nil {
 		return fmt.Errorf("{{ $pkg }}: missing string value")
 	}
-	if !strings.HasPrefix(*v[0], e.prefix()) {
+	if !strings.HasPrefix(*v[0], "Error: ") {
 		return fmt.Errorf("{{ $pkg }}: invalid string for error: %s", *v[0])
 	}
-	e.Msg = strings.TrimPrefix(*v[0], e.prefix())
+	e.Msg = strings.TrimPrefix(*v[0], "Error: ")
 	return nil
 }
-
-// prefix returns the prefix used for gremlin constants.
-func (ConstraintError) prefix() string { return "Error: " }
 
 // NewErrUniqueField creates a constraint error for unique fields.
 func NewErrUniqueField(label, field string, v any) *ConstraintError {
@@ -45,10 +41,10 @@ func NewErrUniqueEdge(label, edge, id string) *ConstraintError {
 
 // isConstantError indicates if the given response holds a gremlin constant containing an error.
 func isConstantError(r *gremlin.Response) (*ConstraintError, bool) {
-	e := &ConstraintError{}
+	e := &gremlinConstraintError{}
 	if err := graphson.Unmarshal(r.Result.Data, e); err != nil {
 		return nil, false
 	}
-	return e, true
+	return &ConstraintError{Msg: e.Msg}, true
 }
 {{ end }}

@@ -15,8 +15,8 @@ import (
 	"entgo.io/ent/entql"
 )
 
-// addPredicate implements the predicateAdder interface.
-func (_q *TeamQuery) addPredicate(pred func(s *sql.Selector)) {
+// AddPredicate implements the predicateAdder interface.
+func (_q *TeamQuery) AddPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)
 }
 
@@ -25,13 +25,8 @@ func (_q *TeamQuery) Filter() *TeamFilter {
 	return &TeamFilter{Config: _q.Config, predicateAdder: _q}
 }
 
-// addPredicate implements the predicateAdder interface.
-func (m *TeamMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
-}
-
-// Filter returns an entql.Where implementation to apply filters on the TeamMutation builder.
-func (m *TeamMutation) Filter() *TeamFilter {
+// NewTeamFilterForMutation creates a new TeamFilter for the given mutation.
+func NewTeamFilterForMutation(m *TeamMutation) *TeamFilter {
 	return &TeamFilter{Config: m.Config, predicateAdder: m}
 }
 
@@ -43,7 +38,7 @@ type TeamFilter struct {
 
 // Where applies the entql predicate on the query filter.
 func (f *TeamFilter) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
+	f.AddPredicate(func(s *sql.Selector) {
 		if err := schemaGraph.EvalP("Team", p, s); err != nil {
 			s.AddError(err)
 		}

@@ -23,7 +23,7 @@ import (
 
 // UserGroupQuery is the builder for querying UserGroup entities.
 type UserGroupQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []usergroup.OrderOption
 	inters     []Interceptor
@@ -68,7 +68,7 @@ func (_q *UserGroupQuery) Order(o ...usergroup.OrderOption) *UserGroupQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (_q *UserGroupQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -82,7 +82,7 @@ func (_q *UserGroupQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, usergroup.UserTable, usergroup.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -90,7 +90,7 @@ func (_q *UserGroupQuery) QueryUser() *UserQuery {
 
 // QueryGroup chains the current query on the "group" edge.
 func (_q *UserGroupQuery) QueryGroup() *GroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -104,7 +104,7 @@ func (_q *UserGroupQuery) QueryGroup() *GroupQuery {
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, usergroup.GroupTable, usergroup.GroupColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -118,7 +118,7 @@ func (_q *UserGroupQuery) First(ctx context.Context) (*UserGroup, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{usergroup.Label}
+		return nil, &NotFoundError{Label: usergroup.Label}
 	}
 	return nodes[0], nil
 }
@@ -140,7 +140,7 @@ func (_q *UserGroupQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{usergroup.Label}
+		err = &NotFoundError{Label: usergroup.Label}
 		return
 	}
 	return ids[0], nil
@@ -167,9 +167,9 @@ func (_q *UserGroupQuery) Only(ctx context.Context) (*UserGroup, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{usergroup.Label}
+		return nil, &NotFoundError{Label: usergroup.Label}
 	default:
-		return nil, &NotSingularError{usergroup.Label}
+		return nil, &NotSingularError{Label: usergroup.Label}
 	}
 }
 
@@ -194,9 +194,9 @@ func (_q *UserGroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{usergroup.Label}
+		err = &NotFoundError{Label: usergroup.Label}
 	default:
-		err = &NotSingularError{usergroup.Label}
+		err = &NotSingularError{Label: usergroup.Label}
 	}
 	return
 }
@@ -297,7 +297,7 @@ func (_q *UserGroupQuery) Clone() *UserGroupQuery {
 		return nil
 	}
 	return &UserGroupQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]usergroup.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -313,7 +313,7 @@ func (_q *UserGroupQuery) Clone() *UserGroupQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserGroupQuery) WithUser(opts ...func(*UserQuery)) *UserGroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -324,7 +324,7 @@ func (_q *UserGroupQuery) WithUser(opts ...func(*UserQuery)) *UserGroupQuery {
 // WithGroup tells the query-builder to eager-load the nodes that are connected to
 // the "group" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserGroupQuery) WithGroup(opts ...func(*GroupQuery)) *UserGroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -393,7 +393,7 @@ func (_q *UserGroupQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !usergroup.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -416,18 +416,18 @@ func (_q *UserGroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Us
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*UserGroup).scanValues(nil, columns)
+		return (*UserGroup).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &UserGroup{config: _q.config}
+		node := &UserGroup{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -513,7 +513,7 @@ func (_q *UserGroupQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *UserGroupQuery) querySpec() *sqlgraph.QuerySpec {
@@ -563,7 +563,7 @@ func (_q *UserGroupQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *UserGroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(usergroup.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -635,7 +635,7 @@ func (_g *UserGroupGroupBy) sqlScan(ctx context.Context, root *UserGroupQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -677,7 +677,7 @@ func (_s *UserGroupSelect) sqlScan(ctx context.Context, root *UserGroupQuery, v 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -22,7 +22,7 @@ import (
 
 // PCQuery is the builder for querying PC entities.
 type PCQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []pc.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *PCQuery) First(ctx context.Context) (*PC, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{pc.Label}
+		return nil, &NotFoundError{Label: pc.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *PCQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{pc.Label}
+		err = &NotFoundError{Label: pc.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *PCQuery) Only(ctx context.Context) (*PC, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{pc.Label}
+		return nil, &NotFoundError{Label: pc.Label}
 	default:
-		return nil, &NotSingularError{pc.Label}
+		return nil, &NotSingularError{Label: pc.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *PCQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{pc.Label}
+		err = &NotFoundError{Label: pc.Label}
 	default:
-		err = &NotSingularError{pc.Label}
+		err = &NotSingularError{Label: pc.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *PCQuery) Clone() *PCQuery {
 		return nil
 	}
 	return &PCQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]pc.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -321,7 +321,7 @@ func (_q *PCQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*PC, e
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms PCs
@@ -329,7 +329,7 @@ func (_q *PCQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*PC, e
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -337,7 +337,7 @@ func (_q *PCQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*PC, e
 func (_q *PCQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -413,7 +413,7 @@ func (_g *PCGroupBy) gremlinScan(ctx context.Context, root *PCQuery, v any) erro
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -466,7 +466,7 @@ func (_s *PCSelect) gremlinScan(ctx context.Context, root *PCQuery, v any) error
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

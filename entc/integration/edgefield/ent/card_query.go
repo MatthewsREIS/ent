@@ -22,7 +22,7 @@ import (
 
 // CardQuery is the builder for querying Card entities.
 type CardQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []card.OrderOption
 	inters     []Interceptor
@@ -66,7 +66,7 @@ func (_q *CardQuery) Order(o ...card.OrderOption) *CardQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (_q *CardQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -80,7 +80,7 @@ func (_q *CardQuery) QueryOwner() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, card.OwnerTable, card.OwnerColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -94,7 +94,7 @@ func (_q *CardQuery) First(ctx context.Context) (*Card, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{card.Label}
+		return nil, &NotFoundError{Label: card.Label}
 	}
 	return nodes[0], nil
 }
@@ -116,7 +116,7 @@ func (_q *CardQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{card.Label}
+		err = &NotFoundError{Label: card.Label}
 		return
 	}
 	return ids[0], nil
@@ -143,9 +143,9 @@ func (_q *CardQuery) Only(ctx context.Context) (*Card, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{card.Label}
+		return nil, &NotFoundError{Label: card.Label}
 	default:
-		return nil, &NotSingularError{card.Label}
+		return nil, &NotSingularError{Label: card.Label}
 	}
 }
 
@@ -170,9 +170,9 @@ func (_q *CardQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{card.Label}
+		err = &NotFoundError{Label: card.Label}
 	default:
-		err = &NotSingularError{card.Label}
+		err = &NotSingularError{Label: card.Label}
 	}
 	return
 }
@@ -273,7 +273,7 @@ func (_q *CardQuery) Clone() *CardQuery {
 		return nil
 	}
 	return &CardQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]card.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -288,7 +288,7 @@ func (_q *CardQuery) Clone() *CardQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -357,7 +357,7 @@ func (_q *CardQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !card.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -379,18 +379,18 @@ func (_q *CardQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Card, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Card).scanValues(nil, columns)
+		return (*Card).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Card{config: _q.config}
+		node := &Card{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -441,7 +441,7 @@ func (_q *CardQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *CardQuery) querySpec() *sqlgraph.QuerySpec {
@@ -488,7 +488,7 @@ func (_q *CardQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *CardQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(card.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -560,7 +560,7 @@ func (_g *CardGroupBy) sqlScan(ctx context.Context, root *CardQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -602,7 +602,7 @@ func (_s *CardSelect) sqlScan(ctx context.Context, root *CardQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

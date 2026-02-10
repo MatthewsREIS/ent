@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/internal"
 )
 
 const (
@@ -183,8 +184,8 @@ var (
 	DefaultAddress func() string
 )
 
-// Role defines the type for the "role" enum field.
-type Role string
+// Role is an alias for the enum type defined in the internal package.
+type Role = internal.UserRole
 
 // RoleUser is the default value of the Role enum.
 const DefaultRole = RoleUser
@@ -197,10 +198,6 @@ const (
 	RoleTestUser Role = "test user"
 )
 
-func (r Role) String() string {
-	return string(r)
-}
-
 // RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
 func RoleValidator(r Role) error {
 	switch r {
@@ -211,8 +208,8 @@ func RoleValidator(r Role) error {
 	}
 }
 
-// Employment defines the type for the "employment" enum field.
-type Employment string
+// Employment is an alias for the enum type defined in the internal package.
+type Employment = internal.UserEmployment
 
 // EmploymentFullTime is the default value of the Employment enum.
 const DefaultEmployment = EmploymentFullTime
@@ -223,10 +220,6 @@ const (
 	EmploymentPartTime Employment = "Part-Time"
 	EmploymentContract Employment = "Contract"
 )
-
-func (e Employment) String() string {
-	return string(e)
-}
 
 // EmploymentValidator is a validator for the "employment" field enum values. It is called by the builders before save.
 func EmploymentValidator(e Employment) error {
@@ -509,13 +502,13 @@ func newParentStep() *sqlgraph.Step {
 	)
 }
 
-// Ptr returns a new pointer to the enum value.
-func (r Role) Ptr() *Role {
+// PtrRole returns a new pointer to the enum value.
+func PtrRole(r Role) *Role {
 	return &r
 }
 
-// Ptr returns a new pointer to the enum value.
-func (e Employment) Ptr() *Employment {
+// PtrEmployment returns a new pointer to the enum value.
+func PtrEmployment(e Employment) *Employment {
 	return &e
 }
 

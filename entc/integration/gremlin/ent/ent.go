@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"entgo.io/ent"
@@ -19,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/encoding/graphson"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
+	"entgo.io/ent/entc/integration/gremlin/ent/internal"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -183,21 +183,14 @@ func Sum(field string) AggregateFunc {
 	}
 }
 
-// ValidationError returns when validating a field or edge fails.
-type ValidationError struct {
-	Name string // Field or edge name.
-	err  error
-}
-
-// Error implements the error interface.
-func (e *ValidationError) Error() string {
-	return e.err.Error()
-}
-
-// Unwrap implements the errors.Wrapper interface.
-func (e *ValidationError) Unwrap() error {
-	return e.err
-}
+// Error type aliases from internal.
+type (
+	ValidationError  = internal.ValidationError
+	NotFoundError    = internal.NotFoundError
+	NotSingularError = internal.NotSingularError
+	NotLoadedError   = internal.NotLoadedError
+	ConstraintError  = internal.ConstraintError
+)
 
 // IsValidationError returns a boolean indicating whether the error is a validation error.
 func IsValidationError(err error) bool {
@@ -206,16 +199,6 @@ func IsValidationError(err error) bool {
 	}
 	var e *ValidationError
 	return errors.As(err, &e)
-}
-
-// NotFoundError returns when trying to fetch a specific entity and it was not found in the database.
-type NotFoundError struct {
-	label string
-}
-
-// Error implements the error interface.
-func (e *NotFoundError) Error() string {
-	return "ent: " + e.label + " not found"
 }
 
 // IsNotFound returns a boolean indicating whether the error is a not found error.
@@ -235,16 +218,6 @@ func MaskNotFound(err error) error {
 	return err
 }
 
-// NotSingularError returns when trying to fetch a singular entity and more then one was found in the database.
-type NotSingularError struct {
-	label string
-}
-
-// Error implements the error interface.
-func (e *NotSingularError) Error() string {
-	return "ent: " + e.label + " not singular"
-}
-
 // IsNotSingular returns a boolean indicating whether the error is a not singular error.
 func IsNotSingular(err error) bool {
 	if err == nil {
@@ -254,16 +227,6 @@ func IsNotSingular(err error) bool {
 	return errors.As(err, &e)
 }
 
-// NotLoadedError returns when trying to get a node that was not loaded by the query.
-type NotLoadedError struct {
-	edge string
-}
-
-// Error implements the error interface.
-func (e *NotLoadedError) Error() string {
-	return "ent: " + e.edge + " edge was not loaded"
-}
-
 // IsNotLoaded returns a boolean indicating whether the error is a not loaded error.
 func IsNotLoaded(err error) bool {
 	if err == nil {
@@ -271,24 +234,6 @@ func IsNotLoaded(err error) bool {
 	}
 	var e *NotLoadedError
 	return errors.As(err, &e)
-}
-
-// ConstraintError returns when trying to create/update one or more entities and
-// one or more of their constraints failed. For example, violation of edge or
-// field uniqueness.
-type ConstraintError struct {
-	msg  string
-	wrap error
-}
-
-// Error implements the error interface.
-func (e ConstraintError) Error() string {
-	return "ent: constraint failed: " + e.msg
-}
-
-// Unwrap implements the errors.Wrapper interface.
-func (e *ConstraintError) Unwrap() error {
-	return e.wrap
 }
 
 // IsConstraintError returns a boolean indicating whether the error is a constraint failure.
@@ -346,7 +291,7 @@ func (s *selector) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{s.label}
+		err = &NotFoundError{Label: s.label}
 	default:
 		err = fmt.Errorf("ent: Strings returned %d results when one was expected", len(v))
 	}
@@ -393,7 +338,7 @@ func (s *selector) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{s.label}
+		err = &NotFoundError{Label: s.label}
 	default:
 		err = fmt.Errorf("ent: Ints returned %d results when one was expected", len(v))
 	}
@@ -440,7 +385,7 @@ func (s *selector) Float64(ctx context.Context) (_ float64, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{s.label}
+		err = &NotFoundError{Label: s.label}
 	default:
 		err = fmt.Errorf("ent: Float64s returned %d results when one was expected", len(v))
 	}
@@ -487,7 +432,7 @@ func (s *selector) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{s.label}
+		err = &NotFoundError{Label: s.label}
 	default:
 		err = fmt.Errorf("ent: Bools returned %d results when one was expected", len(v))
 	}
@@ -503,38 +448,12 @@ func (s *selector) BoolX(ctx context.Context) bool {
 	return v
 }
 
-// withHooks invokes the builder operation with the given hooks, if any.
-func withHooks[V Value, M any, PM interface {
+// WithHooks invokes the builder operation with the given hooks, if any.
+func WithHooks[V Value, M any, PM interface {
 	*M
 	Mutation
 }](ctx context.Context, exec func(context.Context) (V, error), mutation PM, hooks []Hook) (value V, err error) {
-	if len(hooks) == 0 {
-		return exec(ctx)
-	}
-	var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-		mutationT, ok := any(m).(PM)
-		if !ok {
-			return nil, fmt.Errorf("unexpected mutation type %T", m)
-		}
-		// Set the mutation to the builder.
-		*mutation = *mutationT
-		return exec(ctx)
-	})
-	for i := len(hooks) - 1; i >= 0; i-- {
-		if hooks[i] == nil {
-			return value, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-		}
-		mut = hooks[i](mut)
-	}
-	v, err := mut.Mutate(ctx, mutation)
-	if err != nil {
-		return value, err
-	}
-	nv, ok := v.(V)
-	if !ok {
-		return value, fmt.Errorf("unexpected node type %T returned from %T", v, mutation)
-	}
-	return nv, nil
+	return internal.WithHooks[V, M, PM](ctx, exec, mutation, hooks)
 }
 
 // setContextOp returns a new context with the given QueryContext attached (including its op) in case it does not exist.
@@ -619,12 +538,11 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 	return nil
 }
 
-// Code implements the dsl.Node interface.
-func (e ConstraintError) Code() (string, []any) {
-	return strconv.Quote(e.prefix() + e.msg), nil
+type gremlinConstraintError struct {
+	Msg string
 }
 
-func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
+func (e *gremlinConstraintError) UnmarshalGraphson(b []byte) error {
 	var v [1]*string
 	if err := graphson.Unmarshal(b, &v); err != nil {
 		return err
@@ -632,33 +550,30 @@ func (e *ConstraintError) UnmarshalGraphson(b []byte) error {
 	if v[0] == nil {
 		return fmt.Errorf("ent: missing string value")
 	}
-	if !strings.HasPrefix(*v[0], e.prefix()) {
+	if !strings.HasPrefix(*v[0], "Error: ") {
 		return fmt.Errorf("ent: invalid string for error: %s", *v[0])
 	}
-	e.msg = strings.TrimPrefix(*v[0], e.prefix())
+	e.Msg = strings.TrimPrefix(*v[0], "Error: ")
 	return nil
 }
 
-// prefix returns the prefix used for gremlin constants.
-func (ConstraintError) prefix() string { return "Error: " }
-
 // NewErrUniqueField creates a constraint error for unique fields.
 func NewErrUniqueField(label, field string, v any) *ConstraintError {
-	return &ConstraintError{msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
+	return &ConstraintError{Msg: fmt.Sprintf("field %s.%s with value: %#v", label, field, v)}
 }
 
 // NewErrUniqueEdge creates a constraint error for unique edges.
 func NewErrUniqueEdge(label, edge, id string) *ConstraintError {
-	return &ConstraintError{msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
+	return &ConstraintError{Msg: fmt.Sprintf("edge %s.%s with id: %#v", label, edge, id)}
 }
 
 // isConstantError indicates if the given response holds a gremlin constant containing an error.
 func isConstantError(r *gremlin.Response) (*ConstraintError, bool) {
-	e := &ConstraintError{}
+	e := &gremlinConstraintError{}
 	if err := graphson.Unmarshal(r.Result.Data, e); err != nil {
 		return nil, false
 	}
-	return e, true
+	return &ConstraintError{Msg: e.Msg}, true
 }
 
 // queryHook describes an internal hook for the different gremlinAll methods.

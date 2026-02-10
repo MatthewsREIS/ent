@@ -25,7 +25,7 @@ import (
 
 // TeamQuery is the builder for querying Team entities.
 type TeamQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []team.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *TeamQuery) Order(o ...team.OrderOption) *TeamQuery {
 
 // QueryTasks chains the current query on the "tasks" edge.
 func (_q *TeamQuery) QueryTasks() *TaskQuery {
-	query := (&TaskClient{config: _q.config}).Query()
+	query := (&TaskClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (_q *TeamQuery) QueryTasks() *TaskQuery {
 			sqlgraph.To(task.Table, task.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, team.TasksTable, team.TasksPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -92,7 +92,7 @@ func (_q *TeamQuery) QueryTasks() *TaskQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (_q *TeamQuery) QueryUsers() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -106,7 +106,7 @@ func (_q *TeamQuery) QueryUsers() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, team.UsersTable, team.UsersPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -120,7 +120,7 @@ func (_q *TeamQuery) First(ctx context.Context) (*Team, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{team.Label}
+		return nil, &NotFoundError{Label: team.Label}
 	}
 	return nodes[0], nil
 }
@@ -142,7 +142,7 @@ func (_q *TeamQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{team.Label}
+		err = &NotFoundError{Label: team.Label}
 		return
 	}
 	return ids[0], nil
@@ -169,9 +169,9 @@ func (_q *TeamQuery) Only(ctx context.Context) (*Team, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{team.Label}
+		return nil, &NotFoundError{Label: team.Label}
 	default:
-		return nil, &NotSingularError{team.Label}
+		return nil, &NotSingularError{Label: team.Label}
 	}
 }
 
@@ -196,9 +196,9 @@ func (_q *TeamQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{team.Label}
+		err = &NotFoundError{Label: team.Label}
 	default:
-		err = &NotSingularError{team.Label}
+		err = &NotSingularError{Label: team.Label}
 	}
 	return
 }
@@ -299,7 +299,7 @@ func (_q *TeamQuery) Clone() *TeamQuery {
 		return nil
 	}
 	return &TeamQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]team.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -315,7 +315,7 @@ func (_q *TeamQuery) Clone() *TeamQuery {
 // WithTasks tells the query-builder to eager-load the nodes that are connected to
 // the "tasks" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TeamQuery) WithTasks(opts ...func(*TaskQuery)) *TeamQuery {
-	query := (&TaskClient{config: _q.config}).Query()
+	query := (&TaskClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -326,7 +326,7 @@ func (_q *TeamQuery) WithTasks(opts ...func(*TaskQuery)) *TeamQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TeamQuery) WithUsers(opts ...func(*UserQuery)) *TeamQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -395,7 +395,7 @@ func (_q *TeamQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !team.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -424,18 +424,18 @@ func (_q *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Team).scanValues(nil, columns)
+		return (*Team).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Team{config: _q.config}
+		node := &Team{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -587,7 +587,7 @@ func (_q *TeamQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *TeamQuery) querySpec() *sqlgraph.QuerySpec {
@@ -631,7 +631,7 @@ func (_q *TeamQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *TeamQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(team.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -703,7 +703,7 @@ func (_g *TeamGroupBy) sqlScan(ctx context.Context, root *TeamQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -745,7 +745,7 @@ func (_s *TeamSelect) sqlScan(ctx context.Context, root *TeamQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

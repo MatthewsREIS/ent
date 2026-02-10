@@ -24,7 +24,8 @@ import (
 	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 	{{- range $f := $fields }}
 		{{- $pkg := $f.Type.PkgPath }}
-		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (not (hasPrefix $pkg (printf "%s/" $.Config.Package))) }}
+		{{- $isSchemaPkg := or (hasSuffix $pkg "/schema") (hasPrefix $pkg (printf "%s/schema/" $.Config.Package)) -}}
+		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (or (not (hasPrefix $pkg (printf "%s/" $.Config.Package))) $isSchemaPkg) }}
 			{{- $name := $f.Type.PkgName }}
 			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
 			{{- $seen = set $seen $pkg true }}
@@ -735,6 +736,24 @@ func (m *{{ $mutation }}) ResetEdge(name string) error {
 		}
 	{{- end }}
 	return fmt.Errorf("unknown {{ $n.Name }} edge %s", name)
+}
+
+// Exported accessors for cross-package CUD builders.
+
+{{- if $n.HasOneFieldID }}
+// SetMutationID sets the tracked entity ID after a successful create.
+func (m *{{ $n.MutationName }}) SetMutationID(id *{{ $n.ID.Type }}) { m.{{ $n.ID.BuilderField }} = id }
+{{- end }}
+
+// SetDone marks the mutation as completed.
+func (m *{{ $n.MutationName }}) SetDone() { m.done = true }
+
+// MutationPredicates returns the list of predicates for update/delete mutations.
+func (m *{{ $n.MutationName }}) MutationPredicates() []predicate.{{ $n.Name }} { return m.predicates }
+
+// AddPredicate adds a predicate to the mutation (used by entql filters).
+func (m *{{ $n.MutationName }}) AddPredicate(pred func(s {{ $.Storage.Builder }})) {
+	m.predicates = append(m.predicates, pred)
 }
 
 {{ end }}

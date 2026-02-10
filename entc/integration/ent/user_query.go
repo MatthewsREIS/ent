@@ -27,7 +27,7 @@ import (
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
-	config
+	Config
 	ctx                *QueryContext
 	order              []user.OrderOption
 	inters             []Interceptor
@@ -90,7 +90,7 @@ func (_q *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 
 // QueryCard chains the current query on the "card" edge.
 func (_q *UserQuery) QueryCard() *CardQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -104,7 +104,7 @@ func (_q *UserQuery) QueryCard() *CardQuery {
 			sqlgraph.To(card.Table, card.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -112,7 +112,7 @@ func (_q *UserQuery) QueryCard() *CardQuery {
 
 // QueryPets chains the current query on the "pets" edge.
 func (_q *UserQuery) QueryPets() *PetQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -126,7 +126,7 @@ func (_q *UserQuery) QueryPets() *PetQuery {
 			sqlgraph.To(pet.Table, pet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -134,7 +134,7 @@ func (_q *UserQuery) QueryPets() *PetQuery {
 
 // QueryFiles chains the current query on the "files" edge.
 func (_q *UserQuery) QueryFiles() *FileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -148,7 +148,7 @@ func (_q *UserQuery) QueryFiles() *FileQuery {
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -156,7 +156,7 @@ func (_q *UserQuery) QueryFiles() *FileQuery {
 
 // QueryGroups chains the current query on the "groups" edge.
 func (_q *UserQuery) QueryGroups() *GroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -170,7 +170,7 @@ func (_q *UserQuery) QueryGroups() *GroupQuery {
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.GroupsTable, user.GroupsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -178,7 +178,7 @@ func (_q *UserQuery) QueryGroups() *GroupQuery {
 
 // QueryFriends chains the current query on the "friends" edge.
 func (_q *UserQuery) QueryFriends() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -192,7 +192,7 @@ func (_q *UserQuery) QueryFriends() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -200,7 +200,7 @@ func (_q *UserQuery) QueryFriends() *UserQuery {
 
 // QueryFollowers chains the current query on the "followers" edge.
 func (_q *UserQuery) QueryFollowers() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -214,7 +214,7 @@ func (_q *UserQuery) QueryFollowers() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -222,7 +222,7 @@ func (_q *UserQuery) QueryFollowers() *UserQuery {
 
 // QueryFollowing chains the current query on the "following" edge.
 func (_q *UserQuery) QueryFollowing() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -236,7 +236,7 @@ func (_q *UserQuery) QueryFollowing() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -244,7 +244,7 @@ func (_q *UserQuery) QueryFollowing() *UserQuery {
 
 // QueryTeam chains the current query on the "team" edge.
 func (_q *UserQuery) QueryTeam() *PetQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -258,7 +258,7 @@ func (_q *UserQuery) QueryTeam() *PetQuery {
 			sqlgraph.To(pet.Table, pet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.TeamTable, user.TeamColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -266,7 +266,7 @@ func (_q *UserQuery) QueryTeam() *PetQuery {
 
 // QuerySpouse chains the current query on the "spouse" edge.
 func (_q *UserQuery) QuerySpouse() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -280,7 +280,7 @@ func (_q *UserQuery) QuerySpouse() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -288,7 +288,7 @@ func (_q *UserQuery) QuerySpouse() *UserQuery {
 
 // QueryChildren chains the current query on the "children" edge.
 func (_q *UserQuery) QueryChildren() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -302,7 +302,7 @@ func (_q *UserQuery) QueryChildren() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.ChildrenTable, user.ChildrenColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -310,7 +310,7 @@ func (_q *UserQuery) QueryChildren() *UserQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *UserQuery) QueryParent() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -324,7 +324,7 @@ func (_q *UserQuery) QueryParent() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, user.ParentTable, user.ParentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -338,7 +338,7 @@ func (_q *UserQuery) First(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{Label: user.Label}
 	}
 	return nodes[0], nil
 }
@@ -360,7 +360,7 @@ func (_q *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{Label: user.Label}
 		return
 	}
 	return ids[0], nil
@@ -387,9 +387,9 @@ func (_q *UserQuery) Only(ctx context.Context) (*User, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{Label: user.Label}
 	default:
-		return nil, &NotSingularError{user.Label}
+		return nil, &NotSingularError{Label: user.Label}
 	}
 }
 
@@ -414,9 +414,9 @@ func (_q *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{Label: user.Label}
 	default:
-		err = &NotSingularError{user.Label}
+		err = &NotSingularError{Label: user.Label}
 	}
 	return
 }
@@ -517,7 +517,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        _q.config,
+		Config:        _q.Config,
 		ctx:           _q.ctx.Clone(),
 		order:         append([]user.OrderOption{}, _q.order...),
 		inters:        append([]Interceptor{}, _q.inters...),
@@ -543,7 +543,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -554,7 +554,7 @@ func (_q *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
 // WithPets tells the query-builder to eager-load the nodes that are connected to
 // the "pets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -565,7 +565,7 @@ func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -576,7 +576,7 @@ func (_q *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -587,7 +587,7 @@ func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
 // WithFriends tells the query-builder to eager-load the nodes that are connected to
 // the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -598,7 +598,7 @@ func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
 // WithFollowers tells the query-builder to eager-load the nodes that are connected to
 // the "followers" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -609,7 +609,7 @@ func (_q *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
 // WithFollowing tells the query-builder to eager-load the nodes that are connected to
 // the "following" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -620,7 +620,7 @@ func (_q *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
 // WithTeam tells the query-builder to eager-load the nodes that are connected to
 // the "team" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -631,7 +631,7 @@ func (_q *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
 // WithSpouse tells the query-builder to eager-load the nodes that are connected to
 // the "spouse" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -642,7 +642,7 @@ func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -653,7 +653,7 @@ func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -722,7 +722,7 @@ func (_q *UserQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !user.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -761,13 +761,13 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*User).scanValues(nil, columns)
+		return (*User).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &User{config: _q.config}
+		node := &User{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -775,7 +775,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -785,7 +785,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadCard(ctx, query, nodes, nil,
 			func(n *User, e *Card) {
 				n.Edges.Card = e
-				if !e.Edges.loadedTypes[0] {
+				if !e.Edges.IsLoaded(0) {
 					e.Edges.Owner = n
 				}
 			}); err != nil {
@@ -797,7 +797,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			func(n *User) { n.Edges.Pets = []*Pet{} },
 			func(n *User, e *Pet) {
 				n.Edges.Pets = append(n.Edges.Pets, e)
-				if !e.Edges.loadedTypes[1] {
+				if !e.Edges.IsLoaded(1) {
 					e.Edges.Owner = n
 				}
 			}); err != nil {
@@ -809,7 +809,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			func(n *User) { n.Edges.Files = []*File{} },
 			func(n *User, e *File) {
 				n.Edges.Files = append(n.Edges.Files, e)
-				if !e.Edges.loadedTypes[0] {
+				if !e.Edges.IsLoaded(0) {
 					e.Edges.Owner = n
 				}
 			}); err != nil {
@@ -848,7 +848,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := _q.loadTeam(ctx, query, nodes, nil,
 			func(n *User, e *Pet) {
 				n.Edges.Team = e
-				if !e.Edges.loadedTypes[0] {
+				if !e.Edges.IsLoaded(0) {
 					e.Edges.Team = n
 				}
 			}); err != nil {
@@ -866,7 +866,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			func(n *User) { n.Edges.Children = []*User{} },
 			func(n *User, e *User) {
 				n.Edges.Children = append(n.Edges.Children, e)
-				if !e.Edges.loadedTypes[10] {
+				if !e.Edges.IsLoaded(10) {
 					e.Edges.Parent = n
 				}
 			}); err != nil {
@@ -881,10 +881,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	}
 	for name, query := range _q.withNamedPets {
 		if err := _q.loadPets(ctx, query, nodes,
-			func(n *User) { n.appendNamedPets(name) },
+			func(n *User) { n.AppendNamedPets(name) },
 			func(n *User, e *Pet) {
-				n.appendNamedPets(name, e)
-				if !e.Edges.loadedTypes[1] {
+				n.AppendNamedPets(name, e)
+				if !e.Edges.IsLoaded(1) {
 					e.Edges.Owner = n
 				}
 			}); err != nil {
@@ -893,10 +893,10 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	}
 	for name, query := range _q.withNamedFiles {
 		if err := _q.loadFiles(ctx, query, nodes,
-			func(n *User) { n.appendNamedFiles(name) },
+			func(n *User) { n.AppendNamedFiles(name) },
 			func(n *User, e *File) {
-				n.appendNamedFiles(name, e)
-				if !e.Edges.loadedTypes[0] {
+				n.AppendNamedFiles(name, e)
+				if !e.Edges.IsLoaded(0) {
 					e.Edges.Owner = n
 				}
 			}); err != nil {
@@ -905,38 +905,38 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	}
 	for name, query := range _q.withNamedGroups {
 		if err := _q.loadGroups(ctx, query, nodes,
-			func(n *User) { n.appendNamedGroups(name) },
-			func(n *User, e *Group) { n.appendNamedGroups(name, e) }); err != nil {
+			func(n *User) { n.AppendNamedGroups(name) },
+			func(n *User, e *Group) { n.AppendNamedGroups(name, e) }); err != nil {
 			return nil, err
 		}
 	}
 	for name, query := range _q.withNamedFriends {
 		if err := _q.loadFriends(ctx, query, nodes,
-			func(n *User) { n.appendNamedFriends(name) },
-			func(n *User, e *User) { n.appendNamedFriends(name, e) }); err != nil {
+			func(n *User) { n.AppendNamedFriends(name) },
+			func(n *User, e *User) { n.AppendNamedFriends(name, e) }); err != nil {
 			return nil, err
 		}
 	}
 	for name, query := range _q.withNamedFollowers {
 		if err := _q.loadFollowers(ctx, query, nodes,
-			func(n *User) { n.appendNamedFollowers(name) },
-			func(n *User, e *User) { n.appendNamedFollowers(name, e) }); err != nil {
+			func(n *User) { n.AppendNamedFollowers(name) },
+			func(n *User, e *User) { n.AppendNamedFollowers(name, e) }); err != nil {
 			return nil, err
 		}
 	}
 	for name, query := range _q.withNamedFollowing {
 		if err := _q.loadFollowing(ctx, query, nodes,
-			func(n *User) { n.appendNamedFollowing(name) },
-			func(n *User, e *User) { n.appendNamedFollowing(name, e) }); err != nil {
+			func(n *User) { n.AppendNamedFollowing(name) },
+			func(n *User, e *User) { n.AppendNamedFollowing(name, e) }); err != nil {
 			return nil, err
 		}
 	}
 	for name, query := range _q.withNamedChildren {
 		if err := _q.loadChildren(ctx, query, nodes,
-			func(n *User) { n.appendNamedChildren(name) },
+			func(n *User) { n.AppendNamedChildren(name) },
 			func(n *User, e *User) {
-				n.appendNamedChildren(name, e)
-				if !e.Edges.loadedTypes[10] {
+				n.AppendNamedChildren(name, e)
+				if !e.Edges.IsLoaded(10) {
 					e.Edges.Parent = n
 				}
 			}); err != nil {
@@ -962,7 +962,7 @@ func (_q *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Us
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_card
+		fk := n.GetUserCard()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "user_card" is nil for node %v`, n.ID)
 		}
@@ -993,7 +993,7 @@ func (_q *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_pets
+		fk := n.GetUserPets()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "user_pets" is nil for node %v`, n.ID)
 		}
@@ -1024,7 +1024,7 @@ func (_q *UserQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*U
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_files
+		fk := n.GetUserFiles()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "user_files" is nil for node %v`, n.ID)
 		}
@@ -1296,7 +1296,7 @@ func (_q *UserQuery) loadTeam(ctx context.Context, query *PetQuery, nodes []*Use
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_team
+		fk := n.GetUserTeam()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "user_team" is nil for node %v`, n.ID)
 		}
@@ -1312,10 +1312,10 @@ func (_q *UserQuery) loadSpouse(ctx context.Context, query *UserQuery, nodes []*
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*User)
 	for i := range nodes {
-		if nodes[i].user_spouse == nil {
+		if nodes[i].GetUserSpouse() == nil {
 			continue
 		}
-		fk := *nodes[i].user_spouse
+		fk := *nodes[i].GetUserSpouse()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -1359,7 +1359,7 @@ func (_q *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes [
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_parent
+		fk := n.GetUserParent()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "user_parent" is nil for node %v`, n.ID)
 		}
@@ -1375,10 +1375,10 @@ func (_q *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*User)
 	for i := range nodes {
-		if nodes[i].user_parent == nil {
+		if nodes[i].GetUserParent() == nil {
 			continue
 		}
-		fk := *nodes[i].user_parent
+		fk := *nodes[i].GetUserParent()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -1413,7 +1413,7 @@ func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
@@ -1457,7 +1457,7 @@ func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(user.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -1495,7 +1495,7 @@ func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *UserQuery) ForUpdate(opts ...sql.LockOption) *UserQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -1508,7 +1508,7 @@ func (_q *UserQuery) ForUpdate(opts ...sql.LockOption) *UserQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *UserQuery) ForShare(opts ...sql.LockOption) *UserQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -1526,7 +1526,7 @@ func (_q *UserQuery) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
 // WithNamedPets tells the query-builder to eager-load the nodes that are connected to the "pets"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithNamedPets(name string, opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -1540,7 +1540,7 @@ func (_q *UserQuery) WithNamedPets(name string, opts ...func(*PetQuery)) *UserQu
 // WithNamedFiles tells the query-builder to eager-load the nodes that are connected to the "files"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *UserQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -1554,7 +1554,7 @@ func (_q *UserQuery) WithNamedFiles(name string, opts ...func(*FileQuery)) *User
 // WithNamedGroups tells the query-builder to eager-load the nodes that are connected to the "groups"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithNamedGroups(name string, opts ...func(*GroupQuery)) *UserQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -1568,7 +1568,7 @@ func (_q *UserQuery) WithNamedGroups(name string, opts ...func(*GroupQuery)) *Us
 // WithNamedFriends tells the query-builder to eager-load the nodes that are connected to the "friends"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithNamedFriends(name string, opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -1582,7 +1582,7 @@ func (_q *UserQuery) WithNamedFriends(name string, opts ...func(*UserQuery)) *Us
 // WithNamedFollowers tells the query-builder to eager-load the nodes that are connected to the "followers"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithNamedFollowers(name string, opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -1596,7 +1596,7 @@ func (_q *UserQuery) WithNamedFollowers(name string, opts ...func(*UserQuery)) *
 // WithNamedFollowing tells the query-builder to eager-load the nodes that are connected to the "following"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithNamedFollowing(name string, opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -1610,7 +1610,7 @@ func (_q *UserQuery) WithNamedFollowing(name string, opts ...func(*UserQuery)) *
 // WithNamedChildren tells the query-builder to eager-load the nodes that are connected to the "children"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithNamedChildren(name string, opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -1662,7 +1662,7 @@ func (_g *UserGroupBy) sqlScan(ctx context.Context, root *UserQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -1704,7 +1704,7 @@ func (_s *UserSelect) sqlScan(ctx context.Context, root *UserQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

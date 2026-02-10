@@ -24,7 +24,7 @@ import (
 
 // CardQuery is the builder for querying Card entities.
 type CardQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []card.OrderOption
 	inters     []Interceptor
@@ -69,7 +69,7 @@ func (_q *CardQuery) Order(o ...card.OrderOption) *CardQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (_q *CardQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *CardQuery) QueryOwner() *UserQuery {
 
 // QuerySpec chains the current query on the "spec" edge.
 func (_q *CardQuery) QuerySpec() *SpecQuery {
-	query := (&SpecClient{config: _q.config}).Query()
+	query := (&SpecClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -103,7 +103,7 @@ func (_q *CardQuery) First(ctx context.Context) (*Card, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{card.Label}
+		return nil, &NotFoundError{Label: card.Label}
 	}
 	return nodes[0], nil
 }
@@ -125,7 +125,7 @@ func (_q *CardQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{card.Label}
+		err = &NotFoundError{Label: card.Label}
 		return
 	}
 	return ids[0], nil
@@ -152,9 +152,9 @@ func (_q *CardQuery) Only(ctx context.Context) (*Card, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{card.Label}
+		return nil, &NotFoundError{Label: card.Label}
 	default:
-		return nil, &NotSingularError{card.Label}
+		return nil, &NotSingularError{Label: card.Label}
 	}
 }
 
@@ -179,9 +179,9 @@ func (_q *CardQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{card.Label}
+		err = &NotFoundError{Label: card.Label}
 	default:
-		err = &NotSingularError{card.Label}
+		err = &NotSingularError{Label: card.Label}
 	}
 	return
 }
@@ -282,7 +282,7 @@ func (_q *CardQuery) Clone() *CardQuery {
 		return nil
 	}
 	return &CardQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]card.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -298,7 +298,7 @@ func (_q *CardQuery) Clone() *CardQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -309,7 +309,7 @@ func (_q *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 // WithSpec tells the query-builder to eager-load the nodes that are connected to
 // the "spec" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CardQuery) WithSpec(opts ...func(*SpecQuery)) *CardQuery {
-	query := (&SpecClient{config: _q.config}).Query()
+	query := (&SpecClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -399,7 +399,7 @@ func (_q *CardQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Car
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Cards
@@ -407,7 +407,7 @@ func (_q *CardQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Car
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -415,7 +415,7 @@ func (_q *CardQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Car
 func (_q *CardQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -491,7 +491,7 @@ func (_g *CardGroupBy) gremlinScan(ctx context.Context, root *CardQuery, v any) 
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -544,7 +544,7 @@ func (_s *CardSelect) gremlinScan(ctx context.Context, root *CardQuery, v any) e
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

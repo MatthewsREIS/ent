@@ -22,7 +22,7 @@ import (
 
 // ExValueScanQuery is the builder for querying ExValueScan entities.
 type ExValueScanQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []exvaluescan.OrderOption
 	inters     []Interceptor
@@ -72,7 +72,7 @@ func (_q *ExValueScanQuery) First(ctx context.Context) (*ExValueScan, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{exvaluescan.Label}
+		return nil, &NotFoundError{Label: exvaluescan.Label}
 	}
 	return nodes[0], nil
 }
@@ -94,7 +94,7 @@ func (_q *ExValueScanQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{exvaluescan.Label}
+		err = &NotFoundError{Label: exvaluescan.Label}
 		return
 	}
 	return ids[0], nil
@@ -121,9 +121,9 @@ func (_q *ExValueScanQuery) Only(ctx context.Context) (*ExValueScan, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{exvaluescan.Label}
+		return nil, &NotFoundError{Label: exvaluescan.Label}
 	default:
-		return nil, &NotSingularError{exvaluescan.Label}
+		return nil, &NotSingularError{Label: exvaluescan.Label}
 	}
 }
 
@@ -148,9 +148,9 @@ func (_q *ExValueScanQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{exvaluescan.Label}
+		err = &NotFoundError{Label: exvaluescan.Label}
 	default:
-		err = &NotSingularError{exvaluescan.Label}
+		err = &NotSingularError{Label: exvaluescan.Label}
 	}
 	return
 }
@@ -251,7 +251,7 @@ func (_q *ExValueScanQuery) Clone() *ExValueScanQuery {
 		return nil
 	}
 	return &ExValueScanQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]exvaluescan.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -324,7 +324,7 @@ func (_q *ExValueScanQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !exvaluescan.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -343,12 +343,12 @@ func (_q *ExValueScanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*ExValueScan).scanValues(nil, columns)
+		return (*ExValueScan).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &ExValueScan{config: _q.config}
+		node := &ExValueScan{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -356,7 +356,7 @@ func (_q *ExValueScanQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -374,7 +374,7 @@ func (_q *ExValueScanQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *ExValueScanQuery) querySpec() *sqlgraph.QuerySpec {
@@ -418,7 +418,7 @@ func (_q *ExValueScanQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *ExValueScanQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(exvaluescan.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -456,7 +456,7 @@ func (_q *ExValueScanQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *ExValueScanQuery) ForUpdate(opts ...sql.LockOption) *ExValueScanQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -469,7 +469,7 @@ func (_q *ExValueScanQuery) ForUpdate(opts ...sql.LockOption) *ExValueScanQuery 
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *ExValueScanQuery) ForShare(opts ...sql.LockOption) *ExValueScanQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -525,7 +525,7 @@ func (_g *ExValueScanGroupBy) sqlScan(ctx context.Context, root *ExValueScanQuer
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -567,7 +567,7 @@ func (_s *ExValueScanSelect) sqlScan(ctx context.Context, root *ExValueScanQuery
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

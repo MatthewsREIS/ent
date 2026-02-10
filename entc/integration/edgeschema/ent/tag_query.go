@@ -26,7 +26,7 @@ import (
 
 // TagQuery is the builder for querying Tag entities.
 type TagQuery struct {
-	config
+	Config
 	ctx           *QueryContext
 	order         []tag.OrderOption
 	inters        []Interceptor
@@ -73,7 +73,7 @@ func (_q *TagQuery) Order(o ...tag.OrderOption) *TagQuery {
 
 // QueryTweets chains the current query on the "tweets" edge.
 func (_q *TagQuery) QueryTweets() *TweetQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -87,7 +87,7 @@ func (_q *TagQuery) QueryTweets() *TweetQuery {
 			sqlgraph.To(tweet.Table, tweet.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, tag.TweetsTable, tag.TweetsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -95,7 +95,7 @@ func (_q *TagQuery) QueryTweets() *TweetQuery {
 
 // QueryGroups chains the current query on the "groups" edge.
 func (_q *TagQuery) QueryGroups() *GroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -109,7 +109,7 @@ func (_q *TagQuery) QueryGroups() *GroupQuery {
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, tag.GroupsTable, tag.GroupsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -117,7 +117,7 @@ func (_q *TagQuery) QueryGroups() *GroupQuery {
 
 // QueryTweetTags chains the current query on the "tweet_tags" edge.
 func (_q *TagQuery) QueryTweetTags() *TweetTagQuery {
-	query := (&TweetTagClient{config: _q.config}).Query()
+	query := (&TweetTagClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -131,7 +131,7 @@ func (_q *TagQuery) QueryTweetTags() *TweetTagQuery {
 			sqlgraph.To(tweettag.Table, tweettag.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, tag.TweetTagsTable, tag.TweetTagsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -139,7 +139,7 @@ func (_q *TagQuery) QueryTweetTags() *TweetTagQuery {
 
 // QueryGroupTags chains the current query on the "group_tags" edge.
 func (_q *TagQuery) QueryGroupTags() *GroupTagQuery {
-	query := (&GroupTagClient{config: _q.config}).Query()
+	query := (&GroupTagClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -153,7 +153,7 @@ func (_q *TagQuery) QueryGroupTags() *GroupTagQuery {
 			sqlgraph.To(grouptag.Table, grouptag.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, tag.GroupTagsTable, tag.GroupTagsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -167,7 +167,7 @@ func (_q *TagQuery) First(ctx context.Context) (*Tag, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{tag.Label}
+		return nil, &NotFoundError{Label: tag.Label}
 	}
 	return nodes[0], nil
 }
@@ -189,7 +189,7 @@ func (_q *TagQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{tag.Label}
+		err = &NotFoundError{Label: tag.Label}
 		return
 	}
 	return ids[0], nil
@@ -216,9 +216,9 @@ func (_q *TagQuery) Only(ctx context.Context) (*Tag, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{tag.Label}
+		return nil, &NotFoundError{Label: tag.Label}
 	default:
-		return nil, &NotSingularError{tag.Label}
+		return nil, &NotSingularError{Label: tag.Label}
 	}
 }
 
@@ -243,9 +243,9 @@ func (_q *TagQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{tag.Label}
+		err = &NotFoundError{Label: tag.Label}
 	default:
-		err = &NotSingularError{tag.Label}
+		err = &NotSingularError{Label: tag.Label}
 	}
 	return
 }
@@ -346,7 +346,7 @@ func (_q *TagQuery) Clone() *TagQuery {
 		return nil
 	}
 	return &TagQuery{
-		config:        _q.config,
+		Config:        _q.Config,
 		ctx:           _q.ctx.Clone(),
 		order:         append([]tag.OrderOption{}, _q.order...),
 		inters:        append([]Interceptor{}, _q.inters...),
@@ -364,7 +364,7 @@ func (_q *TagQuery) Clone() *TagQuery {
 // WithTweets tells the query-builder to eager-load the nodes that are connected to
 // the "tweets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TagQuery) WithTweets(opts ...func(*TweetQuery)) *TagQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -375,7 +375,7 @@ func (_q *TagQuery) WithTweets(opts ...func(*TweetQuery)) *TagQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TagQuery) WithGroups(opts ...func(*GroupQuery)) *TagQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -386,7 +386,7 @@ func (_q *TagQuery) WithGroups(opts ...func(*GroupQuery)) *TagQuery {
 // WithTweetTags tells the query-builder to eager-load the nodes that are connected to
 // the "tweet_tags" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TagQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TagQuery {
-	query := (&TweetTagClient{config: _q.config}).Query()
+	query := (&TweetTagClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -397,7 +397,7 @@ func (_q *TagQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TagQuery {
 // WithGroupTags tells the query-builder to eager-load the nodes that are connected to
 // the "group_tags" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TagQuery) WithGroupTags(opts ...func(*GroupTagQuery)) *TagQuery {
-	query := (&GroupTagClient{config: _q.config}).Query()
+	query := (&GroupTagClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -466,7 +466,7 @@ func (_q *TagQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !tag.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -491,18 +491,18 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Tag).scanValues(nil, columns)
+		return (*Tag).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Tag{config: _q.config}
+		node := &Tag{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -728,7 +728,7 @@ func (_q *TagQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *TagQuery) querySpec() *sqlgraph.QuerySpec {
@@ -772,7 +772,7 @@ func (_q *TagQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *TagQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(tag.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -844,7 +844,7 @@ func (_g *TagGroupBy) sqlScan(ctx context.Context, root *TagQuery, v any) error 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -886,7 +886,7 @@ func (_s *TagSelect) sqlScan(ctx context.Context, root *TagQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

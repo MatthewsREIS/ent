@@ -24,7 +24,7 @@ import (
 
 // PostQuery is the builder for querying Post entities.
 type PostQuery struct {
-	config
+	Config
 	ctx          *QueryContext
 	order        []post.OrderOption
 	inters       []Interceptor
@@ -69,7 +69,7 @@ func (_q *PostQuery) Order(o ...post.OrderOption) *PostQuery {
 
 // QueryAuthor chains the current query on the "author" edge.
 func (_q *PostQuery) QueryAuthor() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *PostQuery) QueryAuthor() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, post.AuthorTable, post.AuthorColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -91,7 +91,7 @@ func (_q *PostQuery) QueryAuthor() *UserQuery {
 
 // QueryComments chains the current query on the "comments" edge.
 func (_q *PostQuery) QueryComments() *CommentQuery {
-	query := (&CommentClient{config: _q.config}).Query()
+	query := (&CommentClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (_q *PostQuery) QueryComments() *CommentQuery {
 			sqlgraph.To(comment.Table, comment.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, post.CommentsTable, post.CommentsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -119,7 +119,7 @@ func (_q *PostQuery) First(ctx context.Context) (*Post, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{post.Label}
+		return nil, &NotFoundError{Label: post.Label}
 	}
 	return nodes[0], nil
 }
@@ -141,7 +141,7 @@ func (_q *PostQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{post.Label}
+		err = &NotFoundError{Label: post.Label}
 		return
 	}
 	return ids[0], nil
@@ -168,9 +168,9 @@ func (_q *PostQuery) Only(ctx context.Context) (*Post, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{post.Label}
+		return nil, &NotFoundError{Label: post.Label}
 	default:
-		return nil, &NotSingularError{post.Label}
+		return nil, &NotSingularError{Label: post.Label}
 	}
 }
 
@@ -195,9 +195,9 @@ func (_q *PostQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{post.Label}
+		err = &NotFoundError{Label: post.Label}
 	default:
-		err = &NotSingularError{post.Label}
+		err = &NotSingularError{Label: post.Label}
 	}
 	return
 }
@@ -298,7 +298,7 @@ func (_q *PostQuery) Clone() *PostQuery {
 		return nil
 	}
 	return &PostQuery{
-		config:       _q.config,
+		Config:       _q.Config,
 		ctx:          _q.ctx.Clone(),
 		order:        append([]post.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
@@ -314,7 +314,7 @@ func (_q *PostQuery) Clone() *PostQuery {
 // WithAuthor tells the query-builder to eager-load the nodes that are connected to
 // the "author" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *PostQuery) WithAuthor(opts ...func(*UserQuery)) *PostQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +325,7 @@ func (_q *PostQuery) WithAuthor(opts ...func(*UserQuery)) *PostQuery {
 // WithComments tells the query-builder to eager-load the nodes that are connected to
 // the "comments" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *PostQuery) WithComments(opts ...func(*CommentQuery)) *PostQuery {
-	query := (&CommentClient{config: _q.config}).Query()
+	query := (&CommentClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -394,7 +394,7 @@ func (_q *PostQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !post.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -417,18 +417,18 @@ func (_q *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Post).scanValues(nil, columns)
+		return (*Post).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Post{config: _q.config}
+		node := &Post{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -516,7 +516,7 @@ func (_q *PostQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *PostQuery) querySpec() *sqlgraph.QuerySpec {
@@ -563,7 +563,7 @@ func (_q *PostQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *PostQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(post.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -635,7 +635,7 @@ func (_g *PostGroupBy) sqlScan(ctx context.Context, root *PostQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -677,7 +677,7 @@ func (_s *PostSelect) sqlScan(ctx context.Context, root *PostQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

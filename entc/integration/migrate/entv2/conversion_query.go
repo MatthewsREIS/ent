@@ -21,7 +21,7 @@ import (
 
 // ConversionQuery is the builder for querying Conversion entities.
 type ConversionQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []conversion.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *ConversionQuery) First(ctx context.Context) (*Conversion, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{conversion.Label}
+		return nil, &NotFoundError{Label: conversion.Label}
 	}
 	return nodes[0], nil
 }
@@ -92,7 +92,7 @@ func (_q *ConversionQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{conversion.Label}
+		err = &NotFoundError{Label: conversion.Label}
 		return
 	}
 	return ids[0], nil
@@ -119,9 +119,9 @@ func (_q *ConversionQuery) Only(ctx context.Context) (*Conversion, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{conversion.Label}
+		return nil, &NotFoundError{Label: conversion.Label}
 	default:
-		return nil, &NotSingularError{conversion.Label}
+		return nil, &NotSingularError{Label: conversion.Label}
 	}
 }
 
@@ -146,9 +146,9 @@ func (_q *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{conversion.Label}
+		err = &NotFoundError{Label: conversion.Label}
 	default:
-		err = &NotSingularError{conversion.Label}
+		err = &NotSingularError{Label: conversion.Label}
 	}
 	return
 }
@@ -249,7 +249,7 @@ func (_q *ConversionQuery) Clone() *ConversionQuery {
 		return nil
 	}
 	return &ConversionQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]conversion.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -321,7 +321,7 @@ func (_q *ConversionQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !conversion.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -340,17 +340,17 @@ func (_q *ConversionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*C
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Conversion).scanValues(nil, columns)
+		return (*Conversion).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Conversion{config: _q.config}
+		node := &Conversion{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -365,7 +365,7 @@ func (_q *ConversionQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
@@ -409,7 +409,7 @@ func (_q *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *ConversionQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(conversion.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -481,7 +481,7 @@ func (_g *ConversionGroupBy) sqlScan(ctx context.Context, root *ConversionQuery,
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -523,7 +523,7 @@ func (_s *ConversionSelect) sqlScan(ctx context.Context, root *ConversionQuery, 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

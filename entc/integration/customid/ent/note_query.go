@@ -23,7 +23,7 @@ import (
 
 // NoteQuery is the builder for querying Note entities.
 type NoteQuery struct {
-	config
+	Config
 	ctx          *QueryContext
 	order        []note.OrderOption
 	inters       []Interceptor
@@ -69,7 +69,7 @@ func (_q *NoteQuery) Order(o ...note.OrderOption) *NoteQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *NoteQuery) QueryParent() *NoteQuery {
-	query := (&NoteClient{config: _q.config}).Query()
+	query := (&NoteClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *NoteQuery) QueryParent() *NoteQuery {
 			sqlgraph.To(note.Table, note.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, note.ParentTable, note.ParentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -91,7 +91,7 @@ func (_q *NoteQuery) QueryParent() *NoteQuery {
 
 // QueryChildren chains the current query on the "children" edge.
 func (_q *NoteQuery) QueryChildren() *NoteQuery {
-	query := (&NoteClient{config: _q.config}).Query()
+	query := (&NoteClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (_q *NoteQuery) QueryChildren() *NoteQuery {
 			sqlgraph.To(note.Table, note.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, note.ChildrenTable, note.ChildrenColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -119,7 +119,7 @@ func (_q *NoteQuery) First(ctx context.Context) (*Note, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{note.Label}
+		return nil, &NotFoundError{Label: note.Label}
 	}
 	return nodes[0], nil
 }
@@ -141,7 +141,7 @@ func (_q *NoteQuery) FirstID(ctx context.Context) (id schema.NoteID, err error) 
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{note.Label}
+		err = &NotFoundError{Label: note.Label}
 		return
 	}
 	return ids[0], nil
@@ -168,9 +168,9 @@ func (_q *NoteQuery) Only(ctx context.Context) (*Note, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{note.Label}
+		return nil, &NotFoundError{Label: note.Label}
 	default:
-		return nil, &NotSingularError{note.Label}
+		return nil, &NotSingularError{Label: note.Label}
 	}
 }
 
@@ -195,9 +195,9 @@ func (_q *NoteQuery) OnlyID(ctx context.Context) (id schema.NoteID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{note.Label}
+		err = &NotFoundError{Label: note.Label}
 	default:
-		err = &NotSingularError{note.Label}
+		err = &NotSingularError{Label: note.Label}
 	}
 	return
 }
@@ -298,7 +298,7 @@ func (_q *NoteQuery) Clone() *NoteQuery {
 		return nil
 	}
 	return &NoteQuery{
-		config:       _q.config,
+		Config:       _q.Config,
 		ctx:          _q.ctx.Clone(),
 		order:        append([]note.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
@@ -314,7 +314,7 @@ func (_q *NoteQuery) Clone() *NoteQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *NoteQuery) WithParent(opts ...func(*NoteQuery)) *NoteQuery {
-	query := (&NoteClient{config: _q.config}).Query()
+	query := (&NoteClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +325,7 @@ func (_q *NoteQuery) WithParent(opts ...func(*NoteQuery)) *NoteQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *NoteQuery) WithChildren(opts ...func(*NoteQuery)) *NoteQuery {
-	query := (&NoteClient{config: _q.config}).Query()
+	query := (&NoteClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -394,7 +394,7 @@ func (_q *NoteQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !note.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -424,18 +424,18 @@ func (_q *NoteQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Note, e
 		_spec.Node.Columns = append(_spec.Node.Columns, note.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Note).scanValues(nil, columns)
+		return (*Note).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Note{config: _q.config}
+		node := &Note{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -461,10 +461,10 @@ func (_q *NoteQuery) loadParent(ctx context.Context, query *NoteQuery, nodes []*
 	ids := make([]schema.NoteID, 0, len(nodes))
 	nodeids := make(map[schema.NoteID][]*Note)
 	for i := range nodes {
-		if nodes[i].note_children == nil {
+		if nodes[i].GetNoteChildren() == nil {
 			continue
 		}
-		fk := *nodes[i].note_children
+		fk := *nodes[i].GetNoteChildren()
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -508,7 +508,7 @@ func (_q *NoteQuery) loadChildren(ctx context.Context, query *NoteQuery, nodes [
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.note_children
+		fk := n.GetNoteChildren()
 		if fk == nil {
 			return fmt.Errorf(`foreign-key "note_children" is nil for node %v`, n.ID)
 		}
@@ -527,7 +527,7 @@ func (_q *NoteQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *NoteQuery) querySpec() *sqlgraph.QuerySpec {
@@ -571,7 +571,7 @@ func (_q *NoteQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *NoteQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(note.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -643,7 +643,7 @@ func (_g *NoteGroupBy) sqlScan(ctx context.Context, root *NoteQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -685,7 +685,7 @@ func (_s *NoteSelect) sqlScan(ctx context.Context, root *NoteQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
