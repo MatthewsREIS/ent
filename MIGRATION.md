@@ -106,11 +106,49 @@ ctx = ent.NewTxContext(ctx, tx)
 + &ent.NotFoundError{Label: "user"}
 ```
 
+## Automated Migration Tool (Best-Effort)
+
+The `ent` CLI now includes a best-effort rewrite command for this migration:
+
+```bash
+# Dry-run (default): scans and reports without changing files.
+ent migrate split-api .
+
+# Apply safe rewrites in-place and write a residual report.
+ent migrate split-api --write --report migration-report.md .
+```
+
+What the command rewrites automatically:
+
+- `entity.Update()` -> `client.<Entity>.UpdateOne(entity)`
+- `entity.Unwrap()` -> `client.<Entity>.GetX(ctx, entity.ID)` (only when `client` and `ctx` are discoverable)
+- `entity.QueryX()` -> `client.<Entity>.QueryX(entity)` (only when `client` is discoverable)
+- Edge setters that pass entities:
+  - `.SetOwner(user)` -> `.SetOwnerID(user.ID)`
+  - `.AddPets(p1, p2)` -> `.AddPetIDs(p1.ID, p2.ID)`
+- `NotFoundError{"label"}` -> `NotFoundError{Label: "label"}`
+
+What the command intentionally leaves as residuals for manual follow-up:
+
+- `m.Client()` and `m.Tx()` call sites where context requirements are application-specific
+- query/update/unwrap sites where the needed `client` and/or `ctx` cannot be inferred safely
+- any cases outside the known mechanical patterns above
+
+When `--report` is set, unresolved sites are written to a Markdown report with file, line, pattern, and manual advice.
+
+The tool is designed to be safe and mechanical, not complete. Always run your test/build pipeline after applying changes.
+
 ## Migration Checklist
 
 1. **Regenerate code:** Run `go generate ./ent` to regenerate with the new templates.
 
-2. **Fix compilation errors** using the patterns above. Common search-and-replace patterns:
+2. **Run automated migration:**
+
+   ```bash
+   ent migrate split-api --write --report migration-report.md .
+   ```
+
+3. **Fix residual/manual items** from `migration-report.md` using the patterns above. Common search-and-replace patterns:
 
    | Find | Replace With |
    |------|-------------|
@@ -122,14 +160,38 @@ ctx = ent.NewTxContext(ctx, tx)
    | `m.Client()` | `ent.FromContext(ctx)` |
    | `m.Tx()` | `ent.TxFromContext(ctx)` |
 
-3. **Inject context** in tests and entry points:
+4. **Inject context** in tests and entry points:
 
    ```go
    client := ent.Open(...)
    ctx := ent.NewContext(context.Background(), client)
    ```
 
-4. **Update custom templates** that reference `*config` (lowercase) to use `*Config` (uppercase), since `Config` is now an exported type from `internal/`.
+5. **Update custom templates** that reference `*config` (lowercase) to use `*Config` (uppercase), since `Config` is now an exported type from `internal/`.
+
+6. **Validate the migration:** Run `go test ./...` and your application-specific checks.
+
+## AI-Agent Runbook
+
+If you are using an AI coding agent, use this order:
+
+1. Regenerate ent code:
+
+   ```bash
+   go generate ./ent
+   ```
+
+2. Run the automated migration tool with a residual report:
+
+   ```bash
+   ent migrate split-api --write --report migration-report.md .
+   ```
+
+3. Run the project test/build checks (at minimum `go test ./...`).
+
+4. Read `migration-report.md` and apply only the listed manual rewrites.
+
+5. Re-run tests/build, then do a final grep for known patterns (`.Unwrap(`, `.Client()`, `.Tx()`, `.Query` on entity values) to catch missed call sites.
 
 ## Hooks Requiring Context Injection
 
