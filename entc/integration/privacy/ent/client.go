@@ -13,7 +13,7 @@ import (
 	"log"
 	"reflect"
 
-	"entgo.io/ent"
+	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/privacy/ent/migrate"
 
 	"net/http"
