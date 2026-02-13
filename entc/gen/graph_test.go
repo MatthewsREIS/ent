@@ -753,6 +753,29 @@ func TestGraph_Gen_SplitOffByDefault(t *testing.T) {
 	require.True(os.IsNotExist(err))
 }
 
+func TestQueryTemplateNode(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		out   string
+		ok    bool
+	}{
+		{name: "query file", input: "user_query.go", out: "user", ok: true},
+		{name: "split base file", input: "user_query_base.go", out: "user", ok: true},
+		{name: "legacy split part", input: "user_query_part17.go", out: "user", ok: true},
+		{name: "split typed part is ignored", input: "user_query_user.go", out: "", ok: false},
+		{name: "custom query suffix is ignored", input: "user_query_custom.go", out: "", ok: false},
+		{name: "non-query file", input: "user_update.go", out: "", ok: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out, ok := queryTemplateNode(tt.input)
+			require.Equal(t, tt.ok, ok)
+			require.Equal(t, tt.out, out)
+		})
+	}
+}
+
 func TestGraph_Gen_SplitIncludeTemplateName(t *testing.T) {
 	require := require.New(t)
 	target := filepath.Join(t.TempDir(), "ent")

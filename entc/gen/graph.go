@@ -1169,11 +1169,6 @@ func queryTemplateNode(name string) (string, bool) {
 		if idx > 0 {
 			return name[:idx], true
 		}
-	case strings.Contains(name, "_query_") && strings.HasSuffix(name, ".go"):
-		idx := strings.Index(name, "_query_")
-		if idx > 0 {
-			return name[:idx], true
-		}
 	}
 	return "", false
 }
