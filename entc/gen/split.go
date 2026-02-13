@@ -546,7 +546,9 @@ func positionOffset(fset *token.FileSet, pos token.Pos) int {
 
 func (a assets) cleanupSplit() error {
 	families := make(map[string]map[string]struct{})
+	generated := make(map[string]struct{}, len(a.files))
 	for path, file := range a.files {
+		generated[path] = struct{}{}
 		origin := file.meta.Origin
 		if origin == "" {
 			origin = path
@@ -562,14 +564,14 @@ func (a assets) cleanupSplit() error {
 		keep[path] = struct{}{}
 	}
 	for origin, keep := range families {
-		if err := cleanupSplitFamily(origin, keep); err != nil {
+		if err := cleanupSplitFamily(origin, keep, generated); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func cleanupSplitFamily(origin string, keep map[string]struct{}) error {
+func cleanupSplitFamily(origin string, keep map[string]struct{}, generated map[string]struct{}) error {
 	prefix := strings.TrimSuffix(origin, ".go")
 	patterns := []string{
 		origin,
@@ -589,6 +591,9 @@ func cleanupSplitFamily(origin string, keep map[string]struct{}) error {
 	}
 	for stale := range seen {
 		if _, ok := keep[stale]; ok {
+			continue
+		}
+		if _, ok := generated[stale]; ok {
 			continue
 		}
 		if err := os.Remove(stale); err != nil && !os.IsNotExist(err) {

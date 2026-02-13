@@ -5,6 +5,8 @@
 package gen
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -95,4 +97,39 @@ func TestSplitConfig_shouldSplit(t *testing.T) {
 		Output:   "gql_node.go",
 		Core:     false,
 	}))
+}
+
+func TestAssets_cleanupSplitPreservesOtherGeneratedFiles(t *testing.T) {
+	dir := t.TempDir()
+	origin := filepath.Join(dir, "user.go")
+	base := filepath.Join(dir, "user_base.go")
+	other := filepath.Join(dir, "user_create.go")
+	stale := filepath.Join(dir, "user_stale.go")
+
+	for _, path := range []string{origin, base, other, stale} {
+		require.NoError(t, os.WriteFile(path, []byte("package ent\n"), 0644))
+	}
+
+	a := assets{
+		files: map[string]assetFile{
+			origin: {
+				content: []byte("package ent\n"),
+				meta:    splitAssetMeta{Origin: origin},
+			},
+			base: {
+				content: []byte("package ent\n"),
+				meta:    splitAssetMeta{Origin: origin},
+			},
+			other: {
+				content: []byte("package ent\n"),
+				meta:    splitAssetMeta{Origin: other},
+			},
+		},
+	}
+
+	require.NoError(t, a.cleanupSplit())
+	_, err := os.Stat(other)
+	require.NoError(t, err)
+	_, err = os.Stat(stale)
+	require.True(t, os.IsNotExist(err))
 }
