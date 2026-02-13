@@ -221,8 +221,34 @@ var taskCreateDescriptor = entbuilder.CreateDescriptor[config, Task, *TaskMutati
 		Type:        field.TypeInt,
 		UserDefined: false,
 		AssignGenerated: func(node *Task, value driver.Value) error {
-			id := value.(int64)
-			node.ID = int(id)
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Task.ID type: %T", value)
+			}
 			return nil
 		},
 	},
