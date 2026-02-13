@@ -1165,10 +1165,20 @@ func queryTemplateNode(name string) (string, bool) {
 	case strings.HasSuffix(name, "_query_base.go"):
 		return strings.TrimSuffix(name, "_query_base.go"), true
 	case strings.Contains(name, "_query_part") && strings.HasSuffix(name, ".go"):
-		idx := strings.Index(name, "_query_part")
-		if idx > 0 {
-			return name[:idx], true
+		prefix, part, ok := strings.Cut(name, "_query_part")
+		if !ok || prefix == "" {
+			break
 		}
+		part, ok = strings.CutSuffix(part, ".go")
+		if !ok || part == "" {
+			break
+		}
+		for _, r := range part {
+			if r < '0' || r > '9' {
+				return "", false
+			}
+		}
+		return prefix, true
 	}
 	return "", false
 }

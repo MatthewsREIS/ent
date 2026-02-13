@@ -763,8 +763,12 @@ func TestQueryTemplateNode(t *testing.T) {
 		{name: "query file", input: "user_query.go", out: "user", ok: true},
 		{name: "split base file", input: "user_query_base.go", out: "user", ok: true},
 		{name: "legacy split part", input: "user_query_part17.go", out: "user", ok: true},
+		{name: "legacy split part without numeric suffix is ignored", input: "user_query_part.go", out: "", ok: false},
+		{name: "legacy split part with alpha suffix is ignored", input: "user_query_partx.go", out: "", ok: false},
 		{name: "split typed part is ignored", input: "user_query_user.go", out: "", ok: false},
 		{name: "custom query suffix is ignored", input: "user_query_custom.go", out: "", ok: false},
+		{name: "word containing query part is ignored", input: "user_query_partial.go", out: "", ok: false},
+		{name: "word containing query partner is ignored", input: "user_query_partner.go", out: "", ok: false},
 		{name: "non-query file", input: "user_update.go", out: "", ok: false},
 	}
 	for _, tt := range tests {
