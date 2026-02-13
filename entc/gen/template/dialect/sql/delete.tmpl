@@ -48,6 +48,13 @@ var {{ $descriptor }} = entbuilder.DeleteDescriptor[config, *{{ $.MutationName }
 	},
 }
 
+{{- /* Allow adding methods to the delete-builder by ent extensions or user templates.*/}}
+{{- with $tmpls := matchTemplate "dialect/sql/delete/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+
 func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
 	_spec, err := entbuilder.BuildDeleteSpec({{ $receiver }}.config, {{ $mutation }}, &{{ $descriptor }})
 	if err != nil {

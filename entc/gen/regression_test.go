@@ -106,6 +106,46 @@ func TestUserCreateDescriptorAssignGeneratedInt(t *testing.T) {
 	require.NoErrorf(t, err, "go test output:\n%s", out)
 }
 
+func TestGraph_Gen_SQLModifierDeleteBuilderHasModify(t *testing.T) {
+	mod := writeTempModule(t, "deletemodifierregen")
+	target := filepath.Join(mod, "ent")
+
+	graph, err := NewGraph(&Config{
+		Package:  "deletemodifierregen/ent",
+		Target:   target,
+		Storage:  drivers[0],
+		Features: []Feature{FeatureModifier},
+	}, &load.Schema{
+		Name: "Task",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+	})
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	testFile := filepath.Join(target, "task_delete_modifier_test.go")
+	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
+
+import (
+	"testing"
+
+	"entgo.io/ent/dialect/sql"
+)
+
+func TestTaskDeleteHasModify(t *testing.T) {
+	td := &TaskDelete{}
+	_ = td.Modify(func(*sql.DeleteBuilder) {})
+}
+`), 0644))
+
+	cmd := exec.Command("go", "test", "-mod=mod", "./ent", "-run", "TestTaskDeleteHasModify", "-count=1")
+	cmd.Dir = mod
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	out, err := cmd.CombinedOutput()
+	require.NoErrorf(t, err, "go test output:\n%s", out)
+}
+
 func writeTempModule(t *testing.T, module string) string {
 	t.Helper()
 	mod := t.TempDir()
