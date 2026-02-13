@@ -111,15 +111,17 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
     nodes := make([]*{{ $.Name }}, len({{ $receiver }}.builders))
     mutators := make([]Mutator, len({{ $receiver }}.builders))
     for i := range {{ $receiver }}.builders {
+        if err := entgen.ApplyDefaults({{ $receiver }}.builders[i].mutation, {{ index $.Scope "SpecVar" }}.Fields); err != nil {
+            return nil, err
+        }
+    }
+    for i := range {{ $receiver }}.builders {
         func(i int, root context.Context) {
             curr := {{ $receiver }}.builders[i]
             var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
                 mutation, ok := m.(*{{ $.MutationName }})
                 if !ok {
                     return nil, fmt.Errorf("unexpected mutation type %T", m)
-                }
-                if err := entgen.ApplyDefaults(mutation, {{ index $.Scope "SpecVar" }}.Fields); err != nil {
-                    return nil, err
                 }
                 if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, {{ index $.Scope "SpecVar" }}); err != nil {
                     return nil, err

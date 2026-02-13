@@ -303,10 +303,8 @@ func generate(g *Graph) error {
 	if err := assets.write(); err != nil {
 		return err
 	}
-	if g.Config.Split != nil {
-		if err := assets.cleanupSplit(); err != nil {
-			return err
-		}
+	if err := assets.cleanupSplit(); err != nil {
+		return err
 	}
 	// Cleanup nodes' assets and old template
 	// files that are not needed anymore.
