@@ -623,10 +623,27 @@ func isSplitCleanupCandidate(origin, path string) bool {
 	if !strings.HasPrefix(name, originBase+"_") || !strings.HasSuffix(name, ".go") {
 		return false
 	}
-	if strings.HasSuffix(name, "_base.go") || strings.HasPrefix(strings.TrimSuffix(name, ".go"), originBase+"_part") {
+	if strings.HasSuffix(name, "_base.go") || isLegacySplitPartFile(originBase, name) {
 		return true
 	}
 	return hasSplitFileMarker(path)
+}
+
+func isLegacySplitPartFile(originBase, name string) bool {
+	base, ok := strings.CutSuffix(name, ".go")
+	if !ok {
+		return false
+	}
+	part, ok := strings.CutPrefix(base, originBase+"_part")
+	if !ok || part == "" {
+		return false
+	}
+	for _, r := range part {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func hasSplitFileMarker(path string) bool {

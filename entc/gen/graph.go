@@ -1197,6 +1197,9 @@ func removeSplitFamily(origin string) error {
 			return err
 		}
 		for _, path := range paths {
+			if !isSplitCleanupCandidate(origin, path) {
+				continue
+			}
 			if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
 				return err
 			}

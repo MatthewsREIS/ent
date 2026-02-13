@@ -830,6 +830,45 @@ func TestQueryTemplateNode(t *testing.T) {
 	}
 }
 
+func TestRemoveSplitFamilyPreservesNonGeneratedSiblings(t *testing.T) {
+	require := require.New(t)
+	dir := t.TempDir()
+
+	origin := filepath.Join(dir, "user.go")
+	base := filepath.Join(dir, "user_base.go")
+	legacyPart := filepath.Join(dir, "user_part7.go")
+	customLegacyLike := filepath.Join(dir, "user_partial.go")
+	helper := filepath.Join(dir, "user_helpers.go")
+	generatedTyped := filepath.Join(dir, "user_pet.go")
+	customTyped := filepath.Join(dir, "user_custom.go")
+
+	require.NoError(os.WriteFile(origin, []byte("package ent\n"), 0644))
+	require.NoError(os.WriteFile(base, []byte("package ent\n"), 0644))
+	require.NoError(os.WriteFile(legacyPart, []byte("package ent\n"), 0644))
+	require.NoError(os.WriteFile(customLegacyLike, []byte("package ent\n"), 0644))
+	require.NoError(os.WriteFile(helper, []byte("package ent\n"), 0644))
+	require.NoError(os.WriteFile(generatedTyped, []byte("package ent\n\n"+splitFileMarker+"\n"), 0644))
+	require.NoError(os.WriteFile(customTyped, []byte("package ent\n"), 0644))
+
+	require.NoError(removeSplitFamily(origin))
+
+	_, err := os.Stat(origin)
+	require.True(os.IsNotExist(err))
+	_, err = os.Stat(base)
+	require.True(os.IsNotExist(err))
+	_, err = os.Stat(legacyPart)
+	require.True(os.IsNotExist(err))
+	_, err = os.Stat(generatedTyped)
+	require.True(os.IsNotExist(err))
+
+	_, err = os.Stat(customLegacyLike)
+	require.NoError(err)
+	_, err = os.Stat(helper)
+	require.NoError(err)
+	_, err = os.Stat(customTyped)
+	require.NoError(err)
+}
+
 func TestGraph_Gen_SplitIncludeTemplateName(t *testing.T) {
 	require := require.New(t)
 	target := filepath.Join(t.TempDir(), "ent")

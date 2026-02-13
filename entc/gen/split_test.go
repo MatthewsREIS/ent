@@ -107,6 +107,7 @@ func TestAssets_cleanupSplitPreservesOtherGeneratedFiles(t *testing.T) {
 	helper := filepath.Join(dir, "user_helpers.go")
 	staleSplit := filepath.Join(dir, "user_pet.go")
 	staleLegacy := filepath.Join(dir, "user_part7.go")
+	customLegacyLike := filepath.Join(dir, "user_partial.go")
 
 	require.NoError(t, os.WriteFile(origin, []byte("package ent\n"), 0644))
 	require.NoError(t, os.WriteFile(base, []byte("package ent\n"), 0644))
@@ -114,6 +115,7 @@ func TestAssets_cleanupSplitPreservesOtherGeneratedFiles(t *testing.T) {
 	require.NoError(t, os.WriteFile(helper, []byte("package ent\n"), 0644))
 	require.NoError(t, os.WriteFile(staleSplit, []byte("package ent\n\n"+splitFileMarker+"\n"), 0644))
 	require.NoError(t, os.WriteFile(staleLegacy, []byte("package ent\n"), 0644))
+	require.NoError(t, os.WriteFile(customLegacyLike, []byte("package ent\n"), 0644))
 
 	a := assets{
 		files: map[string]assetFile{
@@ -141,4 +143,6 @@ func TestAssets_cleanupSplitPreservesOtherGeneratedFiles(t *testing.T) {
 	require.True(t, os.IsNotExist(err))
 	_, err = os.Stat(staleLegacy)
 	require.True(t, os.IsNotExist(err))
+	_, err = os.Stat(customLegacyLike)
+	require.NoError(t, err)
 }
