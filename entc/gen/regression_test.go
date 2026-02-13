@@ -179,15 +179,34 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 	userQuery, err := os.ReadFile(filepath.Join(target, "user_query.go"))
 	require.NoError(t, err)
 	require.Contains(t, string(userQuery), "joinT.Schema(_q.schemaConfig.UserGroups)")
+	require.NotContains(t, string(userQuery), "edge.Schema = _q.schemaConfig.UserGroups")
 
 	groupUpdate, err := os.ReadFile(filepath.Join(target, "group_update.go"))
 	require.NoError(t, err)
 	require.Truef(
 		t,
-		strings.Count(string(groupUpdate), "edge.Schema = _u.schemaConfig.UserGroups") >= 3,
+		strings.Count(string(groupUpdate), "edge.Schema = cfg.schemaConfig.UserGroups") >= 3,
 		"expected schema hook to be applied for clear/remove/add edge mutations, got:\n%s",
 		groupUpdate,
 	)
+	require.NotContains(t, string(groupUpdate), "edge.Schema = _u.schemaConfig.UserGroups")
+
+	testFile := filepath.Join(target, "schemaconfig_compile_test.go")
+	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
+
+import "testing"
+
+func TestGeneratedSchemaConfigDescriptorPathsCompile(t *testing.T) {
+	_ = (*UserQuery).WithGroups
+	_ = (*GroupUpdate).ClearUsers
+}
+`), 0644))
+
+	cmd := exec.Command("go", "test", "-mod=mod", "./ent", "-run", "TestGeneratedSchemaConfigDescriptorPathsCompile", "-count=1")
+	cmd.Dir = mod
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	out, err := cmd.CombinedOutput()
+	require.NoErrorf(t, err, "go test output:\n%s", out)
 }
 
 func writeTempModule(t *testing.T, module string) string {

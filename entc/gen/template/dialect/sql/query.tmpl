@@ -114,7 +114,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 		{{- $descriptor := printf "%s%sEdgeLoadDescriptor" $.Package $e.StructField }}
 		var {{ $descriptor }} = entbuilder.EdgeLoadDescriptor[{{ $.Name }}, {{ $e.Type.Name }}, {{ $.ID.Type }}, {{ $e.Type.ID.Type }}]{
 		EdgeSpec: func() *sqlgraph.EdgeSpec {
-			edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 				Rel:          sqlgraph.{{ $e.Rel.Type }},
 				Inverse:      {{ $e.IsInverse }},
 				Table:        {{ $.Package }}.{{ $e.TableConstant }},
@@ -123,15 +123,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 				TargetColumn: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
 				TargetType:   field.{{ $e.Type.ID.Type.ConstName }},
 			})
-			{{- /* Allow mutating the sqlgraph.EdgeSpec by ent extensions or user templates.*/}}
-			{{- with $tmpls := matchTemplate "dialect/sql/defedge/spec/*" }}
-				{{- range $tmpl := $tmpls }}
-					{{- with extend $ "Edge" $e "Ident" "edge" }}
-						{{- xtemplate $tmpl . }}
-					{{- end }}
-				{{- end }}
-			{{- end }}
-			return edge
 		},
 		ExtractNodeID: func(n *{{ $.Name }}) {{ $.ID.Type }} { return n.ID },
 		ExtractEdgeID: func(e *{{ $e.Type.Name }}) {{ $e.Type.ID.Type }} { return e.ID },

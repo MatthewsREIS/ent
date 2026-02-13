@@ -180,7 +180,7 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 		{
 			Clear: func(cfg config, m *TeamMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TasksCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        team.TasksTable,
@@ -188,7 +188,8 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 						Bidi:         false,
 						TargetColumn: task.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -235,7 +236,7 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 		{
 			Clear: func(cfg config, m *TeamMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UsersCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        team.UsersTable,
@@ -243,7 +244,8 @@ var teamUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TeamMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

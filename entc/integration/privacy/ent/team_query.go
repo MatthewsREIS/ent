@@ -460,7 +460,7 @@ func (_q *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 
 var teamTasksEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Team, Task, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+		edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 			Rel:          sqlgraph.M2M,
 			Inverse:      true,
 			Table:        team.TasksTable,
@@ -469,6 +469,7 @@ var teamTasksEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Team, Task, int,
 			TargetColumn: task.FieldID,
 			TargetType:   field.TypeInt,
 		})
+		return edge
 	},
 	ExtractNodeID: func(n *Team) int { return n.ID },
 	ExtractEdgeID: func(e *Task) int { return e.ID },
@@ -483,7 +484,7 @@ var teamTasksEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Team, Task, int,
 }
 var teamUsersEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Team, User, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+		edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 			Rel:          sqlgraph.M2M,
 			Inverse:      true,
 			Table:        team.UsersTable,
@@ -492,6 +493,7 @@ var teamUsersEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Team, User, int,
 			TargetColumn: user.FieldID,
 			TargetType:   field.TypeInt,
 		})
+		return edge
 	},
 	ExtractNodeID: func(n *Team) int { return n.ID },
 	ExtractEdgeID: func(e *User) int { return e.ID },
@@ -530,7 +532,9 @@ func (_q *TeamQuery) loadTasks(ctx context.Context, query *TaskQuery, nodes []*T
 			return withInterceptors[[]*Task](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *TeamQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*Team, init func(*Team), assign func(*Team, *User)) error {
@@ -558,7 +562,9 @@ func (_q *TeamQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*T
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 

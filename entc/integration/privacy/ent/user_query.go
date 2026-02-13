@@ -460,7 +460,7 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 
 var userTeamsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Team, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+		edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 			Rel:          sqlgraph.M2M,
 			Inverse:      false,
 			Table:        user.TeamsTable,
@@ -469,6 +469,7 @@ var userTeamsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Team, int,
 			TargetColumn: team.FieldID,
 			TargetType:   field.TypeInt,
 		})
+		return edge
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *Team) int { return e.ID },
@@ -483,7 +484,7 @@ var userTeamsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Team, int,
 }
 var userTasksEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Task, int, int]{
 	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+		edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 			Rel:          sqlgraph.O2M,
 			Inverse:      false,
 			Table:        user.TasksTable,
@@ -492,6 +493,7 @@ var userTasksEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Task, int,
 			TargetColumn: task.FieldID,
 			TargetType:   field.TypeInt,
 		})
+		return edge
 	},
 	ExtractNodeID: func(n *User) int { return n.ID },
 	ExtractEdgeID: func(e *Task) int { return e.ID },
@@ -525,7 +527,9 @@ func (_q *UserQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*U
 			return withInterceptors[[]*Team](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadTasks(ctx context.Context, query *TaskQuery, nodes []*User, init func(*User), assign func(*User, *Task)) error {
