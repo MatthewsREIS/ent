@@ -257,11 +257,37 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 
 {{ define "dialect/sql/update/descriptor/edge" }}
 {{- $e := $.Scope.Edge -}}
-	{
+		{
 {{- /* Clear entire edge */}}
-		Clear: func(cfg config, m *{{ $.MutationName }}) (*sqlgraph.EdgeSpec, bool, error) {
-			if m.{{ $e.MutationCleared }}() {
-				return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Clear: func(cfg config, m *{{ $.MutationName }}) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.{{ $e.MutationCleared }}() {
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.{{ $e.Rel.Type }},
+						Inverse:      {{ $e.IsInverse }},
+						Table:        {{ $.Package }}.{{ $e.TableConstant }},
+						Columns:      {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}{{ $.Package }}.{{ $e.ColumnConstant }}{{ end }},
+						Bidi:         {{ $e.Bidi }},
+						TargetColumn: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
+						TargetType:   field.{{ $e.Type.ID.Type.ConstName }},
+					})
+					{{- with $tmpls := matchTemplate "dialect/sql/defedge/spec/*" }}
+						{{- range $tmpl := $tmpls }}
+							{{- with extend $ "Ident" "edge" }}
+								{{- xtemplate $tmpl . }}
+							{{- end }}
+						{{- end }}
+					{{- end }}
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+{{- if not $e.Unique }}
+			Remove: func(cfg config, m *{{ $.MutationName }}) ([]*sqlgraph.EdgeSpec, error) {
+			nodes := m.Removed{{ $e.StructField }}IDs()
+			if len(nodes) == 0 || m.{{ $e.MutationCleared }}() {
+				return nil, nil
+			}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 					Rel:          sqlgraph.{{ $e.Rel.Type }},
 					Inverse:      {{ $e.IsInverse }},
 					Table:        {{ $.Package }}.{{ $e.TableConstant }},
@@ -269,48 +295,44 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 					Bidi:         {{ $e.Bidi }},
 					TargetColumn: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
 					TargetType:   field.{{ $e.Type.ID.Type.ConstName }},
-				}), true, nil
-			}
-			return nil, false, nil
-		},
-{{- if not $e.Unique }}
-		Remove: func(cfg config, m *{{ $.MutationName }}) ([]*sqlgraph.EdgeSpec, error) {
-			nodes := m.Removed{{ $e.StructField }}IDs()
-			if len(nodes) == 0 || m.{{ $e.MutationCleared }}() {
-				return nil, nil
-			}
-			edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-				Rel:          sqlgraph.{{ $e.Rel.Type }},
-				Inverse:      {{ $e.IsInverse }},
-				Table:        {{ $.Package }}.{{ $e.TableConstant }},
-				Columns:      {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}{{ $.Package }}.{{ $e.ColumnConstant }}{{ end }},
-				Bidi:         {{ $e.Bidi }},
-				TargetColumn: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
-				TargetType:   field.{{ $e.Type.ID.Type.ConstName }},
-			})
-			for _, id := range nodes {
-				edge.Target.Nodes = append(edge.Target.Nodes, id)
-			}
-			return []*sqlgraph.EdgeSpec{edge}, nil
-		},
+				})
+				{{- with $tmpls := matchTemplate "dialect/sql/defedge/spec/*" }}
+					{{- range $tmpl := $tmpls }}
+						{{- with extend $ "Ident" "edge" }}
+							{{- xtemplate $tmpl . }}
+						{{- end }}
+					{{- end }}
+				{{- end }}
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
 {{- end }}
 		Add: func(cfg config, m *{{ $.MutationName }}) ([]*sqlgraph.EdgeSpec, error) {
 			nodes := m.{{ $e.StructField }}IDs()
 			if len(nodes) == 0 {
 				return nil, nil
 			}
-			edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-				Rel:          sqlgraph.{{ $e.Rel.Type }},
-				Inverse:      {{ $e.IsInverse }},
-				Table:        {{ $.Package }}.{{ $e.TableConstant }},
-				Columns:      {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}{{ $.Package }}.{{ $e.ColumnConstant }}{{ end }},
-				Bidi:         {{ $e.Bidi }},
-				TargetColumn: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
-				TargetType:   field.{{ $e.Type.ID.Type.ConstName }},
-			})
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.{{ $e.Rel.Type }},
+					Inverse:      {{ $e.IsInverse }},
+					Table:        {{ $.Package }}.{{ $e.TableConstant }},
+					Columns:      {{ if $e.M2M }}{{ $.Package }}.{{ $e.PKConstant }}{{ else }}{{ $.Package }}.{{ $e.ColumnConstant }}{{ end }},
+					Bidi:         {{ $e.Bidi }},
+					TargetColumn: {{ $e.Type.Package }}.{{ $e.Type.ID.Constant }},
+					TargetType:   field.{{ $e.Type.ID.Type.ConstName }},
+				})
+				{{- with $tmpls := matchTemplate "dialect/sql/defedge/spec/*" }}
+					{{- range $tmpl := $tmpls }}
+						{{- with extend $ "Ident" "edge" }}
+							{{- xtemplate $tmpl . }}
+						{{- end }}
+					{{- end }}
+				{{- end }}
 {{- with $e.Through }}
-	{{- if .HasDefault }}
-			// Apply through-table defaults for {{ .Name }}
+		{{- if .HasDefault }}
+				// Apply through-table defaults for {{ .Name }}
 			throughMut := new{{ .MutationName }}(cfg, OpCreate)
 			if err := entgen.ApplyDefaults(throughMut, {{ .Package }}CreateSpec.Fields); err != nil {
 				return nil, err

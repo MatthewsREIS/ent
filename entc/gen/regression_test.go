@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 
 	"entgo.io/ent/entc/load"
@@ -144,6 +145,49 @@ func TestTaskDeleteHasModify(t *testing.T) {
 	cmd.Env = append(os.Environ(), "GOWORK=off")
 	out, err := cmd.CombinedOutput()
 	require.NoErrorf(t, err, "go test output:\n%s", out)
+}
+
+func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
+	mod := writeTempModule(t, "schemaconfigregen")
+	target := filepath.Join(mod, "ent")
+
+	graph, err := NewGraph(&Config{
+		Package:  "schemaconfigregen/ent",
+		Target:   target,
+		Storage:  drivers[0],
+		Features: []Feature{FeatureSchemaConfig},
+	}, &load.Schema{
+		Name: "User",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Edges: []*load.Edge{
+			{Name: "groups", Type: "Group"},
+		},
+	}, &load.Schema{
+		Name: "Group",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Edges: []*load.Edge{
+			{Name: "users", Type: "User", RefName: "groups", Inverse: true},
+		},
+	})
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	userQuery, err := os.ReadFile(filepath.Join(target, "user_query.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(userQuery), "joinT.Schema(_q.schemaConfig.UserGroups)")
+
+	groupUpdate, err := os.ReadFile(filepath.Join(target, "group_update.go"))
+	require.NoError(t, err)
+	require.Truef(
+		t,
+		strings.Count(string(groupUpdate), "edge.Schema = _u.schemaConfig.UserGroups") >= 3,
+		"expected schema hook to be applied for clear/remove/add edge mutations, got:\n%s",
+		groupUpdate,
+	)
 }
 
 func writeTempModule(t *testing.T, module string) string {

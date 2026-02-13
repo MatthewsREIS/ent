@@ -70,6 +70,7 @@ func LoadEdgeM2M[N, E any, NID, EID comparable](
 	withInterceptors func(context.Context, any, any, any) (any, error),
 	query any,
 	interceptors any,
+	joinHooks ...func(*sql.SelectTable),
 ) error {
 	if len(nodes) == 0 {
 		return nil
@@ -93,6 +94,14 @@ func LoadEdgeM2M[N, E any, NID, EID comparable](
 	columns := spec.Columns
 	addWhere(func(s *sql.Selector) {
 		joinT := sql.Table(spec.Table)
+		if spec.Schema != "" {
+			joinT.Schema(spec.Schema)
+		}
+		for _, hook := range joinHooks {
+			if hook != nil {
+				hook(joinT)
+			}
+		}
 		s.Join(joinT).On(s.C(spec.Target.IDSpec.Column), joinT.C(columns[pkIndices[1]]))
 		s.Where(sql.InValues(joinT.C(columns[pkIndices[0]]), edgeIDs...))
 		selectedCols := s.SelectedColumns()
