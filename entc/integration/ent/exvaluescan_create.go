@@ -249,7 +249,9 @@ var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueSca
 			exvaluescan.FieldBinary,
 			field.TypeString,
 			(*ExValueScanMutation).Binary,
-			exvaluescan.ValueScanner.Binary.Value,
+			entbuilder.LazyScanner(func() entbuilder.ScannerFunc[*url.URL] {
+				return exvaluescan.ValueScanner.Binary.Value
+			}),
 			func(n *ExValueScan, v *url.URL) { n.Binary = v },
 		),
 
@@ -257,7 +259,9 @@ var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueSca
 			exvaluescan.FieldBinaryBytes,
 			field.TypeBytes,
 			(*ExValueScanMutation).BinaryBytes,
-			exvaluescan.ValueScanner.BinaryBytes.Value,
+			entbuilder.LazyScanner(func() entbuilder.ScannerFunc[*url.URL] {
+				return exvaluescan.ValueScanner.BinaryBytes.Value
+			}),
 			func(n *ExValueScan, v *url.URL) { n.BinaryBytes = v },
 		),
 
@@ -265,7 +269,9 @@ var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueSca
 			exvaluescan.FieldBinaryOptional,
 			field.TypeString,
 			(*ExValueScanMutation).BinaryOptional,
-			exvaluescan.ValueScanner.BinaryOptional.Value,
+			entbuilder.LazyScanner(func() entbuilder.ScannerFunc[*url.URL] {
+				return exvaluescan.ValueScanner.BinaryOptional.Value
+			}),
 			func(n *ExValueScan, v *url.URL) { n.BinaryOptional = v },
 		),
 
@@ -273,7 +279,9 @@ var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueSca
 			exvaluescan.FieldText,
 			field.TypeString,
 			(*ExValueScanMutation).Text,
-			exvaluescan.ValueScanner.Text.Value,
+			entbuilder.LazyScanner(func() entbuilder.ScannerFunc[*big.Int] {
+				return exvaluescan.ValueScanner.Text.Value
+			}),
 			func(n *ExValueScan, v *big.Int) { n.Text = v },
 		),
 
@@ -281,7 +289,9 @@ var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueSca
 			exvaluescan.FieldTextOptional,
 			field.TypeString,
 			(*ExValueScanMutation).TextOptional,
-			exvaluescan.ValueScanner.TextOptional.Value,
+			entbuilder.LazyScanner(func() entbuilder.ScannerFunc[*big.Int] {
+				return exvaluescan.ValueScanner.TextOptional.Value
+			}),
 			func(n *ExValueScan, v *big.Int) { n.TextOptional = v },
 		),
 
@@ -289,7 +299,9 @@ var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueSca
 			exvaluescan.FieldBase64,
 			field.TypeString,
 			(*ExValueScanMutation).Base64,
-			exvaluescan.ValueScanner.Base64.Value,
+			entbuilder.LazyScanner(func() entbuilder.ScannerFunc[string] {
+				return exvaluescan.ValueScanner.Base64.Value
+			}),
 			func(n *ExValueScan, v string) { n.Base64 = v },
 		),
 
@@ -297,7 +309,9 @@ var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueSca
 			exvaluescan.FieldCustom,
 			field.TypeString,
 			(*ExValueScanMutation).Custom,
-			exvaluescan.ValueScanner.Custom.Value,
+			entbuilder.LazyScanner(func() entbuilder.ScannerFunc[string] {
+				return exvaluescan.ValueScanner.Custom.Value
+			}),
 			func(n *ExValueScan, v string) { n.Custom = v },
 		),
 
@@ -305,7 +319,9 @@ var exvaluescanCreateDescriptor = entbuilder.CreateDescriptor[config, ExValueSca
 			exvaluescan.FieldCustomOptional,
 			field.TypeString,
 			(*ExValueScanMutation).CustomOptional,
-			exvaluescan.ValueScanner.CustomOptional.Value,
+			entbuilder.LazyScanner(func() entbuilder.ScannerFunc[string] {
+				return exvaluescan.ValueScanner.CustomOptional.Value
+			}),
 			func(n *ExValueScan, v string) { n.CustomOptional = v },
 		),
 	},

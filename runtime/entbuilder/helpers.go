@@ -7,6 +7,17 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
+// ScannerFunc defines the scanner function signature used by create descriptors.
+type ScannerFunc[T any] func(T) (driver.Value, error)
+
+// LazyScanner defers scanner lookup until execution time.
+// This avoids package init panics when scanner variables are wired in init().
+func LazyScanner[T any](scanner func() ScannerFunc[T]) ScannerFunc[T] {
+	return func(v T) (driver.Value, error) {
+		return scanner()(v)
+	}
+}
+
 // SimpleField creates a FieldDescriptor for non-nillable fields without custom value scanning.
 // This is the most common case and reduces 15 lines of boilerplate to 1 line.
 //

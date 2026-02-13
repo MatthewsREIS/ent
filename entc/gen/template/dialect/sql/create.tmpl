@@ -296,7 +296,9 @@ entbuilder.NillableFieldWithScanner[config, {{ $.Name }}, *{{ $.MutationName }},
 	{{ $.Package }}.{{ $f.Constant }},
 	field.{{ $f.Type.ConstName }},
 	(*{{ $.MutationName }}).{{ $f.MutationGet }},
-	{{ $f.ValueFunc }},
+	entbuilder.LazyScanner(func() entbuilder.ScannerFunc[{{ $f.Type }}] {
+		return {{ $f.ValueFunc }}
+	}),
 	func(n *{{ $.Name }}, v *{{ $f.Type }}) { n.{{ $f.StructField }} = v },
 ),
 {{- else if $f.HasValueScanner }}
@@ -304,7 +306,9 @@ entbuilder.FieldWithScanner[config, {{ $.Name }}, *{{ $.MutationName }}, {{ $f.T
 	{{ $.Package }}.{{ $f.Constant }},
 	field.{{ $f.Type.ConstName }},
 	(*{{ $.MutationName }}).{{ $f.MutationGet }},
-	{{ $f.ValueFunc }},
+	entbuilder.LazyScanner(func() entbuilder.ScannerFunc[{{ $f.Type }}] {
+		return {{ $f.ValueFunc }}
+	}),
 	func(n *{{ $.Name }}, v {{ $f.Type }}) { n.{{ $f.StructField }} = v },
 ),
 {{- else if $f.NillableValue }}
