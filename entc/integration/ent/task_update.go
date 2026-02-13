@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -221,6 +223,121 @@ func (_u *TaskUpdate) check() error {
 	return nil
 }
 
+var enttaskUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TaskMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*TaskMutation]{
+		{
+			Column: enttask.FieldPriority,
+			Type:   field.TypeInt,
+			Set: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.Priority(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedPriority(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: enttask.FieldPriorities,
+			Type:   field.TypeJSON,
+			Set: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.Priorities(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *TaskMutation) bool {
+				return m.PrioritiesCleared()
+			},
+		},
+
+		{
+			Column: enttask.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *TaskMutation) bool {
+				return m.NameCleared()
+			},
+		},
+
+		{
+			Column: enttask.FieldOwner,
+			Type:   field.TypeString,
+			Set: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.Owner(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *TaskMutation) bool {
+				return m.OwnerCleared()
+			},
+		},
+
+		{
+			Column: enttask.FieldOrder,
+			Type:   field.TypeInt,
+			Set: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.Order(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOrder(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *TaskMutation) bool {
+				return m.OrderCleared()
+			},
+		},
+
+		{
+			Column: enttask.FieldOrderOption,
+			Type:   field.TypeInt,
+			Set: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.OrderOption(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedOrderOption(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *TaskMutation) bool {
+				return m.OrderOptionCleared()
+			},
+		},
+
+		{
+			Column: enttask.FieldOp,
+			Type:   field.TypeString,
+			Set: func(m *TaskMutation) (driver.Value, bool, error) {
+				if value, ok := m.GetOp(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *TaskMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *TaskUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TaskUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -239,50 +356,8 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Priority(); ok {
-		_spec.SetField(enttask.FieldPriority, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPriority(); ok {
-		_spec.AddField(enttask.FieldPriority, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.Priorities(); ok {
-		_spec.SetField(enttask.FieldPriorities, field.TypeJSON, value)
-	}
-	if _u.mutation.PrioritiesCleared() {
-		_spec.ClearField(enttask.FieldPriorities, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(enttask.FieldName, field.TypeString, value)
-	}
-	if _u.mutation.NameCleared() {
-		_spec.ClearField(enttask.FieldName, field.TypeString)
-	}
-	if value, ok := _u.mutation.Owner(); ok {
-		_spec.SetField(enttask.FieldOwner, field.TypeString, value)
-	}
-	if _u.mutation.OwnerCleared() {
-		_spec.ClearField(enttask.FieldOwner, field.TypeString)
-	}
-	if value, ok := _u.mutation.Order(); ok {
-		_spec.SetField(enttask.FieldOrder, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedOrder(); ok {
-		_spec.AddField(enttask.FieldOrder, field.TypeInt, value)
-	}
-	if _u.mutation.OrderCleared() {
-		_spec.ClearField(enttask.FieldOrder, field.TypeInt)
-	}
-	if value, ok := _u.mutation.OrderOption(); ok {
-		_spec.SetField(enttask.FieldOrderOption, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedOrderOption(); ok {
-		_spec.AddField(enttask.FieldOrderOption, field.TypeInt, value)
-	}
-	if _u.mutation.OrderOptionCleared() {
-		_spec.ClearField(enttask.FieldOrderOption, field.TypeInt)
-	}
-	if value, ok := _u.mutation.GetOp(); ok {
-		_spec.SetField(enttask.FieldOp, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &enttaskUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -542,50 +617,8 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Priority(); ok {
-		_spec.SetField(enttask.FieldPriority, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedPriority(); ok {
-		_spec.AddField(enttask.FieldPriority, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.Priorities(); ok {
-		_spec.SetField(enttask.FieldPriorities, field.TypeJSON, value)
-	}
-	if _u.mutation.PrioritiesCleared() {
-		_spec.ClearField(enttask.FieldPriorities, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(enttask.FieldName, field.TypeString, value)
-	}
-	if _u.mutation.NameCleared() {
-		_spec.ClearField(enttask.FieldName, field.TypeString)
-	}
-	if value, ok := _u.mutation.Owner(); ok {
-		_spec.SetField(enttask.FieldOwner, field.TypeString, value)
-	}
-	if _u.mutation.OwnerCleared() {
-		_spec.ClearField(enttask.FieldOwner, field.TypeString)
-	}
-	if value, ok := _u.mutation.Order(); ok {
-		_spec.SetField(enttask.FieldOrder, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedOrder(); ok {
-		_spec.AddField(enttask.FieldOrder, field.TypeInt, value)
-	}
-	if _u.mutation.OrderCleared() {
-		_spec.ClearField(enttask.FieldOrder, field.TypeInt)
-	}
-	if value, ok := _u.mutation.OrderOption(); ok {
-		_spec.SetField(enttask.FieldOrderOption, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedOrderOption(); ok {
-		_spec.AddField(enttask.FieldOrderOption, field.TypeInt, value)
-	}
-	if _u.mutation.OrderOptionCleared() {
-		_spec.ClearField(enttask.FieldOrderOption, field.TypeInt)
-	}
-	if value, ok := _u.mutation.GetOp(); ok {
-		_spec.SetField(enttask.FieldOp, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &enttaskUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Task{config: _u.config}

@@ -8,6 +8,7 @@ package entv1
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -83,6 +85,25 @@ func (_u *CustomTypeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var customtypeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CustomTypeMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*CustomTypeMutation]{
+		{
+			Column: customtype.FieldCustom,
+			Type:   field.TypeString,
+			Set: func(m *CustomTypeMutation) (driver.Value, bool, error) {
+				if value, ok := m.Custom(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *CustomTypeMutation) bool {
+				return m.CustomCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *CustomTypeMutation]{},
+}
+
 func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(customtype.Table, customtype.Columns, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -92,11 +113,8 @@ func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Custom(); ok {
-		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
-	}
-	if _u.mutation.CustomCleared() {
-		_spec.ClearField(customtype.FieldCustom, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &customtypeUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -209,11 +227,8 @@ func (_u *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType, 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Custom(); ok {
-		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
-	}
-	if _u.mutation.CustomCleared() {
-		_spec.ClearField(customtype.FieldCustom, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &customtypeUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &CustomType{config: _u.config}
 	_spec.Assign = _node.assignValues

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/license"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // LicenseCreate is the builder for creating a License entity.
@@ -65,7 +66,9 @@ func (_c *LicenseCreate) Mutation() *LicenseMutation {
 
 // Save creates the License in the database.
 func (_c *LicenseCreate) Save(ctx context.Context) (*License, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, licenseCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -91,31 +94,57 @@ func (_c *LicenseCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *LicenseCreate) defaults() {
-	if _, ok := _c.mutation.CreateTime(); !ok {
-		v := license.DefaultCreateTime()
-		_c.mutation.SetCreateTime(v)
-	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
-		v := license.DefaultUpdateTime()
-		_c.mutation.SetUpdateTime(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *LicenseCreate) check() error {
-	if _, ok := _c.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "License.create_time"`)}
-	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "License.update_time"`)}
-	}
-	return nil
+var licenseCreateSpec = entgen.CreateSpec[*LicenseMutation]{
+	Fields: []entgen.FieldSpec[*LicenseMutation]{
+		{
+			Name: "create_time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "License.create_time"`)}
+				},
+			},
+			IsSet: func(m *LicenseMutation) bool {
+				_, ok := m.CreateTime()
+				return ok
+			},
+			Default: func(m *LicenseMutation) error {
+				if _, ok := m.CreateTime(); !ok {
+					v := license.DefaultCreateTime()
+					m.SetCreateTime(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "update_time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "License.update_time"`)}
+				},
+			},
+			IsSet: func(m *LicenseMutation) bool {
+				_, ok := m.UpdateTime()
+				return ok
+			},
+			Default: func(m *LicenseMutation) error {
+				if _, ok := m.UpdateTime(); !ok {
+					v := license.DefaultUpdateTime()
+					m.SetUpdateTime(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "id",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*LicenseMutation]{},
 }
 
 func (_c *LicenseCreate) gremlinSave(ctx context.Context) (*License, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, licenseCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

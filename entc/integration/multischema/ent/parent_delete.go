@@ -8,20 +8,23 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // ParentDelete is the builder for deleting a Parent entity.
 type ParentDelete struct {
 	config
-	hooks    []Hook
-	mutation *ParentMutation
+	hooks     []Hook
+	mutation  *ParentMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the ParentDelete builder.
@@ -44,17 +47,43 @@ func (_d *ParentDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *ParentDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(parent.Table, sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt))
-	_spec.Node.Schema = _d.schemaConfig.Parent
-	ctx = internal.NewSchemaConfigContext(ctx, _d.schemaConfig)
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var parentDeleteDescriptor = entbuilder.DeleteDescriptor[config, *ParentMutation]{
+	Table: parent.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*ParentMutation]{
+		Column: parent.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *ParentMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Schema: func(cfg config, _ *ParentMutation) (string, bool) {
+		return cfg.schemaConfig.Parent, true
+	},
+	Predicates: func(m *ParentMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *ParentDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ParentDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
+func (_d *ParentDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &parentDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	ctx = internal.NewSchemaConfigContext(ctx, _d.schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -17,6 +18,8 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -55,7 +58,9 @@ func (_c *LinkCreate) Mutation() *LinkMutation {
 
 // Save creates the Link in the database.
 func (_c *LinkCreate) Save(ctx context.Context) (*Link, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, linkCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -81,64 +86,112 @@ func (_c *LinkCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *LinkCreate) defaults() {
-	if _, ok := _c.mutation.LinkInformation(); !ok {
-		v := link.DefaultLinkInformation
-		_c.mutation.SetLinkInformation(v)
-	}
-	if _, ok := _c.mutation.ID(); !ok {
-		v := link.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var linkCreateSpec = entgen.CreateSpec[*LinkMutation]{
+	Fields: []entgen.FieldSpec[*LinkMutation]{
+		{
+			Name: "link_information",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "link_information", err: errors.New(`ent: missing required field "Link.link_information"`)}
+				},
+			},
+			IsSet: func(m *LinkMutation) bool {
+				_, ok := m.LinkInformation()
+				return ok
+			},
+			Default: func(m *LinkMutation) error {
+				if _, ok := m.LinkInformation(); !ok {
+					v := link.DefaultLinkInformation
+					m.SetLinkInformation(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "id",
+			Default: func(m *LinkMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := link.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*LinkMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *LinkCreate) check() error {
-	if _, ok := _c.mutation.LinkInformation(); !ok {
-		return &ValidationError{Name: "link_information", err: errors.New(`ent: missing required field "Link.link_information"`)}
-	}
-	return nil
+var linkCreateDescriptor = entbuilder.CreateDescriptor[config, Link, *LinkMutation]{
+	Table: link.Table,
+	NewNode: func(cfg config) *Link {
+		return &Link{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Link, *LinkMutation]{
+		Column:      link.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *LinkMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Link, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(uuidc.UUIDC)
+			return nil
+		},
+		AssignGenerated: func(node *Link, value driver.Value) error {
+			switch v := value.(type) {
+			case *uuidc.UUIDC:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case uuidc.UUIDC:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Link, *LinkMutation]{
+
+		entbuilder.SimpleField[config, Link, *LinkMutation, map[string]schema.LinkInformation](
+			link.FieldLinkInformation,
+			field.TypeJSON,
+			(*LinkMutation).LinkInformation,
+			func(n *Link, v map[string]schema.LinkInformation) { n.LinkInformation = v },
+		),
+	},
 }
 
 func (_c *LinkCreate) sqlSave(ctx context.Context) (*Link, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, linkCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &linkCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuidc.UUIDC); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &linkCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Link{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(link.Table, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.LinkInformation(); ok {
-		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
-		_node.LinkInformation = value
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -319,20 +372,27 @@ func (_c *LinkCreateBulk) Save(ctx context.Context) ([]*Link, error) {
 	nodes := make([]*Link, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, linkCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LinkMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, linkCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &linkCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -344,16 +404,23 @@ func (_c *LinkCreateBulk) Save(ctx context.Context) ([]*Link, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &linkCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -16,6 +17,8 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -70,7 +73,9 @@ func (_c *RentalCreate) Mutation() *RentalMutation {
 
 // Save creates the Rental in the database.
 func (_c *RentalCreate) Save(ctx context.Context) (*Rental, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, rentalCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -96,96 +101,219 @@ func (_c *RentalCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *RentalCreate) defaults() {
-	if _, ok := _c.mutation.Date(); !ok {
-		v := rental.DefaultDate()
-		_c.mutation.SetDate(v)
-	}
+var rentalCreateSpec = entgen.CreateSpec[*RentalMutation]{
+	Fields: []entgen.FieldSpec[*RentalMutation]{
+		{
+			Name: "date",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "Rental.date"`)}
+				},
+			},
+			IsSet: func(m *RentalMutation) bool {
+				_, ok := m.Date()
+				return ok
+			},
+			Default: func(m *RentalMutation) error {
+				if _, ok := m.Date(); !ok {
+					v := rental.DefaultDate()
+					m.SetDate(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "user_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Rental.user_id"`)}
+				},
+			},
+			IsSet: func(m *RentalMutation) bool {
+				_, ok := m.UserID()
+				return ok
+			},
+		},
+		{
+			Name: "car_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "car_id", err: errors.New(`ent: missing required field "Rental.car_id"`)}
+				},
+			},
+			IsSet: func(m *RentalMutation) bool {
+				_, ok := m.CarID()
+				return ok
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*RentalMutation]{
+		{
+			Name: "user",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Rental.user"`)}
+				},
+			},
+			Count: func(m *RentalMutation) int {
+				return len(m.UserIDs())
+			},
+		},
+		{
+			Name: "car",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "car", err: errors.New(`ent: missing required edge "Rental.car"`)}
+				},
+			},
+			Count: func(m *RentalMutation) int {
+				return len(m.CarIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *RentalCreate) check() error {
-	if _, ok := _c.mutation.Date(); !ok {
-		return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "Rental.date"`)}
-	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Rental.user_id"`)}
-	}
-	if _, ok := _c.mutation.CarID(); !ok {
-		return &ValidationError{Name: "car_id", err: errors.New(`ent: missing required field "Rental.car_id"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Rental.user"`)}
-	}
-	if len(_c.mutation.CarIDs()) == 0 {
-		return &ValidationError{Name: "car", err: errors.New(`ent: missing required edge "Rental.car"`)}
-	}
-	return nil
+var rentalCreateDescriptor = entbuilder.CreateDescriptor[config, Rental, *RentalMutation]{
+	Table: rental.Table,
+	NewNode: func(cfg config) *Rental {
+		return &Rental{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Rental, *RentalMutation]{
+		Column:      rental.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Rental, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Rental.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Rental, *RentalMutation]{
+
+		entbuilder.SimpleField[config, Rental, *RentalMutation, time.Time](
+			rental.FieldDate,
+			field.TypeTime,
+			(*RentalMutation).Date,
+			func(n *Rental, v time.Time) { n.Date = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Rental, *RentalMutation]{
+		{
+			Value: func(cfg config, m *RentalMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.UserIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   rental.UserTable,
+					Columns: []string{rental.UserColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Rental, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.UserID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *RentalMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.CarIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   rental.CarTable,
+					Columns: []string{rental.CarColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Rental, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]uuid.UUID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.CarID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *RentalCreate) sqlSave(ctx context.Context) (*Rental, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, rentalCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &rentalCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &rentalCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Rental{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(rental.Table, sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt))
-	)
-	if value, ok := _c.mutation.Date(); ok {
-		_spec.SetField(rental.FieldDate, field.TypeTime, value)
-		_node.Date = value
-	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   rental.UserTable,
-			Columns: []string{rental.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.CarIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   rental.CarTable,
-			Columns: []string{rental.CarColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.CarID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // RentalCreateBulk is the builder for creating many Rental entities in bulk.
@@ -204,20 +332,27 @@ func (_c *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 	nodes := make([]*Rental, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, rentalCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RentalMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, rentalCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &rentalCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -228,20 +363,23 @@ func (_c *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &rentalCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

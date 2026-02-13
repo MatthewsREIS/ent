@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
@@ -68,7 +69,9 @@ func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation {
 
 // Save creates the GroupInfo in the database.
 func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, groupinfoCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -94,27 +97,47 @@ func (_c *GroupInfoCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *GroupInfoCreate) defaults() {
-	if _, ok := _c.mutation.MaxUsers(); !ok {
-		v := groupinfo.DefaultMaxUsers
-		_c.mutation.SetMaxUsers(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *GroupInfoCreate) check() error {
-	if _, ok := _c.mutation.Desc(); !ok {
-		return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
-	}
-	if _, ok := _c.mutation.MaxUsers(); !ok {
-		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
-	}
-	return nil
+var groupinfoCreateSpec = entgen.CreateSpec[*GroupInfoMutation]{
+	Fields: []entgen.FieldSpec[*GroupInfoMutation]{
+		{
+			Name: "desc",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
+				},
+			},
+			IsSet: func(m *GroupInfoMutation) bool {
+				_, ok := m.Desc()
+				return ok
+			},
+		},
+		{
+			Name: "max_users",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
+				},
+			},
+			IsSet: func(m *GroupInfoMutation) bool {
+				_, ok := m.MaxUsers()
+				return ok
+			},
+			Default: func(m *GroupInfoMutation) error {
+				if _, ok := m.MaxUsers(); !ok {
+					v := groupinfo.DefaultMaxUsers
+					m.SetMaxUsers(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*GroupInfoMutation]{},
 }
 
 func (_c *GroupInfoCreate) gremlinSave(ctx context.Context) (*GroupInfo, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, groupinfoCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

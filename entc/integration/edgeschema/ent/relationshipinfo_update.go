@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -77,6 +79,22 @@ func (_u *RelationshipInfoUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var relationshipinfoUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RelationshipInfoMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*RelationshipInfoMutation]{
+		{
+			Column: relationshipinfo.FieldText,
+			Type:   field.TypeString,
+			Set: func(m *RelationshipInfoMutation) (driver.Value, bool, error) {
+				if value, ok := m.Text(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *RelationshipInfoMutation]{},
+}
+
 func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(relationshipinfo.Table, relationshipinfo.Columns, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -86,8 +104,8 @@ func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (_node int, err e
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &relationshipinfoUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -194,8 +212,8 @@ func (_u *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *Relati
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &relationshipinfoUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &RelationshipInfo{config: _u.config}
 	_spec.Assign = _node.assignValues

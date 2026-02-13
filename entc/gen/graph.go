@@ -97,6 +97,10 @@ type (
 		// BuildFlags holds a list of custom build flags to use
 		// when loading the schema packages.
 		BuildFlags []string
+
+		// Split holds optional file-splitting configuration for generated
+		// Go assets. If nil, generated outputs stay as single files.
+		Split *SplitConfig
 	}
 
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
@@ -240,6 +244,9 @@ func (g *Graph) Gen() error {
 
 // generate is the default Generator implementation.
 func generate(g *Graph) error {
+	if err := g.Config.normalizeSplit(); err != nil {
+		return err
+	}
 	var (
 		assets   assets
 		external []GraphTemplate
@@ -255,7 +262,12 @@ func generate(g *Graph) error {
 			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
 				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 			}
-			assets.add(filepath.Join(g.Config.Target, tmpl.Format(n)), b.Bytes())
+			output := tmpl.Format(n)
+			assets.add(filepath.Join(g.Config.Target, output), b.Bytes(), splitAssetMeta{
+				Template: tmpl.Name,
+				Output:   filepath.ToSlash(output),
+				Core:     true,
+			})
 		}
 	}
 	for _, tmpl := range append(GraphTemplates, external...) {
@@ -269,7 +281,11 @@ func generate(g *Graph) error {
 		if err := templates.ExecuteTemplate(b, tmpl.Name, g); err != nil {
 			return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 		}
-		assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes())
+		assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes(), splitAssetMeta{
+			Template: tmpl.Name,
+			Output:   filepath.ToSlash(tmpl.Format),
+			Core:     isCoreGraphTemplate(tmpl),
+		})
 	}
 	for _, f := range allFeatures {
 		if f.cleanup == nil || g.featureEnabled(f) {
@@ -279,9 +295,15 @@ func generate(g *Graph) error {
 			return fmt.Errorf("cleanup %q feature assets: %w", f.Name, err)
 		}
 	}
+	if err := applySplit(g, &assets); err != nil {
+		return err
+	}
 	// Write and format assets only if template execution
 	// finished successfully.
 	if err := assets.write(); err != nil {
+		return err
+	}
+	if err := assets.cleanupSplit(); err != nil {
 		return err
 	}
 	// Cleanup nodes' assets and old template
@@ -1091,29 +1113,42 @@ func cleanOldNodes(assets assets, target string) {
 		return
 	}
 	// Find deleted nodes by selecting one generated
-	// file from standard templates (<T>_query.go).
+	// file from standard templates (<T>_query.go), or split variants.
 	var deleted []*Type
 	for _, f := range d {
-		if !strings.HasSuffix(f.Name(), "_query.go") {
+		name, ok := queryTemplateNode(f.Name())
+		if !ok {
 			continue
 		}
-		typ := &Type{Name: strings.TrimSuffix(f.Name(), "_query.go")}
+		typ := &Type{Name: name}
 		path := filepath.Join(target, typ.PackageDir())
 		if _, ok := assets.dirs[path]; ok {
 			continue
 		}
-		// If it is a node, it must have a model file and a dir (e.g. ent/t.go, ent/t).
-		_, err1 := os.Stat(path + ".go")
+		// If it is a node, it must have a model file (or split variants) and a dir.
+		hasModel := false
+		if _, err := os.Stat(path + ".go"); err == nil {
+			hasModel = true
+		}
+		if !hasModel {
+			for _, pattern := range []string{path + "_base.go", path + "_part*.go", path + "_*.go"} {
+				matches, err := filepath.Glob(pattern)
+				if err == nil && len(matches) > 0 {
+					hasModel = true
+					break
+				}
+			}
+		}
 		f2, err2 := os.Stat(path)
-		if err1 == nil && err2 == nil && f2.IsDir() {
+		if hasModel && err2 == nil && f2.IsDir() {
 			deleted = append(deleted, typ)
 		}
 	}
 	for _, typ := range deleted {
 		for _, t := range Templates {
-			err := os.Remove(filepath.Join(target, t.Format(typ)))
-			if err != nil && !os.IsNotExist(err) {
-				log.Printf("remove old file %s: %s\n", filepath.Join(target, t.Format(typ)), err)
+			path := filepath.Join(target, t.Format(typ))
+			if err := removeSplitFamily(path); err != nil {
+				log.Printf("remove old file %s: %s\n", path, err)
 			}
 		}
 		err := os.Remove(filepath.Join(target, typ.PackageDir()))
@@ -1123,16 +1158,74 @@ func cleanOldNodes(assets assets, target string) {
 	}
 }
 
-type assets struct {
-	dirs  map[string]struct{}
-	files map[string][]byte
+func queryTemplateNode(name string) (string, bool) {
+	switch {
+	case strings.HasSuffix(name, "_query.go"):
+		return strings.TrimSuffix(name, "_query.go"), true
+	case strings.HasSuffix(name, "_query_base.go"):
+		return strings.TrimSuffix(name, "_query_base.go"), true
+	case strings.Contains(name, "_query_part") && strings.HasSuffix(name, ".go"):
+		prefix, part, ok := strings.Cut(name, "_query_part")
+		if !ok || prefix == "" {
+			break
+		}
+		part, ok = strings.CutSuffix(part, ".go")
+		if !ok || part == "" {
+			break
+		}
+		for _, r := range part {
+			if r < '0' || r > '9' {
+				return "", false
+			}
+		}
+		return prefix, true
+	}
+	return "", false
 }
 
-func (a *assets) add(path string, content []byte) {
-	if a.files == nil {
-		a.files = make(map[string][]byte)
+func removeSplitFamily(origin string) error {
+	if err := os.Remove(origin); err != nil && !os.IsNotExist(err) {
+		return err
 	}
-	a.files[path] = content
+	if !strings.HasSuffix(origin, ".go") {
+		return nil
+	}
+	prefix := strings.TrimSuffix(origin, ".go")
+	for _, pattern := range []string{prefix + "_base.go", prefix + "_part*.go", prefix + "_*.go"} {
+		paths, err := filepath.Glob(pattern)
+		if err != nil {
+			return err
+		}
+		for _, path := range paths {
+			if !isSplitCleanupCandidate(origin, path) {
+				continue
+			}
+			if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+type assets struct {
+	dirs  map[string]struct{}
+	files map[string]assetFile
+}
+
+type assetFile struct {
+	content []byte
+	meta    splitAssetMeta
+}
+
+func (a *assets) add(path string, content []byte, meta splitAssetMeta) {
+	if a.files == nil {
+		a.files = make(map[string]assetFile)
+	}
+	if meta.Origin == "" {
+		meta.Origin = path
+	}
+	a.files[path] = assetFile{content: content, meta: meta}
 }
 
 func (a *assets) addDir(path string) {
@@ -1150,7 +1243,7 @@ func (a assets) write() error {
 		}
 	}
 	for path, content := range a.files {
-		if err := os.WriteFile(path, content, 0644); err != nil {
+		if err := os.WriteFile(path, content.content, 0644); err != nil {
 			return fmt.Errorf("write file %q: %w", path, err)
 		}
 	}
@@ -1164,7 +1257,7 @@ func (a assets) format() error {
 	for path, content := range a.files {
 		path, content := path, content
 		wg.Go(func() error {
-			src, err := imports.Process(path, content, nil)
+			src, err := imports.Process(path, content.content, nil)
 			if err != nil {
 				return fmt.Errorf("format file %s: %w", path, err)
 			}

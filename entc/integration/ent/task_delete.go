@@ -8,20 +8,22 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/schema/field"
-
 	enttask "entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 )
 
 // TaskDelete is the builder for deleting a Task entity.
 type TaskDelete struct {
 	config
-	hooks    []Hook
-	mutation *TaskMutation
+	hooks     []Hook
+	mutation  *TaskMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the TaskDelete builder.
@@ -44,15 +46,39 @@ func (_d *TaskDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *TaskDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(enttask.Table, sqlgraph.NewFieldSpec(enttask.FieldID, field.TypeInt))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var enttaskDeleteDescriptor = entbuilder.DeleteDescriptor[config, *TaskMutation]{
+	Table: enttask.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*TaskMutation]{
+		Column: enttask.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *TaskMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *TaskMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *TaskDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *TaskDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
+func (_d *TaskDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &enttaskDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

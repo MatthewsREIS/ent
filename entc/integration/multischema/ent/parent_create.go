@@ -8,12 +8,15 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -73,7 +76,9 @@ func (_c *ParentCreate) Mutation() *ParentMutation {
 
 // Save creates the Parent in the database.
 func (_c *ParentCreate) Save(ctx context.Context) (*Parent, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, parentCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -99,99 +104,222 @@ func (_c *ParentCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *ParentCreate) defaults() {
-	if _, ok := _c.mutation.ByAdoption(); !ok {
-		v := parent.DefaultByAdoption
-		_c.mutation.SetByAdoption(v)
-	}
+var parentCreateSpec = entgen.CreateSpec[*ParentMutation]{
+	Fields: []entgen.FieldSpec[*ParentMutation]{
+		{
+			Name: "by_adoption",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "by_adoption", err: errors.New(`ent: missing required field "Parent.by_adoption"`)}
+				},
+			},
+			IsSet: func(m *ParentMutation) bool {
+				_, ok := m.ByAdoption()
+				return ok
+			},
+			Default: func(m *ParentMutation) error {
+				if _, ok := m.ByAdoption(); !ok {
+					v := parent.DefaultByAdoption
+					m.SetByAdoption(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "user_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Parent.user_id"`)}
+				},
+			},
+			IsSet: func(m *ParentMutation) bool {
+				_, ok := m.UserID()
+				return ok
+			},
+		},
+		{
+			Name: "parent_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "parent_id", err: errors.New(`ent: missing required field "Parent.parent_id"`)}
+				},
+			},
+			IsSet: func(m *ParentMutation) bool {
+				_, ok := m.ParentID()
+				return ok
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*ParentMutation]{
+		{
+			Name: "child",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "child", err: errors.New(`ent: missing required edge "Parent.child"`)}
+				},
+			},
+			Count: func(m *ParentMutation) int {
+				return len(m.ChildIDs())
+			},
+		},
+		{
+			Name: "parent",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "parent", err: errors.New(`ent: missing required edge "Parent.parent"`)}
+				},
+			},
+			Count: func(m *ParentMutation) int {
+				return len(m.ParentIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *ParentCreate) check() error {
-	if _, ok := _c.mutation.ByAdoption(); !ok {
-		return &ValidationError{Name: "by_adoption", err: errors.New(`ent: missing required field "Parent.by_adoption"`)}
-	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Parent.user_id"`)}
-	}
-	if _, ok := _c.mutation.ParentID(); !ok {
-		return &ValidationError{Name: "parent_id", err: errors.New(`ent: missing required field "Parent.parent_id"`)}
-	}
-	if len(_c.mutation.ChildIDs()) == 0 {
-		return &ValidationError{Name: "child", err: errors.New(`ent: missing required edge "Parent.child"`)}
-	}
-	if len(_c.mutation.ParentIDs()) == 0 {
-		return &ValidationError{Name: "parent", err: errors.New(`ent: missing required edge "Parent.parent"`)}
-	}
-	return nil
+var parentCreateDescriptor = entbuilder.CreateDescriptor[config, Parent, *ParentMutation]{
+	Table: parent.Table,
+	NewNode: func(cfg config) *Parent {
+		return &Parent{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Parent, *ParentMutation]{
+		Column:      parent.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Parent, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Parent.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Parent, *ParentMutation]{
+
+		entbuilder.SimpleField[config, Parent, *ParentMutation, bool](
+			parent.FieldByAdoption,
+			field.TypeBool,
+			(*ParentMutation).ByAdoption,
+			func(n *Parent, v bool) { n.ByAdoption = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Parent, *ParentMutation]{
+		{
+			Value: func(cfg config, m *ParentMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ChildIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   parent.ChildTable,
+					Columns: []string{parent.ChildColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				edge.Schema = cfg.schemaConfig.Parent
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Parent, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.UserID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *ParentMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.ParentIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   parent.ParentTable,
+					Columns: []string{parent.ParentColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				edge.Schema = cfg.schemaConfig.Parent
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Parent, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.ParentID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *ParentCreate) sqlSave(ctx context.Context) (*Parent, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, parentCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &parentCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.Schema = _c.schemaConfig.Parent
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &parentCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *ParentCreate) createSpec() (*Parent, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Parent{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(parent.Table, sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt))
-	)
-	_spec.Schema = _c.schemaConfig.Parent
-	if value, ok := _c.mutation.ByAdoption(); ok {
-		_spec.SetField(parent.FieldByAdoption, field.TypeBool, value)
-		_node.ByAdoption = value
-	}
-	if nodes := _c.mutation.ChildIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   parent.ChildTable,
-			Columns: []string{parent.ChildColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _c.schemaConfig.Parent
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   parent.ParentTable,
-			Columns: []string{parent.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		edge.Schema = _c.schemaConfig.Parent
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ParentID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // ParentCreateBulk is the builder for creating many Parent entities in bulk.
@@ -210,20 +338,27 @@ func (_c *ParentCreateBulk) Save(ctx context.Context) ([]*Parent, error) {
 	nodes := make([]*Parent, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, parentCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ParentMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, parentCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &parentCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -234,20 +369,23 @@ func (_c *ParentCreateBulk) Save(ctx context.Context) ([]*Parent, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &parentCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

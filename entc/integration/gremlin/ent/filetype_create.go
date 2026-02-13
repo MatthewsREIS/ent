@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // FileTypeCreate is the builder for creating a FileType entity.
@@ -82,7 +83,9 @@ func (_c *FileTypeCreate) Mutation() *FileTypeMutation {
 
 // Save creates the FileType in the database.
 func (_c *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, filetypeCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -108,44 +111,87 @@ func (_c *FileTypeCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *FileTypeCreate) defaults() {
-	if _, ok := _c.mutation.GetType(); !ok {
-		v := filetype.DefaultType
-		_c.mutation.SetType(v)
-	}
-	if _, ok := _c.mutation.State(); !ok {
-		v := filetype.DefaultState
-		_c.mutation.SetState(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *FileTypeCreate) check() error {
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "FileType.name"`)}
-	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "FileType.type"`)}
-	}
-	if v, ok := _c.mutation.GetType(); ok {
-		if err := filetype.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.State(); !ok {
-		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "FileType.state"`)}
-	}
-	if v, ok := _c.mutation.State(); ok {
-		if err := filetype.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
-		}
-	}
-	return nil
+var filetypeCreateSpec = entgen.CreateSpec[*FileTypeMutation]{
+	Fields: []entgen.FieldSpec[*FileTypeMutation]{
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "FileType.name"`)}
+				},
+			},
+			IsSet: func(m *FileTypeMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+		},
+		{
+			Name: "type",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "FileType.type"`)}
+				},
+			},
+			IsSet: func(m *FileTypeMutation) bool {
+				_, ok := m.GetType()
+				return ok
+			},
+			Default: func(m *FileTypeMutation) error {
+				if _, ok := m.GetType(); !ok {
+					v := filetype.DefaultType
+					m.SetType(v)
+				}
+				return nil
+			},
+			Validators: []func(*FileTypeMutation) error{
+				func(m *FileTypeMutation) error {
+					if v, ok := m.GetType(); ok {
+						if err := filetype.TypeValidator(v); err != nil {
+							return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "state",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "FileType.state"`)}
+				},
+			},
+			IsSet: func(m *FileTypeMutation) bool {
+				_, ok := m.State()
+				return ok
+			},
+			Default: func(m *FileTypeMutation) error {
+				if _, ok := m.State(); !ok {
+					v := filetype.DefaultState
+					m.SetState(v)
+				}
+				return nil
+			},
+			Validators: []func(*FileTypeMutation) error{
+				func(m *FileTypeMutation) error {
+					if v, ok := m.State(); ok {
+						if err := filetype.StateValidator(v); err != nil {
+							return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*FileTypeMutation]{},
 }
 
 func (_c *FileTypeCreate) gremlinSave(ctx context.Context) (*FileType, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, filetypeCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

@@ -6,26 +6,66 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
 
+{{ define "dialect/sql/delete/fields" }}
+    {{- with $tmpls := matchTemplate "dialect/sql/delete/fields/additional/*" }}
+        {{- range $tmpl := $tmpls }}
+            {{- xtemplate $tmpl $ }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
 {{ define "dialect/sql/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation" }}
+{{ $descriptor := printf "%sDeleteDescriptor" $.Package }}
+
+var {{ $descriptor }} = entbuilder.DeleteDescriptor[config, *{{ $.MutationName }}]{
+	Table: {{ $.Package }}.Table,
+	{{- if $.HasOneFieldID }}
+	ID: &entbuilder.DeleteIDDescriptor[*{{ $.MutationName }}]{
+		Column: {{ $.Package }}.{{ $.ID.Constant }},
+		Type:   field.{{ $.ID.Type.ConstName }},
+		Value: func(m *{{ $.MutationName }}) (driver.Value, bool, error) {
+			if id, ok := m.{{ $.ID.MutationGet }}(); ok {
+				return id, true, nil
+			}
+			return nil, false, nil
+		},
+	},
+	{{- end }}
+	{{- with $tmpls := matchTemplate "dialect/sql/delete/descriptor/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+	Predicates: func(m *{{ $.MutationName }}) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
+		}
+		return predicates
+	},
+}
+
+{{- /* Allow adding methods to the delete-builder by ent extensions or user templates.*/}}
+{{- with $tmpls := matchTemplate "dialect/sql/delete/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec({{ $.Package }}.Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
+	_spec, err := entbuilder.BuildDeleteSpec({{ $receiver }}.config, {{ $mutation }}, &{{ $descriptor }})
+	if err != nil {
+		return 0, err
+	}
 	{{- /* Allow mutating the sqlgraph.DeleteSpec by ent extensions or user templates.*/}}
 	{{- with $tmpls := matchTemplate "dialect/sql/delete/spec/*" }}
 		{{- range $tmpl := $tmpls }}
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
 	affected, err := sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

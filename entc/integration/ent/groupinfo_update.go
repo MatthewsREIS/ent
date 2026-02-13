@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -136,6 +138,95 @@ func (_u *GroupInfoUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var groupinfoUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupInfoMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*GroupInfoMutation]{
+		{
+			Column: groupinfo.FieldDesc,
+			Type:   field.TypeString,
+			Set: func(m *GroupInfoMutation) (driver.Value, bool, error) {
+				if value, ok := m.Desc(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: groupinfo.FieldMaxUsers,
+			Type:   field.TypeInt,
+			Set: func(m *GroupInfoMutation) (driver.Value, bool, error) {
+				if value, ok := m.MaxUsers(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *GroupInfoMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedMaxUsers(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *GroupInfoMutation]{
+		{
+			Clear: func(cfg config, m *GroupInfoMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.GroupsCleared() {
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      true,
+						Table:        groupinfo.GroupsTable,
+						Columns:      groupinfo.GroupsColumn,
+						Bidi:         false,
+						TargetColumn: group.FieldID,
+						TargetType:   field.TypeInt,
+					})
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Remove: func(cfg config, m *GroupInfoMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.RemovedGroupsIDs()
+				if len(nodes) == 0 || m.GroupsCleared() {
+					return nil, nil
+				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        groupinfo.GroupsTable,
+					Columns:      groupinfo.GroupsColumn,
+					Bidi:         false,
+					TargetColumn: group.FieldID,
+					TargetType:   field.TypeInt,
+				})
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+			Add: func(cfg config, m *GroupInfoMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.GroupsIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      true,
+					Table:        groupinfo.GroupsTable,
+					Columns:      groupinfo.GroupsColumn,
+					Bidi:         false,
+					TargetColumn: group.FieldID,
+					TargetType:   field.TypeInt,
+				})
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *GroupInfoUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GroupInfoUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -151,59 +242,8 @@ func (_u *GroupInfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Desc(); ok {
-		_spec.SetField(groupinfo.FieldDesc, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.MaxUsers(); ok {
-		_spec.SetField(groupinfo.FieldMaxUsers, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedMaxUsers(); ok {
-		_spec.AddField(groupinfo.FieldMaxUsers, field.TypeInt, value)
-	}
-	if _u.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   groupinfo.GroupsTable,
-			Columns: []string{groupinfo.GroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   groupinfo.GroupsTable,
-			Columns: []string{groupinfo.GroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   groupinfo.GroupsTable,
-			Columns: []string{groupinfo.GroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &groupinfoUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -375,59 +415,8 @@ func (_u *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, er
 			}
 		}
 	}
-	if value, ok := _u.mutation.Desc(); ok {
-		_spec.SetField(groupinfo.FieldDesc, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.MaxUsers(); ok {
-		_spec.SetField(groupinfo.FieldMaxUsers, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedMaxUsers(); ok {
-		_spec.AddField(groupinfo.FieldMaxUsers, field.TypeInt, value)
-	}
-	if _u.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   groupinfo.GroupsTable,
-			Columns: []string{groupinfo.GroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   groupinfo.GroupsTable,
-			Columns: []string{groupinfo.GroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   groupinfo.GroupsTable,
-			Columns: []string{groupinfo.GroupsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &groupinfoUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &GroupInfo{config: _u.config}

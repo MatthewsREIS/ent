@@ -690,9 +690,13 @@ func (u *UpdateBuilder) writeSetter(b *Builder) {
 // DeleteBuilder is a builder for `DELETE` statement.
 type DeleteBuilder struct {
 	Builder
-	table  string
-	schema string
-	where  *Predicate
+	table     string
+	schema    string
+	where     *Predicate
+	returning []string
+	order     []any
+	limit     *int
+	prefix    Queries
 }
 
 // Delete creates a builder for the `DELETE` statement.
@@ -737,14 +741,62 @@ func (d *DeleteBuilder) FromSelect(s *Selector) *DeleteBuilder {
 
 // Query returns query representation of a `DELETE` statement.
 func (d *DeleteBuilder) Query() (string, []any) {
-	d.WriteString("DELETE FROM ")
-	d.writeSchema(d.schema)
-	d.Ident(d.table)
-	if d.where != nil {
-		d.WriteString(" WHERE ")
-		d.Join(d.where)
+	b := d.Builder.clone()
+	if len(d.prefix) > 0 {
+		b.join(d.prefix, " ")
+		b.Pad()
 	}
-	return d.String(), d.args
+	b.WriteString("DELETE FROM ")
+	b.writeSchema(d.schema)
+	b.Ident(d.table)
+	if d.where != nil {
+		b.WriteString(" WHERE ")
+		b.Join(d.where)
+	}
+	joinReturning(d.returning, &b)
+	joinOrder(d.order, &b)
+	if d.limit != nil {
+		b.WriteString(" LIMIT ")
+		b.WriteString(strconv.Itoa(*d.limit))
+	}
+	return b.String(), b.args
+}
+
+// OrderBy appends the `ORDER BY` clause to the `DELETE` statement.
+// Supported by SQLite and MySQL.
+func (d *DeleteBuilder) OrderBy(columns ...string) *DeleteBuilder {
+	if d.postgres() {
+		d.AddError(errors.New("ORDER BY is not supported by PostgreSQL"))
+		return d
+	}
+	for i := range columns {
+		d.order = append(d.order, columns[i])
+	}
+	return d
+}
+
+// Limit appends the `LIMIT` clause to the `DELETE` statement.
+// Supported by SQLite and MySQL.
+func (d *DeleteBuilder) Limit(limit int) *DeleteBuilder {
+	if d.postgres() {
+		d.AddError(errors.New("LIMIT is not supported by PostgreSQL"))
+		return d
+	}
+	d.limit = &limit
+	return d
+}
+
+// Prefix prefixes the DELETE statement with list of statements.
+func (d *DeleteBuilder) Prefix(stmts ...Querier) *DeleteBuilder {
+	d.prefix = append(d.prefix, stmts...)
+	return d
+}
+
+// Returning adds the `RETURNING` clause to the delete statement.
+// Supported by SQLite and PostgreSQL.
+func (d *DeleteBuilder) Returning(columns ...string) *DeleteBuilder {
+	d.returning = columns
+	return d
 }
 
 // Predicate is a where predicate.

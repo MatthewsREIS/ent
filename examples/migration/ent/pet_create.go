@@ -8,12 +8,15 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/pet"
 	"entgo.io/ent/examples/migration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -94,7 +97,9 @@ func (_c *PetCreate) Mutation() *PetMutation {
 
 // Save creates the Pet in the database.
 func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, petCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -120,123 +125,265 @@ func (_c *PetCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *PetCreate) defaults() {
-	if _, ok := _c.mutation.OwnerID(); !ok {
-		v := pet.DefaultOwnerID
-		_c.mutation.SetOwnerID(v)
-	}
-	if _, ok := _c.mutation.ID(); !ok {
-		v := pet.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var petCreateSpec = entgen.CreateSpec[*PetMutation]{
+	Fields: []entgen.FieldSpec[*PetMutation]{
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
+				},
+			},
+			IsSet: func(m *PetMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+		},
+		{
+			Name: "age",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
+				},
+			},
+			IsSet: func(m *PetMutation) bool {
+				_, ok := m.Age()
+				return ok
+			},
+		},
+		{
+			Name: "weight",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "weight", err: errors.New(`ent: missing required field "Pet.weight"`)}
+				},
+			},
+			IsSet: func(m *PetMutation) bool {
+				_, ok := m.Weight()
+				return ok
+			},
+		},
+		{
+			Name: "best_friend_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "best_friend_id", err: errors.New(`ent: missing required field "Pet.best_friend_id"`)}
+				},
+			},
+			IsSet: func(m *PetMutation) bool {
+				_, ok := m.BestFriendID()
+				return ok
+			},
+		},
+		{
+			Name: "owner_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "Pet.owner_id"`)}
+				},
+			},
+			IsSet: func(m *PetMutation) bool {
+				_, ok := m.OwnerID()
+				return ok
+			},
+			Default: func(m *PetMutation) error {
+				if _, ok := m.OwnerID(); !ok {
+					v := pet.DefaultOwnerID
+					m.SetOwnerID(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "id",
+			Default: func(m *PetMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := pet.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*PetMutation]{
+		{
+			Name: "best_friend",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "best_friend", err: errors.New(`ent: missing required edge "Pet.best_friend"`)}
+				},
+			},
+			Count: func(m *PetMutation) int {
+				return len(m.BestFriendIDs())
+			},
+		},
+		{
+			Name: "owner",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Pet.owner"`)}
+				},
+			},
+			Count: func(m *PetMutation) int {
+				return len(m.OwnerIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *PetCreate) check() error {
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
-	}
-	if _, ok := _c.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
-	}
-	if _, ok := _c.mutation.Weight(); !ok {
-		return &ValidationError{Name: "weight", err: errors.New(`ent: missing required field "Pet.weight"`)}
-	}
-	if _, ok := _c.mutation.BestFriendID(); !ok {
-		return &ValidationError{Name: "best_friend_id", err: errors.New(`ent: missing required field "Pet.best_friend_id"`)}
-	}
-	if _, ok := _c.mutation.OwnerID(); !ok {
-		return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "Pet.owner_id"`)}
-	}
-	if len(_c.mutation.BestFriendIDs()) == 0 {
-		return &ValidationError{Name: "best_friend", err: errors.New(`ent: missing required edge "Pet.best_friend"`)}
-	}
-	if len(_c.mutation.OwnerIDs()) == 0 {
-		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Pet.owner"`)}
-	}
-	return nil
+var petCreateDescriptor = entbuilder.CreateDescriptor[config, Pet, *PetMutation]{
+	Table: pet.Table,
+	NewNode: func(cfg config) *Pet {
+		return &Pet{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Pet, *PetMutation]{
+		Column:      pet.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *PetMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Pet, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(node *Pet, value driver.Value) error {
+			switch v := value.(type) {
+			case *uuid.UUID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case uuid.UUID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Pet, *PetMutation]{
+
+		entbuilder.SimpleField[config, Pet, *PetMutation, string](
+			pet.FieldName,
+			field.TypeString,
+			(*PetMutation).Name,
+			func(n *Pet, v string) { n.Name = v },
+		),
+
+		entbuilder.SimpleField[config, Pet, *PetMutation, float64](
+			pet.FieldAge,
+			field.TypeFloat64,
+			(*PetMutation).Age,
+			func(n *Pet, v float64) { n.Age = v },
+		),
+
+		entbuilder.SimpleField[config, Pet, *PetMutation, float64](
+			pet.FieldWeight,
+			field.TypeFloat64,
+			(*PetMutation).Weight,
+			func(n *Pet, v float64) { n.Weight = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Pet, *PetMutation]{
+		{
+			Value: func(cfg config, m *PetMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.BestFriendIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2O,
+					Inverse: false,
+					Table:   pet.BestFriendTable,
+					Columns: []string{pet.BestFriendColumn},
+					Bidi:    true,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeUUID),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Pet, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]uuid.UUID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.BestFriendID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *PetMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.OwnerIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   pet.OwnerTable,
+					Columns: []string{pet.OwnerColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Pet, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.OwnerID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, petCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &petCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &petCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Pet{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(pet.Table, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeUUID))
-	)
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(pet.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := _c.mutation.Age(); ok {
-		_spec.SetField(pet.FieldAge, field.TypeFloat64, value)
-		_node.Age = value
-	}
-	if value, ok := _c.mutation.Weight(); ok {
-		_spec.SetField(pet.FieldWeight, field.TypeFloat64, value)
-		_node.Weight = value
-	}
-	if nodes := _c.mutation.BestFriendIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   pet.BestFriendTable,
-			Columns: []string{pet.BestFriendColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.BestFriendID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   pet.OwnerTable,
-			Columns: []string{pet.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.OwnerID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // PetCreateBulk is the builder for creating many Pet entities in bulk.
@@ -255,20 +402,27 @@ func (_c *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 	nodes := make([]*Pet, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, petCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PetMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, petCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &petCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -279,16 +433,23 @@ func (_c *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &petCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

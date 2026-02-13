@@ -147,6 +147,49 @@ package ent
 
 The full example exists in [GitHub](https://github.com/ent/ent/tree/master/examples/entcpkg).
 
+## Optional File Splitting
+
+`entc` can split selected generated files into deterministic type-oriented parts.
+This feature is opt-in. If `Split` is unset (`nil`) or you do not pass `entc.Split(...)`,
+generation behavior stays unchanged.
+
+```go title="ent/entc.go"
+// +build ignore
+
+package main
+
+import (
+	"log"
+
+	"entgo.io/ent/entc"
+	"entgo.io/ent/entc/gen"
+)
+
+func main() {
+	opts := []entc.Option{
+		entc.Split(
+			gen.SplitByType(),
+			// Match by template name and/or output file name.
+			gen.SplitInclude("client", "mutation.go"),
+			// Exclude specific outputs if needed.
+			gen.SplitExclude("gql_*.go"),
+		),
+	}
+	if err := entc.Generate("./schema", &gen.Config{}, opts...); err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+Selection behavior:
+
+- With no include patterns, only core built-in codegen templates are eligible.
+- Extension outputs are skipped by default, including `gql_*.go`.
+- Add include patterns (for example `gql_*.go`) to explicitly opt extension files in.
+- Exclude patterns always win over include patterns.
+
+See [Codegen File Splitting](codegen-file-splitting.md) for naming, determinism, and stale-file cleanup details.
+
 ## Schema Description
 
 In order to get a description of your graph schema, run:

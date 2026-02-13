@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/builder"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -64,6 +65,11 @@ func (_u *BuilderUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var builderUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BuilderMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*BuilderMutation]{},
+	Edges:  []entbuilder.UpdateEdgeDescriptor[config, *BuilderMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *BuilderUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *BuilderUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -78,6 +84,9 @@ func (_u *BuilderUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &builderUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -177,6 +186,9 @@ func (_u *BuilderUpdateOne) sqlSave(ctx context.Context) (_node *Builder, err er
 				ps[i](selector)
 			}
 		}
+	}
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &builderUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Builder{config: _u.config}

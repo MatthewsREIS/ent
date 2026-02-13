@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -132,7 +133,9 @@ func (_c *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, cardCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -158,51 +161,110 @@ func (_c *CardCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *CardCreate) defaults() {
-	if _, ok := _c.mutation.CreateTime(); !ok {
-		v := card.DefaultCreateTime()
-		_c.mutation.SetCreateTime(v)
-	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
-		v := card.DefaultUpdateTime()
-		_c.mutation.SetUpdateTime(v)
-	}
-	if _, ok := _c.mutation.Balance(); !ok {
-		v := card.DefaultBalance
-		_c.mutation.SetBalance(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *CardCreate) check() error {
-	if _, ok := _c.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Card.create_time"`)}
-	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Card.update_time"`)}
-	}
-	if _, ok := _c.mutation.Balance(); !ok {
-		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "Card.balance"`)}
-	}
-	if _, ok := _c.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
-	}
-	if v, ok := _c.mutation.Number(); ok {
-		if err := card.NumberValidator(v); err != nil {
-			return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Name(); ok {
-		if err := card.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
-		}
-	}
-	return nil
+var cardCreateSpec = entgen.CreateSpec[*CardMutation]{
+	Fields: []entgen.FieldSpec[*CardMutation]{
+		{
+			Name: "create_time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Card.create_time"`)}
+				},
+			},
+			IsSet: func(m *CardMutation) bool {
+				_, ok := m.CreateTime()
+				return ok
+			},
+			Default: func(m *CardMutation) error {
+				if _, ok := m.CreateTime(); !ok {
+					v := card.DefaultCreateTime()
+					m.SetCreateTime(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "update_time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Card.update_time"`)}
+				},
+			},
+			IsSet: func(m *CardMutation) bool {
+				_, ok := m.UpdateTime()
+				return ok
+			},
+			Default: func(m *CardMutation) error {
+				if _, ok := m.UpdateTime(); !ok {
+					v := card.DefaultUpdateTime()
+					m.SetUpdateTime(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "balance",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "Card.balance"`)}
+				},
+			},
+			IsSet: func(m *CardMutation) bool {
+				_, ok := m.Balance()
+				return ok
+			},
+			Default: func(m *CardMutation) error {
+				if _, ok := m.Balance(); !ok {
+					v := card.DefaultBalance
+					m.SetBalance(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "number",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
+				},
+			},
+			IsSet: func(m *CardMutation) bool {
+				_, ok := m.Number()
+				return ok
+			},
+			Validators: []func(*CardMutation) error{
+				func(m *CardMutation) error {
+					if v, ok := m.Number(); ok {
+						if err := card.NumberValidator(v); err != nil {
+							return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "name",
+			Validators: []func(*CardMutation) error{
+				func(m *CardMutation) error {
+					if v, ok := m.Name(); ok {
+						if err := card.NameValidator(v); err != nil {
+							return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*CardMutation]{},
 }
 
 func (_c *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, cardCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entgen"
 	"github.com/google/uuid"
 )
 
@@ -149,7 +150,9 @@ func (_c *PetCreate) Mutation() *PetMutation {
 
 // Save creates the Pet in the database.
 func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, petCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -175,34 +178,76 @@ func (_c *PetCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *PetCreate) defaults() {
-	if _, ok := _c.mutation.Age(); !ok {
-		v := pet.DefaultAge
-		_c.mutation.SetAge(v)
-	}
-	if _, ok := _c.mutation.Trained(); !ok {
-		v := pet.DefaultTrained
-		_c.mutation.SetTrained(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *PetCreate) check() error {
-	if _, ok := _c.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
-	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
-	}
-	if _, ok := _c.mutation.Trained(); !ok {
-		return &ValidationError{Name: "trained", err: errors.New(`ent: missing required field "Pet.trained"`)}
-	}
-	return nil
+var petCreateSpec = entgen.CreateSpec[*PetMutation]{
+	Fields: []entgen.FieldSpec[*PetMutation]{
+		{
+			Name: "age",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
+				},
+			},
+			IsSet: func(m *PetMutation) bool {
+				_, ok := m.Age()
+				return ok
+			},
+			Default: func(m *PetMutation) error {
+				if _, ok := m.Age(); !ok {
+					v := pet.DefaultAge
+					m.SetAge(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
+				},
+			},
+			IsSet: func(m *PetMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+		},
+		{
+			Name: "uuid",
+		},
+		{
+			Name: "nickname",
+		},
+		{
+			Name: "trained",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "trained", err: errors.New(`ent: missing required field "Pet.trained"`)}
+				},
+			},
+			IsSet: func(m *PetMutation) bool {
+				_, ok := m.Trained()
+				return ok
+			},
+			Default: func(m *PetMutation) error {
+				if _, ok := m.Trained(); !ok {
+					v := pet.DefaultTrained
+					m.SetTrained(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "optional_time",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*PetMutation]{},
 }
 
 func (_c *PetCreate) gremlinSave(ctx context.Context) (*Pet, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, petCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

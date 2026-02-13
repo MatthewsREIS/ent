@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/session"
 	"entgo.io/ent/examples/migration/ent/sessiondevice"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -120,7 +123,9 @@ func (_c *SessionCreate) Mutation() *SessionMutation {
 
 // Save creates the Session in the database.
 func (_c *SessionCreate) Save(ctx context.Context) (*Session, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, sessionCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -146,99 +151,196 @@ func (_c *SessionCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *SessionCreate) defaults() {
-	if _, ok := _c.mutation.Active(); !ok {
-		v := session.DefaultActive
-		_c.mutation.SetActive(v)
-	}
-	if _, ok := _c.mutation.ID(); !ok {
-		v := session.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var sessionCreateSpec = entgen.CreateSpec[*SessionMutation]{
+	Fields: []entgen.FieldSpec[*SessionMutation]{
+		{
+			Name: "active",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Session.active"`)}
+				},
+			},
+			IsSet: func(m *SessionMutation) bool {
+				_, ok := m.Active()
+				return ok
+			},
+			Default: func(m *SessionMutation) error {
+				if _, ok := m.Active(); !ok {
+					v := session.DefaultActive
+					m.SetActive(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "issued_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "issued_at", err: errors.New(`ent: missing required field "Session.issued_at"`)}
+				},
+			},
+			IsSet: func(m *SessionMutation) bool {
+				_, ok := m.IssuedAt()
+				return ok
+			},
+		},
+		{
+			Name: "expires_at",
+		},
+		{
+			Name: "token",
+		},
+		{
+			Name: "method",
+		},
+		{
+			Name: "device_id",
+		},
+		{
+			Name: "id",
+			Default: func(m *SessionMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := session.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*SessionMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *SessionCreate) check() error {
-	if _, ok := _c.mutation.Active(); !ok {
-		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Session.active"`)}
-	}
-	if _, ok := _c.mutation.IssuedAt(); !ok {
-		return &ValidationError{Name: "issued_at", err: errors.New(`ent: missing required field "Session.issued_at"`)}
-	}
-	return nil
+var sessionCreateDescriptor = entbuilder.CreateDescriptor[config, Session, *SessionMutation]{
+	Table: session.Table,
+	NewNode: func(cfg config) *Session {
+		return &Session{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Session, *SessionMutation]{
+		Column:      session.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *SessionMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Session, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(node *Session, value driver.Value) error {
+			switch v := value.(type) {
+			case *uuid.UUID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case uuid.UUID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Session, *SessionMutation]{
+
+		entbuilder.SimpleField[config, Session, *SessionMutation, bool](
+			session.FieldActive,
+			field.TypeBool,
+			(*SessionMutation).Active,
+			func(n *Session, v bool) { n.Active = v },
+		),
+
+		entbuilder.SimpleField[config, Session, *SessionMutation, time.Time](
+			session.FieldIssuedAt,
+			field.TypeTime,
+			(*SessionMutation).IssuedAt,
+			func(n *Session, v time.Time) { n.IssuedAt = v },
+		),
+
+		entbuilder.SimpleField[config, Session, *SessionMutation, time.Time](
+			session.FieldExpiresAt,
+			field.TypeTime,
+			(*SessionMutation).ExpiresAt,
+			func(n *Session, v time.Time) { n.ExpiresAt = v },
+		),
+
+		entbuilder.SimpleField[config, Session, *SessionMutation, string](
+			session.FieldToken,
+			field.TypeString,
+			(*SessionMutation).Token,
+			func(n *Session, v string) { n.Token = v },
+		),
+
+		entbuilder.SimpleField[config, Session, *SessionMutation, map[string]interface{}](
+			session.FieldMethod,
+			field.TypeJSON,
+			(*SessionMutation).Method,
+			func(n *Session, v map[string]interface{}) { n.Method = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Session, *SessionMutation]{
+		{
+			Value: func(cfg config, m *SessionMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.DeviceIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   session.DeviceTable,
+					Columns: []string{session.DeviceColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Session, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]uuid.UUID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.DeviceID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, sessionCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &sessionCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &sessionCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Session{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
-	)
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.Active(); ok {
-		_spec.SetField(session.FieldActive, field.TypeBool, value)
-		_node.Active = value
-	}
-	if value, ok := _c.mutation.IssuedAt(); ok {
-		_spec.SetField(session.FieldIssuedAt, field.TypeTime, value)
-		_node.IssuedAt = value
-	}
-	if value, ok := _c.mutation.ExpiresAt(); ok {
-		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
-		_node.ExpiresAt = value
-	}
-	if value, ok := _c.mutation.Token(); ok {
-		_spec.SetField(session.FieldToken, field.TypeString, value)
-		_node.Token = value
-	}
-	if value, ok := _c.mutation.Method(); ok {
-		_spec.SetField(session.FieldMethod, field.TypeJSON, value)
-		_node.Method = value
-	}
-	if nodes := _c.mutation.DeviceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.DeviceID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // SessionCreateBulk is the builder for creating many Session entities in bulk.
@@ -257,20 +359,27 @@ func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 	nodes := make([]*Session, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, sessionCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SessionMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, sessionCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &sessionCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -281,16 +390,23 @@ func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &sessionCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

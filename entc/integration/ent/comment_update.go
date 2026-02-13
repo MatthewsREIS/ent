@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -194,6 +196,107 @@ func (_u *CommentUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var commentUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CommentMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*CommentMutation]{
+		{
+			Column: comment.FieldUniqueInt,
+			Type:   field.TypeInt,
+			Set: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.UniqueInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedUniqueInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: comment.FieldUniqueFloat,
+			Type:   field.TypeFloat64,
+			Set: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.UniqueFloat(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedUniqueFloat(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: comment.FieldNillableInt,
+			Type:   field.TypeInt,
+			Set: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.NillableInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedNillableInt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *CommentMutation) bool {
+				return m.NillableIntCleared()
+			},
+		},
+
+		{
+			Column: comment.FieldTable,
+			Type:   field.TypeString,
+			Set: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.Table(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *CommentMutation) bool {
+				return m.TableCleared()
+			},
+		},
+
+		{
+			Column: comment.FieldDir,
+			Type:   field.TypeJSON,
+			Set: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.Dir(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *CommentMutation) bool {
+				return m.DirCleared()
+			},
+		},
+
+		{
+			Column: comment.FieldClient,
+			Type:   field.TypeString,
+			Set: func(m *CommentMutation) (driver.Value, bool, error) {
+				if value, ok := m.GetClient(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *CommentMutation) bool {
+				return m.ClientCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *CommentMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *CommentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CommentUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -209,44 +312,8 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UniqueInt(); ok {
-		_spec.SetField(comment.FieldUniqueInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUniqueInt(); ok {
-		_spec.AddField(comment.FieldUniqueInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.UniqueFloat(); ok {
-		_spec.SetField(comment.FieldUniqueFloat, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedUniqueFloat(); ok {
-		_spec.AddField(comment.FieldUniqueFloat, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.NillableInt(); ok {
-		_spec.SetField(comment.FieldNillableInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt(); ok {
-		_spec.AddField(comment.FieldNillableInt, field.TypeInt, value)
-	}
-	if _u.mutation.NillableIntCleared() {
-		_spec.ClearField(comment.FieldNillableInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.Table(); ok {
-		_spec.SetField(comment.FieldTable, field.TypeString, value)
-	}
-	if _u.mutation.TableCleared() {
-		_spec.ClearField(comment.FieldTable, field.TypeString)
-	}
-	if value, ok := _u.mutation.Dir(); ok {
-		_spec.SetField(comment.FieldDir, field.TypeJSON, value)
-	}
-	if _u.mutation.DirCleared() {
-		_spec.ClearField(comment.FieldDir, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.GetClient(); ok {
-		_spec.SetField(comment.FieldClient, field.TypeString, value)
-	}
-	if _u.mutation.ClientCleared() {
-		_spec.ClearField(comment.FieldClient, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &commentUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -476,44 +543,8 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 			}
 		}
 	}
-	if value, ok := _u.mutation.UniqueInt(); ok {
-		_spec.SetField(comment.FieldUniqueInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedUniqueInt(); ok {
-		_spec.AddField(comment.FieldUniqueInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.UniqueFloat(); ok {
-		_spec.SetField(comment.FieldUniqueFloat, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedUniqueFloat(); ok {
-		_spec.AddField(comment.FieldUniqueFloat, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.NillableInt(); ok {
-		_spec.SetField(comment.FieldNillableInt, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedNillableInt(); ok {
-		_spec.AddField(comment.FieldNillableInt, field.TypeInt, value)
-	}
-	if _u.mutation.NillableIntCleared() {
-		_spec.ClearField(comment.FieldNillableInt, field.TypeInt)
-	}
-	if value, ok := _u.mutation.Table(); ok {
-		_spec.SetField(comment.FieldTable, field.TypeString, value)
-	}
-	if _u.mutation.TableCleared() {
-		_spec.ClearField(comment.FieldTable, field.TypeString)
-	}
-	if value, ok := _u.mutation.Dir(); ok {
-		_spec.SetField(comment.FieldDir, field.TypeJSON, value)
-	}
-	if _u.mutation.DirCleared() {
-		_spec.ClearField(comment.FieldDir, field.TypeJSON)
-	}
-	if value, ok := _u.mutation.GetClient(); ok {
-		_spec.SetField(comment.FieldClient, field.TypeString, value)
-	}
-	if _u.mutation.ClientCleared() {
-		_spec.ClearField(comment.FieldClient, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &commentUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Comment{config: _u.config}

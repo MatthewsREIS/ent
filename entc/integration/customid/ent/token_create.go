@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -17,6 +18,8 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/account"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -66,7 +69,9 @@ func (_c *TokenCreate) Mutation() *TokenMutation {
 
 // Save creates the Token in the database.
 func (_c *TokenCreate) Save(ctx context.Context) (*Token, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, tokenCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -92,85 +97,160 @@ func (_c *TokenCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *TokenCreate) defaults() {
-	if _, ok := _c.mutation.ID(); !ok {
-		v := token.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var tokenCreateSpec = entgen.CreateSpec[*TokenMutation]{
+	Fields: []entgen.FieldSpec[*TokenMutation]{
+		{
+			Name: "body",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "body", err: errors.New(`ent: missing required field "Token.body"`)}
+				},
+			},
+			IsSet: func(m *TokenMutation) bool {
+				_, ok := m.Body()
+				return ok
+			},
+			Validators: []func(*TokenMutation) error{
+				func(m *TokenMutation) error {
+					if v, ok := m.Body(); ok {
+						if err := token.BodyValidator(v); err != nil {
+							return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "id",
+			Default: func(m *TokenMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := token.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*TokenMutation]{
+		{
+			Name: "account",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "account", err: errors.New(`ent: missing required edge "Token.account"`)}
+				},
+			},
+			Count: func(m *TokenMutation) int {
+				return len(m.AccountIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *TokenCreate) check() error {
-	if _, ok := _c.mutation.Body(); !ok {
-		return &ValidationError{Name: "body", err: errors.New(`ent: missing required field "Token.body"`)}
-	}
-	if v, ok := _c.mutation.Body(); ok {
-		if err := token.BodyValidator(v); err != nil {
-			return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
-		}
-	}
-	if len(_c.mutation.AccountIDs()) == 0 {
-		return &ValidationError{Name: "account", err: errors.New(`ent: missing required edge "Token.account"`)}
-	}
-	return nil
+var tokenCreateDescriptor = entbuilder.CreateDescriptor[config, Token, *TokenMutation]{
+	Table: token.Table,
+	NewNode: func(cfg config) *Token {
+		return &Token{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Token, *TokenMutation]{
+		Column:      token.FieldID,
+		Type:        field.TypeOther,
+		UserDefined: true,
+		Value: func(m *TokenMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Token, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(sid.ID)
+			return nil
+		},
+		AssignGenerated: func(node *Token, value driver.Value) error {
+			switch v := value.(type) {
+			case *sid.ID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case sid.ID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Token, *TokenMutation]{
+
+		entbuilder.SimpleField[config, Token, *TokenMutation, string](
+			token.FieldBody,
+			field.TypeString,
+			(*TokenMutation).Body,
+			func(n *Token, v string) { n.Body = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Token, *TokenMutation]{
+		{
+			Value: func(cfg config, m *TokenMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.AccountIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   token.AccountTable,
+					Columns: []string{token.AccountColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Token, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]sid.ID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.account_token = &ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *TokenCreate) sqlSave(ctx context.Context) (*Token, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, tokenCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &tokenCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*sid.ID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &tokenCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Token{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(token.Table, sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.Body(); ok {
-		_spec.SetField(token.FieldBody, field.TypeString, value)
-		_node.Body = value
-	}
-	if nodes := _c.mutation.AccountIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   token.AccountTable,
-			Columns: []string{token.AccountColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.account_token = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -351,20 +431,27 @@ func (_c *TokenCreateBulk) Save(ctx context.Context) ([]*Token, error) {
 	nodes := make([]*Token, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, tokenCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TokenMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, tokenCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &tokenCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -376,16 +463,23 @@ func (_c *TokenCreateBulk) Save(ctx context.Context) ([]*Token, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &tokenCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

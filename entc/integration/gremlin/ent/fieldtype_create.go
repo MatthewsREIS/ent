@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
+	"entgo.io/ent/runtime/entgen"
 	"github.com/google/uuid"
 )
 
@@ -796,7 +797,9 @@ func (_c *FieldTypeCreate) Mutation() *FieldTypeMutation {
 
 // Save creates the FieldType in the database.
 func (_c *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, fieldtypeCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -822,136 +825,476 @@ func (_c *FieldTypeCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *FieldTypeCreate) defaults() {
-	if _, ok := _c.mutation.LinkOther(); !ok {
-		v := fieldtype.DefaultLinkOther
-		_c.mutation.SetLinkOther(v)
-	}
-	if _, ok := _c.mutation.LinkOtherFunc(); !ok {
-		v := fieldtype.DefaultLinkOtherFunc()
-		_c.mutation.SetLinkOtherFunc(v)
-	}
-	if _, ok := _c.mutation.Dir(); !ok {
-		v := fieldtype.DefaultDir()
-		_c.mutation.SetDir(v)
-	}
-	if _, ok := _c.mutation.Str(); !ok {
-		v := fieldtype.DefaultStr()
-		_c.mutation.SetStr(v)
-	}
-	if _, ok := _c.mutation.NullStr(); !ok {
-		v := fieldtype.DefaultNullStr()
-		_c.mutation.SetNullStr(v)
-	}
-	if _, ok := _c.mutation.DeletedAt(); !ok {
-		v := fieldtype.DefaultDeletedAt()
-		_c.mutation.SetDeletedAt(v)
-	}
-	if _, ok := _c.mutation.IP(); !ok {
-		v := fieldtype.DefaultIP()
-		_c.mutation.SetIP(v)
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		v := fieldtype.DefaultRole
-		_c.mutation.SetRole(v)
-	}
-	if _, ok := _c.mutation.Pair(); !ok {
-		v := fieldtype.DefaultPair()
-		_c.mutation.SetPair(v)
-	}
-	if _, ok := _c.mutation.Vstring(); !ok {
-		v := fieldtype.DefaultVstring()
-		_c.mutation.SetVstring(v)
-	}
-	if _, ok := _c.mutation.Triple(); !ok {
-		v := fieldtype.DefaultTriple()
-		_c.mutation.SetTriple(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *FieldTypeCreate) check() error {
-	if _, ok := _c.mutation.Int(); !ok {
-		return &ValidationError{Name: "int", err: errors.New(`ent: missing required field "FieldType.int"`)}
-	}
-	if _, ok := _c.mutation.Int8(); !ok {
-		return &ValidationError{Name: "int8", err: errors.New(`ent: missing required field "FieldType.int8"`)}
-	}
-	if _, ok := _c.mutation.Int16(); !ok {
-		return &ValidationError{Name: "int16", err: errors.New(`ent: missing required field "FieldType.int16"`)}
-	}
-	if _, ok := _c.mutation.Int32(); !ok {
-		return &ValidationError{Name: "int32", err: errors.New(`ent: missing required field "FieldType.int32"`)}
-	}
-	if _, ok := _c.mutation.Int64(); !ok {
-		return &ValidationError{Name: "int64", err: errors.New(`ent: missing required field "FieldType.int64"`)}
-	}
-	if v, ok := _c.mutation.ValidateOptionalInt32(); ok {
-		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.State(); ok {
-		if err := fieldtype.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.MAC(); ok {
-		if err := fieldtype.MACValidator(v.String()); err != nil {
-			return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Dir(); !ok {
-		return &ValidationError{Name: "dir", err: errors.New(`ent: missing required field "FieldType.dir"`)}
-	}
-	if v, ok := _c.mutation.Ndir(); ok {
-		if err := fieldtype.NdirValidator(string(v)); err != nil {
-			return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Link(); ok {
-		if err := fieldtype.LinkValidator(v.String()); err != nil {
-			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.RawData(); ok {
-		if err := fieldtype.RawDataValidator(v); err != nil {
-			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.IP(); ok {
-		if err := fieldtype.IPValidator([]byte(v)); err != nil {
-			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "FieldType.role"`)}
-	}
-	if v, ok := _c.mutation.Role(); ok {
-		if err := fieldtype.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Priority(); ok {
-		if err := fieldtype.PriorityValidator(v); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Pair(); !ok {
-		return &ValidationError{Name: "pair", err: errors.New(`ent: missing required field "FieldType.pair"`)}
-	}
-	if _, ok := _c.mutation.Vstring(); !ok {
-		return &ValidationError{Name: "vstring", err: errors.New(`ent: missing required field "FieldType.vstring"`)}
-	}
-	if _, ok := _c.mutation.Triple(); !ok {
-		return &ValidationError{Name: "triple", err: errors.New(`ent: missing required field "FieldType.triple"`)}
-	}
-	return nil
+var fieldtypeCreateSpec = entgen.CreateSpec[*FieldTypeMutation]{
+	Fields: []entgen.FieldSpec[*FieldTypeMutation]{
+		{
+			Name: "int",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int", err: errors.New(`ent: missing required field "FieldType.int"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int()
+				return ok
+			},
+		},
+		{
+			Name: "int8",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int8", err: errors.New(`ent: missing required field "FieldType.int8"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int8()
+				return ok
+			},
+		},
+		{
+			Name: "int16",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int16", err: errors.New(`ent: missing required field "FieldType.int16"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int16()
+				return ok
+			},
+		},
+		{
+			Name: "int32",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int32", err: errors.New(`ent: missing required field "FieldType.int32"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int32()
+				return ok
+			},
+		},
+		{
+			Name: "int64",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int64", err: errors.New(`ent: missing required field "FieldType.int64"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int64()
+				return ok
+			},
+		},
+		{
+			Name: "optional_int",
+		},
+		{
+			Name: "optional_int8",
+		},
+		{
+			Name: "optional_int16",
+		},
+		{
+			Name: "optional_int32",
+		},
+		{
+			Name: "optional_int64",
+		},
+		{
+			Name: "nillable_int",
+		},
+		{
+			Name: "nillable_int8",
+		},
+		{
+			Name: "nillable_int16",
+		},
+		{
+			Name: "nillable_int32",
+		},
+		{
+			Name: "nillable_int64",
+		},
+		{
+			Name: "validate_optional_int32",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.ValidateOptionalInt32(); ok {
+						if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
+							return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_uint",
+		},
+		{
+			Name: "optional_uint8",
+		},
+		{
+			Name: "optional_uint16",
+		},
+		{
+			Name: "optional_uint32",
+		},
+		{
+			Name: "optional_uint64",
+		},
+		{
+			Name: "state",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.State(); ok {
+						if err := fieldtype.StateValidator(v); err != nil {
+							return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_float",
+		},
+		{
+			Name: "optional_float32",
+		},
+		{
+			Name: "text",
+		},
+		{
+			Name: "datetime",
+		},
+		{
+			Name: "decimal",
+		},
+		{
+			Name: "link_other",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.LinkOther(); !ok {
+					v := fieldtype.DefaultLinkOther
+					m.SetLinkOther(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "link_other_func",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.LinkOtherFunc(); !ok {
+					v := fieldtype.DefaultLinkOtherFunc()
+					m.SetLinkOtherFunc(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "mac",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.MAC(); ok {
+						if err := fieldtype.MACValidator(v.String()); err != nil {
+							return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "string_array",
+		},
+		{
+			Name: "password",
+		},
+		{
+			Name: "string_scanner",
+		},
+		{
+			Name: "duration",
+		},
+		{
+			Name: "dir",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "dir", err: errors.New(`ent: missing required field "FieldType.dir"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Dir()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Dir(); !ok {
+					v := fieldtype.DefaultDir()
+					m.SetDir(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "ndir",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Ndir(); ok {
+						if err := fieldtype.NdirValidator(string(v)); err != nil {
+							return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "str",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Str(); !ok {
+					v := fieldtype.DefaultStr()
+					m.SetStr(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "null_str",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.NullStr(); !ok {
+					v := fieldtype.DefaultNullStr()
+					m.SetNullStr(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "link",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Link(); ok {
+						if err := fieldtype.LinkValidator(v.String()); err != nil {
+							return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "null_link",
+		},
+		{
+			Name: "active",
+		},
+		{
+			Name: "null_active",
+		},
+		{
+			Name: "deleted",
+		},
+		{
+			Name: "deleted_at",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.DeletedAt(); !ok {
+					v := fieldtype.DefaultDeletedAt()
+					m.SetDeletedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "raw_data",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.RawData(); ok {
+						if err := fieldtype.RawDataValidator(v); err != nil {
+							return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "sensitive",
+		},
+		{
+			Name: "ip",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.IP(); !ok {
+					v := fieldtype.DefaultIP()
+					m.SetIP(v)
+				}
+				return nil
+			},
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.IP(); ok {
+						if err := fieldtype.IPValidator([]byte(v)); err != nil {
+							return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "null_int64",
+		},
+		{
+			Name: "schema_int",
+		},
+		{
+			Name: "schema_int8",
+		},
+		{
+			Name: "schema_int64",
+		},
+		{
+			Name: "schema_float",
+		},
+		{
+			Name: "schema_float32",
+		},
+		{
+			Name: "null_float",
+		},
+		{
+			Name: "role",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "FieldType.role"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Role()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Role(); !ok {
+					v := fieldtype.DefaultRole
+					m.SetRole(v)
+				}
+				return nil
+			},
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Role(); ok {
+						if err := fieldtype.RoleValidator(v); err != nil {
+							return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "priority",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Priority(); ok {
+						if err := fieldtype.PriorityValidator(v); err != nil {
+							return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_uuid",
+		},
+		{
+			Name: "nillable_uuid",
+		},
+		{
+			Name: "strings",
+		},
+		{
+			Name: "pair",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "pair", err: errors.New(`ent: missing required field "FieldType.pair"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Pair()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Pair(); !ok {
+					v := fieldtype.DefaultPair()
+					m.SetPair(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "nil_pair",
+		},
+		{
+			Name: "vstring",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "vstring", err: errors.New(`ent: missing required field "FieldType.vstring"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Vstring()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Vstring(); !ok {
+					v := fieldtype.DefaultVstring()
+					m.SetVstring(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "triple",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "triple", err: errors.New(`ent: missing required field "FieldType.triple"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Triple()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Triple(); !ok {
+					v := fieldtype.DefaultTriple()
+					m.SetTriple(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "big_int",
+		},
+		{
+			Name: "password_other",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*FieldTypeMutation]{},
 }
 
 func (_c *FieldTypeCreate) gremlinSave(ctx context.Context) (*FieldType, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, fieldtypeCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

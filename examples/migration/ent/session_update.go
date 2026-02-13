@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/examples/migration/ent/predicate"
 	"entgo.io/ent/examples/migration/ent/session"
 	"entgo.io/ent/examples/migration/ent/sessiondevice"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -177,6 +179,112 @@ func (_u *SessionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var sessionUpdateDescriptor = entbuilder.UpdateDescriptor[config, *SessionMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*SessionMutation]{
+		{
+			Column: session.FieldActive,
+			Type:   field.TypeBool,
+			Set: func(m *SessionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Active(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: session.FieldIssuedAt,
+			Type:   field.TypeTime,
+			Set: func(m *SessionMutation) (driver.Value, bool, error) {
+				if value, ok := m.IssuedAt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: session.FieldExpiresAt,
+			Type:   field.TypeTime,
+			Set: func(m *SessionMutation) (driver.Value, bool, error) {
+				if value, ok := m.ExpiresAt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *SessionMutation) bool {
+				return m.ExpiresAtCleared()
+			},
+		},
+
+		{
+			Column: session.FieldToken,
+			Type:   field.TypeString,
+			Set: func(m *SessionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Token(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *SessionMutation) bool {
+				return m.TokenCleared()
+			},
+		},
+
+		{
+			Column: session.FieldMethod,
+			Type:   field.TypeJSON,
+			Set: func(m *SessionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Method(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *SessionMutation) bool {
+				return m.MethodCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *SessionMutation]{
+		{
+			Clear: func(cfg config, m *SessionMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.DeviceCleared() {
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        session.DeviceTable,
+						Columns:      session.DeviceColumn,
+						Bidi:         false,
+						TargetColumn: sessiondevice.FieldID,
+						TargetType:   field.TypeUUID,
+					})
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *SessionMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.DeviceIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        session.DeviceTable,
+					Columns:      session.DeviceColumn,
+					Bidi:         false,
+					TargetColumn: sessiondevice.FieldID,
+					TargetType:   field.TypeUUID,
+				})
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -186,58 +294,8 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(session.FieldActive, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.IssuedAt(); ok {
-		_spec.SetField(session.FieldIssuedAt, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.ExpiresAt(); ok {
-		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
-	}
-	if _u.mutation.ExpiresAtCleared() {
-		_spec.ClearField(session.FieldExpiresAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.Token(); ok {
-		_spec.SetField(session.FieldToken, field.TypeString, value)
-	}
-	if _u.mutation.TokenCleared() {
-		_spec.ClearField(session.FieldToken, field.TypeString)
-	}
-	if value, ok := _u.mutation.Method(); ok {
-		_spec.SetField(session.FieldMethod, field.TypeJSON, value)
-	}
-	if _u.mutation.MethodCleared() {
-		_spec.ClearField(session.FieldMethod, field.TypeJSON)
-	}
-	if _u.mutation.DeviceCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.DeviceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &sessionUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -441,58 +499,8 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 			}
 		}
 	}
-	if value, ok := _u.mutation.Active(); ok {
-		_spec.SetField(session.FieldActive, field.TypeBool, value)
-	}
-	if value, ok := _u.mutation.IssuedAt(); ok {
-		_spec.SetField(session.FieldIssuedAt, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.ExpiresAt(); ok {
-		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
-	}
-	if _u.mutation.ExpiresAtCleared() {
-		_spec.ClearField(session.FieldExpiresAt, field.TypeTime)
-	}
-	if value, ok := _u.mutation.Token(); ok {
-		_spec.SetField(session.FieldToken, field.TypeString, value)
-	}
-	if _u.mutation.TokenCleared() {
-		_spec.ClearField(session.FieldToken, field.TypeString)
-	}
-	if value, ok := _u.mutation.Method(); ok {
-		_spec.SetField(session.FieldMethod, field.TypeJSON, value)
-	}
-	if _u.mutation.MethodCleared() {
-		_spec.ClearField(session.FieldMethod, field.TypeJSON)
-	}
-	if _u.mutation.DeviceCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.DeviceIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   session.DeviceTable,
-			Columns: []string{session.DeviceColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &sessionUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Session{config: _u.config}
 	_spec.Assign = _node.assignValues

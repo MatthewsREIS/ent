@@ -16,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -71,7 +73,9 @@ func (_c *BlobLinkCreate) Mutation() *BlobLinkMutation {
 
 // Save creates the BlobLink in the database.
 func (_c *BlobLinkCreate) Save(ctx context.Context) (*BlobLink, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, bloblinkCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -97,93 +101,182 @@ func (_c *BlobLinkCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *BlobLinkCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		v := bloblink.DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
-	}
+var bloblinkCreateSpec = entgen.CreateSpec[*BlobLinkMutation]{
+	Fields: []entgen.FieldSpec[*BlobLinkMutation]{
+		{
+			Name: "created_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "BlobLink.created_at"`)}
+				},
+			},
+			IsSet: func(m *BlobLinkMutation) bool {
+				_, ok := m.CreatedAt()
+				return ok
+			},
+			Default: func(m *BlobLinkMutation) error {
+				if _, ok := m.CreatedAt(); !ok {
+					v := bloblink.DefaultCreatedAt()
+					m.SetCreatedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "blob_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "blob_id", err: errors.New(`ent: missing required field "BlobLink.blob_id"`)}
+				},
+			},
+			IsSet: func(m *BlobLinkMutation) bool {
+				_, ok := m.BlobID()
+				return ok
+			},
+		},
+		{
+			Name: "link_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "link_id", err: errors.New(`ent: missing required field "BlobLink.link_id"`)}
+				},
+			},
+			IsSet: func(m *BlobLinkMutation) bool {
+				_, ok := m.LinkID()
+				return ok
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*BlobLinkMutation]{
+		{
+			Name: "blob",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "blob", err: errors.New(`ent: missing required edge "BlobLink.blob"`)}
+				},
+			},
+			Count: func(m *BlobLinkMutation) int {
+				return len(m.BlobIDs())
+			},
+		},
+		{
+			Name: "link",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "link", err: errors.New(`ent: missing required edge "BlobLink.link"`)}
+				},
+			},
+			Count: func(m *BlobLinkMutation) int {
+				return len(m.LinkIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *BlobLinkCreate) check() error {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "BlobLink.created_at"`)}
-	}
-	if _, ok := _c.mutation.BlobID(); !ok {
-		return &ValidationError{Name: "blob_id", err: errors.New(`ent: missing required field "BlobLink.blob_id"`)}
-	}
-	if _, ok := _c.mutation.LinkID(); !ok {
-		return &ValidationError{Name: "link_id", err: errors.New(`ent: missing required field "BlobLink.link_id"`)}
-	}
-	if len(_c.mutation.BlobIDs()) == 0 {
-		return &ValidationError{Name: "blob", err: errors.New(`ent: missing required edge "BlobLink.blob"`)}
-	}
-	if len(_c.mutation.LinkIDs()) == 0 {
-		return &ValidationError{Name: "link", err: errors.New(`ent: missing required edge "BlobLink.link"`)}
-	}
-	return nil
+var bloblinkCreateDescriptor = entbuilder.CreateDescriptor[config, BlobLink, *BlobLinkMutation]{
+	Table: bloblink.Table,
+	NewNode: func(cfg config) *BlobLink {
+		return &BlobLink{config: cfg}
+	},
+	Fields: []entbuilder.FieldDescriptor[config, BlobLink, *BlobLinkMutation]{
+
+		entbuilder.SimpleField[config, BlobLink, *BlobLinkMutation, time.Time](
+			bloblink.FieldCreatedAt,
+			field.TypeTime,
+			(*BlobLinkMutation).CreatedAt,
+			func(n *BlobLink, v time.Time) { n.CreatedAt = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, BlobLink, *BlobLinkMutation]{
+		{
+			Value: func(cfg config, m *BlobLinkMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.BlobIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   bloblink.BlobTable,
+					Columns: []string{bloblink.BlobColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *BlobLink, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]uuid.UUID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.BlobID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *BlobLinkMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.LinkIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   bloblink.LinkTable,
+					Columns: []string{bloblink.LinkColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *BlobLink, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]uuid.UUID)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.LinkID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *BlobLinkCreate) sqlSave(ctx context.Context) (*BlobLink, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, bloblinkCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &bloblinkCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &bloblinkCreateDescriptor); err != nil {
+		return nil, err
+	}
+	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
-	var (
-		_node = &BlobLink{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(bloblink.Table, nil)
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(bloblink.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if nodes := _c.mutation.BlobIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   bloblink.BlobTable,
-			Columns: []string{bloblink.BlobColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.BlobID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.LinkIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   bloblink.LinkTable,
-			Columns: []string{bloblink.LinkColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.LinkID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -385,20 +478,27 @@ func (_c *BlobLinkCreateBulk) Save(ctx context.Context) ([]*BlobLink, error) {
 	nodes := make([]*BlobLink, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, bloblinkCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BlobLinkMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, bloblinkCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &bloblinkCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -410,15 +510,22 @@ func (_c *BlobLinkCreateBulk) Save(ctx context.Context) ([]*BlobLink, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &bloblinkCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

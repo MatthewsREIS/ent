@@ -8,10 +8,13 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -155,6 +158,9 @@ func (_c *ConversionCreate) Mutation() *ConversionMutation {
 
 // Save creates the Conversion in the database.
 func (_c *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, conversionCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -180,71 +186,168 @@ func (_c *ConversionCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *ConversionCreate) check() error {
-	return nil
+var conversionCreateSpec = entgen.CreateSpec[*ConversionMutation]{
+	Fields: []entgen.FieldSpec[*ConversionMutation]{
+		{
+			Name: "name",
+		},
+		{
+			Name: "int8_to_string",
+		},
+		{
+			Name: "uint8_to_string",
+		},
+		{
+			Name: "int16_to_string",
+		},
+		{
+			Name: "uint16_to_string",
+		},
+		{
+			Name: "int32_to_string",
+		},
+		{
+			Name: "uint32_to_string",
+		},
+		{
+			Name: "int64_to_string",
+		},
+		{
+			Name: "uint64_to_string",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*ConversionMutation]{},
+}
+
+var conversionCreateDescriptor = entbuilder.CreateDescriptor[config, Conversion, *ConversionMutation]{
+	Table: conversion.Table,
+	NewNode: func(cfg config) *Conversion {
+		return &Conversion{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Conversion, *ConversionMutation]{
+		Column:      conversion.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Conversion, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Conversion.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Conversion, *ConversionMutation]{
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldName,
+			field.TypeString,
+			(*ConversionMutation).Name,
+			func(n *Conversion, v string) { n.Name = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldInt8ToString,
+			field.TypeString,
+			(*ConversionMutation).Int8ToString,
+			func(n *Conversion, v string) { n.Int8ToString = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldUint8ToString,
+			field.TypeString,
+			(*ConversionMutation).Uint8ToString,
+			func(n *Conversion, v string) { n.Uint8ToString = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldInt16ToString,
+			field.TypeString,
+			(*ConversionMutation).Int16ToString,
+			func(n *Conversion, v string) { n.Int16ToString = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldUint16ToString,
+			field.TypeString,
+			(*ConversionMutation).Uint16ToString,
+			func(n *Conversion, v string) { n.Uint16ToString = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldInt32ToString,
+			field.TypeString,
+			(*ConversionMutation).Int32ToString,
+			func(n *Conversion, v string) { n.Int32ToString = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldUint32ToString,
+			field.TypeString,
+			(*ConversionMutation).Uint32ToString,
+			func(n *Conversion, v string) { n.Uint32ToString = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldInt64ToString,
+			field.TypeString,
+			(*ConversionMutation).Int64ToString,
+			func(n *Conversion, v string) { n.Int64ToString = v },
+		),
+
+		entbuilder.SimpleField[config, Conversion, *ConversionMutation, string](
+			conversion.FieldUint64ToString,
+			field.TypeString,
+			(*ConversionMutation).Uint64ToString,
+			func(n *Conversion, v string) { n.Uint64ToString = v },
+		),
+	},
 }
 
 func (_c *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, conversionCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &conversionCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &conversionCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Conversion{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(conversion.Table, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
-	)
-	if value, ok := _c.mutation.Name(); ok {
-		_spec.SetField(conversion.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := _c.mutation.Int8ToString(); ok {
-		_spec.SetField(conversion.FieldInt8ToString, field.TypeString, value)
-		_node.Int8ToString = value
-	}
-	if value, ok := _c.mutation.Uint8ToString(); ok {
-		_spec.SetField(conversion.FieldUint8ToString, field.TypeString, value)
-		_node.Uint8ToString = value
-	}
-	if value, ok := _c.mutation.Int16ToString(); ok {
-		_spec.SetField(conversion.FieldInt16ToString, field.TypeString, value)
-		_node.Int16ToString = value
-	}
-	if value, ok := _c.mutation.Uint16ToString(); ok {
-		_spec.SetField(conversion.FieldUint16ToString, field.TypeString, value)
-		_node.Uint16ToString = value
-	}
-	if value, ok := _c.mutation.Int32ToString(); ok {
-		_spec.SetField(conversion.FieldInt32ToString, field.TypeString, value)
-		_node.Int32ToString = value
-	}
-	if value, ok := _c.mutation.Uint32ToString(); ok {
-		_spec.SetField(conversion.FieldUint32ToString, field.TypeString, value)
-		_node.Uint32ToString = value
-	}
-	if value, ok := _c.mutation.Int64ToString(); ok {
-		_spec.SetField(conversion.FieldInt64ToString, field.TypeString, value)
-		_node.Int64ToString = value
-	}
-	if value, ok := _c.mutation.Uint64ToString(); ok {
-		_spec.SetField(conversion.FieldUint64ToString, field.TypeString, value)
-		_node.Uint64ToString = value
-	}
-	return _node, _spec
 }
 
 // ConversionCreateBulk is the builder for creating many Conversion entities in bulk.
@@ -263,19 +366,27 @@ func (_c *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error)
 	nodes := make([]*Conversion, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, conversionCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ConversionMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, conversionCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &conversionCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -286,20 +397,23 @@ func (_c *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error)
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &conversionCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

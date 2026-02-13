@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -193,7 +194,9 @@ func (_c *FileCreate) Mutation() *FileMutation {
 
 // Save creates the File in the database.
 func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, fileCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -219,37 +222,85 @@ func (_c *FileCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *FileCreate) defaults() {
-	if _, ok := _c.mutation.Size(); !ok {
-		v := file.DefaultSize
-		_c.mutation.SetSize(v)
-	}
-}
-
-// check runs all checks and user-defined validators on the builder.
-func (_c *FileCreate) check() error {
-	if v, ok := _c.mutation.SetID(); ok {
-		if err := file.SetIDValidator(v); err != nil {
-			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Size(); !ok {
-		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
-	}
-	if v, ok := _c.mutation.Size(); ok {
-		if err := file.SizeValidator(v); err != nil {
-			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
-	}
-	return nil
+var fileCreateSpec = entgen.CreateSpec[*FileMutation]{
+	Fields: []entgen.FieldSpec[*FileMutation]{
+		{
+			Name: "set_id",
+			Validators: []func(*FileMutation) error{
+				func(m *FileMutation) error {
+					if v, ok := m.SetID(); ok {
+						if err := file.SetIDValidator(v); err != nil {
+							return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "size",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
+				},
+			},
+			IsSet: func(m *FileMutation) bool {
+				_, ok := m.Size()
+				return ok
+			},
+			Default: func(m *FileMutation) error {
+				if _, ok := m.Size(); !ok {
+					v := file.DefaultSize
+					m.SetSize(v)
+				}
+				return nil
+			},
+			Validators: []func(*FileMutation) error{
+				func(m *FileMutation) error {
+					if v, ok := m.Size(); ok {
+						if err := file.SizeValidator(v); err != nil {
+							return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "name",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
+				},
+			},
+			IsSet: func(m *FileMutation) bool {
+				_, ok := m.Name()
+				return ok
+			},
+		},
+		{
+			Name: "user",
+		},
+		{
+			Name: "group",
+		},
+		{
+			Name: "op",
+		},
+		{
+			Name: "field_id",
+		},
+		{
+			Name: "create_time",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*FileMutation]{},
 }
 
 func (_c *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, fileCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

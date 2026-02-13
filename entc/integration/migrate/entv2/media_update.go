@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -123,6 +125,53 @@ func (_u *MediaUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var mediaUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MediaMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*MediaMutation]{
+		{
+			Column: media.FieldSource,
+			Type:   field.TypeString,
+			Set: func(m *MediaMutation) (driver.Value, bool, error) {
+				if value, ok := m.Source(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *MediaMutation) bool {
+				return m.SourceCleared()
+			},
+		},
+
+		{
+			Column: media.FieldSourceURI,
+			Type:   field.TypeString,
+			Set: func(m *MediaMutation) (driver.Value, bool, error) {
+				if value, ok := m.SourceURI(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *MediaMutation) bool {
+				return m.SourceURICleared()
+			},
+		},
+
+		{
+			Column: media.FieldText,
+			Type:   field.TypeString,
+			Set: func(m *MediaMutation) (driver.Value, bool, error) {
+				if value, ok := m.Text(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *MediaMutation) bool {
+				return m.TextCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *MediaMutation]{},
+}
+
 func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -132,23 +181,8 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Source(); ok {
-		_spec.SetField(media.FieldSource, field.TypeString, value)
-	}
-	if _u.mutation.SourceCleared() {
-		_spec.ClearField(media.FieldSource, field.TypeString)
-	}
-	if value, ok := _u.mutation.SourceURI(); ok {
-		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
-	}
-	if _u.mutation.SourceURICleared() {
-		_spec.ClearField(media.FieldSourceURI, field.TypeString)
-	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(media.FieldText, field.TypeString, value)
-	}
-	if _u.mutation.TextCleared() {
-		_spec.ClearField(media.FieldText, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &mediaUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -301,23 +335,8 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Source(); ok {
-		_spec.SetField(media.FieldSource, field.TypeString, value)
-	}
-	if _u.mutation.SourceCleared() {
-		_spec.ClearField(media.FieldSource, field.TypeString)
-	}
-	if value, ok := _u.mutation.SourceURI(); ok {
-		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
-	}
-	if _u.mutation.SourceURICleared() {
-		_spec.ClearField(media.FieldSourceURI, field.TypeString)
-	}
-	if value, ok := _u.mutation.Text(); ok {
-		_spec.SetField(media.FieldText, field.TypeString, value)
-	}
-	if _u.mutation.TextCleared() {
-		_spec.ClearField(media.FieldText, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &mediaUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Media{config: _u.config}
 	_spec.Assign = _node.assignValues

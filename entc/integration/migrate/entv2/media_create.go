@@ -8,10 +8,13 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -71,6 +74,9 @@ func (_c *MediaCreate) Mutation() *MediaMutation {
 
 // Save creates the Media in the database.
 func (_c *MediaCreate) Save(ctx context.Context) (*Media, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, mediaCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -96,47 +102,108 @@ func (_c *MediaCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *MediaCreate) check() error {
-	return nil
+var mediaCreateSpec = entgen.CreateSpec[*MediaMutation]{
+	Fields: []entgen.FieldSpec[*MediaMutation]{
+		{
+			Name: "source",
+		},
+		{
+			Name: "source_uri",
+		},
+		{
+			Name: "text",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*MediaMutation]{},
+}
+
+var mediaCreateDescriptor = entbuilder.CreateDescriptor[config, Media, *MediaMutation]{
+	Table: media.Table,
+	NewNode: func(cfg config) *Media {
+		return &Media{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Media, *MediaMutation]{
+		Column:      media.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Media, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Media.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Media, *MediaMutation]{
+
+		entbuilder.SimpleField[config, Media, *MediaMutation, string](
+			media.FieldSource,
+			field.TypeString,
+			(*MediaMutation).Source,
+			func(n *Media, v string) { n.Source = v },
+		),
+
+		entbuilder.SimpleField[config, Media, *MediaMutation, string](
+			media.FieldSourceURI,
+			field.TypeString,
+			(*MediaMutation).SourceURI,
+			func(n *Media, v string) { n.SourceURI = v },
+		),
+
+		entbuilder.SimpleField[config, Media, *MediaMutation, string](
+			media.FieldText,
+			field.TypeString,
+			(*MediaMutation).Text,
+			func(n *Media, v string) { n.Text = v },
+		),
+	},
 }
 
 func (_c *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, mediaCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &mediaCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &mediaCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Media{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(media.Table, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
-	)
-	if value, ok := _c.mutation.Source(); ok {
-		_spec.SetField(media.FieldSource, field.TypeString, value)
-		_node.Source = value
-	}
-	if value, ok := _c.mutation.SourceURI(); ok {
-		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
-		_node.SourceURI = value
-	}
-	if value, ok := _c.mutation.Text(); ok {
-		_spec.SetField(media.FieldText, field.TypeString, value)
-		_node.Text = value
-	}
-	return _node, _spec
 }
 
 // MediaCreateBulk is the builder for creating many Media entities in bulk.
@@ -155,19 +222,27 @@ func (_c *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 	nodes := make([]*Media, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, mediaCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MediaMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, mediaCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &mediaCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -178,20 +253,23 @@ func (_c *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &mediaCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

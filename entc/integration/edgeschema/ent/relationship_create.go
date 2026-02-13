@@ -16,6 +16,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -89,7 +91,7 @@ func (_c *RelationshipCreate) Mutation() *RelationshipMutation {
 
 // Save creates the Relationship in the database.
 func (_c *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
-	if err := _c.defaults(); err != nil {
+	if err := entgen.ApplyDefaults(_c.mutation, relationshipCreateSpec.Fields); err != nil {
 		return nil, err
 	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
@@ -117,111 +119,216 @@ func (_c *RelationshipCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *RelationshipCreate) defaults() error {
-	if _, ok := _c.mutation.Weight(); !ok {
-		v := relationship.DefaultWeight
-		_c.mutation.SetWeight(v)
-	}
-	return nil
+var relationshipCreateSpec = entgen.CreateSpec[*RelationshipMutation]{
+	Fields: []entgen.FieldSpec[*RelationshipMutation]{
+		{
+			Name: "weight",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "weight", err: errors.New(`ent: missing required field "Relationship.weight"`)}
+				},
+			},
+			IsSet: func(m *RelationshipMutation) bool {
+				_, ok := m.Weight()
+				return ok
+			},
+			Default: func(m *RelationshipMutation) error {
+				if _, ok := m.Weight(); !ok {
+					v := relationship.DefaultWeight
+					m.SetWeight(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "user_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Relationship.user_id"`)}
+				},
+			},
+			IsSet: func(m *RelationshipMutation) bool {
+				_, ok := m.UserID()
+				return ok
+			},
+		},
+		{
+			Name: "relative_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "relative_id", err: errors.New(`ent: missing required field "Relationship.relative_id"`)}
+				},
+			},
+			IsSet: func(m *RelationshipMutation) bool {
+				_, ok := m.RelativeID()
+				return ok
+			},
+		},
+		{
+			Name: "info_id",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*RelationshipMutation]{
+		{
+			Name: "user",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Relationship.user"`)}
+				},
+			},
+			Count: func(m *RelationshipMutation) int {
+				return len(m.UserIDs())
+			},
+		},
+		{
+			Name: "relative",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "relative", err: errors.New(`ent: missing required edge "Relationship.relative"`)}
+				},
+			},
+			Count: func(m *RelationshipMutation) int {
+				return len(m.RelativeIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *RelationshipCreate) check() error {
-	if _, ok := _c.mutation.Weight(); !ok {
-		return &ValidationError{Name: "weight", err: errors.New(`ent: missing required field "Relationship.weight"`)}
-	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Relationship.user_id"`)}
-	}
-	if _, ok := _c.mutation.RelativeID(); !ok {
-		return &ValidationError{Name: "relative_id", err: errors.New(`ent: missing required field "Relationship.relative_id"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Relationship.user"`)}
-	}
-	if len(_c.mutation.RelativeIDs()) == 0 {
-		return &ValidationError{Name: "relative", err: errors.New(`ent: missing required edge "Relationship.relative"`)}
-	}
-	return nil
+var relationshipCreateDescriptor = entbuilder.CreateDescriptor[config, Relationship, *RelationshipMutation]{
+	Table: relationship.Table,
+	NewNode: func(cfg config) *Relationship {
+		return &Relationship{config: cfg}
+	},
+	Fields: []entbuilder.FieldDescriptor[config, Relationship, *RelationshipMutation]{
+
+		entbuilder.SimpleField[config, Relationship, *RelationshipMutation, int](
+			relationship.FieldWeight,
+			field.TypeInt,
+			(*RelationshipMutation).Weight,
+			func(n *Relationship, v int) { n.Weight = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Relationship, *RelationshipMutation]{
+		{
+			Value: func(cfg config, m *RelationshipMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.UserIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   relationship.UserTable,
+					Columns: []string{relationship.UserColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Relationship, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.UserID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *RelationshipMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.RelativeIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   relationship.RelativeTable,
+					Columns: []string{relationship.RelativeColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Relationship, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.RelativeID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *RelationshipMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.InfoIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   relationship.InfoTable,
+					Columns: []string{relationship.InfoColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Relationship, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.InfoID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *RelationshipCreate) sqlSave(ctx context.Context) (*Relationship, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, relationshipCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &relationshipCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &relationshipCreateDescriptor); err != nil {
+		return nil, err
+	}
+	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Relationship{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(relationship.Table, nil)
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Weight(); ok {
-		_spec.SetField(relationship.FieldWeight, field.TypeInt, value)
-		_node.Weight = value
-	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   relationship.UserTable,
-			Columns: []string{relationship.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.RelativeIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   relationship.RelativeTable,
-			Columns: []string{relationship.RelativeColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.RelativeID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.InfoIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   relationship.InfoTable,
-			Columns: []string{relationship.InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.InfoID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -475,20 +582,27 @@ func (_c *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, er
 	nodes := make([]*Relationship, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, relationshipCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RelationshipMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, relationshipCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &relationshipCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -500,15 +614,22 @@ func (_c *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, er
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &relationshipCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

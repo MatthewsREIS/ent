@@ -8,20 +8,23 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	config
-	hooks    []Hook
-	mutation *GroupMutation
+	hooks     []Hook
+	mutation  *GroupMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the GroupDelete builder.
@@ -44,17 +47,43 @@ func (_d *GroupDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *GroupDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(group.Table, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
-	_spec.Node.Schema = _d.schemaConfig.Group
-	ctx = internal.NewSchemaConfigContext(ctx, _d.schemaConfig)
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var groupDeleteDescriptor = entbuilder.DeleteDescriptor[config, *GroupMutation]{
+	Table: group.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*GroupMutation]{
+		Column: group.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *GroupMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Schema: func(cfg config, _ *GroupMutation) (string, bool) {
+		return cfg.schemaConfig.Group, true
+	},
+	Predicates: func(m *GroupMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *GroupDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *GroupDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
+func (_d *GroupDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &groupDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	ctx = internal.NewSchemaConfigContext(ctx, _d.schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

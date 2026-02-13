@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/privacytenant/ent/predicate"
 	"entgo.io/ent/examples/privacytenant/ent/tenant"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -87,6 +89,22 @@ func (_u *TenantUpdate) check() error {
 	return nil
 }
 
+var tenantUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TenantMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*TenantMutation]{
+		{
+			Column: tenant.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *TenantMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *TenantMutation]{},
+}
+
 func (_u *TenantUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -99,8 +117,8 @@ func (_u *TenantUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(tenant.FieldName, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &tenantUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -220,8 +238,8 @@ func (_u *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err erro
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(tenant.FieldName, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &tenantUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Tenant{config: _u.config}
 	_spec.Assign = _node.assignValues

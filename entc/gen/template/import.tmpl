@@ -40,6 +40,12 @@ import (
 			{{ $import.Alias }} "{{ $import.Path }}"
 		{{- end }}
 	{{- end }}
+	{{- if and (hasField $ "Scope") ($.Scope.CreateUsesEntgen) }}
+		"entgo.io/ent/runtime/entgen"
+	{{- end }}
+	{{- if and (hasField $ "Scope") (or ($.Scope.CreateUsesEntbuilder) ($.Scope.UpdateUsesEntbuilder) ($.Scope.DeleteUsesEntbuilder)) }}
+		"entgo.io/ent/runtime/entbuilder"
+	{{- end }}
 	{{- template "import/additional" $ }}
 )
 {{ end }}

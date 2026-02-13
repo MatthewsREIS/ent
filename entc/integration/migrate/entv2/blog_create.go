@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -59,6 +62,9 @@ func (_c *BlogCreate) Mutation() *BlogMutation {
 
 // Save creates the Blog in the database.
 func (_c *BlogCreate) Save(ctx context.Context) (*Blog, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, blogCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -84,67 +90,138 @@ func (_c *BlogCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *BlogCreate) check() error {
-	switch _c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
-		if _, ok := _c.mutation.Oid(); !ok {
-			return &ValidationError{Name: "oid", err: errors.New(`entv2: missing required field "Blog.oid"`)}
-		}
-	}
-	return nil
+var blogCreateSpec = entgen.CreateSpec[*BlogMutation]{
+	Fields: []entgen.FieldSpec[*BlogMutation]{
+		{
+			Name: "oid",
+			Requirement: entgen.FieldRequirement{
+				Dialects: map[string]struct{}{
+					dialect.SQLite: {},
+					dialect.MySQL:  {},
+				},
+				Error: func() error {
+					return &ValidationError{Name: "oid", err: errors.New(`entv2: missing required field "Blog.oid"`)}
+				},
+			},
+			IsSet: func(m *BlogMutation) bool {
+				_, ok := m.Oid()
+				return ok
+			},
+		},
+		{
+			Name: "id",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*BlogMutation]{},
+}
+
+var blogCreateDescriptor = entbuilder.CreateDescriptor[config, Blog, *BlogMutation]{
+	Table: blog.Table,
+	NewNode: func(cfg config) *Blog {
+		return &Blog{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Blog, *BlogMutation]{
+		Column:      blog.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: true,
+		Value: func(m *BlogMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Blog, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(int)
+			return nil
+		},
+		AssignGenerated: func(node *Blog, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Blog.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Blog, *BlogMutation]{
+
+		entbuilder.SimpleField[config, Blog, *BlogMutation, int](
+			blog.FieldOid,
+			field.TypeInt,
+			(*BlogMutation).Oid,
+			func(n *Blog, v int) { n.Oid = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Blog, *BlogMutation]{
+		{
+			Value: func(cfg config, m *BlogMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.AdminsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   blog.AdminsTable,
+					Columns: []string{blog.AdminsColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *BlogCreate) sqlSave(ctx context.Context) (*Blog, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, blogCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &blogCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &blogCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Blog{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(blog.Table, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
-	)
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := _c.mutation.Oid(); ok {
-		_spec.SetField(blog.FieldOid, field.TypeInt, value)
-		_node.Oid = value
-	}
-	if nodes := _c.mutation.AdminsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   blog.AdminsTable,
-			Columns: []string{blog.AdminsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // BlogCreateBulk is the builder for creating many Blog entities in bulk.
@@ -163,19 +240,27 @@ func (_c *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
 	nodes := make([]*Blog, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, blogCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BlogMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, blogCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &blogCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -186,20 +271,23 @@ func (_c *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &blogCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

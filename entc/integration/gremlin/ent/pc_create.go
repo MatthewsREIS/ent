@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/pc"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // PCCreate is the builder for creating a PC entity.
@@ -29,6 +30,9 @@ func (_c *PCCreate) Mutation() *PCMutation {
 
 // Save creates the PC in the database.
 func (_c *PCCreate) Save(ctx context.Context) (*PC, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, pcCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -54,13 +58,13 @@ func (_c *PCCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *PCCreate) check() error {
-	return nil
+var pcCreateSpec = entgen.CreateSpec[*PCMutation]{
+	Fields: []entgen.FieldSpec[*PCMutation]{},
+	Edges:  []entgen.EdgeSpec[*PCMutation]{},
 }
 
 func (_c *PCCreate) gremlinSave(ctx context.Context) (*PC, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, pcCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

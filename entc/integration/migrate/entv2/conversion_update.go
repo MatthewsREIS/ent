@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -243,6 +245,137 @@ func (_u *ConversionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var conversionUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ConversionMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*ConversionMutation]{
+		{
+			Column: conversion.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.NameCleared()
+			},
+		},
+
+		{
+			Column: conversion.FieldInt8ToString,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int8ToString(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.Int8ToStringCleared()
+			},
+		},
+
+		{
+			Column: conversion.FieldUint8ToString,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Uint8ToString(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.Uint8ToStringCleared()
+			},
+		},
+
+		{
+			Column: conversion.FieldInt16ToString,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int16ToString(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.Int16ToStringCleared()
+			},
+		},
+
+		{
+			Column: conversion.FieldUint16ToString,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Uint16ToString(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.Uint16ToStringCleared()
+			},
+		},
+
+		{
+			Column: conversion.FieldInt32ToString,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int32ToString(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.Int32ToStringCleared()
+			},
+		},
+
+		{
+			Column: conversion.FieldUint32ToString,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Uint32ToString(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.Uint32ToStringCleared()
+			},
+		},
+
+		{
+			Column: conversion.FieldInt64ToString,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Int64ToString(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.Int64ToStringCleared()
+			},
+		},
+
+		{
+			Column: conversion.FieldUint64ToString,
+			Type:   field.TypeString,
+			Set: func(m *ConversionMutation) (driver.Value, bool, error) {
+				if value, ok := m.Uint64ToString(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ConversionMutation) bool {
+				return m.Uint64ToStringCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *ConversionMutation]{},
+}
+
 func (_u *ConversionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(conversion.Table, conversion.Columns, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -252,59 +385,8 @@ func (_u *ConversionUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(conversion.FieldName, field.TypeString, value)
-	}
-	if _u.mutation.NameCleared() {
-		_spec.ClearField(conversion.FieldName, field.TypeString)
-	}
-	if value, ok := _u.mutation.Int8ToString(); ok {
-		_spec.SetField(conversion.FieldInt8ToString, field.TypeString, value)
-	}
-	if _u.mutation.Int8ToStringCleared() {
-		_spec.ClearField(conversion.FieldInt8ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Uint8ToString(); ok {
-		_spec.SetField(conversion.FieldUint8ToString, field.TypeString, value)
-	}
-	if _u.mutation.Uint8ToStringCleared() {
-		_spec.ClearField(conversion.FieldUint8ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Int16ToString(); ok {
-		_spec.SetField(conversion.FieldInt16ToString, field.TypeString, value)
-	}
-	if _u.mutation.Int16ToStringCleared() {
-		_spec.ClearField(conversion.FieldInt16ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Uint16ToString(); ok {
-		_spec.SetField(conversion.FieldUint16ToString, field.TypeString, value)
-	}
-	if _u.mutation.Uint16ToStringCleared() {
-		_spec.ClearField(conversion.FieldUint16ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Int32ToString(); ok {
-		_spec.SetField(conversion.FieldInt32ToString, field.TypeString, value)
-	}
-	if _u.mutation.Int32ToStringCleared() {
-		_spec.ClearField(conversion.FieldInt32ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Uint32ToString(); ok {
-		_spec.SetField(conversion.FieldUint32ToString, field.TypeString, value)
-	}
-	if _u.mutation.Uint32ToStringCleared() {
-		_spec.ClearField(conversion.FieldUint32ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Int64ToString(); ok {
-		_spec.SetField(conversion.FieldInt64ToString, field.TypeString, value)
-	}
-	if _u.mutation.Int64ToStringCleared() {
-		_spec.ClearField(conversion.FieldInt64ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Uint64ToString(); ok {
-		_spec.SetField(conversion.FieldUint64ToString, field.TypeString, value)
-	}
-	if _u.mutation.Uint64ToStringCleared() {
-		_spec.ClearField(conversion.FieldUint64ToString, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &conversionUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -577,59 +659,8 @@ func (_u *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion, 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(conversion.FieldName, field.TypeString, value)
-	}
-	if _u.mutation.NameCleared() {
-		_spec.ClearField(conversion.FieldName, field.TypeString)
-	}
-	if value, ok := _u.mutation.Int8ToString(); ok {
-		_spec.SetField(conversion.FieldInt8ToString, field.TypeString, value)
-	}
-	if _u.mutation.Int8ToStringCleared() {
-		_spec.ClearField(conversion.FieldInt8ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Uint8ToString(); ok {
-		_spec.SetField(conversion.FieldUint8ToString, field.TypeString, value)
-	}
-	if _u.mutation.Uint8ToStringCleared() {
-		_spec.ClearField(conversion.FieldUint8ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Int16ToString(); ok {
-		_spec.SetField(conversion.FieldInt16ToString, field.TypeString, value)
-	}
-	if _u.mutation.Int16ToStringCleared() {
-		_spec.ClearField(conversion.FieldInt16ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Uint16ToString(); ok {
-		_spec.SetField(conversion.FieldUint16ToString, field.TypeString, value)
-	}
-	if _u.mutation.Uint16ToStringCleared() {
-		_spec.ClearField(conversion.FieldUint16ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Int32ToString(); ok {
-		_spec.SetField(conversion.FieldInt32ToString, field.TypeString, value)
-	}
-	if _u.mutation.Int32ToStringCleared() {
-		_spec.ClearField(conversion.FieldInt32ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Uint32ToString(); ok {
-		_spec.SetField(conversion.FieldUint32ToString, field.TypeString, value)
-	}
-	if _u.mutation.Uint32ToStringCleared() {
-		_spec.ClearField(conversion.FieldUint32ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Int64ToString(); ok {
-		_spec.SetField(conversion.FieldInt64ToString, field.TypeString, value)
-	}
-	if _u.mutation.Int64ToStringCleared() {
-		_spec.ClearField(conversion.FieldInt64ToString, field.TypeString)
-	}
-	if value, ok := _u.mutation.Uint64ToString(); ok {
-		_spec.SetField(conversion.FieldUint64ToString, field.TypeString, value)
-	}
-	if _u.mutation.Uint64ToStringCleared() {
-		_spec.ClearField(conversion.FieldUint64ToString, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &conversionUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Conversion{config: _u.config}
 	_spec.Assign = _node.assignValues

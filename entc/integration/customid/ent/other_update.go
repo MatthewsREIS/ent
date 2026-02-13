@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -63,6 +64,11 @@ func (_u *OtherUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var otherUpdateDescriptor = entbuilder.UpdateDescriptor[config, *OtherMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*OtherMutation]{},
+	Edges:  []entbuilder.UpdateEdgeDescriptor[config, *OtherMutation]{},
+}
+
 func (_u *OtherUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(other.Table, other.Columns, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -71,6 +77,9 @@ func (_u *OtherUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &otherUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -162,6 +171,9 @@ func (_u *OtherUpdateOne) sqlSave(ctx context.Context) (_node *Other, err error)
 				ps[i](selector)
 			}
 		}
+	}
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &otherUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Other{config: _u.config}
 	_spec.Assign = _node.assignValues

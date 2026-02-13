@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -19,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -408,35 +408,31 @@ func (_q *AccountQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Acco
 	return nodes, nil
 }
 
+var accountTokenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Account, Token, sid.ID, sid.ID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        account.TokenTable,
+			Columns:      account.TokenColumn,
+			Bidi:         false,
+			TargetColumn: token.FieldID,
+			TargetType:   field.TypeOther,
+		})
+	},
+	ExtractNodeID: func(n *Account) sid.ID { return n.ID },
+	ExtractEdgeID: func(e *Token) sid.ID { return e.ID },
+	ExtractEdgeFK: func(e *Token) *sid.ID {
+		return e.account_token
+	},
+}
+
 func (_q *AccountQuery) loadToken(ctx context.Context, query *TokenQuery, nodes []*Account, init func(*Account), assign func(*Account, *Token)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[sid.ID]*Account)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	query.withFKs = true
-	query.Where(predicate.Token(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(account.TokenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.account_token
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "account_token" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "account_token" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &accountTokenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

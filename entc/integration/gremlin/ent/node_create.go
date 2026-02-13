@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // NodeCreate is the builder for creating a Node entity.
@@ -98,6 +99,9 @@ func (_c *NodeCreate) Mutation() *NodeMutation {
 
 // Save creates the Node in the database.
 func (_c *NodeCreate) Save(ctx context.Context) (*Node, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, nodeCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -123,13 +127,20 @@ func (_c *NodeCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *NodeCreate) check() error {
-	return nil
+var nodeCreateSpec = entgen.CreateSpec[*NodeMutation]{
+	Fields: []entgen.FieldSpec[*NodeMutation]{
+		{
+			Name: "value",
+		},
+		{
+			Name: "updated_at",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*NodeMutation]{},
 }
 
 func (_c *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, nodeCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

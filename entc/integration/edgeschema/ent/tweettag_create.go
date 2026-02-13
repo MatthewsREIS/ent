@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -18,6 +19,8 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -87,7 +90,9 @@ func (_c *TweetTagCreate) Mutation() *TweetTagMutation {
 
 // Save creates the TweetTag in the database.
 func (_c *TweetTagCreate) Save(ctx context.Context) (*TweetTag, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, tweettagCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -113,110 +118,226 @@ func (_c *TweetTagCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *TweetTagCreate) defaults() {
-	if _, ok := _c.mutation.AddedAt(); !ok {
-		v := tweettag.DefaultAddedAt()
-		_c.mutation.SetAddedAt(v)
-	}
-	if _, ok := _c.mutation.ID(); !ok {
-		v := tweettag.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var tweettagCreateSpec = entgen.CreateSpec[*TweetTagMutation]{
+	Fields: []entgen.FieldSpec[*TweetTagMutation]{
+		{
+			Name: "added_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "added_at", err: errors.New(`ent: missing required field "TweetTag.added_at"`)}
+				},
+			},
+			IsSet: func(m *TweetTagMutation) bool {
+				_, ok := m.AddedAt()
+				return ok
+			},
+			Default: func(m *TweetTagMutation) error {
+				if _, ok := m.AddedAt(); !ok {
+					v := tweettag.DefaultAddedAt()
+					m.SetAddedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "tag_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "tag_id", err: errors.New(`ent: missing required field "TweetTag.tag_id"`)}
+				},
+			},
+			IsSet: func(m *TweetTagMutation) bool {
+				_, ok := m.TagID()
+				return ok
+			},
+		},
+		{
+			Name: "tweet_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "TweetTag.tweet_id"`)}
+				},
+			},
+			IsSet: func(m *TweetTagMutation) bool {
+				_, ok := m.TweetID()
+				return ok
+			},
+		},
+		{
+			Name: "id",
+			Default: func(m *TweetTagMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := tweettag.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*TweetTagMutation]{
+		{
+			Name: "tag",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "tag", err: errors.New(`ent: missing required edge "TweetTag.tag"`)}
+				},
+			},
+			Count: func(m *TweetTagMutation) int {
+				return len(m.TagIDs())
+			},
+		},
+		{
+			Name: "tweet",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "TweetTag.tweet"`)}
+				},
+			},
+			Count: func(m *TweetTagMutation) int {
+				return len(m.TweetIDs())
+			},
+		},
+	},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *TweetTagCreate) check() error {
-	if _, ok := _c.mutation.AddedAt(); !ok {
-		return &ValidationError{Name: "added_at", err: errors.New(`ent: missing required field "TweetTag.added_at"`)}
-	}
-	if _, ok := _c.mutation.TagID(); !ok {
-		return &ValidationError{Name: "tag_id", err: errors.New(`ent: missing required field "TweetTag.tag_id"`)}
-	}
-	if _, ok := _c.mutation.TweetID(); !ok {
-		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "TweetTag.tweet_id"`)}
-	}
-	if len(_c.mutation.TagIDs()) == 0 {
-		return &ValidationError{Name: "tag", err: errors.New(`ent: missing required edge "TweetTag.tag"`)}
-	}
-	if len(_c.mutation.TweetIDs()) == 0 {
-		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "TweetTag.tweet"`)}
-	}
-	return nil
+var tweettagCreateDescriptor = entbuilder.CreateDescriptor[config, TweetTag, *TweetTagMutation]{
+	Table: tweettag.Table,
+	NewNode: func(cfg config) *TweetTag {
+		return &TweetTag{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, TweetTag, *TweetTagMutation]{
+		Column:      tweettag.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *TweetTagMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *TweetTag, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(node *TweetTag, value driver.Value) error {
+			switch v := value.(type) {
+			case *uuid.UUID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case uuid.UUID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, TweetTag, *TweetTagMutation]{
+
+		entbuilder.SimpleField[config, TweetTag, *TweetTagMutation, time.Time](
+			tweettag.FieldAddedAt,
+			field.TypeTime,
+			(*TweetTagMutation).AddedAt,
+			func(n *TweetTag, v time.Time) { n.AddedAt = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, TweetTag, *TweetTagMutation]{
+		{
+			Value: func(cfg config, m *TweetTagMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.TagIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   tweettag.TagTable,
+					Columns: []string{tweettag.TagColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *TweetTag, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.TagID = ids[0]
+				return nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *TweetTagMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.TweetIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: false,
+					Table:   tweettag.TweetTable,
+					Columns: []string{tweettag.TweetColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *TweetTag, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.TweetID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *TweetTagCreate) sqlSave(ctx context.Context) (*TweetTag, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, tweettagCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &tweettagCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &tweettagCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
-	var (
-		_node = &TweetTag{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(tweettag.Table, sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.AddedAt(); ok {
-		_spec.SetField(tweettag.FieldAddedAt, field.TypeTime, value)
-		_node.AddedAt = value
-	}
-	if nodes := _c.mutation.TagIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweettag.TagTable,
-			Columns: []string{tweettag.TagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.TagID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.TweetIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   tweettag.TweetTable,
-			Columns: []string{tweettag.TweetColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.TweetID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -449,20 +570,27 @@ func (_c *TweetTagCreateBulk) Save(ctx context.Context) ([]*TweetTag, error) {
 	nodes := make([]*TweetTag, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, tweettagCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TweetTagMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, tweettagCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &tweettagCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -474,16 +602,23 @@ func (_c *TweetTagCreateBulk) Save(ctx context.Context) ([]*TweetTag, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &tweettagCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

@@ -90,3 +90,31 @@ in the LICENSE file in the root directory of this source tree.
         _spec.AddModifiers({{ $receiver }}.modifiers...)
     {{- end }}
 {{- end -}}
+
+{{/* Template for adding the "modifiers" field to the delete builder. */}}
+{{ define "dialect/sql/delete/fields/additional/modify" -}}
+    {{- if $.FeatureEnabled "sql/modifier" }}
+        modifiers []func(*sql.DeleteBuilder)
+    {{- end }}
+{{- end -}}
+
+{{/* A template for adding the Modify method to the delete builder. */}}
+{{ define "dialect/sql/delete/additional/modify" }}
+    {{ if $.FeatureEnabled "sql/modifier" }}
+        {{ $builder := pascal $.Scope.Builder }}
+        {{ $receiver := $.Scope.Receiver }}
+        // Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+        func ({{ $receiver }} *{{ $builder }}) Modify(modifiers ...func(d *sql.DeleteBuilder)) *{{ $builder }} {
+            {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, modifiers...)
+            return {{ $receiver }}
+        }
+    {{ end }}
+{{ end }}
+
+{{/* Template for passing the modifiers to the sqlgraph.DeleteSpec. */}}
+{{ define "dialect/sql/delete/spec/modify" }}
+    {{- if $.FeatureEnabled "sql/modifier" }}
+        {{- $receiver := $.Scope.Receiver }}
+        _spec.AddModifiers({{ $receiver }}.modifiers...)
+    {{- end }}
+{{- end -}}

@@ -8,6 +8,7 @@ package versioned
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/versioned/friendship"
 	"entgo.io/ent/entc/integration/multischema/versioned/internal"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -112,6 +114,39 @@ func (_u *FriendshipUpdate) check() error {
 	return nil
 }
 
+var friendshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *FriendshipMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*FriendshipMutation]{
+		{
+			Column: friendship.FieldWeight,
+			Type:   field.TypeInt,
+			Set: func(m *FriendshipMutation) (driver.Value, bool, error) {
+				if value, ok := m.Weight(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *FriendshipMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedWeight(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: friendship.FieldCreatedAt,
+			Type:   field.TypeTime,
+			Set: func(m *FriendshipMutation) (driver.Value, bool, error) {
+				if value, ok := m.CreatedAt(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *FriendshipMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *FriendshipUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FriendshipUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -130,14 +165,8 @@ func (_u *FriendshipUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Weight(); ok {
-		_spec.SetField(friendship.FieldWeight, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedWeight(); ok {
-		_spec.AddField(friendship.FieldWeight, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(friendship.FieldCreatedAt, field.TypeTime, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &friendshipUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.Node.Schema = _u.schemaConfig.Friendship
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
@@ -289,14 +318,8 @@ func (_u *FriendshipUpdateOne) sqlSave(ctx context.Context) (_node *Friendship, 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Weight(); ok {
-		_spec.SetField(friendship.FieldWeight, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.AddedWeight(); ok {
-		_spec.AddField(friendship.FieldWeight, field.TypeInt, value)
-	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
-		_spec.SetField(friendship.FieldCreatedAt, field.TypeTime, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &friendshipUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.Node.Schema = _u.schemaConfig.Friendship
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)

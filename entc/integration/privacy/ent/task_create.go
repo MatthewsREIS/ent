@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -115,7 +118,7 @@ func (_c *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
-	if err := _c.defaults(); err != nil {
+	if err := entgen.ApplyDefaults(_c.mutation, taskCreateSpec.Fields); err != nil {
 		return nil, err
 	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
@@ -143,109 +146,220 @@ func (_c *TaskCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *TaskCreate) defaults() error {
-	if _, ok := _c.mutation.Status(); !ok {
-		v := task.DefaultStatus
-		_c.mutation.SetStatus(v)
-	}
-	return nil
+var taskCreateSpec = entgen.CreateSpec[*TaskMutation]{
+	Fields: []entgen.FieldSpec[*TaskMutation]{
+		{
+			Name: "title",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Task.title"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.Title()
+				return ok
+			},
+			Validators: []func(*TaskMutation) error{
+				func(m *TaskMutation) error {
+					if v, ok := m.Title(); ok {
+						if err := task.TitleValidator(v); err != nil {
+							return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "description",
+		},
+		{
+			Name: "status",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Task.status"`)}
+				},
+			},
+			IsSet: func(m *TaskMutation) bool {
+				_, ok := m.Status()
+				return ok
+			},
+			Default: func(m *TaskMutation) error {
+				if _, ok := m.Status(); !ok {
+					v := task.DefaultStatus
+					m.SetStatus(v)
+				}
+				return nil
+			},
+			Validators: []func(*TaskMutation) error{
+				func(m *TaskMutation) error {
+					if v, ok := m.Status(); ok {
+						if err := task.StatusValidator(v); err != nil {
+							return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Task.status": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "uuid",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*TaskMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *TaskCreate) check() error {
-	if _, ok := _c.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Task.title"`)}
-	}
-	if v, ok := _c.mutation.Title(); ok {
-		if err := task.TitleValidator(v); err != nil {
-			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Task.status"`)}
-	}
-	if v, ok := _c.mutation.Status(); ok {
-		if err := task.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Task.status": %w`, err)}
-		}
-	}
-	return nil
+var taskCreateDescriptor = entbuilder.CreateDescriptor[config, Task, *TaskMutation]{
+	Table: task.Table,
+	NewNode: func(cfg config) *Task {
+		return &Task{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Task, *TaskMutation]{
+		Column:      task.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Task, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Task.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Task, *TaskMutation]{
+
+		entbuilder.SimpleField[config, Task, *TaskMutation, string](
+			task.FieldTitle,
+			field.TypeString,
+			(*TaskMutation).Title,
+			func(n *Task, v string) { n.Title = v },
+		),
+
+		entbuilder.SimpleField[config, Task, *TaskMutation, string](
+			task.FieldDescription,
+			field.TypeString,
+			(*TaskMutation).Description,
+			func(n *Task, v string) { n.Description = v },
+		),
+
+		entbuilder.SimpleField[config, Task, *TaskMutation, task.Status](
+			task.FieldStatus,
+			field.TypeEnum,
+			(*TaskMutation).Status,
+			func(n *Task, v task.Status) { n.Status = v },
+		),
+
+		entbuilder.SimpleField[config, Task, *TaskMutation, uuid.UUID](
+			task.FieldUUID,
+			field.TypeUUID,
+			(*TaskMutation).UUID,
+			func(n *Task, v uuid.UUID) { n.UUID = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Task, *TaskMutation]{
+		{
+			Value: func(cfg config, m *TaskMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.TeamsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2M,
+					Inverse: false,
+					Table:   task.TeamsTable,
+					Columns: task.TeamsPrimaryKey,
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+
+		{
+			Value: func(cfg config, m *TaskMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.OwnerIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   task.OwnerTable,
+					Columns: []string{task.OwnerColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Task, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.user_tasks = &ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, taskCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &taskCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &taskCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Task{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(task.Table, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
-	)
-	if value, ok := _c.mutation.Title(); ok {
-		_spec.SetField(task.FieldTitle, field.TypeString, value)
-		_node.Title = value
-	}
-	if value, ok := _c.mutation.Description(); ok {
-		_spec.SetField(task.FieldDescription, field.TypeString, value)
-		_node.Description = value
-	}
-	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(task.FieldStatus, field.TypeEnum, value)
-		_node.Status = value
-	}
-	if value, ok := _c.mutation.UUID(); ok {
-		_spec.SetField(task.FieldUUID, field.TypeUUID, value)
-		_node.UUID = value
-	}
-	if nodes := _c.mutation.TeamsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   task.TeamsTable,
-			Columns: task.TeamsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   task.OwnerTable,
-			Columns: []string{task.OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.user_tasks = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // TaskCreateBulk is the builder for creating many Task entities in bulk.
@@ -264,20 +378,27 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 	nodes := make([]*Task, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, taskCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TaskMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, taskCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &taskCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -288,20 +409,23 @@ func (_c *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &taskCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

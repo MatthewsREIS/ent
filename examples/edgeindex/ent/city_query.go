@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,6 +17,7 @@ import (
 	"entgo.io/ent/examples/edgeindex/ent/city"
 	"entgo.io/ent/examples/edgeindex/ent/predicate"
 	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -407,35 +407,31 @@ func (_q *CityQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*City, e
 	return nodes, nil
 }
 
+var cityStreetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[City, Street, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        city.StreetsTable,
+			Columns:      city.StreetsColumn,
+			Bidi:         false,
+			TargetColumn: street.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *City) int { return n.ID },
+	ExtractEdgeID: func(e *Street) int { return e.ID },
+	ExtractEdgeFK: func(e *Street) *int {
+		return e.city_streets
+	},
+}
+
 func (_q *CityQuery) loadStreets(ctx context.Context, query *StreetQuery, nodes []*City, init func(*City), assign func(*City, *Street)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*City)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	query.withFKs = true
-	query.Where(predicate.Street(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(city.StreetsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.city_streets
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "city_streets" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "city_streets" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &cityStreetsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

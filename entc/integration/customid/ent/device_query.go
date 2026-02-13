@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -19,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -436,67 +436,57 @@ func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	return nodes, nil
 }
 
+var deviceActiveSessionEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Device, Session, schema.ID, schema.ID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        device.ActiveSessionTable,
+			Columns:      device.ActiveSessionColumn,
+			Bidi:         false,
+			TargetColumn: session.FieldID,
+			TargetType:   field.TypeBytes,
+		})
+	},
+	ExtractNodeID: func(n *Device) schema.ID { return n.ID },
+	ExtractEdgeID: func(e *Session) schema.ID { return e.ID },
+	ExtractNodeFK: func(n *Device) *schema.ID {
+		return n.device_active_session
+	},
+}
+var deviceSessionsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Device, Session, schema.ID, schema.ID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        device.SessionsTable,
+			Columns:      device.SessionsColumn,
+			Bidi:         false,
+			TargetColumn: session.FieldID,
+			TargetType:   field.TypeBytes,
+		})
+	},
+	ExtractNodeID: func(n *Device) schema.ID { return n.ID },
+	ExtractEdgeID: func(e *Session) schema.ID { return e.ID },
+	ExtractEdgeFK: func(e *Session) *schema.ID {
+		return e.device_sessions
+	},
+}
+
 func (_q *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
-	ids := make([]schema.ID, 0, len(nodes))
-	nodeids := make(map[schema.ID][]*Device)
-	for i := range nodes {
-		if nodes[i].device_active_session == nil {
-			continue
-		}
-		fk := *nodes[i].device_active_session
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(session.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "device_active_session" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &deviceActiveSessionEdgeLoadDescriptor, nodes, assign,
+		func(ids []schema.ID) {
+			query.Where(session.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[schema.ID]*Device)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	query.withFKs = true
-	query.Where(predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(device.SessionsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.device_sessions
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "device_sessions" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "device_sessions" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &deviceSessionsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

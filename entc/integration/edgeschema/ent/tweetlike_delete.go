@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TweetLikeDelete is the builder for deleting a TweetLike entity.
@@ -42,14 +43,21 @@ func (_d *TweetLikeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *TweetLikeDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(tweetlike.Table, nil)
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
+var tweetlikeDeleteDescriptor = entbuilder.DeleteDescriptor[config, *TweetLikeMutation]{
+	Table: tweetlike.Table,
+	Predicates: func(m *TweetLikeMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *TweetLikeDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &tweetlikeDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {

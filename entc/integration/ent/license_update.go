@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -80,6 +82,22 @@ func (_u *LicenseUpdate) defaults() {
 	}
 }
 
+var licenseUpdateDescriptor = entbuilder.UpdateDescriptor[config, *LicenseMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*LicenseMutation]{
+		{
+			Column: license.FieldUpdateTime,
+			Type:   field.TypeTime,
+			Set: func(m *LicenseMutation) (driver.Value, bool, error) {
+				if value, ok := m.UpdateTime(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *LicenseMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *LicenseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -95,8 +113,8 @@ func (_u *LicenseUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UpdateTime(); ok {
-		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &licenseUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -212,8 +230,8 @@ func (_u *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err er
 			}
 		}
 	}
-	if value, ok := _u.mutation.UpdateTime(); ok {
-		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &licenseUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &License{config: _u.config}

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/examples/migration/ent/card"
 	"entgo.io/ent/examples/migration/ent/payment"
 	"entgo.io/ent/examples/migration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -190,6 +192,109 @@ func (_u *PaymentUpdate) check() error {
 	return nil
 }
 
+var paymentUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PaymentMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*PaymentMutation]{
+		{
+			Column: payment.FieldAmount,
+			Type:   field.TypeFloat64,
+			Set: func(m *PaymentMutation) (driver.Value, bool, error) {
+				if value, ok := m.Amount(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *PaymentMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedAmount(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: payment.FieldCurrency,
+			Type:   field.TypeEnum,
+			Set: func(m *PaymentMutation) (driver.Value, bool, error) {
+				if value, ok := m.Currency(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: payment.FieldTime,
+			Type:   field.TypeTime,
+			Set: func(m *PaymentMutation) (driver.Value, bool, error) {
+				if value, ok := m.Time(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: payment.FieldDescription,
+			Type:   field.TypeString,
+			Set: func(m *PaymentMutation) (driver.Value, bool, error) {
+				if value, ok := m.Description(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: payment.FieldStatus,
+			Type:   field.TypeEnum,
+			Set: func(m *PaymentMutation) (driver.Value, bool, error) {
+				if value, ok := m.Status(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *PaymentMutation]{
+		{
+			Clear: func(cfg config, m *PaymentMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.CardCleared() {
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        payment.CardTable,
+						Columns:      payment.CardColumn,
+						Bidi:         false,
+						TargetColumn: card.FieldID,
+						TargetType:   field.TypeInt,
+					})
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *PaymentMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.CardIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        payment.CardTable,
+					Columns:      payment.CardColumn,
+					Bidi:         false,
+					TargetColumn: card.FieldID,
+					TargetType:   field.TypeInt,
+				})
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 func (_u *PaymentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -202,52 +307,8 @@ func (_u *PaymentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Amount(); ok {
-		_spec.SetField(payment.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAmount(); ok {
-		_spec.AddField(payment.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.Currency(); ok {
-		_spec.SetField(payment.FieldCurrency, field.TypeEnum, value)
-	}
-	if value, ok := _u.mutation.Time(); ok {
-		_spec.SetField(payment.FieldTime, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(payment.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(payment.FieldStatus, field.TypeEnum, value)
-	}
-	if _u.mutation.CardCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   payment.CardTable,
-			Columns: []string{payment.CardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   payment.CardTable,
-			Columns: []string{payment.CardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &paymentUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -468,52 +529,8 @@ func (_u *PaymentUpdateOne) sqlSave(ctx context.Context) (_node *Payment, err er
 			}
 		}
 	}
-	if value, ok := _u.mutation.Amount(); ok {
-		_spec.SetField(payment.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.AddedAmount(); ok {
-		_spec.AddField(payment.FieldAmount, field.TypeFloat64, value)
-	}
-	if value, ok := _u.mutation.Currency(); ok {
-		_spec.SetField(payment.FieldCurrency, field.TypeEnum, value)
-	}
-	if value, ok := _u.mutation.Time(); ok {
-		_spec.SetField(payment.FieldTime, field.TypeTime, value)
-	}
-	if value, ok := _u.mutation.Description(); ok {
-		_spec.SetField(payment.FieldDescription, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(payment.FieldStatus, field.TypeEnum, value)
-	}
-	if _u.mutation.CardCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   payment.CardTable,
-			Columns: []string{payment.CardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   payment.CardTable,
-			Columns: []string{payment.CardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &paymentUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Payment{config: _u.config}
 	_spec.Assign = _node.assignValues

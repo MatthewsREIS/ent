@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/goods"
+	"entgo.io/ent/runtime/entgen"
 )
 
 // GoodsCreate is the builder for creating a Goods entity.
@@ -29,6 +30,9 @@ func (_c *GoodsCreate) Mutation() *GoodsMutation {
 
 // Save creates the Goods in the database.
 func (_c *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, goodsCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
@@ -54,13 +58,13 @@ func (_c *GoodsCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *GoodsCreate) check() error {
-	return nil
+var goodsCreateSpec = entgen.CreateSpec[*GoodsMutation]{
+	Fields: []entgen.FieldSpec[*GoodsMutation]{},
+	Edges:  []entgen.EdgeSpec[*GoodsMutation]{},
 }
 
 func (_c *GoodsCreate) gremlinSave(ctx context.Context) (*Goods, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, goodsCreateSpec); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
