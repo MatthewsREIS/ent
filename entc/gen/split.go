@@ -22,7 +22,8 @@ type SplitMode string
 
 const (
 	// SplitModeType splits declarations into deterministic files by schema type.
-	SplitModeType SplitMode = "type"
+	SplitModeType   SplitMode = "type"
+	splitFileMarker           = "// entc:split-file"
 )
 
 // SplitConfig configures optional splitting of generated Go assets.
@@ -293,7 +294,7 @@ func splitGoByType(path string, file assetFile, types []splitType) (map[string]a
 	baseMeta.Output = baseOutput
 	baseMeta.Origin = originPath
 	files[basePath] = assetFile{
-		content: splitFileContent(prologue, importDecls, baseDecls),
+		content: splitFileContent(prologue, importDecls, baseDecls, true),
 		meta:    baseMeta,
 	}
 
@@ -308,7 +309,7 @@ func splitGoByType(path string, file assetFile, types []splitType) (map[string]a
 		partMeta.Output = fmt.Sprintf("%s_%s.go", baseOutputPrefix, key)
 		partMeta.Origin = originPath
 		files[partPath] = assetFile{
-			content: splitFileContent(prologue, importDecls, typedDecls[key]),
+			content: splitFileContent(prologue, importDecls, typedDecls[key], true),
 			meta:    partMeta,
 		}
 	}
@@ -506,8 +507,11 @@ func splitHasBoundaryPrefix(ident, prefix string) bool {
 	}
 }
 
-func splitFileContent(prologue []byte, imports, decls [][]byte) []byte {
+func splitFileContent(prologue []byte, imports, decls [][]byte, split bool) []byte {
 	size := len(prologue)
+	if split {
+		size += len(splitFileMarker) + 2
+	}
 	for _, imp := range imports {
 		size += len(imp) + 2
 	}
@@ -516,6 +520,10 @@ func splitFileContent(prologue []byte, imports, decls [][]byte) []byte {
 	}
 	out := make([]byte, 0, size+1)
 	out = append(out, prologue...)
+	if split {
+		out = append(out, splitFileMarker...)
+		out = append(out, '\n', '\n')
+	}
 	for i, imp := range imports {
 		if i > 0 {
 			out = append(out, '\n', '\n')
@@ -596,11 +604,37 @@ func cleanupSplitFamily(origin string, keep map[string]struct{}, generated map[s
 		if _, ok := generated[stale]; ok {
 			continue
 		}
+		if !isSplitCleanupCandidate(origin, stale) {
+			continue
+		}
 		if err := os.Remove(stale); err != nil && !os.IsNotExist(err) {
 			return fmt.Errorf("remove stale split file %q: %w", stale, err)
 		}
 	}
 	return nil
+}
+
+func isSplitCleanupCandidate(origin, path string) bool {
+	if path == origin {
+		return true
+	}
+	originBase := strings.TrimSuffix(filepath.Base(origin), ".go")
+	name := filepath.Base(path)
+	if !strings.HasPrefix(name, originBase+"_") || !strings.HasSuffix(name, ".go") {
+		return false
+	}
+	if strings.HasSuffix(name, "_base.go") || strings.HasPrefix(strings.TrimSuffix(name, ".go"), originBase+"_part") {
+		return true
+	}
+	return hasSplitFileMarker(path)
+}
+
+func hasSplitFileMarker(path string) bool {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	return bytes.Contains(content, []byte(splitFileMarker))
 }
 
 func isCoreGraphTemplate(tmpl GraphTemplate) bool {

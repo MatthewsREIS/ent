@@ -253,8 +253,34 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 		}
 		return fmt.Errorf("unexpected {{ $.Name }}.ID type: %T", value)
 {{- else }}
-		id := value.(int64)
-		node.ID = {{ $id.Type }}(id)
+		switch v := value.(type) {
+		case int:
+			node.ID = {{ $id.Type }}(v)
+		case int8:
+			node.ID = {{ $id.Type }}(v)
+		case int16:
+			node.ID = {{ $id.Type }}(v)
+		case int32:
+			node.ID = {{ $id.Type }}(v)
+		case int64:
+			node.ID = {{ $id.Type }}(v)
+		case uint:
+			node.ID = {{ $id.Type }}(v)
+		case uint8:
+			node.ID = {{ $id.Type }}(v)
+		case uint16:
+			node.ID = {{ $id.Type }}(v)
+		case uint32:
+			node.ID = {{ $id.Type }}(v)
+		case uint64:
+			node.ID = {{ $id.Type }}(v)
+		default:
+			if v, ok := value.({{ $id.Type }}); ok {
+				node.ID = v
+				return nil
+			}
+			return fmt.Errorf("unexpected {{ $.Name }}.ID type: %T", value)
+		}
 {{- end }}
 		return nil
 	},

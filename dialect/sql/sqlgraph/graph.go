@@ -915,6 +915,9 @@ func DeleteNodes(ctx context.Context, drv dialect.Driver, spec *DeleteSpec) (int
 			spec.Modifiers[i](deleter)
 		}
 	}
+	if err := deleter.Err(); err != nil {
+		return 0, err
+	}
 	query, args := deleter.Query()
 	if err := drv.Exec(ctx, query, args, &res); err != nil {
 		return 0, err

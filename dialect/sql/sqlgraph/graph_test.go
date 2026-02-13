@@ -2372,6 +2372,25 @@ func TestDeleteNodesSchema(t *testing.T) {
 	require.Equal(t, 2, affected)
 }
 
+func TestDeleteNodesModifierError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	affected, err := DeleteNodes(context.Background(), sql.OpenDB(dialect.Postgres, db), &DeleteSpec{
+		Node: &NodeSpec{
+			Table: "users",
+			ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+		},
+		Modifiers: []func(*sql.DeleteBuilder){
+			func(d *sql.DeleteBuilder) {
+				d.OrderBy("id").Limit(1)
+			},
+		},
+	})
+	require.ErrorContains(t, err, "ORDER BY is not supported by PostgreSQL")
+	require.Equal(t, 0, affected)
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
 func TestQueryNodes(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)

@@ -753,6 +753,26 @@ func TestGraph_Gen_SplitOffByDefault(t *testing.T) {
 	require.True(os.IsNotExist(err))
 }
 
+func TestGraph_Gen_SplitOffByDefaultPreservesSiblingFiles(t *testing.T) {
+	require := require.New(t)
+	target := filepath.Join(t.TempDir(), "ent")
+	user, pet := splitSchemas()
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Target:  target,
+		Storage: drivers[0],
+	}, user, pet)
+	require.NoError(err)
+	require.NoError(graph.Gen())
+
+	helper := filepath.Join(target, "user_helpers.go")
+	require.NoError(os.WriteFile(helper, []byte("package ent\n"), 0644))
+	require.NoError(graph.Gen())
+
+	_, err = os.Stat(helper)
+	require.NoError(err)
+}
+
 func TestQueryTemplateNode(t *testing.T) {
 	tests := []struct {
 		name  string
