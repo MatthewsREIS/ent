@@ -761,7 +761,9 @@ func (_q *TweetQuery) loadLikedUsers(ctx context.Context, query *UserQuery, node
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *TweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Tweet, init func(*Tweet), assign func(*Tweet, *User)) error {
@@ -789,7 +791,9 @@ func (_q *TweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*T
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *TweetQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Tweet, init func(*Tweet), assign func(*Tweet, *Tag)) error {
@@ -817,7 +821,9 @@ func (_q *TweetQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Tw
 			return withInterceptors[[]*Tag](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *TweetQuery) loadLikes(ctx context.Context, query *TweetLikeQuery, nodes []*Tweet, init func(*Tweet), assign func(*Tweet, *TweetLike)) error {

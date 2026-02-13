@@ -160,7 +160,7 @@ var usergroupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserGroupMu
 		{
 			Clear: func(cfg config, m *UserGroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        usergroup.UserTable,
@@ -168,7 +168,8 @@ var usergroupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserGroupMu
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -196,7 +197,7 @@ var usergroupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserGroupMu
 		{
 			Clear: func(cfg config, m *UserGroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        usergroup.GroupTable,
@@ -204,7 +205,8 @@ var usergroupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserGroupMu
 						Bidi:         false,
 						TargetColumn: group.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

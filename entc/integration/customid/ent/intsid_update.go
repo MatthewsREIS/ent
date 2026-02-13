@@ -132,7 +132,7 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 		{
 			Clear: func(cfg config, m *IntSIDMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        intsid.ParentTable,
@@ -140,7 +140,8 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 						Bidi:         true,
 						TargetColumn: intsid.FieldID,
 						TargetType:   field.TypeInt64,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -168,7 +169,7 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 		{
 			Clear: func(cfg config, m *IntSIDMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ChildrenCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        intsid.ChildrenTable,
@@ -176,7 +177,8 @@ var intsidUpdateDescriptor = entbuilder.UpdateDescriptor[config, *IntSIDMutation
 						Bidi:         false,
 						TargetColumn: intsid.FieldID,
 						TargetType:   field.TypeInt64,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

@@ -197,7 +197,7 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 		{
 			Clear: func(cfg config, m *BlobMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2O,
 						Inverse:      false,
 						Table:        blob.ParentTable,
@@ -205,7 +205,8 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 						Bidi:         true,
 						TargetColumn: blob.FieldID,
 						TargetType:   field.TypeUUID,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -233,7 +234,7 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 		{
 			Clear: func(cfg config, m *BlobMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.LinksCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        blob.LinksTable,
@@ -241,7 +242,8 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 						Bidi:         true,
 						TargetColumn: blob.FieldID,
 						TargetType:   field.TypeUUID,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

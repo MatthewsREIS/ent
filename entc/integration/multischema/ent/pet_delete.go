@@ -71,6 +71,12 @@ var petDeleteDescriptor = entbuilder.DeleteDescriptor[config, *PetMutation]{
 	},
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *PetDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *PetDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *PetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &petDeleteDescriptor)
 	if err != nil {

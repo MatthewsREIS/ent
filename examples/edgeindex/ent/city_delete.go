@@ -8,11 +8,13 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/edgeindex/ent/city"
 	"entgo.io/ent/examples/edgeindex/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -43,14 +45,31 @@ func (_d *CityDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *CityDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(city.Table, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var cityDeleteDescriptor = entbuilder.DeleteDescriptor[config, *CityMutation]{
+	Table: city.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*CityMutation]{
+		Column: city.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *CityMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *CityMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *CityDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &cityDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {

@@ -133,7 +133,7 @@ var fileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *FileMutation]{
 		{
 			Clear: func(cfg config, m *FileMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ProcessesCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        file.ProcessesTable,
@@ -141,7 +141,8 @@ var fileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *FileMutation]{
 						Bidi:         false,
 						TargetColumn: process.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

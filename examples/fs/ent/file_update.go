@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/fs/ent/file"
 	"entgo.io/ent/examples/fs/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -158,6 +160,126 @@ func (_u *FileUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var fileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *FileMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*FileMutation]{
+		{
+			Column: file.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *FileMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: file.FieldDeleted,
+			Type:   field.TypeBool,
+			Set: func(m *FileMutation) (driver.Value, bool, error) {
+				if value, ok := m.Deleted(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *FileMutation]{
+		{
+			Clear: func(cfg config, m *FileMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.ParentCleared() {
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.M2O,
+						Inverse:      true,
+						Table:        file.ParentTable,
+						Columns:      file.ParentColumn,
+						Bidi:         false,
+						TargetColumn: file.FieldID,
+						TargetType:   field.TypeInt,
+					})
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(cfg config, m *FileMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.ParentIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.M2O,
+					Inverse:      true,
+					Table:        file.ParentTable,
+					Columns:      file.ParentColumn,
+					Bidi:         false,
+					TargetColumn: file.FieldID,
+					TargetType:   field.TypeInt,
+				})
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+
+		{
+			Clear: func(cfg config, m *FileMutation) (*sqlgraph.EdgeSpec, bool, error) {
+				if m.ChildrenCleared() {
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+						Rel:          sqlgraph.O2M,
+						Inverse:      false,
+						Table:        file.ChildrenTable,
+						Columns:      file.ChildrenColumn,
+						Bidi:         false,
+						TargetColumn: file.FieldID,
+						TargetType:   field.TypeInt,
+					})
+					return edge, true, nil
+				}
+				return nil, false, nil
+			},
+			Remove: func(cfg config, m *FileMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.RemovedChildrenIDs()
+				if len(nodes) == 0 || m.ChildrenCleared() {
+					return nil, nil
+				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        file.ChildrenTable,
+					Columns:      file.ChildrenColumn,
+					Bidi:         false,
+					TargetColumn: file.FieldID,
+					TargetType:   field.TypeInt,
+				})
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+			Add: func(cfg config, m *FileMutation) ([]*sqlgraph.EdgeSpec, error) {
+				nodes := m.ChildrenIDs()
+				if len(nodes) == 0 {
+					return nil, nil
+				}
+				edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					Rel:          sqlgraph.O2M,
+					Inverse:      false,
+					Table:        file.ChildrenTable,
+					Columns:      file.ChildrenColumn,
+					Bidi:         false,
+					TargetColumn: file.FieldID,
+					TargetType:   field.TypeInt,
+				})
+				for _, id := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, id)
+				}
+				return []*sqlgraph.EdgeSpec{edge}, nil
+			},
+		},
+	},
+}
+
 func (_u *FileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(file.Table, file.Columns, sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -167,85 +289,8 @@ func (_u *FileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(file.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Deleted(); ok {
-		_spec.SetField(file.FieldDeleted, field.TypeBool, value)
-	}
-	if _u.mutation.ParentCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.ChildrenCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &fileUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -433,85 +478,8 @@ func (_u *FileUpdateOne) sqlSave(ctx context.Context) (_node *File, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(file.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Deleted(); ok {
-		_spec.SetField(file.FieldDeleted, field.TypeBool, value)
-	}
-	if _u.mutation.ParentCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   file.ParentTable,
-			Columns: []string{file.ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.ChildrenCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   file.ChildrenTable,
-			Columns: []string{file.ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &fileUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &File{config: _u.config}
 	_spec.Assign = _node.assignValues

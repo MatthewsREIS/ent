@@ -203,7 +203,7 @@ var docUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DocMutation]{
 		{
 			Clear: func(cfg config, m *DocMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      true,
 						Table:        doc.ParentTable,
@@ -211,7 +211,8 @@ var docUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DocMutation]{
 						Bidi:         false,
 						TargetColumn: doc.FieldID,
 						TargetType:   field.TypeString,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -239,7 +240,7 @@ var docUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DocMutation]{
 		{
 			Clear: func(cfg config, m *DocMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ChildrenCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      false,
 						Table:        doc.ChildrenTable,
@@ -247,7 +248,8 @@ var docUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DocMutation]{
 						Bidi:         false,
 						TargetColumn: doc.FieldID,
 						TargetType:   field.TypeString,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -294,7 +296,7 @@ var docUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DocMutation]{
 		{
 			Clear: func(cfg config, m *DocMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.RelatedCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        doc.RelatedTable,
@@ -302,7 +304,8 @@ var docUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DocMutation]{
 						Bidi:         true,
 						TargetColumn: doc.FieldID,
 						TargetType:   field.TypeString,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

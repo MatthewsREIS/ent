@@ -146,7 +146,7 @@ var blogUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlogMutation]{
 		{
 			Clear: func(cfg config, m *BlogMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.AdminsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      false,
 						Table:        blog.AdminsTable,
@@ -154,7 +154,8 @@ var blogUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlogMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

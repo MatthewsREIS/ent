@@ -160,7 +160,7 @@ var bloblinkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobLinkMuta
 		{
 			Clear: func(cfg config, m *BlobLinkMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.BlobCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        bloblink.BlobTable,
@@ -168,7 +168,8 @@ var bloblinkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobLinkMuta
 						Bidi:         false,
 						TargetColumn: blob.FieldID,
 						TargetType:   field.TypeUUID,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -196,7 +197,7 @@ var bloblinkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobLinkMuta
 		{
 			Clear: func(cfg config, m *BlobLinkMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.LinkCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        bloblink.LinkTable,
@@ -204,7 +205,8 @@ var bloblinkUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobLinkMuta
 						Bidi:         false,
 						TargetColumn: blob.FieldID,
 						TargetType:   field.TypeUUID,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

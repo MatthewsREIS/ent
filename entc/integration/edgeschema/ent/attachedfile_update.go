@@ -166,7 +166,7 @@ var attachedfileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Attached
 		{
 			Clear: func(cfg config, m *AttachedFileMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FiCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        attachedfile.FiTable,
@@ -174,7 +174,8 @@ var attachedfileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Attached
 						Bidi:         false,
 						TargetColumn: file.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -202,7 +203,7 @@ var attachedfileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Attached
 		{
 			Clear: func(cfg config, m *AttachedFileMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ProcCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        attachedfile.ProcTable,
@@ -210,7 +211,8 @@ var attachedfileUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Attached
 						Bidi:         false,
 						TargetColumn: process.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

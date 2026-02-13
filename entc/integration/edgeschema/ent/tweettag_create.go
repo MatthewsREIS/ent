@@ -570,15 +570,17 @@ func (_c *TweetTagCreateBulk) Save(ctx context.Context) ([]*TweetTag, error) {
 	nodes := make([]*TweetTag, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, tweettagCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
 			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TweetTagMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
-				}
-				if err := entgen.ApplyDefaults(mutation, tweettagCreateSpec.Fields); err != nil {
-					return nil, err
 				}
 				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, tweettagCreateSpec); err != nil {
 					return nil, err

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/comment"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -101,6 +104,9 @@ func (_c *CommentCreate) Mutation() *CommentMutation {
 
 // Save creates the Comment in the database.
 func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, commentCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -126,66 +132,159 @@ func (_c *CommentCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *CommentCreate) check() error {
-	if _, ok := _c.mutation.UniqueInt(); !ok {
-		return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "Comment.unique_int"`)}
-	}
-	if _, ok := _c.mutation.UniqueFloat(); !ok {
-		return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "Comment.unique_float"`)}
-	}
-	return nil
+var commentCreateSpec = entgen.CreateSpec[*CommentMutation]{
+	Fields: []entgen.FieldSpec[*CommentMutation]{
+		{
+			Name: "unique_int",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "Comment.unique_int"`)}
+				},
+			},
+			IsSet: func(m *CommentMutation) bool {
+				_, ok := m.UniqueInt()
+				return ok
+			},
+		},
+		{
+			Name: "unique_float",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "Comment.unique_float"`)}
+				},
+			},
+			IsSet: func(m *CommentMutation) bool {
+				_, ok := m.UniqueFloat()
+				return ok
+			},
+		},
+		{
+			Name: "nillable_int",
+		},
+		{
+			Name: "table",
+		},
+		{
+			Name: "dir",
+		},
+		{
+			Name: "client",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*CommentMutation]{},
+}
+
+var commentCreateDescriptor = entbuilder.CreateDescriptor[config, Comment, *CommentMutation]{
+	Table: comment.Table,
+	NewNode: func(cfg config) *Comment {
+		return &Comment{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Comment, *CommentMutation]{
+		Column:      comment.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Comment, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Comment.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Comment, *CommentMutation]{
+
+		entbuilder.SimpleField[config, Comment, *CommentMutation, int](
+			comment.FieldUniqueInt,
+			field.TypeInt,
+			(*CommentMutation).UniqueInt,
+			func(n *Comment, v int) { n.UniqueInt = v },
+		),
+
+		entbuilder.SimpleField[config, Comment, *CommentMutation, float64](
+			comment.FieldUniqueFloat,
+			field.TypeFloat64,
+			(*CommentMutation).UniqueFloat,
+			func(n *Comment, v float64) { n.UniqueFloat = v },
+		),
+
+		entbuilder.NillableField[config, Comment, *CommentMutation, int](
+			comment.FieldNillableInt,
+			field.TypeInt,
+			(*CommentMutation).NillableInt,
+			func(n *Comment, v *int) { n.NillableInt = v },
+		),
+
+		entbuilder.SimpleField[config, Comment, *CommentMutation, string](
+			comment.FieldTable,
+			field.TypeString,
+			(*CommentMutation).Table,
+			func(n *Comment, v string) { n.Table = v },
+		),
+
+		entbuilder.SimpleField[config, Comment, *CommentMutation, schemadir.Dir](
+			comment.FieldDir,
+			field.TypeJSON,
+			(*CommentMutation).Dir,
+			func(n *Comment, v schemadir.Dir) { n.Dir = v },
+		),
+
+		entbuilder.SimpleField[config, Comment, *CommentMutation, string](
+			comment.FieldClient,
+			field.TypeString,
+			(*CommentMutation).GetClient,
+			func(n *Comment, v string) { n.Client = v },
+		),
+	},
 }
 
 func (_c *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, commentCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &commentCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &commentCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Comment{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.UniqueInt(); ok {
-		_spec.SetField(comment.FieldUniqueInt, field.TypeInt, value)
-		_node.UniqueInt = value
-	}
-	if value, ok := _c.mutation.UniqueFloat(); ok {
-		_spec.SetField(comment.FieldUniqueFloat, field.TypeFloat64, value)
-		_node.UniqueFloat = value
-	}
-	if value, ok := _c.mutation.NillableInt(); ok {
-		_spec.SetField(comment.FieldNillableInt, field.TypeInt, value)
-		_node.NillableInt = &value
-	}
-	if value, ok := _c.mutation.Table(); ok {
-		_spec.SetField(comment.FieldTable, field.TypeString, value)
-		_node.Table = value
-	}
-	if value, ok := _c.mutation.Dir(); ok {
-		_spec.SetField(comment.FieldDir, field.TypeJSON, value)
-		_node.Dir = value
-	}
-	if value, ok := _c.mutation.GetClient(); ok {
-		_spec.SetField(comment.FieldClient, field.TypeString, value)
-		_node.Client = value
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -574,19 +673,27 @@ func (_c *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 	nodes := make([]*Comment, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, commentCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CommentMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, commentCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &commentCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -598,20 +705,23 @@ func (_c *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &commentCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

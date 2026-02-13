@@ -130,7 +130,7 @@ var infoUpdateDescriptor = entbuilder.UpdateDescriptor[config, *InfoMutation]{
 		{
 			Clear: func(cfg config, m *InfoMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        info.UserTable,
@@ -138,7 +138,8 @@ var infoUpdateDescriptor = entbuilder.UpdateDescriptor[config, *InfoMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

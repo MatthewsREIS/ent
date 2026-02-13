@@ -165,7 +165,7 @@ var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
 		{
 			Clear: func(cfg config, m *NodeMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.PrevCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2O,
 						Inverse:      true,
 						Table:        node.PrevTable,
@@ -173,7 +173,8 @@ var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
 						Bidi:         false,
 						TargetColumn: node.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -201,7 +202,7 @@ var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
 		{
 			Clear: func(cfg config, m *NodeMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.NextCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2O,
 						Inverse:      false,
 						Table:        node.NextTable,
@@ -209,7 +210,8 @@ var nodeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NodeMutation]{
 						Bidi:         false,
 						TargetColumn: node.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

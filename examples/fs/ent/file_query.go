@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/fs/ent/file"
 	"entgo.io/ent/examples/fs/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -448,63 +448,61 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	return nodes, nil
 }
 
+var fileParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[File, File, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        file.ParentTable,
+			Columns:      file.ParentColumn,
+			Bidi:         false,
+			TargetColumn: file.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *File) int { return n.ID },
+	ExtractEdgeID: func(e *File) int { return e.ID },
+	ExtractNodeFK: func(n *File) *int {
+		v := n.ParentID
+		return &v
+	},
+}
+var fileChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[File, File, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        file.ChildrenTable,
+			Columns:      file.ChildrenColumn,
+			Bidi:         false,
+			TargetColumn: file.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *File) int { return n.ID },
+	ExtractEdgeID: func(e *File) int { return e.ID },
+	ExtractEdgeFK: func(e *File) *int {
+		v := e.ParentID
+		return &v
+	},
+}
+
 func (_q *FileQuery) loadParent(ctx context.Context, query *FileQuery, nodes []*File, init func(*File), assign func(*File, *File)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*File)
-	for i := range nodes {
-		fk := nodes[i].ParentID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(file.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &fileParentEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(file.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *FileQuery) loadChildren(ctx context.Context, query *FileQuery, nodes []*File, init func(*File), assign func(*File, *File)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*File)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(file.FieldParentID)
 	}
-	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(file.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ParentID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &fileChildrenEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

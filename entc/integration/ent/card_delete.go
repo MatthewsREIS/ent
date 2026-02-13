@@ -8,19 +8,22 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // CardDelete is the builder for deleting a Card entity.
 type CardDelete struct {
 	config
-	hooks    []Hook
-	mutation *CardMutation
+	hooks     []Hook
+	mutation  *CardMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // Where appends a list predicates to the CardDelete builder.
@@ -43,15 +46,39 @@ func (_d *CardDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *CardDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var cardDeleteDescriptor = entbuilder.DeleteDescriptor[config, *CardMutation]{
+	Table: card.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*CardMutation]{
+		Column: card.FieldID,
+		Type:   field.TypeInt,
+		Value: func(m *CardMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *CardMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *CardDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *CardDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
+func (_d *CardDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &cardDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
+	_spec.AddModifiers(_d.modifiers...)
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}

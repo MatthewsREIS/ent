@@ -160,7 +160,7 @@ var tweetlikeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetLikeMu
 		{
 			Clear: func(cfg config, m *TweetLikeMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TweetCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        tweetlike.TweetTable,
@@ -168,7 +168,8 @@ var tweetlikeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetLikeMu
 						Bidi:         false,
 						TargetColumn: tweet.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -196,7 +197,7 @@ var tweetlikeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetLikeMu
 		{
 			Clear: func(cfg config, m *TweetLikeMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        tweetlike.UserTable,
@@ -204,7 +205,8 @@ var tweetlikeUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetLikeMu
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

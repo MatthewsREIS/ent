@@ -107,7 +107,7 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UsersCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        group.UsersTable,
@@ -115,7 +115,8 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

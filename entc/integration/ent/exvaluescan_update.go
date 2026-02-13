@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math/big"
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -156,6 +158,140 @@ func (_u *ExValueScanUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var exvaluescanUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ExValueScanMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*ExValueScanMutation]{
+		{
+			Column: exvaluescan.FieldBinary,
+			Type:   field.TypeString,
+			Set: func(m *ExValueScanMutation) (driver.Value, bool, error) {
+				if value, ok := m.Binary(); ok {
+					vv, err := exvaluescan.ValueScanner.Binary.Value(value)
+					if err != nil {
+						return nil, false, err
+					}
+					return vv, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldBinaryBytes,
+			Type:   field.TypeBytes,
+			Set: func(m *ExValueScanMutation) (driver.Value, bool, error) {
+				if value, ok := m.BinaryBytes(); ok {
+					vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
+					if err != nil {
+						return nil, false, err
+					}
+					return vv, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldBinaryOptional,
+			Type:   field.TypeString,
+			Set: func(m *ExValueScanMutation) (driver.Value, bool, error) {
+				if value, ok := m.BinaryOptional(); ok {
+					vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)
+					if err != nil {
+						return nil, false, err
+					}
+					return vv, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ExValueScanMutation) bool {
+				return m.BinaryOptionalCleared()
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldText,
+			Type:   field.TypeString,
+			Set: func(m *ExValueScanMutation) (driver.Value, bool, error) {
+				if value, ok := m.Text(); ok {
+					vv, err := exvaluescan.ValueScanner.Text.Value(value)
+					if err != nil {
+						return nil, false, err
+					}
+					return vv, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldTextOptional,
+			Type:   field.TypeString,
+			Set: func(m *ExValueScanMutation) (driver.Value, bool, error) {
+				if value, ok := m.TextOptional(); ok {
+					vv, err := exvaluescan.ValueScanner.TextOptional.Value(value)
+					if err != nil {
+						return nil, false, err
+					}
+					return vv, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ExValueScanMutation) bool {
+				return m.TextOptionalCleared()
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldBase64,
+			Type:   field.TypeString,
+			Set: func(m *ExValueScanMutation) (driver.Value, bool, error) {
+				if value, ok := m.Base64(); ok {
+					vv, err := exvaluescan.ValueScanner.Base64.Value(value)
+					if err != nil {
+						return nil, false, err
+					}
+					return vv, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldCustom,
+			Type:   field.TypeString,
+			Set: func(m *ExValueScanMutation) (driver.Value, bool, error) {
+				if value, ok := m.Custom(); ok {
+					vv, err := exvaluescan.ValueScanner.Custom.Value(value)
+					if err != nil {
+						return nil, false, err
+					}
+					return vv, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: exvaluescan.FieldCustomOptional,
+			Type:   field.TypeString,
+			Set: func(m *ExValueScanMutation) (driver.Value, bool, error) {
+				if value, ok := m.CustomOptional(); ok {
+					vv, err := exvaluescan.ValueScanner.CustomOptional.Value(value)
+					if err != nil {
+						return nil, false, err
+					}
+					return vv, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *ExValueScanMutation) bool {
+				return m.CustomOptionalCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *ExValueScanMutation]{},
+}
+
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
 func (_u *ExValueScanUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *ExValueScanUpdate {
 	_u.modifiers = append(_u.modifiers, modifiers...)
@@ -171,70 +307,8 @@ func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (_node int, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Binary(); ok {
-		vv, err := exvaluescan.ValueScanner.Binary.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(exvaluescan.FieldBinary, field.TypeString, vv)
-	}
-	if value, ok := _u.mutation.BinaryBytes(); ok {
-		vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(exvaluescan.FieldBinaryBytes, field.TypeBytes, vv)
-	}
-	if value, ok := _u.mutation.BinaryOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(exvaluescan.FieldBinaryOptional, field.TypeString, vv)
-	}
-	if _u.mutation.BinaryOptionalCleared() {
-		_spec.ClearField(exvaluescan.FieldBinaryOptional, field.TypeString)
-	}
-	if value, ok := _u.mutation.Text(); ok {
-		vv, err := exvaluescan.ValueScanner.Text.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(exvaluescan.FieldText, field.TypeString, vv)
-	}
-	if value, ok := _u.mutation.TextOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.TextOptional.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(exvaluescan.FieldTextOptional, field.TypeString, vv)
-	}
-	if _u.mutation.TextOptionalCleared() {
-		_spec.ClearField(exvaluescan.FieldTextOptional, field.TypeString)
-	}
-	if value, ok := _u.mutation.Base64(); ok {
-		vv, err := exvaluescan.ValueScanner.Base64.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(exvaluescan.FieldBase64, field.TypeString, vv)
-	}
-	if value, ok := _u.mutation.Custom(); ok {
-		vv, err := exvaluescan.ValueScanner.Custom.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(exvaluescan.FieldCustom, field.TypeString, vv)
-	}
-	if value, ok := _u.mutation.CustomOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.CustomOptional.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(exvaluescan.FieldCustomOptional, field.TypeString, vv)
-	}
-	if _u.mutation.CustomOptionalCleared() {
-		_spec.ClearField(exvaluescan.FieldCustomOptional, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &exvaluescanUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -425,70 +499,8 @@ func (_u *ExValueScanUpdateOne) sqlSave(ctx context.Context) (_node *ExValueScan
 			}
 		}
 	}
-	if value, ok := _u.mutation.Binary(); ok {
-		vv, err := exvaluescan.ValueScanner.Binary.Value(value)
-		if err != nil {
-			return nil, err
-		}
-		_spec.SetField(exvaluescan.FieldBinary, field.TypeString, vv)
-	}
-	if value, ok := _u.mutation.BinaryBytes(); ok {
-		vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
-		if err != nil {
-			return nil, err
-		}
-		_spec.SetField(exvaluescan.FieldBinaryBytes, field.TypeBytes, vv)
-	}
-	if value, ok := _u.mutation.BinaryOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)
-		if err != nil {
-			return nil, err
-		}
-		_spec.SetField(exvaluescan.FieldBinaryOptional, field.TypeString, vv)
-	}
-	if _u.mutation.BinaryOptionalCleared() {
-		_spec.ClearField(exvaluescan.FieldBinaryOptional, field.TypeString)
-	}
-	if value, ok := _u.mutation.Text(); ok {
-		vv, err := exvaluescan.ValueScanner.Text.Value(value)
-		if err != nil {
-			return nil, err
-		}
-		_spec.SetField(exvaluescan.FieldText, field.TypeString, vv)
-	}
-	if value, ok := _u.mutation.TextOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.TextOptional.Value(value)
-		if err != nil {
-			return nil, err
-		}
-		_spec.SetField(exvaluescan.FieldTextOptional, field.TypeString, vv)
-	}
-	if _u.mutation.TextOptionalCleared() {
-		_spec.ClearField(exvaluescan.FieldTextOptional, field.TypeString)
-	}
-	if value, ok := _u.mutation.Base64(); ok {
-		vv, err := exvaluescan.ValueScanner.Base64.Value(value)
-		if err != nil {
-			return nil, err
-		}
-		_spec.SetField(exvaluescan.FieldBase64, field.TypeString, vv)
-	}
-	if value, ok := _u.mutation.Custom(); ok {
-		vv, err := exvaluescan.ValueScanner.Custom.Value(value)
-		if err != nil {
-			return nil, err
-		}
-		_spec.SetField(exvaluescan.FieldCustom, field.TypeString, vv)
-	}
-	if value, ok := _u.mutation.CustomOptional(); ok {
-		vv, err := exvaluescan.ValueScanner.CustomOptional.Value(value)
-		if err != nil {
-			return nil, err
-		}
-		_spec.SetField(exvaluescan.FieldCustomOptional, field.TypeString, vv)
-	}
-	if _u.mutation.CustomOptionalCleared() {
-		_spec.ClearField(exvaluescan.FieldCustomOptional, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &exvaluescanUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &ExValueScan{config: _u.config}

@@ -246,7 +246,7 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 		{
 			Clear: func(cfg config, m *TagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TweetsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        tag.TweetsTable,
@@ -254,7 +254,8 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 						Bidi:         false,
 						TargetColumn: tweet.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -329,7 +330,7 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 		{
 			Clear: func(cfg config, m *TagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        tag.GroupsTable,
@@ -337,7 +338,8 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 						Bidi:         false,
 						TargetColumn: group.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -384,7 +386,7 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 		{
 			Clear: func(cfg config, m *TagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TweetTagsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        tag.TweetTagsTable,
@@ -392,7 +394,8 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 						Bidi:         false,
 						TargetColumn: tweettag.FieldID,
 						TargetType:   field.TypeUUID,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -439,7 +442,7 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 		{
 			Clear: func(cfg config, m *TagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupTagsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        tag.GroupTagsTable,
@@ -447,7 +450,8 @@ var tagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TagMutation]{
 						Bidi:         false,
 						TargetColumn: grouptag.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

@@ -202,7 +202,7 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 		{
 			Clear: func(cfg config, m *MetadataMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2O,
 						Inverse:      true,
 						Table:        metadata.UserTable,
@@ -210,7 +210,8 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -238,7 +239,7 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 		{
 			Clear: func(cfg config, m *MetadataMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ChildrenCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        metadata.ChildrenTable,
@@ -246,7 +247,8 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 						Bidi:         false,
 						TargetColumn: metadata.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -293,7 +295,7 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 		{
 			Clear: func(cfg config, m *MetadataMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        metadata.ParentTable,
@@ -301,7 +303,8 @@ var metadataUpdateDescriptor = entbuilder.UpdateDescriptor[config, *MetadataMuta
 						Bidi:         false,
 						TargetColumn: metadata.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

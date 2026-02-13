@@ -71,6 +71,12 @@ var groupDeleteDescriptor = entbuilder.DeleteDescriptor[config, *GroupMutation]{
 	},
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *GroupDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *GroupDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *GroupDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &groupDeleteDescriptor)
 	if err != nil {

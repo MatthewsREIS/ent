@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/item"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -61,7 +64,9 @@ func (_c *ItemCreate) Mutation() *ItemMutation {
 
 // Save creates the Item in the database.
 func (_c *ItemCreate) Save(ctx context.Context) (*Item, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, itemCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -87,67 +92,106 @@ func (_c *ItemCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *ItemCreate) defaults() {
-	if _, ok := _c.mutation.ID(); !ok {
-		v := item.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var itemCreateSpec = entgen.CreateSpec[*ItemMutation]{
+	Fields: []entgen.FieldSpec[*ItemMutation]{
+		{
+			Name: "text",
+			Validators: []func(*ItemMutation) error{
+				func(m *ItemMutation) error {
+					if v, ok := m.Text(); ok {
+						if err := item.TextValidator(v); err != nil {
+							return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "id",
+			Default: func(m *ItemMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := item.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+			Validators: []func(*ItemMutation) error{
+				func(m *ItemMutation) error {
+					if v, ok := m.ID(); ok {
+						if err := item.IDValidator(v); err != nil {
+							return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*ItemMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *ItemCreate) check() error {
-	if v, ok := _c.mutation.Text(); ok {
-		if err := item.TextValidator(v); err != nil {
-			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.ID(); ok {
-		if err := item.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
-		}
-	}
-	return nil
+var itemCreateDescriptor = entbuilder.CreateDescriptor[config, Item, *ItemMutation]{
+	Table: item.Table,
+	NewNode: func(cfg config) *Item {
+		return &Item{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Item, *ItemMutation]{
+		Column:      item.FieldID,
+		Type:        field.TypeString,
+		UserDefined: true,
+		Value: func(m *ItemMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *Item, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(string)
+			return nil
+		},
+		AssignGenerated: func(node *Item, value driver.Value) error {
+			if v, ok := value.(string); ok {
+				node.ID = v
+				return nil
+			}
+			return fmt.Errorf("unexpected Item.ID type: %T", value)
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Item, *ItemMutation]{
+
+		entbuilder.SimpleField[config, Item, *ItemMutation, string](
+			item.FieldText,
+			field.TypeString,
+			(*ItemMutation).Text,
+			func(n *Item, v string) { n.Text = v },
+		),
+	},
 }
 
 func (_c *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, itemCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &itemCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Item.ID type: %T", _spec.ID.Value)
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &itemCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Item{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(item.Table, sqlgraph.NewFieldSpec(item.FieldID, field.TypeString))
-	)
-	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := _c.mutation.Text(); ok {
-		_spec.SetField(item.FieldText, field.TypeString, value)
-		_node.Text = value
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -341,20 +385,27 @@ func (_c *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 	nodes := make([]*Item, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, itemCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ItemMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, itemCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &itemCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -366,16 +417,23 @@ func (_c *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &itemCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

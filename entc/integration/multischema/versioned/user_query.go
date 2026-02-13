@@ -816,7 +816,10 @@ func (_q *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []
 			return withInterceptors[[]*Group](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+			joinT.Schema(_q.schemaConfig.GroupUsers)
+		})
 	return nil
 }
 func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
@@ -844,7 +847,10 @@ func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+			joinT.Schema(_q.schemaConfig.Friendship)
+		})
 	return nil
 }
 func (_q *UserQuery) loadFollowers(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
@@ -872,7 +878,10 @@ func (_q *UserQuery) loadFollowers(ctx context.Context, query *UserQuery, nodes 
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+			joinT.Schema(_q.schemaConfig.UserFollowing)
+		})
 	return nil
 }
 func (_q *UserQuery) loadFollowing(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
@@ -900,7 +909,10 @@ func (_q *UserQuery) loadFollowing(ctx context.Context, query *UserQuery, nodes 
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+			joinT.Schema(_q.schemaConfig.UserFollowing)
+		})
 	return nil
 }
 func (_q *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery, nodes []*User, init func(*User), assign func(*User, *Friendship)) error {

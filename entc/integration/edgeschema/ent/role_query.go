@@ -501,7 +501,9 @@ func (_q *RoleQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Ro
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *RoleQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, nodes []*Role, init func(*Role), assign func(*Role, *RoleUser)) error {

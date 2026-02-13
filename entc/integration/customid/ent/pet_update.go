@@ -194,7 +194,7 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.OwnerCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      true,
 						Table:        pet.OwnerTable,
@@ -202,7 +202,8 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -230,7 +231,7 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.CarsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      false,
 						Table:        pet.CarsTable,
@@ -238,7 +239,8 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 						Bidi:         false,
 						TargetColumn: car.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -285,7 +287,7 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FriendsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        pet.FriendsTable,
@@ -293,7 +295,8 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 						Bidi:         true,
 						TargetColumn: pet.FieldID,
 						TargetType:   field.TypeString,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -340,7 +343,7 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.BestFriendCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2O,
 						Inverse:      false,
 						Table:        pet.BestFriendTable,
@@ -348,7 +351,8 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 						Bidi:         true,
 						TargetColumn: pet.FieldID,
 						TargetType:   field.TypeString,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

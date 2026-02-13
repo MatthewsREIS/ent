@@ -169,7 +169,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.PetsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      false,
 						Table:        user.PetsTable,
@@ -177,7 +177,8 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: pet.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -224,7 +225,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FriendsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        user.FriendsTable,
@@ -232,7 +233,8 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         true,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

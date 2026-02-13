@@ -625,7 +625,9 @@ func (_q *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []
 			return withInterceptors[[]*Group](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {

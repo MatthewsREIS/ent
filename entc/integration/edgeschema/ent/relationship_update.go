@@ -203,7 +203,7 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 		{
 			Clear: func(cfg config, m *RelationshipMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        relationship.UserTable,
@@ -211,7 +211,8 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -239,7 +240,7 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 		{
 			Clear: func(cfg config, m *RelationshipMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.RelativeCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        relationship.RelativeTable,
@@ -247,7 +248,8 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -275,7 +277,7 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 		{
 			Clear: func(cfg config, m *RelationshipMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.InfoCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        relationship.InfoTable,
@@ -283,7 +285,8 @@ var relationshipUpdateDescriptor = entbuilder.UpdateDescriptor[config, *Relation
 						Bidi:         false,
 						TargetColumn: relationshipinfo.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

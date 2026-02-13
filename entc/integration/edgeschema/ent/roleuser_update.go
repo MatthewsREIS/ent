@@ -160,7 +160,7 @@ var roleuserUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleUserMuta
 		{
 			Clear: func(cfg config, m *RoleUserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.RoleCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        roleuser.RoleTable,
@@ -168,7 +168,8 @@ var roleuserUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleUserMuta
 						Bidi:         false,
 						TargetColumn: role.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -196,7 +197,7 @@ var roleuserUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleUserMuta
 		{
 			Clear: func(cfg config, m *RoleUserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        roleuser.UserTable,
@@ -204,7 +205,8 @@ var roleuserUpdateDescriptor = entbuilder.UpdateDescriptor[config, *RoleUserMuta
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

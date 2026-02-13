@@ -497,7 +497,9 @@ func (_q *ProcessQuery) loadFiles(ctx context.Context, query *FileQuery, nodes [
 			return withInterceptors[[]*File](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *ProcessQuery) loadAttachedFiles(ctx context.Context, query *AttachedFileQuery, nodes []*Process, init func(*Process), assign func(*Process, *AttachedFile)) error {

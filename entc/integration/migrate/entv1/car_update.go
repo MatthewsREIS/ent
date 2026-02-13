@@ -96,7 +96,7 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 		{
 			Clear: func(cfg config, m *CarMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.OwnerCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2O,
 						Inverse:      true,
 						Table:        car.OwnerTable,
@@ -104,7 +104,8 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

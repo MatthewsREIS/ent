@@ -133,7 +133,7 @@ var grouptagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupTagMuta
 		{
 			Clear: func(cfg config, m *GroupTagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TagCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        grouptag.TagTable,
@@ -141,7 +141,8 @@ var grouptagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupTagMuta
 						Bidi:         false,
 						TargetColumn: tag.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -169,7 +170,7 @@ var grouptagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupTagMuta
 		{
 			Clear: func(cfg config, m *GroupTagMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        grouptag.GroupTable,
@@ -177,7 +178,8 @@ var grouptagUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupTagMuta
 						Bidi:         false,
 						TargetColumn: group.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

@@ -8,11 +8,13 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/predicate"
 	"entgo.io/ent/examples/migration/ent/sessiondevice"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -43,14 +45,31 @@ func (_d *SessionDeviceDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
-func (_d *SessionDeviceDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(sessiondevice.Table, sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
+var sessiondeviceDeleteDescriptor = entbuilder.DeleteDescriptor[config, *SessionDeviceMutation]{
+	Table: sessiondevice.Table,
+	ID: &entbuilder.DeleteIDDescriptor[*SessionDeviceMutation]{
+		Column: sessiondevice.FieldID,
+		Type:   field.TypeUUID,
+		Value: func(m *SessionDeviceMutation) (driver.Value, bool, error) {
+			if id, ok := m.ID(); ok {
+				return id, true, nil
 			}
+			return nil, false, nil
+		},
+	},
+	Predicates: func(m *SessionDeviceMutation) []func(*sql.Selector) {
+		predicates := make([]func(*sql.Selector), len(m.predicates))
+		for i := range m.predicates {
+			predicates[i] = m.predicates[i]
 		}
+		return predicates
+	},
+}
+
+func (_d *SessionDeviceDelete) sqlExec(ctx context.Context) (int, error) {
+	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &sessiondeviceDeleteDescriptor)
+	if err != nil {
+		return 0, err
 	}
 	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {

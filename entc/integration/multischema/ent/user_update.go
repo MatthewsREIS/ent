@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -354,7 +355,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.PetsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      false,
 						Table:        user.PetsTable,
@@ -362,7 +363,9 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: pet.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					edge.Schema = cfg.schemaConfig.Pet
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -380,6 +383,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: pet.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Pet
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -399,6 +403,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: pet.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Pet
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -409,7 +414,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        user.GroupsTable,
@@ -417,7 +422,9 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: group.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					edge.Schema = cfg.schemaConfig.GroupUsers
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -435,6 +442,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: group.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.GroupUsers
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -454,6 +462,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: group.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.GroupUsers
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -464,7 +473,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FriendsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        user.FriendsTable,
@@ -472,7 +481,9 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         true,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					edge.Schema = cfg.schemaConfig.Friendship
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -490,6 +501,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Friendship
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -509,6 +521,23 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Friendship
+				// Apply through-table defaults for Friendship
+				throughMut := newFriendshipMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, friendshipCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range friendshipCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -519,7 +548,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        user.ParentsTable,
@@ -527,7 +556,9 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					edge.Schema = cfg.schemaConfig.UserChildren
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -545,6 +576,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.UserChildren
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -564,6 +596,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.UserChildren
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -574,7 +607,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ChildrenCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        user.ChildrenTable,
@@ -582,7 +615,9 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					edge.Schema = cfg.schemaConfig.Parent
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -600,6 +635,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Parent
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -619,6 +655,23 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Parent
+				// Apply through-table defaults for Parent
+				throughMut := newParentMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, parentCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range parentCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -629,7 +682,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FriendshipsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        user.FriendshipsTable,
@@ -637,7 +690,9 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: friendship.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					edge.Schema = cfg.schemaConfig.Friendship
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -655,6 +710,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: friendship.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Friendship
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -674,6 +730,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: friendship.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Friendship
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -684,7 +741,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentHoodCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        user.ParentHoodTable,
@@ -692,7 +749,9 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: parent.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					edge.Schema = cfg.schemaConfig.Parent
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -710,6 +769,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: parent.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Parent
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}
@@ -729,6 +789,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 					TargetColumn: parent.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Parent
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

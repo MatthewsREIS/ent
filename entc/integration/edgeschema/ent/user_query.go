@@ -1117,7 +1117,9 @@ func (_q *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []
 			return withInterceptors[[]*Group](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
@@ -1145,7 +1147,9 @@ func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadRelatives(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
@@ -1173,7 +1177,9 @@ func (_q *UserQuery) loadRelatives(ctx context.Context, query *UserQuery, nodes 
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadLikedTweets(ctx context.Context, query *TweetQuery, nodes []*User, init func(*User), assign func(*User, *Tweet)) error {
@@ -1201,7 +1207,9 @@ func (_q *UserQuery) loadLikedTweets(ctx context.Context, query *TweetQuery, nod
 			return withInterceptors[[]*Tweet](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*User, init func(*User), assign func(*User, *Tweet)) error {
@@ -1229,7 +1237,9 @@ func (_q *UserQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []
 			return withInterceptors[[]*Tweet](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadRoles(ctx context.Context, query *RoleQuery, nodes []*User, init func(*User), assign func(*User, *Role)) error {
@@ -1257,7 +1267,9 @@ func (_q *UserQuery) loadRoles(ctx context.Context, query *RoleQuery, nodes []*U
 			return withInterceptors[[]*Role](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadJoinedGroups(ctx context.Context, query *UserGroupQuery, nodes []*User, init func(*User), assign func(*User, *UserGroup)) error {

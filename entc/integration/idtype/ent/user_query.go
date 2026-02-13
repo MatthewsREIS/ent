@@ -597,7 +597,9 @@ func (_q *UserQuery) loadFollowers(ctx context.Context, query *UserQuery, nodes 
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadFollowing(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
@@ -625,7 +627,9 @@ func (_q *UserQuery) loadFollowing(ctx context.Context, query *UserQuery, nodes 
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 

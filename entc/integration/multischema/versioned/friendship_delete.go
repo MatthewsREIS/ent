@@ -71,6 +71,12 @@ var friendshipDeleteDescriptor = entbuilder.DeleteDescriptor[config, *Friendship
 	},
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *FriendshipDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *FriendshipDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *FriendshipDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &friendshipDeleteDescriptor)
 	if err != nil {

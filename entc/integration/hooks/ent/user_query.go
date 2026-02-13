@@ -663,7 +663,9 @@ func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *UserQuery) loadBestFriend(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {

@@ -128,7 +128,7 @@ var tokenUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TokenMutation]{
 		{
 			Clear: func(cfg config, m *TokenMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.AccountCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      true,
 						Table:        token.AccountTable,
@@ -136,7 +136,8 @@ var tokenUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TokenMutation]{
 						Bidi:         false,
 						TargetColumn: account.FieldID,
 						TargetType:   field.TypeOther,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

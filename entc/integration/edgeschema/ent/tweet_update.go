@@ -282,7 +282,7 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 		{
 			Clear: func(cfg config, m *TweetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.LikedUsersCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        tweet.LikedUsersTable,
@@ -290,7 +290,8 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -353,7 +354,7 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 		{
 			Clear: func(cfg config, m *TweetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UserCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        tweet.UserTable,
@@ -361,7 +362,8 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -424,7 +426,7 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 		{
 			Clear: func(cfg config, m *TweetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TagsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        tweet.TagsTable,
@@ -432,7 +434,8 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 						Bidi:         false,
 						TargetColumn: tag.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -507,7 +510,7 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 		{
 			Clear: func(cfg config, m *TweetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TweetUserCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        tweet.TweetUserTable,
@@ -515,7 +518,8 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 						Bidi:         false,
 						TargetColumn: usertweet.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -562,7 +566,7 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 		{
 			Clear: func(cfg config, m *TweetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TweetTagsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        tweet.TweetTagsTable,
@@ -570,7 +574,8 @@ var tweetUpdateDescriptor = entbuilder.UpdateDescriptor[config, *TweetMutation]{
 						Bidi:         false,
 						TargetColumn: tweettag.FieldID,
 						TargetType:   field.TypeUUID,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

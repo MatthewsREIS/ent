@@ -142,7 +142,7 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 		{
 			Clear: func(cfg config, m *CarMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.RentalsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      false,
 						Table:        car.RentalsTable,
@@ -150,7 +150,8 @@ var carUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CarMutation]{
 						Bidi:         false,
 						TargetColumn: rental.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

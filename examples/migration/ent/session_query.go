@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/examples/migration/ent/predicate"
 	"entgo.io/ent/examples/migration/ent/session"
 	"entgo.io/ent/examples/migration/ent/sessiondevice"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -406,33 +407,32 @@ func (_q *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	return nodes, nil
 }
 
+var sessionDeviceEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Session, SessionDevice, uuid.UUID, uuid.UUID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        session.DeviceTable,
+			Columns:      session.DeviceColumn,
+			Bidi:         false,
+			TargetColumn: sessiondevice.FieldID,
+			TargetType:   field.TypeUUID,
+		})
+	},
+	ExtractNodeID: func(n *Session) uuid.UUID { return n.ID },
+	ExtractEdgeID: func(e *SessionDevice) uuid.UUID { return e.ID },
+	ExtractNodeFK: func(n *Session) *uuid.UUID {
+		v := n.DeviceID
+		return &v
+	},
+}
+
 func (_q *SessionQuery) loadDevice(ctx context.Context, query *SessionDeviceQuery, nodes []*Session, init func(*Session), assign func(*Session, *SessionDevice)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Session)
-	for i := range nodes {
-		fk := nodes[i].DeviceID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(sessiondevice.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "device_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &sessionDeviceEdgeLoadDescriptor, nodes, assign,
+		func(ids []uuid.UUID) {
+			query.Where(sessiondevice.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

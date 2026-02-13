@@ -71,6 +71,12 @@ var parentDeleteDescriptor = entbuilder.DeleteDescriptor[config, *ParentMutation
 	},
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *ParentDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ParentDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *ParentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &parentDeleteDescriptor)
 	if err != nil {

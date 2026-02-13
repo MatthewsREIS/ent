@@ -245,7 +245,7 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.UsersCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        group.UsersTable,
@@ -253,7 +253,8 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -316,7 +317,7 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.TagsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        group.TagsTable,
@@ -324,7 +325,8 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 						Bidi:         false,
 						TargetColumn: tag.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -371,7 +373,7 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.JoinedUsersCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        group.JoinedUsersTable,
@@ -379,7 +381,8 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 						Bidi:         false,
 						TargetColumn: usergroup.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -426,7 +429,7 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 		{
 			Clear: func(cfg config, m *GroupMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.GroupTagsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        group.GroupTagsTable,
@@ -434,7 +437,8 @@ var groupUpdateDescriptor = entbuilder.UpdateDescriptor[config, *GroupMutation]{
 						Bidi:         false,
 						TargetColumn: grouptag.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

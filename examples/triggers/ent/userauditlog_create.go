@@ -4,11 +4,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/triggers/ent/userauditlog"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -66,6 +69,9 @@ func (_c *UserAuditLogCreate) Mutation() *UserAuditLogMutation {
 
 // Save creates the UserAuditLog in the database.
 func (_c *UserAuditLogCreate) Save(ctx context.Context) (*UserAuditLog, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, userauditlogCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -91,57 +97,138 @@ func (_c *UserAuditLogCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *UserAuditLogCreate) check() error {
-	if _, ok := _c.mutation.OperationType(); !ok {
-		return &ValidationError{Name: "operation_type", err: errors.New(`ent: missing required field "UserAuditLog.operation_type"`)}
-	}
-	if _, ok := _c.mutation.OperationTime(); !ok {
-		return &ValidationError{Name: "operation_time", err: errors.New(`ent: missing required field "UserAuditLog.operation_time"`)}
-	}
-	return nil
+var userauditlogCreateSpec = entgen.CreateSpec[*UserAuditLogMutation]{
+	Fields: []entgen.FieldSpec[*UserAuditLogMutation]{
+		{
+			Name: "operation_type",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "operation_type", err: errors.New(`ent: missing required field "UserAuditLog.operation_type"`)}
+				},
+			},
+			IsSet: func(m *UserAuditLogMutation) bool {
+				_, ok := m.OperationType()
+				return ok
+			},
+		},
+		{
+			Name: "operation_time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "operation_time", err: errors.New(`ent: missing required field "UserAuditLog.operation_time"`)}
+				},
+			},
+			IsSet: func(m *UserAuditLogMutation) bool {
+				_, ok := m.OperationTime()
+				return ok
+			},
+		},
+		{
+			Name: "old_value",
+		},
+		{
+			Name: "new_value",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*UserAuditLogMutation]{},
+}
+
+var userauditlogCreateDescriptor = entbuilder.CreateDescriptor[config, UserAuditLog, *UserAuditLogMutation]{
+	Table: userauditlog.Table,
+	NewNode: func(cfg config) *UserAuditLog {
+		return &UserAuditLog{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, UserAuditLog, *UserAuditLogMutation]{
+		Column:      userauditlog.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *UserAuditLog, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected UserAuditLog.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, UserAuditLog, *UserAuditLogMutation]{
+
+		entbuilder.SimpleField[config, UserAuditLog, *UserAuditLogMutation, string](
+			userauditlog.FieldOperationType,
+			field.TypeString,
+			(*UserAuditLogMutation).OperationType,
+			func(n *UserAuditLog, v string) { n.OperationType = v },
+		),
+
+		entbuilder.SimpleField[config, UserAuditLog, *UserAuditLogMutation, string](
+			userauditlog.FieldOperationTime,
+			field.TypeString,
+			(*UserAuditLogMutation).OperationTime,
+			func(n *UserAuditLog, v string) { n.OperationTime = v },
+		),
+
+		entbuilder.SimpleField[config, UserAuditLog, *UserAuditLogMutation, string](
+			userauditlog.FieldOldValue,
+			field.TypeString,
+			(*UserAuditLogMutation).OldValue,
+			func(n *UserAuditLog, v string) { n.OldValue = v },
+		),
+
+		entbuilder.SimpleField[config, UserAuditLog, *UserAuditLogMutation, string](
+			userauditlog.FieldNewValue,
+			field.TypeString,
+			(*UserAuditLogMutation).NewValue,
+			func(n *UserAuditLog, v string) { n.NewValue = v },
+		),
+	},
 }
 
 func (_c *UserAuditLogCreate) sqlSave(ctx context.Context) (*UserAuditLog, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, userauditlogCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &userauditlogCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &userauditlogCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *UserAuditLogCreate) createSpec() (*UserAuditLog, *sqlgraph.CreateSpec) {
-	var (
-		_node = &UserAuditLog{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(userauditlog.Table, sqlgraph.NewFieldSpec(userauditlog.FieldID, field.TypeInt))
-	)
-	if value, ok := _c.mutation.OperationType(); ok {
-		_spec.SetField(userauditlog.FieldOperationType, field.TypeString, value)
-		_node.OperationType = value
-	}
-	if value, ok := _c.mutation.OperationTime(); ok {
-		_spec.SetField(userauditlog.FieldOperationTime, field.TypeString, value)
-		_node.OperationTime = value
-	}
-	if value, ok := _c.mutation.OldValue(); ok {
-		_spec.SetField(userauditlog.FieldOldValue, field.TypeString, value)
-		_node.OldValue = value
-	}
-	if value, ok := _c.mutation.NewValue(); ok {
-		_spec.SetField(userauditlog.FieldNewValue, field.TypeString, value)
-		_node.NewValue = value
-	}
-	return _node, _spec
 }
 
 // UserAuditLogCreateBulk is the builder for creating many UserAuditLog entities in bulk.
@@ -160,19 +247,27 @@ func (_c *UserAuditLogCreateBulk) Save(ctx context.Context) ([]*UserAuditLog, er
 	nodes := make([]*UserAuditLog, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, userauditlogCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserAuditLogMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, userauditlogCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &userauditlogCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -183,20 +278,23 @@ func (_c *UserAuditLogCreateBulk) Save(ctx context.Context) ([]*UserAuditLog, er
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &userauditlogCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

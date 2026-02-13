@@ -649,7 +649,9 @@ func (_q *GroupQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*
 			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *GroupQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Group, init func(*Group), assign func(*Group, *Tag)) error {
@@ -677,7 +679,9 @@ func (_q *GroupQuery) loadTags(ctx context.Context, query *TagQuery, nodes []*Gr
 			return withInterceptors[[]*Tag](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *GroupQuery) loadJoinedUsers(ctx context.Context, query *UserGroupQuery, nodes []*Group, init func(*Group), assign func(*Group, *UserGroup)) error {

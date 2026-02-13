@@ -154,8 +154,34 @@ var grouptagCreateDescriptor = entbuilder.CreateDescriptor[config, GroupTag, *Gr
 		Type:        field.TypeInt,
 		UserDefined: false,
 		AssignGenerated: func(node *GroupTag, value driver.Value) error {
-			id := value.(int64)
-			node.ID = int(id)
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected GroupTag.ID type: %T", value)
+			}
 			return nil
 		},
 	},
@@ -439,15 +465,17 @@ func (_c *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
 	nodes := make([]*GroupTag, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, grouptagCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
 			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupTagMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
-				}
-				if err := entgen.ApplyDefaults(mutation, grouptagCreateSpec.Fields); err != nil {
-					return nil, err
 				}
 				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, grouptagCreateSpec); err != nil {
 					return nil, err

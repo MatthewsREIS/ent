@@ -130,7 +130,7 @@ var commentUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CommentMutati
 		{
 			Clear: func(cfg config, m *CommentMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.PostCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      true,
 						Table:        comment.PostTable,
@@ -138,7 +138,8 @@ var commentUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CommentMutati
 						Bidi:         false,
 						TargetColumn: post.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

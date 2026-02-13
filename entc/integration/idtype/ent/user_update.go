@@ -193,7 +193,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.SpouseCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2O,
 						Inverse:      false,
 						Table:        user.SpouseTable,
@@ -201,7 +201,8 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         true,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeUint64,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -229,7 +230,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FollowersCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      true,
 						Table:        user.FollowersTable,
@@ -237,7 +238,8 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeUint64,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -284,7 +286,7 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 		{
 			Clear: func(cfg config, m *UserMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FollowingCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        user.FollowingTable,
@@ -292,7 +294,8 @@ var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeUint64,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/o2obidi/ent/predicate"
 	"entgo.io/ent/examples/o2obidi/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -412,36 +413,31 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	return nodes, nil
 }
 
+var userSpouseEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2O,
+			Inverse:      false,
+			Table:        user.SpouseTable,
+			Columns:      user.SpouseColumn,
+			Bidi:         true,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *User) int { return n.ID },
+	ExtractEdgeID: func(e *User) int { return e.ID },
+	ExtractNodeFK: func(n *User) *int {
+		return n.user_spouse
+	},
+}
+
 func (_q *UserQuery) loadSpouse(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*User)
-	for i := range nodes {
-		if nodes[i].user_spouse == nil {
-			continue
-		}
-		fk := *nodes[i].user_spouse
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_spouse" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &userSpouseEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

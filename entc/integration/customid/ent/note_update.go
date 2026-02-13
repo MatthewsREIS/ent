@@ -167,7 +167,7 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 		{
 			Clear: func(cfg config, m *NoteMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ParentCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      true,
 						Table:        note.ParentTable,
@@ -175,7 +175,8 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 						Bidi:         false,
 						TargetColumn: note.FieldID,
 						TargetType:   field.TypeString,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -203,7 +204,7 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 		{
 			Clear: func(cfg config, m *NoteMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ChildrenCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      false,
 						Table:        note.ChildrenTable,
@@ -211,7 +212,8 @@ var noteUpdateDescriptor = entbuilder.UpdateDescriptor[config, *NoteMutation]{
 						Bidi:         false,
 						TargetColumn: note.FieldID,
 						TargetType:   field.TypeString,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

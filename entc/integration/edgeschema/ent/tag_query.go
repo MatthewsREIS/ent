@@ -650,7 +650,9 @@ func (_q *TagQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*
 			return withInterceptors[[]*Tweet](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *TagQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Group)) error {
@@ -678,7 +680,9 @@ func (_q *TagQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*
 			return withInterceptors[[]*Group](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *TagQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *TweetTag)) error {

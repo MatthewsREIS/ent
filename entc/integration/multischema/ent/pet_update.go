@@ -130,7 +130,7 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 		{
 			Clear: func(cfg config, m *PetMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.OwnerCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      true,
 						Table:        pet.OwnerTable,
@@ -138,7 +138,9 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					edge.Schema = cfg.schemaConfig.Pet
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -156,6 +158,7 @@ var petUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PetMutation]{
 					TargetColumn: user.FieldID,
 					TargetType:   field.TypeInt,
 				})
+				edge.Schema = cfg.schemaConfig.Pet
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

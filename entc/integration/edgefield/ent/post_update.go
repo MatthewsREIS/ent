@@ -128,7 +128,7 @@ var postUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PostMutation]{
 		{
 			Clear: func(cfg config, m *PostMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.AuthorCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        post.AuthorTable,
@@ -136,7 +136,8 @@ var postUpdateDescriptor = entbuilder.UpdateDescriptor[config, *PostMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

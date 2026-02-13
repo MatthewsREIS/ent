@@ -97,7 +97,7 @@ var sessionUpdateDescriptor = entbuilder.UpdateDescriptor[config, *SessionMutati
 		{
 			Clear: func(cfg config, m *SessionMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.DeviceCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      true,
 						Table:        session.DeviceTable,
@@ -105,7 +105,8 @@ var sessionUpdateDescriptor = entbuilder.UpdateDescriptor[config, *SessionMutati
 						Bidi:         false,
 						TargetColumn: device.FieldID,
 						TargetType:   field.TypeBytes,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

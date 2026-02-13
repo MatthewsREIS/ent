@@ -640,7 +640,9 @@ func (_q *PetQuery) loadFriends(ctx context.Context, query *PetQuery, nodes []*P
 			return withInterceptors[[]*Pet](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *PetQuery) loadBestFriend(ctx context.Context, query *PetQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *Pet)) error {

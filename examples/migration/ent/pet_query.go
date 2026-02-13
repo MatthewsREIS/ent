@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/examples/migration/ent/pet"
 	"entgo.io/ent/examples/migration/ent/predicate"
 	"entgo.io/ent/examples/migration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -448,62 +449,59 @@ func (_q *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	return nodes, nil
 }
 
+var petBestFriendEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, Pet, uuid.UUID, uuid.UUID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2O,
+			Inverse:      false,
+			Table:        pet.BestFriendTable,
+			Columns:      pet.BestFriendColumn,
+			Bidi:         true,
+			TargetColumn: pet.FieldID,
+			TargetType:   field.TypeUUID,
+		})
+	},
+	ExtractNodeID: func(n *Pet) uuid.UUID { return n.ID },
+	ExtractEdgeID: func(e *Pet) uuid.UUID { return e.ID },
+	ExtractNodeFK: func(n *Pet) *uuid.UUID {
+		v := n.BestFriendID
+		return &v
+	},
+}
+var petOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, User, uuid.UUID, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        pet.OwnerTable,
+			Columns:      pet.OwnerColumn,
+			Bidi:         false,
+			TargetColumn: user.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *Pet) uuid.UUID { return n.ID },
+	ExtractEdgeID: func(e *User) int { return e.ID },
+	ExtractNodeFK: func(n *Pet) *int {
+		v := n.OwnerID
+		return &v
+	},
+}
+
 func (_q *PetQuery) loadBestFriend(ctx context.Context, query *PetQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *Pet)) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Pet)
-	for i := range nodes {
-		fk := nodes[i].BestFriendID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(pet.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "best_friend_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &petBestFriendEdgeLoadDescriptor, nodes, assign,
+		func(ids []uuid.UUID) {
+			query.Where(pet.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Pet)
-	for i := range nodes {
-		fk := nodes[i].OwnerID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &petOwnerEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(user.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

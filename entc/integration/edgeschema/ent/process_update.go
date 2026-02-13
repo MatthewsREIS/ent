@@ -145,7 +145,7 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 		{
 			Clear: func(cfg config, m *ProcessMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.FilesCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2M,
 						Inverse:      false,
 						Table:        process.FilesTable,
@@ -153,7 +153,8 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 						Bidi:         false,
 						TargetColumn: file.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -216,7 +217,7 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 		{
 			Clear: func(cfg config, m *ProcessMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.AttachedFilesCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      true,
 						Table:        process.AttachedFilesTable,
@@ -224,7 +225,8 @@ var processUpdateDescriptor = entbuilder.UpdateDescriptor[config, *ProcessMutati
 						Bidi:         false,
 						TargetColumn: attachedfile.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

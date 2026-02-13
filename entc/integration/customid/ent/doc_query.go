@@ -601,7 +601,9 @@ func (_q *DocQuery) loadRelated(ctx context.Context, query *DocQuery, nodes []*D
 			return withInterceptors[[]*Doc](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 

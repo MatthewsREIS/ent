@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"net"
@@ -19,6 +20,8 @@ import (
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -796,7 +799,9 @@ func (_c *FieldTypeCreate) Mutation() *FieldTypeMutation {
 
 // Save creates the FieldType in the database.
 func (_c *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, fieldtypeCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -822,419 +827,996 @@ func (_c *FieldTypeCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *FieldTypeCreate) defaults() {
-	if _, ok := _c.mutation.LinkOther(); !ok {
-		v := fieldtype.DefaultLinkOther
-		_c.mutation.SetLinkOther(v)
-	}
-	if _, ok := _c.mutation.LinkOtherFunc(); !ok {
-		v := fieldtype.DefaultLinkOtherFunc()
-		_c.mutation.SetLinkOtherFunc(v)
-	}
-	if _, ok := _c.mutation.Dir(); !ok {
-		v := fieldtype.DefaultDir()
-		_c.mutation.SetDir(v)
-	}
-	if _, ok := _c.mutation.Str(); !ok {
-		v := fieldtype.DefaultStr()
-		_c.mutation.SetStr(v)
-	}
-	if _, ok := _c.mutation.NullStr(); !ok {
-		v := fieldtype.DefaultNullStr()
-		_c.mutation.SetNullStr(v)
-	}
-	if _, ok := _c.mutation.DeletedAt(); !ok {
-		v := fieldtype.DefaultDeletedAt()
-		_c.mutation.SetDeletedAt(v)
-	}
-	if _, ok := _c.mutation.IP(); !ok {
-		v := fieldtype.DefaultIP()
-		_c.mutation.SetIP(v)
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		v := fieldtype.DefaultRole
-		_c.mutation.SetRole(v)
-	}
-	if _, ok := _c.mutation.Pair(); !ok {
-		v := fieldtype.DefaultPair()
-		_c.mutation.SetPair(v)
-	}
-	if _, ok := _c.mutation.Vstring(); !ok {
-		v := fieldtype.DefaultVstring()
-		_c.mutation.SetVstring(v)
-	}
-	if _, ok := _c.mutation.Triple(); !ok {
-		v := fieldtype.DefaultTriple()
-		_c.mutation.SetTriple(v)
-	}
+var fieldtypeCreateSpec = entgen.CreateSpec[*FieldTypeMutation]{
+	Fields: []entgen.FieldSpec[*FieldTypeMutation]{
+		{
+			Name: "int",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int", err: errors.New(`ent: missing required field "FieldType.int"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int()
+				return ok
+			},
+		},
+		{
+			Name: "int8",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int8", err: errors.New(`ent: missing required field "FieldType.int8"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int8()
+				return ok
+			},
+		},
+		{
+			Name: "int16",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int16", err: errors.New(`ent: missing required field "FieldType.int16"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int16()
+				return ok
+			},
+		},
+		{
+			Name: "int32",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int32", err: errors.New(`ent: missing required field "FieldType.int32"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int32()
+				return ok
+			},
+		},
+		{
+			Name: "int64",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "int64", err: errors.New(`ent: missing required field "FieldType.int64"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Int64()
+				return ok
+			},
+		},
+		{
+			Name: "optional_int",
+		},
+		{
+			Name: "optional_int8",
+		},
+		{
+			Name: "optional_int16",
+		},
+		{
+			Name: "optional_int32",
+		},
+		{
+			Name: "optional_int64",
+		},
+		{
+			Name: "nillable_int",
+		},
+		{
+			Name: "nillable_int8",
+		},
+		{
+			Name: "nillable_int16",
+		},
+		{
+			Name: "nillable_int32",
+		},
+		{
+			Name: "nillable_int64",
+		},
+		{
+			Name: "validate_optional_int32",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.ValidateOptionalInt32(); ok {
+						if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
+							return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_uint",
+		},
+		{
+			Name: "optional_uint8",
+		},
+		{
+			Name: "optional_uint16",
+		},
+		{
+			Name: "optional_uint32",
+		},
+		{
+			Name: "optional_uint64",
+		},
+		{
+			Name: "state",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.State(); ok {
+						if err := fieldtype.StateValidator(v); err != nil {
+							return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_float",
+		},
+		{
+			Name: "optional_float32",
+		},
+		{
+			Name: "text",
+		},
+		{
+			Name: "datetime",
+		},
+		{
+			Name: "decimal",
+		},
+		{
+			Name: "link_other",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.LinkOther(); !ok {
+					v := fieldtype.DefaultLinkOther
+					m.SetLinkOther(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "link_other_func",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.LinkOtherFunc(); !ok {
+					v := fieldtype.DefaultLinkOtherFunc()
+					m.SetLinkOtherFunc(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "mac",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.MAC(); ok {
+						if err := fieldtype.MACValidator(v.String()); err != nil {
+							return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "string_array",
+		},
+		{
+			Name: "password",
+		},
+		{
+			Name: "string_scanner",
+		},
+		{
+			Name: "duration",
+		},
+		{
+			Name: "dir",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "dir", err: errors.New(`ent: missing required field "FieldType.dir"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Dir()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Dir(); !ok {
+					v := fieldtype.DefaultDir()
+					m.SetDir(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "ndir",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Ndir(); ok {
+						if err := fieldtype.NdirValidator(string(v)); err != nil {
+							return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "str",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Str(); !ok {
+					v := fieldtype.DefaultStr()
+					m.SetStr(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "null_str",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.NullStr(); !ok {
+					v := fieldtype.DefaultNullStr()
+					m.SetNullStr(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "link",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Link(); ok {
+						if err := fieldtype.LinkValidator(v.String()); err != nil {
+							return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "null_link",
+		},
+		{
+			Name: "active",
+		},
+		{
+			Name: "null_active",
+		},
+		{
+			Name: "deleted",
+		},
+		{
+			Name: "deleted_at",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.DeletedAt(); !ok {
+					v := fieldtype.DefaultDeletedAt()
+					m.SetDeletedAt(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "raw_data",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.RawData(); ok {
+						if err := fieldtype.RawDataValidator(v); err != nil {
+							return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "sensitive",
+		},
+		{
+			Name: "ip",
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.IP(); !ok {
+					v := fieldtype.DefaultIP()
+					m.SetIP(v)
+				}
+				return nil
+			},
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.IP(); ok {
+						if err := fieldtype.IPValidator([]byte(v)); err != nil {
+							return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "null_int64",
+		},
+		{
+			Name: "schema_int",
+		},
+		{
+			Name: "schema_int8",
+		},
+		{
+			Name: "schema_int64",
+		},
+		{
+			Name: "schema_float",
+		},
+		{
+			Name: "schema_float32",
+		},
+		{
+			Name: "null_float",
+		},
+		{
+			Name: "role",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "FieldType.role"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Role()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Role(); !ok {
+					v := fieldtype.DefaultRole
+					m.SetRole(v)
+				}
+				return nil
+			},
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Role(); ok {
+						if err := fieldtype.RoleValidator(v); err != nil {
+							return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "priority",
+			Validators: []func(*FieldTypeMutation) error{
+				func(m *FieldTypeMutation) error {
+					if v, ok := m.Priority(); ok {
+						if err := fieldtype.PriorityValidator(v); err != nil {
+							return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "optional_uuid",
+		},
+		{
+			Name: "nillable_uuid",
+		},
+		{
+			Name: "strings",
+		},
+		{
+			Name: "pair",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "pair", err: errors.New(`ent: missing required field "FieldType.pair"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Pair()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Pair(); !ok {
+					v := fieldtype.DefaultPair()
+					m.SetPair(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "nil_pair",
+		},
+		{
+			Name: "vstring",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "vstring", err: errors.New(`ent: missing required field "FieldType.vstring"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Vstring()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Vstring(); !ok {
+					v := fieldtype.DefaultVstring()
+					m.SetVstring(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "triple",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "triple", err: errors.New(`ent: missing required field "FieldType.triple"`)}
+				},
+			},
+			IsSet: func(m *FieldTypeMutation) bool {
+				_, ok := m.Triple()
+				return ok
+			},
+			Default: func(m *FieldTypeMutation) error {
+				if _, ok := m.Triple(); !ok {
+					v := fieldtype.DefaultTriple()
+					m.SetTriple(v)
+				}
+				return nil
+			},
+		},
+		{
+			Name: "big_int",
+		},
+		{
+			Name: "password_other",
+		},
+	},
+	Edges: []entgen.EdgeSpec[*FieldTypeMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *FieldTypeCreate) check() error {
-	if _, ok := _c.mutation.Int(); !ok {
-		return &ValidationError{Name: "int", err: errors.New(`ent: missing required field "FieldType.int"`)}
-	}
-	if _, ok := _c.mutation.Int8(); !ok {
-		return &ValidationError{Name: "int8", err: errors.New(`ent: missing required field "FieldType.int8"`)}
-	}
-	if _, ok := _c.mutation.Int16(); !ok {
-		return &ValidationError{Name: "int16", err: errors.New(`ent: missing required field "FieldType.int16"`)}
-	}
-	if _, ok := _c.mutation.Int32(); !ok {
-		return &ValidationError{Name: "int32", err: errors.New(`ent: missing required field "FieldType.int32"`)}
-	}
-	if _, ok := _c.mutation.Int64(); !ok {
-		return &ValidationError{Name: "int64", err: errors.New(`ent: missing required field "FieldType.int64"`)}
-	}
-	if v, ok := _c.mutation.ValidateOptionalInt32(); ok {
-		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
-			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.State(); ok {
-		if err := fieldtype.StateValidator(v); err != nil {
-			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.MAC(); ok {
-		if err := fieldtype.MACValidator(v.String()); err != nil {
-			return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Dir(); !ok {
-		return &ValidationError{Name: "dir", err: errors.New(`ent: missing required field "FieldType.dir"`)}
-	}
-	if v, ok := _c.mutation.Ndir(); ok {
-		if err := fieldtype.NdirValidator(string(v)); err != nil {
-			return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Link(); ok {
-		if err := fieldtype.LinkValidator(v.String()); err != nil {
-			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.RawData(); ok {
-		if err := fieldtype.RawDataValidator(v); err != nil {
-			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.IP(); ok {
-		if err := fieldtype.IPValidator([]byte(v)); err != nil {
-			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Role(); !ok {
-		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "FieldType.role"`)}
-	}
-	if v, ok := _c.mutation.Role(); ok {
-		if err := fieldtype.RoleValidator(v); err != nil {
-			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
-		}
-	}
-	if v, ok := _c.mutation.Priority(); ok {
-		if err := fieldtype.PriorityValidator(v); err != nil {
-			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Pair(); !ok {
-		return &ValidationError{Name: "pair", err: errors.New(`ent: missing required field "FieldType.pair"`)}
-	}
-	if _, ok := _c.mutation.Vstring(); !ok {
-		return &ValidationError{Name: "vstring", err: errors.New(`ent: missing required field "FieldType.vstring"`)}
-	}
-	if _, ok := _c.mutation.Triple(); !ok {
-		return &ValidationError{Name: "triple", err: errors.New(`ent: missing required field "FieldType.triple"`)}
-	}
-	return nil
+var fieldtypeCreateDescriptor = entbuilder.CreateDescriptor[config, FieldType, *FieldTypeMutation]{
+	Table: fieldtype.Table,
+	NewNode: func(cfg config) *FieldType {
+		return &FieldType{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, FieldType, *FieldTypeMutation]{
+		Column:      fieldtype.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *FieldType, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected FieldType.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, FieldType, *FieldTypeMutation]{
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int](
+			fieldtype.FieldInt,
+			field.TypeInt,
+			(*FieldTypeMutation).Int,
+			func(n *FieldType, v int) { n.Int = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int8](
+			fieldtype.FieldInt8,
+			field.TypeInt8,
+			(*FieldTypeMutation).Int8,
+			func(n *FieldType, v int8) { n.Int8 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int16](
+			fieldtype.FieldInt16,
+			field.TypeInt16,
+			(*FieldTypeMutation).Int16,
+			func(n *FieldType, v int16) { n.Int16 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int32](
+			fieldtype.FieldInt32,
+			field.TypeInt32,
+			(*FieldTypeMutation).Int32,
+			func(n *FieldType, v int32) { n.Int32 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int64](
+			fieldtype.FieldInt64,
+			field.TypeInt64,
+			(*FieldTypeMutation).Int64,
+			func(n *FieldType, v int64) { n.Int64 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int](
+			fieldtype.FieldOptionalInt,
+			field.TypeInt,
+			(*FieldTypeMutation).OptionalInt,
+			func(n *FieldType, v int) { n.OptionalInt = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int8](
+			fieldtype.FieldOptionalInt8,
+			field.TypeInt8,
+			(*FieldTypeMutation).OptionalInt8,
+			func(n *FieldType, v int8) { n.OptionalInt8 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int16](
+			fieldtype.FieldOptionalInt16,
+			field.TypeInt16,
+			(*FieldTypeMutation).OptionalInt16,
+			func(n *FieldType, v int16) { n.OptionalInt16 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int32](
+			fieldtype.FieldOptionalInt32,
+			field.TypeInt32,
+			(*FieldTypeMutation).OptionalInt32,
+			func(n *FieldType, v int32) { n.OptionalInt32 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int64](
+			fieldtype.FieldOptionalInt64,
+			field.TypeInt64,
+			(*FieldTypeMutation).OptionalInt64,
+			func(n *FieldType, v int64) { n.OptionalInt64 = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, int](
+			fieldtype.FieldNillableInt,
+			field.TypeInt,
+			(*FieldTypeMutation).NillableInt,
+			func(n *FieldType, v *int) { n.NillableInt = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, int8](
+			fieldtype.FieldNillableInt8,
+			field.TypeInt8,
+			(*FieldTypeMutation).NillableInt8,
+			func(n *FieldType, v *int8) { n.NillableInt8 = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, int16](
+			fieldtype.FieldNillableInt16,
+			field.TypeInt16,
+			(*FieldTypeMutation).NillableInt16,
+			func(n *FieldType, v *int16) { n.NillableInt16 = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, int32](
+			fieldtype.FieldNillableInt32,
+			field.TypeInt32,
+			(*FieldTypeMutation).NillableInt32,
+			func(n *FieldType, v *int32) { n.NillableInt32 = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, int64](
+			fieldtype.FieldNillableInt64,
+			field.TypeInt64,
+			(*FieldTypeMutation).NillableInt64,
+			func(n *FieldType, v *int64) { n.NillableInt64 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, int32](
+			fieldtype.FieldValidateOptionalInt32,
+			field.TypeInt32,
+			(*FieldTypeMutation).ValidateOptionalInt32,
+			func(n *FieldType, v int32) { n.ValidateOptionalInt32 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, uint](
+			fieldtype.FieldOptionalUint,
+			field.TypeUint,
+			(*FieldTypeMutation).OptionalUint,
+			func(n *FieldType, v uint) { n.OptionalUint = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, uint8](
+			fieldtype.FieldOptionalUint8,
+			field.TypeUint8,
+			(*FieldTypeMutation).OptionalUint8,
+			func(n *FieldType, v uint8) { n.OptionalUint8 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, uint16](
+			fieldtype.FieldOptionalUint16,
+			field.TypeUint16,
+			(*FieldTypeMutation).OptionalUint16,
+			func(n *FieldType, v uint16) { n.OptionalUint16 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, uint32](
+			fieldtype.FieldOptionalUint32,
+			field.TypeUint32,
+			(*FieldTypeMutation).OptionalUint32,
+			func(n *FieldType, v uint32) { n.OptionalUint32 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, uint64](
+			fieldtype.FieldOptionalUint64,
+			field.TypeUint64,
+			(*FieldTypeMutation).OptionalUint64,
+			func(n *FieldType, v uint64) { n.OptionalUint64 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, fieldtype.State](
+			fieldtype.FieldState,
+			field.TypeEnum,
+			(*FieldTypeMutation).State,
+			func(n *FieldType, v fieldtype.State) { n.State = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, float64](
+			fieldtype.FieldOptionalFloat,
+			field.TypeFloat64,
+			(*FieldTypeMutation).OptionalFloat,
+			func(n *FieldType, v float64) { n.OptionalFloat = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, float32](
+			fieldtype.FieldOptionalFloat32,
+			field.TypeFloat32,
+			(*FieldTypeMutation).OptionalFloat32,
+			func(n *FieldType, v float32) { n.OptionalFloat32 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, string](
+			fieldtype.FieldText,
+			field.TypeString,
+			(*FieldTypeMutation).Text,
+			func(n *FieldType, v string) { n.Text = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, time.Time](
+			fieldtype.FieldDatetime,
+			field.TypeTime,
+			(*FieldTypeMutation).Datetime,
+			func(n *FieldType, v time.Time) { n.Datetime = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, float64](
+			fieldtype.FieldDecimal,
+			field.TypeFloat64,
+			(*FieldTypeMutation).Decimal,
+			func(n *FieldType, v float64) { n.Decimal = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *schema.Link](
+			fieldtype.FieldLinkOther,
+			field.TypeOther,
+			(*FieldTypeMutation).LinkOther,
+			func(n *FieldType, v *schema.Link) { n.LinkOther = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *schema.Link](
+			fieldtype.FieldLinkOtherFunc,
+			field.TypeOther,
+			(*FieldTypeMutation).LinkOtherFunc,
+			func(n *FieldType, v *schema.Link) { n.LinkOtherFunc = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.MAC](
+			fieldtype.FieldMAC,
+			field.TypeString,
+			(*FieldTypeMutation).MAC,
+			func(n *FieldType, v schema.MAC) { n.MAC = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Strings](
+			fieldtype.FieldStringArray,
+			field.TypeOther,
+			(*FieldTypeMutation).StringArray,
+			func(n *FieldType, v schema.Strings) { n.StringArray = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, string](
+			fieldtype.FieldPassword,
+			field.TypeString,
+			(*FieldTypeMutation).Password,
+			func(n *FieldType, v string) { n.Password = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, schema.StringScanner](
+			fieldtype.FieldStringScanner,
+			field.TypeString,
+			(*FieldTypeMutation).StringScanner,
+			func(n *FieldType, v *schema.StringScanner) { n.StringScanner = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, time.Duration](
+			fieldtype.FieldDuration,
+			field.TypeInt64,
+			(*FieldTypeMutation).Duration,
+			func(n *FieldType, v time.Duration) { n.Duration = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, http.Dir](
+			fieldtype.FieldDir,
+			field.TypeString,
+			(*FieldTypeMutation).Dir,
+			func(n *FieldType, v http.Dir) { n.Dir = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, http.Dir](
+			fieldtype.FieldNdir,
+			field.TypeString,
+			(*FieldTypeMutation).Ndir,
+			func(n *FieldType, v *http.Dir) { n.Ndir = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, sql.NullString](
+			fieldtype.FieldStr,
+			field.TypeString,
+			(*FieldTypeMutation).Str,
+			func(n *FieldType, v sql.NullString) { n.Str = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *sql.NullString](
+			fieldtype.FieldNullStr,
+			field.TypeString,
+			(*FieldTypeMutation).NullStr,
+			func(n *FieldType, v *sql.NullString) { n.NullStr = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Link](
+			fieldtype.FieldLink,
+			field.TypeString,
+			(*FieldTypeMutation).Link,
+			func(n *FieldType, v schema.Link) { n.Link = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *schema.Link](
+			fieldtype.FieldNullLink,
+			field.TypeString,
+			(*FieldTypeMutation).NullLink,
+			func(n *FieldType, v *schema.Link) { n.NullLink = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Status](
+			fieldtype.FieldActive,
+			field.TypeBool,
+			(*FieldTypeMutation).Active,
+			func(n *FieldType, v schema.Status) { n.Active = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, schema.Status](
+			fieldtype.FieldNullActive,
+			field.TypeBool,
+			(*FieldTypeMutation).NullActive,
+			func(n *FieldType, v *schema.Status) { n.NullActive = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *sql.NullBool](
+			fieldtype.FieldDeleted,
+			field.TypeBool,
+			(*FieldTypeMutation).Deleted,
+			func(n *FieldType, v *sql.NullBool) { n.Deleted = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *sql.NullTime](
+			fieldtype.FieldDeletedAt,
+			field.TypeTime,
+			(*FieldTypeMutation).DeletedAt,
+			func(n *FieldType, v *sql.NullTime) { n.DeletedAt = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, []byte](
+			fieldtype.FieldRawData,
+			field.TypeBytes,
+			(*FieldTypeMutation).RawData,
+			func(n *FieldType, v []byte) { n.RawData = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, []byte](
+			fieldtype.FieldSensitive,
+			field.TypeBytes,
+			(*FieldTypeMutation).Sensitive,
+			func(n *FieldType, v []byte) { n.Sensitive = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, net.IP](
+			fieldtype.FieldIP,
+			field.TypeBytes,
+			(*FieldTypeMutation).IP,
+			func(n *FieldType, v net.IP) { n.IP = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *sql.NullInt64](
+			fieldtype.FieldNullInt64,
+			field.TypeInt,
+			(*FieldTypeMutation).NullInt64,
+			func(n *FieldType, v *sql.NullInt64) { n.NullInt64 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Int](
+			fieldtype.FieldSchemaInt,
+			field.TypeInt,
+			(*FieldTypeMutation).SchemaInt,
+			func(n *FieldType, v schema.Int) { n.SchemaInt = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Int8](
+			fieldtype.FieldSchemaInt8,
+			field.TypeInt8,
+			(*FieldTypeMutation).SchemaInt8,
+			func(n *FieldType, v schema.Int8) { n.SchemaInt8 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Int64](
+			fieldtype.FieldSchemaInt64,
+			field.TypeInt64,
+			(*FieldTypeMutation).SchemaInt64,
+			func(n *FieldType, v schema.Int64) { n.SchemaInt64 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Float64](
+			fieldtype.FieldSchemaFloat,
+			field.TypeFloat64,
+			(*FieldTypeMutation).SchemaFloat,
+			func(n *FieldType, v schema.Float64) { n.SchemaFloat = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Float32](
+			fieldtype.FieldSchemaFloat32,
+			field.TypeFloat32,
+			(*FieldTypeMutation).SchemaFloat32,
+			func(n *FieldType, v schema.Float32) { n.SchemaFloat32 = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *sql.NullFloat64](
+			fieldtype.FieldNullFloat,
+			field.TypeFloat64,
+			(*FieldTypeMutation).NullFloat,
+			func(n *FieldType, v *sql.NullFloat64) { n.NullFloat = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, role.Role](
+			fieldtype.FieldRole,
+			field.TypeEnum,
+			(*FieldTypeMutation).Role,
+			func(n *FieldType, v role.Role) { n.Role = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, role.Priority](
+			fieldtype.FieldPriority,
+			field.TypeEnum,
+			(*FieldTypeMutation).Priority,
+			func(n *FieldType, v role.Priority) { n.Priority = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, uuid.UUID](
+			fieldtype.FieldOptionalUUID,
+			field.TypeUUID,
+			(*FieldTypeMutation).OptionalUUID,
+			func(n *FieldType, v uuid.UUID) { n.OptionalUUID = v },
+		),
+
+		entbuilder.NillableField[config, FieldType, *FieldTypeMutation, uuid.UUID](
+			fieldtype.FieldNillableUUID,
+			field.TypeUUID,
+			(*FieldTypeMutation).NillableUUID,
+			func(n *FieldType, v *uuid.UUID) { n.NillableUUID = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, []string](
+			fieldtype.FieldStrings,
+			field.TypeJSON,
+			(*FieldTypeMutation).Strings,
+			func(n *FieldType, v []string) { n.Strings = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Pair](
+			fieldtype.FieldPair,
+			field.TypeBytes,
+			(*FieldTypeMutation).Pair,
+			func(n *FieldType, v schema.Pair) { n.Pair = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, *schema.Pair](
+			fieldtype.FieldNilPair,
+			field.TypeBytes,
+			(*FieldTypeMutation).NilPair,
+			func(n *FieldType, v *schema.Pair) { n.NilPair = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.VString](
+			fieldtype.FieldVstring,
+			field.TypeString,
+			(*FieldTypeMutation).Vstring,
+			func(n *FieldType, v schema.VString) { n.Vstring = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Triple](
+			fieldtype.FieldTriple,
+			field.TypeString,
+			(*FieldTypeMutation).Triple,
+			func(n *FieldType, v schema.Triple) { n.Triple = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.BigInt](
+			fieldtype.FieldBigInt,
+			field.TypeInt,
+			(*FieldTypeMutation).BigInt,
+			func(n *FieldType, v schema.BigInt) { n.BigInt = v },
+		),
+
+		entbuilder.SimpleField[config, FieldType, *FieldTypeMutation, schema.Password](
+			fieldtype.FieldPasswordOther,
+			field.TypeOther,
+			(*FieldTypeMutation).PasswordOther,
+			func(n *FieldType, v schema.Password) { n.PasswordOther = v },
+		),
+	},
 }
 
 func (_c *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, fieldtypeCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &fieldtypeCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
+	_spec.OnConflict = _c.conflict
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &fieldtypeCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
-	var (
-		_node = &FieldType{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(fieldtype.Table, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
-	)
-	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Int(); ok {
-		_spec.SetField(fieldtype.FieldInt, field.TypeInt, value)
-		_node.Int = value
-	}
-	if value, ok := _c.mutation.Int8(); ok {
-		_spec.SetField(fieldtype.FieldInt8, field.TypeInt8, value)
-		_node.Int8 = value
-	}
-	if value, ok := _c.mutation.Int16(); ok {
-		_spec.SetField(fieldtype.FieldInt16, field.TypeInt16, value)
-		_node.Int16 = value
-	}
-	if value, ok := _c.mutation.Int32(); ok {
-		_spec.SetField(fieldtype.FieldInt32, field.TypeInt32, value)
-		_node.Int32 = value
-	}
-	if value, ok := _c.mutation.Int64(); ok {
-		_spec.SetField(fieldtype.FieldInt64, field.TypeInt64, value)
-		_node.Int64 = value
-	}
-	if value, ok := _c.mutation.OptionalInt(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt, field.TypeInt, value)
-		_node.OptionalInt = value
-	}
-	if value, ok := _c.mutation.OptionalInt8(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt8, field.TypeInt8, value)
-		_node.OptionalInt8 = value
-	}
-	if value, ok := _c.mutation.OptionalInt16(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt16, field.TypeInt16, value)
-		_node.OptionalInt16 = value
-	}
-	if value, ok := _c.mutation.OptionalInt32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt32, field.TypeInt32, value)
-		_node.OptionalInt32 = value
-	}
-	if value, ok := _c.mutation.OptionalInt64(); ok {
-		_spec.SetField(fieldtype.FieldOptionalInt64, field.TypeInt64, value)
-		_node.OptionalInt64 = value
-	}
-	if value, ok := _c.mutation.NillableInt(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt, field.TypeInt, value)
-		_node.NillableInt = &value
-	}
-	if value, ok := _c.mutation.NillableInt8(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt8, field.TypeInt8, value)
-		_node.NillableInt8 = &value
-	}
-	if value, ok := _c.mutation.NillableInt16(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt16, field.TypeInt16, value)
-		_node.NillableInt16 = &value
-	}
-	if value, ok := _c.mutation.NillableInt32(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt32, field.TypeInt32, value)
-		_node.NillableInt32 = &value
-	}
-	if value, ok := _c.mutation.NillableInt64(); ok {
-		_spec.SetField(fieldtype.FieldNillableInt64, field.TypeInt64, value)
-		_node.NillableInt64 = &value
-	}
-	if value, ok := _c.mutation.ValidateOptionalInt32(); ok {
-		_spec.SetField(fieldtype.FieldValidateOptionalInt32, field.TypeInt32, value)
-		_node.ValidateOptionalInt32 = value
-	}
-	if value, ok := _c.mutation.OptionalUint(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint, field.TypeUint, value)
-		_node.OptionalUint = value
-	}
-	if value, ok := _c.mutation.OptionalUint8(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint8, field.TypeUint8, value)
-		_node.OptionalUint8 = value
-	}
-	if value, ok := _c.mutation.OptionalUint16(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint16, field.TypeUint16, value)
-		_node.OptionalUint16 = value
-	}
-	if value, ok := _c.mutation.OptionalUint32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint32, field.TypeUint32, value)
-		_node.OptionalUint32 = value
-	}
-	if value, ok := _c.mutation.OptionalUint64(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUint64, field.TypeUint64, value)
-		_node.OptionalUint64 = value
-	}
-	if value, ok := _c.mutation.State(); ok {
-		_spec.SetField(fieldtype.FieldState, field.TypeEnum, value)
-		_node.State = value
-	}
-	if value, ok := _c.mutation.OptionalFloat(); ok {
-		_spec.SetField(fieldtype.FieldOptionalFloat, field.TypeFloat64, value)
-		_node.OptionalFloat = value
-	}
-	if value, ok := _c.mutation.OptionalFloat32(); ok {
-		_spec.SetField(fieldtype.FieldOptionalFloat32, field.TypeFloat32, value)
-		_node.OptionalFloat32 = value
-	}
-	if value, ok := _c.mutation.Text(); ok {
-		_spec.SetField(fieldtype.FieldText, field.TypeString, value)
-		_node.Text = value
-	}
-	if value, ok := _c.mutation.Datetime(); ok {
-		_spec.SetField(fieldtype.FieldDatetime, field.TypeTime, value)
-		_node.Datetime = value
-	}
-	if value, ok := _c.mutation.Decimal(); ok {
-		_spec.SetField(fieldtype.FieldDecimal, field.TypeFloat64, value)
-		_node.Decimal = value
-	}
-	if value, ok := _c.mutation.LinkOther(); ok {
-		_spec.SetField(fieldtype.FieldLinkOther, field.TypeOther, value)
-		_node.LinkOther = value
-	}
-	if value, ok := _c.mutation.LinkOtherFunc(); ok {
-		_spec.SetField(fieldtype.FieldLinkOtherFunc, field.TypeOther, value)
-		_node.LinkOtherFunc = value
-	}
-	if value, ok := _c.mutation.MAC(); ok {
-		_spec.SetField(fieldtype.FieldMAC, field.TypeString, value)
-		_node.MAC = value
-	}
-	if value, ok := _c.mutation.StringArray(); ok {
-		_spec.SetField(fieldtype.FieldStringArray, field.TypeOther, value)
-		_node.StringArray = value
-	}
-	if value, ok := _c.mutation.Password(); ok {
-		_spec.SetField(fieldtype.FieldPassword, field.TypeString, value)
-		_node.Password = value
-	}
-	if value, ok := _c.mutation.StringScanner(); ok {
-		_spec.SetField(fieldtype.FieldStringScanner, field.TypeString, value)
-		_node.StringScanner = &value
-	}
-	if value, ok := _c.mutation.Duration(); ok {
-		_spec.SetField(fieldtype.FieldDuration, field.TypeInt64, value)
-		_node.Duration = value
-	}
-	if value, ok := _c.mutation.Dir(); ok {
-		_spec.SetField(fieldtype.FieldDir, field.TypeString, value)
-		_node.Dir = value
-	}
-	if value, ok := _c.mutation.Ndir(); ok {
-		_spec.SetField(fieldtype.FieldNdir, field.TypeString, value)
-		_node.Ndir = &value
-	}
-	if value, ok := _c.mutation.Str(); ok {
-		_spec.SetField(fieldtype.FieldStr, field.TypeString, value)
-		_node.Str = value
-	}
-	if value, ok := _c.mutation.NullStr(); ok {
-		_spec.SetField(fieldtype.FieldNullStr, field.TypeString, value)
-		_node.NullStr = value
-	}
-	if value, ok := _c.mutation.Link(); ok {
-		_spec.SetField(fieldtype.FieldLink, field.TypeString, value)
-		_node.Link = value
-	}
-	if value, ok := _c.mutation.NullLink(); ok {
-		_spec.SetField(fieldtype.FieldNullLink, field.TypeString, value)
-		_node.NullLink = value
-	}
-	if value, ok := _c.mutation.Active(); ok {
-		_spec.SetField(fieldtype.FieldActive, field.TypeBool, value)
-		_node.Active = value
-	}
-	if value, ok := _c.mutation.NullActive(); ok {
-		_spec.SetField(fieldtype.FieldNullActive, field.TypeBool, value)
-		_node.NullActive = &value
-	}
-	if value, ok := _c.mutation.Deleted(); ok {
-		_spec.SetField(fieldtype.FieldDeleted, field.TypeBool, value)
-		_node.Deleted = value
-	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
-		_spec.SetField(fieldtype.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = value
-	}
-	if value, ok := _c.mutation.RawData(); ok {
-		_spec.SetField(fieldtype.FieldRawData, field.TypeBytes, value)
-		_node.RawData = value
-	}
-	if value, ok := _c.mutation.Sensitive(); ok {
-		_spec.SetField(fieldtype.FieldSensitive, field.TypeBytes, value)
-		_node.Sensitive = value
-	}
-	if value, ok := _c.mutation.IP(); ok {
-		_spec.SetField(fieldtype.FieldIP, field.TypeBytes, value)
-		_node.IP = value
-	}
-	if value, ok := _c.mutation.NullInt64(); ok {
-		_spec.SetField(fieldtype.FieldNullInt64, field.TypeInt, value)
-		_node.NullInt64 = value
-	}
-	if value, ok := _c.mutation.SchemaInt(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt, field.TypeInt, value)
-		_node.SchemaInt = value
-	}
-	if value, ok := _c.mutation.SchemaInt8(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt8, field.TypeInt8, value)
-		_node.SchemaInt8 = value
-	}
-	if value, ok := _c.mutation.SchemaInt64(); ok {
-		_spec.SetField(fieldtype.FieldSchemaInt64, field.TypeInt64, value)
-		_node.SchemaInt64 = value
-	}
-	if value, ok := _c.mutation.SchemaFloat(); ok {
-		_spec.SetField(fieldtype.FieldSchemaFloat, field.TypeFloat64, value)
-		_node.SchemaFloat = value
-	}
-	if value, ok := _c.mutation.SchemaFloat32(); ok {
-		_spec.SetField(fieldtype.FieldSchemaFloat32, field.TypeFloat32, value)
-		_node.SchemaFloat32 = value
-	}
-	if value, ok := _c.mutation.NullFloat(); ok {
-		_spec.SetField(fieldtype.FieldNullFloat, field.TypeFloat64, value)
-		_node.NullFloat = value
-	}
-	if value, ok := _c.mutation.Role(); ok {
-		_spec.SetField(fieldtype.FieldRole, field.TypeEnum, value)
-		_node.Role = value
-	}
-	if value, ok := _c.mutation.Priority(); ok {
-		_spec.SetField(fieldtype.FieldPriority, field.TypeEnum, value)
-		_node.Priority = value
-	}
-	if value, ok := _c.mutation.OptionalUUID(); ok {
-		_spec.SetField(fieldtype.FieldOptionalUUID, field.TypeUUID, value)
-		_node.OptionalUUID = value
-	}
-	if value, ok := _c.mutation.NillableUUID(); ok {
-		_spec.SetField(fieldtype.FieldNillableUUID, field.TypeUUID, value)
-		_node.NillableUUID = &value
-	}
-	if value, ok := _c.mutation.Strings(); ok {
-		_spec.SetField(fieldtype.FieldStrings, field.TypeJSON, value)
-		_node.Strings = value
-	}
-	if value, ok := _c.mutation.Pair(); ok {
-		_spec.SetField(fieldtype.FieldPair, field.TypeBytes, value)
-		_node.Pair = value
-	}
-	if value, ok := _c.mutation.NilPair(); ok {
-		_spec.SetField(fieldtype.FieldNilPair, field.TypeBytes, value)
-		_node.NilPair = value
-	}
-	if value, ok := _c.mutation.Vstring(); ok {
-		_spec.SetField(fieldtype.FieldVstring, field.TypeString, value)
-		_node.Vstring = value
-	}
-	if value, ok := _c.mutation.Triple(); ok {
-		_spec.SetField(fieldtype.FieldTriple, field.TypeString, value)
-		_node.Triple = value
-	}
-	if value, ok := _c.mutation.BigInt(); ok {
-		_spec.SetField(fieldtype.FieldBigInt, field.TypeInt, value)
-		_node.BigInt = value
-	}
-	if value, ok := _c.mutation.PasswordOther(); ok {
-		_spec.SetField(fieldtype.FieldPasswordOther, field.TypeOther, value)
-		_node.PasswordOther = value
-	}
-	return _node, _spec
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -4184,20 +4766,27 @@ func (_c *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error) {
 	nodes := make([]*FieldType, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, fieldtypeCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FieldTypeMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, fieldtypeCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &fieldtypeCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -4209,20 +4798,23 @@ func (_c *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &fieldtypeCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

@@ -67,6 +67,12 @@ var userDeleteDescriptor = entbuilder.DeleteDescriptor[config, *UserMutation]{
 	},
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *UserDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *UserDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *UserDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec, err := entbuilder.BuildDeleteSpec(_d.config, _d.mutation, &userDeleteDescriptor)
 	if err != nil {

@@ -577,7 +577,9 @@ func (_q *BlobQuery) loadLinks(ctx context.Context, query *BlobQuery, nodes []*B
 			return withInterceptors[[]*Blob](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
 		},
 		query,
-		query.inters)
+		query.inters,
+		func(joinT *sql.SelectTable) {
+		})
 	return nil
 }
 func (_q *BlobQuery) loadBlobLinks(ctx context.Context, query *BlobLinkQuery, nodes []*Blob, init func(*Blob), assign func(*Blob, *BlobLink)) error {

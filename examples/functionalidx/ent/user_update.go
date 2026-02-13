@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/functionalidx/ent/predicate"
 	"entgo.io/ent/examples/functionalidx/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -73,6 +75,22 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*UserMutation]{
+		{
+			Column: user.FieldName,
+			Type:   field.TypeString,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Name(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *UserMutation]{},
+}
+
 func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -82,8 +100,8 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(user.FieldName, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -190,8 +208,8 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
-		_spec.SetField(user.FieldName, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues

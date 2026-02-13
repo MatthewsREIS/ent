@@ -216,7 +216,7 @@ var cardUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CardMutation]{
 		{
 			Clear: func(cfg config, m *CardMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.OwnerCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      true,
 						Table:        card.OwnerTable,
@@ -224,7 +224,8 @@ var cardUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CardMutation]{
 						Bidi:         false,
 						TargetColumn: user.FieldID,
 						TargetType:   field.TypeInt,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},

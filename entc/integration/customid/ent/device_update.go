@@ -133,7 +133,7 @@ var deviceUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DeviceMutation
 		{
 			Clear: func(cfg config, m *DeviceMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.ActiveSessionCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.M2O,
 						Inverse:      false,
 						Table:        device.ActiveSessionTable,
@@ -141,7 +141,8 @@ var deviceUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DeviceMutation
 						Bidi:         false,
 						TargetColumn: session.FieldID,
 						TargetType:   field.TypeBytes,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
@@ -169,7 +170,7 @@ var deviceUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DeviceMutation
 		{
 			Clear: func(cfg config, m *DeviceMutation) (*sqlgraph.EdgeSpec, bool, error) {
 				if m.SessionsCleared() {
-					return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+					edge := entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
 						Rel:          sqlgraph.O2M,
 						Inverse:      false,
 						Table:        device.SessionsTable,
@@ -177,7 +178,8 @@ var deviceUpdateDescriptor = entbuilder.UpdateDescriptor[config, *DeviceMutation
 						Bidi:         false,
 						TargetColumn: session.FieldID,
 						TargetType:   field.TypeBytes,
-					}), true, nil
+					})
+					return edge, true, nil
 				}
 				return nil, false, nil
 			},
