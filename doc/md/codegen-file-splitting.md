@@ -32,9 +32,9 @@ Examples:
 In `type` mode, a selected file is rewritten into deterministic parts:
 
 - `<name>_base.go`
-- `<name>_partNN_<type>.go`
+- `<name>_<type>.go`
 
-`NN` is zero-padded and stable across runs for the same input, and type suffixes are deterministic.
+Type suffixes are deterministic.
 
 ## Stale File Cleanup
 
