@@ -414,15 +414,17 @@ func (_c *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 	nodes := make([]*Account, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, accountCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
 			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AccountMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
-				}
-				if err := entgen.ApplyDefaults(mutation, accountCreateSpec.Fields); err != nil {
-					return nil, err
 				}
 				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, accountCreateSpec); err != nil {
 					return nil, err

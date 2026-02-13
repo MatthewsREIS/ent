@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -277,6 +278,22 @@ var blobUpdateDescriptor = entbuilder.UpdateDescriptor[config, *BlobMutation]{
 					TargetColumn: blob.FieldID,
 					TargetType:   field.TypeUUID,
 				})
+				// Apply through-table defaults for BlobLink
+				throughMut := newBlobLinkMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, bloblinkCreateSpec.Fields); err != nil {
+					return nil, err
+				}
+				for _, fd := range bloblinkCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return nil, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, id := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, id)
 				}

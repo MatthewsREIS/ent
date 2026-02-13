@@ -299,6 +299,22 @@ var blobCreateDescriptor = entbuilder.CreateDescriptor[config, Blob, *BlobMutati
 						IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
 					},
 				}
+				// Apply through-table defaults for BlobLink
+				throughMut := newBlobLinkMutation(cfg, OpCreate)
+				if err := entgen.ApplyDefaults(throughMut, bloblinkCreateSpec.Fields); err != nil {
+					return entbuilder.EdgeValue{}, false, err
+				}
+				for _, fd := range bloblinkCreateDescriptor.Fields {
+					if fv, ok, err := fd.Value(throughMut); err != nil {
+						return entbuilder.EdgeValue{}, false, err
+					} else if ok {
+						edge.Target.Fields = append(edge.Target.Fields, &sqlgraph.FieldSpec{
+							Column: fd.Column,
+							Type:   fd.Type,
+							Value:  fv.Spec,
+						})
+					}
+				}
 				for _, k := range nodes {
 					edge.Target.Nodes = append(edge.Target.Nodes, k)
 				}
@@ -548,15 +564,17 @@ func (_c *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 	nodes := make([]*Blob, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, blobCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
 			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BlobMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
-				}
-				if err := entgen.ApplyDefaults(mutation, blobCreateSpec.Fields); err != nil {
-					return nil, err
 				}
 				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, blobCreateSpec); err != nil {
 					return nil, err
