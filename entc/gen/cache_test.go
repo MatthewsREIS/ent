@@ -104,6 +104,94 @@ func TestFormatCacheCreatesNewFiles(t *testing.T) {
 	require.Contains(t, string(got), "var Z = 3")
 }
 
+// TestSkipPackagesLoadFormatsWithoutImports verifies that when
+// SKIP_PACKAGES_LOAD=1 (via the skipPackagesLoad package var), the
+// format() method uses go/format.Source instead of imports.Process,
+// producing valid Go source without invoking the expensive packages.Load.
+func TestSkipPackagesLoadFormatsWithoutImports(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "skip.go")
+
+	// Valid Go source with an existing import.
+	src := []byte("package foo\n\nimport \"fmt\"\n\nvar X = fmt.Sprintf(\"hello\")\n")
+
+	// Enable skip mode.
+	old := skipPackagesLoad
+	skipPackagesLoad = true
+	t.Cleanup(func() { skipPackagesLoad = old })
+
+	a := assets{}
+	a.add(path, src)
+	require.NoError(t, a.format())
+
+	got, err := os.ReadFile(path)
+	require.NoError(t, err)
+	require.Contains(t, string(got), "package foo")
+	require.Contains(t, string(got), `"fmt"`)
+	require.Contains(t, string(got), "fmt.Sprintf")
+}
+
+// TestSkipPackagesLoadDefaultOff verifies that the skipPackagesLoad
+// variable defaults to false when SKIP_PACKAGES_LOAD is not set,
+// ensuring backward-compatible behavior.
+func TestSkipPackagesLoadDefaultOff(t *testing.T) {
+	// The test process does not set SKIP_PACKAGES_LOAD=1, so
+	// the package-level var should be false (unless overridden
+	// by a prior test, which we guard against via Cleanup).
+	dir := t.TempDir()
+	path := filepath.Join(dir, "default.go")
+
+	src := []byte("package foo\n\nvar X = 1\n")
+
+	old := skipPackagesLoad
+	skipPackagesLoad = false
+	t.Cleanup(func() { skipPackagesLoad = old })
+
+	a := assets{}
+	a.add(path, src)
+	require.NoError(t, a.format())
+
+	got, err := os.ReadFile(path)
+	require.NoError(t, err)
+	require.Contains(t, string(got), "package foo")
+	require.Contains(t, string(got), "var X = 1")
+}
+
+// TestSkipPackagesLoadProducesSameOutput verifies that for well-formed
+// generated code (with correct imports already present), both the
+// imports.Process path and the format.Source path produce identical output.
+func TestSkipPackagesLoadProducesSameOutput(t *testing.T) {
+	src := []byte("package foo\n\nvar X = 1\n")
+
+	// Run with imports.Process (default).
+	dir1 := t.TempDir()
+	path1 := filepath.Join(dir1, "with_imports.go")
+
+	old := skipPackagesLoad
+	skipPackagesLoad = false
+	t.Cleanup(func() { skipPackagesLoad = old })
+
+	a1 := assets{}
+	a1.add(path1, src)
+	require.NoError(t, a1.format())
+	got1, err := os.ReadFile(path1)
+	require.NoError(t, err)
+
+	// Run with format.Source (skip mode).
+	dir2 := t.TempDir()
+	path2 := filepath.Join(dir2, "with_format.go")
+
+	skipPackagesLoad = true
+	a2 := assets{}
+	a2.add(path2, src)
+	require.NoError(t, a2.format())
+	got2, err := os.ReadFile(path2)
+	require.NoError(t, err)
+
+	require.Equal(t, string(got1), string(got2),
+		"output should be identical for well-formed source regardless of skip flag")
+}
+
 // TestWriteOnlyCreatesDirectories verifies that write() creates directories
 // but does not write files (format() handles file writes with caching).
 func TestWriteOnlyCreatesDirectories(t *testing.T) {

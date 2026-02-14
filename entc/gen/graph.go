@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"log"
@@ -1166,19 +1167,42 @@ func (a assets) write() error {
 	return nil
 }
 
+// skipPackagesLoad reports whether the SKIP_PACKAGES_LOAD environment variable
+// is set to "1", indicating that the expensive goimports pass (which internally
+// calls packages.Load to resolve imports) should be replaced with basic Go
+// formatting. This is useful during development to reduce memory usage and
+// generation time, since template-generated imports are already correct and
+// any issues will surface at compile time.
+var skipPackagesLoad = os.Getenv("SKIP_PACKAGES_LOAD") == "1"
+
 // format runs "goimports" on all assets and writes them to disk.
 // It skips writing files whose formatted content is identical to
 // what is already on disk, preserving file modification times and
 // avoiding unnecessary Go build cache invalidation.
+//
+// When SKIP_PACKAGES_LOAD=1, the expensive imports.Process call (which
+// internally triggers packages.Load) is replaced with go/format.Source
+// for basic formatting only.
 func (a assets) format() error {
 	var wg errgroup.Group
 	wg.SetLimit(runtime.GOMAXPROCS(0))
 	for path, content := range a.files {
 		path, content := path, content
 		wg.Go(func() error {
-			src, err := imports.Process(path, content, nil)
-			if err != nil {
-				return fmt.Errorf("format file %s: %w", path, err)
+			var (
+				src []byte
+				err error
+			)
+			if skipPackagesLoad {
+				src, err = format.Source(content)
+				if err != nil {
+					return fmt.Errorf("format file %s: %w", path, err)
+				}
+			} else {
+				src, err = imports.Process(path, content, nil)
+				if err != nil {
+					return fmt.Errorf("format file %s: %w", path, err)
+				}
 			}
 			// Read the existing file and skip writing if content is unchanged.
 			// This preserves mtime so the Go build cache is not invalidated.
