@@ -1154,22 +1154,22 @@ func (a *assets) addDir(path string) {
 	a.dirs[path] = struct{}{}
 }
 
-// write files and dirs in the assets.
+// write files and dirs in the assets. Directories are always created,
+// but file writes are skipped for files that will be formatted by
+// format() — it handles the final write with content-hash caching.
 func (a assets) write() error {
 	for dir := range a.dirs {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			return fmt.Errorf("create dir %q: %w", dir, err)
 		}
 	}
-	for path, content := range a.files {
-		if err := os.WriteFile(path, content, 0644); err != nil {
-			return fmt.Errorf("write file %q: %w", path, err)
-		}
-	}
 	return nil
 }
 
-// format runs "goimports" on all assets.
+// format runs "goimports" on all assets and writes them to disk.
+// It skips writing files whose formatted content is identical to
+// what is already on disk, preserving file modification times and
+// avoiding unnecessary Go build cache invalidation.
 func (a assets) format() error {
 	var wg errgroup.Group
 	wg.SetLimit(runtime.GOMAXPROCS(0))
@@ -1179,6 +1179,11 @@ func (a assets) format() error {
 			src, err := imports.Process(path, content, nil)
 			if err != nil {
 				return fmt.Errorf("format file %s: %w", path, err)
+			}
+			// Read the existing file and skip writing if content is unchanged.
+			// This preserves mtime so the Go build cache is not invalidated.
+			if existing, err := os.ReadFile(path); err == nil && bytes.Equal(existing, src) {
+				return nil
 			}
 			if err := os.WriteFile(path, src, 0644); err != nil {
 				return fmt.Errorf("write file %s: %w", path, err)
