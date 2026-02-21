@@ -43,6 +43,11 @@ type (
 		// target directory.
 		Target string
 
+		// SnapshotDir specifies an alternative directory for the schema snapshot.
+		// When set, the snapshot is read from and copied to this directory,
+		// allowing it to live outside the gitignored Target directory.
+		SnapshotDir string
+
 		// Package defines the Go package path of the target directory
 		// mentioned above. For example, "github.com/org/project/ent".
 		//
