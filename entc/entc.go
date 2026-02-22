@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"go/token"
+	"os"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -162,6 +163,19 @@ func BuildFlags(flags ...string) Option {
 // config.
 func BuildTags(tags ...string) Option {
 	return BuildFlags("-tags", strings.Join(tags, ","))
+}
+
+// SnapshotDir sets an alternative directory for the schema snapshot file,
+// allowing it to live outside the gitignored Target directory.
+func SnapshotDir(dir string) Option {
+	return func(cfg *gen.Config) error {
+		abs, err := filepath.Abs(dir)
+		if err != nil {
+			return fmt.Errorf("resolving snapshot dir: %w", err)
+		}
+		cfg.SnapshotDir = abs
+		return nil
+	}
 }
 
 // Split enables and configures optional file splitting for generated Go files.
@@ -401,7 +415,29 @@ func generate(schemaPath string, cfg *gen.Config) error {
 	if err := normalizePkg(cfg); err != nil {
 		return err
 	}
-	return graph.Gen()
+	// Save the original target before Gen (Split rewrites cfg.Target to a temp dir).
+	origTarget := cfg.Target
+	if err := graph.Gen(); err != nil {
+		return err
+	}
+	// Copy snapshot to external directory if configured.
+	if cfg.SnapshotDir != "" {
+		if ok, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); ok {
+			src := filepath.Join(origTarget, "internal", "schema.go")
+			dst := filepath.Join(cfg.SnapshotDir, "schema.go")
+			data, err := os.ReadFile(src)
+			if err != nil {
+				return fmt.Errorf("reading snapshot for copy: %w", err)
+			}
+			if err := os.MkdirAll(cfg.SnapshotDir, 0o755); err != nil {
+				return fmt.Errorf("creating snapshot dir: %w", err)
+			}
+			if err := os.WriteFile(dst, data, 0o644); err != nil {
+				return fmt.Errorf("writing snapshot copy: %w", err)
+			}
+		}
+	}
+	return nil
 }
 
 func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
@@ -423,7 +459,12 @@ func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
 			}
 		}
 	}
-	target := filepath.Join(cfg.Target, "internal/schema.go")
+	var target string
+	if cfg.SnapshotDir != "" {
+		target = filepath.Join(cfg.SnapshotDir, "schema.go")
+	} else {
+		target = filepath.Join(cfg.Target, "internal/schema.go")
+	}
 	return (&internal.Snapshot{Path: target, Config: cfg}).Restore()
 }
 
