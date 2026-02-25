@@ -58,6 +58,7 @@ var (
 		"indirect":      indirect,
 		"hasPrefix":     strings.HasPrefix,
 		"hasSuffix":     strings.HasSuffix,
+		"trimPrefix":    strings.TrimPrefix,
 		"trimPackage":   trimPackage,
 		"xtemplate":     xtemplate,
 		"hasTemplate":   hasTemplate,

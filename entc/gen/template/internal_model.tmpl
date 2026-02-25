@@ -263,10 +263,16 @@ func ({{ $receiver }} *{{ $.Name }}) AssignValues(columns []string, values []any
 		{{- range  $f := $.Fields }}
 			case "{{ $f.StorageKey }}":
 				{{- if and ($f.IsEnum) (not $f.HasGoType) }}
+					{{- $enumType := printf "%s%s" $.Name (trimPackage $f.Type.String $.Package) }}
 					if value, ok := values[i].(*sql.NullString); !ok {
 						return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[i])
 					} else if value.Valid {
-						{{ $receiver }}.{{ $f.StructField }} = {{ $.Name }}{{ trimPackage $f.Type.String $.Package }}(value.String)
+						{{- if $f.NillableValue }}
+						enumValue := {{ $enumType }}(value.String)
+						{{ $receiver }}.{{ $f.StructField }} = &enumValue
+						{{- else }}
+						{{ $receiver }}.{{ $f.StructField }} = {{ $enumType }}(value.String)
+						{{- end }}
 					}
 				{{- else if $f.HasValueScanner }}
 					if value, err := {{ $.Name }}ValueScanner.{{ $f.StructField }}.FromValue(values[i]); err != nil {
