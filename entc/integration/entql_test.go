@@ -23,7 +23,7 @@ func EntQL(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 
 	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
-	nati := client.User.Create().SetName("nati").SetAge(30).AddFriends(a8m).SaveX(ctx)
+	nati := client.User.Create().SetName("nati").SetAge(30).AddFriendIDs(a8m.ID).SaveX(ctx)
 
 	uq := client.User.Query()
 	uq.Filter().Where(entql.HasEdge("friends"))
@@ -39,8 +39,8 @@ func EntQL(t *testing.T, client *ent.Client) {
 	require.Equal(nati.ID, uq.OnlyIDX(ctx))
 
 	u1, u2 := uuid.New(), uuid.New()
-	xabi := client.Pet.Create().SetName("xabi").SetOwner(a8m).SetUUID(u1).SaveX(ctx)
-	luna := client.Pet.Create().SetName("luna").SetOwner(nati).SetUUID(u2).SaveX(ctx)
+	xabi := client.Pet.Create().SetName("xabi").SetOwnerID(a8m.ID).SetUUID(u1).SaveX(ctx)
+	luna := client.Pet.Create().SetName("luna").SetOwnerID(nati.ID).SetUUID(u2).SaveX(ctx)
 	uq = client.User.Query()
 	uq.Filter().Where(
 		entql.And(
@@ -81,8 +81,7 @@ func EntQL(t *testing.T, client *ent.Client) {
 	pq.Where(pet.Name(luna.Name)).Filter().WhereID(entql.IntEQ(xabi.ID))
 	require.False(pq.ExistX(ctx))
 
-	update := client.User.Update().SetRole(user.RoleAdmin)
-	update.Mutation().Filter().WhereName(entql.StringEQ(a8m.Name))
+	update := client.User.Update().SetRole(user.RoleAdmin).Where(user.Name(a8m.Name))
 	updated := update.SaveX(ctx)
 	require.Equal(1, updated)
 	uq = client.User.Query()

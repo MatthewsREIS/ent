@@ -24,7 +24,7 @@ import (
 
 // SpecQuery is the builder for querying Spec entities.
 type SpecQuery struct {
-	config
+	Config
 	ctx           *QueryContext
 	order         []spec.OrderOption
 	inters        []Interceptor
@@ -70,7 +70,7 @@ func (_q *SpecQuery) Order(o ...spec.OrderOption) *SpecQuery {
 
 // QueryCard chains the current query on the "card" edge.
 func (_q *SpecQuery) QueryCard() *CardQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (_q *SpecQuery) QueryCard() *CardQuery {
 			sqlgraph.To(card.Table, card.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -98,7 +98,7 @@ func (_q *SpecQuery) First(ctx context.Context) (*Spec, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{spec.Label}
+		return nil, &NotFoundError{Label: spec.Label}
 	}
 	return nodes[0], nil
 }
@@ -120,7 +120,7 @@ func (_q *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{spec.Label}
+		err = &NotFoundError{Label: spec.Label}
 		return
 	}
 	return ids[0], nil
@@ -147,9 +147,9 @@ func (_q *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{spec.Label}
+		return nil, &NotFoundError{Label: spec.Label}
 	default:
-		return nil, &NotSingularError{spec.Label}
+		return nil, &NotSingularError{Label: spec.Label}
 	}
 }
 
@@ -174,9 +174,9 @@ func (_q *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{spec.Label}
+		err = &NotFoundError{Label: spec.Label}
 	default:
-		err = &NotSingularError{spec.Label}
+		err = &NotSingularError{Label: spec.Label}
 	}
 	return
 }
@@ -277,7 +277,7 @@ func (_q *SpecQuery) Clone() *SpecQuery {
 		return nil
 	}
 	return &SpecQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]spec.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -293,7 +293,7 @@ func (_q *SpecQuery) Clone() *SpecQuery {
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -340,7 +340,7 @@ func (_q *SpecQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !spec.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -362,13 +362,13 @@ func (_q *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Spec).scanValues(nil, columns)
+		return (*Spec).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Spec{config: _q.config}
+		node := &Spec{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -376,7 +376,7 @@ func (_q *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, e
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -391,8 +391,8 @@ func (_q *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, e
 	}
 	for name, query := range _q.withNamedCard {
 		if err := _q.loadCard(ctx, query, nodes,
-			func(n *Spec) { n.appendNamedCard(name) },
-			func(n *Spec, e *Card) { n.appendNamedCard(name, e) }); err != nil {
+			func(n *Spec) { n.AppendNamedCard(name) },
+			func(n *Spec, e *Card) { n.AppendNamedCard(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -463,7 +463,7 @@ func (_q *SpecQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *SpecQuery) querySpec() *sqlgraph.QuerySpec {
@@ -507,7 +507,7 @@ func (_q *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(spec.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -545,7 +545,7 @@ func (_q *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *SpecQuery) ForUpdate(opts ...sql.LockOption) *SpecQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -558,7 +558,7 @@ func (_q *SpecQuery) ForUpdate(opts ...sql.LockOption) *SpecQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *SpecQuery) ForShare(opts ...sql.LockOption) *SpecQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -576,7 +576,7 @@ func (_q *SpecQuery) Modify(modifiers ...func(s *sql.Selector)) *SpecSelect {
 // WithNamedCard tells the query-builder to eager-load the nodes that are connected to the "card"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *SpecQuery) WithNamedCard(name string, opts ...func(*CardQuery)) *SpecQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -628,7 +628,7 @@ func (_g *SpecGroupBy) sqlScan(ctx context.Context, root *SpecQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -670,7 +670,7 @@ func (_s *SpecSelect) sqlScan(ctx context.Context, root *SpecQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

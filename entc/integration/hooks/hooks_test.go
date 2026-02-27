@@ -102,13 +102,13 @@ func TestMutationClient(t *testing.T) {
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
 			id, _ := m.OwnerID()
-			usr := m.Client().User.GetX(ctx, id)
+			usr := ent.NewUserClient(m.Config).GetX(ctx, id)
 			m.SetName(usr.Name)
 			return next.Mutate(ctx, m)
 		})
 	})
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
-	crd := client.Card.Create().SetNumber("1234").SetOwner(a8m).SaveX(ctx)
+	crd := client.Card.Create().SetNumber("1234").SetOwnerID(a8m.ID).SaveX(ctx)
 	require.Equal(t, a8m.Name, crd.Name)
 }
 
@@ -136,7 +136,12 @@ func TestMutatorClient(t *testing.T) {
 					// Record when card was expired.
 					m.SetExpiredAt(time.Now())
 					// Execute the update operation.
-					if _, err := m.Client().Mutate(ctx, m); err != nil {
+					// Create a temporary client from the mutation's config to execute the mutation.
+					client := &ent.Client{Config: m.Config}
+					client.Card = ent.NewCardClient(m.Config)
+					client.Pet = ent.NewPetClient(m.Config)
+					client.User = ent.NewUserClient(m.Config)
+					if _, err := client.Mutate(ctx, m); err != nil {
 						return nil, err
 					}
 					return len(ids), nil
@@ -169,9 +174,9 @@ func TestMutationTx(t *testing.T) {
 	defer client.Close()
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
-			tx, err := m.Tx()
-			if err != nil {
-				return nil, err
+			tx := ent.TxFromContext(ctx)
+			if tx == nil {
+				return nil, fmt.Errorf("not running in a transaction")
 			}
 			if err := tx.Rollback(); err != nil {
 				return nil, err
@@ -181,11 +186,12 @@ func TestMutationTx(t *testing.T) {
 	})
 	tx, err := client.Tx(ctx)
 	require.NoError(t, err)
-	a8m := tx.User.Create().SetName("a8m").SaveX(ctx)
-	crd, err := tx.Card.Create().SetNumber("1234").SetOwner(a8m).Save(ctx)
+	txCtx := ent.NewTxContext(ctx, tx)
+	a8m := tx.User.Create().SetName("a8m").SaveX(txCtx)
+	crd, err := tx.Card.Create().SetNumber("1234").SetOwnerID(a8m.ID).Save(txCtx)
 	require.EqualError(t, err, "rolled back")
 	require.Nil(t, crd)
-	_, err = tx.Card.Query().All(ctx)
+	_, err = tx.Card.Query().All(txCtx)
 	require.Error(t, err, "tx already rolled back")
 }
 
@@ -202,13 +208,13 @@ func TestDeletion(t *testing.T) {
 			if !ok {
 				return nil, fmt.Errorf("missing id")
 			}
-			m.Client().Card.Delete().Where(card.HasOwnerWith(user.ID(id))).ExecX(ctx)
+			ent.NewCardClient(m.Config).Delete().Where(card.HasOwnerWith(user.ID(id))).ExecX(ctx)
 			return next.Mutate(ctx, m)
 		})
 	})
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	for i := 0; i < 5; i++ {
-		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwner(a8m).SaveX(ctx)
+		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwnerID(a8m.ID).SaveX(ctx)
 	}
 	client.User.DeleteOne(a8m).ExecX(ctx)
 	require.Zero(t, client.User.Query().CountX(ctx))
@@ -237,7 +243,7 @@ func TestMutationIDs(t *testing.T) {
 	)
 	for i := 0; i < 5; i++ {
 		owner := client.User.Create().SetName(fmt.Sprintf("owner-%d", i)).SaveX(ctx)
-		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwner(owner).ExecX(ctx)
+		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwnerID(owner.ID).ExecX(ctx)
 	}
 	for i := 0; i < 5; i++ {
 		p := user.And(user.Name(fmt.Sprintf("owner-%d", i)), user.HasCardsWith(card.Number(fmt.Sprintf("card-%d", i))))
@@ -289,7 +295,7 @@ func TestUpdateAfterCreation(t *testing.T) {
 			require.Equal(t, 1, existingUser.Version, "version does not match the original value")
 
 			// After the user was created, return its updated version (a new object).
-			newUser := m.Client().User.UpdateOne(existingUser).
+			newUser := ent.NewUserClient(m.Config).UpdateOne(existingUser).
 				SetVersion(2).
 				SaveX(ctx)
 			return newUser, nil
@@ -317,12 +323,12 @@ func TestUpdateAfterUpdateOne(t *testing.T) {
 
 			// After the user was created, return its updated version (a new object).  Don't use UpdateOne because it
 			// will cause recursive calls to this hook.
-			m.Client().User.Update().
+			ent.NewUserClient(m.Config).Update().
 				Where(user.IDEQ(u.ID)).
 				SetVersion(3).
 				SaveX(ctx)
 
-			return m.Client().User.Get(ctx, u.ID)
+			return ent.NewUserClient(m.Config).Get(ctx, u.ID)
 		})
 	}, ent.OpUpdateOne))
 
@@ -447,8 +453,8 @@ func TestConditions(t *testing.T) {
 
 	ctx := context.Background()
 	crd := client.Card.Create().SetNumber("9876").SaveX(ctx)
-	crd = crd.Update().SetName("alexsn").SaveX(ctx)
-	crd = crd.Update().ClearName().SaveX(ctx)
+	crd = client.Card.UpdateOne(crd).SetName("alexsn").SaveX(ctx)
+	crd = client.Card.UpdateOne(crd).ClearName().SaveX(ctx)
 	client.Card.DeleteOne(crd).ExecX(ctx)
 
 	alexsn := client.User.Create().SetName("alexsn").SaveX(ctx)
@@ -463,8 +469,8 @@ func TestRuntimeTx(t *testing.T) {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
 			v, err := next.Mutate(ctx, m)
 			require.NoError(t, err)
-			tx, err := m.Tx()
-			require.NoError(t, err)
+			// Construct a Tx from the config to access transaction features
+			tx := &ent.Tx{Config: m.Config}
 			tx.OnCommit(func(next ent.Committer) ent.Committer {
 				return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
 					// Ensure the transaction can see the created card.
@@ -632,16 +638,16 @@ func TestInterceptor_Sanity(t *testing.T) {
 }
 
 func TestSoftDelete(t *testing.T) {
-	ctx := context.Background()
 	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
+	ctx := ent.NewContext(context.Background(), client)
 
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	pets := client.Pet.CreateBulk(
-		client.Pet.Create().SetName("a").SetOwner(a8m),
-		client.Pet.Create().SetName("b").SetOwner(a8m),
+		client.Pet.Create().SetName("a").SetOwnerID(a8m.ID),
+		client.Pet.Create().SetName("b").SetOwnerID(a8m.ID),
 		// Set delete_time manually.
-		client.Pet.Create().SetName("c").SetOwner(a8m).SetDeleteTime(time.Now()),
+		client.Pet.Create().SetName("c").SetOwnerID(a8m.ID).SetDeleteTime(time.Now()),
 	).SaveX(ctx)
 	require.Equal(t, []int{pets[0].ID, pets[1].ID}, client.Pet.Query().Order(ent.Asc(pet.FieldID)).IDsX(ctx))
 
@@ -686,9 +692,9 @@ func TestSoftDelete(t *testing.T) {
 	require.Len(t, n2c, 4)
 
 	// Edge traversals.
-	require.False(t, a8m.QueryPets().ExistX(ctx), "interceptors should be applied on edge traversals")
+	require.False(t, client.User.QueryPets(a8m).ExistX(ctx), "interceptors should be applied on edge traversals")
 	require.False(t, client.User.Query().QueryPets().ExistX(ctx))
-	require.Equal(t, 3, a8m.QueryPets().CountX(schema.SkipSoftDelete(ctx)))
+	require.Equal(t, 3, client.User.QueryPets(a8m).CountX(schema.SkipSoftDelete(ctx)))
 
 	// Eager-loading edges.
 	a8m = client.User.Query().WithPets().OnlyX(ctx)
@@ -702,8 +708,8 @@ func TestTraverseUnique(t *testing.T) {
 
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
 	client.Pet.CreateBulk(
-		client.Pet.Create().SetName("a").SetOwner(a8m),
-		client.Pet.Create().SetName("b").SetOwner(a8m),
+		client.Pet.Create().SetName("a").SetOwnerID(a8m.ID),
+		client.Pet.Create().SetName("b").SetOwnerID(a8m.ID),
 	).ExecX(ctx)
 	require.Equal(t, 1, client.Pet.Query().QueryOwner().CountX(ctx))
 
@@ -761,9 +767,9 @@ func TestTypedTraverser(t *testing.T) {
 	defer client.Close()
 	a8m, nat := client.User.Create().SetName("a8m").SaveX(ctx), client.User.Create().SetName("nati").SetActive(false).SaveX(ctx)
 	client.Pet.CreateBulk(
-		client.Pet.Create().SetName("a").SetOwner(a8m),
-		client.Pet.Create().SetName("b").SetOwner(a8m),
-		client.Pet.Create().SetName("c").SetOwner(nat),
+		client.Pet.Create().SetName("a").SetOwnerID(a8m.ID),
+		client.Pet.Create().SetName("b").SetOwnerID(a8m.ID),
+		client.Pet.Create().SetName("c").SetOwnerID(nat.ID),
 	).ExecX(ctx)
 
 	// Get all pets of all users.
@@ -807,9 +813,9 @@ func TestFilterTraverseFunc(t *testing.T) {
 	defer client.Close()
 	a8m, nat := client.User.Create().SetName("a8m").SaveX(ctx), client.User.Create().SetName("nati").SetActive(false).SaveX(ctx)
 	client.Pet.CreateBulk(
-		client.Pet.Create().SetName("a").SetOwner(a8m),
-		client.Pet.Create().SetName("b").SetOwner(a8m),
-		client.Pet.Create().SetName("c").SetOwner(nat),
+		client.Pet.Create().SetName("a").SetOwnerID(a8m.ID),
+		client.Pet.Create().SetName("b").SetOwnerID(a8m.ID),
+		client.Pet.Create().SetName("c").SetOwnerID(nat.ID),
 	).ExecX(ctx)
 	// Get all pets of all users.
 	if n := client.User.Query().QueryPets().CountX(ctx); n != 3 {

@@ -22,7 +22,7 @@ import (
 
 // FieldTypeQuery is the builder for querying FieldType entities.
 type FieldTypeQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []fieldtype.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{fieldtype.Label}
+		return nil, &NotFoundError{Label: fieldtype.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *FieldTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{fieldtype.Label}
+		err = &NotFoundError{Label: fieldtype.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{fieldtype.Label}
+		return nil, &NotFoundError{Label: fieldtype.Label}
 	default:
-		return nil, &NotSingularError{fieldtype.Label}
+		return nil, &NotSingularError{Label: fieldtype.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{fieldtype.Label}
+		err = &NotFoundError{Label: fieldtype.Label}
 	default:
-		err = &NotSingularError{fieldtype.Label}
+		err = &NotSingularError{Label: fieldtype.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *FieldTypeQuery) Clone() *FieldTypeQuery {
 		return nil
 	}
 	return &FieldTypeQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]fieldtype.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -343,7 +343,7 @@ func (_q *FieldTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms FieldTypes
@@ -351,7 +351,7 @@ func (_q *FieldTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -359,7 +359,7 @@ func (_q *FieldTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([
 func (_q *FieldTypeQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -435,7 +435,7 @@ func (_g *FieldTypeGroupBy) gremlinScan(ctx context.Context, root *FieldTypeQuer
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -488,7 +488,7 @@ func (_s *FieldTypeSelect) gremlinScan(ctx context.Context, root *FieldTypeQuery
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

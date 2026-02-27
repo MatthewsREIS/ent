@@ -22,7 +22,7 @@ import (
 
 // MixinIDQuery is the builder for querying MixinID entities.
 type MixinIDQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []mixinid.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *MixinIDQuery) First(ctx context.Context) (*MixinID, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{mixinid.Label}
+		return nil, &NotFoundError{Label: mixinid.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *MixinIDQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{mixinid.Label}
+		err = &NotFoundError{Label: mixinid.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *MixinIDQuery) Only(ctx context.Context) (*MixinID, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{mixinid.Label}
+		return nil, &NotFoundError{Label: mixinid.Label}
 	default:
-		return nil, &NotSingularError{mixinid.Label}
+		return nil, &NotSingularError{Label: mixinid.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *MixinIDQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{mixinid.Label}
+		err = &NotFoundError{Label: mixinid.Label}
 	default:
-		err = &NotSingularError{mixinid.Label}
+		err = &NotSingularError{Label: mixinid.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *MixinIDQuery) Clone() *MixinIDQuery {
 		return nil
 	}
 	return &MixinIDQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]mixinid.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -322,7 +322,7 @@ func (_q *MixinIDQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !mixinid.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -341,17 +341,17 @@ func (_q *MixinIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Mixi
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*MixinID).scanValues(nil, columns)
+		return (*MixinID).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &MixinID{config: _q.config}
+		node := &MixinID{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -366,7 +366,7 @@ func (_q *MixinIDQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
@@ -410,7 +410,7 @@ func (_q *MixinIDQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *MixinIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(mixinid.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -482,7 +482,7 @@ func (_g *MixinIDGroupBy) sqlScan(ctx context.Context, root *MixinIDQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -524,7 +524,7 @@ func (_s *MixinIDSelect) sqlScan(ctx context.Context, root *MixinIDQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

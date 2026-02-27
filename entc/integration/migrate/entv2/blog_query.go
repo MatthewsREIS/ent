@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,13 +18,12 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // BlogQuery is the builder for querying Blog entities.
 type BlogQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []blog.OrderOption
 	inters     []Interceptor
@@ -67,7 +67,7 @@ func (_q *BlogQuery) Order(o ...blog.OrderOption) *BlogQuery {
 
 // QueryAdmins chains the current query on the "admins" edge.
 func (_q *BlogQuery) QueryAdmins() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -81,7 +81,7 @@ func (_q *BlogQuery) QueryAdmins() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, blog.AdminsTable, blog.AdminsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -95,7 +95,7 @@ func (_q *BlogQuery) First(ctx context.Context) (*Blog, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{blog.Label}
+		return nil, &NotFoundError{Label: blog.Label}
 	}
 	return nodes[0], nil
 }
@@ -117,7 +117,7 @@ func (_q *BlogQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{blog.Label}
+		err = &NotFoundError{Label: blog.Label}
 		return
 	}
 	return ids[0], nil
@@ -144,9 +144,9 @@ func (_q *BlogQuery) Only(ctx context.Context) (*Blog, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{blog.Label}
+		return nil, &NotFoundError{Label: blog.Label}
 	default:
-		return nil, &NotSingularError{blog.Label}
+		return nil, &NotSingularError{Label: blog.Label}
 	}
 }
 
@@ -171,9 +171,9 @@ func (_q *BlogQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{blog.Label}
+		err = &NotFoundError{Label: blog.Label}
 	default:
-		err = &NotSingularError{blog.Label}
+		err = &NotSingularError{Label: blog.Label}
 	}
 	return
 }
@@ -274,7 +274,7 @@ func (_q *BlogQuery) Clone() *BlogQuery {
 		return nil
 	}
 	return &BlogQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]blog.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -289,7 +289,7 @@ func (_q *BlogQuery) Clone() *BlogQuery {
 // WithAdmins tells the query-builder to eager-load the nodes that are connected to
 // the "admins" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlogQuery) WithAdmins(opts ...func(*UserQuery)) *BlogQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -358,7 +358,7 @@ func (_q *BlogQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !blog.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -380,18 +380,18 @@ func (_q *BlogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blog, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Blog).scanValues(nil, columns)
+		return (*Blog).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Blog{config: _q.config}
+		node := &Blog{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -407,31 +407,35 @@ func (_q *BlogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blog, e
 	return nodes, nil
 }
 
-var blogAdminsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Blog, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        blog.AdminsTable,
-			Columns:      blog.AdminsColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Blog) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractEdgeFK: func(e *User) *int {
-		return e.blog_admins
-	},
-}
-
 func (_q *BlogQuery) loadAdmins(ctx context.Context, query *UserQuery, nodes []*Blog, init func(*Blog), assign func(*Blog, *User)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Blog)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &blogAdminsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(blog.AdminsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetBlogAdmins()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "blog_admins" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "blog_admins" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 
@@ -441,7 +445,7 @@ func (_q *BlogQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *BlogQuery) querySpec() *sqlgraph.QuerySpec {
@@ -485,7 +489,7 @@ func (_q *BlogQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *BlogQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(blog.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -557,7 +561,7 @@ func (_g *BlogGroupBy) sqlScan(ctx context.Context, root *BlogQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -599,7 +603,7 @@ func (_s *BlogSelect) sqlScan(ctx context.Context, root *BlogQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

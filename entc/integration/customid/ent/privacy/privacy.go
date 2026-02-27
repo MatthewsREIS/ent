@@ -600,39 +600,39 @@ func queryFilter(q ent.Query) (Filter, error) {
 func mutationFilter(m ent.Mutation) (Filter, error) {
 	switch m := m.(type) {
 	case *ent.AccountMutation:
-		return m.Filter(), nil
+		return ent.NewAccountFilterForMutation(m), nil
 	case *ent.BlobMutation:
-		return m.Filter(), nil
+		return ent.NewBlobFilterForMutation(m), nil
 	case *ent.BlobLinkMutation:
-		return m.Filter(), nil
+		return ent.NewBlobLinkFilterForMutation(m), nil
 	case *ent.CarMutation:
-		return m.Filter(), nil
+		return ent.NewCarFilterForMutation(m), nil
 	case *ent.DeviceMutation:
-		return m.Filter(), nil
+		return ent.NewDeviceFilterForMutation(m), nil
 	case *ent.DocMutation:
-		return m.Filter(), nil
+		return ent.NewDocFilterForMutation(m), nil
 	case *ent.GroupMutation:
-		return m.Filter(), nil
+		return ent.NewGroupFilterForMutation(m), nil
 	case *ent.IntSIDMutation:
-		return m.Filter(), nil
+		return ent.NewIntSIDFilterForMutation(m), nil
 	case *ent.LinkMutation:
-		return m.Filter(), nil
+		return ent.NewLinkFilterForMutation(m), nil
 	case *ent.MixinIDMutation:
-		return m.Filter(), nil
+		return ent.NewMixinIDFilterForMutation(m), nil
 	case *ent.NoteMutation:
-		return m.Filter(), nil
+		return ent.NewNoteFilterForMutation(m), nil
 	case *ent.OtherMutation:
-		return m.Filter(), nil
+		return ent.NewOtherFilterForMutation(m), nil
 	case *ent.PetMutation:
-		return m.Filter(), nil
+		return ent.NewPetFilterForMutation(m), nil
 	case *ent.RevisionMutation:
-		return m.Filter(), nil
+		return ent.NewRevisionFilterForMutation(m), nil
 	case *ent.SessionMutation:
-		return m.Filter(), nil
+		return ent.NewSessionFilterForMutation(m), nil
 	case *ent.TokenMutation:
-		return m.Filter(), nil
+		return ent.NewTokenFilterForMutation(m), nil
 	case *ent.UserMutation:
-		return m.Filter(), nil
+		return ent.NewUserFilterForMutation(m), nil
 	default:
 		return nil, Denyf("ent/privacy: unexpected mutation type %T for mutation filter", m)
 	}

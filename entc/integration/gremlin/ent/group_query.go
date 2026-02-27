@@ -23,7 +23,7 @@ import (
 
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
-	config
+	Config
 	ctx         *QueryContext
 	order       []group.OrderOption
 	inters      []Interceptor
@@ -70,7 +70,7 @@ func (_q *GroupQuery) Order(o ...group.OrderOption) *GroupQuery {
 
 // QueryFiles chains the current query on the "files" edge.
 func (_q *GroupQuery) QueryFiles() *FileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (_q *GroupQuery) QueryFiles() *FileQuery {
 
 // QueryBlocked chains the current query on the "blocked" edge.
 func (_q *GroupQuery) QueryBlocked() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -98,7 +98,7 @@ func (_q *GroupQuery) QueryBlocked() *UserQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (_q *GroupQuery) QueryUsers() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -112,7 +112,7 @@ func (_q *GroupQuery) QueryUsers() *UserQuery {
 
 // QueryInfo chains the current query on the "info" edge.
 func (_q *GroupQuery) QueryInfo() *GroupInfoQuery {
-	query := (&GroupInfoClient{config: _q.config}).Query()
+	query := (&GroupInfoClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -132,7 +132,7 @@ func (_q *GroupQuery) First(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{group.Label}
+		return nil, &NotFoundError{Label: group.Label}
 	}
 	return nodes[0], nil
 }
@@ -154,7 +154,7 @@ func (_q *GroupQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{group.Label}
+		err = &NotFoundError{Label: group.Label}
 		return
 	}
 	return ids[0], nil
@@ -181,9 +181,9 @@ func (_q *GroupQuery) Only(ctx context.Context) (*Group, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{group.Label}
+		return nil, &NotFoundError{Label: group.Label}
 	default:
-		return nil, &NotSingularError{group.Label}
+		return nil, &NotSingularError{Label: group.Label}
 	}
 }
 
@@ -208,9 +208,9 @@ func (_q *GroupQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{group.Label}
+		err = &NotFoundError{Label: group.Label}
 	default:
-		err = &NotSingularError{group.Label}
+		err = &NotSingularError{Label: group.Label}
 	}
 	return
 }
@@ -311,7 +311,7 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 		return nil
 	}
 	return &GroupQuery{
-		config:      _q.config,
+		Config:      _q.Config,
 		ctx:         _q.ctx.Clone(),
 		order:       append([]group.OrderOption{}, _q.order...),
 		inters:      append([]Interceptor{}, _q.inters...),
@@ -329,7 +329,7 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -340,7 +340,7 @@ func (_q *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
 // WithBlocked tells the query-builder to eager-load the nodes that are connected to
 // the "blocked" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -351,7 +351,7 @@ func (_q *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -362,7 +362,7 @@ func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 // WithInfo tells the query-builder to eager-load the nodes that are connected to
 // the "info" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
-	query := (&GroupInfoClient{config: _q.config}).Query()
+	query := (&GroupInfoClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -452,7 +452,7 @@ func (_q *GroupQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Gr
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Groups
@@ -460,7 +460,7 @@ func (_q *GroupQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Gr
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -468,7 +468,7 @@ func (_q *GroupQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Gr
 func (_q *GroupQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -544,7 +544,7 @@ func (_g *GroupGroupBy) gremlinScan(ctx context.Context, root *GroupQuery, v any
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -597,7 +597,7 @@ func (_s *GroupSelect) gremlinScan(ctx context.Context, root *GroupQuery, v any)
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

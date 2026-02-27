@@ -111,23 +111,23 @@ type (
 {{ range $f := $.MutableFields }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
-		u.Set({{ $.Package }}.{{ $f.Constant }}, v)
+	func (u *{{ $upsertSet }}) {{ $func }}(v {{ trimPackage (toString $f.Type) $.Package }}) *{{ $upsertSet }} {
+		u.Set({{ $f.Constant }}, v)
 		return u
 	}
 
 	{{ $func = print "Update" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
 	func (u *{{ $upsertSet }}) {{ $func }}() *{{ $upsertSet }} {
-		u.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+		u.SetExcluded({{ $f.Constant }})
 		return u
 	}
 
 	{{ if $f.SupportsMutationAdd }}
 		{{ $func := print "Add" $f.StructField }}
 		// {{ $func }} adds v to the "{{ $f.Name }}" field.
-		func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
-			u.Add({{ $.Package }}.{{ $f.Constant }}, v)
+		func (u *{{ $upsertSet }}) {{ $func }}(v {{ trimPackage (toString $f.Type) $.Package }}) *{{ $upsertSet }} {
+			u.Add({{ $f.Constant }}, v)
 			return u
 		}
 	{{ end }}
@@ -136,7 +136,7 @@ type (
 		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
 		func (u *{{ $upsertSet }}) {{ $func }}() *{{ $upsertSet }} {
-			u.SetNull({{ $.Package }}.{{ $f.Constant }})
+			u.SetNull({{ $f.Constant }})
 			return u
 		}
 	{{ end }}
@@ -164,12 +164,12 @@ func (u *{{ $upsertOne }}) UpdateNewValues() *{{ $upsertOne }} {
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 			{{- if $udfID }}
 				if _, exists := u.create.mutation.ID(); exists {
-					s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+					s.SetIgnore({{ $.ID.Constant }})
 				}
 			{{- end }}
 			{{- range $f := $.ImmutableFields }}
 				if _, exists := u.create.mutation.{{ $f.MutationGet }}(); exists {
-					s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+					s.SetIgnore({{ $f.Constant }})
 				}
 			{{- end }}
 		}))
@@ -228,7 +228,7 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 	// Exec executes the UPSERT query and returns the inserted/updated ID.
 	func (u *{{ $upsertOne }}) ID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 		{{- if and $udfID (not $.ID.Type.Numeric) }}
-			if u.create.driver.Dialect() == dialect.MySQL {
+			if u.create.Drv.Dialect() == dialect.MySQL {
 				// In case of "ON CONFLICT", there is no way to get back non-numeric ID
 				// fields from the database since MySQL does not support the RETURNING clause.
 				return id, errors.New("{{ $pkg }}: {{ $upsertOne }}.ID is not supported by MySQL driver. Use {{ $upsertOne }}.Exec instead")
@@ -337,12 +337,12 @@ func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
 			for _, b := range u.create.builders {
 				{{- if $udfID }}
 					if _, exists := b.mutation.ID(); exists {
-						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+						s.SetIgnore({{ $.ID.Constant }})
 					}
 				{{- end }}
 				{{- range $f := $.ImmutableFields }}
 					if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
-						s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+						s.SetIgnore({{ $f.Constant }})
 					}
 				{{- end }}
 			}
@@ -414,7 +414,7 @@ func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
 {{ range $f := $.MutableFields }}
     {{ $func := print "Set" $f.StructField }}
     // {{ $func }} sets the "{{ $f.Name }}" field.
-	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+    func (u *{{ $upsert }}) {{ $func }}(v {{ trimPackage (toString $f.Type) $.Package }}) *{{ $upsert }} {
 		return u.Update(func(s *{{ $upsertSet }}) {
 			s.{{ $func }}(v)
 		})
@@ -423,7 +423,7 @@ func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
 	{{ if $f.SupportsMutationAdd }}
 		{{ $func := print "Add" $f.StructField }}
 		// {{ $func }} adds v to the "{{ $f.Name }}" field.
-		func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {
+		func (u *{{ $upsert }}) {{ $func }}(v {{ trimPackage (toString $f.Type) $.Package }}) *{{ $upsert }} {
 			return u.Update(func(s *{{ $upsertSet }}) {
 				s.{{ $func }}(v)
 			})

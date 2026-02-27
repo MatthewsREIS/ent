@@ -22,7 +22,7 @@ import (
 
 // BuilderQuery is the builder for querying Builder entities.
 type BuilderQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []builder.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *BuilderQuery) First(ctx context.Context) (*Builder, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{builder.Label}
+		return nil, &NotFoundError{Label: builder.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *BuilderQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{builder.Label}
+		err = &NotFoundError{Label: builder.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{builder.Label}
+		return nil, &NotFoundError{Label: builder.Label}
 	default:
-		return nil, &NotSingularError{builder.Label}
+		return nil, &NotSingularError{Label: builder.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *BuilderQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{builder.Label}
+		err = &NotFoundError{Label: builder.Label}
 	default:
-		err = &NotSingularError{builder.Label}
+		err = &NotSingularError{Label: builder.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *BuilderQuery) Clone() *BuilderQuery {
 		return nil
 	}
 	return &BuilderQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]builder.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -321,7 +321,7 @@ func (_q *BuilderQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Builders
@@ -329,7 +329,7 @@ func (_q *BuilderQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -337,7 +337,7 @@ func (_q *BuilderQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*
 func (_q *BuilderQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -413,7 +413,7 @@ func (_g *BuilderGroupBy) gremlinScan(ctx context.Context, root *BuilderQuery, v
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -466,7 +466,7 @@ func (_s *BuilderSelect) gremlinScan(ctx context.Context, root *BuilderQuery, v 
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

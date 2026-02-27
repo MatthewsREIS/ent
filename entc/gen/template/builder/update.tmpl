@@ -9,9 +9,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "update" }}
 {{ $pkg := base $.Config.Package }}
 
-{{ template "header" $ }}
+{{ with extend $ "Package" $.Package }}
+	{{ template "header" . }}
+{{ end }}
 
-{{ with extend $ "Imports" $.SiblingImports "UpdateUsesEntbuilder" (and $.Storage (eq $.Storage.Name "sql")) }}
+{{ with extend $ "Imports" $.BuilderImports }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -22,8 +24,13 @@ in the LICENSE file in the root directory of this source tree.
 
 // {{ $builder }} is the builder for updating {{ $.Name }} entities.
 type {{ $builder }} struct {
-	config
+	Config
 	{{- template "update/fields" $ -}}
+}
+
+// New{{ $builder }} returns a new {{ $builder }} initialized with the given config, hooks, and mutation.
+func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *{{ $builder }} {
+	return &{{ $builder }}{Config: c, hooks: hooks, mutation: mutation}
 }
 
 // Where appends a list predicates to the {{ $builder }} builder.
@@ -51,7 +58,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -91,9 +98,14 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 
 // {{ $onebuilder }} is the builder for updating a single {{ $.Name }} entity.
 type {{ $onebuilder }} struct {
-	config
+	Config
 	fields []string
 	{{- template "update/fields" $ }}
+}
+
+// New{{ $onebuilder }} returns a new {{ $onebuilder }} initialized with the given config, hooks, and mutation.
+func New{{ $onebuilder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *{{ $onebuilder }} {
+	return &{{ $onebuilder }}{Config: c, hooks: hooks, mutation: mutation}
 }
 
 {{ with extend $ "Receiver" $receiver "Builder" $onebuilder }}
@@ -129,7 +141,7 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
-	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -207,15 +219,6 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			{{ $mutation }}.{{ $idsFunc }}(ids...)
 			return {{ $receiver }}
 		}
-		{{ $func := print "Remove" $e.StructField }}
-		// {{ $func }} removes "{{ $e.Name }}" edges to {{ $e.Type.Name }} entities.
-		func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v ...*{{ $e.Type.Name }}) *{{ $builder }} {
-			ids := make([]{{ $e.Type.ID.Type }}, len(v))
-			for i := range v {
-				ids[i] = v[i].ID
-			}
-			return {{ $receiver }}.{{ $idsFunc }}(ids...)
-		}
 	{{ end }}
 {{ end }}
 {{ end }}
@@ -235,11 +238,11 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			{{- if $f.UpdateDefault }}
 				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {{ if $f.Optional }} && !{{ $mutation }}.{{ $f.StructField }}Cleared() {{ end }} {
 					{{- if $runtimeRequired }}
-						if {{ $.Package }}.{{ $f.UpdateDefaultName }} == nil {
-							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.Package }}.{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
+						if {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }} == nil {
+							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
-					v := {{ $.Package }}.{{ $f.UpdateDefaultName }}()
+					v := {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }}()
 					{{ $mutation }}.{{ $f.MutationSet }}(v)
 				}
 			{{- end }}
@@ -257,8 +260,8 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 			{{- $isValidator := and ($f.HasGoType) ($f.Type.Validator) }}
 			{{- with and (not $f.Immutable) (or $f.Validators $f.IsEnum $isValidator) }}
 				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-					if err := {{ if or $f.Validators $f.IsEnum }}{{ $.Package }}.{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
-						return &ValidationError{Name: "{{ $f.Name }}", err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
+					if err := {{ if or $f.Validators $f.IsEnum }}{{ $.PackageQualifier }}{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
+						return &ValidationError{Name: "{{ $f.Name }}", Err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 					}
 				}
 			{{- end }}

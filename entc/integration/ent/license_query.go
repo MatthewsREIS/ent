@@ -22,7 +22,7 @@ import (
 
 // LicenseQuery is the builder for querying License entities.
 type LicenseQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []license.OrderOption
 	inters     []Interceptor
@@ -72,7 +72,7 @@ func (_q *LicenseQuery) First(ctx context.Context) (*License, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{license.Label}
+		return nil, &NotFoundError{Label: license.Label}
 	}
 	return nodes[0], nil
 }
@@ -94,7 +94,7 @@ func (_q *LicenseQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{license.Label}
+		err = &NotFoundError{Label: license.Label}
 		return
 	}
 	return ids[0], nil
@@ -121,9 +121,9 @@ func (_q *LicenseQuery) Only(ctx context.Context) (*License, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{license.Label}
+		return nil, &NotFoundError{Label: license.Label}
 	default:
-		return nil, &NotSingularError{license.Label}
+		return nil, &NotSingularError{Label: license.Label}
 	}
 }
 
@@ -148,9 +148,9 @@ func (_q *LicenseQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{license.Label}
+		err = &NotFoundError{Label: license.Label}
 	default:
-		err = &NotSingularError{license.Label}
+		err = &NotSingularError{Label: license.Label}
 	}
 	return
 }
@@ -251,7 +251,7 @@ func (_q *LicenseQuery) Clone() *LicenseQuery {
 		return nil
 	}
 	return &LicenseQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]license.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -324,7 +324,7 @@ func (_q *LicenseQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !license.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -343,12 +343,12 @@ func (_q *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*License).scanValues(nil, columns)
+		return (*License).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &License{config: _q.config}
+		node := &License{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -356,7 +356,7 @@ func (_q *LicenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Lice
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -374,7 +374,7 @@ func (_q *LicenseQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
@@ -418,7 +418,7 @@ func (_q *LicenseQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *LicenseQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(license.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -456,7 +456,7 @@ func (_q *LicenseQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *LicenseQuery) ForUpdate(opts ...sql.LockOption) *LicenseQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -469,7 +469,7 @@ func (_q *LicenseQuery) ForUpdate(opts ...sql.LockOption) *LicenseQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *LicenseQuery) ForShare(opts ...sql.LockOption) *LicenseQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -525,7 +525,7 @@ func (_g *LicenseGroupBy) sqlScan(ctx context.Context, root *LicenseQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -567,7 +567,7 @@ func (_s *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

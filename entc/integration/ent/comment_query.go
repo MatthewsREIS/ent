@@ -22,7 +22,7 @@ import (
 
 // CommentQuery is the builder for querying Comment entities.
 type CommentQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []comment.OrderOption
 	inters     []Interceptor
@@ -72,7 +72,7 @@ func (_q *CommentQuery) First(ctx context.Context) (*Comment, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{comment.Label}
+		return nil, &NotFoundError{Label: comment.Label}
 	}
 	return nodes[0], nil
 }
@@ -94,7 +94,7 @@ func (_q *CommentQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{comment.Label}
+		err = &NotFoundError{Label: comment.Label}
 		return
 	}
 	return ids[0], nil
@@ -121,9 +121,9 @@ func (_q *CommentQuery) Only(ctx context.Context) (*Comment, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{comment.Label}
+		return nil, &NotFoundError{Label: comment.Label}
 	default:
-		return nil, &NotSingularError{comment.Label}
+		return nil, &NotSingularError{Label: comment.Label}
 	}
 }
 
@@ -148,9 +148,9 @@ func (_q *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{comment.Label}
+		err = &NotFoundError{Label: comment.Label}
 	default:
-		err = &NotSingularError{comment.Label}
+		err = &NotSingularError{Label: comment.Label}
 	}
 	return
 }
@@ -251,7 +251,7 @@ func (_q *CommentQuery) Clone() *CommentQuery {
 		return nil
 	}
 	return &CommentQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]comment.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -324,7 +324,7 @@ func (_q *CommentQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !comment.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -343,12 +343,12 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Comment).scanValues(nil, columns)
+		return (*Comment).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Comment{config: _q.config}
+		node := &Comment{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -356,7 +356,7 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -374,7 +374,7 @@ func (_q *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *CommentQuery) querySpec() *sqlgraph.QuerySpec {
@@ -418,7 +418,7 @@ func (_q *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(comment.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -456,7 +456,7 @@ func (_q *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *CommentQuery) ForUpdate(opts ...sql.LockOption) *CommentQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -469,7 +469,7 @@ func (_q *CommentQuery) ForUpdate(opts ...sql.LockOption) *CommentQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *CommentQuery) ForShare(opts ...sql.LockOption) *CommentQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -525,7 +525,7 @@ func (_g *CommentGroupBy) sqlScan(ctx context.Context, root *CommentQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -567,7 +567,7 @@ func (_s *CommentSelect) sqlScan(ctx context.Context, root *CommentQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

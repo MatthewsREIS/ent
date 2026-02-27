@@ -57,11 +57,6 @@ func IDLTE(id int) predicate.Tag {
 	return predicate.Tag(sql.FieldLTE(FieldID, id))
 }
 
-// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
-func Value(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldEQ(FieldValue, v))
-}
-
 // ValueEQ applies the EQ predicate on the "value" field.
 func ValueEQ(v string) predicate.Tag {
 	return predicate.Tag(sql.FieldEQ(FieldValue, v))

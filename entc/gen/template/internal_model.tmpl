@@ -1,0 +1,336 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{ define "internal/model" }}
+
+{{ with extend $ "Package" "internal" }}
+	{{ template "header" . }}
+{{ end }}
+
+import (
+	"fmt"
+	"strings"
+
+	// Guardrail: internal model package must remain import-cycle safe and must not import
+	// generated root query/client packages (alias direction is root -> internal only).
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
+	{{- if $.HasValueScanner }}
+		"entgo.io/ent/schema/field"
+	{{- end }}
+	{{- if $.HasOneFieldID }}
+		{{- with $.ID.Type.PkgPath }}
+			{{- $name := $.ID.Type.PkgName }}
+			{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end }}"{{ . }}"
+		{{- end }}
+	{{- end }}
+	{{- $seen := dict }}
+	{{- range $f := $.Fields }}
+		{{- $pkg := $f.Type.PkgPath }}
+		{{- /* Skip generated entity sub-packages to avoid cycles, but allow schema package imports. */ -}}
+		{{- $isSchemaPkg := or (hasSuffix $pkg "/schema") (hasPrefix $pkg (printf "%s/schema/" $.Config.Package)) -}}
+		{{- $isGeneratedSubPkg := and (hasPrefix $pkg (printf "%s/" $.Config.Package)) (not $isSchemaPkg) -}}
+		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (not $isGeneratedSubPkg) }}
+			{{- $name := $f.Type.PkgName }}
+			{{ if ne $name (base $pkg) }}{{ $name }} {{ end }}"{{ $pkg }}"
+			{{- $seen = set $seen $pkg true }}
+		{{- end }}
+	{{- end }}
+)
+
+{{ template "model/comment" $ }}
+{{- with $tmpls := matchTemplate "model/comment/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
+{{- if $.HasValueScanner }}
+
+var {{ $.Name }}ValueScanner struct {
+	{{- range $f := $.Fields }}
+		{{- if $f.HasValueScanner }}
+			{{ $f.StructField }} field.TypeValueScanner[{{ $f.Type }}]
+		{{- end }}
+	{{- end }}
+}
+{{- end }}
+
+type {{ $.Name }} struct {
+	Config {{ template "model/omittags" $ }}
+	{{- if $.HasOneFieldID }}
+		// ID of the ent.
+		{{- if $.ID.Comment }}
+			{{- range $line := split $.ID.Comment "\n" }}
+				// {{ $line }}
+			{{- end }}
+		{{- end }}
+		ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
+	{{- end }}
+	{{- range $f := $.Fields }}
+		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
+		{{- template "model/fieldcomment" $f }}
+		{{ $f.StructField }} {{ if $f.NillableValue }}*{{ end }}{{ if and ($f.IsEnum) (not $f.HasGoType) }}{{ $.Name }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }} {{ if not $f.Sensitive }}`{{ $tag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
+	{{- end }}
+	{{- with $.Edges }}
+		// Edges holds the relations/edges for other nodes in the graph.
+		// The values are being populated by the {{ $.Name }}Query when eager-loading is set.
+		Edges {{ $.Name }}Edges {{ template "model/edgetags" $ }}
+	{{- end -}}
+	{{- /* Additional fields to add by the storage driver. */}}
+	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- else }}
+		selectValues sql.SelectValues
+	{{- end }}
+	{{- /* Additional fields to add by the user. */}}
+	{{- template "model/fields/additional" $ }}
+}
+
+{{- with $.Edges }}
+{{- $edgesType := print $.Name "Edges"}}
+// {{ $.Name }}Edges holds the relations/edges for other nodes in the graph.
+type {{ $edgesType }} struct {
+	{{- range $e := . }}
+		{{- template "model/edgecomment" $e }}
+		{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
+	{{- end }}
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [{{ len . }}]bool
+	{{- /* Additional fields to add by the user. */}}
+	{{- template "model/edges/fields/additional" $ }}
+}
+
+// SetLoadedTypes sets the loaded types state for eager-loading.
+func (e *{{ $edgesType }}) SetLoadedTypes(lt [{{ len . }}]bool) {
+	e.loadedTypes = lt
+}
+
+// IsLoaded returns whether the edge at the given index was loaded.
+func (e {{ $edgesType }}) IsLoaded(idx int) bool {
+	return e.loadedTypes[idx]
+}
+
+{{- range $i, $e := . }}
+	// {{ $e.StructField }}OrErr returns the {{ $e.StructField }} value or an error if the edge
+	// was not loaded in eager-loading{{ if $e.Unique }}, or loaded but was not found{{ end }}.
+	func (e {{ $edgesType }}) {{ $e.StructField }}OrErr() ({{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }}, error) {
+		{{- if $e.Unique }}
+			if e.{{ $e.StructField }} != nil {
+				return e.{{ $e.StructField }}, nil
+			} else if e.loadedTypes[{{ $i }}] {
+				{{- /* Edge was loaded but was not found. Inline the label. */}}
+				return nil, &NotFoundError{Label: "{{ $e.Type.Name }}"}
+			}
+		{{- else }}
+			if e.loadedTypes[{{ $i }}] {
+				return e.{{ $e.StructField }}, nil
+			}
+		{{- end }}
+		return nil, &NotLoadedError{Edge: "{{ $e.Name }}"}
+	}
+{{- end }}
+{{- end }}
+
+{{/* Define enum types locally in internal with entity-prefixed names to avoid import cycles. */}}
+{{- range $f := $.EnumFields }}
+{{- if not $f.HasGoType }}
+{{ $enum := printf "%s%s" $.Name (trimPackage $f.Type.String $.Package) }}
+// {{ $enum }} defines the type for the "{{ $f.Name }}" enum field.
+type {{ $enum }} string
+
+func (s {{ $enum }}) String() string {
+	return string(s)
+}
+{{- end }}
+{{- end }}
+
+{{ template "internal/model/decode" $ }}
+
+{{ $receiver := $.Receiver }}
+
+// Unwrap unwraps the {{ $.Name }} entity that was returned from a transaction after it was closed,
+// so that all future queries will be executed through the driver which created the transaction.
+func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
+	unwrapper, ok := {{ $receiver }}.Config.Drv.(DriverUnwrapper)
+	if !ok {
+		panic("internal: {{ $.Name }} is not a transactional entity")
+	}
+	{{ $receiver }}.Config.Drv = unwrapper.UnwrapDriver()
+	return {{ $receiver }}
+}
+
+{{ template "model/stringer" $ }}
+
+{{ template "model/additional" $ }}
+
+{{ $slice := plural $.Name }}
+// {{ $slice }} is a parsable slice of {{ $.Name }}.
+type {{ $slice }} []*{{ $.Name }}
+
+{{ with extend $ "Slice" $slice }}
+	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
+	{{ xtemplate $tmpl . }}
+{{ end }}
+{{- if eq $.Storage.Name "gremlin" }}
+{{ with extend $ "Receiver" $.Receiver }}
+	{{ xtemplate "dialect/gremlin/decode/one" . }}
+{{ end }}
+{{- end }}
+{{ end }}
+
+{{/*
+Internal model decode template.
+Inlines field/edge name strings instead of referencing sub-package constants.
+*/}}
+{{ define "internal/model/decode" }}
+{{ $receiver := $.Receiver }}
+
+{{ $ctypes := dict }}
+{{ if $.HasOneFieldID }}
+	{{ $idscantype := $.ID.NewScanType }}
+	{{ $ctypes = set $ctypes $idscantype (list $.ID.StorageKey) }}
+{{ end }}
+{{ range $f := $.Fields }}
+	{{- if $f.HasValueScanner }}
+		{{- continue }}
+	{{- end }}
+	{{ $names := list }}
+	{{ if hasKey $ctypes $f.NewScanType }}
+		{{ $names = get $ctypes $f.NewScanType }}
+	{{ end }}
+	{{ $names = append $names $f.StorageKey }}
+	{{ $ctypes = set $ctypes $f.NewScanType $names }}
+{{ end }}
+
+// ScanValues returns the types for scanning values from sql.Rows.
+func (*{{ $.Name }}) ScanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
+	for i := range columns {
+		switch columns[i] {
+			{{- range $type, $columns := $ctypes }}
+				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }} "{{ $c }}"{{ end }}:
+					values[i] = {{ $type }}
+			{{- end }}
+			{{- range $f := $.Fields }}
+				{{- if $f.HasValueScanner }}
+					case "{{ $f.StorageKey }}":
+					values[i] = {{ $.Name }}ValueScanner.{{ $f.StructField }}.ScanValue()
+				{{- end }}
+			{{- end }}
+			{{- if eq $.Storage.Name "sql" }}
+				{{- range $i, $fk := $.UnexportedForeignKeys }}
+					{{- $f := $fk.Field }}
+					case "{{ $f.StorageKey }}": // {{ $fk.StructField }}
+						values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
+				{{- end }}
+			{{- end }}
+			default:
+				values[i] = new(sql.UnknownType)
+		}
+	}
+	return values, nil
+}
+
+// AssignValues assigns the values that were returned from sql.Rows (after scanning)
+// to the {{ $.Name }} fields.
+func ({{ $receiver }} *{{ $.Name }}) AssignValues(columns []string, values []any) error {
+	if m, n := len(values), len(columns); m < n {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	}
+	for i := range columns {
+		switch columns[i] {
+		{{- if $.HasOneFieldID }}
+			case "{{ $.ID.StorageKey }}":
+				{{- if or $.ID.IsString $.ID.IsBytes $.ID.HasGoType }}
+					{{- with extend $ "Idx" "i" "Field" $.ID "Rec" $receiver }}
+						{{ template "dialect/sql/decode/field" . }}
+					{{- end }}
+				{{- else }}
+					value, ok := values[i].(*sql.NullInt64)
+					if !ok {
+						return fmt.Errorf("unexpected type %T for field id", value)
+					}
+					{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
+				{{- end }}
+		{{- end }}
+		{{- range  $f := $.Fields }}
+			case "{{ $f.StorageKey }}":
+				{{- if and ($f.IsEnum) (not $f.HasGoType) }}
+					{{- $enumType := printf "%s%s" $.Name (trimPackage $f.Type.String $.Package) }}
+					if value, ok := values[i].(*sql.NullString); !ok {
+						return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[i])
+					} else if value.Valid {
+						{{- if $f.NillableValue }}
+						enumValue := {{ $enumType }}(value.String)
+						{{ $receiver }}.{{ $f.StructField }} = &enumValue
+						{{- else }}
+						{{ $receiver }}.{{ $f.StructField }} = {{ $enumType }}(value.String)
+						{{- end }}
+					}
+				{{- else if $f.HasValueScanner }}
+					if value, err := {{ $.Name }}ValueScanner.{{ $f.StructField }}.FromValue(values[i]); err != nil {
+						return err
+					} else {
+						{{ $receiver }}.{{ $f.StructField }} = value
+					}
+				{{- else }}
+					{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver }}
+						{{ template "dialect/sql/decode/field" . }}
+					{{- end }}
+				{{- end }}
+		{{- end }}
+		{{- if eq $.Storage.Name "sql" }}
+			{{- range $i, $fk := $.UnexportedForeignKeys }}
+				{{- $f := $fk.Field }}
+				case {{ if $fk.UserDefined }}"{{ $.ID.StorageKey }}"{{ else }}"{{ $f.StorageKey }}"{{ end }}:
+					{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsBytes $f.HasGoType)) }}
+						{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
+							{{ template "dialect/sql/decode/field" . }}
+						{{- end }}
+					{{- else }}
+						if value, ok := values[i].(*sql.NullInt64); !ok {
+							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
+						} else if value.Valid {
+							{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
+							{{ if and $f.Nillable (not $f.Type.Nillable) }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
+						}
+					{{- end }}
+			{{- end }}
+		{{- end }}
+		default:
+			{{ $receiver }}.selectValues.Set(columns[i], values[i])
+		}
+	}
+	return nil
+}
+
+// {{ $.ValueName }} returns the ent.Value that was dynamically selected and assigned to the {{ $.Name }}.
+// This includes values selected through modifiers, order, etc.
+func ({{ $receiver }} *{{ $.Name }}) {{ $.ValueName }}(name string) (ent.Value, error) {
+	return {{ $receiver }}.selectValues.Get(name)
+}
+
+{{- /* Exported accessors for unexported FK fields, used by sub-package create builders and root queries. */ -}}
+{{- if eq $.Storage.Name "sql" }}
+{{- range $fk := $.UnexportedForeignKeys }}
+{{- $f := $fk.Field }}
+// Set{{ pascal $fk.StructField }} sets the {{ $fk.StructField }} foreign key.
+func ({{ $receiver }} *{{ $.Name }}) Set{{ pascal $fk.StructField }}(v {{ $f.Type }}) {
+	{{ $receiver }}.{{ $fk.StructField }} = {{ if $f.Nillable }}&{{ end }}v
+}
+
+// Get{{ pascal $fk.StructField }} returns the {{ $fk.StructField }} foreign key value.
+func ({{ $receiver }} *{{ $.Name }}) Get{{ pascal $fk.StructField }}() {{ if $f.Nillable }}*{{ end }}{{ $f.Type }} {
+	return {{ $receiver }}.{{ $fk.StructField }}
+}
+{{- end }}
+{{- end }}
+
+{{ end }}

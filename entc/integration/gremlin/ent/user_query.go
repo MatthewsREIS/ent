@@ -22,7 +22,7 @@ import (
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
-	config
+	Config
 	ctx           *QueryContext
 	order         []user.OrderOption
 	inters        []Interceptor
@@ -76,7 +76,7 @@ func (_q *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 
 // QueryCard chains the current query on the "card" edge.
 func (_q *UserQuery) QueryCard() *CardQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -90,7 +90,7 @@ func (_q *UserQuery) QueryCard() *CardQuery {
 
 // QueryPets chains the current query on the "pets" edge.
 func (_q *UserQuery) QueryPets() *PetQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -104,7 +104,7 @@ func (_q *UserQuery) QueryPets() *PetQuery {
 
 // QueryFiles chains the current query on the "files" edge.
 func (_q *UserQuery) QueryFiles() *FileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -118,7 +118,7 @@ func (_q *UserQuery) QueryFiles() *FileQuery {
 
 // QueryGroups chains the current query on the "groups" edge.
 func (_q *UserQuery) QueryGroups() *GroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -132,7 +132,7 @@ func (_q *UserQuery) QueryGroups() *GroupQuery {
 
 // QueryFriends chains the current query on the "friends" edge.
 func (_q *UserQuery) QueryFriends() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -146,7 +146,7 @@ func (_q *UserQuery) QueryFriends() *UserQuery {
 
 // QueryFollowers chains the current query on the "followers" edge.
 func (_q *UserQuery) QueryFollowers() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -160,7 +160,7 @@ func (_q *UserQuery) QueryFollowers() *UserQuery {
 
 // QueryFollowing chains the current query on the "following" edge.
 func (_q *UserQuery) QueryFollowing() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -174,7 +174,7 @@ func (_q *UserQuery) QueryFollowing() *UserQuery {
 
 // QueryTeam chains the current query on the "team" edge.
 func (_q *UserQuery) QueryTeam() *PetQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -188,7 +188,7 @@ func (_q *UserQuery) QueryTeam() *PetQuery {
 
 // QuerySpouse chains the current query on the "spouse" edge.
 func (_q *UserQuery) QuerySpouse() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -202,7 +202,7 @@ func (_q *UserQuery) QuerySpouse() *UserQuery {
 
 // QueryChildren chains the current query on the "children" edge.
 func (_q *UserQuery) QueryChildren() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -216,7 +216,7 @@ func (_q *UserQuery) QueryChildren() *UserQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *UserQuery) QueryParent() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -236,7 +236,7 @@ func (_q *UserQuery) First(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{Label: user.Label}
 	}
 	return nodes[0], nil
 }
@@ -258,7 +258,7 @@ func (_q *UserQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{Label: user.Label}
 		return
 	}
 	return ids[0], nil
@@ -285,9 +285,9 @@ func (_q *UserQuery) Only(ctx context.Context) (*User, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{Label: user.Label}
 	default:
-		return nil, &NotSingularError{user.Label}
+		return nil, &NotSingularError{Label: user.Label}
 	}
 }
 
@@ -312,9 +312,9 @@ func (_q *UserQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{Label: user.Label}
 	default:
-		err = &NotSingularError{user.Label}
+		err = &NotSingularError{Label: user.Label}
 	}
 	return
 }
@@ -415,7 +415,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        _q.config,
+		Config:        _q.Config,
 		ctx:           _q.ctx.Clone(),
 		order:         append([]user.OrderOption{}, _q.order...),
 		inters:        append([]Interceptor{}, _q.inters...),
@@ -440,7 +440,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -451,7 +451,7 @@ func (_q *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
 // WithPets tells the query-builder to eager-load the nodes that are connected to
 // the "pets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -462,7 +462,7 @@ func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -473,7 +473,7 @@ func (_q *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -484,7 +484,7 @@ func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
 // WithFriends tells the query-builder to eager-load the nodes that are connected to
 // the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -495,7 +495,7 @@ func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
 // WithFollowers tells the query-builder to eager-load the nodes that are connected to
 // the "followers" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -506,7 +506,7 @@ func (_q *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
 // WithFollowing tells the query-builder to eager-load the nodes that are connected to
 // the "following" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -517,7 +517,7 @@ func (_q *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
 // WithTeam tells the query-builder to eager-load the nodes that are connected to
 // the "team" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := (&PetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -528,7 +528,7 @@ func (_q *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
 // WithSpouse tells the query-builder to eager-load the nodes that are connected to
 // the "spouse" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -539,7 +539,7 @@ func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -550,7 +550,7 @@ func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -640,7 +640,7 @@ func (_q *UserQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Use
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Users
@@ -648,7 +648,7 @@ func (_q *UserQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Use
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -656,7 +656,7 @@ func (_q *UserQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Use
 func (_q *UserQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -732,7 +732,7 @@ func (_g *UserGroupBy) gremlinScan(ctx context.Context, root *UserQuery, v any) 
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -785,7 +785,7 @@ func (_s *UserSelect) gremlinScan(ctx context.Context, root *UserQuery, v any) e
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

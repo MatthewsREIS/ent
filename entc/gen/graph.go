@@ -264,7 +264,11 @@ func generate(g *Graph) error {
 				continue
 			}
 			b := bytes.NewBuffer(nil)
-			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
+			var data any = n
+			if tmpl.SubPackage {
+				data = &typeScope{Type: n, Scope: map[any]any{"InSubPackage": true}}
+			}
+			if err := templates.ExecuteTemplate(b, tmpl.Name, data); err != nil {
 				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 			}
 			output := tmpl.Format(n)
@@ -317,6 +321,22 @@ func generate(g *Graph) error {
 	for _, n := range deletedTemplates {
 		if err := os.Remove(filepath.Join(g.Target, n)); err != nil && !os.IsNotExist(err) {
 			log.Printf("remove old file %s: %s\n", filepath.Join(g.Target, n), err)
+		}
+	}
+	// Overwrite stale root-level per-type files from old template layout
+	// with empty stubs (e.g. user_create.go replaced by user/create.go).
+	// We write stubs instead of deleting because go generate iterates
+	// all package files and would fail if a file disappears mid-run.
+	stub := []byte("package " + filepath.Base(g.Package) + "\n")
+	for _, n := range g.Nodes {
+		for _, pattern := range deletedTypeTemplates {
+			name := fmt.Sprintf(pattern, n.PackageDir())
+			p := filepath.Join(g.Target, name)
+			if _, err := os.Stat(p); err == nil {
+				if err := os.WriteFile(p, stub, 0644); err != nil {
+					log.Printf("stub old file %s: %s\n", p, err)
+				}
+			}
 		}
 	}
 	// We can't run "imports" on files when the state is not completed.
@@ -1156,8 +1176,17 @@ func cleanOldNodes(assets assets, target string) {
 				log.Printf("remove old file %s: %s\n", path, err)
 			}
 		}
-		err := os.Remove(filepath.Join(target, typ.PackageDir()))
-		if err != nil && !os.IsNotExist(err) {
+		// Remove stale root-level files from old template layout
+		// (e.g. user_create.go replaced by user/create.go).
+		for _, pattern := range deletedTypeTemplates {
+			name := fmt.Sprintf(pattern, typ.PackageDir())
+			if err := os.Remove(filepath.Join(target, name)); err != nil && !os.IsNotExist(err) {
+				log.Printf("remove old file %s: %s\n", filepath.Join(target, name), err)
+			}
+		}
+		// Use RemoveAll to remove the sub-package directory and all
+		// its contents (create.go, update.go, delete.go, client.go, etc.).
+		if err := os.RemoveAll(filepath.Join(target, typ.PackageDir())); err != nil {
 			log.Printf("remove old dir %s: %s\n", filepath.Join(target, typ.PackageDir()), err)
 		}
 	}

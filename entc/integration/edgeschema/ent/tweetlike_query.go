@@ -23,7 +23,7 @@ import (
 
 // TweetLikeQuery is the builder for querying TweetLike entities.
 type TweetLikeQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []tweetlike.OrderOption
 	inters     []Interceptor
@@ -68,7 +68,7 @@ func (_q *TweetLikeQuery) Order(o ...tweetlike.OrderOption) *TweetLikeQuery {
 
 // QueryTweet chains the current query on the "tweet" edge.
 func (_q *TweetLikeQuery) QueryTweet() *TweetQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -82,7 +82,7 @@ func (_q *TweetLikeQuery) QueryTweet() *TweetQuery {
 			sqlgraph.To(tweet.Table, tweet.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, tweetlike.TweetTable, tweetlike.TweetColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -90,7 +90,7 @@ func (_q *TweetLikeQuery) QueryTweet() *TweetQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (_q *TweetLikeQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -104,7 +104,7 @@ func (_q *TweetLikeQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, tweetlike.UserTable, tweetlike.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -118,7 +118,7 @@ func (_q *TweetLikeQuery) First(ctx context.Context) (*TweetLike, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{tweetlike.Label}
+		return nil, &NotFoundError{Label: tweetlike.Label}
 	}
 	return nodes[0], nil
 }
@@ -144,9 +144,9 @@ func (_q *TweetLikeQuery) Only(ctx context.Context) (*TweetLike, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{tweetlike.Label}
+		return nil, &NotFoundError{Label: tweetlike.Label}
 	default:
-		return nil, &NotSingularError{tweetlike.Label}
+		return nil, &NotSingularError{Label: tweetlike.Label}
 	}
 }
 
@@ -225,7 +225,7 @@ func (_q *TweetLikeQuery) Clone() *TweetLikeQuery {
 		return nil
 	}
 	return &TweetLikeQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]tweetlike.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -241,7 +241,7 @@ func (_q *TweetLikeQuery) Clone() *TweetLikeQuery {
 // WithTweet tells the query-builder to eager-load the nodes that are connected to
 // the "tweet" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetLikeQuery) WithTweet(opts ...func(*TweetQuery)) *TweetLikeQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := (&TweetClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -252,7 +252,7 @@ func (_q *TweetLikeQuery) WithTweet(opts ...func(*TweetQuery)) *TweetLikeQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetLikeQuery) WithUser(opts ...func(*UserQuery)) *TweetLikeQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -321,7 +321,7 @@ func (_q *TweetLikeQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !tweetlike.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -350,18 +350,18 @@ func (_q *TweetLikeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tw
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*TweetLike).scanValues(nil, columns)
+		return (*TweetLike).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &TweetLike{config: _q.config}
+		node := &TweetLike{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -445,7 +445,7 @@ func (_q *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Unique = false
 	_spec.Node.Columns = nil
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
@@ -492,7 +492,7 @@ func (_q *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *TweetLikeQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(tweetlike.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -564,7 +564,7 @@ func (_g *TweetLikeGroupBy) sqlScan(ctx context.Context, root *TweetLikeQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -606,7 +606,7 @@ func (_s *TweetLikeSelect) sqlScan(ctx context.Context, root *TweetLikeQuery, v 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -21,7 +21,7 @@ import (
 
 // RelationshipInfoQuery is the builder for querying RelationshipInfo entities.
 type RelationshipInfoQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []relationshipinfo.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *RelationshipInfoQuery) First(ctx context.Context) (*RelationshipInfo, 
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{relationshipinfo.Label}
+		return nil, &NotFoundError{Label: relationshipinfo.Label}
 	}
 	return nodes[0], nil
 }
@@ -92,7 +92,7 @@ func (_q *RelationshipInfoQuery) FirstID(ctx context.Context) (id int, err error
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{relationshipinfo.Label}
+		err = &NotFoundError{Label: relationshipinfo.Label}
 		return
 	}
 	return ids[0], nil
@@ -119,9 +119,9 @@ func (_q *RelationshipInfoQuery) Only(ctx context.Context) (*RelationshipInfo, e
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{relationshipinfo.Label}
+		return nil, &NotFoundError{Label: relationshipinfo.Label}
 	default:
-		return nil, &NotSingularError{relationshipinfo.Label}
+		return nil, &NotSingularError{Label: relationshipinfo.Label}
 	}
 }
 
@@ -146,9 +146,9 @@ func (_q *RelationshipInfoQuery) OnlyID(ctx context.Context) (id int, err error)
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{relationshipinfo.Label}
+		err = &NotFoundError{Label: relationshipinfo.Label}
 	default:
-		err = &NotSingularError{relationshipinfo.Label}
+		err = &NotSingularError{Label: relationshipinfo.Label}
 	}
 	return
 }
@@ -249,7 +249,7 @@ func (_q *RelationshipInfoQuery) Clone() *RelationshipInfoQuery {
 		return nil
 	}
 	return &RelationshipInfoQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]relationshipinfo.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -321,7 +321,7 @@ func (_q *RelationshipInfoQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !relationshipinfo.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -340,17 +340,17 @@ func (_q *RelationshipInfoQuery) sqlAll(ctx context.Context, hooks ...queryHook)
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*RelationshipInfo).scanValues(nil, columns)
+		return (*RelationshipInfo).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &RelationshipInfo{config: _q.config}
+		node := &RelationshipInfo{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -365,7 +365,7 @@ func (_q *RelationshipInfoQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *RelationshipInfoQuery) querySpec() *sqlgraph.QuerySpec {
@@ -409,7 +409,7 @@ func (_q *RelationshipInfoQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *RelationshipInfoQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(relationshipinfo.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -481,7 +481,7 @@ func (_g *RelationshipInfoGroupBy) sqlScan(ctx context.Context, root *Relationsh
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -523,7 +523,7 @@ func (_s *RelationshipInfoSelect) sqlScan(ctx context.Context, root *Relationshi
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

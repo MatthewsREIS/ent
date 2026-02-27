@@ -29,34 +29,34 @@ func O2OTwoTypes(t *testing.T, client *ent.Client) {
 
 	t.Log("new user without card")
 	usr := client.User.Create().SetAge(10).SetName("foo").SaveX(ctx)
-	require.Zero(usr.QueryCard().CountX(ctx))
+	require.Zero(client.User.QueryCard(usr).CountX(ctx))
 
 	t.Log("add card to user on card creation (inverse creation)")
-	crd := client.Card.Create().SetNumber("1").SetOwner(usr).SaveX(ctx)
-	require.Equal(usr.QueryCard().CountX(ctx), 1)
-	require.Equal(crd.QueryOwner().CountX(ctx), 1)
+	crd := client.Card.Create().SetNumber("1").SetOwnerID(usr.ID).SaveX(ctx)
+	require.Equal(client.User.QueryCard(usr).CountX(ctx), 1)
+	require.Equal(client.Card.QueryOwner(crd).CountX(ctx), 1)
 
 	t.Log("delete inverse should delete association")
 	client.Card.DeleteOne(crd).ExecX(ctx)
 	require.Zero(client.Card.Query().CountX(ctx))
-	require.Zero(usr.QueryCard().CountX(ctx), "user should not have card")
+	require.Zero(client.User.QueryCard(usr).CountX(ctx), "user should not have card")
 
 	t.Log("add card to user by updating user (the owner of the edge)")
 	crd = client.Card.Create().SetNumber("10").SaveX(ctx)
-	usr.Update().SetCard(crd).ExecX(ctx)
-	require.Equal(usr.Name, crd.QueryOwner().OnlyX(ctx).Name)
-	require.Equal(crd.Number, usr.QueryCard().OnlyX(ctx).Number)
+	client.User.UpdateOne(usr).SetCardID(crd.ID).ExecX(ctx)
+	require.Equal(usr.Name, client.Card.QueryOwner(crd).OnlyX(ctx).Name)
+	require.Equal(crd.Number, client.User.QueryCard(usr).OnlyX(ctx).Number)
 
 	t.Log("delete assoc should delete inverse edge")
 	client.User.DeleteOne(usr).ExecX(ctx)
 	require.Zero(client.User.Query().CountX(ctx))
-	require.Zero(crd.QueryOwner().CountX(ctx), "card should not have an owner")
+	require.Zero(client.Card.QueryOwner(crd).CountX(ctx), "card should not have an owner")
 
 	t.Log("add card to user by updating card (the inverse edge)")
 	usr = client.User.Create().SetAge(10).SetName("bar").SaveX(ctx)
-	crd.Update().SetOwner(usr).ExecX(ctx)
-	require.Equal(usr.Name, crd.QueryOwner().OnlyX(ctx).Name)
-	require.Equal(crd.Number, usr.QueryCard().OnlyX(ctx).Number)
+	client.Card.UpdateOne(crd).SetOwnerID(usr.ID).ExecX(ctx)
+	require.Equal(usr.Name, client.Card.QueryOwner(crd).OnlyX(ctx).Name)
+	require.Equal(crd.Number, client.User.QueryCard(usr).OnlyX(ctx).Number)
 
 	t.Log("query with side lookup on inverse")
 	ocrd := client.Card.Create().SetNumber("orphan card").SaveX(ctx)
@@ -106,11 +106,11 @@ func O2OTwoTypes(t *testing.T, client *ent.Client) {
 	)
 
 	t.Log("query long path from inverse")
-	require.Equal(crd.Number, crd.QueryOwner().QueryCard().OnlyX(ctx).Number, "should get itself")
-	require.Equal(usr.Name, crd.QueryOwner().QueryCard().QueryOwner().OnlyX(ctx).Name, "should get its owner")
+	require.Equal(crd.Number, client.Card.QueryOwner(crd).QueryCard().OnlyX(ctx).Number, "should get itself")
+	require.Equal(usr.Name, client.Card.QueryOwner(crd).QueryCard().QueryOwner().OnlyX(ctx).Name, "should get its owner")
 	require.Equal(
 		usr.Name,
-		crd.QueryOwner().
+		client.Card.QueryOwner(crd).
 			Where(user.HasCard()).
 			QueryCard().
 			QueryOwner().
@@ -120,11 +120,11 @@ func O2OTwoTypes(t *testing.T, client *ent.Client) {
 	)
 
 	t.Log("query long path from assoc")
-	require.Equal(usr.Name, usr.QueryCard().QueryOwner().OnlyX(ctx).Name, "should get itself")
-	require.Equal(crd.Number, usr.QueryCard().QueryOwner().QueryCard().OnlyX(ctx).Number, "should get its card")
+	require.Equal(usr.Name, client.User.QueryCard(usr).QueryOwner().OnlyX(ctx).Name, "should get itself")
+	require.Equal(crd.Number, client.User.QueryCard(usr).QueryOwner().QueryCard().OnlyX(ctx).Number, "should get its card")
 	require.Equal(
 		crd.Number,
-		usr.QueryCard().
+		client.User.QueryCard(usr).
 			Where(card.HasOwner()).
 			QueryOwner().
 			Where(user.HasCard()).
@@ -142,42 +142,42 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("head of the list")
 	head := client.Node.Create().SetValue(1).SaveX(ctx)
-	require.Zero(head.QueryPrev().CountX(ctx))
-	require.Zero(head.QueryNext().CountX(ctx))
+	require.Zero(client.Node.QueryPrev(head).CountX(ctx))
+	require.Zero(client.Node.QueryNext(head).CountX(ctx))
 
 	t.Log("add node to the linked-list and connect it to the head (inverse creation)")
-	sec := client.Node.Create().SetValue(2).SetPrev(head).SaveX(ctx)
-	require.Zero(sec.QueryNext().CountX(ctx), "should not have next")
-	require.Equal(head.ID, sec.QueryPrev().OnlyX(ctx).ID, "head should point to the second node")
-	require.Equal(sec.ID, head.QueryNext().OnlyX(ctx).ID)
+	sec := client.Node.Create().SetValue(2).SetPrevID(head.ID).SaveX(ctx)
+	require.Zero(client.Node.QueryNext(sec).CountX(ctx), "should not have next")
+	require.Equal(head.ID, client.Node.QueryPrev(sec).OnlyX(ctx).ID, "head should point to the second node")
+	require.Equal(sec.ID, client.Node.QueryNext(head).OnlyX(ctx).ID)
 	require.Equal(2, client.Node.Query().CountX(ctx), "linked-list should have 2 nodes")
 
 	t.Log("delete inverse should delete association")
 	client.Node.DeleteOne(sec).ExecX(ctx)
-	require.Zero(head.QueryNext().CountX(ctx))
+	require.Zero(client.Node.QueryNext(head).CountX(ctx))
 	require.Equal(1, client.Node.Query().CountX(ctx), "linked-list should have 1 node")
 
 	t.Log("add node to the linked-list by updating the head (the owner of the edge)")
 	sec = client.Node.Create().SetValue(2).SaveX(ctx)
-	head.Update().SetNext(sec).ExecX(ctx)
-	require.Zero(sec.QueryNext().CountX(ctx), "should not have next")
-	require.Equal(head.ID, sec.QueryPrev().OnlyX(ctx).ID, "head should point to the second node")
-	require.Equal(sec.ID, head.QueryNext().OnlyX(ctx).ID)
+	client.Node.UpdateOne(head).SetNextID(sec.ID).ExecX(ctx)
+	require.Zero(client.Node.QueryNext(sec).CountX(ctx), "should not have next")
+	require.Equal(head.ID, client.Node.QueryPrev(sec).OnlyX(ctx).ID, "head should point to the second node")
+	require.Equal(sec.ID, client.Node.QueryNext(head).OnlyX(ctx).ID)
 	require.Equal(2, client.Node.Query().CountX(ctx), "linked-list should have 2 nodes")
 
 	t.Log("delete assoc should delete inverse edge")
 	client.Node.DeleteOne(head).ExecX(ctx)
-	require.Zero(sec.QueryPrev().CountX(ctx), "second node should be the head now")
-	require.Zero(sec.QueryNext().CountX(ctx), "second node should be the head now")
+	require.Zero(client.Node.QueryPrev(sec).CountX(ctx), "second node should be the head now")
+	require.Zero(client.Node.QueryNext(sec).CountX(ctx), "second node should be the head now")
 
 	t.Log("update second node value to be 1")
-	head = sec.Update().SetValue(1).SaveX(ctx)
+	head = client.Node.UpdateOne(sec).SetValue(1).SaveX(ctx)
 	require.Equal(1, head.Value)
 
 	t.Log("create a linked-list 1->2->3->4->5")
 	nodes := []*ent.Node{head}
 	for i := 0; i < 4; i++ {
-		next := client.Node.Create().SetValue(nodes[i].Value + 1).SetPrev(nodes[i]).SaveX(ctx)
+		next := client.Node.Create().SetValue(nodes[i].Value + 1).SetPrevID(nodes[i].ID).SaveX(ctx)
 		nodes = append(nodes, next)
 	}
 	require.Equal(len(nodes), client.Node.Query().CountX(ctx))
@@ -185,26 +185,26 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 	t.Log("check correctness of the list values")
 	for i, n := range nodes[:3] {
 		require.Equal(i+1, n.Value)
-		require.Equal(nodes[i+1].Value, n.QueryNext().OnlyX(ctx).Value)
+		require.Equal(nodes[i+1].Value, client.Node.QueryNext(n).OnlyX(ctx).Value)
 	}
-	require.Zero(nodes[len(nodes)-1].QueryNext().CountX(ctx), "last node should point to nil")
+	require.Zero(client.Node.QueryNext(nodes[len(nodes)-1]).CountX(ctx), "last node should point to nil")
 
 	t.Log("query with side lookup on inverse/assoc")
 	require.Equal(4, client.Node.Query().Where(node.HasNext()).CountX(ctx))
 	require.Equal(4, client.Node.Query().Where(node.HasPrev()).CountX(ctx))
 
 	t.Log("make the linked-list to be circular")
-	nodes[len(nodes)-1].Update().SetNext(head).SaveX(ctx)
-	require.Equal(nodes[0].Value, nodes[len(nodes)-1].QueryNext().OnlyX(ctx).Value, "last node should point to head")
-	require.Equal(nodes[len(nodes)-1].Value, nodes[0].QueryPrev().OnlyX(ctx).Value, "head should have a reference to the tail")
+	client.Node.UpdateOne(nodes[len(nodes)-1]).SetNextID(head.ID).SaveX(ctx)
+	require.Equal(nodes[0].Value, client.Node.QueryNext(nodes[len(nodes)-1]).OnlyX(ctx).Value, "last node should point to head")
+	require.Equal(nodes[len(nodes)-1].Value, client.Node.QueryPrev(nodes[0]).OnlyX(ctx).Value, "head should have a reference to the tail")
 
 	t.Log("query with side lookup on inverse/assoc")
 	require.Equal(5, client.Node.Query().Where(node.HasNext()).CountX(ctx))
 	require.Equal(5, client.Node.Query().Where(node.HasPrev()).CountX(ctx))
 	// node that points (with "next") to other node with value 2 (the head).
-	require.Equal(nodes[0].Value, client.Node.Query().Where(node.HasNextWith(node.Value(2))).OnlyX(ctx).Value)
+	require.Equal(nodes[0].Value, client.Node.Query().Where(node.HasNextWith(node.ValueEQ(2))).OnlyX(ctx).Value)
 	// node that points (with "next") to other node with value 1 (the tail).
-	require.Equal(nodes[len(nodes)-1].Value, client.Node.Query().Where(node.HasNextWith(node.Value(1))).OnlyX(ctx).Value)
+	require.Equal(nodes[len(nodes)-1].Value, client.Node.Query().Where(node.HasNextWith(node.ValueEQ(1))).OnlyX(ctx).Value)
 	// nodes that points to nodes with value greater than 2 (X->2->3->4->X).
 	values, err := client.Node.Query().
 		Where(node.HasNextWith(node.ValueGT(2))).
@@ -218,43 +218,41 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 	// going back from head to tail until we reach the head.
 	require.Equal(
 		head.Value,
-		head.
-			QueryPrev(). // 5 (tail)
-			QueryPrev(). // 4
-			QueryPrev(). // 3
-			QueryPrev(). // 2
-			QueryPrev(). // 1 (head)
-			OnlyX(ctx).Value,
+		client.Node.QueryPrev(head). // 5 (tail)
+						QueryPrev(). // 4
+						QueryPrev(). // 3
+						QueryPrev(). // 2
+						QueryPrev(). // 1 (head)
+						OnlyX(ctx).Value,
 	)
 	// disrupt the query in the middle.
-	require.Zero(head.QueryPrev().QueryPrev().Where(node.ValueGT(10)).QueryPrev().QueryPrev().QueryPrev().CountX(ctx))
+	require.Zero(client.Node.QueryPrev(head).QueryPrev().Where(node.ValueGT(10)).QueryPrev().QueryPrev().QueryPrev().CountX(ctx))
 
 	t.Log("query long path from assoc")
 	// going forward from head to next until we reach the head.
 	require.Equal(
 		head.Value,
-		head.
-			QueryNext(). // 2
-			QueryNext(). // 3
-			QueryNext(). // 4
-			QueryNext(). // 5 (tail)
-			QueryNext(). // 1 (head)
-			OnlyX(ctx).Value,
+		client.Node.QueryNext(head). // 2
+						QueryNext(). // 3
+						QueryNext(). // 4
+						QueryNext(). // 5 (tail)
+						QueryNext(). // 1 (head)
+						OnlyX(ctx).Value,
 	)
 	// disrupt the query in the middle.
-	require.Zero(head.QueryNext().QueryNext().Where(node.ValueGT(10)).QueryNext().QueryNext().QueryNext().CountX(ctx))
+	require.Zero(client.Node.QueryNext(head).QueryNext().Where(node.ValueGT(10)).QueryNext().QueryNext().QueryNext().CountX(ctx))
 
 	t.Log("delete all nodes except the head")
 	client.Node.Delete().Where(node.ValueGT(1)).ExecX(ctx)
 	head = client.Node.Query().OnlyX(ctx)
 
 	t.Log("node points to itself (circular linked-list with 1 node)")
-	head.Update().SetNext(head).SaveX(ctx)
-	require.Equal(head.ID, head.QueryPrev().OnlyIDX(ctx))
-	require.Equal(head.ID, head.QueryNext().OnlyIDX(ctx))
-	head.Update().ClearNext().SaveX(ctx)
-	require.Zero(head.QueryPrev().CountX(ctx))
-	require.Zero(head.QueryNext().CountX(ctx))
+	head = client.Node.UpdateOne(head).SetNextID(head.ID).SaveX(ctx)
+	require.Equal(head.ID, client.Node.QueryPrev(head).OnlyIDX(ctx))
+	require.Equal(head.ID, client.Node.QueryNext(head).OnlyIDX(ctx))
+	head = client.Node.UpdateOne(head).ClearNext().SaveX(ctx)
+	require.Zero(client.Node.QueryPrev(head).CountX(ctx))
+	require.Zero(client.Node.QueryNext(head).CountX(ctx))
 }
 
 // Demonstrate a O2O relation between two instances of the same type, where the relation
@@ -271,50 +269,50 @@ func O2OSelfRef(t *testing.T, client *ent.Client) {
 
 	t.Log("new user without spouse")
 	foo := client.User.Create().SetAge(10).SetName("foo").SaveX(ctx)
-	require.False(foo.QuerySpouse().ExistX(ctx))
+	require.False(client.User.QuerySpouse(foo).ExistX(ctx))
 
 	t.Log("sets spouse on user creation (inverse creation)")
-	bar := client.User.Create().SetAge(10).SetName("bar").SetSpouse(foo).SaveX(ctx)
-	require.True(foo.QuerySpouse().ExistX(ctx))
-	require.True(bar.QuerySpouse().ExistX(ctx))
+	bar := client.User.Create().SetAge(10).SetName("bar").SetSpouseID(foo.ID).SaveX(ctx)
+	require.True(client.User.QuerySpouse(foo).ExistX(ctx))
+	require.True(client.User.QuerySpouse(bar).ExistX(ctx))
 	require.Equal(2, client.User.Query().Where(user.HasSpouse()).CountX(ctx))
 
 	t.Log("delete inverse should delete association")
 	client.User.DeleteOne(bar).ExecX(ctx)
-	require.False(foo.QuerySpouse().ExistX(ctx))
+	require.False(client.User.QuerySpouse(foo).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasSpouse()).CountX(ctx))
 
 	t.Log("add spouse to user by updating a user")
 	bar = client.User.Create().SetAge(10).SetName("bar").SaveX(ctx)
-	foo.Update().SetSpouse(bar).ExecX(ctx)
-	require.True(foo.QuerySpouse().ExistX(ctx))
-	require.True(bar.QuerySpouse().ExistX(ctx))
+	client.User.UpdateOne(foo).SetSpouseID(bar.ID).ExecX(ctx)
+	require.True(client.User.QuerySpouse(foo).ExistX(ctx))
+	require.True(client.User.QuerySpouse(bar).ExistX(ctx))
 	require.Equal(2, client.User.Query().Where(user.HasSpouse()).CountX(ctx))
 
 	t.Log("remove a spouse using update")
-	foo.Update().ClearSpouse().ExecX(ctx)
-	require.False(foo.QuerySpouse().ExistX(ctx))
-	require.False(bar.QuerySpouse().ExistX(ctx))
+	client.User.UpdateOne(foo).ClearSpouse().ExecX(ctx)
+	require.False(client.User.QuerySpouse(foo).ExistX(ctx))
+	require.False(client.User.QuerySpouse(bar).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasSpouse()).CountX(ctx))
 	// return back the spouse.
-	foo.Update().SetSpouse(bar).ExecX(ctx)
+	client.User.UpdateOne(foo).SetSpouseID(bar.ID).ExecX(ctx)
 
 	t.Log("create a user without spouse")
 	baz := client.User.Create().SetAge(10).SetName("baz").SaveX(ctx)
-	require.False(baz.QuerySpouse().ExistX(ctx))
+	require.False(client.User.QuerySpouse(baz).ExistX(ctx))
 	require.Equal(2, client.User.Query().Where(user.HasSpouse()).CountX(ctx))
 
 	t.Log("set a new spouse")
-	foo.Update().ClearSpouse().SetSpouse(baz).ExecX(ctx)
-	require.True(foo.QuerySpouse().ExistX(ctx))
-	require.True(baz.QuerySpouse().ExistX(ctx))
-	require.False(bar.QuerySpouse().ExistX(ctx))
+	client.User.UpdateOne(foo).ClearSpouse().SetSpouseID(baz.ID).ExecX(ctx)
+	require.True(client.User.QuerySpouse(foo).ExistX(ctx))
+	require.True(client.User.QuerySpouse(baz).ExistX(ctx))
+	require.False(client.User.QuerySpouse(bar).ExistX(ctx))
 	// return back the spouse.
-	foo.Update().ClearSpouse().SetSpouse(bar).ExecX(ctx)
+	client.User.UpdateOne(foo).ClearSpouse().SetSpouseID(bar.ID).ExecX(ctx)
 
 	t.Log("spouse is a unique edge")
-	require.Error(baz.Update().SetSpouse(bar).Exec(ctx))
-	require.Error(baz.Update().SetSpouse(foo).Exec(ctx))
+	require.Error(client.User.UpdateOne(baz).SetSpouseID(bar.ID).Exec(ctx))
+	require.Error(client.User.UpdateOne(baz).SetSpouseID(foo.ID).Exec(ctx))
 
 	t.Log("query with side lookup")
 	require.Equal(
@@ -353,21 +351,19 @@ func O2OSelfRef(t *testing.T, client *ent.Client) {
 	t.Log("query path from a user")
 	require.Equal(
 		foo.Name,
-		foo.
-			QuerySpouse(). // bar
-			QuerySpouse(). // foo
-			QuerySpouse(). // bar
-			QuerySpouse(). // foo
-			OnlyX(ctx).Name,
+		client.User.QuerySpouse(foo). // bar
+						QuerySpouse(). // foo
+						QuerySpouse(). // bar
+						QuerySpouse(). // foo
+						OnlyX(ctx).Name,
 	)
 	require.Equal(
 		bar.Name,
-		bar.
-			QuerySpouse(). // foo
-			QuerySpouse(). // bar
-			QuerySpouse(). // foo
-			QuerySpouse(). // bar
-			OnlyX(ctx).Name,
+		client.User.QuerySpouse(bar). // foo
+						QuerySpouse(). // bar
+						QuerySpouse(). // foo
+						QuerySpouse(). // bar
+						OnlyX(ctx).Name,
 	)
 
 	t.Log("query path from client")
@@ -399,61 +395,61 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 
 	t.Log("new user without pet")
 	usr := client.User.Create().SetAge(30).SetName("a8m").SaveX(ctx)
-	require.False(usr.QueryPets().ExistX(ctx))
+	require.False(client.User.QueryPets(usr).ExistX(ctx))
 
 	t.Log("add pet to user on pet creation (inverse creation)")
-	pedro := client.Pet.Create().SetName("pedro").SetOwner(usr).SaveX(ctx)
-	require.Equal(usr.Name, pedro.QueryOwner().OnlyX(ctx).Name)
-	require.Equal(pedro.Name, usr.QueryPets().OnlyX(ctx).Name)
+	pedro := client.Pet.Create().SetName("pedro").SetOwnerID(usr.ID).SaveX(ctx)
+	require.Equal(usr.Name, client.Pet.QueryOwner(pedro).OnlyX(ctx).Name)
+	require.Equal(pedro.Name, client.User.QueryPets(usr).OnlyX(ctx).Name)
 
 	t.Log("delete inverse should delete association")
 	client.Pet.DeleteOne(pedro).ExecX(ctx)
 	require.Zero(client.Pet.Query().CountX(ctx))
-	require.False(usr.QueryPets().ExistX(ctx), "user should not have pet")
+	require.False(client.User.QueryPets(usr).ExistX(ctx), "user should not have pet")
 
 	t.Log("add pet to user by updating user (the owner of the edge)")
 	pedro = client.Pet.Create().SetName("pedro").SaveX(ctx)
-	usr.Update().AddPets(pedro).ExecX(ctx)
-	require.Equal(usr.Name, pedro.QueryOwner().OnlyX(ctx).Name)
-	require.Equal(pedro.Name, usr.QueryPets().OnlyX(ctx).Name)
+	client.User.UpdateOne(usr).AddPetIDs(pedro.ID).ExecX(ctx)
+	require.Equal(usr.Name, client.Pet.QueryOwner(pedro).OnlyX(ctx).Name)
+	require.Equal(pedro.Name, client.User.QueryPets(usr).OnlyX(ctx).Name)
 
 	t.Log("delete assoc (owner of the edge) should delete inverse edge")
 	client.User.DeleteOne(usr).ExecX(ctx)
 	require.Zero(client.User.Query().CountX(ctx))
-	require.False(pedro.QueryOwner().ExistX(ctx), "pet should not have an owner")
+	require.False(client.Pet.QueryOwner(pedro).ExistX(ctx), "pet should not have an owner")
 
 	t.Log("add pet to user by updating pet (the inverse edge)")
 	usr = client.User.Create().SetAge(30).SetName("a8m").SaveX(ctx)
-	pedro.Update().SetOwner(usr).ExecX(ctx)
-	require.Equal(usr.Name, pedro.QueryOwner().OnlyX(ctx).Name)
-	require.Equal(pedro.Name, usr.QueryPets().OnlyX(ctx).Name)
+	client.Pet.UpdateOne(pedro).SetOwnerID(usr.ID).ExecX(ctx)
+	require.Equal(usr.Name, client.Pet.QueryOwner(pedro).OnlyX(ctx).Name)
+	require.Equal(pedro.Name, client.User.QueryPets(usr).OnlyX(ctx).Name)
 
 	t.Log("add another pet to user")
-	xabi := client.Pet.Create().SetName("xabi").SetOwner(usr).SaveX(ctx)
-	require.Equal(2, usr.QueryPets().CountX(ctx))
-	require.Equal(1, xabi.QueryOwner().CountX(ctx))
-	require.Equal(1, pedro.QueryOwner().CountX(ctx))
+	xabi := client.Pet.Create().SetName("xabi").SetOwnerID(usr.ID).SaveX(ctx)
+	require.Equal(2, client.User.QueryPets(usr).CountX(ctx))
+	require.Equal(1, client.Pet.QueryOwner(xabi).CountX(ctx))
+	require.Equal(1, client.Pet.QueryOwner(pedro).CountX(ctx))
 
 	t.Log("edge is unique on the inverse side")
-	_, err := client.User.Create().SetAge(30).SetName("alex").AddPets(pedro).Save(ctx)
+	_, err := client.User.Create().SetAge(30).SetName("alex").AddPetIDs(pedro.ID).Save(ctx)
 	require.Error(err, "pet already has an owner")
 
 	t.Log("add multiple pets on creation")
 	p1 := client.Pet.Create().SetName("p1").SaveX(ctx)
 	p2 := client.Pet.Create().SetName("p2").SaveX(ctx)
-	usr2 := client.User.Create().SetAge(30).SetName("alex").AddPets(p1, p2).SaveX(ctx)
-	require.True(p1.QueryOwner().ExistX(ctx))
-	require.True(p2.QueryOwner().ExistX(ctx))
-	require.Equal(2, usr2.QueryPets().CountX(ctx))
+	usr2 := client.User.Create().SetAge(30).SetName("alex").AddPetIDs(p1.ID, p2.ID).SaveX(ctx)
+	require.True(client.Pet.QueryOwner(p1).ExistX(ctx))
+	require.True(client.Pet.QueryOwner(p2).ExistX(ctx))
+	require.Equal(2, client.User.QueryPets(usr2).CountX(ctx))
 	// delete p1, p2.
 	client.Pet.Delete().Where(pet.IDIn(p1.ID, p2.ID)).ExecX(ctx)
-	require.Zero(usr2.QueryPets().CountX(ctx))
+	require.Zero(client.User.QueryPets(usr2).CountX(ctx))
 
 	t.Log("change the owner a pet")
-	xabi.Update().ClearOwner().SetOwner(usr2).ExecX(ctx)
-	require.Equal(1, usr.QueryPets().CountX(ctx))
-	require.Equal(1, usr2.QueryPets().CountX(ctx))
-	require.Equal(usr2.Name, xabi.QueryOwner().OnlyX(ctx).Name)
+	client.Pet.UpdateOne(xabi).ClearOwner().SetOwnerID(usr2.ID).ExecX(ctx)
+	require.Equal(1, client.User.QueryPets(usr).CountX(ctx))
+	require.Equal(1, client.User.QueryPets(usr2).CountX(ctx))
+	require.Equal(usr2.Name, client.Pet.QueryOwner(xabi).OnlyX(ctx).Name)
 
 	t.Log("query with side lookup on inverse")
 	opet := client.Pet.Create().SetName("orphan pet").SaveX(ctx)
@@ -519,11 +515,11 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 	)
 
 	t.Log("query long path from inverse")
-	require.Equal(pedro.Name, pedro.QueryOwner().QueryPets().OnlyX(ctx).Name, "should get itself")
-	require.Equal(usr.Name, pedro.QueryOwner().QueryPets().QueryOwner().OnlyX(ctx).Name, "should get its owner")
+	require.Equal(pedro.Name, client.Pet.QueryOwner(pedro).QueryPets().OnlyX(ctx).Name, "should get itself")
+	require.Equal(usr.Name, client.Pet.QueryOwner(pedro).QueryPets().QueryOwner().OnlyX(ctx).Name, "should get its owner")
 	require.Equal(
 		usr.Name,
-		pedro.QueryOwner().
+		client.Pet.QueryOwner(pedro).
 			Where(user.HasPets()).
 			QueryPets().
 			QueryOwner().
@@ -533,11 +529,11 @@ func O2MTwoTypes(t *testing.T, client *ent.Client) {
 	)
 
 	t.Log("query long path from assoc")
-	require.Equal(usr.Name, usr.QueryPets().QueryOwner().OnlyX(ctx).Name, "should get itself")
-	require.Equal(pedro.Name, usr.QueryPets().QueryOwner().QueryPets().OnlyX(ctx).Name, "should get its pet")
+	require.Equal(usr.Name, client.User.QueryPets(usr).QueryOwner().OnlyX(ctx).Name, "should get itself")
+	require.Equal(pedro.Name, client.User.QueryPets(usr).QueryOwner().QueryPets().OnlyX(ctx).Name, "should get its pet")
 	require.Equal(
 		pedro.Name,
-		usr.QueryPets().
+		client.User.QueryPets(usr).
 			Where(pet.HasOwner()). // pedro
 			QueryOwner().          //
 			Where(user.HasPets()). // a8m
@@ -569,64 +565,64 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("new parent without children")
 	prt := client.User.Create().SetAge(30).SetName("a8m").SaveX(ctx)
-	require.Zero(prt.QueryChildren().CountX(ctx))
+	require.Zero(client.User.QueryChildren(prt).CountX(ctx))
 
 	t.Log("add child to parent on child creation (inverse creation)")
-	chd := client.User.Create().SetAge(1).SetName("child").SetParent(prt).SaveX(ctx)
-	require.Equal(prt.Name, chd.QueryParent().OnlyX(ctx).Name)
-	require.Equal(chd.Name, prt.QueryChildren().OnlyX(ctx).Name)
+	chd := client.User.Create().SetAge(1).SetName("child").SetParentID(prt.ID).SaveX(ctx)
+	require.Equal(prt.Name, client.User.QueryParent(chd).OnlyX(ctx).Name)
+	require.Equal(chd.Name, client.User.QueryChildren(prt).OnlyX(ctx).Name)
 
 	t.Log("delete inverse should delete association")
 	client.User.DeleteOne(chd).ExecX(ctx)
-	require.False(prt.QueryChildren().ExistX(ctx), "user should not have children")
+	require.False(client.User.QueryChildren(prt).ExistX(ctx), "user should not have children")
 
 	t.Log("add child to parent by updating user (the owner of the edge)")
 	chd = client.User.Create().SetAge(1).SetName("child").SaveX(ctx)
-	prt.Update().AddChildIDs(chd.ID).ExecX(ctx)
-	require.Equal(prt.Name, chd.QueryParent().OnlyX(ctx).Name)
-	require.Equal(chd.Name, prt.QueryChildren().OnlyX(ctx).Name)
+	client.User.UpdateOne(prt).AddChildIDs(chd.ID).ExecX(ctx)
+	require.Equal(prt.Name, client.User.QueryParent(chd).OnlyX(ctx).Name)
+	require.Equal(chd.Name, client.User.QueryChildren(prt).OnlyX(ctx).Name)
 
 	t.Log("delete assoc (owner of the edge) should delete inverse edge")
 	client.User.DeleteOne(prt).ExecX(ctx)
 	require.Equal(1, client.User.Query().CountX(ctx))
-	require.False(chd.QueryParent().ExistX(ctx), "child should not have an owner")
+	require.False(client.User.QueryParent(chd).ExistX(ctx), "child should not have an owner")
 
 	t.Log("add pet to user by updating pet (the inverse edge)")
 	prt = client.User.Create().SetAge(30).SetName("a8m").SaveX(ctx)
-	chd.Update().SetParent(prt).ExecX(ctx)
-	require.Equal(prt.Name, chd.QueryParent().OnlyX(ctx).Name)
-	require.Equal(chd.Name, prt.QueryChildren().OnlyX(ctx).Name)
-	require.Zero(prt.QueryParent().CountX(ctx), "parent is orphan")
-	require.Zero(chd.QueryChildren().CountX(ctx), "child should not have children")
+	client.User.UpdateOne(chd).SetParentID(prt.ID).ExecX(ctx)
+	require.Equal(prt.Name, client.User.QueryParent(chd).OnlyX(ctx).Name)
+	require.Equal(chd.Name, client.User.QueryChildren(prt).OnlyX(ctx).Name)
+	require.Zero(client.User.QueryParent(prt).CountX(ctx), "parent is orphan")
+	require.Zero(client.User.QueryChildren(chd).CountX(ctx), "child should not have children")
 
 	t.Log("add another pet to user")
-	chd2 := client.User.Create().SetAge(1).SetName("child2").SetParent(prt).SaveX(ctx)
-	require.Equal(2, prt.QueryChildren().CountX(ctx))
-	require.Equal(1, chd.QueryParent().CountX(ctx))
-	require.Equal(1, chd2.QueryParent().CountX(ctx))
+	chd2 := client.User.Create().SetAge(1).SetName("child2").SetParentID(prt.ID).SaveX(ctx)
+	require.Equal(2, client.User.QueryChildren(prt).CountX(ctx))
+	require.Equal(1, client.User.QueryParent(chd).CountX(ctx))
+	require.Equal(1, client.User.QueryParent(chd2).CountX(ctx))
 
 	t.Log("edge is unique on the inverse side")
-	_, err := client.User.Create().SetAge(30).SetName("alex").AddChildren(chd).Save(ctx)
+	_, err := client.User.Create().SetAge(30).SetName("alex").AddChildIDs(chd.ID).Save(ctx)
 	require.Error(err, "child already has parent")
-	_, err = client.User.Create().SetAge(30).SetName("alex").AddChildren(chd2).Save(ctx)
+	_, err = client.User.Create().SetAge(30).SetName("alex").AddChildIDs(chd2.ID).Save(ctx)
 	require.Error(err, "child already has parent")
 
 	t.Log("add multiple child on creation")
 	chd3 := client.User.Create().SetAge(1).SetName("child3").SaveX(ctx)
 	chd4 := client.User.Create().SetAge(1).SetName("child4").SaveX(ctx)
-	prt2 := client.User.Create().SetAge(30).SetName("alex").AddChildren(chd3, chd4).SaveX(ctx)
-	require.True(chd3.QueryParent().ExistX(ctx))
-	require.True(chd3.QueryParent().ExistX(ctx))
-	require.Equal(2, prt2.QueryChildren().CountX(ctx))
+	prt2 := client.User.Create().SetAge(30).SetName("alex").AddChildIDs(chd3.ID, chd4.ID).SaveX(ctx)
+	require.True(client.User.QueryParent(chd3).ExistX(ctx))
+	require.True(client.User.QueryParent(chd3).ExistX(ctx))
+	require.Equal(2, client.User.QueryChildren(prt2).CountX(ctx))
 	// delete chd3, chd4.
 	client.User.Delete().Where(user.IDIn(chd3.ID, chd4.ID)).ExecX(ctx)
-	require.Zero(prt2.QueryChildren().CountX(ctx))
+	require.Zero(client.User.QueryChildren(prt2).CountX(ctx))
 
 	t.Log("change the parent a child")
-	chd2.Update().ClearParent().SetParent(prt2).ExecX(ctx)
-	require.Equal(1, prt.QueryChildren().CountX(ctx))
-	require.Equal(1, prt2.QueryChildren().CountX(ctx))
-	require.Equal(chd2.Name, prt2.QueryChildren().OnlyX(ctx).Name)
+	client.User.UpdateOne(chd2).ClearParent().SetParentID(prt2.ID).ExecX(ctx)
+	require.Equal(1, client.User.QueryChildren(prt).CountX(ctx))
+	require.Equal(1, client.User.QueryChildren(prt2).CountX(ctx))
+	require.Equal(chd2.Name, client.User.QueryChildren(prt2).OnlyX(ctx).Name)
 
 	t.Log("query with side lookup on inverse")
 	ochd := client.User.Create().SetAge(1).SetName("orphan user").SaveX(ctx)
@@ -720,11 +716,11 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 	)
 
 	t.Log("query long path from inverse")
-	require.Equal(chd.Name, chd.QueryParent().QueryChildren().OnlyX(ctx).Name, "should get itself")
-	require.Equal(prt.Name, chd.QueryParent().QueryChildren().QueryParent().OnlyX(ctx).Name, "should get its parent")
+	require.Equal(chd.Name, client.User.QueryParent(chd).QueryChildren().OnlyX(ctx).Name, "should get itself")
+	require.Equal(prt.Name, client.User.QueryParent(chd).QueryChildren().QueryParent().OnlyX(ctx).Name, "should get its parent")
 	require.Equal(
 		prt.Name,
-		chd.QueryParent().
+		client.User.QueryParent(chd).
 			Where(user.HasChildren()).
 			QueryChildren().
 			QueryParent().
@@ -734,11 +730,11 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 	)
 
 	t.Log("query long path from assoc")
-	require.Equal(prt.Name, prt.QueryChildren().QueryParent().OnlyX(ctx).Name, "should get itself")
-	require.Equal(chd.Name, prt.QueryChildren().QueryParent().QueryChildren().OnlyX(ctx).Name, "should get its child")
+	require.Equal(prt.Name, client.User.QueryChildren(prt).QueryParent().OnlyX(ctx).Name, "should get itself")
+	require.Equal(chd.Name, client.User.QueryChildren(prt).QueryParent().QueryChildren().OnlyX(ctx).Name, "should get its child")
 	require.Equal(
 		chd.Name,
-		prt.QueryChildren().
+		client.User.QueryChildren(prt).
 			Where(user.HasParent()).   // child
 			QueryParent().             //
 			Where(user.HasChildren()). // parent
@@ -776,44 +772,44 @@ func M2MSelfRef(t *testing.T, client *ent.Client) {
 
 	t.Log("new user without friends")
 	foo := client.User.Create().SetAge(10).SetName("foo").SaveX(ctx)
-	require.False(foo.QueryFriends().ExistX(ctx))
+	require.False(client.User.QueryFriends(foo).ExistX(ctx))
 
 	t.Log("sets friendship on user creation (inverse creation)")
-	bar := client.User.Create().SetAge(10).SetName("bar").AddFriends(foo).SaveX(ctx)
-	require.True(foo.QueryFriends().ExistX(ctx))
-	require.True(bar.QueryFriends().ExistX(ctx))
+	bar := client.User.Create().SetAge(10).SetName("bar").AddFriendIDs(foo.ID).SaveX(ctx)
+	require.True(client.User.QueryFriends(foo).ExistX(ctx))
+	require.True(client.User.QueryFriends(bar).ExistX(ctx))
 	require.Equal(2, client.User.Query().Where(user.HasFriends()).CountX(ctx))
 
 	t.Log("delete inverse should delete association")
 	client.User.DeleteOne(bar).ExecX(ctx)
-	require.False(foo.QueryFriends().ExistX(ctx))
+	require.False(client.User.QueryFriends(foo).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasFriends()).CountX(ctx))
 
 	t.Log("add friendship to user by updating existing users")
 	bar = client.User.Create().SetAge(10).SetName("bar").SaveX(ctx)
-	foo.Update().AddFriends(bar).ExecX(ctx)
-	require.True(foo.QueryFriends().ExistX(ctx))
-	require.True(bar.QueryFriends().ExistX(ctx))
+	client.User.UpdateOne(foo).AddFriendIDs(bar.ID).ExecX(ctx)
+	require.True(client.User.QueryFriends(foo).ExistX(ctx))
+	require.True(client.User.QueryFriends(bar).ExistX(ctx))
 	require.Equal(2, client.User.Query().Where(user.HasFriends()).CountX(ctx))
 
 	t.Log("remove friendship using update")
-	foo.Update().RemoveFriends(bar).ExecX(ctx)
-	require.False(foo.QueryFriends().ExistX(ctx))
-	require.False(bar.QueryFriends().ExistX(ctx))
+	client.User.UpdateOne(foo).RemoveFriendIDs(bar.ID).ExecX(ctx)
+	require.False(client.User.QueryFriends(foo).ExistX(ctx))
+	require.False(client.User.QueryFriends(bar).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasFriends()).CountX(ctx))
 	// return back the friendship.
-	foo.Update().AddFriends(bar).ExecX(ctx)
+	client.User.UpdateOne(foo).AddFriendIDs(bar.ID).ExecX(ctx)
 
 	t.Log("create a user without friends")
 	baz := client.User.Create().SetAge(10).SetName("baz").SaveX(ctx)
-	require.False(baz.QueryFriends().ExistX(ctx))
+	require.False(client.User.QueryFriends(baz).ExistX(ctx))
 	require.Equal(2, client.User.Query().Where(user.HasFriends()).CountX(ctx))
 
 	t.Log("both baz and bar are friends of foo")
-	baz.Update().AddFriends(foo).ExecX(ctx)
-	require.Equal(2, foo.QueryFriends().CountX(ctx))
-	require.Equal(foo.Name, bar.QueryFriends().OnlyX(ctx).Name)
-	require.Equal(foo.Name, baz.QueryFriends().OnlyX(ctx).Name)
+	client.User.UpdateOne(baz).AddFriendIDs(foo.ID).ExecX(ctx)
+	require.Equal(2, client.User.QueryFriends(foo).CountX(ctx))
+	require.Equal(foo.Name, client.User.QueryFriends(bar).OnlyX(ctx).Name)
+	require.Equal(foo.Name, client.User.QueryFriends(baz).OnlyX(ctx).Name)
 	require.Equal(3, client.User.Query().Where(user.HasFriends()).CountX(ctx))
 
 	t.Log("query with side lookup")
@@ -851,29 +847,26 @@ func M2MSelfRef(t *testing.T, client *ent.Client) {
 	t.Log("query path from a user")
 	require.Equal(
 		foo.Name,
-		foo.
-			QueryFriends().Where(user.Name(bar.Name)). // bar
-			QueryFriends().                            // foo
-			QueryFriends().Where(user.Name(baz.Name)). // baz
-			QueryFriends().                            // foo
-			OnlyX(ctx).Name,
+		client.User.QueryFriends(foo).Where(user.Name(bar.Name)). // bar
+										QueryFriends().                            // foo
+										QueryFriends().Where(user.Name(baz.Name)). // baz
+										QueryFriends().                            // foo
+										OnlyX(ctx).Name,
 	)
 	require.Equal(
 		foo.Name,
-		foo.
-			QueryFriends(). // bar, baz
-			QueryFriends(). // foo
-			QueryFriends(). // bar, baz
-			QueryFriends(). // foo
-			OnlyX(ctx).Name,
+		client.User.QueryFriends(foo). // bar, baz
+						QueryFriends(). // foo
+						QueryFriends(). // bar, baz
+						QueryFriends(). // foo
+						OnlyX(ctx).Name,
 	)
 	require.Equal(
 		baz.Name,
-		foo.
-			QueryFriends().Where(user.Name(bar.Name)).           // bar
-			QueryFriends().                                      // foo
-			QueryFriends().Where(user.Not(user.Name(bar.Name))). // baz
-			OnlyX(ctx).Name,
+		client.User.QueryFriends(foo).Where(user.Name(bar.Name)). // bar
+										QueryFriends().                                      // foo
+										QueryFriends().Where(user.Not(user.Name(bar.Name))). // baz
+										OnlyX(ctx).Name,
 	)
 
 	t.Log("query path from client")
@@ -915,70 +908,70 @@ func M2MSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("new user without followers")
 	foo := client.User.Create().SetAge(10).SetName("foo").SaveX(ctx)
-	require.False(foo.QueryFollowers().ExistX(ctx))
+	require.False(client.User.QueryFollowers(foo).ExistX(ctx))
 
 	t.Log("adds followers on user creation (inverse creation)")
-	bar := client.User.Create().SetAge(10).SetName("bar").AddFollowing(foo).SaveX(ctx)
-	require.Equal(foo.Name, bar.QueryFollowing().OnlyX(ctx).Name)
-	require.Equal(bar.Name, foo.QueryFollowers().OnlyX(ctx).Name)
+	bar := client.User.Create().SetAge(10).SetName("bar").AddFollowingIDs(foo.ID).SaveX(ctx)
+	require.Equal(foo.Name, client.User.QueryFollowing(bar).OnlyX(ctx).Name)
+	require.Equal(bar.Name, client.User.QueryFollowers(foo).OnlyX(ctx).Name)
 	require.Equal(1, client.User.Query().Where(user.HasFollowers()).CountX(ctx))
 	require.Equal(1, client.User.Query().Where(user.HasFollowing()).CountX(ctx))
 
 	t.Log("delete inverse should delete association")
 	client.User.DeleteOne(bar).ExecX(ctx)
-	require.False(foo.QueryFollowers().ExistX(ctx))
+	require.False(client.User.QueryFollowers(foo).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasFollowers()).CountX(ctx))
 	require.Zero(client.User.Query().Where(user.HasFollowing()).CountX(ctx))
 
 	t.Log("add followers to user by updating existing users")
 	bar = client.User.Create().SetAge(10).SetName("bar").SaveX(ctx)
-	foo.Update().AddFollowers(bar).ExecX(ctx)
-	require.Equal(foo.Name, bar.QueryFollowing().OnlyX(ctx).Name)
-	require.Equal(bar.Name, foo.QueryFollowers().OnlyX(ctx).Name)
+	client.User.UpdateOne(foo).AddFollowerIDs(bar.ID).ExecX(ctx)
+	require.Equal(foo.Name, client.User.QueryFollowing(bar).OnlyX(ctx).Name)
+	require.Equal(bar.Name, client.User.QueryFollowers(foo).OnlyX(ctx).Name)
 	require.Equal(1, client.User.Query().Where(user.HasFollowers()).CountX(ctx))
 	require.Equal(1, client.User.Query().Where(user.HasFollowing()).CountX(ctx))
 
 	t.Log("remove following using update")
-	bar.Update().RemoveFollowing(foo).ExecX(ctx)
-	require.False(foo.QueryFollowers().ExistX(ctx))
-	require.False(bar.QueryFollowing().ExistX(ctx))
+	client.User.UpdateOne(bar).RemoveFollowingIDs(foo.ID).ExecX(ctx)
+	require.False(client.User.QueryFollowers(foo).ExistX(ctx))
+	require.False(client.User.QueryFollowing(bar).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasFollowing()).CountX(ctx))
 	require.Zero(client.User.Query().Where(user.HasFollowers()).CountX(ctx))
 	// follow back.
-	bar.Update().AddFollowing(foo).ExecX(ctx)
+	client.User.UpdateOne(bar).AddFollowingIDs(foo.ID).ExecX(ctx)
 
 	t.Log("remove followers using update (inverse)")
-	foo.Update().RemoveFollowers(bar).ExecX(ctx)
-	require.False(foo.QueryFollowers().ExistX(ctx))
-	require.False(bar.QueryFollowing().ExistX(ctx))
+	client.User.UpdateOne(foo).RemoveFollowerIDs(bar.ID).ExecX(ctx)
+	require.False(client.User.QueryFollowers(foo).ExistX(ctx))
+	require.False(client.User.QueryFollowing(bar).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasFollowing()).CountX(ctx))
 	require.Zero(client.User.Query().Where(user.HasFollowers()).CountX(ctx))
 	// follow back.
-	bar.Update().AddFollowing(foo).ExecX(ctx)
+	client.User.UpdateOne(bar).AddFollowingIDs(foo.ID).ExecX(ctx)
 
 	users := make([]*ent.User, 5)
 	for i := range users {
 		u := client.User.Create().SetAge(10).SetName(fmt.Sprintf("user-%d", i)).SaveX(ctx)
-		users[i] = u.Update().AddFollowing(foo, bar).SaveX(ctx)
+		users[i] = client.User.UpdateOne(u).AddFollowingIDs(foo.ID, bar.ID).SaveX(ctx)
 		require.Equal(
 			[]string{bar.Name, foo.Name},
-			u.QueryFollowing().
+			client.User.QueryFollowing(u).
 				Order(ent.Asc(user.FieldName)).
 				GroupBy(user.FieldName).
 				StringsX(ctx),
 		)
 	}
-	require.Equal(5, bar.QueryFollowers().CountX(ctx), "users1..5")
-	require.Equal(6, foo.QueryFollowers().CountX(ctx), "users1..5 and bar")
+	require.Equal(5, client.User.QueryFollowers(bar).CountX(ctx), "users1..5")
+	require.Equal(6, client.User.QueryFollowers(foo).CountX(ctx), "users1..5 and bar")
 	require.Equal(2, client.User.Query().Where(user.HasFollowers()).CountX(ctx), "foo and bar")
 	require.Equal(6, client.User.Query().Where(user.HasFollowing()).CountX(ctx), "users1..5 and bar")
 	// compare followers.
 	require.Equal(
-		bar.QueryFollowers().
+		client.User.QueryFollowers(bar).
 			Order(ent.Asc(user.FieldName)).
 			GroupBy(user.FieldName).
 			StringsX(ctx),
-		foo.QueryFollowers().
+		client.User.QueryFollowers(foo).
 			Where(user.Not(user.Name(bar.Name))).
 			Order(ent.Asc(user.FieldName)).
 			GroupBy(user.FieldName).
@@ -991,12 +984,12 @@ func M2MSameType(t *testing.T, client *ent.Client) {
 	require.Equal(2, client.User.Query().CountX(ctx))
 
 	t.Log("query with side lookup from inverse")
-	require.Equal(foo.Name, foo.QueryFollowers().QueryFollowing().OnlyX(ctx).Name, "should get itself")
-	require.Equal(bar.Name, foo.QueryFollowers().QueryFollowing().QueryFollowers().OnlyX(ctx).Name, "should get its follower (bar)")
+	require.Equal(foo.Name, client.User.QueryFollowers(foo).QueryFollowing().OnlyX(ctx).Name, "should get itself")
+	require.Equal(bar.Name, client.User.QueryFollowers(foo).QueryFollowing().QueryFollowers().OnlyX(ctx).Name, "should get its follower (bar)")
 
 	t.Log("query with side lookup from assoc")
-	require.Equal(bar.Name, bar.QueryFollowing().QueryFollowers().OnlyX(ctx).Name, "should get itself")
-	require.Equal(foo.Name, bar.QueryFollowing().QueryFollowers().QueryFollowing().OnlyX(ctx).Name, "should get foo")
+	require.Equal(bar.Name, client.User.QueryFollowing(bar).QueryFollowers().OnlyX(ctx).Name, "should get itself")
+	require.Equal(foo.Name, client.User.QueryFollowing(bar).QueryFollowers().QueryFollowing().OnlyX(ctx).Name, "should get foo")
 
 	// generate additional users and make sure we don't get them in the queries below.
 	client.User.Create().SetAge(10).SetName("baz").SaveX(ctx)
@@ -1005,11 +998,10 @@ func M2MSameType(t *testing.T, client *ent.Client) {
 	t.Log("query path from a user")
 	require.Equal(
 		bar.Name,
-		foo.
-			QueryFollowers().Where(user.Name(bar.Name)). // bar
-			QueryFollowing().Where(user.HasFollowers()). // foo
-			QueryFollowers().                            // bar
-			Where(
+		client.User.QueryFollowers(foo).Where(user.Name(bar.Name)). // bar
+										QueryFollowing().Where(user.HasFollowers()). // foo
+										QueryFollowers().                            // bar
+										Where(
 				user.HasFollowingWith(
 					user.Name(foo.Name),
 				),
@@ -1048,99 +1040,98 @@ func M2MTwoTypes(t *testing.T, client *ent.Client) {
 
 	t.Log("new user without groups")
 	foo := client.User.Create().SetAge(10).SetName("foo").SaveX(ctx)
-	require.False(foo.QueryGroups().ExistX(ctx))
+	require.False(client.User.QueryGroups(foo).ExistX(ctx))
 	require.Zero(client.Group.Query().CountX(ctx))
 
 	t.Log("adds users to group on group creation (inverse creation)")
 	// group-info is required edge.
 	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
-	hub := client.Group.Create().SetName("Github").SetExpire(time.Now()).AddUsers(foo).SetInfo(inf).SaveX(ctx)
-	require.Equal(foo.Name, hub.QueryUsers().OnlyX(ctx).Name, "group has only one user")
-	require.Equal(hub.Name, foo.QueryGroups().OnlyX(ctx).Name, "user is connected to one group")
+	hub := client.Group.Create().SetName("Github").SetExpire(time.Now()).AddUserIDs(foo.ID).SetInfoID(inf.ID).SaveX(ctx)
+	require.Equal(foo.Name, client.Group.QueryUsers(hub).OnlyX(ctx).Name, "group has only one user")
+	require.Equal(hub.Name, client.User.QueryGroups(foo).OnlyX(ctx).Name, "user is connected to one group")
 	require.Equal(1, client.User.Query().Where(user.HasGroups()).CountX(ctx))
 	require.Equal(1, client.Group.Query().Where(group.HasUsers()).CountX(ctx))
 
 	t.Log("add an existing M2M edge should not throw an error")
-	foo.Update().AddGroups(hub).ExecX(ctx)
-	require.Equal(1, foo.QueryGroups().CountX(ctx))
-	hub.Update().AddUsers(foo).ExecX(ctx)
-	require.Equal(1, hub.QueryUsers().CountX(ctx))
+	client.User.UpdateOne(foo).AddGroupIDs(hub.ID).ExecX(ctx)
+	require.Equal(1, client.User.QueryGroups(foo).CountX(ctx))
+	client.Group.UpdateOne(hub).AddUserIDs(foo.ID).ExecX(ctx)
+	require.Equal(1, client.Group.QueryUsers(hub).CountX(ctx))
 
 	t.Log("delete inverse should delete association")
 	client.Group.DeleteOne(hub).ExecX(ctx)
-	require.False(foo.QueryGroups().ExistX(ctx))
+	require.False(client.User.QueryGroups(foo).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasGroups()).CountX(ctx))
 	require.Zero(client.Group.Query().Where(group.HasUsers()).CountX(ctx))
 
 	t.Log("add user to groups updating existing users")
-	hub = client.Group.Create().SetName("Github").SetExpire(time.Now()).SetInfo(inf).SaveX(ctx)
-	require.False(foo.QueryGroups().ExistX(ctx))
-	foo.Update().AddGroups(hub).ExecX(ctx)
-	require.Equal(foo.Name, hub.QueryUsers().OnlyX(ctx).Name, "group has only one user")
-	require.Equal(hub.Name, foo.QueryGroups().OnlyX(ctx).Name, "user is connected to one group")
+	hub = client.Group.Create().SetName("Github").SetExpire(time.Now()).SetInfoID(inf.ID).SaveX(ctx)
+	require.False(client.User.QueryGroups(foo).ExistX(ctx))
+	client.User.UpdateOne(foo).AddGroupIDs(hub.ID).ExecX(ctx)
+	require.Equal(foo.Name, client.Group.QueryUsers(hub).OnlyX(ctx).Name, "group has only one user")
+	require.Equal(hub.Name, client.User.QueryGroups(foo).OnlyX(ctx).Name, "user is connected to one group")
 	require.Equal(1, client.User.Query().Where(user.HasGroups()).CountX(ctx))
 	require.Equal(1, client.Group.Query().Where(group.HasUsers()).CountX(ctx))
 
 	t.Log("delete assoc should delete inverse as well")
 	client.User.DeleteOne(foo).ExecX(ctx)
-	require.False(hub.QueryUsers().ExistX(ctx))
+	require.False(client.Group.QueryUsers(hub).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasGroups()).CountX(ctx))
 	require.Zero(client.Group.Query().Where(group.HasUsers()).CountX(ctx))
 	// add back the user.
-	foo = client.User.Create().SetAge(10).SetName("foo").AddGroups(hub).SaveX(ctx)
+	foo = client.User.Create().SetAge(10).SetName("foo").AddGroupIDs(hub.ID).SaveX(ctx)
 
 	t.Log("remove following using update (assoc)")
-	foo.Update().RemoveGroups(hub).ExecX(ctx)
-	require.False(foo.QueryGroups().ExistX(ctx))
-	require.False(hub.QueryUsers().ExistX(ctx))
+	client.User.UpdateOne(foo).RemoveGroupIDs(hub.ID).ExecX(ctx)
+	require.False(client.User.QueryGroups(foo).ExistX(ctx))
+	require.False(client.Group.QueryUsers(hub).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasGroups()).CountX(ctx))
 	require.Zero(client.Group.Query().Where(group.HasUsers()).CountX(ctx))
 	// join back to group.
-	foo.Update().AddGroups(hub).ExecX(ctx)
+	client.User.UpdateOne(foo).AddGroupIDs(hub.ID).ExecX(ctx)
 
 	t.Log("remove following using update (inverse)")
-	hub.Update().RemoveUsers(foo).ExecX(ctx)
-	require.False(foo.QueryGroups().ExistX(ctx))
-	require.False(hub.QueryUsers().ExistX(ctx))
+	client.Group.UpdateOne(hub).RemoveUserIDs(foo.ID).ExecX(ctx)
+	require.False(client.User.QueryGroups(foo).ExistX(ctx))
+	require.False(client.Group.QueryUsers(hub).ExistX(ctx))
 	require.Zero(client.User.Query().Where(user.HasGroups()).CountX(ctx))
 	require.Zero(client.Group.Query().Where(group.HasUsers()).CountX(ctx))
 	// add back the user.
-	hub.Update().AddUsers(foo).ExecX(ctx)
+	client.Group.UpdateOne(hub).AddUserIDs(foo.ID).ExecX(ctx)
 
 	t.Log("multiple groups and users")
-	lab := client.Group.Create().SetName("Gitlab").SetExpire(time.Now()).SetInfo(inf).SaveX(ctx)
+	lab := client.Group.Create().SetName("Gitlab").SetExpire(time.Now()).SetInfoID(inf.ID).SaveX(ctx)
 	bar := client.User.Create().SetAge(10).SetName("bar").SaveX(ctx)
 	require.Equal(1, client.User.Query().Where(user.HasGroups()).CountX(ctx))
 	require.Equal(1, client.Group.Query().Where(group.HasUsers()).CountX(ctx))
-	bar.Update().AddGroups(lab).ExecX(ctx)
+	client.User.UpdateOne(bar).AddGroupIDs(lab.ID).ExecX(ctx)
 	require.Equal(2, client.User.Query().Where(user.HasGroups()).CountX(ctx))
 	require.Equal(2, client.Group.Query().Where(group.HasUsers()).CountX(ctx))
 	// validate relations.
-	require.Equal(foo.Name, hub.QueryUsers().OnlyX(ctx).Name, "hub has only one user")
-	require.Equal(hub.Name, foo.QueryGroups().OnlyX(ctx).Name, "foo is connected only to hub")
-	require.Equal(bar.Name, lab.QueryUsers().OnlyX(ctx).Name, "lab has only one user")
-	require.Equal(lab.Name, bar.QueryGroups().OnlyX(ctx).Name, "bar is connected only to lab")
+	require.Equal(foo.Name, client.Group.QueryUsers(hub).OnlyX(ctx).Name, "hub has only one user")
+	require.Equal(hub.Name, client.User.QueryGroups(foo).OnlyX(ctx).Name, "foo is connected only to hub")
+	require.Equal(bar.Name, client.Group.QueryUsers(lab).OnlyX(ctx).Name, "lab has only one user")
+	require.Equal(lab.Name, client.User.QueryGroups(bar).OnlyX(ctx).Name, "bar is connected only to lab")
 	// add bar to hub.
-	bar.Update().AddGroups(hub).ExecX(ctx)
-	require.Equal(2, hub.QueryUsers().CountX(ctx))
-	require.Equal(1, lab.QueryUsers().CountX(ctx))
-	require.Equal([]string{bar.Name, foo.Name}, hub.QueryUsers().Order(ent.Asc(user.FieldName)).GroupBy(user.FieldName).StringsX(ctx))
-	require.Equal([]string{hub.Name, lab.Name}, bar.QueryGroups().Order(ent.Asc(user.FieldName)).GroupBy(user.FieldName).StringsX(ctx))
+	client.User.UpdateOne(bar).AddGroupIDs(hub.ID).ExecX(ctx)
+	require.Equal(2, client.Group.QueryUsers(hub).CountX(ctx))
+	require.Equal(1, client.Group.QueryUsers(lab).CountX(ctx))
+	require.Equal([]string{bar.Name, foo.Name}, client.Group.QueryUsers(hub).Order(ent.Asc(user.FieldName)).GroupBy(user.FieldName).StringsX(ctx))
+	require.Equal([]string{hub.Name, lab.Name}, client.User.QueryGroups(bar).Order(ent.Asc(user.FieldName)).GroupBy(user.FieldName).StringsX(ctx))
 
 	t.Log("query with side lookup from inverse")
-	require.Equal(hub.Name, hub.QueryUsers().QueryGroups().Where(group.Name(hub.Name)).OnlyX(ctx).Name, "should get itself")
-	require.Equal(bar.Name, lab.QueryUsers().QueryGroups().Where(group.Not(group.Name(hub.Name))).QueryUsers().OnlyX(ctx).Name, "should get its user")
+	require.Equal(hub.Name, client.Group.QueryUsers(hub).QueryGroups().Where(group.Name(hub.Name)).OnlyX(ctx).Name, "should get itself")
+	require.Equal(bar.Name, client.Group.QueryUsers(lab).QueryGroups().Where(group.Not(group.Name(hub.Name))).QueryUsers().OnlyX(ctx).Name, "should get its user")
 
 	t.Log("query with side lookup from assoc")
-	require.Equal(bar.Name, bar.QueryGroups().Where(group.Name(lab.Name)).QueryUsers().OnlyX(ctx).Name, "should get itself")
-	require.Equal(lab.Name, bar.QueryGroups().Where(group.Name(lab.Name)).QueryUsers().QueryGroups().Where(group.Name(lab.Name)).OnlyX(ctx).Name, "should get its group")
+	require.Equal(bar.Name, client.User.QueryGroups(bar).Where(group.Name(lab.Name)).QueryUsers().OnlyX(ctx).Name, "should get itself")
+	require.Equal(lab.Name, client.User.QueryGroups(bar).Where(group.Name(lab.Name)).QueryUsers().QueryGroups().Where(group.Name(lab.Name)).OnlyX(ctx).Name, "should get its group")
 
 	t.Log("query path from a user")
 	require.Equal(
 		hub.Name,
-		bar.
+		client.User.QueryGroups(bar).
 			// hub.
-			QueryGroups().
 			Where(
 				group.HasUsersWith(user.Name(foo.Name)),
 			).

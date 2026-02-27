@@ -60,7 +60,6 @@ func (d SoftDeleteMixin) Hooks() []ent.Hook {
 					}
 					mx, ok := m.(interface {
 						SetOp(ent.Op)
-						Client() *gen.Client
 						SetDeleteTime(time.Time)
 						WhereP(...func(*sql.Selector))
 					})
@@ -70,7 +69,7 @@ func (d SoftDeleteMixin) Hooks() []ent.Hook {
 					d.P(mx)
 					mx.SetOp(ent.OpUpdate)
 					mx.SetDeleteTime(time.Now())
-					return mx.Client().Mutate(ctx, m)
+					return gen.FromContext(ctx).Mutate(ctx, m)
 				})
 			},
 			ent.OpDeleteOne|ent.OpDelete,

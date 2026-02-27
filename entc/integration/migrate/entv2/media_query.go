@@ -21,7 +21,7 @@ import (
 
 // MediaQuery is the builder for querying Media entities.
 type MediaQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []media.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *MediaQuery) First(ctx context.Context) (*Media, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{media.Label}
+		return nil, &NotFoundError{Label: media.Label}
 	}
 	return nodes[0], nil
 }
@@ -92,7 +92,7 @@ func (_q *MediaQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{media.Label}
+		err = &NotFoundError{Label: media.Label}
 		return
 	}
 	return ids[0], nil
@@ -119,9 +119,9 @@ func (_q *MediaQuery) Only(ctx context.Context) (*Media, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{media.Label}
+		return nil, &NotFoundError{Label: media.Label}
 	default:
-		return nil, &NotSingularError{media.Label}
+		return nil, &NotSingularError{Label: media.Label}
 	}
 }
 
@@ -146,9 +146,9 @@ func (_q *MediaQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{media.Label}
+		err = &NotFoundError{Label: media.Label}
 	default:
-		err = &NotSingularError{media.Label}
+		err = &NotSingularError{Label: media.Label}
 	}
 	return
 }
@@ -249,7 +249,7 @@ func (_q *MediaQuery) Clone() *MediaQuery {
 		return nil
 	}
 	return &MediaQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]media.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -321,7 +321,7 @@ func (_q *MediaQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !media.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -340,17 +340,17 @@ func (_q *MediaQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Media,
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Media).scanValues(nil, columns)
+		return (*Media).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Media{config: _q.config}
+		node := &Media{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -365,7 +365,7 @@ func (_q *MediaQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *MediaQuery) querySpec() *sqlgraph.QuerySpec {
@@ -409,7 +409,7 @@ func (_q *MediaQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *MediaQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(media.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -481,7 +481,7 @@ func (_g *MediaGroupBy) sqlScan(ctx context.Context, root *MediaQuery, v any) er
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -523,7 +523,7 @@ func (_s *MediaSelect) sqlScan(ctx context.Context, root *MediaQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -101,32 +101,32 @@ func CustomID(t *testing.T, client *ent.Client) {
 	a8m := client.User.Create().SetID(5).SaveX(ctx)
 	require.Equal(t, 5, a8m.ID)
 
-	hub := client.Group.Create().SetID(3).AddUsers(a8m, nat).SaveX(ctx)
+	hub := client.Group.Create().SetID(3).AddUserIDs(a8m.ID, nat.ID).SaveX(ctx)
 	require.Equal(t, 3, hub.ID)
-	require.Equal(t, []int{1, 5}, hub.QueryUsers().Order(ent.Asc(user.FieldID)).IDsX(ctx))
+	require.Equal(t, []int{1, 5}, client.Group.QueryUsers(hub).Order(ent.Asc(user.FieldID)).IDsX(ctx))
 
 	blb := client.Blob.Create().SaveX(ctx)
 	require.NotEmpty(t, blb.ID, "use default value")
 	id := uuid.New()
-	chd := client.Blob.Create().SetID(id).SetParent(blb).SaveX(ctx)
+	chd := client.Blob.Create().SetID(id).SetParentID(blb.ID).SaveX(ctx)
 	require.Equal(t, id, chd.ID, "use provided id")
-	require.Equal(t, blb.ID, chd.QueryParent().OnlyX(ctx).ID)
-	lnk := client.Blob.Create().SetID(uuid.New()).AddLinks(chd, blb).SaveX(ctx)
-	require.Equal(t, 2, lnk.QueryLinks().CountX(ctx))
-	require.Equal(t, lnk.ID, chd.QueryLinks().OnlyX(ctx).ID)
-	require.Equal(t, lnk.ID, blb.QueryLinks().OnlyX(ctx).ID)
+	require.Equal(t, blb.ID, client.Blob.QueryParent(chd).OnlyX(ctx).ID)
+	lnk := client.Blob.Create().SetID(uuid.New()).AddLinkIDs(chd.ID, blb.ID).SaveX(ctx)
+	require.Equal(t, 2, client.Blob.QueryLinks(lnk).CountX(ctx))
+	require.Equal(t, lnk.ID, client.Blob.QueryLinks(chd).OnlyX(ctx).ID)
+	require.Equal(t, lnk.ID, client.Blob.QueryLinks(blb).OnlyX(ctx).ID)
 	require.Len(t, client.Blob.Query().IDsX(ctx), 3)
-	links := lnk.QueryBlobLinks().AllX(ctx)
+	links := client.Blob.QueryBlobLinks(lnk).AllX(ctx)
 	require.Len(t, links, 2)
 	require.Equal(t, lnk.ID, links[0].BlobID)
 	require.NotEqual(t, uuid.Nil, links[0].LinkID)
 	require.Equal(t, lnk.ID, links[1].BlobID)
 	require.NotEqual(t, uuid.Nil, links[1].LinkID)
 
-	pedro := client.Pet.Create().SetID("pedro").SetOwner(a8m).SaveX(ctx)
-	require.Equal(t, a8m.ID, pedro.QueryOwner().OnlyIDX(ctx))
-	require.Equal(t, pedro.ID, a8m.QueryPets().OnlyIDX(ctx))
-	xabi := client.Pet.Create().SetID("xabi").AddFriends(pedro).SetBestFriend(pedro).SaveX(ctx)
+	pedro := client.Pet.Create().SetID("pedro").SetOwnerID(a8m.ID).SaveX(ctx)
+	require.Equal(t, a8m.ID, client.Pet.QueryOwner(pedro).OnlyIDX(ctx))
+	require.Equal(t, pedro.ID, client.User.QueryPets(a8m).OnlyIDX(ctx))
+	xabi := client.Pet.Create().SetID("xabi").AddFriendIDs(pedro.ID).SetBestFriendID(pedro.ID).SaveX(ctx)
 	require.Equal(t, "xabi", xabi.ID)
 	pedro = client.Pet.Query().Where(pet.HasOwnerWith(user.ID(a8m.ID))).OnlyX(ctx)
 	require.Equal(t, "pedro", pedro.ID)
@@ -146,7 +146,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Len(t, pets[1].Edges.Friends, 1)
 	require.Equal(t, pedro.ID, pets[1].Edges.Friends[0].ID)
 
-	bee := client.Car.Create().SetModel("Chevrolet Camaro").SetOwner(pedro).SaveX(ctx)
+	bee := client.Car.Create().SetModel("Chevrolet Camaro").SetOwnerID(pedro.ID).SaveX(ctx)
 	require.NotNil(t, bee)
 	bee = client.Car.Query().WithOwner().OnlyX(ctx)
 	require.Equal(t, "Chevrolet Camaro", bee.Model)
@@ -154,15 +154,15 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, pedro.ID, bee.Edges.Owner.ID)
 
 	pets = client.Pet.CreateBulk(
-		client.Pet.Create().SetID("luna").SetOwner(a8m).AddFriends(xabi),
-		client.Pet.Create().SetID("layla").SetOwner(a8m).AddFriendIDs(pedro.ID),
-		client.Pet.Create().AddFriends(pedro, xabi),
+		client.Pet.Create().SetID("luna").SetOwnerID(a8m.ID).AddFriendIDs(xabi.ID),
+		client.Pet.Create().SetID("layla").SetOwnerID(a8m.ID).AddFriendIDs(pedro.ID),
+		client.Pet.Create().AddFriendIDs(pedro.ID, xabi.ID),
 	).SaveX(ctx)
 	require.Equal(t, "luna", pets[0].ID)
-	require.Equal(t, xabi.ID, pets[0].QueryFriends().OnlyIDX(ctx))
+	require.Equal(t, xabi.ID, client.Pet.QueryFriends(pets[0]).OnlyIDX(ctx))
 	require.Equal(t, "layla", pets[1].ID)
-	require.Equal(t, pedro.ID, pets[1].QueryFriends().OnlyIDX(ctx))
-	require.Equal(t, []string{"pedro", "xabi"}, pets[2].QueryFriends().Order(ent.Asc(pet.FieldID)).IDsX(ctx))
+	require.Equal(t, pedro.ID, client.Pet.QueryFriends(pets[1]).OnlyIDX(ctx))
+	require.Equal(t, []string{"pedro", "xabi"}, client.Pet.QueryFriends(pets[2]).Order(ent.Asc(pet.FieldID)).IDsX(ctx))
 
 	u1, u2 := uuid.New(), uuid.New()
 	blobs := client.Blob.CreateBulk(
@@ -175,21 +175,21 @@ func CustomID(t *testing.T, client *ent.Client) {
 	parent := client.Note.Create().SetText("parent").SaveX(ctx)
 	require.NotEmpty(t, parent.ID)
 	require.NotEmpty(t, parent.Text)
-	child := client.Note.Create().SetText("child").SetParent(parent).SaveX(ctx)
-	require.NotEmpty(t, child.QueryParent().OnlyIDX(ctx))
+	child := client.Note.Create().SetText("child").SetParentID(parent.ID).SaveX(ctx)
+	require.NotEmpty(t, client.Note.QueryParent(child).OnlyIDX(ctx))
 
 	pdoc := client.Doc.Create().SetText("parent").SaveX(ctx)
 	require.NotEmpty(t, pdoc.ID)
 	require.NotEmpty(t, pdoc.Text)
-	cdoc := client.Doc.Create().SetText("child").SetParent(pdoc).SaveX(ctx)
-	require.NotEmpty(t, cdoc.QueryParent().OnlyIDX(ctx))
+	cdoc := client.Doc.Create().SetText("child").SetParentID(pdoc.ID).SaveX(ctx)
+	require.NotEmpty(t, client.Doc.QueryParent(cdoc).OnlyIDX(ctx))
 
 	t.Run("IntSID", func(t *testing.T) {
 		root := client.IntSID.Create().SaveX(ctx)
 		require.EqualValues(t, sid.ID("1"), root.ID)
 		children := client.IntSID.CreateBulk(
-			client.IntSID.Create().SetParent(root),
-			client.IntSID.Create().SetParent(root),
+			client.IntSID.Create().SetParentID(root.ID),
+			client.IntSID.Create().SetParentID(root.ID),
 		).SaveX(ctx)
 		require.EqualValues(t, sid.ID("2"), children[0].ID)
 		require.EqualValues(t, sid.ID("3"), children[1].ID)
@@ -197,9 +197,9 @@ func CustomID(t *testing.T, client *ent.Client) {
 		require.EqualValues(t, 1, len(el))
 		require.EqualValues(t, 2, len(el[0].Edges.Children))
 		cid := sid.ID("100")
-		child := client.IntSID.Create().SetID(cid).SetParent(root).SaveX(ctx)
+		child := client.IntSID.Create().SetID(cid).SetParentID(root.ID).SaveX(ctx)
 		require.EqualValues(t, cid, child.ID)
-		require.EqualValues(t, root.ID, child.QueryParent().OnlyX(ctx).ID)
+		require.EqualValues(t, root.ID, client.IntSID.QueryParent(child).OnlyX(ctx).ID)
 	})
 
 	t.Run("Upsert", func(t *testing.T) {
@@ -213,7 +213,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 		client.Blob.Create().
 			SetID(id).
 			OnConflictColumns(blob.FieldID).
-			Update(func(set *ent.BlobUpsert) {
+			Update(func(set *blob.BlobUpsert) {
 				set.AddCount(1)
 			}).
 			ExecX(ctx)
@@ -263,7 +263,7 @@ func BytesID(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	s := client.Session.Create().SaveX(ctx)
 	require.NotEmpty(t, s.ID)
-	client.Device.Create().SetActiveSession(s).AddSessionIDs(s.ID).SaveX(ctx)
+	client.Device.Create().SetActiveSessionID(s.ID).AddSessionIDs(s.ID).SaveX(ctx)
 	d := client.Device.Query().WithActiveSession().WithSessions().OnlyX(ctx)
 	require.Equal(t, s.ID, d.Edges.ActiveSession.ID)
 	require.Equal(t, s.ID, d.Edges.Sessions[0].ID)

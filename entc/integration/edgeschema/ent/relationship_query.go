@@ -23,7 +23,7 @@ import (
 
 // RelationshipQuery is the builder for querying Relationship entities.
 type RelationshipQuery struct {
-	config
+	Config
 	ctx          *QueryContext
 	order        []relationship.OrderOption
 	inters       []Interceptor
@@ -69,7 +69,7 @@ func (_q *RelationshipQuery) Order(o ...relationship.OrderOption) *RelationshipQ
 
 // QueryUser chains the current query on the "user" edge.
 func (_q *RelationshipQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *RelationshipQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, relationship.UserTable, relationship.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -91,7 +91,7 @@ func (_q *RelationshipQuery) QueryUser() *UserQuery {
 
 // QueryRelative chains the current query on the "relative" edge.
 func (_q *RelationshipQuery) QueryRelative() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (_q *RelationshipQuery) QueryRelative() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, relationship.RelativeTable, relationship.RelativeColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -113,7 +113,7 @@ func (_q *RelationshipQuery) QueryRelative() *UserQuery {
 
 // QueryInfo chains the current query on the "info" edge.
 func (_q *RelationshipQuery) QueryInfo() *RelationshipInfoQuery {
-	query := (&RelationshipInfoClient{config: _q.config}).Query()
+	query := (&RelationshipInfoClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -127,7 +127,7 @@ func (_q *RelationshipQuery) QueryInfo() *RelationshipInfoQuery {
 			sqlgraph.To(relationshipinfo.Table, relationshipinfo.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, relationship.InfoTable, relationship.InfoColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -141,7 +141,7 @@ func (_q *RelationshipQuery) First(ctx context.Context) (*Relationship, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{relationship.Label}
+		return nil, &NotFoundError{Label: relationship.Label}
 	}
 	return nodes[0], nil
 }
@@ -167,9 +167,9 @@ func (_q *RelationshipQuery) Only(ctx context.Context) (*Relationship, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{relationship.Label}
+		return nil, &NotFoundError{Label: relationship.Label}
 	default:
-		return nil, &NotSingularError{relationship.Label}
+		return nil, &NotSingularError{Label: relationship.Label}
 	}
 }
 
@@ -248,7 +248,7 @@ func (_q *RelationshipQuery) Clone() *RelationshipQuery {
 		return nil
 	}
 	return &RelationshipQuery{
-		config:       _q.config,
+		Config:       _q.Config,
 		ctx:          _q.ctx.Clone(),
 		order:        append([]relationship.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
@@ -265,7 +265,7 @@ func (_q *RelationshipQuery) Clone() *RelationshipQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RelationshipQuery) WithUser(opts ...func(*UserQuery)) *RelationshipQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -276,7 +276,7 @@ func (_q *RelationshipQuery) WithUser(opts ...func(*UserQuery)) *RelationshipQue
 // WithRelative tells the query-builder to eager-load the nodes that are connected to
 // the "relative" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RelationshipQuery) WithRelative(opts ...func(*UserQuery)) *RelationshipQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -287,7 +287,7 @@ func (_q *RelationshipQuery) WithRelative(opts ...func(*UserQuery)) *Relationshi
 // WithInfo tells the query-builder to eager-load the nodes that are connected to
 // the "info" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RelationshipQuery) WithInfo(opts ...func(*RelationshipInfoQuery)) *RelationshipQuery {
-	query := (&RelationshipInfoClient{config: _q.config}).Query()
+	query := (&RelationshipInfoClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -356,7 +356,7 @@ func (_q *RelationshipQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !relationship.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -386,18 +386,18 @@ func (_q *RelationshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Relationship).scanValues(nil, columns)
+		return (*Relationship).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Relationship{config: _q.config}
+		node := &Relationship{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -516,7 +516,7 @@ func (_q *RelationshipQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Unique = false
 	_spec.Node.Columns = nil
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *RelationshipQuery) querySpec() *sqlgraph.QuerySpec {
@@ -566,7 +566,7 @@ func (_q *RelationshipQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *RelationshipQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(relationship.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -638,7 +638,7 @@ func (_g *RelationshipGroupBy) sqlScan(ctx context.Context, root *RelationshipQu
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -680,7 +680,7 @@ func (_s *RelationshipSelect) sqlScan(ctx context.Context, root *RelationshipQue
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

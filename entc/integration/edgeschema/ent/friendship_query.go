@@ -23,7 +23,7 @@ import (
 
 // FriendshipQuery is the builder for querying Friendship entities.
 type FriendshipQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []friendship.OrderOption
 	inters     []Interceptor
@@ -68,7 +68,7 @@ func (_q *FriendshipQuery) Order(o ...friendship.OrderOption) *FriendshipQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (_q *FriendshipQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -82,7 +82,7 @@ func (_q *FriendshipQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, friendship.UserTable, friendship.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -90,7 +90,7 @@ func (_q *FriendshipQuery) QueryUser() *UserQuery {
 
 // QueryFriend chains the current query on the "friend" edge.
 func (_q *FriendshipQuery) QueryFriend() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -104,7 +104,7 @@ func (_q *FriendshipQuery) QueryFriend() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, friendship.FriendTable, friendship.FriendColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -118,7 +118,7 @@ func (_q *FriendshipQuery) First(ctx context.Context) (*Friendship, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{friendship.Label}
+		return nil, &NotFoundError{Label: friendship.Label}
 	}
 	return nodes[0], nil
 }
@@ -140,7 +140,7 @@ func (_q *FriendshipQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{friendship.Label}
+		err = &NotFoundError{Label: friendship.Label}
 		return
 	}
 	return ids[0], nil
@@ -167,9 +167,9 @@ func (_q *FriendshipQuery) Only(ctx context.Context) (*Friendship, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{friendship.Label}
+		return nil, &NotFoundError{Label: friendship.Label}
 	default:
-		return nil, &NotSingularError{friendship.Label}
+		return nil, &NotSingularError{Label: friendship.Label}
 	}
 }
 
@@ -194,9 +194,9 @@ func (_q *FriendshipQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{friendship.Label}
+		err = &NotFoundError{Label: friendship.Label}
 	default:
-		err = &NotSingularError{friendship.Label}
+		err = &NotSingularError{Label: friendship.Label}
 	}
 	return
 }
@@ -297,7 +297,7 @@ func (_q *FriendshipQuery) Clone() *FriendshipQuery {
 		return nil
 	}
 	return &FriendshipQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]friendship.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -313,7 +313,7 @@ func (_q *FriendshipQuery) Clone() *FriendshipQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FriendshipQuery) WithUser(opts ...func(*UserQuery)) *FriendshipQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -324,7 +324,7 @@ func (_q *FriendshipQuery) WithUser(opts ...func(*UserQuery)) *FriendshipQuery {
 // WithFriend tells the query-builder to eager-load the nodes that are connected to
 // the "friend" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FriendshipQuery) WithFriend(opts ...func(*UserQuery)) *FriendshipQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -393,7 +393,7 @@ func (_q *FriendshipQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !friendship.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -416,18 +416,18 @@ func (_q *FriendshipQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*F
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Friendship).scanValues(nil, columns)
+		return (*Friendship).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Friendship{config: _q.config}
+		node := &Friendship{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -510,7 +510,7 @@ func (_q *FriendshipQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {
@@ -560,7 +560,7 @@ func (_q *FriendshipQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *FriendshipQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(friendship.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -632,7 +632,7 @@ func (_g *FriendshipGroupBy) sqlScan(ctx context.Context, root *FriendshipQuery,
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -674,7 +674,7 @@ func (_s *FriendshipSelect) sqlScan(ctx context.Context, root *FriendshipQuery, 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

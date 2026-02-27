@@ -22,7 +22,7 @@ import (
 
 // APIQuery is the builder for querying Api entities.
 type APIQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []api.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *APIQuery) First(ctx context.Context) (*Api, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{api.Label}
+		return nil, &NotFoundError{Label: api.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *APIQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{api.Label}
+		err = &NotFoundError{Label: api.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *APIQuery) Only(ctx context.Context) (*Api, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{api.Label}
+		return nil, &NotFoundError{Label: api.Label}
 	default:
-		return nil, &NotSingularError{api.Label}
+		return nil, &NotSingularError{Label: api.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *APIQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{api.Label}
+		err = &NotFoundError{Label: api.Label}
 	default:
-		err = &NotSingularError{api.Label}
+		err = &NotSingularError{Label: api.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *APIQuery) Clone() *APIQuery {
 		return nil
 	}
 	return &APIQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]api.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -321,7 +321,7 @@ func (_q *APIQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Api,
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Apis
@@ -329,7 +329,7 @@ func (_q *APIQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Api,
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -337,7 +337,7 @@ func (_q *APIQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Api,
 func (_q *APIQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -413,7 +413,7 @@ func (_g *APIGroupBy) gremlinScan(ctx context.Context, root *APIQuery, v any) er
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -466,7 +466,7 @@ func (_s *APISelect) gremlinScan(ctx context.Context, root *APIQuery, v any) err
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

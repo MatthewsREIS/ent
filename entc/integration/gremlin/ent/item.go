@@ -7,88 +7,12 @@
 package ent
 
 import (
-	"fmt"
-	"strings"
-
-	"entgo.io/ent/dialect/gremlin"
+	"entgo.io/ent/entc/integration/gremlin/ent/internal"
 )
 
-// Item is the model entity for the Item schema.
-type Item struct {
-	config `json:"-"`
-	// ID of the ent.
-	ID string `json:"id,omitempty"`
-	// Text holds the value of the "text" field.
-	Text string `json:"text,omitempty"`
-}
-
-// FromResponse scans the gremlin response data into Item.
-func (_m *Item) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scan_m struct {
-		ID   string `json:"id,omitempty"`
-		Text string `json:"text,omitempty"`
-	}
-	if err := vmap.Decode(&scan_m); err != nil {
-		return err
-	}
-	_m.ID = scan_m.ID
-	_m.Text = scan_m.Text
-	return nil
-}
-
-// Update returns a builder for updating this Item.
-// Note that you need to call Item.Unwrap() before calling this method if this Item
-// was returned from a transaction, and the transaction was committed or rolled back.
-func (_m *Item) Update() *ItemUpdateOne {
-	return NewItemClient(_m.config).UpdateOne(_m)
-}
-
-// Unwrap unwraps the Item entity that was returned from a transaction after it was closed,
-// so that all future queries will be executed through the driver which created the transaction.
-func (_m *Item) Unwrap() *Item {
-	_tx, ok := _m.config.driver.(*txDriver)
-	if !ok {
-		panic("ent: Item is not a transactional entity")
-	}
-	_m.config.driver = _tx.drv
-	return _m
-}
-
-// String implements the fmt.Stringer.
-func (_m *Item) String() string {
-	var builder strings.Builder
-	builder.WriteString("Item(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("text=")
-	builder.WriteString(_m.Text)
-	builder.WriteByte(')')
-	return builder.String()
-}
-
-// Items is a parsable slice of Item.
-type Items []*Item
-
-// FromResponse scans the gremlin response data into Items.
-func (_m *Items) FromResponse(res *gremlin.Response) error {
-	vmap, err := res.ReadValueMap()
-	if err != nil {
-		return err
-	}
-	var scan_m []struct {
-		ID   string `json:"id,omitempty"`
-		Text string `json:"text,omitempty"`
-	}
-	if err := vmap.Decode(&scan_m); err != nil {
-		return err
-	}
-	for _, v := range scan_m {
-		node := &Item{ID: v.ID}
-		node.Text = v.Text
-		*_m = append(*_m, node)
-	}
-	return nil
-}
+// Model type aliases from internal.
+// Guardrail: aliasing is one-way (root -> internal), and methods belong to the type definition site.
+// Do not attach root-only methods to alias models; add model methods on internal types instead.
+// Keep the internal package free of root query/client imports to avoid import cycles.
+type Item = internal.Item
+type Items = internal.Items

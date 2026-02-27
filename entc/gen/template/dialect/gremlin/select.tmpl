@@ -29,7 +29,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, root *{{
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := {{ $receiver }}.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

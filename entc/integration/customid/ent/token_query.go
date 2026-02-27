@@ -18,13 +18,12 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // TokenQuery is the builder for querying Token entities.
 type TokenQuery struct {
-	config
+	Config
 	ctx         *QueryContext
 	order       []token.OrderOption
 	inters      []Interceptor
@@ -69,7 +68,7 @@ func (_q *TokenQuery) Order(o ...token.OrderOption) *TokenQuery {
 
 // QueryAccount chains the current query on the "account" edge.
 func (_q *TokenQuery) QueryAccount() *AccountQuery {
-	query := (&AccountClient{config: _q.config}).Query()
+	query := (&AccountClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +82,7 @@ func (_q *TokenQuery) QueryAccount() *AccountQuery {
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, token.AccountTable, token.AccountColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -97,7 +96,7 @@ func (_q *TokenQuery) First(ctx context.Context) (*Token, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{token.Label}
+		return nil, &NotFoundError{Label: token.Label}
 	}
 	return nodes[0], nil
 }
@@ -119,7 +118,7 @@ func (_q *TokenQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{token.Label}
+		err = &NotFoundError{Label: token.Label}
 		return
 	}
 	return ids[0], nil
@@ -146,9 +145,9 @@ func (_q *TokenQuery) Only(ctx context.Context) (*Token, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{token.Label}
+		return nil, &NotFoundError{Label: token.Label}
 	default:
-		return nil, &NotSingularError{token.Label}
+		return nil, &NotSingularError{Label: token.Label}
 	}
 }
 
@@ -173,9 +172,9 @@ func (_q *TokenQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{token.Label}
+		err = &NotFoundError{Label: token.Label}
 	default:
-		err = &NotSingularError{token.Label}
+		err = &NotSingularError{Label: token.Label}
 	}
 	return
 }
@@ -276,7 +275,7 @@ func (_q *TokenQuery) Clone() *TokenQuery {
 		return nil
 	}
 	return &TokenQuery{
-		config:      _q.config,
+		Config:      _q.Config,
 		ctx:         _q.ctx.Clone(),
 		order:       append([]token.OrderOption{}, _q.order...),
 		inters:      append([]Interceptor{}, _q.inters...),
@@ -291,7 +290,7 @@ func (_q *TokenQuery) Clone() *TokenQuery {
 // WithAccount tells the query-builder to eager-load the nodes that are connected to
 // the "account" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
-	query := (&AccountClient{config: _q.config}).Query()
+	query := (&AccountClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -360,7 +359,7 @@ func (_q *TokenQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !token.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -389,18 +388,18 @@ func (_q *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 		_spec.Node.Columns = append(_spec.Node.Columns, token.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Token).scanValues(nil, columns)
+		return (*Token).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Token{config: _q.config}
+		node := &Token{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -415,31 +414,36 @@ func (_q *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 	return nodes, nil
 }
 
-var tokenAccountEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Token, Account, sid.ID, sid.ID]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        token.AccountTable,
-			Columns:      token.AccountColumn,
-			Bidi:         false,
-			TargetColumn: account.FieldID,
-			TargetType:   field.TypeOther,
-		})
-	},
-	ExtractNodeID: func(n *Token) sid.ID { return n.ID },
-	ExtractEdgeID: func(e *Account) sid.ID { return e.ID },
-	ExtractNodeFK: func(n *Token) *sid.ID {
-		return n.account_token
-	},
-}
-
 func (_q *TokenQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*Token, init func(*Token), assign func(*Token, *Account)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &tokenAccountEdgeLoadDescriptor, nodes, assign,
-		func(ids []sid.ID) {
-			query.Where(account.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]sid.ID, 0, len(nodes))
+	nodeids := make(map[sid.ID][]*Token)
+	for i := range nodes {
+		if nodes[i].GetAccountToken() == nil {
+			continue
+		}
+		fk := *nodes[i].GetAccountToken()
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(account.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "account_token" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -449,7 +453,7 @@ func (_q *TokenQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *TokenQuery) querySpec() *sqlgraph.QuerySpec {
@@ -493,7 +497,7 @@ func (_q *TokenQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *TokenQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(token.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -565,7 +569,7 @@ func (_g *TokenGroupBy) sqlScan(ctx context.Context, root *TokenQuery, v any) er
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -607,7 +611,7 @@ func (_s *TokenSelect) sqlScan(ctx context.Context, root *TokenQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

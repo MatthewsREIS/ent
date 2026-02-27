@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,13 +18,12 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // NodeQuery is the builder for querying Node entities.
 type NodeQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []node.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *NodeQuery) Order(o ...node.OrderOption) *NodeQuery {
 
 // QueryPrev chains the current query on the "prev" edge.
 func (_q *NodeQuery) QueryPrev() *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := (&NodeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (_q *NodeQuery) QueryPrev() *NodeQuery {
 			sqlgraph.To(node.Table, node.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -92,7 +92,7 @@ func (_q *NodeQuery) QueryPrev() *NodeQuery {
 
 // QueryNext chains the current query on the "next" edge.
 func (_q *NodeQuery) QueryNext() *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := (&NodeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -106,7 +106,7 @@ func (_q *NodeQuery) QueryNext() *NodeQuery {
 			sqlgraph.To(node.Table, node.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -120,7 +120,7 @@ func (_q *NodeQuery) First(ctx context.Context) (*Node, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{node.Label}
+		return nil, &NotFoundError{Label: node.Label}
 	}
 	return nodes[0], nil
 }
@@ -142,7 +142,7 @@ func (_q *NodeQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{node.Label}
+		err = &NotFoundError{Label: node.Label}
 		return
 	}
 	return ids[0], nil
@@ -169,9 +169,9 @@ func (_q *NodeQuery) Only(ctx context.Context) (*Node, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{node.Label}
+		return nil, &NotFoundError{Label: node.Label}
 	default:
-		return nil, &NotSingularError{node.Label}
+		return nil, &NotSingularError{Label: node.Label}
 	}
 }
 
@@ -196,9 +196,9 @@ func (_q *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{node.Label}
+		err = &NotFoundError{Label: node.Label}
 	default:
-		err = &NotSingularError{node.Label}
+		err = &NotSingularError{Label: node.Label}
 	}
 	return
 }
@@ -299,7 +299,7 @@ func (_q *NodeQuery) Clone() *NodeQuery {
 		return nil
 	}
 	return &NodeQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]node.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -316,7 +316,7 @@ func (_q *NodeQuery) Clone() *NodeQuery {
 // WithPrev tells the query-builder to eager-load the nodes that are connected to
 // the "prev" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := (&NodeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -327,7 +327,7 @@ func (_q *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
 // WithNext tells the query-builder to eager-load the nodes that are connected to
 // the "next" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := (&NodeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -396,7 +396,7 @@ func (_q *NodeQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !node.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -426,13 +426,13 @@ func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 		_spec.Node.Columns = append(_spec.Node.Columns, node.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Node).scanValues(nil, columns)
+		return (*Node).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Node{config: _q.config}
+		node := &Node{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -440,7 +440,7 @@ func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -450,7 +450,7 @@ func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 		if err := _q.loadPrev(ctx, query, nodes, nil,
 			func(n *Node, e *Node) {
 				n.Edges.Prev = e
-				if !e.Edges.loadedTypes[1] {
+				if !e.Edges.IsLoaded(1) {
 					e.Edges.Next = n
 				}
 			}); err != nil {
@@ -461,7 +461,7 @@ func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 		if err := _q.loadNext(ctx, query, nodes, nil,
 			func(n *Node, e *Node) {
 				n.Edges.Next = e
-				if !e.Edges.loadedTypes[0] {
+				if !e.Edges.IsLoaded(0) {
 					e.Edges.Prev = n
 				}
 			}); err != nil {
@@ -471,57 +471,64 @@ func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 	return nodes, nil
 }
 
-var nodePrevEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      true,
-			Table:        node.PrevTable,
-			Columns:      node.PrevColumn,
-			Bidi:         false,
-			TargetColumn: node.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Node) int { return n.ID },
-	ExtractEdgeID: func(e *Node) int { return e.ID },
-	ExtractNodeFK: func(n *Node) *int {
-		return n.node_next
-	},
-}
-var nodeNextEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      false,
-			Table:        node.NextTable,
-			Columns:      node.NextColumn,
-			Bidi:         false,
-			TargetColumn: node.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Node) int { return n.ID },
-	ExtractEdgeID: func(e *Node) int { return e.ID },
-	ExtractEdgeFK: func(e *Node) *int {
-		return e.node_next
-	},
-}
-
 func (_q *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &nodePrevEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(node.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Node)
+	for i := range nodes {
+		if nodes[i].GetNodeNext() == nil {
+			continue
+		}
+		fk := *nodes[i].GetNodeNext()
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(node.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "node_next" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Node)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2O(ctx, &nodeNextEdgeLoadDescriptor, nodes, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(node.NextColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetNodeNext()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "node_next" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "node_next" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 
@@ -534,7 +541,7 @@ func (_q *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *NodeQuery) querySpec() *sqlgraph.QuerySpec {
@@ -578,7 +585,7 @@ func (_q *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(node.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -616,7 +623,7 @@ func (_q *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *NodeQuery) ForUpdate(opts ...sql.LockOption) *NodeQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -629,7 +636,7 @@ func (_q *NodeQuery) ForUpdate(opts ...sql.LockOption) *NodeQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *NodeQuery) ForShare(opts ...sql.LockOption) *NodeQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -685,7 +692,7 @@ func (_g *NodeGroupBy) sqlScan(ctx context.Context, root *NodeQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -727,7 +734,7 @@ func (_s *NodeSelect) sqlScan(ctx context.Context, root *NodeQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

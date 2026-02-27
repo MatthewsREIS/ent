@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,13 +19,12 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // DeviceQuery is the builder for querying Device entities.
 type DeviceQuery struct {
-	config
+	Config
 	ctx               *QueryContext
 	order             []device.OrderOption
 	inters            []Interceptor
@@ -70,7 +70,7 @@ func (_q *DeviceQuery) Order(o ...device.OrderOption) *DeviceQuery {
 
 // QueryActiveSession chains the current query on the "active_session" edge.
 func (_q *DeviceQuery) QueryActiveSession() *SessionQuery {
-	query := (&SessionClient{config: _q.config}).Query()
+	query := (&SessionClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (_q *DeviceQuery) QueryActiveSession() *SessionQuery {
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, device.ActiveSessionTable, device.ActiveSessionColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -92,7 +92,7 @@ func (_q *DeviceQuery) QueryActiveSession() *SessionQuery {
 
 // QuerySessions chains the current query on the "sessions" edge.
 func (_q *DeviceQuery) QuerySessions() *SessionQuery {
-	query := (&SessionClient{config: _q.config}).Query()
+	query := (&SessionClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -106,7 +106,7 @@ func (_q *DeviceQuery) QuerySessions() *SessionQuery {
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, device.SessionsTable, device.SessionsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -120,7 +120,7 @@ func (_q *DeviceQuery) First(ctx context.Context) (*Device, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{device.Label}
+		return nil, &NotFoundError{Label: device.Label}
 	}
 	return nodes[0], nil
 }
@@ -142,7 +142,7 @@ func (_q *DeviceQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{device.Label}
+		err = &NotFoundError{Label: device.Label}
 		return
 	}
 	return ids[0], nil
@@ -169,9 +169,9 @@ func (_q *DeviceQuery) Only(ctx context.Context) (*Device, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{device.Label}
+		return nil, &NotFoundError{Label: device.Label}
 	default:
-		return nil, &NotSingularError{device.Label}
+		return nil, &NotSingularError{Label: device.Label}
 	}
 }
 
@@ -196,9 +196,9 @@ func (_q *DeviceQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{device.Label}
+		err = &NotFoundError{Label: device.Label}
 	default:
-		err = &NotSingularError{device.Label}
+		err = &NotSingularError{Label: device.Label}
 	}
 	return
 }
@@ -299,7 +299,7 @@ func (_q *DeviceQuery) Clone() *DeviceQuery {
 		return nil
 	}
 	return &DeviceQuery{
-		config:            _q.config,
+		Config:            _q.Config,
 		ctx:               _q.ctx.Clone(),
 		order:             append([]device.OrderOption{}, _q.order...),
 		inters:            append([]Interceptor{}, _q.inters...),
@@ -315,7 +315,7 @@ func (_q *DeviceQuery) Clone() *DeviceQuery {
 // WithActiveSession tells the query-builder to eager-load the nodes that are connected to
 // the "active_session" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *DeviceQuery) WithActiveSession(opts ...func(*SessionQuery)) *DeviceQuery {
-	query := (&SessionClient{config: _q.config}).Query()
+	query := (&SessionClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -326,7 +326,7 @@ func (_q *DeviceQuery) WithActiveSession(opts ...func(*SessionQuery)) *DeviceQue
 // WithSessions tells the query-builder to eager-load the nodes that are connected to
 // the "sessions" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *DeviceQuery) WithSessions(opts ...func(*SessionQuery)) *DeviceQuery {
-	query := (&SessionClient{config: _q.config}).Query()
+	query := (&SessionClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -373,7 +373,7 @@ func (_q *DeviceQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !device.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -403,18 +403,18 @@ func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 		_spec.Node.Columns = append(_spec.Node.Columns, device.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Device).scanValues(nil, columns)
+		return (*Device).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Device{config: _q.config}
+		node := &Device{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -436,57 +436,67 @@ func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	return nodes, nil
 }
 
-var deviceActiveSessionEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Device, Session, schema.ID, schema.ID]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        device.ActiveSessionTable,
-			Columns:      device.ActiveSessionColumn,
-			Bidi:         false,
-			TargetColumn: session.FieldID,
-			TargetType:   field.TypeBytes,
-		})
-	},
-	ExtractNodeID: func(n *Device) schema.ID { return n.ID },
-	ExtractEdgeID: func(e *Session) schema.ID { return e.ID },
-	ExtractNodeFK: func(n *Device) *schema.ID {
-		return n.device_active_session
-	},
-}
-var deviceSessionsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Device, Session, schema.ID, schema.ID]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        device.SessionsTable,
-			Columns:      device.SessionsColumn,
-			Bidi:         false,
-			TargetColumn: session.FieldID,
-			TargetType:   field.TypeBytes,
-		})
-	},
-	ExtractNodeID: func(n *Device) schema.ID { return n.ID },
-	ExtractEdgeID: func(e *Session) schema.ID { return e.ID },
-	ExtractEdgeFK: func(e *Session) *schema.ID {
-		return e.device_sessions
-	},
-}
-
 func (_q *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &deviceActiveSessionEdgeLoadDescriptor, nodes, assign,
-		func(ids []schema.ID) {
-			query.Where(session.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]schema.ID, 0, len(nodes))
+	nodeids := make(map[schema.ID][]*Device)
+	for i := range nodes {
+		if nodes[i].GetDeviceActiveSession() == nil {
+			continue
+		}
+		fk := *nodes[i].GetDeviceActiveSession()
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(session.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "device_active_session" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[schema.ID]*Device)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &deviceSessionsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(device.SessionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetDeviceSessions()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "device_sessions" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "device_sessions" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 
@@ -496,7 +506,7 @@ func (_q *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
@@ -540,7 +550,7 @@ func (_q *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *DeviceQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(device.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -612,7 +622,7 @@ func (_g *DeviceGroupBy) sqlScan(ctx context.Context, root *DeviceQuery, v any) 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -654,7 +664,7 @@ func (_s *DeviceSelect) sqlScan(ctx context.Context, root *DeviceQuery, v any) e
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

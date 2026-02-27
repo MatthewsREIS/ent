@@ -22,7 +22,7 @@ import (
 
 // NodeQuery is the builder for querying Node entities.
 type NodeQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []node.OrderOption
 	inters     []Interceptor
@@ -67,7 +67,7 @@ func (_q *NodeQuery) Order(o ...node.OrderOption) *NodeQuery {
 
 // QueryPrev chains the current query on the "prev" edge.
 func (_q *NodeQuery) QueryPrev() *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := (&NodeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -81,7 +81,7 @@ func (_q *NodeQuery) QueryPrev() *NodeQuery {
 
 // QueryNext chains the current query on the "next" edge.
 func (_q *NodeQuery) QueryNext() *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := (&NodeClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -101,7 +101,7 @@ func (_q *NodeQuery) First(ctx context.Context) (*Node, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{node.Label}
+		return nil, &NotFoundError{Label: node.Label}
 	}
 	return nodes[0], nil
 }
@@ -123,7 +123,7 @@ func (_q *NodeQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{node.Label}
+		err = &NotFoundError{Label: node.Label}
 		return
 	}
 	return ids[0], nil
@@ -150,9 +150,9 @@ func (_q *NodeQuery) Only(ctx context.Context) (*Node, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{node.Label}
+		return nil, &NotFoundError{Label: node.Label}
 	default:
-		return nil, &NotSingularError{node.Label}
+		return nil, &NotSingularError{Label: node.Label}
 	}
 }
 
@@ -177,9 +177,9 @@ func (_q *NodeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{node.Label}
+		err = &NotFoundError{Label: node.Label}
 	default:
-		err = &NotSingularError{node.Label}
+		err = &NotSingularError{Label: node.Label}
 	}
 	return
 }
@@ -280,7 +280,7 @@ func (_q *NodeQuery) Clone() *NodeQuery {
 		return nil
 	}
 	return &NodeQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]node.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -296,7 +296,7 @@ func (_q *NodeQuery) Clone() *NodeQuery {
 // WithPrev tells the query-builder to eager-load the nodes that are connected to
 // the "prev" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := (&NodeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -307,7 +307,7 @@ func (_q *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
 // WithNext tells the query-builder to eager-load the nodes that are connected to
 // the "next" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := (&NodeClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -397,7 +397,7 @@ func (_q *NodeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Nod
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Nodes
@@ -405,7 +405,7 @@ func (_q *NodeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Nod
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -413,7 +413,7 @@ func (_q *NodeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Nod
 func (_q *NodeQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -489,7 +489,7 @@ func (_g *NodeGroupBy) gremlinScan(ctx context.Context, root *NodeQuery, v any) 
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -542,7 +542,7 @@ func (_s *NodeSelect) gremlinScan(ctx context.Context, root *NodeQuery, v any) e
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

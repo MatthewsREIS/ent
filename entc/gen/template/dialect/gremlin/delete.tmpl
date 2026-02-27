@@ -14,17 +14,17 @@ in the LICENSE file in the root directory of this source tree.
 func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlin().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := {{ $receiver }}.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	{{ $mutation }}.done = true
+	{{ $mutation }}.SetDone()
 	return res.ReadInt()
 }
 
 
 func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
-	t := g.V().HasLabel({{ $.Package }}.Label)
-	for _, p := range {{ $mutation }}.predicates {
+	t := g.V().HasLabel(Label)
+	for _, p := range {{ $mutation }}.MutationPredicates() {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

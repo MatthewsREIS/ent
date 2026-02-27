@@ -15,7 +15,7 @@ import (
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
-	config
+	Config
 	// AttachedFile is the client for interacting with the AttachedFile builders.
 	AttachedFile *AttachedFileClient
 	// File is the client for interacting with the File builders.
@@ -94,7 +94,7 @@ func (f CommitFunc) Commit(ctx context.Context, tx *Tx) error {
 
 // Commit commits the transaction.
 func (tx *Tx) Commit() error {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver := tx.Config.Drv.(*txDriver)
 	var fn Committer = CommitFunc(func(context.Context, *Tx) error {
 		return txDriver.tx.Commit()
 	})
@@ -109,7 +109,7 @@ func (tx *Tx) Commit() error {
 
 // OnCommit adds a hook to call on commit.
 func (tx *Tx) OnCommit(f CommitHook) {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver := tx.Config.Drv.(*txDriver)
 	txDriver.mu.Lock()
 	txDriver.onCommit = append(txDriver.onCommit, f)
 	txDriver.mu.Unlock()
@@ -150,7 +150,7 @@ func (f RollbackFunc) Rollback(ctx context.Context, tx *Tx) error {
 
 // Rollback rollbacks the transaction.
 func (tx *Tx) Rollback() error {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver := tx.Config.Drv.(*txDriver)
 	var fn Rollbacker = RollbackFunc(func(context.Context, *Tx) error {
 		return txDriver.tx.Rollback()
 	})
@@ -165,7 +165,7 @@ func (tx *Tx) Rollback() error {
 
 // OnRollback adds a hook to call on rollback.
 func (tx *Tx) OnRollback(f RollbackHook) {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver := tx.Config.Drv.(*txDriver)
 	txDriver.mu.Lock()
 	txDriver.onRollback = append(txDriver.onRollback, f)
 	txDriver.mu.Unlock()
@@ -174,30 +174,30 @@ func (tx *Tx) OnRollback(f RollbackHook) {
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
 	tx.clientOnce.Do(func() {
-		tx.client = &Client{config: tx.config}
+		tx.client = &Client{Config: tx.Config}
 		tx.client.init()
 	})
 	return tx.client
 }
 
 func (tx *Tx) init() {
-	tx.AttachedFile = NewAttachedFileClient(tx.config)
-	tx.File = NewFileClient(tx.config)
-	tx.Friendship = NewFriendshipClient(tx.config)
-	tx.Group = NewGroupClient(tx.config)
-	tx.GroupTag = NewGroupTagClient(tx.config)
-	tx.Process = NewProcessClient(tx.config)
-	tx.Relationship = NewRelationshipClient(tx.config)
-	tx.RelationshipInfo = NewRelationshipInfoClient(tx.config)
-	tx.Role = NewRoleClient(tx.config)
-	tx.RoleUser = NewRoleUserClient(tx.config)
-	tx.Tag = NewTagClient(tx.config)
-	tx.Tweet = NewTweetClient(tx.config)
-	tx.TweetLike = NewTweetLikeClient(tx.config)
-	tx.TweetTag = NewTweetTagClient(tx.config)
-	tx.User = NewUserClient(tx.config)
-	tx.UserGroup = NewUserGroupClient(tx.config)
-	tx.UserTweet = NewUserTweetClient(tx.config)
+	tx.AttachedFile = NewAttachedFileClient(tx.Config)
+	tx.File = NewFileClient(tx.Config)
+	tx.Friendship = NewFriendshipClient(tx.Config)
+	tx.Group = NewGroupClient(tx.Config)
+	tx.GroupTag = NewGroupTagClient(tx.Config)
+	tx.Process = NewProcessClient(tx.Config)
+	tx.Relationship = NewRelationshipClient(tx.Config)
+	tx.RelationshipInfo = NewRelationshipInfoClient(tx.Config)
+	tx.Role = NewRoleClient(tx.Config)
+	tx.RoleUser = NewRoleUserClient(tx.Config)
+	tx.Tag = NewTagClient(tx.Config)
+	tx.Tweet = NewTweetClient(tx.Config)
+	tx.TweetLike = NewTweetLikeClient(tx.Config)
+	tx.TweetTag = NewTweetTagClient(tx.Config)
+	tx.User = NewUserClient(tx.Config)
+	tx.UserGroup = NewUserGroupClient(tx.Config)
+	tx.UserTweet = NewUserTweetClient(tx.Config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -257,6 +257,11 @@ func (tx *txDriver) Exec(ctx context.Context, query string, args, v any) error {
 // Query calls tx.Query.
 func (tx *txDriver) Query(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Query(ctx, query, args, v)
+}
+
+// UnwrapDriver implements internal.DriverUnwrapper for model Unwrap() support.
+func (tx *txDriver) UnwrapDriver() dialect.Driver {
+	return tx.drv
 }
 
 var _ dialect.Driver = (*txDriver)(nil)

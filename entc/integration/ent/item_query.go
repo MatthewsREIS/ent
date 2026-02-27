@@ -22,7 +22,7 @@ import (
 
 // ItemQuery is the builder for querying Item entities.
 type ItemQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []item.OrderOption
 	inters     []Interceptor
@@ -72,7 +72,7 @@ func (_q *ItemQuery) First(ctx context.Context) (*Item, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{item.Label}
+		return nil, &NotFoundError{Label: item.Label}
 	}
 	return nodes[0], nil
 }
@@ -94,7 +94,7 @@ func (_q *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{item.Label}
+		err = &NotFoundError{Label: item.Label}
 		return
 	}
 	return ids[0], nil
@@ -121,9 +121,9 @@ func (_q *ItemQuery) Only(ctx context.Context) (*Item, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{item.Label}
+		return nil, &NotFoundError{Label: item.Label}
 	default:
-		return nil, &NotSingularError{item.Label}
+		return nil, &NotSingularError{Label: item.Label}
 	}
 }
 
@@ -148,9 +148,9 @@ func (_q *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{item.Label}
+		err = &NotFoundError{Label: item.Label}
 	default:
-		err = &NotSingularError{item.Label}
+		err = &NotSingularError{Label: item.Label}
 	}
 	return
 }
@@ -251,7 +251,7 @@ func (_q *ItemQuery) Clone() *ItemQuery {
 		return nil
 	}
 	return &ItemQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]item.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -324,7 +324,7 @@ func (_q *ItemQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !item.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -343,12 +343,12 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Item).scanValues(nil, columns)
+		return (*Item).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Item{config: _q.config}
+		node := &Item{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -356,7 +356,7 @@ func (_q *ItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Item, e
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -374,7 +374,7 @@ func (_q *ItemQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *ItemQuery) querySpec() *sqlgraph.QuerySpec {
@@ -418,7 +418,7 @@ func (_q *ItemQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(item.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -456,7 +456,7 @@ func (_q *ItemQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *ItemQuery) ForUpdate(opts ...sql.LockOption) *ItemQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -469,7 +469,7 @@ func (_q *ItemQuery) ForUpdate(opts ...sql.LockOption) *ItemQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *ItemQuery) ForShare(opts ...sql.LockOption) *ItemQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -525,7 +525,7 @@ func (_g *ItemGroupBy) sqlScan(ctx context.Context, root *ItemQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -567,7 +567,7 @@ func (_s *ItemSelect) sqlScan(ctx context.Context, root *ItemQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

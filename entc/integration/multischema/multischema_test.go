@@ -80,7 +80,7 @@ func TestMySQL(t *testing.T) {
 		client.Group.Create().SetName("GitHub"),
 		client.Group.Create().SetName("GitLab"),
 	).SaveX(ctx)
-	a8m := client.User.Create().SetName("a8m").AddPets(pedro).AddGroups(groups...).SaveX(ctx)
+	a8m := client.User.Create().SetName("a8m").AddPetIDs(pedro.ID).AddGroupIDs(groups[0].ID, groups[1].ID).SaveX(ctx)
 
 	// Custom modifier with schema config.
 	var names []struct {
@@ -128,20 +128,20 @@ func TestMySQL(t *testing.T) {
 		SaveX(ctx)
 	require.Equal(t, 1, affected)
 
-	exist := groups[0].QueryUsers().ExistX(ctx)
+	exist := client.Group.QueryUsers(groups[0]).ExistX(ctx)
 	require.False(t, exist)
-	exist = groups[1].QueryUsers().ExistX(ctx)
+	exist = client.Group.QueryUsers(groups[1]).ExistX(ctx)
 	require.True(t, exist)
-	exist = pedro.QueryOwner().ExistX(ctx)
+	exist = client.Pet.QueryOwner(pedro).ExistX(ctx)
 	require.True(t, exist)
-	pedro = pedro.Update().ClearOwner().SaveX(ctx)
-	exist = pedro.QueryOwner().ExistX(ctx)
+	pedro = client.Pet.UpdateOne(pedro).ClearOwner().SaveX(ctx)
+	exist = client.Pet.QueryOwner(pedro).ExistX(ctx)
 	require.False(t, exist)
 
 	require.Equal(t, client.User.Query().CountX(ctx), len(client.User.Query().AllX(ctx)))
 	require.Equal(t, client.Pet.Query().CountX(ctx), len(client.Pet.Query().AllX(ctx)))
 
-	nat := client.User.Create().SetName("nati").AddFriends(a8m).SaveX(ctx)
+	nat := client.User.Create().SetName("nati").AddFriendIDs(a8m.ID).SaveX(ctx)
 	users := client.User.Query().WithFriends().WithFriendships().WithGroups().Order(ent.Asc(user.FieldName)).AllX(ctx)
 	require.Len(t, users, 2)
 	require.Equal(t, users[0].Name, a8m.Name)
@@ -153,14 +153,14 @@ func TestMySQL(t *testing.T) {
 	require.Len(t, users[0].Edges.Friendships, 1)
 	require.Len(t, users[1].Edges.Friendships, 1)
 
-	ta := client.User.Create().SetName("ta").AddParents(a8m, nat).SaveX(ctx)
-	el := client.User.Create().SetName("el").AddParents(a8m, nat).SaveX(ctx)
-	jo := client.User.Create().SetName("be").AddParents(a8m, nat).SaveX(ctx)
+	ta := client.User.Create().SetName("ta").AddParentIDs(a8m.ID, nat.ID).SaveX(ctx)
+	el := client.User.Create().SetName("el").AddParentIDs(a8m.ID, nat.ID).SaveX(ctx)
+	jo := client.User.Create().SetName("be").AddParentIDs(a8m.ID, nat.ID).SaveX(ctx)
 
 	require.Equal(t, 3, client.User.Query().Where(user.HasParents()).CountX(ctx))
-	require.Equal(t, 3, a8m.QueryChildren().CountX(ctx))
+	require.Equal(t, 3, client.User.QueryChildren(a8m).CountX(ctx))
 
-	sib := ta.QueryParents().QueryChildren().Where(user.NameNEQ(ta.Name)).AllX(ctx)
+	sib := client.User.QueryParents(ta).QueryChildren().Where(user.NameNEQ(ta.Name)).AllX(ctx)
 	require.Len(t, sib, 2)
 	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == el.Name }))
 	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == jo.Name }))
@@ -205,7 +205,7 @@ func TestVersionedMigration(t *testing.T) {
 		client.Group.Create().SetName("GitHub"),
 		client.Group.Create().SetName("GitLab"),
 	).SaveX(ctx)
-	a8m := client.User.Create().SetName("a8m").AddPets(pedro).AddGroups(groups...).SaveX(ctx)
+	a8m := client.User.Create().SetName("a8m").AddPetIDs(pedro.ID).AddGroupIDs(groups[0].ID, groups[1].ID).SaveX(ctx)
 
 	// Custom modifier with schema config.
 	var names []struct {
@@ -253,20 +253,20 @@ func TestVersionedMigration(t *testing.T) {
 		SaveX(ctx)
 	require.Equal(t, 1, affected)
 
-	exist := groups[0].QueryUsers().ExistX(ctx)
+	exist := client.Group.QueryUsers(groups[0]).ExistX(ctx)
 	require.False(t, exist)
-	exist = groups[1].QueryUsers().ExistX(ctx)
+	exist = client.Group.QueryUsers(groups[1]).ExistX(ctx)
 	require.True(t, exist)
-	exist = pedro.QueryOwner().ExistX(ctx)
+	exist = client.Pet.QueryOwner(pedro).ExistX(ctx)
 	require.True(t, exist)
-	pedro = pedro.Update().ClearOwner().SaveX(ctx)
-	exist = pedro.QueryOwner().ExistX(ctx)
+	pedro = client.Pet.UpdateOne(pedro).ClearOwner().SaveX(ctx)
+	exist = client.Pet.QueryOwner(pedro).ExistX(ctx)
 	require.False(t, exist)
 
 	require.Equal(t, client.User.Query().CountX(ctx), len(client.User.Query().AllX(ctx)))
 	require.Equal(t, client.Pet.Query().CountX(ctx), len(client.Pet.Query().AllX(ctx)))
 
-	nat := client.User.Create().SetName("nati").AddFriends(a8m).SaveX(ctx)
+	nat := client.User.Create().SetName("nati").AddFriendIDs(a8m.ID).SaveX(ctx)
 	users := client.User.Query().WithFriends().WithFriendships().WithGroups().Order(ent.Asc(user.FieldName)).AllX(ctx)
 	require.Len(t, users, 2)
 	require.Equal(t, users[0].Name, a8m.Name)

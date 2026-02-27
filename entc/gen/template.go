@@ -32,6 +32,7 @@ type (
 		Cond           func(*Type) bool   // condition to apply the template.
 		Format         func(*Type) string // file name format.
 		ExtendPatterns []string           // extend patterns.
+		SubPackage     bool               // template outputs to per-entity sub-package.
 	}
 	// GraphTemplate specifies a template that is executed with
 	// the Graph object.
@@ -47,23 +48,58 @@ var (
 	// Templates holds the template information for a file that the graph is generating.
 	Templates = []TypeTemplate{
 		{
-			Name:   "create",
-			Cond:   notView,
-			Format: pkgf("%s_create.go"),
+			Name: "internal/model",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("internal/%s_model.go", t.PackageDir())
+			},
+		},
+		{
+			Name: "internal/mutation",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("internal/%s_mutation.go", t.PackageDir())
+			},
+		},
+		{
+			Name: "shared",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/shared.go", t.PackageDir())
+			},
+			SubPackage: true,
+		},
+		{
+			Name: "create",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/create.go", t.PackageDir())
+			},
 			ExtendPatterns: []string{
 				"dialect/*/create/fields/additional/*",
 				"dialect/*/create_bulk/fields/additional/*",
 			},
+			SubPackage: true,
 		},
 		{
-			Name:   "update",
-			Cond:   notView,
-			Format: pkgf("%s_update.go"),
+			Name: "update",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/update.go", t.PackageDir())
+			},
+			SubPackage: true,
 		},
 		{
-			Name:   "delete",
-			Cond:   notView,
-			Format: pkgf("%s_delete.go"),
+			Name: "delete",
+			Cond: notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/delete.go", t.PackageDir())
+			},
+			SubPackage: true,
+		},
+		{
+			Name:   "client/type",
+			Format: pkgf("%s_client.go"),
 		},
 		{
 			Name:   "query",
@@ -92,12 +128,32 @@ var (
 				"meta/additional/*",
 			},
 		},
+		{
+			Name:   "mutation/type",
+			Cond:   notView,
+			Format: pkgf("%s_mutation.go"),
+		},
+		{
+			Name: "dialect/sql/entql/type",
+			Cond: func(t *Type) bool {
+				return t.featureEnabled(FeatureEntQL)
+			},
+			Format: pkgf("%s_entql.go"),
+		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
 	GraphTemplates = []GraphTemplate{
 		{
+			Name:   "internal/types",
+			Format: "internal/types.go",
+		},
+		{
 			Name:   "base",
 			Format: "ent.go",
+		},
+		{
+			Name:   "config",
+			Format: "config.go",
 		},
 		{
 			Name:   "client",
@@ -168,7 +224,16 @@ var (
 		},
 	}
 	// template files that were deleted and should be removed by the codegen.
-	deletedTemplates = []string{"config.go", "context.go"}
+	deletedTemplates = []string{"context.go"}
+	// deletedTypeTemplates holds per-type file patterns that were replaced by
+	// sub-package equivalents and should be cleaned up during generation.
+	// For example, "%s_create.go" was replaced by "%s/create.go".
+	deletedTypeTemplates = []string{
+		"%s_create.go",
+		"%s_update.go",
+		"%s_delete.go",
+		"%s/client.go",
+	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
 		"client/additional/*",

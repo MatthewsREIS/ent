@@ -7,10 +7,6 @@ in the LICENSE file in the root directory of this source tree.
 {{/* The line below tells Intellij/GoLand to enable the autocompletion based *gen.Graph type. */}}
 {{/* gotype: entgo.io/ent/entc/gen.Graph */}}
 
-{{ define "config/options/schemaconfig" }}
-// SchemaConfigFromContext exports the internal.SchemaConfigFromContext
-// for external usage (inside custom predicates or modifiers).
-func SchemaConfigFromContext(ctx context.Context) SchemaConfig {
-	return internal.SchemaConfigFromContext(ctx)
-}
-{{ end }}
+{{/* SchemaConfigFromContext is now re-exported by the built-in dialect/sql/config/options/schemaconfig template. */}}
+{{/* This custom template is kept empty for backward compatibility. */}}
+{{ define "config/options/schemaconfig" }}{{ end }}
