@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/jsonencode/ent/card"
 	"entgo.io/ent/examples/jsonencode/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -77,6 +79,22 @@ func (_u *CardUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var cardUpdateDescriptor = entbuilder.UpdateDescriptor[config, *CardMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*CardMutation]{
+		{
+			Column: card.FieldNumber,
+			Type:   field.TypeString,
+			Set: func(m *CardMutation) (driver.Value, bool, error) {
+				if value, ok := m.Number(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *CardMutation]{},
+}
+
 func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -86,8 +104,8 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Number(); ok {
-		_spec.SetField(card.FieldNumber, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &cardUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -194,8 +212,8 @@ func (_u *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Number(); ok {
-		_spec.SetField(card.FieldNumber, field.TypeString, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &cardUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &Card{config: _u.config}
 	_spec.Assign = _node.assignValues

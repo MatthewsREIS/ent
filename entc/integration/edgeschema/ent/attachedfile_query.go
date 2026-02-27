@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -448,62 +449,59 @@ func (_q *AttachedFileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	return nodes, nil
 }
 
+var attachedfileFiEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[AttachedFile, File, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        attachedfile.FiTable,
+			Columns:      attachedfile.FiColumn,
+			Bidi:         false,
+			TargetColumn: file.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *AttachedFile) int { return n.ID },
+	ExtractEdgeID: func(e *File) int { return e.ID },
+	ExtractNodeFK: func(n *AttachedFile) *int {
+		v := n.FID
+		return &v
+	},
+}
+var attachedfileProcEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[AttachedFile, Process, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      false,
+			Table:        attachedfile.ProcTable,
+			Columns:      attachedfile.ProcColumn,
+			Bidi:         false,
+			TargetColumn: process.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *AttachedFile) int { return n.ID },
+	ExtractEdgeID: func(e *Process) int { return e.ID },
+	ExtractNodeFK: func(n *AttachedFile) *int {
+		v := n.ProcID
+		return &v
+	},
+}
+
 func (_q *AttachedFileQuery) loadFi(ctx context.Context, query *FileQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *File)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*AttachedFile)
-	for i := range nodes {
-		fk := nodes[i].FID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(file.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "f_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &attachedfileFiEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(file.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 func (_q *AttachedFileQuery) loadProc(ctx context.Context, query *ProcessQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *Process)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*AttachedFile)
-	for i := range nodes {
-		fk := nodes[i].ProcID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(process.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "proc_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &attachedfileProcEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(process.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

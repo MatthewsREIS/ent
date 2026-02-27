@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -15,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/version/ent/predicate"
 	"entgo.io/ent/examples/version/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -108,6 +110,39 @@ func (_u *UserUpdate) check() error {
 	return nil
 }
 
+var userUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*UserMutation]{
+		{
+			Column: user.FieldVersion,
+			Type:   field.TypeInt64,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Version(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Add: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.AddedVersion(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: user.FieldStatus,
+			Type:   field.TypeEnum,
+			Set: func(m *UserMutation) (driver.Value, bool, error) {
+				if value, ok := m.Status(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *UserMutation]{},
+}
+
 func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
 		return _node, err
@@ -120,14 +155,8 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Version(); ok {
-		_spec.SetField(user.FieldVersion, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedVersion(); ok {
-		_spec.AddField(user.FieldVersion, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -268,14 +297,8 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Version(); ok {
-		_spec.SetField(user.FieldVersion, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.AddedVersion(); ok {
-		_spec.AddField(user.FieldVersion, field.TypeInt64, value)
-	}
-	if value, ok := _u.mutation.Status(); ok {
-		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues

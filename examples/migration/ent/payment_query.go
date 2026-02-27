@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/examples/migration/ent/card"
 	"entgo.io/ent/examples/migration/ent/payment"
 	"entgo.io/ent/examples/migration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -405,33 +406,32 @@ func (_q *PaymentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Paym
 	return nodes, nil
 }
 
+var paymentCardEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Payment, Card, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        payment.CardTable,
+			Columns:      payment.CardColumn,
+			Bidi:         false,
+			TargetColumn: card.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *Payment) int { return n.ID },
+	ExtractEdgeID: func(e *Card) int { return e.ID },
+	ExtractNodeFK: func(n *Payment) *int {
+		v := n.CardID
+		return &v
+	},
+}
+
 func (_q *PaymentQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Payment, init func(*Payment), assign func(*Payment, *Card)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Payment)
-	for i := range nodes {
-		fk := nodes[i].CardID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(card.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "card_id" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &paymentCardEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(card.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

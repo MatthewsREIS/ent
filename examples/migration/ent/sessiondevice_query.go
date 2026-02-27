@@ -8,7 +8,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,6 +17,7 @@ import (
 	"entgo.io/ent/examples/migration/ent/predicate"
 	"entgo.io/ent/examples/migration/ent/session"
 	"entgo.io/ent/examples/migration/ent/sessiondevice"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -408,34 +408,34 @@ func (_q *SessionDeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	return nodes, nil
 }
 
+var sessiondeviceSessionsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[SessionDevice, Session, uuid.UUID, uuid.UUID]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.O2M,
+			Inverse:      false,
+			Table:        sessiondevice.SessionsTable,
+			Columns:      sessiondevice.SessionsColumn,
+			Bidi:         false,
+			TargetColumn: session.FieldID,
+			TargetType:   field.TypeUUID,
+		})
+	},
+	ExtractNodeID: func(n *SessionDevice) uuid.UUID { return n.ID },
+	ExtractEdgeID: func(e *Session) uuid.UUID { return e.ID },
+	ExtractEdgeFK: func(e *Session) *uuid.UUID {
+		v := e.DeviceID
+		return &v
+	},
+}
+
 func (_q *SessionDeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*SessionDevice, init func(*SessionDevice), assign func(*SessionDevice, *Session)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*SessionDevice)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(session.FieldDeviceID)
 	}
-	query.Where(predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(sessiondevice.SessionsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.DeviceID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "device_id" returned %v for node %v`, fk, n.ID)
-		}
-		assign(node, n)
-	}
+	return entbuilder.LoadEdgeO2M(ctx, &sessiondeviceSessionsEdgeLoadDescriptor, nodes, init, assign,
+		func(bool) {},
+		func(fn func(*sql.Selector)) { query.Where(fn) },
+		query.All)
 	return nil
 }
 

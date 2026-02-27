@@ -274,6 +274,9 @@ func TestPostCreation(t *testing.T) {
 	}, ent.OpCreate))
 	client.Card.Create().SetNumber("12345").SetName("a8m").SaveX(ctx)
 	client.Card.CreateBulk(client.Card.Create().SetNumber("12345")).SaveX(ctx)
+	cards := client.Card.CreateBulk(client.Card.Create()).SaveX(ctx)
+	require.Len(t, cards, 1)
+	require.Equal(t, "unknown", cards[0].Number)
 }
 
 func TestUpdateAfterCreation(t *testing.T) {

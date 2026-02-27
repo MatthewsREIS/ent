@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/session"
 	"entgo.io/ent/examples/migration/ent/sessiondevice"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -100,7 +103,9 @@ func (_c *SessionDeviceCreate) Mutation() *SessionDeviceMutation {
 
 // Save creates the SessionDevice in the database.
 func (_c *SessionDeviceCreate) Save(ctx context.Context) (*SessionDevice, error) {
-	_c.defaults()
+	if err := entgen.ApplyDefaults(_c.mutation, sessiondeviceCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -126,115 +131,228 @@ func (_c *SessionDeviceCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (_c *SessionDeviceCreate) defaults() {
-	if _, ok := _c.mutation.ID(); !ok {
-		v := sessiondevice.DefaultID()
-		_c.mutation.SetID(v)
-	}
+var sessiondeviceCreateSpec = entgen.CreateSpec[*SessionDeviceMutation]{
+	Fields: []entgen.FieldSpec[*SessionDeviceMutation]{
+		{
+			Name: "ip_address",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "ip_address", err: errors.New(`ent: missing required field "SessionDevice.ip_address"`)}
+				},
+			},
+			IsSet: func(m *SessionDeviceMutation) bool {
+				_, ok := m.IPAddress()
+				return ok
+			},
+			Validators: []func(*SessionDeviceMutation) error{
+				func(m *SessionDeviceMutation) error {
+					if v, ok := m.IPAddress(); ok {
+						if err := sessiondevice.IPAddressValidator(v); err != nil {
+							return &ValidationError{Name: "ip_address", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.ip_address": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "user_agent",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "user_agent", err: errors.New(`ent: missing required field "SessionDevice.user_agent"`)}
+				},
+			},
+			IsSet: func(m *SessionDeviceMutation) bool {
+				_, ok := m.UserAgent()
+				return ok
+			},
+			Validators: []func(*SessionDeviceMutation) error{
+				func(m *SessionDeviceMutation) error {
+					if v, ok := m.UserAgent(); ok {
+						if err := sessiondevice.UserAgentValidator(v); err != nil {
+							return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.user_agent": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "location",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "location", err: errors.New(`ent: missing required field "SessionDevice.location"`)}
+				},
+			},
+			IsSet: func(m *SessionDeviceMutation) bool {
+				_, ok := m.Location()
+				return ok
+			},
+			Validators: []func(*SessionDeviceMutation) error{
+				func(m *SessionDeviceMutation) error {
+					if v, ok := m.Location(); ok {
+						if err := sessiondevice.LocationValidator(v); err != nil {
+							return &ValidationError{Name: "location", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.location": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "created_at",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "SessionDevice.created_at"`)}
+				},
+			},
+			IsSet: func(m *SessionDeviceMutation) bool {
+				_, ok := m.CreatedAt()
+				return ok
+			},
+		},
+		{
+			Name: "updated_at",
+		},
+		{
+			Name: "id",
+			Default: func(m *SessionDeviceMutation) error {
+				if _, ok := m.ID(); !ok {
+					v := sessiondevice.DefaultID()
+					m.SetID(v)
+				}
+				return nil
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*SessionDeviceMutation]{},
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *SessionDeviceCreate) check() error {
-	if _, ok := _c.mutation.IPAddress(); !ok {
-		return &ValidationError{Name: "ip_address", err: errors.New(`ent: missing required field "SessionDevice.ip_address"`)}
-	}
-	if v, ok := _c.mutation.IPAddress(); ok {
-		if err := sessiondevice.IPAddressValidator(v); err != nil {
-			return &ValidationError{Name: "ip_address", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.ip_address": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.UserAgent(); !ok {
-		return &ValidationError{Name: "user_agent", err: errors.New(`ent: missing required field "SessionDevice.user_agent"`)}
-	}
-	if v, ok := _c.mutation.UserAgent(); ok {
-		if err := sessiondevice.UserAgentValidator(v); err != nil {
-			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.user_agent": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Location(); !ok {
-		return &ValidationError{Name: "location", err: errors.New(`ent: missing required field "SessionDevice.location"`)}
-	}
-	if v, ok := _c.mutation.Location(); ok {
-		if err := sessiondevice.LocationValidator(v); err != nil {
-			return &ValidationError{Name: "location", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.location": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "SessionDevice.created_at"`)}
-	}
-	return nil
+var sessiondeviceCreateDescriptor = entbuilder.CreateDescriptor[config, SessionDevice, *SessionDeviceMutation]{
+	Table: sessiondevice.Table,
+	NewNode: func(cfg config) *SessionDevice {
+		return &SessionDevice{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, SessionDevice, *SessionDeviceMutation]{
+		Column:      sessiondevice.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *SessionDeviceMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				idCopy := id
+				return entbuilder.FieldValue{Spec: &idCopy, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(node *SessionDevice, fv entbuilder.FieldValue) error {
+			node.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(node *SessionDevice, value driver.Value) error {
+			switch v := value.(type) {
+			case *uuid.UUID:
+				if v != nil {
+					node.ID = *v
+					return nil
+				}
+			case uuid.UUID:
+				node.ID = v
+				return nil
+			}
+			if err := node.ID.Scan(value); err != nil {
+				return err
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, SessionDevice, *SessionDeviceMutation]{
+
+		entbuilder.SimpleField[config, SessionDevice, *SessionDeviceMutation, string](
+			sessiondevice.FieldIPAddress,
+			field.TypeString,
+			(*SessionDeviceMutation).IPAddress,
+			func(n *SessionDevice, v string) { n.IPAddress = v },
+		),
+
+		entbuilder.SimpleField[config, SessionDevice, *SessionDeviceMutation, string](
+			sessiondevice.FieldUserAgent,
+			field.TypeString,
+			(*SessionDeviceMutation).UserAgent,
+			func(n *SessionDevice, v string) { n.UserAgent = v },
+		),
+
+		entbuilder.SimpleField[config, SessionDevice, *SessionDeviceMutation, string](
+			sessiondevice.FieldLocation,
+			field.TypeString,
+			(*SessionDeviceMutation).Location,
+			func(n *SessionDevice, v string) { n.Location = v },
+		),
+
+		entbuilder.SimpleField[config, SessionDevice, *SessionDeviceMutation, time.Time](
+			sessiondevice.FieldCreatedAt,
+			field.TypeTime,
+			(*SessionDeviceMutation).CreatedAt,
+			func(n *SessionDevice, v time.Time) { n.CreatedAt = v },
+		),
+
+		entbuilder.SimpleField[config, SessionDevice, *SessionDeviceMutation, time.Time](
+			sessiondevice.FieldUpdatedAt,
+			field.TypeTime,
+			(*SessionDeviceMutation).UpdatedAt,
+			func(n *SessionDevice, v time.Time) { n.UpdatedAt = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, SessionDevice, *SessionDeviceMutation]{
+		{
+			Value: func(cfg config, m *SessionDeviceMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.SessionsIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.O2M,
+					Inverse: false,
+					Table:   sessiondevice.SessionsTable,
+					Columns: []string{sessiondevice.SessionsColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+		},
+	},
 }
 
 func (_c *SessionDeviceCreate) sqlSave(ctx context.Context) (*SessionDevice, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, sessiondeviceCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &sessiondeviceCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &sessiondeviceCreateDescriptor); err != nil {
+		return nil, err
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *SessionDeviceCreate) createSpec() (*SessionDevice, *sqlgraph.CreateSpec) {
-	var (
-		_node = &SessionDevice{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(sessiondevice.Table, sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID))
-	)
-	if id, ok := _c.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = &id
-	}
-	if value, ok := _c.mutation.IPAddress(); ok {
-		_spec.SetField(sessiondevice.FieldIPAddress, field.TypeString, value)
-		_node.IPAddress = value
-	}
-	if value, ok := _c.mutation.UserAgent(); ok {
-		_spec.SetField(sessiondevice.FieldUserAgent, field.TypeString, value)
-		_node.UserAgent = value
-	}
-	if value, ok := _c.mutation.Location(); ok {
-		_spec.SetField(sessiondevice.FieldLocation, field.TypeString, value)
-		_node.Location = value
-	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
-		_spec.SetField(sessiondevice.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
-		_spec.SetField(sessiondevice.FieldUpdatedAt, field.TypeTime, value)
-		_node.UpdatedAt = value
-	}
-	if nodes := _c.mutation.SessionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   sessiondevice.SessionsTable,
-			Columns: []string{sessiondevice.SessionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // SessionDeviceCreateBulk is the builder for creating many SessionDevice entities in bulk.
@@ -253,20 +371,27 @@ func (_c *SessionDeviceCreateBulk) Save(ctx context.Context) ([]*SessionDevice, 
 	nodes := make([]*SessionDevice, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, sessiondeviceCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
-			builder.defaults()
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SessionDeviceMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, sessiondeviceCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &sessiondeviceCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -277,16 +402,23 @@ func (_c *SessionDeviceCreateBulk) Save(ctx context.Context) ([]*SessionDevice, 
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &sessiondeviceCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

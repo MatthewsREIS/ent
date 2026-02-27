@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 
@@ -11,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/triggers/ent/predicate"
 	"entgo.io/ent/examples/triggers/ent/userauditlog"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -127,6 +129,61 @@ func (_u *UserAuditLogUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+var userauditlogUpdateDescriptor = entbuilder.UpdateDescriptor[config, *UserAuditLogMutation]{
+	Fields: []entbuilder.UpdateFieldDescriptor[*UserAuditLogMutation]{
+		{
+			Column: userauditlog.FieldOperationType,
+			Type:   field.TypeString,
+			Set: func(m *UserAuditLogMutation) (driver.Value, bool, error) {
+				if value, ok := m.OperationType(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: userauditlog.FieldOperationTime,
+			Type:   field.TypeString,
+			Set: func(m *UserAuditLogMutation) (driver.Value, bool, error) {
+				if value, ok := m.OperationTime(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+		},
+
+		{
+			Column: userauditlog.FieldOldValue,
+			Type:   field.TypeString,
+			Set: func(m *UserAuditLogMutation) (driver.Value, bool, error) {
+				if value, ok := m.OldValue(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserAuditLogMutation) bool {
+				return m.OldValueCleared()
+			},
+		},
+
+		{
+			Column: userauditlog.FieldNewValue,
+			Type:   field.TypeString,
+			Set: func(m *UserAuditLogMutation) (driver.Value, bool, error) {
+				if value, ok := m.NewValue(); ok {
+					return value, true, nil
+				}
+				return nil, false, nil
+			},
+			Clear: func(m *UserAuditLogMutation) bool {
+				return m.NewValueCleared()
+			},
+		},
+	},
+	Edges: []entbuilder.UpdateEdgeDescriptor[config, *UserAuditLogMutation]{},
+}
+
 func (_u *UserAuditLogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(userauditlog.Table, userauditlog.Columns, sqlgraph.NewFieldSpec(userauditlog.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -136,23 +193,8 @@ func (_u *UserAuditLogUpdate) sqlSave(ctx context.Context) (_node int, err error
 			}
 		}
 	}
-	if value, ok := _u.mutation.OperationType(); ok {
-		_spec.SetField(userauditlog.FieldOperationType, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.OperationTime(); ok {
-		_spec.SetField(userauditlog.FieldOperationTime, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.OldValue(); ok {
-		_spec.SetField(userauditlog.FieldOldValue, field.TypeString, value)
-	}
-	if _u.mutation.OldValueCleared() {
-		_spec.ClearField(userauditlog.FieldOldValue, field.TypeString)
-	}
-	if value, ok := _u.mutation.NewValue(); ok {
-		_spec.SetField(userauditlog.FieldNewValue, field.TypeString, value)
-	}
-	if _u.mutation.NewValueCleared() {
-		_spec.ClearField(userauditlog.FieldNewValue, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userauditlogUpdateDescriptor, _spec); err != nil {
+		return 0, err
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -313,23 +355,8 @@ func (_u *UserAuditLogUpdateOne) sqlSave(ctx context.Context) (_node *UserAuditL
 			}
 		}
 	}
-	if value, ok := _u.mutation.OperationType(); ok {
-		_spec.SetField(userauditlog.FieldOperationType, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.OperationTime(); ok {
-		_spec.SetField(userauditlog.FieldOperationTime, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.OldValue(); ok {
-		_spec.SetField(userauditlog.FieldOldValue, field.TypeString, value)
-	}
-	if _u.mutation.OldValueCleared() {
-		_spec.ClearField(userauditlog.FieldOldValue, field.TypeString)
-	}
-	if value, ok := _u.mutation.NewValue(); ok {
-		_spec.SetField(userauditlog.FieldNewValue, field.TypeString, value)
-	}
-	if _u.mutation.NewValueCleared() {
-		_spec.ClearField(userauditlog.FieldNewValue, field.TypeString)
+	if err := entbuilder.ApplyUpdate(_u.config, _u.mutation, &userauditlogUpdateDescriptor, _spec); err != nil {
+		return nil, err
 	}
 	_node = &UserAuditLog{config: _u.config}
 	_spec.Assign = _node.assignValues

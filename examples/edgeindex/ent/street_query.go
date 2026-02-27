@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/examples/edgeindex/ent/city"
 	"entgo.io/ent/examples/edgeindex/ent/predicate"
 	"entgo.io/ent/examples/edgeindex/ent/street"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -413,36 +414,31 @@ func (_q *StreetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Stree
 	return nodes, nil
 }
 
+var streetCityEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Street, City, int, int]{
+	EdgeSpec: func() *sqlgraph.EdgeSpec {
+		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
+			Rel:          sqlgraph.M2O,
+			Inverse:      true,
+			Table:        street.CityTable,
+			Columns:      street.CityColumn,
+			Bidi:         false,
+			TargetColumn: city.FieldID,
+			TargetType:   field.TypeInt,
+		})
+	},
+	ExtractNodeID: func(n *Street) int { return n.ID },
+	ExtractEdgeID: func(e *City) int { return e.ID },
+	ExtractNodeFK: func(n *Street) *int {
+		return n.city_streets
+	},
+}
+
 func (_q *StreetQuery) loadCity(ctx context.Context, query *CityQuery, nodes []*Street, init func(*Street), assign func(*Street, *City)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Street)
-	for i := range nodes {
-		if nodes[i].city_streets == nil {
-			continue
-		}
-		fk := *nodes[i].city_streets
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(city.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "city_streets" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
+	return entbuilder.LoadEdgeM2O(ctx, &streetCityEdgeLoadDescriptor, nodes, assign,
+		func(ids []int) {
+			query.Where(city.IDIn(ids...))
+		},
+		query.All)
 	return nil
 }
 

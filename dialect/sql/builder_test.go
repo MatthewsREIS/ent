@@ -650,6 +650,38 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []any{"foo", 10, "bar", 20, "admin"},
 		},
 		{
+			input: Delete("users").
+				OrderBy("name").
+				Limit(5),
+			wantQuery: "DELETE FROM `users` ORDER BY `name` LIMIT 5",
+		},
+		{
+			input: Dialect(dialect.SQLite).
+				Delete("users").
+				OrderBy("name").
+				Limit(1),
+			wantQuery: "DELETE FROM `users` ORDER BY `name` LIMIT 1",
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Delete("users").
+				Returning("*"),
+			wantQuery: `DELETE FROM "users" RETURNING *`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Delete("users").
+				Returning("id", "name"),
+			wantQuery: `DELETE FROM "users" RETURNING "id", "name"`,
+		},
+		{
+			input: Delete("users").
+				Prefix(Expr("SET @i = 1;")).
+				OrderBy("id").
+				Limit(2),
+			wantQuery: "SET @i = 1; DELETE FROM `users` ORDER BY `id` LIMIT 2",
+		},
+		{
 			input:     Select().From(Table("users")),
 			wantQuery: "SELECT * FROM `users`",
 		},
@@ -2159,6 +2191,38 @@ func TestUpdateBuilder_WithPrefix(t *testing.T) {
 	query, args = u.Query()
 	require.Empty(t, args)
 	require.Equal(t, "SET @i = 1; UPDATE `users` SET `id` = (@i:=@i+1) ORDER BY `id`", query)
+}
+
+func TestDeleteBuilder_WithPrefix(t *testing.T) {
+	d := Dialect(dialect.MySQL).
+		Delete("users").
+		Prefix(ExprFunc(func(b *Builder) {
+			b.WriteString("SET @i = ").Arg(1).WriteByte(';')
+		})).
+		OrderBy("id").
+		Limit(3)
+	require.NoError(t, d.Err())
+	query, args := d.Query()
+	require.Equal(t, []any{1}, args)
+	require.Equal(t, "SET @i = ?; DELETE FROM `users` ORDER BY `id` LIMIT 3", query)
+
+	d = Dialect(dialect.MySQL).
+		Delete("users").
+		Prefix(Expr("SET @i = 1;")).
+		OrderBy("id").
+		Limit(3)
+	require.NoError(t, d.Err())
+	query, args = d.Query()
+	require.Empty(t, args)
+	require.Equal(t, "SET @i = 1; DELETE FROM `users` ORDER BY `id` LIMIT 3", query)
+}
+
+func TestDeleteBuilder_OrderByLimitErrors(t *testing.T) {
+	d := Dialect(dialect.Postgres).
+		Delete("users").
+		OrderBy("id").
+		Limit(1)
+	require.EqualError(t, d.Err(), "ORDER BY is not supported by PostgreSQL; LIMIT is not supported by PostgreSQL")
 }
 
 func TestMultipleFrom(t *testing.T) {

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"time"
@@ -15,6 +16,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/examples/migration/ent/card"
 	"entgo.io/ent/examples/migration/ent/payment"
+	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entgen"
 	"entgo.io/ent/schema/field"
 )
 
@@ -73,6 +76,9 @@ func (_c *PaymentCreate) Mutation() *PaymentMutation {
 
 // Save creates the Payment in the database.
 func (_c *PaymentCreate) Save(ctx context.Context) (*Payment, error) {
+	if err := entgen.ApplyDefaults(_c.mutation, paymentCreateSpec.Fields); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
@@ -98,108 +104,266 @@ func (_c *PaymentCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (_c *PaymentCreate) check() error {
-	if _, ok := _c.mutation.CardID(); !ok {
-		return &ValidationError{Name: "card_id", err: errors.New(`ent: missing required field "Payment.card_id"`)}
-	}
-	if _, ok := _c.mutation.Amount(); !ok {
-		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Payment.amount"`)}
-	}
-	if v, ok := _c.mutation.Amount(); ok {
-		if err := payment.AmountValidator(v); err != nil {
-			return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "Payment.amount": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Currency(); !ok {
-		return &ValidationError{Name: "currency", err: errors.New(`ent: missing required field "Payment.currency"`)}
-	}
-	if v, ok := _c.mutation.Currency(); ok {
-		if err := payment.CurrencyValidator(v); err != nil {
-			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "Payment.currency": %w`, err)}
-		}
-	}
-	if _, ok := _c.mutation.Time(); !ok {
-		return &ValidationError{Name: "time", err: errors.New(`ent: missing required field "Payment.time"`)}
-	}
-	if _, ok := _c.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Payment.description"`)}
-	}
-	if _, ok := _c.mutation.Status(); !ok {
-		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Payment.status"`)}
-	}
-	if v, ok := _c.mutation.Status(); ok {
-		if err := payment.StatusValidator(v); err != nil {
-			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Payment.status": %w`, err)}
-		}
-	}
-	if len(_c.mutation.CardIDs()) == 0 {
-		return &ValidationError{Name: "card", err: errors.New(`ent: missing required edge "Payment.card"`)}
-	}
-	return nil
+var paymentCreateSpec = entgen.CreateSpec[*PaymentMutation]{
+	Fields: []entgen.FieldSpec[*PaymentMutation]{
+		{
+			Name: "card_id",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "card_id", err: errors.New(`ent: missing required field "Payment.card_id"`)}
+				},
+			},
+			IsSet: func(m *PaymentMutation) bool {
+				_, ok := m.CardID()
+				return ok
+			},
+		},
+		{
+			Name: "amount",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Payment.amount"`)}
+				},
+			},
+			IsSet: func(m *PaymentMutation) bool {
+				_, ok := m.Amount()
+				return ok
+			},
+			Validators: []func(*PaymentMutation) error{
+				func(m *PaymentMutation) error {
+					if v, ok := m.Amount(); ok {
+						if err := payment.AmountValidator(v); err != nil {
+							return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "Payment.amount": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "currency",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "currency", err: errors.New(`ent: missing required field "Payment.currency"`)}
+				},
+			},
+			IsSet: func(m *PaymentMutation) bool {
+				_, ok := m.Currency()
+				return ok
+			},
+			Validators: []func(*PaymentMutation) error{
+				func(m *PaymentMutation) error {
+					if v, ok := m.Currency(); ok {
+						if err := payment.CurrencyValidator(v); err != nil {
+							return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "Payment.currency": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+		{
+			Name: "time",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "time", err: errors.New(`ent: missing required field "Payment.time"`)}
+				},
+			},
+			IsSet: func(m *PaymentMutation) bool {
+				_, ok := m.Time()
+				return ok
+			},
+		},
+		{
+			Name: "description",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Payment.description"`)}
+				},
+			},
+			IsSet: func(m *PaymentMutation) bool {
+				_, ok := m.Description()
+				return ok
+			},
+		},
+		{
+			Name: "status",
+			Requirement: entgen.FieldRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Payment.status"`)}
+				},
+			},
+			IsSet: func(m *PaymentMutation) bool {
+				_, ok := m.Status()
+				return ok
+			},
+			Validators: []func(*PaymentMutation) error{
+				func(m *PaymentMutation) error {
+					if v, ok := m.Status(); ok {
+						if err := payment.StatusValidator(v); err != nil {
+							return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Payment.status": %w`, err)}
+						}
+					}
+					return nil
+				},
+			},
+		},
+	},
+	Edges: []entgen.EdgeSpec[*PaymentMutation]{
+		{
+			Name: "card",
+			Requirement: entgen.EdgeRequirement{
+				Required: true,
+				Error: func() error {
+					return &ValidationError{Name: "card", err: errors.New(`ent: missing required edge "Payment.card"`)}
+				},
+			},
+			Count: func(m *PaymentMutation) int {
+				return len(m.CardIDs())
+			},
+		},
+	},
+}
+
+var paymentCreateDescriptor = entbuilder.CreateDescriptor[config, Payment, *PaymentMutation]{
+	Table: payment.Table,
+	NewNode: func(cfg config) *Payment {
+		return &Payment{config: cfg}
+	},
+	ID: &entbuilder.IDDescriptor[config, Payment, *PaymentMutation]{
+		Column:      payment.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(node *Payment, value driver.Value) error {
+			switch v := value.(type) {
+			case int:
+				node.ID = int(v)
+			case int8:
+				node.ID = int(v)
+			case int16:
+				node.ID = int(v)
+			case int32:
+				node.ID = int(v)
+			case int64:
+				node.ID = int(v)
+			case uint:
+				node.ID = int(v)
+			case uint8:
+				node.ID = int(v)
+			case uint16:
+				node.ID = int(v)
+			case uint32:
+				node.ID = int(v)
+			case uint64:
+				node.ID = int(v)
+			default:
+				if v, ok := value.(int); ok {
+					node.ID = v
+					return nil
+				}
+				return fmt.Errorf("unexpected Payment.ID type: %T", value)
+			}
+			return nil
+		},
+	},
+
+	Fields: []entbuilder.FieldDescriptor[config, Payment, *PaymentMutation]{
+
+		entbuilder.SimpleField[config, Payment, *PaymentMutation, float64](
+			payment.FieldAmount,
+			field.TypeFloat64,
+			(*PaymentMutation).Amount,
+			func(n *Payment, v float64) { n.Amount = v },
+		),
+
+		entbuilder.SimpleField[config, Payment, *PaymentMutation, payment.Currency](
+			payment.FieldCurrency,
+			field.TypeEnum,
+			(*PaymentMutation).Currency,
+			func(n *Payment, v payment.Currency) { n.Currency = v },
+		),
+
+		entbuilder.SimpleField[config, Payment, *PaymentMutation, time.Time](
+			payment.FieldTime,
+			field.TypeTime,
+			(*PaymentMutation).Time,
+			func(n *Payment, v time.Time) { n.Time = v },
+		),
+
+		entbuilder.SimpleField[config, Payment, *PaymentMutation, string](
+			payment.FieldDescription,
+			field.TypeString,
+			(*PaymentMutation).Description,
+			func(n *Payment, v string) { n.Description = v },
+		),
+
+		entbuilder.SimpleField[config, Payment, *PaymentMutation, payment.Status](
+			payment.FieldStatus,
+			field.TypeEnum,
+			(*PaymentMutation).Status,
+			func(n *Payment, v payment.Status) { n.Status = v },
+		),
+	},
+	Edges: []entbuilder.EdgeDescriptor[config, Payment, *PaymentMutation]{
+		{
+			Value: func(cfg config, m *PaymentMutation) (entbuilder.EdgeValue, bool, error) {
+				nodes := m.CardIDs()
+				if len(nodes) == 0 {
+					return entbuilder.EdgeValue{}, false, nil
+				}
+				edge := &sqlgraph.EdgeSpec{
+					Rel:     sqlgraph.M2O,
+					Inverse: true,
+					Table:   payment.CardTable,
+					Columns: []string{payment.CardColumn},
+					Bidi:    false,
+					Target: &sqlgraph.EdgeTarget{
+						IDSpec: sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt),
+					},
+				}
+				for _, k := range nodes {
+					edge.Target.Nodes = append(edge.Target.Nodes, k)
+				}
+				return entbuilder.EdgeValue{Spec: edge, Nodes: nodes}, true, nil
+			},
+			Assign: func(node *Payment, ev entbuilder.EdgeValue) error {
+				ids, ok := ev.Nodes.([]int)
+				if !ok || len(ids) == 0 {
+					return nil
+				}
+				node.CardID = ids[0]
+				return nil
+			},
+		},
+	},
 }
 
 func (_c *PaymentCreate) sqlSave(ctx context.Context) (*Payment, error) {
-	if err := _c.check(); err != nil {
+	if err := entgen.CheckCreate(_c.driver.Dialect(), _c.mutation, paymentCreateSpec); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := entbuilder.BuildCreateSpec(_c.config, _c.mutation, &paymentCreateDescriptor)
+	if err != nil {
+		return nil, err
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if err := entbuilder.ApplyGeneratedID(_c.mutation, _spec, _node, &paymentCreateDescriptor); err != nil {
+		return nil, err
+	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
-}
-
-func (_c *PaymentCreate) createSpec() (*Payment, *sqlgraph.CreateSpec) {
-	var (
-		_node = &Payment{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(payment.Table, sqlgraph.NewFieldSpec(payment.FieldID, field.TypeInt))
-	)
-	if value, ok := _c.mutation.Amount(); ok {
-		_spec.SetField(payment.FieldAmount, field.TypeFloat64, value)
-		_node.Amount = value
-	}
-	if value, ok := _c.mutation.Currency(); ok {
-		_spec.SetField(payment.FieldCurrency, field.TypeEnum, value)
-		_node.Currency = value
-	}
-	if value, ok := _c.mutation.Time(); ok {
-		_spec.SetField(payment.FieldTime, field.TypeTime, value)
-		_node.Time = value
-	}
-	if value, ok := _c.mutation.Description(); ok {
-		_spec.SetField(payment.FieldDescription, field.TypeString, value)
-		_node.Description = value
-	}
-	if value, ok := _c.mutation.Status(); ok {
-		_spec.SetField(payment.FieldStatus, field.TypeEnum, value)
-		_node.Status = value
-	}
-	if nodes := _c.mutation.CardIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   payment.CardTable,
-			Columns: []string{payment.CardColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.CardID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	return _node, _spec
 }
 
 // PaymentCreateBulk is the builder for creating many Payment entities in bulk.
@@ -218,19 +382,27 @@ func (_c *PaymentCreateBulk) Save(ctx context.Context) ([]*Payment, error) {
 	nodes := make([]*Payment, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
+		if err := entgen.ApplyDefaults(_c.builders[i].mutation, paymentCreateSpec.Fields); err != nil {
+			return nil, err
+		}
+	}
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := _c.builders[i]
+			curr := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PaymentMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
-				if err := builder.check(); err != nil {
+				if err := entgen.CheckCreate(curr.driver.Dialect(), mutation, paymentCreateSpec); err != nil {
 					return nil, err
 				}
-				builder.mutation = mutation
+				curr.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = entbuilder.BuildCreateSpec(curr.config, mutation, &paymentCreateDescriptor)
+				if err != nil {
+					return nil, err
+				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
@@ -241,20 +413,23 @@ func (_c *PaymentCreateBulk) Save(ctx context.Context) ([]*Payment, error) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
 					}
+					if err == nil {
+						for j := range specs {
+							if err = entbuilder.ApplyGeneratedID(_c.builders[j].mutation, specs[j], nodes[j], &paymentCreateDescriptor); err != nil {
+								break
+							}
+							_c.builders[j].mutation.id = &nodes[j].ID
+							_c.builders[j].mutation.done = true
+						}
+					}
 				}
 				if err != nil {
 					return nil, err
 				}
-				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
-				mutation.done = true
 				return nodes[i], nil
 			})
-			for i := len(builder.hooks) - 1; i >= 0; i-- {
-				mut = builder.hooks[i](mut)
+			for i := len(curr.hooks) - 1; i >= 0; i-- {
+				mut = curr.hooks[i](mut)
 			}
 			mutators[i] = mut
 		}(i, ctx)

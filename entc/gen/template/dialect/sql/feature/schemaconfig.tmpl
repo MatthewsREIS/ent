@@ -105,7 +105,17 @@ func (c *Config) SetSchemaConfig(config SchemaConfig) {
 {{- end }}
 
 {{- define "dialect/sql/delete/spec/ctxschemaconfig" }}
-	{{- template "dialect/sql/spec/ctxschemaconfig" $ }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+		ctx = internal.NewSchemaConfigContext(ctx, {{ $.Scope.Receiver }}.schemaConfig)
+	{{- end }}
+{{- end }}
+
+{{- define "dialect/sql/delete/descriptor/schemaconfig" }}
+    {{- if $.FeatureEnabled "sql/schemaconfig" }}
+        Schema: func(cfg config, _ *{{ $.MutationName }}) (string, bool) {
+            return cfg.schemaConfig.{{ $.Name }}, true
+        },
+    {{- end }}
 {{- end }}
 
 {{- define "dialect/sql/update/spec/ctxschemaconfig" }}
