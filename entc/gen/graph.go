@@ -1235,6 +1235,17 @@ func (a *assets) addDir(path string) {
 	a.dirs[path] = struct{}{}
 }
 
+// writeFileIfChanged writes content to path only if the file does not exist or
+// its current content differs. This avoids touching mtimes on unchanged files,
+// which preserves Go's build-cache entries.
+func writeFileIfChanged(path string, content []byte, perm os.FileMode) error {
+	existing, err := os.ReadFile(path)
+	if err == nil && bytes.Equal(existing, content) {
+		return nil
+	}
+	return os.WriteFile(path, content, perm)
+}
+
 // write files and dirs in the assets.
 func (a assets) write() error {
 	for dir := range a.dirs {
@@ -1243,7 +1254,7 @@ func (a assets) write() error {
 		}
 	}
 	for path, content := range a.files {
-		if err := os.WriteFile(path, content.content, 0644); err != nil {
+		if err := writeFileIfChanged(path, content.content, 0644); err != nil {
 			return fmt.Errorf("write file %q: %w", path, err)
 		}
 	}
@@ -1261,7 +1272,7 @@ func (a assets) format() error {
 			if err != nil {
 				return fmt.Errorf("format file %s: %w", path, err)
 			}
-			if err := os.WriteFile(path, src, 0644); err != nil {
+			if err := writeFileIfChanged(path, src, 0644); err != nil {
 				return fmt.Errorf("write file %s: %w", path, err)
 			}
 			return nil

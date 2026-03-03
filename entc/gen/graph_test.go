@@ -14,6 +14,7 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
@@ -1074,4 +1075,93 @@ func isSplitTypeFile(root, path string) bool {
 	}
 	_, statErr := os.Stat(filepath.Join(root, basePath))
 	return statErr == nil
+}
+
+func TestWriteFileIfChanged(t *testing.T) {
+	dir := t.TempDir()
+
+	t.Run("creates new file", func(t *testing.T) {
+		p := filepath.Join(dir, "new.go")
+		require.NoError(t, writeFileIfChanged(p, []byte("hello"), 0644))
+		got, err := os.ReadFile(p)
+		require.NoError(t, err)
+		require.Equal(t, []byte("hello"), got)
+	})
+
+	t.Run("skips write when content unchanged", func(t *testing.T) {
+		p := filepath.Join(dir, "unchanged.go")
+		require.NoError(t, os.WriteFile(p, []byte("same"), 0644))
+		info1, err := os.Stat(p)
+		require.NoError(t, err)
+
+		// Small sleep to ensure mtime would differ if file were rewritten.
+		time.Sleep(50 * time.Millisecond)
+
+		require.NoError(t, writeFileIfChanged(p, []byte("same"), 0644))
+		info2, err := os.Stat(p)
+		require.NoError(t, err)
+		require.Equal(t, info1.ModTime(), info2.ModTime())
+	})
+
+	t.Run("writes when content changed", func(t *testing.T) {
+		p := filepath.Join(dir, "changed.go")
+		require.NoError(t, os.WriteFile(p, []byte("old"), 0644))
+		info1, err := os.Stat(p)
+		require.NoError(t, err)
+
+		time.Sleep(50 * time.Millisecond)
+
+		require.NoError(t, writeFileIfChanged(p, []byte("new"), 0644))
+		info2, err := os.Stat(p)
+		require.NoError(t, err)
+		require.NotEqual(t, info1.ModTime(), info2.ModTime())
+
+		got, err := os.ReadFile(p)
+		require.NoError(t, err)
+		require.Equal(t, []byte("new"), got)
+	})
+}
+
+func TestAssetsWriteSkipsUnchanged(t *testing.T) {
+	dir := t.TempDir()
+
+	a := assets{
+		dirs:  make(map[string]struct{}),
+		files: make(map[string]assetFile),
+	}
+	p1 := filepath.Join(dir, "a.go")
+	p2 := filepath.Join(dir, "b.go")
+	a.files[p1] = assetFile{content: []byte("content-a")}
+	a.files[p2] = assetFile{content: []byte("content-b")}
+
+	// First write creates the files.
+	require.NoError(t, a.write())
+	info1a, err := os.Stat(p1)
+	require.NoError(t, err)
+	info1b, err := os.Stat(p2)
+	require.NoError(t, err)
+
+	time.Sleep(50 * time.Millisecond)
+
+	// Second write with same content should not touch mtimes.
+	require.NoError(t, a.write())
+	info2a, err := os.Stat(p1)
+	require.NoError(t, err)
+	info2b, err := os.Stat(p2)
+	require.NoError(t, err)
+	require.Equal(t, info1a.ModTime(), info2a.ModTime())
+	require.Equal(t, info1b.ModTime(), info2b.ModTime())
+
+	// Modify one file's content, write again — only modified file should update.
+	a.files[p1] = assetFile{content: []byte("content-a-modified")}
+
+	time.Sleep(50 * time.Millisecond)
+
+	require.NoError(t, a.write())
+	info3a, err := os.Stat(p1)
+	require.NoError(t, err)
+	info3b, err := os.Stat(p2)
+	require.NoError(t, err)
+	require.NotEqual(t, info2a.ModTime(), info3a.ModTime(), "modified file mtime should change")
+	require.Equal(t, info2b.ModTime(), info3b.ModTime(), "unmodified file mtime should not change")
 }
