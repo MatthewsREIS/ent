@@ -61,6 +61,13 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/edge/haswith" -}}
 	{{- $e := $.Scope.Edge -}}
+	{{- /* Check if the edge target type has a deleted_at field (soft delete) */ -}}
+	{{- $edgeHasSoftDelete := false }}
+	{{- range $f := $e.Type.Fields }}
+		{{- if eq $f.Name "deleted_at" }}
+			{{- $edgeHasSoftDelete = true }}
+		{{- end }}
+	{{- end }}
 	func(s *sql.Selector) {
 		step := new{{ pascal $e.Name }}Step()
 		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
@@ -73,6 +80,11 @@ in the LICENSE file in the root directory of this source tree.
 			for _, p := range preds {
 				p(s)
 			}
+			{{- if $edgeHasSoftDelete }}
+			// Auto-filter soft-deleted rows — HasNeighborsWith subqueries bypass ent
+			// interceptors, so we must explicitly exclude soft-deleted records.
+			sql.FieldIsNull("deleted_at")(s)
+			{{- end }}
 		})
 	}
 {{- end }}
