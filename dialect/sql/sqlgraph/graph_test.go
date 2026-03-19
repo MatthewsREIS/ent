@@ -622,6 +622,38 @@ func TestHasNeighbors(t *testing.T) {
 			selector:  sql.Select("*").From(sql.Select("*").From(sql.Table("users")).As("users")).As("users"),
 			wantQuery: "SELECT * FROM (SELECT * FROM `users`) AS `users` WHERE `users`.`id` IN (SELECT `user_groups`.`user_id` FROM `user_groups`)",
 		},
+		{
+			name: "M2M/2types/edge_predicates",
+			step: func() *Step {
+				step := NewStep(
+					From("users", "id"),
+					To("groups", "id"),
+					Edge(M2M, false, "user_groups", "user_id", "group_id"),
+				)
+				step.EdgePredicates = append(step.EdgePredicates, func(s *sql.Selector) {
+					sql.FieldIsNull("deleted_at")(s)
+				})
+				return step
+			}(),
+			selector:  sql.Select("*").From(sql.Table("users")),
+			wantQuery: "SELECT * FROM `users` WHERE `users`.`id` IN (SELECT `user_groups`.`user_id` FROM `user_groups` WHERE `user_groups`.`deleted_at` IS NULL)",
+		},
+		{
+			name: "M2M/2types/inverse/edge_predicates",
+			step: func() *Step {
+				step := NewStep(
+					From("groups", "id"),
+					To("users", "id"),
+					Edge(M2M, true, "user_groups", "user_id", "group_id"),
+				)
+				step.EdgePredicates = append(step.EdgePredicates, func(s *sql.Selector) {
+					sql.FieldIsNull("deleted_at")(s)
+				})
+				return step
+			}(),
+			selector:  sql.Select("*").From(sql.Table("groups")),
+			wantQuery: "SELECT * FROM `groups` WHERE `groups`.`id` IN (SELECT `user_groups`.`group_id` FROM `user_groups` WHERE `user_groups`.`deleted_at` IS NULL)",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -870,6 +902,58 @@ WHERE "s1"."users"."id" IN
 			},
 			wantQuery: `SELECT * FROM (SELECT * FROM "users") AS "users" WHERE "users"."id" IN (SELECT "user_groups"."user_id" FROM "user_groups" JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "name" = $1)`,
 			wantArgs:  []any{"GitHub"},
+		},
+		{
+			name: "M2M/edge_predicates",
+			step: func() *Step {
+				step := NewStep(
+					From("users", "id"),
+					To("groups", "id"),
+					Edge(M2M, false, "user_groups", "user_id", "group_id"),
+				)
+				step.EdgePredicates = append(step.EdgePredicates, func(s *sql.Selector) {
+					sql.FieldIsNull("deleted_at")(s)
+				})
+				return step
+			}(),
+			selector: sql.Dialect("postgres").Select("*").From(sql.Table("users")),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("name", "GitHub"))
+			},
+			wantQuery: `
+SELECT *
+FROM "users"
+WHERE "users"."id" IN
+  (SELECT "user_groups"."user_id"
+  FROM "user_groups"
+  JOIN "groups" AS "t1" ON "user_groups"."group_id" = "t1"."id" WHERE "name" = $1 AND "user_groups"."deleted_at" IS NULL)`,
+			wantArgs: []any{"GitHub"},
+		},
+		{
+			name: "M2M/inverse/edge_predicates",
+			step: func() *Step {
+				step := NewStep(
+					From("groups", "id"),
+					To("users", "id"),
+					Edge(M2M, true, "user_groups", "user_id", "group_id"),
+				)
+				step.EdgePredicates = append(step.EdgePredicates, func(s *sql.Selector) {
+					sql.FieldIsNull("deleted_at")(s)
+				})
+				return step
+			}(),
+			selector: sql.Dialect("postgres").Select("*").From(sql.Table("groups")),
+			predicate: func(s *sql.Selector) {
+				s.Where(sql.EQ("name", "a8m"))
+			},
+			wantQuery: `
+SELECT *
+FROM "groups"
+WHERE "groups"."id" IN
+  (SELECT "user_groups"."group_id"
+  FROM "user_groups"
+  JOIN "users" AS "t1" ON "user_groups"."user_id" = "t1"."id" WHERE "name" = $1 AND "user_groups"."deleted_at" IS NULL)`,
+			wantArgs: []any{"a8m"},
 		},
 	}
 	for _, tt := range tests {
