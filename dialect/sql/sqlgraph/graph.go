@@ -295,13 +295,15 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 			From(edge).
 			Join(to).
 			On(edge.C(pk1), to.C(s.To.Column))
-		for _, ep := range s.EdgePredicates {
-			ep(join)
-		}
 		matches := builder.Select().From(to)
 		matches.WithContext(q.Context())
 		pred(matches)
 		join.FromSelect(matches)
+		// Apply edge predicates AFTER FromSelect, because FromSelect replaces
+		// the join's where clause with matches' where clause.
+		for _, ep := range s.EdgePredicates {
+			ep(join)
+		}
 		q.Where(sql.In(q.C(s.From.Column), join))
 	case s.FromEdgeOwner():
 		to := builder.Table(s.To.Table).Schema(s.To.Schema)
