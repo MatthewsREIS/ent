@@ -32,6 +32,15 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "dialect/sql/predicate/edge/has" -}}
 	{{- $e := $.Scope.Edge -}}
+	{{- /* Check if this is a through-edge and the junction type has soft delete */ -}}
+	{{- $throughHasSoftDelete := false }}
+	{{- if $e.Through }}
+		{{- range $f := $e.Through.Fields }}
+			{{- if eq $f.Name "deleted_at" }}
+				{{- $throughHasSoftDelete = true }}
+			{{- end }}
+		{{- end }}
+	{{- end }}
 	func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			{{- if $.HasCompositeID }}
@@ -54,6 +63,13 @@ in the LICENSE file in the root directory of this source tree.
 				{{- xtemplate $tmpl $ }}
 			{{- end }}
 		{{- end }}
+		{{- if $throughHasSoftDelete }}
+		// Auto-filter soft-deleted junction rows — HasNeighbors subqueries bypass ent
+		// interceptors, so we must explicitly exclude soft-deleted edge records.
+		step.EdgePredicates = append(step.EdgePredicates, func(s *sql.Selector) {
+			sql.FieldIsNull("deleted_at")(s)
+		})
+		{{- end }}
 		{{- /* sqlgraph.To is meaningless on Has<E> (without predicates), because unlike Has<E>With no predicates are applied on the "other" table. */}}
 		sqlgraph.HasNeighbors(s, step)
 	}
@@ -68,6 +84,15 @@ in the LICENSE file in the root directory of this source tree.
 			{{- $edgeHasSoftDelete = true }}
 		{{- end }}
 	{{- end }}
+	{{- /* Check if this is a through-edge and the junction type has soft delete */ -}}
+	{{- $throughHasSoftDelete := false }}
+	{{- if $e.Through }}
+		{{- range $f := $e.Through.Fields }}
+			{{- if eq $f.Name "deleted_at" }}
+				{{- $throughHasSoftDelete = true }}
+			{{- end }}
+		{{- end }}
+	{{- end }}
 	func(s *sql.Selector) {
 		step := new{{ pascal $e.Name }}Step()
 		{{- /* Allow mutating the sqlgraph.Step by ent extensions or user templates.*/}}
@@ -75,6 +100,13 @@ in the LICENSE file in the root directory of this source tree.
 			{{- range $tmpl := $tmpls }}
 				{{- xtemplate $tmpl $ }}
 			{{- end }}
+		{{- end }}
+		{{- if $throughHasSoftDelete }}
+		// Auto-filter soft-deleted junction rows — HasNeighborsWith subqueries bypass ent
+		// interceptors, so we must explicitly exclude soft-deleted edge records.
+		step.EdgePredicates = append(step.EdgePredicates, func(s *sql.Selector) {
+			sql.FieldIsNull("deleted_at")(s)
+		})
 		{{- end }}
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

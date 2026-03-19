@@ -94,6 +94,10 @@ type Step struct {
 		// Column to join with. Usually the "id" column.
 		Column string
 	}
+	// EdgePredicates are optional predicates applied to the edge/junction table
+	// in M2M through-edge queries. Used by codegen to inject soft-delete filters
+	// on junction tables that have a deleted_at field.
+	EdgePredicates []func(*sql.Selector)
 }
 
 // StepOption allows configuring Steps using functional options.
@@ -246,12 +250,11 @@ func HasNeighbors(q *sql.Selector, s *Step) {
 			pk1 = s.Edge.Columns[1]
 		}
 		join := builder.Table(s.Edge.Table).Schema(s.Edge.Schema)
-		q.Where(
-			sql.In(
-				q.C(s.From.Column),
-				builder.Select(join.C(pk1)).From(join),
-			),
-		)
+		subq := builder.Select(join.C(pk1)).From(join)
+		for _, ep := range s.EdgePredicates {
+			ep(subq)
+		}
+		q.Where(sql.In(q.C(s.From.Column), subq))
 	case s.FromEdgeOwner():
 		q.Where(sql.NotNull(q.C(s.Edge.Columns[0])))
 	case s.ToEdgeOwner():
@@ -292,6 +295,9 @@ func HasNeighborsWith(q *sql.Selector, s *Step, pred func(*sql.Selector)) {
 			From(edge).
 			Join(to).
 			On(edge.C(pk1), to.C(s.To.Column))
+		for _, ep := range s.EdgePredicates {
+			ep(join)
+		}
 		matches := builder.Select().From(to)
 		matches.WithContext(q.Context())
 		pred(matches)
