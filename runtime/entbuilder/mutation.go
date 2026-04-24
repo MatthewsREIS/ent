@@ -159,3 +159,14 @@ func (m *Mutation[T]) ResetField(name string) error {
 	delete(m.addedFields, name)
 	return nil
 }
+
+// SetID sets the mutation's target ID. Used by UpdateOne / DeleteOne paths.
+func (m *Mutation[T]) SetID(id any) { m.id = id }
+
+// ID returns the target ID and ok=true if SetID was called.
+func (m *Mutation[T]) ID() (any, bool) {
+	if m.id == nil {
+		return nil, false
+	}
+	return m.id, true
+}

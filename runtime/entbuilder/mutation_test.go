@@ -192,3 +192,19 @@ func TestResetField_UnknownField_ReturnsError(t *testing.T) {
 		t.Fatal("expected error")
 	}
 }
+
+func TestSetID_UpdateOne(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardTestSchema, OpUpdateOne)
+	m.SetID(42)
+	id, ok := m.ID()
+	if !ok || id.(int) != 42 {
+		t.Fatalf("ID: ok=%v id=%v", ok, id)
+	}
+}
+
+func TestID_Unset(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardTestSchema, OpCreate)
+	if _, ok := m.ID(); ok {
+		t.Fatal("expected ok=false before SetID")
+	}
+}
