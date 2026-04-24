@@ -8,34 +8,70 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "where" }}
 
+{{- /* $isSQL gates the compact entbuilder-routed predicate emission. Gremlin and
+      other non-SQL dialects keep their original multi-line form because the
+      entbuilder helpers only wrap sql.Field* functions. */ -}}
+{{ $isSQL := eq $.Storage.Name "sql" }}
+
 {{- with extend $ "Package" $.Package -}}
 	{{ template "header" . }}
 {{ end }}
 
-{{ template "import" $ }}
+{{- /* Wrap the import template with a scope flag that triggers the entbuilder import
+      for the compact predicate helpers used below (SQL storage only). */ -}}
+{{ if $isSQL }}
+	{{ with extend $ "WhereUsesEntbuilder" true }}
+		{{ template "import" . }}
+	{{ end }}
+{{ else }}
+	{{ template "import" $ }}
+{{ end }}
 
 {{ if .HasOneFieldID }}
-	// ID filters vertices based on their ID field.
-	func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}(
-			{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
-			{{- xtemplate $tmpl $ -}}
-		)
-	}
+	{{- if $isSQL }}
+		{{- /* ID equality (compact — no value scanner, no go-type conversion). */}}
+		// ID filters vertices based on their ID field.
+		func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} { return entbuilder.FieldEQ[predicate.{{ $.Name }}]({{ $.ID.Constant }}, id) }
 
-	{{ range $op := $.ID.Ops }}
-		{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
-		{{ $func := printf "ID%s" $op.Name }}
-		// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
-		func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
+		{{ range $op := $.ID.Ops }}
+			{{- $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
+			{{- $func := printf "ID%s" $op.Name }}
+			{{- $opCode := call $.Storage.OpCode $op }}
+			// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
+			{{- if $op.Variadic }}
+				{{- /* In / NotIn: variadic slice doesn't fit entbuilder.FieldIn signature cleanly;
+				      emit the direct 1-line sql.Field<Op> form. */}}
+				func {{ $func }}({{ $arg }} ...{{ $.ID.Type }}) predicate.{{ $.Name }} { return predicate.{{ $.Name }}(sql.Field{{ $opCode }}({{ $.ID.Constant }}, {{ $arg }}...)) }
+			{{- else if $op.Niladic }}
+				func {{ $func }}() predicate.{{ $.Name }} { return entbuilder.Field{{ $opCode }}[predicate.{{ $.Name }}]({{ $.ID.Constant }}) }
+			{{- else }}
+				func {{ $func }}({{ $arg }} {{ $.ID.Type }}) predicate.{{ $.Name }} { return entbuilder.Field{{ $opCode }}[predicate.{{ $.Name }}]({{ $.ID.Constant }}, {{ $arg }}) }
+			{{- end }}
+		{{ end }}
+	{{- else }}
+		{{- /* Non-SQL (e.g. gremlin) — keep the original multi-line emission. */}}
+		// ID filters vertices based on their ID field.
+		func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 			return predicate.{{ $.Name }}(
-				{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
-					{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
-					{{- xtemplate $tmpl . }}
-				{{- end -}}
+				{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
+				{{- xtemplate $tmpl $ -}}
 			)
 		}
-	{{ end }}
+
+		{{ range $op := $.ID.Ops }}
+			{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
+			{{ $func := printf "ID%s" $op.Name }}
+			// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
+			func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
+				return predicate.{{ $.Name }}(
+					{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
+						{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end -}}
+				)
+			}
+		{{ end }}
+	{{- end }}
 {{ end }}
 
 {{ range $f := $.Fields }}
@@ -47,8 +83,8 @@ in the LICENSE file in the root directory of this source tree.
 	{{- if and $hasP $comparable $undeclared }}
 		{{ $arg := "v" }}
 		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
-		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
-			{{- if $f.HasValueScanner }}
+		{{- if $f.HasValueScanner }}
+			func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
 				vc, err := ValueScanner.{{ $f.StructField }}.Value({{ $arg }})
 				{{- $arg = "vc" }}
 				return predicate.{{ $.Name }}OrErr(
@@ -56,19 +92,32 @@ in the LICENSE file in the root directory of this source tree.
 						{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
 						{{- xtemplate $tmpl . }}
 					{{- end }}, err)
-			{{- else }}
-				{{- if and $f.HasGoType (not $f.Type.Valuer) }}
-					vc := {{ $f.BasicType "v" }}
-					{{- $arg = "vc" }}
-				{{- end }}
+			}
+		{{- else if and $f.HasGoType (not $f.Type.Valuer) }}
+			func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
+				vc := {{ $f.BasicType "v" }}
+				{{- $arg = "vc" }}
 				return predicate.{{ $.Name }}(
 					{{- with extend $ "Arg" $arg "Field" $f -}}
 						{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
 						{{- xtemplate $tmpl . }}
 					{{- end -}}
 				)
-			{{- end }}
-		}
+			}
+		{{- else if $isSQL }}
+			{{- /* SQL simple path — compact 1-line body routed through entbuilder.FieldEQ. */}}
+			func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} { return entbuilder.FieldEQ[predicate.{{ $.Name }}]({{ $f.Constant }}, {{ $arg }}) }
+		{{- else }}
+			{{- /* Non-SQL fallback: preserve original multi-line emission. */}}
+			func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
+				return predicate.{{ $.Name }}(
+					{{- with extend $ "Arg" $arg "Field" $f -}}
+						{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end -}}
+				)
+			}
+		{{- end }}
 	{{- end }}
 {{ end }}
 
@@ -78,9 +127,11 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}
 		{{ $func := print $f.StructField $op.Name }}
 		{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
+		{{ $opCode := call $.Storage.OpCode $op }}
 		// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
-		func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
-			{{- if and $f.HasValueScanner (or $op.Variadic (not $op.Niladic)) }}
+		{{- if and $f.HasValueScanner (or $op.Variadic (not $op.Niladic)) }}
+			{{- /* Preserved multi-line value-scanner path. */}}
+			func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
 				{{- if $op.Variadic }}
 					var (
 						err error
@@ -108,18 +159,19 @@ in the LICENSE file in the root directory of this source tree.
 						{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
 						{{- xtemplate $tmpl . }}
 					{{- end }}, err)
-			{{- else }}
-				{{- if and $f.HasGoType (or $stringOp (not $f.Type.Valuer)) }}
-					{{- if $op.Variadic }}
-						v := make([]any, len({{ $arg }}))
-						for i := range v {
-							v[i] = {{ $f.BasicType (printf "%s[i]" $arg) }}
-						}
-						{{- $arg = "v" }}
-					{{- else if not $op.Niladic }}
-						vc := {{ $f.BasicType "v" }}
-						{{- $arg = "vc" }}
-					{{- end }}
+			}
+		{{- else if and $f.HasGoType (or $stringOp (not $f.Type.Valuer)) }}
+			{{- /* Preserved multi-line go-type pre-conversion path. */}}
+			func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
+				{{- if $op.Variadic }}
+					v := make([]any, len({{ $arg }}))
+					for i := range v {
+						v[i] = {{ $f.BasicType (printf "%s[i]" $arg) }}
+					}
+					{{- $arg = "v" }}
+				{{- else if not $op.Niladic }}
+					vc := {{ $f.BasicType "v" }}
+					{{- $arg = "vc" }}
 				{{- end }}
 				return predicate.{{ $.Name }}(
 					{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
@@ -127,8 +179,32 @@ in the LICENSE file in the root directory of this source tree.
 						{{- xtemplate $tmpl . }}
 					{{- end -}}
 				)
+			}
+		{{- else if $isSQL }}
+			{{- if $op.Variadic }}
+				{{- /* SQL simple variadic path (In/NotIn): keep 1-line via direct sql.Field<Op>;
+				      entbuilder.FieldIn signature doesn't fit typed variadic without a conversion. */}}
+				func {{ $func }}({{ $arg }} ...{{ $type }}) predicate.{{ $.Name }} { return predicate.{{ $.Name }}(sql.Field{{ $opCode }}({{ $f.Constant }}, {{ $arg }}...)) }
+			{{- else if $op.Niladic }}
+				{{- /* SQL simple niladic (IsNull/NotNull): route through entbuilder.FieldIsNull/FieldNotNull. */}}
+				func {{ $func }}() predicate.{{ $.Name }} { return entbuilder.Field{{ $opCode }}[predicate.{{ $.Name }}]({{ $f.Constant }}) }
+			{{- else }}
+				{{- /* SQL simple scalar path: route through entbuilder.Field<OpCode>. $opCode matches
+				      the entbuilder helper name for EQ/NEQ/GT/GTE/LT/LTE/Contains/HasPrefix/HasSuffix/
+				      EqualFold/ContainsFold. gofmt re-wraps lines >104 chars to a 3-line form. */}}
+				func {{ $func }}({{ $arg }} {{ $type }}) predicate.{{ $.Name }} { return entbuilder.Field{{ $opCode }}[predicate.{{ $.Name }}]({{ $f.Constant }}, {{ $arg }}) }
 			{{- end }}
-		}
+		{{- else }}
+			{{- /* Non-SQL fallback: preserve original multi-line emission. */}}
+			func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
+				return predicate.{{ $.Name }}(
+					{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
+						{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end -}}
+				)
+			}
+		{{- end }}
 	{{ end }}
 {{ end }}
 
@@ -155,29 +231,40 @@ in the LICENSE file in the root directory of this source tree.
 	}
 {{ end }}
 
-// And groups predicates with the AND operator between them.
-func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}(
-		{{- $tmpl := printf "dialect/%s/predicate/and" $.Storage }}
-		{{- xtemplate $tmpl . -}}
-	)
-}
+{{ if $isSQL }}
+	// And groups predicates with the AND operator between them.
+	func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} { return entbuilder.AndPreds(predicates...) }
 
-// Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}(
-		{{- $tmpl = printf "dialect/%s/predicate/or" $.Storage }}
-		{{- xtemplate $tmpl . -}}
-	)
-}
+	// Or groups predicates with the OR operator between them.
+	func Or(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} { return entbuilder.OrPreds(predicates...) }
 
-// Not applies the not operator on the given predicate.
-func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} {
-	return predicate.{{ $.Name }}(
-		{{- $tmpl = printf "dialect/%s/predicate/not" $.Storage }}
-		{{- xtemplate $tmpl . -}}
-	)
-}
+	// Not applies the not operator on the given predicate.
+	func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} { return entbuilder.NotPred(p) }
+{{ else }}
+	// And groups predicates with the AND operator between them.
+	func And(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
+		return predicate.{{ $.Name }}(
+			{{- $tmpl := printf "dialect/%s/predicate/and" $.Storage }}
+			{{- xtemplate $tmpl . -}}
+		)
+	}
+
+	// Or groups predicates with the OR operator between them.
+	func Or(predicates ...predicate.{{ $.Name }}) predicate.{{ $.Name }} {
+		return predicate.{{ $.Name }}(
+			{{- $tmpl := printf "dialect/%s/predicate/or" $.Storage }}
+			{{- xtemplate $tmpl . -}}
+		)
+	}
+
+	// Not applies the not operator on the given predicate.
+	func Not(p predicate.{{ $.Name }}) predicate.{{ $.Name }} {
+		return predicate.{{ $.Name }}(
+			{{- $tmpl := printf "dialect/%s/predicate/not" $.Storage }}
+			{{- xtemplate $tmpl . -}}
+		)
+	}
+{{ end }}
 
 {{ template "where/additional" $ }}
 
