@@ -34,3 +34,44 @@ type Edge struct {
 	// TargetID is the Go type of the target entity's ID field.
 	TargetID reflect.Type
 }
+
+// Schema[T] is the full descriptor for one entity type. The type parameter
+// binds the descriptor to the entity struct at compile time; at runtime the
+// generic Mutation[T] uses this descriptor to dispatch field/edge access
+// by name via reflect.
+type Schema[T any] struct {
+	// Name is the schema's logical name (singular, matches the schema
+	// file's type name), e.g. "Card".
+	Name string
+	// Table is the database table name, e.g. "cards".
+	Table string
+	// IDField is the entity's primary-key field descriptor.
+	IDField Field
+	// Fields lists all non-ID persisted fields.
+	Fields []Field
+	// Edges lists all relationships.
+	Edges []Edge
+}
+
+// FindField returns the Field with the given Name, or (Field{}, false) if absent.
+func (s *Schema[T]) FindField(name string) (Field, bool) {
+	if s.IDField.Name == name {
+		return s.IDField, true
+	}
+	for _, f := range s.Fields {
+		if f.Name == name {
+			return f, true
+		}
+	}
+	return Field{}, false
+}
+
+// FindEdge returns the Edge with the given Name, or (Edge{}, false) if absent.
+func (s *Schema[T]) FindEdge(name string) (Edge, bool) {
+	for _, e := range s.Edges {
+		if e.Name == name {
+			return e, true
+		}
+	}
+	return Edge{}, false
+}
