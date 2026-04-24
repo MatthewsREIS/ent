@@ -56,3 +56,15 @@ func TestBSet_InstantiatesForMultipleBuilderTypes(t *testing.T) {
 		t.Fatalf("separate instantiations interfered: a.n=%d b.n=%d", a.n, b.n)
 	}
 }
+
+func TestBClear_ReturnsSameBuilder(t *testing.T) {
+	b := &fakeBuilder{}
+	var clearCalls int
+	got := BClear(b, func() { clearCalls++ })
+	if got != b {
+		t.Fatalf("BClear must return the builder pointer it was given")
+	}
+	if clearCalls != 1 {
+		t.Fatalf("clear func must be called exactly once; got %d", clearCalls)
+	}
+}
