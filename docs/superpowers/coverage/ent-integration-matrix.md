@@ -6,23 +6,27 @@ Source: test files under `entc/integration/` on branch `i-h8-ent` at SHA `f88db3
 
 ## File-Category Key
 
+All paths below are relative to each scenario's generated `ent/` root (e.g. `entc/integration/edgeschema/ent/`). Generated per-entity builder files are flat at that root (`<entity>_create.go`, `<entity>_update.go`, etc.), while predicate helpers live in an `<entity>/` subdirectory alongside `where.go`.
+
 | Category   | Generated files exercised |
 |------------|--------------------------|
 | `where`    | `<entity>/where.go` — predicate helpers like `NameEQ`, `HasEdge`, `HasOwnerWith`, etc. |
-| `create`   | `<entity>/create.go` — `Create()`, `CreateBulk()`, builder `.SetX()` / `.AddX()` chains |
-| `update`   | `<entity>/update.go` — `Update()`, `UpdateOne()`, `.SetX()` / `.AddX()` / `.ClearX()` |
-| `delete`   | `<entity>/delete.go` — `Delete()`, `DeleteOne()` |
-| `mutation` | `internal/*_mutation.go` — mutation-state reads: `.OldX()`, `.IDs()`, `.SetOp()`, `.ResetX()` |
+| `create`   | `<entity>_create.go` — `Create()`, `CreateBulk()`, builder `.SetX()` / `.AddX()` chains |
+| `update`   | `<entity>_update.go` — `Update()`, `UpdateOne()`, `.SetX()` / `.AddX()` / `.ClearX()` |
+| `delete`   | `<entity>_delete.go` — `Delete()`, `DeleteOne()` |
+| `mutation` | `mutation.go` — mutation-state reads: `.OldX()`, `.IDs()`, `.SetOp()`, `.ResetX()` (downstream consumer repos may split this into `internal/*_mutation.go`) |
 | `client`   | `client.go` — `client.Use()`, `client.Tx()`, `client.Debug()`, transaction hooks |
-| `entql`    | `<entity>/entql.go` — `.Filter().Where(entql.…)`, typed filter methods like `.WhereName()` |
-| `query`    | `<entity>/query.go` — query entrypoints, `With*` eager loading, `.Order()`, `.GroupBy()` |
+| `entql`    | `entql.go` — `.Filter().Where(entql.…)`, typed filter methods like `.WhereName()` |
+| `query`    | `<entity>_query.go` — query entrypoints, `With*` eager loading, `.Order()`, `.GroupBy()` |
+
+**Threshold for ✓:** the scenario invokes the category's API surface non-trivially — at least one test calls a category-specific method meaningfully (beyond a single throwaway `Query().CountX(ctx)` or a compile-only import). Trivial calls that exist only to build up data for a different assertion are left blank.
 
 ## Coverage Matrix
 
 | Scenario        | where | create | update | delete | mutation | client | entql | query | Notes |
 |-----------------|:-----:|:------:|:------:|:------:|:--------:|:------:|:-----:|:-----:|-------|
 | **root** (entql_test, index_test, integration_test, relation_test, type_test) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | Broad multi-dialect suite covering nearly all categories; `EntQL` sub-file is the only place top-level entql predicates are exercised |
-| cascadelete     |       | ✓      |        | ✓      |          |        |       | ✓     | Cascading deletes through FK edges; focus is on DB-level cascade, not predicate filtering |
+| cascadelete     |       | ✓      |        | ✓      |          |        |       |       | Cascading deletes through FK edges; focus is on DB-level cascade, not predicate filtering. Uses `Query().CountX`/`OnlyIDX` only to assert delete side-effects — trivial under the ✓ threshold |
 | compose         |       |        |        |        |          |        |       |       | Infrastructure only (gremlin-server Docker compose dir); no test file present |
 | config          |       | ✓      |        |        |          |        |       |       | Schema-level SQL annotations (table names, column sizes, incremental IDs); inspects generated AST |
 | customid        | ✓     | ✓      |        |        |          |        |       | ✓     | Non-default ID types (int, UUID, bytes, string, custom); upsert on ID conflict; `WithFriends`/`WithAccount` eager loads |
