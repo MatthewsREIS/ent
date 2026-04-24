@@ -305,3 +305,27 @@ func TestNillableFieldWithScanner_ScannerError_PropagatesAsNotOK(t *testing.T) {
 		t.Fatalf("expected zero FieldValue on error, got %+v", fv)
 	}
 }
+
+func TestLazyScanner_DefersLookup(t *testing.T) {
+	var invoked int
+	inner := func(v int) (driver.Value, error) {
+		invoked++
+		return int64(v * 2), nil
+	}
+	lazy := LazyScanner(func() ScannerFunc[int] {
+		return inner
+	})
+	if invoked != 0 {
+		t.Fatal("LazyScanner must not invoke inner until called")
+	}
+	got, err := lazy(5)
+	if err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+	if got.(int64) != 10 {
+		t.Fatalf("unexpected result: %v", got)
+	}
+	if invoked != 1 {
+		t.Fatalf("expected 1 invocation, got %d", invoked)
+	}
+}
