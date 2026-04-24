@@ -1,6 +1,7 @@
 package entbuilder
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -294,5 +295,78 @@ func TestRemovedEdges_EmptyForSpike(t *testing.T) {
 	m := NewMutation[fakeCardNode](cardEdgeSchema, OpUpdate)
 	if edges := m.RemovedEdges(); len(edges) != 0 {
 		t.Fatalf("RemovedEdges should be empty in spike: %v", edges)
+	}
+}
+
+func TestOldField_DelegatesToSchemaFetcher(t *testing.T) {
+	called := false
+	s := &Schema[fakeCardNode]{
+		Name: "Card",
+		Fields: []Field{{Name: "Name", Column: "name", Type: reflect.TypeOf("")}},
+		OldFieldFetcher: func(ctx context.Context, id any, field string) (any, error) {
+			called = true
+			if field != "Name" {
+				t.Errorf("unexpected field: %s", field)
+			}
+			if id.(int) != 42 {
+				t.Errorf("unexpected id: %v", id)
+			}
+			return "alice", nil
+		},
+	}
+	m := NewMutation[fakeCardNode](s, OpUpdateOne)
+	m.SetID(42)
+	v, err := m.OldField(context.Background(), "Name")
+	if err != nil {
+		t.Fatalf("OldField: %v", err)
+	}
+	if v.(string) != "alice" {
+		t.Fatalf("OldField value: %v", v)
+	}
+	if !called {
+		t.Fatal("expected fetcher to be invoked")
+	}
+}
+
+func TestOldField_NoFetcher_ReturnsError(t *testing.T) {
+	s := &Schema[fakeCardNode]{
+		Name: "Card",
+		Fields: []Field{{Name: "Name", Column: "name", Type: reflect.TypeOf("")}},
+	}
+	m := NewMutation[fakeCardNode](s, OpUpdateOne)
+	m.SetID(1)
+	_, err := m.OldField(context.Background(), "Name")
+	if err == nil {
+		t.Fatal("expected error when schema has no OldFieldFetcher")
+	}
+}
+
+func TestOldField_NoID_ReturnsError(t *testing.T) {
+	s := &Schema[fakeCardNode]{
+		Name: "Card",
+		Fields: []Field{{Name: "Name", Column: "name", Type: reflect.TypeOf("")}},
+		OldFieldFetcher: func(ctx context.Context, id any, field string) (any, error) {
+			return nil, nil
+		},
+	}
+	m := NewMutation[fakeCardNode](s, OpUpdate) // bulk update — no ID
+	_, err := m.OldField(context.Background(), "Name")
+	if err == nil {
+		t.Fatal("expected error when mutation has no ID set")
+	}
+}
+
+func TestOldField_UnknownField_ReturnsError(t *testing.T) {
+	s := &Schema[fakeCardNode]{
+		Name: "Card",
+		OldFieldFetcher: func(ctx context.Context, id any, field string) (any, error) {
+			return nil, nil
+		},
+	}
+	m := NewMutation[fakeCardNode](s, OpUpdateOne)
+	m.SetID(1)
+	_, err := m.OldField(context.Background(), "NotAField")
+	if err == nil {
+		t.Fatal("expected error for unknown field")
 	}
 }

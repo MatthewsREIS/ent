@@ -1,6 +1,9 @@
 package entbuilder
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // Op is a mutation operation kind. Mirrors ent.Op bit layout at the
 // integer level so that callers can convert back and forth without an
@@ -239,3 +242,22 @@ func (m *Mutation[T]) ClearedEdges() []string {
 // removed (for non-unique edges). In the spike's unique-edges-only scope,
 // this is always empty; full through-table support is Phase 4C scope.
 func (m *Mutation[T]) RemovedEdges() []string { return nil }
+
+// OldField retrieves the pre-mutation value of `name` by delegating to the
+// schema's OldFieldFetcher closure. Returns an error if:
+//   - `name` is not a declared field on the schema
+//   - the schema has no OldFieldFetcher wired (e.g., Create-only schemas)
+//   - this mutation has no SetID yet (bulk updates cannot resolve a single row)
+func (m *Mutation[T]) OldField(ctx context.Context, name string) (any, error) {
+	if _, ok := m.schema.FindField(name); !ok {
+		return nil, fmt.Errorf("entbuilder: schema %q has no field %q", m.schema.Name, name)
+	}
+	if m.schema.OldFieldFetcher == nil {
+		return nil, fmt.Errorf("entbuilder: schema %q has no OldFieldFetcher configured", m.schema.Name)
+	}
+	id, ok := m.ID()
+	if !ok {
+		return nil, fmt.Errorf("entbuilder: OldField(%q) requires a target ID (SetID not called)", name)
+	}
+	return m.schema.OldFieldFetcher(ctx, id, name)
+}
