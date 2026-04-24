@@ -124,9 +124,9 @@ must be present so the existing builder code continues to compile:
 ### Embedded Config field
 
 `m.Config` is accessed directly (not via a method) in TestMutationClient,
-TestMutatorClient, TestMutationTx, and TestRuntimeTx to construct new clients.
-The shim struct must embed or expose the `internal.Config` struct at the same
-field name.
+TestMutatorClient, and TestRuntimeTx to construct new clients. The shim
+struct must embed or expose the `internal.Config` struct at the same field
+name.
 
 ---
 
@@ -140,7 +140,7 @@ hooks_test.go. Every one must be present and correct in the shim:
 | `m.Name()` | TestSchemaHooks |
 | `m.OwnerID()` | TestMutationClient |
 | `m.SetName(...)` | TestMutationClient |
-| `m.Config` (field) | TestMutationClient, TestMutatorClient, TestMutationTx, TestRuntimeTx |
+| `m.Config` (field) | TestMutationClient, TestMutatorClient, TestRuntimeTx |
 | `m.ID()` | TestMutatorClient, TestPostCreation |
 | `m.Op()` | TestMutatorClient, TestConditions |
 | `m.Where(...)` | TestMutatorClient |
