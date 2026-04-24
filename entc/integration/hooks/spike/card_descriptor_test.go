@@ -5,12 +5,16 @@
 package spike
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/entc/integration/hooks/ent"
 	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/enttest"
 	"entgo.io/ent/runtime/entbuilder"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestCardDescriptor_Valid(t *testing.T) {
@@ -98,3 +102,62 @@ func TestShim_Field_ByName_UsesConstant(t *testing.T) {
 		t.Fatal("card.FieldName should not be empty")
 	}
 }
+
+// TestShim_OldName_ThroughHooksClient confirms that the descriptor's
+// OldFieldFetcher, wired to a real hooks-scenario client, returns the
+// pre-mutation value correctly.
+func TestShim_OldName_ThroughHooksClient(t *testing.T) {
+	ctx := context.Background()
+	client := enttest.Open(t, dialect.SQLite, "file:spike?mode=memory&cache=shared&_fk=1")
+	defer client.Close()
+
+	wireCardOldFieldFetcher(client)
+
+	// Seed: create a card so we have a row to OldField against.
+	u := client.User.Create().SetName("alice").SaveX(ctx)
+	c := client.Card.Create().
+		SetNumber("1234").
+		SetName("original-name").
+		SetInHook("hook-value").
+		SetOwnerID(u.ID).
+		SaveX(ctx)
+
+	// Build a shim as though we were about to update the card. SetID picks
+	// the row; OldName should read the pre-mutation value from the DB.
+	s := NewCardMutationShim(entbuilder.OpUpdateOne)
+	s.SetID(c.ID)
+	s.SetName("new-name")
+
+	oldName, err := s.OldName(ctx)
+	if err != nil {
+		t.Fatalf("OldName: %v", err)
+	}
+	if oldName != "original-name" {
+		t.Fatalf("OldName: got %q want %q", oldName, "original-name")
+	}
+}
+
+// TestShim_HasFields_Semantics confirms that Fields() / AddedFields() ordering
+// and membership on the shim matches what hook.HasFields combinators test for.
+func TestShim_HasFields_Semantics(t *testing.T) {
+	s := NewCardMutationShim(entbuilder.OpUpdate)
+	s.SetExpiredAt(time.Now())
+
+	found := false
+	for _, name := range s.Fields() {
+		if name == "ExpiredAt" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("Fields() should contain ExpiredAt: %v", s.Fields())
+	}
+
+	// And a field that was NOT set should not appear.
+	for _, name := range s.Fields() {
+		if name == "Name" {
+			t.Fatalf("Fields() should not contain Name: %v", s.Fields())
+		}
+	}
+}
+
