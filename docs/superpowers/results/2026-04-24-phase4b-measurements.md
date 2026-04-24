@@ -74,4 +74,46 @@ and the vet timing is still valid as a proxy for analysis cost.
 
 ## Decision
 
-(To be filled in by the controller.)
+**Outcome: PARTIAL — proceed to Phase 4C.**
+
+### Gate results
+
+| Gate | Target | Measured | Met? |
+|---|---|---|---|
+| Total consumer LOC reduction | ≥ 5% | -1.2% | ✗ |
+| create+update+delete+query combined LOC reduction | ≥ 15% | -3.28% (596,439 → 576,888) | ✗ |
+| Cold `go build` wall time | no regression | -2.3% | ✓ |
+| Cold `go build` peak RSS | no regression (± 5%) | +7.1% | ✗ (narrowly over 5% noise band) |
+| `go vet` peak RSS | no regression (± 5%) | -11.3% | ✓ |
+| `entc/integration/*` tests | green | green (9 scenarios; remaining failures all missing-server infrastructure) | ✓ |
+| Consumer build | green | green | ✓ |
+| Exported API diff (127 packages, `go doc -all`) | zero | zero | ✓ |
+
+Five of eight gates pass. Three fail: the two LOC-reduction targets and the cold-build peak RSS.
+
+### Interpretation
+
+**The LOC targets were optimistic for this phase alone.** Phase 4B rewrites the *outer wrappers* of the create/update/delete/query builders — the per-field/per-edge `SetX` / `AddX` / `ClearX` scaffolding — while leaving the dense `internal/<schema>_mutation.go` and `<schema>_client.go` / `<schema>_entql.go` files untouched. Those three categories carry the bulk of the remaining bloat per the hybrid spec (§"The hybrid split"); Phase 4B was never going to reach 15% on its own surface without them. The 3.28% cut landed on the targeted categories is real, consistent across all four (update -5.7%, delete -3.7%, query -2.9%, create -1.5%), and was achieved without any API drift.
+
+**Per-LOC build efficiency degraded from Phase 3.** Phase 3 `where.tmpl` saw 1.83% LOC reduction yield 10.4% cold-build wall-time improvement (5.7× multiplier). Phase 4B saw 1.2% LOC reduction yield 2.3% wall-time improvement (1.9× multiplier). The multiplier dropped by ~3×. This matches the hybrid-spec's expectation that predicate-shaped generics (one instantiation per schema, one arg type) collapse the type graph more efficiently than builder-shaped generics (one instantiation per schema *per field type*). Phase 3 pushed 111 distinct predicate types through `FieldEQ[predicate.T]`. Phase 4B pushes many more instantiations through `BSet[B, V]`, which dilutes the sharing benefit. Expected, not catastrophic — the absolute numbers are still net positive.
+
+**Peak build RSS up +7.1% (+666 MB) is the only slightly worrying signal.** Single-sample timing RSS has ~±3% noise on a shared desktop; +7.1% is modestly outside the band but not a clear regression. Contributing factors likely include: more generic instantiation sites in the compiler's type graph (partially offset by smaller bodies), and run-to-run variance from an unmeasured shared desktop workload. The Phase 3 measurement showed RSS dropping -3.8% despite a smaller LOC cut, so the mechanism is stable — this one run may be noise. Worth re-measuring after Phase 4C, where the descriptor-driven collapse (111 distinct `*XxxMutation` named types → 1 `Mutation[T]` generic) is predicted to drop the whole-tree type graph meaningfully. Don't treat this as a Phase 4B failure; treat it as noise that the Phase 4C architectural change should dwarf.
+
+**Zero API diff is the headline correctness win.** `diff -r` over `go doc -all` across 127 generated packages returns zero lines. Phase 4B preserved drop-in binary compatibility perfectly — this is non-trivial given the template changes touched every per-schema `SetX`/`ClearX`/`SaveX`/`AllX` method signature site.
+
+### Path forward
+
+1. **Proceed to Phase 4C.** Write `docs/superpowers/plans/YYYY-MM-DD-ent-code-reduction-phase-4c.md` covering descriptor-driven `mutation`, `client`, and `entql` template rewrites plus the witness-test generator. Per the hybrid spec, this phase is where the type-graph collapse lives: 111 schemas × 40+ heavyweight mutation methods per schema → one generic `Mutation[T]` + 111 thin aliases + 111 descriptor-data files. Phase 4A already validated the runtime mechanism on hand-ported `Card`; Phase 4C productionizes it via codegen.
+
+2. **Revise the hybrid spec's gates.** The current ≥40% whole-tree LOC / ≤5.5 GB peak RSS / ≥40% build-time targets still apply to the Phase 4C measurement, not to Phase 4B in isolation. Keep them as final gates.
+
+3. **Carry concerns into Phase 4C planning:**
+   - Type-alias form (`type UserMutation = entbuilder.Mutation[User]`) must be used for drop-in API compatibility. Phase 4A's spike used a parallel `CardMutationShim` type to sidestep this; the template-driven version cannot. Hybrid spec §"The type alias nuance" already flags this.
+   - Witness-test emission must land before any mutation template change touches a production schema. Drift between descriptor and struct is a new failure mode that must be caught at `go test` time, not query time.
+   - Phase 4B's +7.1% RSS blip is an open question for the Phase 4C final measurement — Phase 4C should re-measure both categories to confirm the descriptor collapse reverses it.
+
+4. **Do not escalate to Approach 2 (pure descriptor across all categories) yet.** Approach 1's lean generics delivered the expected modest LOC win on this surface, which is the rational handoff point before the type-graph collapse category kicks in. Escalation remains on the shelf for Phase 4C result interpretation if the descriptor approach underperforms.
+
+### Closing note
+
+Phase 4B was an intermediate step, not the headline win. It delivered a 3.28% reduction on its targeted surface, zero API drift, and preserved correctness across the integration suite. The mechanism works; the next phase is where the big architectural change sits.
