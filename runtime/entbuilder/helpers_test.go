@@ -278,4 +278,30 @@ func TestNillableFieldWithScanner_Value_OK(t *testing.T) {
 	if ptr == &u {
 		t.Fatal("Node must be a copy, not alias")
 	}
+	spec, isBytes := fv.Spec.([]byte)
+	if !isBytes || len(spec) != 16 || spec[0] != 9 {
+		t.Fatalf("unexpected Spec: %+v", fv.Spec)
+	}
+}
+
+func TestNillableFieldWithScanner_ScannerError_PropagatesAsNotOK(t *testing.T) {
+	u := uuidLike{1, 2, 3}
+	desc := NillableFieldWithScanner[fakeCfg, fakeNodeUUID, fakeMutUUID, uuidLike](
+		"id", field.TypeUUID, fakeMutUUID.ID, failingScanner,
+		func(n *fakeNodeUUID, v *uuidLike) {
+			if v != nil {
+				n.ID = *v
+			}
+		},
+	)
+	fv, ok, err := desc.Value(fakeMutUUID{id: &u})
+	if err == nil {
+		t.Fatal("expected scanner error")
+	}
+	if ok {
+		t.Fatal("expected ok=false on scanner error")
+	}
+	if fv != (FieldValue{}) {
+		t.Fatalf("expected zero FieldValue on error, got %+v", fv)
+	}
 }
