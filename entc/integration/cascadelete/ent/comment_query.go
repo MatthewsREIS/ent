@@ -23,7 +23,7 @@ import (
 
 // CommentQuery is the builder for querying Comment entities.
 type CommentQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []comment.OrderOption
 	inters     []Interceptor
@@ -67,7 +67,7 @@ func (_q *CommentQuery) Order(o ...comment.OrderOption) *CommentQuery {
 
 // QueryPost chains the current query on the "post" edge.
 func (_q *CommentQuery) QueryPost() *PostQuery {
-	query := (&PostClient{config: _q.config}).Query()
+	query := (&PostClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -81,7 +81,7 @@ func (_q *CommentQuery) QueryPost() *PostQuery {
 			sqlgraph.To(post.Table, post.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, comment.PostTable, comment.PostColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -95,7 +95,7 @@ func (_q *CommentQuery) First(ctx context.Context) (*Comment, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{comment.Label}
+		return nil, &NotFoundError{Label: comment.Label}
 	}
 	return nodes[0], nil
 }
@@ -117,7 +117,7 @@ func (_q *CommentQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{comment.Label}
+		err = &NotFoundError{Label: comment.Label}
 		return
 	}
 	return ids[0], nil
@@ -144,9 +144,9 @@ func (_q *CommentQuery) Only(ctx context.Context) (*Comment, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{comment.Label}
+		return nil, &NotFoundError{Label: comment.Label}
 	default:
-		return nil, &NotSingularError{comment.Label}
+		return nil, &NotSingularError{Label: comment.Label}
 	}
 }
 
@@ -171,9 +171,9 @@ func (_q *CommentQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{comment.Label}
+		err = &NotFoundError{Label: comment.Label}
 	default:
-		err = &NotSingularError{comment.Label}
+		err = &NotSingularError{Label: comment.Label}
 	}
 	return
 }
@@ -274,7 +274,7 @@ func (_q *CommentQuery) Clone() *CommentQuery {
 		return nil
 	}
 	return &CommentQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]comment.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -289,7 +289,7 @@ func (_q *CommentQuery) Clone() *CommentQuery {
 // WithPost tells the query-builder to eager-load the nodes that are connected to
 // the "post" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CommentQuery) WithPost(opts ...func(*PostQuery)) *CommentQuery {
-	query := (&PostClient{config: _q.config}).Query()
+	query := (&PostClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -358,7 +358,7 @@ func (_q *CommentQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !comment.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -380,18 +380,18 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Comment).scanValues(nil, columns)
+		return (*Comment).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Comment{config: _q.config}
+		node := &Comment{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -441,7 +441,7 @@ func (_q *CommentQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *CommentQuery) querySpec() *sqlgraph.QuerySpec {
@@ -488,7 +488,7 @@ func (_q *CommentQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *CommentQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(comment.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -560,7 +560,7 @@ func (_g *CommentGroupBy) sqlScan(ctx context.Context, root *CommentQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -602,7 +602,7 @@ func (_s *CommentSelect) sqlScan(ctx context.Context, root *CommentQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

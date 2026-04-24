@@ -11,8 +11,8 @@ in the LICENSE file in the root directory of this source tree.
 			{{ $enum := trimPackage $f.Type.String $.Package }}
 			{{ $receiver := receiver $f.BuilderField }}
 
-			// Ptr returns a new pointer to the enum value.
-			func ({{ $receiver }} {{ $enum }}) Ptr() *{{ $enum }} {
+			// Ptr{{ $enum }} returns a new pointer to the enum value.
+			func Ptr{{ $enum }}({{ $receiver }} {{ $enum }}) *{{ $enum }} {
 				return &{{ $receiver }}
 			}
 		{{- end }}

@@ -21,7 +21,7 @@ import (
 
 // ZooQuery is the builder for querying Zoo entities.
 type ZooQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []zoo.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *ZooQuery) First(ctx context.Context) (*Zoo, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{zoo.Label}
+		return nil, &NotFoundError{Label: zoo.Label}
 	}
 	return nodes[0], nil
 }
@@ -92,7 +92,7 @@ func (_q *ZooQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{zoo.Label}
+		err = &NotFoundError{Label: zoo.Label}
 		return
 	}
 	return ids[0], nil
@@ -119,9 +119,9 @@ func (_q *ZooQuery) Only(ctx context.Context) (*Zoo, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{zoo.Label}
+		return nil, &NotFoundError{Label: zoo.Label}
 	default:
-		return nil, &NotSingularError{zoo.Label}
+		return nil, &NotSingularError{Label: zoo.Label}
 	}
 }
 
@@ -146,9 +146,9 @@ func (_q *ZooQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{zoo.Label}
+		err = &NotFoundError{Label: zoo.Label}
 	default:
-		err = &NotSingularError{zoo.Label}
+		err = &NotSingularError{Label: zoo.Label}
 	}
 	return
 }
@@ -249,7 +249,7 @@ func (_q *ZooQuery) Clone() *ZooQuery {
 		return nil
 	}
 	return &ZooQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]zoo.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -299,7 +299,7 @@ func (_q *ZooQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !zoo.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -318,17 +318,17 @@ func (_q *ZooQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Zoo, err
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Zoo).scanValues(nil, columns)
+		return (*Zoo).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Zoo{config: _q.config}
+		node := &Zoo{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -343,7 +343,7 @@ func (_q *ZooQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *ZooQuery) querySpec() *sqlgraph.QuerySpec {
@@ -387,7 +387,7 @@ func (_q *ZooQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *ZooQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(zoo.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -459,7 +459,7 @@ func (_g *ZooGroupBy) sqlScan(ctx context.Context, root *ZooQuery, v any) error 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -501,7 +501,7 @@ func (_s *ZooSelect) sqlScan(ctx context.Context, root *ZooQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

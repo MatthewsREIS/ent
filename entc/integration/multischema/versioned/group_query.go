@@ -8,6 +8,7 @@ package versioned
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,13 +19,12 @@ import (
 	"entgo.io/ent/entc/integration/multischema/versioned/internal"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
 	"entgo.io/ent/entc/integration/multischema/versioned/user"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []group.OrderOption
 	inters     []Interceptor
@@ -69,7 +69,7 @@ func (_q *GroupQuery) Order(o ...group.OrderOption) *GroupQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (_q *GroupQuery) QueryUsers() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,10 +83,10 @@ func (_q *GroupQuery) QueryUsers() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
 		)
-		schemaConfig := _q.schemaConfig
+		schemaConfig := _q.Config.SchemaConfig()
 		step.To.Schema = schemaConfig.User
 		step.Edge.Schema = schemaConfig.GroupUsers
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -100,7 +100,7 @@ func (_q *GroupQuery) First(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{group.Label}
+		return nil, &NotFoundError{Label: group.Label}
 	}
 	return nodes[0], nil
 }
@@ -122,7 +122,7 @@ func (_q *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{group.Label}
+		err = &NotFoundError{Label: group.Label}
 		return
 	}
 	return ids[0], nil
@@ -149,9 +149,9 @@ func (_q *GroupQuery) Only(ctx context.Context) (*Group, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{group.Label}
+		return nil, &NotFoundError{Label: group.Label}
 	default:
-		return nil, &NotSingularError{group.Label}
+		return nil, &NotSingularError{Label: group.Label}
 	}
 }
 
@@ -176,9 +176,9 @@ func (_q *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{group.Label}
+		err = &NotFoundError{Label: group.Label}
 	default:
-		err = &NotSingularError{group.Label}
+		err = &NotSingularError{Label: group.Label}
 	}
 	return
 }
@@ -279,7 +279,7 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 		return nil
 	}
 	return &GroupQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]group.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -295,7 +295,7 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -364,7 +364,7 @@ func (_q *GroupQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !group.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("versioned: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("versioned: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -386,23 +386,24 @@ func (_q *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Group).scanValues(nil, columns)
+		return (*Group).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Group{config: _q.config}
+		node := &Group{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
-	_spec.Node.Schema = _q.schemaConfig.Group
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	_spec.Node.Schema = schemaConfig.Group
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -418,66 +419,74 @@ func (_q *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 	return nodes, nil
 }
 
-var groupUsersEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Group, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2M,
-			Inverse:      false,
-			Table:        group.UsersTable,
-			Columns:      group.UsersPrimaryKey,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Group) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ConvertNodeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	ConvertEdgeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	NewNodeIDScanner: func() any { return new(sql.NullInt64) },
-	NewEdgeIDScanner: func() any { return new(sql.NullInt64) },
-}
-
 func (_q *GroupQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*Group, init func(*Group), assign func(*Group, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &groupUsersEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.prepareQuery,
-		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
-			hooks := make([]queryHook, len(modifiers))
-			for i := range modifiers {
-				hooks[i] = modifiers[i]
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Group)
+	nids := make(map[int]map[*Group]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(group.UsersTable)
+		joinT.Schema(_q.Config.SchemaConfig().GroupUsers)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(group.UsersPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return query.sqlAll(ctx, hooks...)
-		},
-		func(ctx context.Context, q, qr, inters any) (any, error) {
-			// Wrap the entbuilder.querierFunc into an ent.Querier
-			querierFn, ok := qr.(interface {
-				Query(context.Context, any) (any, error)
-			})
-			if !ok {
-				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Group]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
-				return querierFn.Query(ctx, query)
-			})
-			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
-		},
-		query,
-		query.inters,
-		func(joinT *sql.SelectTable) {
-			joinT.Schema(_q.schemaConfig.GroupUsers)
 		})
+	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
 	return nil
 }
 
 func (_q *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
-	_spec.Node.Schema = _q.schemaConfig.Group
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	_spec.Node.Schema = schemaConfig.Group
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
 	}
@@ -485,7 +494,7 @@ func (_q *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *GroupQuery) querySpec() *sqlgraph.QuerySpec {
@@ -529,7 +538,7 @@ func (_q *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(group.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -543,8 +552,9 @@ func (_q *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	t1.Schema(_q.schemaConfig.Group)
-	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	schemaConfig := _q.Config.SchemaConfig()
+	t1.Schema(schemaConfig.Group)
+	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
 	selector.WithContext(ctx)
 	for _, m := range _q.modifiers {
 		m(selector)
@@ -613,7 +623,7 @@ func (_g *GroupGroupBy) sqlScan(ctx context.Context, root *GroupQuery, v any) er
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -655,7 +665,7 @@ func (_s *GroupSelect) sqlScan(ctx context.Context, root *GroupQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

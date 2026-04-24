@@ -19,7 +19,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $f := $.Fields }}
-			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
+			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ if and ($f.IsEnum) (not $f.HasGoType) }}{{ $.Name }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
@@ -56,7 +56,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} []struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $f := $.Fields }}
-			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
+			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ if and ($f.IsEnum) (not $f.HasGoType) }}{{ $.Name }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {

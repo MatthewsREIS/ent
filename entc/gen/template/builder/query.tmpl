@@ -20,7 +20,7 @@ in the LICENSE file in the root directory of this source tree.
 
 // {{ $builder }} is the builder for querying {{ $.Name }} entities.
 type {{ $builder }} struct {
-	config
+	Config
 	ctx			*QueryContext
 	order		[]{{ $.Package }}.OrderOption
 	inters		[]Interceptor
@@ -75,7 +75,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.Package }}.OrderOption) *
 	{{ $edge_builder := print $e.Type.QueryName }}
 	// Query{{ pascal $e.Name }} chains the current query on the "{{ $e.Name }}" edge.
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
-		query := (&{{ $e.Type.ClientName }}{config: {{ $receiver }}.config}).Query()
+		query := (&{{ $e.Type.ClientName }}{Config: {{ $receiver }}.Config}).Query()
 		query.path = func(ctx context.Context) (fromU {{ $.Storage.Builder }}, err error) {
 			if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 				return nil, err
@@ -98,7 +98,7 @@ func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{ {{ $.Package }}.Label}
+		return nil, &NotFoundError{Label: {{ $.Package }}.Label}
 	}
 	return nodes[0], nil
 }
@@ -121,7 +121,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 			return
 		}
 		if len(ids) == 0 {
-			err = &NotFoundError{ {{ $.Package }}.Label}
+			err = &NotFoundError{Label: {{ $.Package }}.Label}
 			return
 		}
 		return ids[0], nil
@@ -149,9 +149,9 @@ func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }},
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{ {{ $.Package }}.Label}
+		return nil, &NotFoundError{Label: {{ $.Package }}.Label}
 	default:
-		return nil, &NotSingularError{ {{ $.Package }}.Label}
+		return nil, &NotSingularError{Label: {{ $.Package }}.Label}
 	}
 }
 
@@ -177,9 +177,9 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 		case 1:
 			id = ids[0]
 		case 0:
-			err = &NotFoundError{ {{ $.Package }}.Label}
+			err = &NotFoundError{Label: {{ $.Package }}.Label}
 		default:
-			err = &NotSingularError{ {{ $.Package }}.Label}
+			err = &NotSingularError{Label: {{ $.Package }}.Label}
 		}
 		return
 	}
@@ -284,7 +284,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		return nil
 	}
 	return &{{ $builder }}{
-		config: 	{{ $receiver }}.config,
+		Config: 	{{ $receiver }}.Config,
 		ctx: 		{{ $receiver }}.ctx.Clone(),
 		order: 		append([]{{ $.Package }}.OrderOption{}, {{ $receiver }}.order...),
 		inters: 	append([]Interceptor{}, {{ $receiver }}.inters...),
@@ -307,7 +307,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 	// {{ $func }} tells the query-builder to eager-load the nodes that are connected to
 	// the "{{ $e.Name }}" edge. The optional arguments are used to configure the query builder of the edge.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
-		query := (&{{ $e.Type.ClientName }}{config: {{ $receiver }}.config}).Query()
+		query := (&{{ $e.Type.ClientName }}{Config: {{ $receiver }}.Config}).Query()
 		for _, opt := range opts {
 			opt(query)
 		}

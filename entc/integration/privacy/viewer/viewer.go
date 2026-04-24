@@ -36,7 +36,7 @@ type UserViewer struct {
 }
 
 func (v UserViewer) Teams(ctx context.Context) ([]string, error) {
-	return v.User.QueryTeams().Select(team.FieldName).Strings(ctx)
+	return ent.NewUserClient(v.User.Config).QueryTeams(v.User).Select(team.FieldName).Strings(ctx)
 }
 
 func (v UserViewer) Can(r Role) bool {

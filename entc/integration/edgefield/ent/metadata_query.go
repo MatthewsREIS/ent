@@ -23,7 +23,7 @@ import (
 
 // MetadataQuery is the builder for querying Metadata entities.
 type MetadataQuery struct {
-	config
+	Config
 	ctx               *QueryContext
 	order             []metadata.OrderOption
 	inters            []Interceptor
@@ -70,7 +70,7 @@ func (_q *MetadataQuery) Order(o ...metadata.OrderOption) *MetadataQuery {
 
 // QueryUser chains the current query on the "user" edge.
 func (_q *MetadataQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func (_q *MetadataQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, metadata.UserTable, metadata.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -92,7 +92,7 @@ func (_q *MetadataQuery) QueryUser() *UserQuery {
 
 // QueryChildren chains the current query on the "children" edge.
 func (_q *MetadataQuery) QueryChildren() *MetadataQuery {
-	query := (&MetadataClient{config: _q.config}).Query()
+	query := (&MetadataClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -106,7 +106,7 @@ func (_q *MetadataQuery) QueryChildren() *MetadataQuery {
 			sqlgraph.To(metadata.Table, metadata.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, metadata.ChildrenTable, metadata.ChildrenColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -114,7 +114,7 @@ func (_q *MetadataQuery) QueryChildren() *MetadataQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *MetadataQuery) QueryParent() *MetadataQuery {
-	query := (&MetadataClient{config: _q.config}).Query()
+	query := (&MetadataClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -128,7 +128,7 @@ func (_q *MetadataQuery) QueryParent() *MetadataQuery {
 			sqlgraph.To(metadata.Table, metadata.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, metadata.ParentTable, metadata.ParentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -142,7 +142,7 @@ func (_q *MetadataQuery) First(ctx context.Context) (*Metadata, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{metadata.Label}
+		return nil, &NotFoundError{Label: metadata.Label}
 	}
 	return nodes[0], nil
 }
@@ -164,7 +164,7 @@ func (_q *MetadataQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{metadata.Label}
+		err = &NotFoundError{Label: metadata.Label}
 		return
 	}
 	return ids[0], nil
@@ -191,9 +191,9 @@ func (_q *MetadataQuery) Only(ctx context.Context) (*Metadata, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{metadata.Label}
+		return nil, &NotFoundError{Label: metadata.Label}
 	default:
-		return nil, &NotSingularError{metadata.Label}
+		return nil, &NotSingularError{Label: metadata.Label}
 	}
 }
 
@@ -218,9 +218,9 @@ func (_q *MetadataQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{metadata.Label}
+		err = &NotFoundError{Label: metadata.Label}
 	default:
-		err = &NotSingularError{metadata.Label}
+		err = &NotSingularError{Label: metadata.Label}
 	}
 	return
 }
@@ -321,7 +321,7 @@ func (_q *MetadataQuery) Clone() *MetadataQuery {
 		return nil
 	}
 	return &MetadataQuery{
-		config:       _q.config,
+		Config:       _q.Config,
 		ctx:          _q.ctx.Clone(),
 		order:        append([]metadata.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
@@ -338,7 +338,7 @@ func (_q *MetadataQuery) Clone() *MetadataQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *MetadataQuery) WithUser(opts ...func(*UserQuery)) *MetadataQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -349,7 +349,7 @@ func (_q *MetadataQuery) WithUser(opts ...func(*UserQuery)) *MetadataQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *MetadataQuery) WithChildren(opts ...func(*MetadataQuery)) *MetadataQuery {
-	query := (&MetadataClient{config: _q.config}).Query()
+	query := (&MetadataClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -360,7 +360,7 @@ func (_q *MetadataQuery) WithChildren(opts ...func(*MetadataQuery)) *MetadataQue
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *MetadataQuery) WithParent(opts ...func(*MetadataQuery)) *MetadataQuery {
-	query := (&MetadataClient{config: _q.config}).Query()
+	query := (&MetadataClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -429,7 +429,7 @@ func (_q *MetadataQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !metadata.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -453,18 +453,18 @@ func (_q *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Metadata).scanValues(nil, columns)
+		return (*Metadata).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Metadata{config: _q.config}
+		node := &Metadata{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -491,8 +491,8 @@ func (_q *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 	}
 	for name, query := range _q.withNamedChildren {
 		if err := _q.loadChildren(ctx, query, nodes,
-			func(n *Metadata) { n.appendNamedChildren(name) },
-			func(n *Metadata, e *Metadata) { n.appendNamedChildren(name, e) }); err != nil {
+			func(n *Metadata) { n.AppendNamedChildren(name) },
+			func(n *Metadata, e *Metadata) { n.AppendNamedChildren(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -590,7 +590,7 @@ func (_q *MetadataQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
@@ -637,7 +637,7 @@ func (_q *MetadataQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(metadata.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -671,7 +671,7 @@ func (_q *MetadataQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // WithNamedChildren tells the query-builder to eager-load the nodes that are connected to the "children"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (_q *MetadataQuery) WithNamedChildren(name string, opts ...func(*MetadataQuery)) *MetadataQuery {
-	query := (&MetadataClient{config: _q.config}).Query()
+	query := (&MetadataClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -723,7 +723,7 @@ func (_g *MetadataGroupBy) sqlScan(ctx context.Context, root *MetadataQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -765,7 +765,7 @@ func (_s *MetadataSelect) sqlScan(ctx context.Context, root *MetadataQuery, v an
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

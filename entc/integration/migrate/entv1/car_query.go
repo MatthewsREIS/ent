@@ -17,13 +17,12 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv1/car"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv1/user"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // CarQuery is the builder for querying Car entities.
 type CarQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []car.OrderOption
 	inters     []Interceptor
@@ -68,7 +67,7 @@ func (_q *CarQuery) Order(o ...car.OrderOption) *CarQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (_q *CarQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -82,7 +81,7 @@ func (_q *CarQuery) QueryOwner() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, car.OwnerTable, car.OwnerColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -96,7 +95,7 @@ func (_q *CarQuery) First(ctx context.Context) (*Car, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{car.Label}
+		return nil, &NotFoundError{Label: car.Label}
 	}
 	return nodes[0], nil
 }
@@ -118,7 +117,7 @@ func (_q *CarQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{car.Label}
+		err = &NotFoundError{Label: car.Label}
 		return
 	}
 	return ids[0], nil
@@ -145,9 +144,9 @@ func (_q *CarQuery) Only(ctx context.Context) (*Car, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{car.Label}
+		return nil, &NotFoundError{Label: car.Label}
 	default:
-		return nil, &NotSingularError{car.Label}
+		return nil, &NotSingularError{Label: car.Label}
 	}
 }
 
@@ -172,9 +171,9 @@ func (_q *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{car.Label}
+		err = &NotFoundError{Label: car.Label}
 	default:
-		err = &NotSingularError{car.Label}
+		err = &NotSingularError{Label: car.Label}
 	}
 	return
 }
@@ -275,7 +274,7 @@ func (_q *CarQuery) Clone() *CarQuery {
 		return nil
 	}
 	return &CarQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]car.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -290,7 +289,7 @@ func (_q *CarQuery) Clone() *CarQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -337,7 +336,7 @@ func (_q *CarQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !car.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("entv1: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("entv1: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -366,18 +365,18 @@ func (_q *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 		_spec.Node.Columns = append(_spec.Node.Columns, car.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Car).scanValues(nil, columns)
+		return (*Car).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Car{config: _q.config}
+		node := &Car{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -392,31 +391,36 @@ func (_q *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	return nodes, nil
 }
 
-var carOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Car, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      true,
-			Table:        car.OwnerTable,
-			Columns:      car.OwnerColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Car) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Car) *int {
-		return n.user_car
-	},
-}
-
 func (_q *CarQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Car, init func(*Car), assign func(*Car, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &carOwnerEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Car)
+	for i := range nodes {
+		if nodes[i].GetUserCar() == nil {
+			continue
+		}
+		fk := *nodes[i].GetUserCar()
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_car" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -426,7 +430,7 @@ func (_q *CarQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *CarQuery) querySpec() *sqlgraph.QuerySpec {
@@ -470,7 +474,7 @@ func (_q *CarQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(car.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -542,7 +546,7 @@ func (_g *CarGroupBy) sqlScan(ctx context.Context, root *CarQuery, v any) error 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -584,7 +588,7 @@ func (_s *CarSelect) sqlScan(ctx context.Context, root *CarQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

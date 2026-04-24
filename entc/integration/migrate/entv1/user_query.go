@@ -8,6 +8,7 @@ package entv1
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,13 +18,12 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv1/car"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv1/user"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
-	config
+	Config
 	ctx          *QueryContext
 	order        []user.OrderOption
 	inters       []Interceptor
@@ -71,7 +71,7 @@ func (_q *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 
 // QueryParent chains the current query on the "parent" edge.
 func (_q *UserQuery) QueryParent() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -85,7 +85,7 @@ func (_q *UserQuery) QueryParent() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -93,7 +93,7 @@ func (_q *UserQuery) QueryParent() *UserQuery {
 
 // QueryChildren chains the current query on the "children" edge.
 func (_q *UserQuery) QueryChildren() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -107,7 +107,7 @@ func (_q *UserQuery) QueryChildren() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -115,7 +115,7 @@ func (_q *UserQuery) QueryChildren() *UserQuery {
 
 // QuerySpouse chains the current query on the "spouse" edge.
 func (_q *UserQuery) QuerySpouse() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -129,7 +129,7 @@ func (_q *UserQuery) QuerySpouse() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -137,7 +137,7 @@ func (_q *UserQuery) QuerySpouse() *UserQuery {
 
 // QueryCar chains the current query on the "car" edge.
 func (_q *UserQuery) QueryCar() *CarQuery {
-	query := (&CarClient{config: _q.config}).Query()
+	query := (&CarClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -151,7 +151,7 @@ func (_q *UserQuery) QueryCar() *CarQuery {
 			sqlgraph.To(car.Table, car.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.CarTable, user.CarColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -165,7 +165,7 @@ func (_q *UserQuery) First(ctx context.Context) (*User, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{Label: user.Label}
 	}
 	return nodes[0], nil
 }
@@ -187,7 +187,7 @@ func (_q *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{Label: user.Label}
 		return
 	}
 	return ids[0], nil
@@ -214,9 +214,9 @@ func (_q *UserQuery) Only(ctx context.Context) (*User, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{user.Label}
+		return nil, &NotFoundError{Label: user.Label}
 	default:
-		return nil, &NotSingularError{user.Label}
+		return nil, &NotSingularError{Label: user.Label}
 	}
 }
 
@@ -241,9 +241,9 @@ func (_q *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{user.Label}
+		err = &NotFoundError{Label: user.Label}
 	default:
-		err = &NotSingularError{user.Label}
+		err = &NotSingularError{Label: user.Label}
 	}
 	return
 }
@@ -344,7 +344,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:       _q.config,
+		Config:       _q.Config,
 		ctx:          _q.ctx.Clone(),
 		order:        append([]user.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
@@ -362,7 +362,7 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -373,7 +373,7 @@ func (_q *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -384,7 +384,7 @@ func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
 // WithSpouse tells the query-builder to eager-load the nodes that are connected to
 // the "spouse" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -395,7 +395,7 @@ func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
 // WithCar tells the query-builder to eager-load the nodes that are connected to
 // the "car" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithCar(opts ...func(*CarQuery)) *UserQuery {
-	query := (&CarClient{config: _q.config}).Query()
+	query := (&CarClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -464,7 +464,7 @@ func (_q *UserQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !user.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("entv1: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("entv1: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -496,18 +496,18 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*User).scanValues(nil, columns)
+		return (*User).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &User{config: _q.config}
+		node := &User{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -541,109 +541,127 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	return nodes, nil
 }
 
-var userParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        user.ParentTable,
-			Columns:      user.ParentColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *User) *int {
-		return n.user_children
-	},
-}
-var userChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        user.ChildrenTable,
-			Columns:      user.ChildrenColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractEdgeFK: func(e *User) *int {
-		return e.user_children
-	},
-}
-var userSpouseEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      false,
-			Table:        user.SpouseTable,
-			Columns:      user.SpouseColumn,
-			Bidi:         true,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *User) *int {
-		return n.user_spouse
-	},
-}
-var userCarEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Car, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      false,
-			Table:        user.CarTable,
-			Columns:      user.CarColumn,
-			Bidi:         false,
-			TargetColumn: car.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *Car) int { return e.ID },
-	ExtractEdgeFK: func(e *Car) *int {
-		return e.user_car
-	},
-}
-
 func (_q *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userParentEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*User)
+	for i := range nodes {
+		if nodes[i].GetUserChildren() == nil {
+			continue
+		}
+		fk := *nodes[i].GetUserChildren()
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_children" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2M(ctx, &userChildrenEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ChildrenColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetUserChildren()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_children" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_children" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *UserQuery) loadSpouse(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userSpouseEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*User)
+	for i := range nodes {
+		if nodes[i].GetUserSpouse() == nil {
+			continue
+		}
+		fk := *nodes[i].GetUserSpouse()
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_spouse" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *UserQuery) loadCar(ctx context.Context, query *CarQuery, nodes []*User, init func(*User), assign func(*User, *Car)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
 	query.withFKs = true
-	return entbuilder.LoadEdgeO2O(ctx, &userCarEdgeLoadDescriptor, nodes, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Car(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CarColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetUserCar()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_car" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_car" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 
@@ -653,7 +671,7 @@ func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
@@ -697,7 +715,7 @@ func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(user.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -769,7 +787,7 @@ func (_g *UserGroupBy) sqlScan(ctx context.Context, root *UserQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -811,7 +829,7 @@ func (_s *UserSelect) sqlScan(ctx context.Context, root *UserQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

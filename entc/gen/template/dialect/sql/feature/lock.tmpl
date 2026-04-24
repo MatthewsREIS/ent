@@ -22,7 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func ({{ $receiver }} *{{ $builder }}) ForUpdate(opts ...sql.LockOption) *{{ $builder }} {
-    if {{ $receiver }}.driver.Dialect() == dialect.Postgres {
+    if {{ $receiver }}.Drv.Dialect() == dialect.Postgres {
         {{ $receiver }}.Unique(false)
     }
     {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, func(s *sql.Selector) {
@@ -35,7 +35,7 @@ func ({{ $receiver }} *{{ $builder }}) ForUpdate(opts ...sql.LockOption) *{{ $bu
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func ({{ $receiver }} *{{ $builder }}) ForShare(opts ...sql.LockOption) *{{ $builder }} {
-    if {{ $receiver }}.driver.Dialect() == dialect.Postgres {
+    if {{ $receiver }}.Drv.Dialect() == dialect.Postgres {
         {{ $receiver }}.Unique(false)
     }
     {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, func(s *sql.Selector) {

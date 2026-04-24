@@ -23,7 +23,7 @@ import (
 
 // FileQuery is the builder for querying File entities.
 type FileQuery struct {
-	config
+	Config
 	ctx           *QueryContext
 	order         []file.OrderOption
 	inters        []Interceptor
@@ -67,7 +67,7 @@ func (_q *FileQuery) Order(o ...file.OrderOption) *FileQuery {
 
 // QueryProcesses chains the current query on the "processes" edge.
 func (_q *FileQuery) QueryProcesses() *ProcessQuery {
-	query := (&ProcessClient{config: _q.config}).Query()
+	query := (&ProcessClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -81,7 +81,7 @@ func (_q *FileQuery) QueryProcesses() *ProcessQuery {
 			sqlgraph.To(process.Table, process.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, file.ProcessesTable, file.ProcessesPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -95,7 +95,7 @@ func (_q *FileQuery) First(ctx context.Context) (*File, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{file.Label}
+		return nil, &NotFoundError{Label: file.Label}
 	}
 	return nodes[0], nil
 }
@@ -117,7 +117,7 @@ func (_q *FileQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{file.Label}
+		err = &NotFoundError{Label: file.Label}
 		return
 	}
 	return ids[0], nil
@@ -144,9 +144,9 @@ func (_q *FileQuery) Only(ctx context.Context) (*File, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{file.Label}
+		return nil, &NotFoundError{Label: file.Label}
 	default:
-		return nil, &NotSingularError{file.Label}
+		return nil, &NotSingularError{Label: file.Label}
 	}
 }
 
@@ -171,9 +171,9 @@ func (_q *FileQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{file.Label}
+		err = &NotFoundError{Label: file.Label}
 	default:
-		err = &NotSingularError{file.Label}
+		err = &NotSingularError{Label: file.Label}
 	}
 	return
 }
@@ -274,7 +274,7 @@ func (_q *FileQuery) Clone() *FileQuery {
 		return nil
 	}
 	return &FileQuery{
-		config:        _q.config,
+		Config:        _q.Config,
 		ctx:           _q.ctx.Clone(),
 		order:         append([]file.OrderOption{}, _q.order...),
 		inters:        append([]Interceptor{}, _q.inters...),
@@ -289,7 +289,7 @@ func (_q *FileQuery) Clone() *FileQuery {
 // WithProcesses tells the query-builder to eager-load the nodes that are connected to
 // the "processes" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithProcesses(opts ...func(*ProcessQuery)) *FileQuery {
-	query := (&ProcessClient{config: _q.config}).Query()
+	query := (&ProcessClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -358,7 +358,7 @@ func (_q *FileQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !file.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -380,18 +380,18 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*File).scanValues(nil, columns)
+		return (*File).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &File{config: _q.config}
+		node := &File{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -468,7 +468,7 @@ func (_q *FileQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *FileQuery) querySpec() *sqlgraph.QuerySpec {
@@ -512,7 +512,7 @@ func (_q *FileQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *FileQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(file.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -584,7 +584,7 @@ func (_g *FileGroupBy) sqlScan(ctx context.Context, root *FileQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -626,7 +626,7 @@ func (_s *FileSelect) sqlScan(ctx context.Context, root *FileQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

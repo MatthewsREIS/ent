@@ -23,7 +23,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := {{ $receiver }}.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var {{ plural $.Receiver }} {{ plural $.Name  }}
@@ -31,7 +31,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...
 		return nil, err
 	}
 	for i := range {{ plural $.Receiver }} {
-		{{ plural $.Receiver }}[i].config = {{ $receiver }}.config
+		{{ plural $.Receiver }}[i].Config = {{ $receiver }}.Config
 	}
 	return {{ plural $.Receiver }}, nil
 }
@@ -39,7 +39,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinAll(ctx context.Context, hooks ...
 func ({{ $receiver }} *{{ $builder }}) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := {{ $receiver }}.gremlinQuery(ctx).Count().Query()
-	if err := {{ $receiver }}.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := {{ $receiver }}.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()

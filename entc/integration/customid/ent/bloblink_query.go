@@ -22,7 +22,7 @@ import (
 
 // BlobLinkQuery is the builder for querying BlobLink entities.
 type BlobLinkQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []bloblink.OrderOption
 	inters     []Interceptor
@@ -67,7 +67,7 @@ func (_q *BlobLinkQuery) Order(o ...bloblink.OrderOption) *BlobLinkQuery {
 
 // QueryBlob chains the current query on the "blob" edge.
 func (_q *BlobLinkQuery) QueryBlob() *BlobQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := (&BlobClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -81,7 +81,7 @@ func (_q *BlobLinkQuery) QueryBlob() *BlobQuery {
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, bloblink.BlobTable, bloblink.BlobColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -89,7 +89,7 @@ func (_q *BlobLinkQuery) QueryBlob() *BlobQuery {
 
 // QueryLink chains the current query on the "link" edge.
 func (_q *BlobLinkQuery) QueryLink() *BlobQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := (&BlobClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -103,7 +103,7 @@ func (_q *BlobLinkQuery) QueryLink() *BlobQuery {
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, bloblink.LinkTable, bloblink.LinkColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -117,7 +117,7 @@ func (_q *BlobLinkQuery) First(ctx context.Context) (*BlobLink, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{bloblink.Label}
+		return nil, &NotFoundError{Label: bloblink.Label}
 	}
 	return nodes[0], nil
 }
@@ -143,9 +143,9 @@ func (_q *BlobLinkQuery) Only(ctx context.Context) (*BlobLink, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{bloblink.Label}
+		return nil, &NotFoundError{Label: bloblink.Label}
 	default:
-		return nil, &NotSingularError{bloblink.Label}
+		return nil, &NotSingularError{Label: bloblink.Label}
 	}
 }
 
@@ -224,7 +224,7 @@ func (_q *BlobLinkQuery) Clone() *BlobLinkQuery {
 		return nil
 	}
 	return &BlobLinkQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]bloblink.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -240,7 +240,7 @@ func (_q *BlobLinkQuery) Clone() *BlobLinkQuery {
 // WithBlob tells the query-builder to eager-load the nodes that are connected to
 // the "blob" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlobLinkQuery) WithBlob(opts ...func(*BlobQuery)) *BlobLinkQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := (&BlobClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -251,7 +251,7 @@ func (_q *BlobLinkQuery) WithBlob(opts ...func(*BlobQuery)) *BlobLinkQuery {
 // WithLink tells the query-builder to eager-load the nodes that are connected to
 // the "link" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlobLinkQuery) WithLink(opts ...func(*BlobQuery)) *BlobLinkQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := (&BlobClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -320,7 +320,7 @@ func (_q *BlobLinkQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !bloblink.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -343,18 +343,18 @@ func (_q *BlobLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Blo
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*BlobLink).scanValues(nil, columns)
+		return (*BlobLink).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &BlobLink{config: _q.config}
+		node := &BlobLink{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -438,7 +438,7 @@ func (_q *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Unique = false
 	_spec.Node.Columns = nil
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
@@ -485,7 +485,7 @@ func (_q *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *BlobLinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(bloblink.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -557,7 +557,7 @@ func (_g *BlobLinkGroupBy) sqlScan(ctx context.Context, root *BlobLinkQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -599,7 +599,7 @@ func (_s *BlobLinkSelect) sqlScan(ctx context.Context, root *BlobLinkQuery, v an
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

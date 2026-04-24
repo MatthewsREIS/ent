@@ -15,7 +15,7 @@ import (
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
-	config
+	Config
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
 	// Card is the client for interacting with the Card builders.
@@ -78,7 +78,7 @@ func (f CommitFunc) Commit(ctx context.Context, tx *Tx) error {
 
 // Commit commits the transaction.
 func (tx *Tx) Commit() error {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver := tx.Config.Drv.(*txDriver)
 	var fn Committer = CommitFunc(func(context.Context, *Tx) error {
 		return txDriver.tx.Commit()
 	})
@@ -93,7 +93,7 @@ func (tx *Tx) Commit() error {
 
 // OnCommit adds a hook to call on commit.
 func (tx *Tx) OnCommit(f CommitHook) {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver := tx.Config.Drv.(*txDriver)
 	txDriver.mu.Lock()
 	txDriver.onCommit = append(txDriver.onCommit, f)
 	txDriver.mu.Unlock()
@@ -134,7 +134,7 @@ func (f RollbackFunc) Rollback(ctx context.Context, tx *Tx) error {
 
 // Rollback rollbacks the transaction.
 func (tx *Tx) Rollback() error {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver := tx.Config.Drv.(*txDriver)
 	var fn Rollbacker = RollbackFunc(func(context.Context, *Tx) error {
 		return txDriver.tx.Rollback()
 	})
@@ -149,7 +149,7 @@ func (tx *Tx) Rollback() error {
 
 // OnRollback adds a hook to call on rollback.
 func (tx *Tx) OnRollback(f RollbackHook) {
-	txDriver := tx.config.driver.(*txDriver)
+	txDriver := tx.Config.Drv.(*txDriver)
 	txDriver.mu.Lock()
 	txDriver.onRollback = append(txDriver.onRollback, f)
 	txDriver.mu.Unlock()
@@ -158,22 +158,22 @@ func (tx *Tx) OnRollback(f RollbackHook) {
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
 	tx.clientOnce.Do(func() {
-		tx.client = &Client{config: tx.config}
+		tx.client = &Client{Config: tx.Config}
 		tx.client.init()
 	})
 	return tx.client
 }
 
 func (tx *Tx) init() {
-	tx.Car = NewCarClient(tx.config)
-	tx.Card = NewCardClient(tx.config)
-	tx.Info = NewInfoClient(tx.config)
-	tx.Metadata = NewMetadataClient(tx.config)
-	tx.Node = NewNodeClient(tx.config)
-	tx.Pet = NewPetClient(tx.config)
-	tx.Post = NewPostClient(tx.config)
-	tx.Rental = NewRentalClient(tx.config)
-	tx.User = NewUserClient(tx.config)
+	tx.Car = NewCarClient(tx.Config)
+	tx.Card = NewCardClient(tx.Config)
+	tx.Info = NewInfoClient(tx.Config)
+	tx.Metadata = NewMetadataClient(tx.Config)
+	tx.Node = NewNodeClient(tx.Config)
+	tx.Pet = NewPetClient(tx.Config)
+	tx.Post = NewPostClient(tx.Config)
+	tx.Rental = NewRentalClient(tx.Config)
+	tx.User = NewUserClient(tx.Config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -233,6 +233,11 @@ func (tx *txDriver) Exec(ctx context.Context, query string, args, v any) error {
 // Query calls tx.Query.
 func (tx *txDriver) Query(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Query(ctx, query, args, v)
+}
+
+// UnwrapDriver implements internal.DriverUnwrapper for model Unwrap() support.
+func (tx *txDriver) UnwrapDriver() dialect.Driver {
+	return tx.drv
 }
 
 var _ dialect.Driver = (*txDriver)(nil)

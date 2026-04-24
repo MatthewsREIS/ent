@@ -22,7 +22,7 @@ import (
 
 // FileTypeQuery is the builder for querying FileType entities.
 type FileTypeQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []filetype.OrderOption
 	inters     []Interceptor
@@ -66,7 +66,7 @@ func (_q *FileTypeQuery) Order(o ...filetype.OrderOption) *FileTypeQuery {
 
 // QueryFiles chains the current query on the "files" edge.
 func (_q *FileTypeQuery) QueryFiles() *FileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -86,7 +86,7 @@ func (_q *FileTypeQuery) First(ctx context.Context) (*FileType, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{filetype.Label}
+		return nil, &NotFoundError{Label: filetype.Label}
 	}
 	return nodes[0], nil
 }
@@ -108,7 +108,7 @@ func (_q *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{filetype.Label}
+		err = &NotFoundError{Label: filetype.Label}
 		return
 	}
 	return ids[0], nil
@@ -135,9 +135,9 @@ func (_q *FileTypeQuery) Only(ctx context.Context) (*FileType, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{filetype.Label}
+		return nil, &NotFoundError{Label: filetype.Label}
 	default:
-		return nil, &NotSingularError{filetype.Label}
+		return nil, &NotSingularError{Label: filetype.Label}
 	}
 }
 
@@ -162,9 +162,9 @@ func (_q *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{filetype.Label}
+		err = &NotFoundError{Label: filetype.Label}
 	default:
-		err = &NotSingularError{filetype.Label}
+		err = &NotSingularError{Label: filetype.Label}
 	}
 	return
 }
@@ -265,7 +265,7 @@ func (_q *FileTypeQuery) Clone() *FileTypeQuery {
 		return nil
 	}
 	return &FileTypeQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]filetype.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -280,7 +280,7 @@ func (_q *FileTypeQuery) Clone() *FileTypeQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -370,7 +370,7 @@ func (_q *FileTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms FileTypes
@@ -378,7 +378,7 @@ func (_q *FileTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -386,7 +386,7 @@ func (_q *FileTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]
 func (_q *FileTypeQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -462,7 +462,7 @@ func (_g *FileTypeGroupBy) gremlinScan(ctx context.Context, root *FileTypeQuery,
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -515,7 +515,7 @@ func (_s *FileTypeSelect) gremlinScan(ctx context.Context, root *FileTypeQuery, 
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

@@ -41,7 +41,7 @@ func TestCustomTemplate(t *testing.T) {
 	})
 
 	p := client.Pet.Create().SetAge(1).SaveX(ctx)
-	u := client.User.Create().SetName("a8m").AddPets(p).SaveX(ctx)
+	u := client.User.Create().SetName("a8m").AddPetIDs(p.ID).SaveX(ctx)
 	g := client.Group.Create().SetMaxUsers(10).SaveX(ctx)
 
 	node, err := client.Node(ctx, p.ID)

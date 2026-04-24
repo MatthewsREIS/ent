@@ -24,7 +24,7 @@ import (
 
 // GroupTagQuery is the builder for querying GroupTag entities.
 type GroupTagQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []grouptag.OrderOption
 	inters     []Interceptor
@@ -69,7 +69,7 @@ func (_q *GroupTagQuery) Order(o ...grouptag.OrderOption) *GroupTagQuery {
 
 // QueryTag chains the current query on the "tag" edge.
 func (_q *GroupTagQuery) QueryTag() *TagQuery {
-	query := (&TagClient{config: _q.config}).Query()
+	query := (&TagClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *GroupTagQuery) QueryTag() *TagQuery {
 			sqlgraph.To(tag.Table, tag.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, grouptag.TagTable, grouptag.TagColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -91,7 +91,7 @@ func (_q *GroupTagQuery) QueryTag() *TagQuery {
 
 // QueryGroup chains the current query on the "group" edge.
 func (_q *GroupTagQuery) QueryGroup() *GroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (_q *GroupTagQuery) QueryGroup() *GroupQuery {
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, grouptag.GroupTable, grouptag.GroupColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -119,7 +119,7 @@ func (_q *GroupTagQuery) First(ctx context.Context) (*GroupTag, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{grouptag.Label}
+		return nil, &NotFoundError{Label: grouptag.Label}
 	}
 	return nodes[0], nil
 }
@@ -141,7 +141,7 @@ func (_q *GroupTagQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{grouptag.Label}
+		err = &NotFoundError{Label: grouptag.Label}
 		return
 	}
 	return ids[0], nil
@@ -168,9 +168,9 @@ func (_q *GroupTagQuery) Only(ctx context.Context) (*GroupTag, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{grouptag.Label}
+		return nil, &NotFoundError{Label: grouptag.Label}
 	default:
-		return nil, &NotSingularError{grouptag.Label}
+		return nil, &NotSingularError{Label: grouptag.Label}
 	}
 }
 
@@ -195,9 +195,9 @@ func (_q *GroupTagQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{grouptag.Label}
+		err = &NotFoundError{Label: grouptag.Label}
 	default:
-		err = &NotSingularError{grouptag.Label}
+		err = &NotSingularError{Label: grouptag.Label}
 	}
 	return
 }
@@ -298,7 +298,7 @@ func (_q *GroupTagQuery) Clone() *GroupTagQuery {
 		return nil
 	}
 	return &GroupTagQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]grouptag.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -314,7 +314,7 @@ func (_q *GroupTagQuery) Clone() *GroupTagQuery {
 // WithTag tells the query-builder to eager-load the nodes that are connected to
 // the "tag" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupTagQuery) WithTag(opts ...func(*TagQuery)) *GroupTagQuery {
-	query := (&TagClient{config: _q.config}).Query()
+	query := (&TagClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +325,7 @@ func (_q *GroupTagQuery) WithTag(opts ...func(*TagQuery)) *GroupTagQuery {
 // WithGroup tells the query-builder to eager-load the nodes that are connected to
 // the "group" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupTagQuery) WithGroup(opts ...func(*GroupQuery)) *GroupTagQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -394,7 +394,7 @@ func (_q *GroupTagQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !grouptag.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -417,18 +417,18 @@ func (_q *GroupTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Gro
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*GroupTag).scanValues(nil, columns)
+		return (*GroupTag).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &GroupTag{config: _q.config}
+		node := &GroupTag{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -511,7 +511,7 @@ func (_q *GroupTagQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *GroupTagQuery) querySpec() *sqlgraph.QuerySpec {
@@ -561,7 +561,7 @@ func (_q *GroupTagQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *GroupTagQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(grouptag.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -633,7 +633,7 @@ func (_g *GroupTagGroupBy) sqlScan(ctx context.Context, root *GroupTagQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -675,7 +675,7 @@ func (_s *GroupTagSelect) sqlScan(ctx context.Context, root *GroupTagQuery, v an
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

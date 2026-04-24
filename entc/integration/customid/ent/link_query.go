@@ -22,7 +22,7 @@ import (
 
 // LinkQuery is the builder for querying Link entities.
 type LinkQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []link.OrderOption
 	inters     []Interceptor
@@ -71,7 +71,7 @@ func (_q *LinkQuery) First(ctx context.Context) (*Link, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{link.Label}
+		return nil, &NotFoundError{Label: link.Label}
 	}
 	return nodes[0], nil
 }
@@ -93,7 +93,7 @@ func (_q *LinkQuery) FirstID(ctx context.Context) (id uuidc.UUIDC, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{link.Label}
+		err = &NotFoundError{Label: link.Label}
 		return
 	}
 	return ids[0], nil
@@ -120,9 +120,9 @@ func (_q *LinkQuery) Only(ctx context.Context) (*Link, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{link.Label}
+		return nil, &NotFoundError{Label: link.Label}
 	default:
-		return nil, &NotSingularError{link.Label}
+		return nil, &NotSingularError{Label: link.Label}
 	}
 }
 
@@ -147,9 +147,9 @@ func (_q *LinkQuery) OnlyID(ctx context.Context) (id uuidc.UUIDC, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{link.Label}
+		err = &NotFoundError{Label: link.Label}
 	default:
-		err = &NotSingularError{link.Label}
+		err = &NotSingularError{Label: link.Label}
 	}
 	return
 }
@@ -250,7 +250,7 @@ func (_q *LinkQuery) Clone() *LinkQuery {
 		return nil
 	}
 	return &LinkQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]link.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -322,7 +322,7 @@ func (_q *LinkQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !link.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -341,17 +341,17 @@ func (_q *LinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Link, e
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Link).scanValues(nil, columns)
+		return (*Link).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Link{config: _q.config}
+		node := &Link{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -366,7 +366,7 @@ func (_q *LinkQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *LinkQuery) querySpec() *sqlgraph.QuerySpec {
@@ -410,7 +410,7 @@ func (_q *LinkQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *LinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(link.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -482,7 +482,7 @@ func (_g *LinkGroupBy) sqlScan(ctx context.Context, root *LinkQuery, v any) erro
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -524,7 +524,7 @@ func (_s *LinkSelect) sqlScan(ctx context.Context, root *LinkQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -22,7 +22,7 @@ import (
 
 // PCQuery is the builder for querying PC entities.
 type PCQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []pc.OrderOption
 	inters     []Interceptor
@@ -72,7 +72,7 @@ func (_q *PCQuery) First(ctx context.Context) (*PC, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{pc.Label}
+		return nil, &NotFoundError{Label: pc.Label}
 	}
 	return nodes[0], nil
 }
@@ -94,7 +94,7 @@ func (_q *PCQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{pc.Label}
+		err = &NotFoundError{Label: pc.Label}
 		return
 	}
 	return ids[0], nil
@@ -121,9 +121,9 @@ func (_q *PCQuery) Only(ctx context.Context) (*PC, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{pc.Label}
+		return nil, &NotFoundError{Label: pc.Label}
 	default:
-		return nil, &NotSingularError{pc.Label}
+		return nil, &NotSingularError{Label: pc.Label}
 	}
 }
 
@@ -148,9 +148,9 @@ func (_q *PCQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{pc.Label}
+		err = &NotFoundError{Label: pc.Label}
 	default:
-		err = &NotSingularError{pc.Label}
+		err = &NotSingularError{Label: pc.Label}
 	}
 	return
 }
@@ -251,7 +251,7 @@ func (_q *PCQuery) Clone() *PCQuery {
 		return nil
 	}
 	return &PCQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]pc.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -302,7 +302,7 @@ func (_q *PCQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !pc.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -321,12 +321,12 @@ func (_q *PCQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PC, error
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*PC).scanValues(nil, columns)
+		return (*PC).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &PC{config: _q.config}
+		node := &PC{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -334,7 +334,7 @@ func (_q *PCQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PC, error
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -352,7 +352,7 @@ func (_q *PCQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *PCQuery) querySpec() *sqlgraph.QuerySpec {
@@ -396,7 +396,7 @@ func (_q *PCQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *PCQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(pc.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -434,7 +434,7 @@ func (_q *PCQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *PCQuery) ForUpdate(opts ...sql.LockOption) *PCQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -447,7 +447,7 @@ func (_q *PCQuery) ForUpdate(opts ...sql.LockOption) *PCQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *PCQuery) ForShare(opts ...sql.LockOption) *PCQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -503,7 +503,7 @@ func (_g *PCGroupBy) sqlScan(ctx context.Context, root *PCQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -545,7 +545,7 @@ func (_s *PCSelect) sqlScan(ctx context.Context, root *PCQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

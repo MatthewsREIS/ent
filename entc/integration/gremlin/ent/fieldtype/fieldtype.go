@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/entc/integration/gremlin/ent/internal"
 )
 
 const (
@@ -196,18 +197,14 @@ var (
 	DefaultTriple func() schema.Triple
 )
 
-// State defines the type for the "state" enum field.
-type State string
+// State is an alias for the enum type defined in the internal package.
+type State = internal.FieldTypeState
 
 // State values.
 const (
 	StateOn  State = "on"
 	StateOff State = "off"
 )
-
-func (s State) String() string {
-	return string(s)
-}
 
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
@@ -244,8 +241,8 @@ func PriorityValidator(pr role.Priority) error {
 // OrderOption defines the ordering options for the FieldType queries.
 type OrderOption func(*dsl.Traversal)
 
-// Ptr returns a new pointer to the enum value.
-func (s State) Ptr() *State {
+// PtrState returns a new pointer to the enum value.
+func PtrState(s State) *State {
 	return &s
 }
 

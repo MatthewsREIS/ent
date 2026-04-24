@@ -328,6 +328,29 @@ func (t Type) Package() string {
 // PackageDir returns the name of the package directory.
 func (t Type) PackageDir() string { return strings.ToLower(t.Name) }
 
+// RootPackageImport returns the import path for the root generated package.
+// For example, if Config.Package is "github.com/org/project/ent", this returns
+// "github.com/org/project/ent". This is useful in sub-package templates that
+// need to import types from the root ent package.
+func (t Type) RootPackageImport() string {
+	return t.Config.Package
+}
+
+// RootPackageAlias returns a suitable Go import alias for the root package.
+// It returns the last path segment of the root package import path.
+// For example, "github.com/org/project/ent" returns "ent".
+func (t Type) RootPackageAlias() string {
+	return path.Base(t.Config.Package)
+}
+
+// SubPackageImport returns the full import path for this entity's sub-package.
+// It combines the root package import path with the entity's package directory.
+// For example, for a "User" type with Config.Package "github.com/org/project/ent",
+// this returns "github.com/org/project/ent/user".
+func (t Type) SubPackageImport() string {
+	return path.Join(t.Config.Package, t.PackageDir())
+}
+
 // PackageAlias returns local package name of a type if there is one.
 // A package has an alias if its generated name conflicts with
 // one of the imports of the user-defined or ent builtin types.
@@ -920,6 +943,21 @@ func (t Type) ValueName() string {
 		return "Value"
 	}
 	return "GetValue"
+}
+
+// PackageQualifier returns the package qualifier prefix for referencing this
+// type's sub-package symbols. For root-level templates it returns "pkg." (e.g. "task.").
+// This is overridden by typeScope to return "" when generating inside the sub-package.
+func (t Type) PackageQualifier() string {
+	return t.Package() + "."
+}
+
+// BuilderImports returns the entity imports needed by CUD builder templates.
+// For root-level templates it returns SiblingImports(). This is overridden by
+// typeScope to return nil when generating inside the sub-package (no entity
+// imports needed since same-package symbols are unqualified).
+func (t Type) BuilderImports() []struct{ Alias, Path string } {
+	return t.SiblingImports()
 }
 
 // SiblingImports returns all sibling packages that are needed for the different builders.
@@ -2275,7 +2313,7 @@ var (
 		"As",
 		"Asc",
 		"Client",
-		"config",
+		"Config",
 		"Count",
 		"Debug",
 		"Desc",
@@ -2300,7 +2338,7 @@ var (
 	)
 	// private fields used by the different builders.
 	privateField = names(
-		"config",
+		"Config",
 		"ctx",
 		"done",
 		"hooks",

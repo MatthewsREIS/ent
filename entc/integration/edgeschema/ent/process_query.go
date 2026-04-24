@@ -24,7 +24,7 @@ import (
 
 // ProcessQuery is the builder for querying Process entities.
 type ProcessQuery struct {
-	config
+	Config
 	ctx               *QueryContext
 	order             []process.OrderOption
 	inters            []Interceptor
@@ -69,7 +69,7 @@ func (_q *ProcessQuery) Order(o ...process.OrderOption) *ProcessQuery {
 
 // QueryFiles chains the current query on the "files" edge.
 func (_q *ProcessQuery) QueryFiles() *FileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func (_q *ProcessQuery) QueryFiles() *FileQuery {
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, process.FilesTable, process.FilesPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -91,7 +91,7 @@ func (_q *ProcessQuery) QueryFiles() *FileQuery {
 
 // QueryAttachedFiles chains the current query on the "attached_files" edge.
 func (_q *ProcessQuery) QueryAttachedFiles() *AttachedFileQuery {
-	query := (&AttachedFileClient{config: _q.config}).Query()
+	query := (&AttachedFileClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +105,7 @@ func (_q *ProcessQuery) QueryAttachedFiles() *AttachedFileQuery {
 			sqlgraph.To(attachedfile.Table, attachedfile.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, process.AttachedFilesTable, process.AttachedFilesColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -119,7 +119,7 @@ func (_q *ProcessQuery) First(ctx context.Context) (*Process, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{process.Label}
+		return nil, &NotFoundError{Label: process.Label}
 	}
 	return nodes[0], nil
 }
@@ -141,7 +141,7 @@ func (_q *ProcessQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{process.Label}
+		err = &NotFoundError{Label: process.Label}
 		return
 	}
 	return ids[0], nil
@@ -168,9 +168,9 @@ func (_q *ProcessQuery) Only(ctx context.Context) (*Process, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{process.Label}
+		return nil, &NotFoundError{Label: process.Label}
 	default:
-		return nil, &NotSingularError{process.Label}
+		return nil, &NotSingularError{Label: process.Label}
 	}
 }
 
@@ -195,9 +195,9 @@ func (_q *ProcessQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{process.Label}
+		err = &NotFoundError{Label: process.Label}
 	default:
-		err = &NotSingularError{process.Label}
+		err = &NotSingularError{Label: process.Label}
 	}
 	return
 }
@@ -298,7 +298,7 @@ func (_q *ProcessQuery) Clone() *ProcessQuery {
 		return nil
 	}
 	return &ProcessQuery{
-		config:            _q.config,
+		Config:            _q.Config,
 		ctx:               _q.ctx.Clone(),
 		order:             append([]process.OrderOption{}, _q.order...),
 		inters:            append([]Interceptor{}, _q.inters...),
@@ -314,7 +314,7 @@ func (_q *ProcessQuery) Clone() *ProcessQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ProcessQuery) WithFiles(opts ...func(*FileQuery)) *ProcessQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := (&FileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +325,7 @@ func (_q *ProcessQuery) WithFiles(opts ...func(*FileQuery)) *ProcessQuery {
 // WithAttachedFiles tells the query-builder to eager-load the nodes that are connected to
 // the "attached_files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ProcessQuery) WithAttachedFiles(opts ...func(*AttachedFileQuery)) *ProcessQuery {
-	query := (&AttachedFileClient{config: _q.config}).Query()
+	query := (&AttachedFileClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -372,7 +372,7 @@ func (_q *ProcessQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !process.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -395,18 +395,18 @@ func (_q *ProcessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Proc
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Process).scanValues(nil, columns)
+		return (*Process).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Process{config: _q.config}
+		node := &Process{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -519,7 +519,7 @@ func (_q *ProcessQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *ProcessQuery) querySpec() *sqlgraph.QuerySpec {
@@ -563,7 +563,7 @@ func (_q *ProcessQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *ProcessQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(process.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -635,7 +635,7 @@ func (_g *ProcessGroupBy) sqlScan(ctx context.Context, root *ProcessQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -677,7 +677,7 @@ func (_s *ProcessSelect) sqlScan(ctx context.Context, root *ProcessQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

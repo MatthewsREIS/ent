@@ -22,7 +22,7 @@ import (
 
 // BuilderQuery is the builder for querying Builder entities.
 type BuilderQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []builder.OrderOption
 	inters     []Interceptor
@@ -72,7 +72,7 @@ func (_q *BuilderQuery) First(ctx context.Context) (*Builder, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{builder.Label}
+		return nil, &NotFoundError{Label: builder.Label}
 	}
 	return nodes[0], nil
 }
@@ -94,7 +94,7 @@ func (_q *BuilderQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{builder.Label}
+		err = &NotFoundError{Label: builder.Label}
 		return
 	}
 	return ids[0], nil
@@ -121,9 +121,9 @@ func (_q *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{builder.Label}
+		return nil, &NotFoundError{Label: builder.Label}
 	default:
-		return nil, &NotSingularError{builder.Label}
+		return nil, &NotSingularError{Label: builder.Label}
 	}
 }
 
@@ -148,9 +148,9 @@ func (_q *BuilderQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{builder.Label}
+		err = &NotFoundError{Label: builder.Label}
 	default:
-		err = &NotSingularError{builder.Label}
+		err = &NotSingularError{Label: builder.Label}
 	}
 	return
 }
@@ -251,7 +251,7 @@ func (_q *BuilderQuery) Clone() *BuilderQuery {
 		return nil
 	}
 	return &BuilderQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]builder.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -302,7 +302,7 @@ func (_q *BuilderQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !builder.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -321,12 +321,12 @@ func (_q *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Buil
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Builder).scanValues(nil, columns)
+		return (*Builder).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Builder{config: _q.config}
+		node := &Builder{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -334,7 +334,7 @@ func (_q *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Buil
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -352,7 +352,7 @@ func (_q *BuilderQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *BuilderQuery) querySpec() *sqlgraph.QuerySpec {
@@ -396,7 +396,7 @@ func (_q *BuilderQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *BuilderQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builderC := sql.Dialect(_q.driver.Dialect())
+	builderC := sql.Dialect(_q.Drv.Dialect())
 	t1 := builderC.Table(builder.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -434,7 +434,7 @@ func (_q *BuilderQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
 func (_q *BuilderQuery) ForUpdate(opts ...sql.LockOption) *BuilderQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -447,7 +447,7 @@ func (_q *BuilderQuery) ForUpdate(opts ...sql.LockOption) *BuilderQuery {
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
 func (_q *BuilderQuery) ForShare(opts ...sql.LockOption) *BuilderQuery {
-	if _q.driver.Dialect() == dialect.Postgres {
+	if _q.Drv.Dialect() == dialect.Postgres {
 		_q.Unique(false)
 	}
 	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
@@ -503,7 +503,7 @@ func (_g *BuilderGroupBy) sqlScan(ctx context.Context, root *BuilderQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -545,7 +545,7 @@ func (_s *BuilderSelect) sqlScan(ctx context.Context, root *BuilderQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

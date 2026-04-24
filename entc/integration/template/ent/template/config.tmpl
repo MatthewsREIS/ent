@@ -10,7 +10,7 @@
 {{ define "config/options/httpclient" }}
 	// HTTPClient option added by a test template.
 	func HTTPClient(hc *http.Client) Option {
-		return func(c *config) {
+		return func(c *Config) {
 			c.HTTPClient = hc
 		}
 	}

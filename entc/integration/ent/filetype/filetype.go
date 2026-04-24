@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/ent/internal"
 )
 
 const (
@@ -55,8 +56,8 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-// Type defines the type for the "type" enum field.
-type Type string
+// Type is an alias for the enum type defined in the internal package.
+type Type = internal.FileTypeType
 
 // TypePNG is the default value of the Type enum.
 const DefaultType = TypePNG
@@ -68,10 +69,6 @@ const (
 	TypeJPG Type = "jpg"
 )
 
-func (_type Type) String() string {
-	return string(_type)
-}
-
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
@@ -82,8 +79,8 @@ func TypeValidator(_type Type) error {
 	}
 }
 
-// State defines the type for the "state" enum field.
-type State string
+// State is an alias for the enum type defined in the internal package.
+type State = internal.FileTypeState
 
 // StateOn is the default value of the State enum.
 const DefaultState = StateOn
@@ -93,10 +90,6 @@ const (
 	StateOn  State = "ON"
 	StateOff State = "OFF"
 )
-
-func (s State) String() string {
-	return string(s)
-}
 
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {
@@ -152,13 +145,13 @@ func newFilesStep() *sqlgraph.Step {
 	)
 }
 
-// Ptr returns a new pointer to the enum value.
-func (_type Type) Ptr() *Type {
+// PtrType returns a new pointer to the enum value.
+func PtrType(_type Type) *Type {
 	return &_type
 }
 
-// Ptr returns a new pointer to the enum value.
-func (s State) Ptr() *State {
+// PtrState returns a new pointer to the enum value.
+func PtrState(s State) *State {
 	return &s
 }
 

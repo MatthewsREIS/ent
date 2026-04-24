@@ -22,7 +22,7 @@ import (
 
 // SpecQuery is the builder for querying Spec entities.
 type SpecQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []spec.OrderOption
 	inters     []Interceptor
@@ -66,7 +66,7 @@ func (_q *SpecQuery) Order(o ...spec.OrderOption) *SpecQuery {
 
 // QueryCard chains the current query on the "card" edge.
 func (_q *SpecQuery) QueryCard() *CardQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -86,7 +86,7 @@ func (_q *SpecQuery) First(ctx context.Context) (*Spec, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{spec.Label}
+		return nil, &NotFoundError{Label: spec.Label}
 	}
 	return nodes[0], nil
 }
@@ -108,7 +108,7 @@ func (_q *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{spec.Label}
+		err = &NotFoundError{Label: spec.Label}
 		return
 	}
 	return ids[0], nil
@@ -135,9 +135,9 @@ func (_q *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{spec.Label}
+		return nil, &NotFoundError{Label: spec.Label}
 	default:
-		return nil, &NotSingularError{spec.Label}
+		return nil, &NotSingularError{Label: spec.Label}
 	}
 }
 
@@ -162,9 +162,9 @@ func (_q *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{spec.Label}
+		err = &NotFoundError{Label: spec.Label}
 	default:
-		err = &NotSingularError{spec.Label}
+		err = &NotSingularError{Label: spec.Label}
 	}
 	return
 }
@@ -265,7 +265,7 @@ func (_q *SpecQuery) Clone() *SpecQuery {
 		return nil
 	}
 	return &SpecQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]spec.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -280,7 +280,7 @@ func (_q *SpecQuery) Clone() *SpecQuery {
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := (&CardClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -348,7 +348,7 @@ func (_q *SpecQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Spe
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms Specs
@@ -356,7 +356,7 @@ func (_q *SpecQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Spe
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -364,7 +364,7 @@ func (_q *SpecQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Spe
 func (_q *SpecQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -440,7 +440,7 @@ func (_g *SpecGroupBy) gremlinScan(ctx context.Context, root *SpecQuery, v any) 
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -493,7 +493,7 @@ func (_s *SpecSelect) gremlinScan(ctx context.Context, root *SpecQuery, v any) e
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

@@ -9,11 +9,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "delete" }}
 {{ $pkg := base $.Config.Package }}
 
-{{ template "header" $ }}
-
-{{ with extend $ "Imports" $.SiblingImports "DeleteUsesEntbuilder" (and $.Storage (eq $.Storage.Name "sql")) }}
-	{{ template "import" . }}
+{{ with extend $ "Package" $.Package }}
+	{{ template "header" . }}
 {{ end }}
+
+{{ template "import" $ }}
 
 {{ $builder := $.DeleteName }}
 {{ $receiver := $.DeleteReceiver }}
@@ -21,13 +21,14 @@ in the LICENSE file in the root directory of this source tree.
 
 // {{ $builder }} is the builder for deleting a {{ $.Name }} entity.
 type {{ $builder }} struct {
-	config
+	Config
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
-	{{- $tmpl := printf "dialect/%s/delete/fields" $.Storage }}
-	{{- if hasTemplate $tmpl }}
-		{{- xtemplate $tmpl . }}
-	{{- end }}
+}
+
+// New{{ $builder }} returns a new {{ $builder }} initialized with the given config, hooks, and mutation.
+func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *{{ $builder }} {
+	return &{{ $builder }}{Config: c, hooks: hooks, mutation: mutation}
 }
 
 // Where appends a list predicates to the {{ $builder }} builder.
@@ -38,7 +39,7 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
+	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -70,6 +71,11 @@ type {{ $onebuilder }} struct {
 	{{ $receiver }} *{{ $builder }}
 }
 
+// New{{ $onebuilder }} returns a new {{ $onebuilder }} wrapping the given {{ $builder }}.
+func New{{ $onebuilder }}(d *{{ $builder }}) *{{ $onebuilder }} {
+	return &{{ $onebuilder }}{ {{- $receiver }}: d}
+}
+
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
 	{{ $oneReceiver }}.{{ $mutation }}.Where(ps...)
@@ -83,7 +89,7 @@ func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{ {{ $.Package }}.Label}
+		return &NotFoundError{Label: {{ $.PackageQualifier }}Label}
 	default:
 		return nil
 	}

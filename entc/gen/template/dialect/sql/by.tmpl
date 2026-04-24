@@ -34,7 +34,7 @@ func checkColumn(t, c string) error {
 	func(s *sql.Selector) {
 		for _, f := range fields {
 			if err := checkColumn(s.TableName(), f); err != nil {
-				s.AddError(&ValidationError{Name: f, err: fmt.Errorf("{{ base $.Config.Package }}: %w", err)})
+				s.AddError(&ValidationError{Name: f, Err: fmt.Errorf("{{ base $.Config.Package }}: %w", err)})
 			}
 			s.OrderBy(sql.{{ $f }}(s.C(f)))
 		}
@@ -58,7 +58,7 @@ func checkColumn(t, c string) error {
 	func(s *sql.Selector) string {
 		{{- if $withField }}
 			if err := checkColumn(s.TableName(), field); err != nil {
-				s.AddError(&ValidationError{Name: field, err: fmt.Errorf("{{ base $.Config.Package }}: %w", err)})
+				s.AddError(&ValidationError{Name: field, Err: fmt.Errorf("{{ base $.Config.Package }}: %w", err)})
 				return ""
 			}
 		{{- end }}

@@ -23,7 +23,7 @@ import (
 
 // GroupInfoQuery is the builder for querying GroupInfo entities.
 type GroupInfoQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []groupinfo.OrderOption
 	inters     []Interceptor
@@ -67,7 +67,7 @@ func (_q *GroupInfoQuery) Order(o ...groupinfo.OrderOption) *GroupInfoQuery {
 
 // QueryGroups chains the current query on the "groups" edge.
 func (_q *GroupInfoQuery) QueryGroups() *GroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -87,7 +87,7 @@ func (_q *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{groupinfo.Label}
+		return nil, &NotFoundError{Label: groupinfo.Label}
 	}
 	return nodes[0], nil
 }
@@ -109,7 +109,7 @@ func (_q *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{groupinfo.Label}
+		err = &NotFoundError{Label: groupinfo.Label}
 		return
 	}
 	return ids[0], nil
@@ -136,9 +136,9 @@ func (_q *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{groupinfo.Label}
+		return nil, &NotFoundError{Label: groupinfo.Label}
 	default:
-		return nil, &NotSingularError{groupinfo.Label}
+		return nil, &NotSingularError{Label: groupinfo.Label}
 	}
 }
 
@@ -163,9 +163,9 @@ func (_q *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{groupinfo.Label}
+		err = &NotFoundError{Label: groupinfo.Label}
 	default:
-		err = &NotSingularError{groupinfo.Label}
+		err = &NotSingularError{Label: groupinfo.Label}
 	}
 	return
 }
@@ -266,7 +266,7 @@ func (_q *GroupInfoQuery) Clone() *GroupInfoQuery {
 		return nil
 	}
 	return &GroupInfoQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]groupinfo.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -281,7 +281,7 @@ func (_q *GroupInfoQuery) Clone() *GroupInfoQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := (&GroupClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -371,7 +371,7 @@ func (_q *GroupInfoQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	var _ms GroupInfos
@@ -379,7 +379,7 @@ func (_q *GroupInfoQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([
 		return nil, err
 	}
 	for i := range _ms {
-		_ms[i].config = _q.config
+		_ms[i].Config = _q.Config
 	}
 	return _ms, nil
 }
@@ -387,7 +387,7 @@ func (_q *GroupInfoQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([
 func (_q *GroupInfoQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
 	query, bindings := _q.gremlinQuery(ctx).Count().Query()
-	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
@@ -463,7 +463,7 @@ func (_g *GroupInfoGroupBy) gremlinScan(ctx context.Context, root *GroupInfoQuer
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(*_g.flds)+len(_g.fns) == 1 {
@@ -516,7 +516,7 @@ func (_s *GroupInfoSelect) gremlinScan(ctx context.Context, root *GroupInfoQuery
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

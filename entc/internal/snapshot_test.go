@@ -5,12 +5,10 @@
 package internal
 
 import (
-	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"entgo.io/ent/entc/gen"
 
@@ -39,34 +37,23 @@ func TestSnapshot_Restore(t *testing.T) {
 			`,
 		}}
 	require.NoError(t, snap.Restore())
-	cmd := exec.Command("go", "generate", "./...")
-	cmd.Dir = testPackage
-	err = cmd.Run()
-	require.NoError(t, err)
+	integrationDir := filepath.Dir(filepath.Dir(testPackage))
+	cmd := exec.Command("go", "generate", "./privacy/ent")
+	cmd.Dir = integrationDir
+	out, err := cmd.CombinedOutput()
+	require.NoError(t, err, "go generate failed in %s:\n%s", integrationDir, string(out))
 }
 
 // addConflicts adds VCS conflicts to the files that match the given patterns.
 func addConflicts(dir string) error {
-	rand.Seed(time.Now().UnixNano())
-	infos, err := os.ReadDir(dir)
+	path := filepath.Join(dir, "internal", "schema.go")
+	fi, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return err
 	}
-	for _, info := range infos {
-		if info.IsDir() || info.Name() == "generate.go" || info.Name() == "entc.go" {
-			continue
-		}
-		path := filepath.Join(dir, info.Name())
-		fi, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, 0644)
-		if err != nil {
-			return err
-		}
-		if _, err := fi.WriteString("\n" + conflictMarker); err != nil {
-			return err
-		}
-		if err := fi.Close(); err != nil {
-			return err
-		}
+	if _, err := fi.WriteString("\n" + conflictMarker); err != nil {
+		_ = fi.Close()
+		return err
 	}
-	return nil
+	return fi.Close()
 }

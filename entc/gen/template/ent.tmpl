@@ -8,130 +8,22 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "model" }}
 
-{{ $pkg := base $.Config.Package }}
 {{ template "header" $ }}
 
-{{ with extend $ "Imports" $.SiblingImports }}
-	{{ template "import" . }}
-{{ end }}
+import (
+	"{{ $.Config.Package }}/internal"
+)
 
-{{ template "model/comment" $ }}
-{{- with $tmpls := matchTemplate "model/comment/additional/*" }}
-	{{- range $tmpl := $tmpls }}
-		{{- xtemplate $tmpl $ }}
-	{{- end }}
-{{- end }}
-type {{ $.Name }} struct {
-	config {{ template "model/omittags" $ }}
-	{{- if $.HasOneFieldID }}
-		// ID of the ent.
-		{{- if $.ID.Comment }}
-			{{- range $line := split $.ID.Comment "\n" }}
-				// {{ $line }}
-			{{- end }}
-		{{- end }}
-		ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
-	{{- end }}
-	{{- range $f := $.Fields }}
-		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
-		{{- template "model/fieldcomment" $f }}
-		{{ $f.StructField }} {{ if $f.NillableValue }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $tag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
-	{{- end }}
-	{{- with $.Edges }}
-		// Edges holds the relations/edges for other nodes in the graph.
-		// The values are being populated by the {{ $.Name }}Query when eager-loading is set.
-		Edges {{ $.Name }}Edges {{ template "model/edgetags" $ }}
-	{{- end -}}
-	{{- /* Additional fields to add by the storage driver. */}}
-	{{- $tmpl := printf "dialect/%s/model/fields" $.Storage }}
-	{{- if hasTemplate $tmpl }}
-		{{- xtemplate $tmpl . }}
-	{{- end }}
-	{{- /* Additional fields to add by the user. */}}
-	{{- template "model/fields/additional" $ }}
-}
-
+// Model type aliases from internal.
+// Guardrail: aliasing is one-way (root -> internal), and methods belong to the type definition site.
+// Do not attach root-only methods to alias models; add model methods on internal types instead.
+// Keep the internal package free of root query/client imports to avoid import cycles.
+type {{ $.Name }} = internal.{{ $.Name }}
 {{- with $.Edges }}
-{{- $edgesType := print $.Name "Edges"}}
-// {{ $.Name }}Edges holds the relations/edges for other nodes in the graph.
-type {{ $edgesType }} struct {
-	{{- range $e := . }}
-		{{- template "model/edgecomment" $e }}
-		{{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }} {{ with $e.StructTag }}`{{ . }}`{{ end }}
-	{{- end }}
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [{{ len . }}]bool
-	{{- /* Additional fields to add by the user. */}}
-	{{- template "model/edges/fields/additional" $ }}
-}
-
-{{- range $i, $e := . }}
-	// {{ $e.StructField }}OrErr returns the {{ $e.StructField }} value or an error if the edge
-	// was not loaded in eager-loading{{ if $e.Unique }}, or loaded but was not found{{ end }}.
-	func (e {{ $edgesType }}) {{ $e.StructField }}OrErr() ({{ if not $e.Unique }}[]{{ end }}*{{ $e.Type.Name }}, error) {
-		{{- if $e.Unique }}
-			if e.{{ $e.StructField }} != nil {
-				return e.{{ $e.StructField }}, nil
-			} else if e.loadedTypes[{{ $i }}] {
-				{{- /* Edge was loaded but was not found. */}}
-				return nil, &NotFoundError{label: {{ $e.Type.Package }}.Label}
-			}
-		{{- else }}
-			if e.loadedTypes[{{ $i }}] {
-				return e.{{ $e.StructField }}, nil
-			}
-		{{- end }}
-		return nil, &NotLoadedError{edge: "{{ $e.Name }}"}
-	}
+type {{ $.Name }}Edges = internal.{{ $.Name }}Edges
 {{- end }}
-{{- end }}
+type {{ plural $.Name }} = internal.{{ plural $.Name }}
 
-{{ $tmpl = printf "dialect/%s/decode/one" $.Storage }}
-{{ xtemplate $tmpl $ }}
-
-{{ $receiver := $.Receiver }}
-
-{{ range $e := $.Edges }}
-	{{ $func := print "Query" $e.StructField }}
-	// {{ $func }} queries the "{{ $e.Name }}" edge of the {{ $.Name }} entity.
-	func ({{ $receiver }} *{{ $.Name }}) {{ $func }}() *{{ $e.Type.QueryName }} {
-		return New{{ $.ClientName }}({{ $receiver }}.config).{{ $func }}({{ $receiver }})
-	}
-{{ end }}
-
-{{- if not $.IsView }}
-// Update returns a builder for updating this {{ $.Name }}.
-// Note that you need to call {{ $.Name }}.Unwrap() before calling this method if this {{ $.Name }}
-// was returned from a transaction, and the transaction was committed or rolled back.
-func ({{ $receiver }} *{{ $.Name }}) Update() *{{ $.UpdateOneName }} {
-	return New{{ $.ClientName }}({{ $receiver }}.config).UpdateOne({{ $receiver }})
-}
-{{- end }}
-
-// Unwrap unwraps the {{ $.Name }} entity that was returned from a transaction after it was closed,
-// so that all future queries will be executed through the driver which created the transaction.
-func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
-	_tx, ok := {{ $receiver }}.config.driver.(*txDriver)
-	if !ok {
-		panic("{{ $pkg }}: {{ $.Name }} is not a transactional entity")
-	}
-	{{ $receiver }}.config.driver = _tx.drv
-	return {{ $receiver }}
-}
-
-{{ template "model/stringer" $ }}
-
-{{ template "model/additional" $ }}
-
-{{ $slice := plural $.Name }}
-// {{ $slice }} is a parsable slice of {{ $.Name }}.
-type {{ $slice }} []*{{ $.Name }}
-
-{{ with extend $ "Slice" $slice }}
-	{{ $tmpl := printf "dialect/%s/decode/many" $.Storage }}
-	{{ xtemplate $tmpl . }}
-{{ end }}
 {{ end }}
 
 {{/* A template to generate a fmt.Stringer implementation. */}}

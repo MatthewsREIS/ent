@@ -1,0 +1,54 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{ define "config" }}
+
+{{ template "header" $ }}
+
+{{/* Additional dependencies injected to config. */}}
+{{ $deps := list }}{{ with $.Config.Annotations }}{{ $deps = $.Config.Annotations.Dependencies }}{{ end }}
+
+import (
+	"{{ $.Config.Package }}/internal"
+)
+
+type (
+	// Config is the configuration for the client and its builder.
+	Config = internal.Config
+	// Option function to configure the client.
+	Option = internal.Option
+)
+
+var (
+	// NewConfig creates a new Config for the client.
+	NewConfig = internal.NewConfig
+	// Debug enables debug logging on the ent.Driver.
+	Debug = internal.Debug
+	// Log sets the logging function for debug mode.
+	Log = internal.Log
+	// Driver configures the client driver.
+	Driver = internal.Driver
+)
+
+{{- /* Additional dependency options reside on the Config object. */}}
+{{- range $dep := $deps }}
+	var {{ $dep.Option }} = internal.{{ $dep.Option }}
+{{- end }}
+
+{{- /* Support adding config options from both global or dialect-specific templates. */}}
+{{- /* This includes SchemaConfig, AlternateSchema, DefaultSchemaConfig (via dialect/sql/config/options/*) */}}
+{{- /* and any user-defined config options (via config/options/*). */}}
+{{- range $prefix := list "" (printf "dialect/%s/" $.Storage) }}
+	{{- with $tmpls := matchTemplate (print $prefix "config/options/*") }}
+		{{- range $tmpl := $tmpls }}
+			{{ xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
+{{ end }}

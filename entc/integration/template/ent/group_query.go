@@ -21,7 +21,7 @@ import (
 
 // GroupQuery is the builder for querying Group entities.
 type GroupQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []group.OrderOption
 	inters     []Interceptor
@@ -73,7 +73,7 @@ func (_q *GroupQuery) First(ctx context.Context) (*Group, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{group.Label}
+		return nil, &NotFoundError{Label: group.Label}
 	}
 	return nodes[0], nil
 }
@@ -95,7 +95,7 @@ func (_q *GroupQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{group.Label}
+		err = &NotFoundError{Label: group.Label}
 		return
 	}
 	return ids[0], nil
@@ -122,9 +122,9 @@ func (_q *GroupQuery) Only(ctx context.Context) (*Group, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{group.Label}
+		return nil, &NotFoundError{Label: group.Label}
 	default:
-		return nil, &NotSingularError{group.Label}
+		return nil, &NotSingularError{Label: group.Label}
 	}
 }
 
@@ -149,9 +149,9 @@ func (_q *GroupQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{group.Label}
+		err = &NotFoundError{Label: group.Label}
 	default:
-		err = &NotSingularError{group.Label}
+		err = &NotSingularError{Label: group.Label}
 	}
 	return
 }
@@ -252,7 +252,7 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 		return nil
 	}
 	return &GroupQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]group.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -324,7 +324,7 @@ func (_q *GroupQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !group.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -343,12 +343,12 @@ func (_q *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Group).scanValues(nil, columns)
+		return (*Group).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Group{config: _q.config}
+		node := &Group{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
@@ -356,7 +356,7 @@ func (_q *GroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Group,
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -374,7 +374,7 @@ func (_q *GroupQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *GroupQuery) querySpec() *sqlgraph.QuerySpec {
@@ -418,7 +418,7 @@ func (_q *GroupQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *GroupQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(group.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -498,7 +498,7 @@ func (_g *GroupGroupBy) sqlScan(ctx context.Context, root *GroupQuery, v any) er
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -540,7 +540,7 @@ func (_s *GroupSelect) sqlScan(ctx context.Context, root *GroupQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

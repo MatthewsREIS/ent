@@ -21,7 +21,7 @@ import (
 
 // RevisionQuery is the builder for querying Revision entities.
 type RevisionQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []revision.OrderOption
 	inters     []Interceptor
@@ -70,7 +70,7 @@ func (_q *RevisionQuery) First(ctx context.Context) (*Revision, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{revision.Label}
+		return nil, &NotFoundError{Label: revision.Label}
 	}
 	return nodes[0], nil
 }
@@ -92,7 +92,7 @@ func (_q *RevisionQuery) FirstID(ctx context.Context) (id string, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{revision.Label}
+		err = &NotFoundError{Label: revision.Label}
 		return
 	}
 	return ids[0], nil
@@ -119,9 +119,9 @@ func (_q *RevisionQuery) Only(ctx context.Context) (*Revision, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{revision.Label}
+		return nil, &NotFoundError{Label: revision.Label}
 	default:
-		return nil, &NotSingularError{revision.Label}
+		return nil, &NotSingularError{Label: revision.Label}
 	}
 }
 
@@ -146,9 +146,9 @@ func (_q *RevisionQuery) OnlyID(ctx context.Context) (id string, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{revision.Label}
+		err = &NotFoundError{Label: revision.Label}
 	default:
-		err = &NotSingularError{revision.Label}
+		err = &NotSingularError{Label: revision.Label}
 	}
 	return
 }
@@ -249,7 +249,7 @@ func (_q *RevisionQuery) Clone() *RevisionQuery {
 		return nil
 	}
 	return &RevisionQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]revision.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -299,7 +299,7 @@ func (_q *RevisionQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !revision.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -318,17 +318,17 @@ func (_q *RevisionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Rev
 		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Revision).scanValues(nil, columns)
+		return (*Revision).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Revision{config: _q.config}
+		node := &Revision{Config: _q.Config}
 		nodes = append(nodes, node)
-		return node.assignValues(columns, values)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -343,7 +343,7 @@ func (_q *RevisionQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *RevisionQuery) querySpec() *sqlgraph.QuerySpec {
@@ -387,7 +387,7 @@ func (_q *RevisionQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *RevisionQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(revision.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -459,7 +459,7 @@ func (_g *RevisionGroupBy) sqlScan(ctx context.Context, root *RevisionQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -501,7 +501,7 @@ func (_s *RevisionSelect) sqlScan(ctx context.Context, root *RevisionQuery, v an
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -17,13 +17,12 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // PetQuery is the builder for querying Pet entities.
 type PetQuery struct {
-	config
+	Config
 	ctx        *QueryContext
 	order      []pet.OrderOption
 	inters     []Interceptor
@@ -68,7 +67,7 @@ func (_q *PetQuery) Order(o ...pet.OrderOption) *PetQuery {
 
 // QueryOwner chains the current query on the "owner" edge.
 func (_q *PetQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -82,7 +81,7 @@ func (_q *PetQuery) QueryOwner() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, pet.OwnerTable, pet.OwnerColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.Drv.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -96,7 +95,7 @@ func (_q *PetQuery) First(ctx context.Context) (*Pet, error) {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{pet.Label}
+		return nil, &NotFoundError{Label: pet.Label}
 	}
 	return nodes[0], nil
 }
@@ -118,7 +117,7 @@ func (_q *PetQuery) FirstID(ctx context.Context) (id int, err error) {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{Label: pet.Label}
 		return
 	}
 	return ids[0], nil
@@ -145,9 +144,9 @@ func (_q *PetQuery) Only(ctx context.Context) (*Pet, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{pet.Label}
+		return nil, &NotFoundError{Label: pet.Label}
 	default:
-		return nil, &NotSingularError{pet.Label}
+		return nil, &NotSingularError{Label: pet.Label}
 	}
 }
 
@@ -172,9 +171,9 @@ func (_q *PetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{pet.Label}
+		err = &NotFoundError{Label: pet.Label}
 	default:
-		err = &NotSingularError{pet.Label}
+		err = &NotSingularError{Label: pet.Label}
 	}
 	return
 }
@@ -275,7 +274,7 @@ func (_q *PetQuery) Clone() *PetQuery {
 		return nil
 	}
 	return &PetQuery{
-		config:     _q.config,
+		Config:     _q.Config,
 		ctx:        _q.ctx.Clone(),
 		order:      append([]pet.OrderOption{}, _q.order...),
 		inters:     append([]Interceptor{}, _q.inters...),
@@ -290,7 +289,7 @@ func (_q *PetQuery) Clone() *PetQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := (&UserClient{Config: _q.Config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -359,7 +358,7 @@ func (_q *PetQuery) prepareQuery(ctx context.Context) error {
 	}
 	for _, f := range _q.ctx.Fields {
 		if !pet.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
+			return &ValidationError{Name: f, Err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
 	}
 	if _q.path != nil {
@@ -388,18 +387,18 @@ func (_q *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)
 	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Pet).scanValues(nil, columns)
+		return (*Pet).ScanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Pet{config: _q.config}
+		node := &Pet{Config: _q.Config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
-		return node.assignValues(columns, values)
+		node.Edges.SetLoadedTypes(loadedTypes)
+		return node.AssignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.Drv, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -414,31 +413,36 @@ func (_q *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	return nodes, nil
 }
 
-var petOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      true,
-			Table:        pet.OwnerTable,
-			Columns:      pet.OwnerColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Pet) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Pet) *int {
-		return n.owner_id
-	},
-}
-
 func (_q *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &petOwnerEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Pet)
+	for i := range nodes {
+		if nodes[i].GetOwnerID() == nil {
+			continue
+		}
+		fk := *nodes[i].GetOwnerID()
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -448,7 +452,7 @@ func (_q *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.ctx.Fields) > 0 {
 		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *PetQuery) querySpec() *sqlgraph.QuerySpec {
@@ -492,7 +496,7 @@ func (_q *PetQuery) querySpec() *sqlgraph.QuerySpec {
 }
 
 func (_q *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(_q.driver.Dialect())
+	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(pet.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
@@ -564,7 +568,7 @@ func (_g *PetGroupBy) sqlScan(ctx context.Context, root *PetQuery, v any) error 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -606,7 +610,7 @@ func (_s *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.Drv.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

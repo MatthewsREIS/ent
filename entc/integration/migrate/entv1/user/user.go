@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/migrate/entv1/internal"
 )
 
 const (
@@ -125,8 +126,8 @@ var (
 	WorkplaceValidator func(string) error
 )
 
-// State defines the type for the "state" enum field.
-type State string
+// State is an alias for the enum type defined in the internal package.
+type State = internal.UserState
 
 // StateLoggedIn is the default value of the State enum.
 const DefaultState = StateLoggedIn
@@ -136,10 +137,6 @@ const (
 	StateLoggedIn  State = "logged_in"
 	StateLoggedOut State = "logged_out"
 )
-
-func (s State) String() string {
-	return string(s)
-}
 
 // StateValidator is a validator for the "state" field enum values. It is called by the builders before save.
 func StateValidator(s State) error {

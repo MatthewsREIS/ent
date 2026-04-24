@@ -32,3 +32,26 @@ func SchemaConfigFromContext(ctx context.Context) SchemaConfig {
 func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context.Context {
 	return context.WithValue(parent, schemaCtxKey{}, config)
 }
+
+// SchemaConfig returns the schema config stored on the Config.
+func (c Config) SchemaConfig() SchemaConfig {
+	return c.schemaConfig
+}
+
+// SetSchemaConfig updates the schema config stored on the Config.
+func (c *Config) SetSchemaConfig(config SchemaConfig) {
+	c.schemaConfig = config
+}
+
+var (
+	// DefaultSchemaConfig represents the default schema names for all tables as defined in ent/schema.
+	DefaultSchemaConfig = SchemaConfig{
+		Friendship:    tableSchemas[0],
+		Group:         tableSchemas[0],
+		GroupUsers:    tableSchemas[0],
+		Pet:           tableSchemas[1],
+		User:          tableSchemas[2],
+		UserFollowing: tableSchemas[2],
+	}
+	tableSchemas = [...]string{"db1", "db2", "db3"}
+)

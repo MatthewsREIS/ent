@@ -79,6 +79,7 @@ import (
 		{{- /* Import external packages */}}
 		{{- template "import/types" $n }}
 	{{- end }}
+	intpkg "{{ $.Config.Package }}/internal"
 
 	"entgo.io/ent"
 	"entgo.io/ent/privacy"
@@ -196,6 +197,7 @@ func init() {
 			{{- with $f.HasValueScanner }}
 				{{- $valuescan := print $pkg ".ValueScanner." $f.StructField }}
 				{{ $valuescan }} = {{ $desc }}.ValueScanner.(field.TypeValueScanner[{{ $f.Type }}])
+				intpkg.{{ $n.Name }}ValueScanner.{{ $f.StructField }} = {{ $desc }}.ValueScanner.(field.TypeValueScanner[{{ $f.Type }}])
 			{{- end }}
 			{{- with $f.Validators }}
 				{{- $name := print $pkg "." $f.Validator }}
