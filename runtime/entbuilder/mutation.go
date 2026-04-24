@@ -215,3 +215,27 @@ func (m *Mutation[T]) EdgeCleared(name string) bool {
 	_, ok := m.clearedEdges[name]
 	return ok
 }
+
+// AddedEdges returns the names of edges that have a target ID set by this mutation.
+// For the spike's unique-edges-only scope, this is the set of edges with a SetEdgeID call.
+func (m *Mutation[T]) AddedEdges() []string {
+	out := make([]string, 0, len(m.edgeIDs))
+	for k := range m.edgeIDs {
+		out = append(out, k)
+	}
+	return out
+}
+
+// ClearedEdges returns the names of edges explicitly cleared.
+func (m *Mutation[T]) ClearedEdges() []string {
+	out := make([]string, 0, len(m.clearedEdges))
+	for k := range m.clearedEdges {
+		out = append(out, k)
+	}
+	return out
+}
+
+// RemovedEdges returns the names of edges that have had specific targets
+// removed (for non-unique edges). In the spike's unique-edges-only scope,
+// this is always empty; full through-table support is Phase 4C scope.
+func (m *Mutation[T]) RemovedEdges() []string { return nil }

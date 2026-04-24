@@ -271,3 +271,28 @@ func TestEdgeCleared_UnknownEdge_ReturnsFalse(t *testing.T) {
 		t.Fatal("expected false for unknown edge")
 	}
 }
+
+func TestAddedEdges_ReflectsSet(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpCreate)
+	_ = m.SetEdgeID("Owner", 7)
+	edges := m.AddedEdges()
+	if len(edges) != 1 || edges[0] != "Owner" {
+		t.Fatalf("AddedEdges: %v", edges)
+	}
+}
+
+func TestClearedEdges_ReflectsCleared(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpUpdate)
+	_ = m.ClearEdge("Owner")
+	edges := m.ClearedEdges()
+	if len(edges) != 1 || edges[0] != "Owner" {
+		t.Fatalf("ClearedEdges: %v", edges)
+	}
+}
+
+func TestRemovedEdges_EmptyForSpike(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpUpdate)
+	if edges := m.RemovedEdges(); len(edges) != 0 {
+		t.Fatalf("RemovedEdges should be empty in spike: %v", edges)
+	}
+}
