@@ -47,7 +47,18 @@ RSS measurements are valid as baseline indicators of vet cost against `./ent/gen
 
 ## Post-POC
 
-(Filled in at Task 16 after regenerating under POC where.tmpl.)
+Captured 2026-04-23. Consumer regenerated against `i-h8-ent` HEAD (compact `where.tmpl`).
+`go build` exited 0. `go vet` exited 1 due to unrelated gqlgen staleness (schema API
+mismatches in `graph/generated.go`); vet timing/RSS numbers are still valid.
+
+| Metric | Baseline | Post-POC | Delta |
+|---|---|---|---|
+| Consumer ent/gen total LOC | 1,635,044 | 1,632,180 | -2,864 (-0.18%) |
+| Consumer where.go total LOC | 156,373 | 153,509 | -2,864 (-1.83%) |
+| Cold `go build ./ent/gen/...` wall time | 1:33.50 | 1:23.83 | -9.67s (-10.4%) |
+| Cold `go build` peak RSS (kB) | 9,646,432 | 9,278,724 | -367,708 (-3.8%) |
+| `go vet ./ent/gen/...` wall time | 0:19.70 | 0:17.47 | -2.23s (-11.3%) |
+| `go vet` peak RSS (kB) | 1,549,700 | 1,596,832 | +47,132 (+3.0%) |
 
 ## Decision
 
