@@ -848,7 +848,7 @@ func TestMutationStateSurface(t *testing.T) {
 			})
 		}, ent.OpCreate))
 		client.Card.Create().SetNumber("1234").ExecX(ctx)
-		require.Contains(t, captured, "number", "Fields() should include 'number'")
+		require.Contains(t, captured, card.FieldNumber, "Fields() should include card.FieldNumber")
 	})
 
 	t.Run("CardMutation_ResetName_ClearsField", func(t *testing.T) {
