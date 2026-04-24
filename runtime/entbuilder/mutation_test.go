@@ -99,3 +99,49 @@ func TestFieldCleared_UnknownField_ReturnsFalse(t *testing.T) {
 		t.Fatal("expected false for unknown field")
 	}
 }
+
+// For numeric deltas we need a schema whose struct has numeric fields.
+type fakeCardWithBalance struct {
+	Balance float64
+	Version int
+}
+
+var cardBalanceSchema = &Schema[fakeCardWithBalance]{
+	Name: "Card",
+	Fields: []Field{
+		{Name: "Balance", Column: "balance", Type: reflect.TypeOf(float64(0))},
+		{Name: "Version", Column: "version", Type: reflect.TypeOf(int(0))},
+	},
+}
+
+func TestAddField_AccumulatesNumericDelta(t *testing.T) {
+	m := NewMutation[fakeCardWithBalance](cardBalanceSchema, OpUpdate)
+	if err := m.AddField("Balance", 3.14); err != nil {
+		t.Fatalf("AddField: %v", err)
+	}
+	v, ok := m.AddedField("Balance")
+	if !ok {
+		t.Fatal("expected AddedField(Balance) ok=true")
+	}
+	if v.(float64) != 3.14 {
+		t.Fatalf("AddedField delta: got %v", v)
+	}
+	added := m.AddedFields()
+	if len(added) != 1 || added[0] != "Balance" {
+		t.Fatalf("AddedFields: %v", added)
+	}
+}
+
+func TestAddField_UnknownField_ReturnsError(t *testing.T) {
+	m := NewMutation[fakeCardWithBalance](cardBalanceSchema, OpUpdate)
+	if err := m.AddField("NotAField", 1); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestAddedField_UnsetReturnsFalse(t *testing.T) {
+	m := NewMutation[fakeCardWithBalance](cardBalanceSchema, OpUpdate)
+	if _, ok := m.AddedField("Balance"); ok {
+		t.Fatal("expected ok=false before any AddField")
+	}
+}

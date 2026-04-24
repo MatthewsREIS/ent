@@ -129,3 +129,21 @@ func (m *Mutation[T]) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
+
+// AddField records a numeric delta for `name`. The caller is responsible
+// for ensuring the field is a numeric type — this matches the existing
+// ent.Mutation.AddField contract.
+func (m *Mutation[T]) AddField(name string, v any) error {
+	if _, ok := m.schema.FindField(name); !ok {
+		return fmt.Errorf("entbuilder: schema %q has no field %q", m.schema.Name, name)
+	}
+	m.addedFields[name] = v
+	return nil
+}
+
+// AddedField returns the recorded delta for `name` (from AddField) and ok=true,
+// or (nil, false) if no delta has been recorded.
+func (m *Mutation[T]) AddedField(name string) (any, bool) {
+	v, ok := m.addedFields[name]
+	return v, ok
+}
