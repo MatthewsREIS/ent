@@ -3,8 +3,10 @@ package entbuilder
 import (
 	"database/sql/driver"
 	"errors"
+	"reflect"
 	"testing"
 
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
 
@@ -303,6 +305,58 @@ func TestNillableFieldWithScanner_ScannerError_PropagatesAsNotOK(t *testing.T) {
 	}
 	if fv != (FieldValue{}) {
 		t.Fatalf("expected zero FieldValue on error, got %+v", fv)
+	}
+}
+
+func TestNewEdgeSpec_M2M_PKColumns(t *testing.T) {
+	spec := NewEdgeSpec(EdgeSpecParams{
+		Rel:          sqlgraph.M2M,
+		Inverse:      false,
+		Table:        "user_groups",
+		Columns:      []string{"user_id", "group_id"},
+		Bidi:         true,
+		TargetColumn: "id",
+		TargetType:   field.TypeInt,
+	})
+	if spec.Rel != sqlgraph.M2M {
+		t.Fatalf("wrong rel: %v", spec.Rel)
+	}
+	if !reflect.DeepEqual(spec.Columns, []string{"user_id", "group_id"}) {
+		t.Fatalf("wrong columns: %v", spec.Columns)
+	}
+	if !spec.Bidi {
+		t.Fatal("Bidi not propagated")
+	}
+	if spec.Target == nil || spec.Target.IDSpec == nil || spec.Target.IDSpec.Column != "id" {
+		t.Fatalf("Target missing or wrong: %+v", spec.Target)
+	}
+}
+
+func TestNewEdgeSpec_O2M_SingleColumnString(t *testing.T) {
+	spec := NewEdgeSpec(EdgeSpecParams{
+		Rel:          sqlgraph.O2M,
+		Table:        "posts",
+		Columns:      "user_id", // single string, should be wrapped
+		TargetColumn: "id",
+		TargetType:   field.TypeInt,
+	})
+	if !reflect.DeepEqual(spec.Columns, []string{"user_id"}) {
+		t.Fatalf("expected single-element slice, got: %v", spec.Columns)
+	}
+}
+
+func TestNewEdgeSpec_InvalidColumnsType_EmptyColumns(t *testing.T) {
+	// Current helper silently produces empty Columns on unknown types.
+	// Document this via test so we notice if it changes.
+	spec := NewEdgeSpec(EdgeSpecParams{
+		Rel:          sqlgraph.M2O,
+		Table:        "x",
+		Columns:      42, // int; unsupported
+		TargetColumn: "id",
+		TargetType:   field.TypeInt,
+	})
+	if len(spec.Columns) != 0 {
+		t.Fatalf("expected empty Columns on unknown type, got: %v", spec.Columns)
 	}
 }
 
