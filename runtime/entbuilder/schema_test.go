@@ -1,6 +1,8 @@
 package entbuilder
 
 import (
+	"context"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -168,6 +170,26 @@ func TestValidateSchema_NullableMatchesPointer(t *testing.T) {
 	}
 	if err := ValidateSchema[fakeCardNode](s); err != nil {
 		t.Fatalf("unexpected err: %v", err)
+	}
+}
+
+func TestSchema_OldFieldFetcher_ReturnsClosure(t *testing.T) {
+	fetcher := func(ctx context.Context, id any, field string) (any, error) {
+		if field == "Name" {
+			return "alice", nil
+		}
+		return nil, fmt.Errorf("unknown field: %s", field)
+	}
+	s := &Schema[fakeCardNode]{
+		Name:            "Card",
+		OldFieldFetcher: fetcher,
+	}
+	got, err := s.OldFieldFetcher(context.Background(), 1, "Name")
+	if err != nil {
+		t.Fatalf("fetcher err: %v", err)
+	}
+	if got.(string) != "alice" {
+		t.Fatalf("OldField value: %v", got)
 	}
 }
 

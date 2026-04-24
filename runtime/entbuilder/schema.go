@@ -1,6 +1,7 @@
 package entbuilder
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 )
@@ -54,6 +55,13 @@ type Schema[T any] struct {
 	Fields []Field
 	// Edges lists all relationships.
 	Edges []Edge
+
+	// OldFieldFetcher is the closure that retrieves the pre-mutation value
+	// for `field` from the row identified by `id`. Typically generated code
+	// wires this to a one-row Query by ID with a single column select.
+	// Nil OldFieldFetcher means the schema does not support OldX lookups
+	// (e.g., on OpCreate mutations).
+	OldFieldFetcher func(ctx context.Context, id any, field string) (any, error)
 }
 
 // FindField returns the Field with the given Name, or (Field{}, false) if absent.
