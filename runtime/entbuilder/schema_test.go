@@ -102,3 +102,88 @@ func TestSchema_FindEdge(t *testing.T) {
 		t.Fatal("expected FindEdge to return ok=false for unknown edge")
 	}
 }
+
+func TestValidateSchema_Matches(t *testing.T) {
+	s := &Schema[fakeCardNode]{
+		Name:    "Card",
+		Table:   "cards",
+		IDField: Field{Name: "ID", Column: "id", Type: reflect.TypeOf(int(0))},
+		Fields: []Field{
+			{Name: "Number", Column: "number", Type: reflect.TypeOf("")},
+			{Name: "Name", Column: "name", Type: reflect.TypeOf(""), Nullable: true},
+			{Name: "CreatedAt", Column: "created_at", Type: reflect.TypeOf(time.Time{})},
+			{Name: "InHook", Column: "in_hook", Type: reflect.TypeOf("")},
+			{Name: "ExpiredAt", Column: "expired_at", Type: reflect.TypeOf(time.Time{}), Nullable: true},
+		},
+	}
+	if err := ValidateSchema[fakeCardNode](s); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+}
+
+func TestValidateSchema_MissingField(t *testing.T) {
+	s := &Schema[fakeCardNode]{
+		Name: "Card",
+		Fields: []Field{
+			{Name: "NotOnStruct", Column: "x", Type: reflect.TypeOf("")},
+		},
+	}
+	err := ValidateSchema[fakeCardNode](s)
+	if err == nil {
+		t.Fatal("expected error when descriptor names a field absent on the struct")
+	}
+	if !containsAll(err.Error(), "NotOnStruct", "fakeCardNode") {
+		t.Fatalf("error message should name the bad field and type: %v", err)
+	}
+}
+
+func TestValidateSchema_WrongType(t *testing.T) {
+	s := &Schema[fakeCardNode]{
+		Name: "Card",
+		Fields: []Field{
+			// Number is string on the struct; descriptor claims int
+			{Name: "Number", Column: "number", Type: reflect.TypeOf(int(0))},
+		},
+	}
+	err := ValidateSchema[fakeCardNode](s)
+	if err == nil {
+		t.Fatal("expected error for type mismatch")
+	}
+}
+
+func TestValidateSchema_NullableMatchesPointer(t *testing.T) {
+	// ExpiredAt on fakeCardNode is *time.Time. The descriptor should
+	// declare Type=time.Time and Nullable=true; the validator peels
+	// the pointer on the struct side.
+	s := &Schema[fakeCardNode]{
+		Name:    "Card",
+		IDField: Field{Name: "ID", Column: "id", Type: reflect.TypeOf(int(0))},
+		Fields: []Field{
+			{Name: "ExpiredAt", Column: "expired_at", Type: reflect.TypeOf(time.Time{}), Nullable: true},
+			{Name: "Number", Column: "number", Type: reflect.TypeOf("")},
+			{Name: "Name", Column: "name", Type: reflect.TypeOf(""), Nullable: true},
+			{Name: "CreatedAt", Column: "created_at", Type: reflect.TypeOf(time.Time{})},
+			{Name: "InHook", Column: "in_hook", Type: reflect.TypeOf("")},
+		},
+	}
+	if err := ValidateSchema[fakeCardNode](s); err != nil {
+		t.Fatalf("unexpected err: %v", err)
+	}
+}
+
+// test helper
+func containsAll(s string, substrs ...string) bool {
+	for _, sub := range substrs {
+		found := false
+		for i := 0; i+len(sub) <= len(s); i++ {
+			if s[i:i+len(sub)] == sub {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
