@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	_ "entgo.io/ent/entc/integration/edgeschema/ent/runtime"
+	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entql"
@@ -407,4 +408,93 @@ func TestEdgeSchemaTypeMatching(t *testing.T) {
 	require.Equal(t, files[2].ID, af.QueryFi().OnlyIDX(ctx))
 	require.Equal(t, []int{files[0].ID, files[1].ID, files[2].ID}, client.AttachedFile.Query().QueryFi().IDsX(ctx))
 	require.Equal(t, files[2].ID, client.AttachedFile.Query().QueryProc().QueryFiles().Where(file.Name(files[2].Name)).OnlyIDX(ctx))
+}
+
+// TestEntQLNonEdgePredicates covers entql typed filter methods on non-edge
+// entities — regression net for Phase 3's where.tmpl rewrite, which feeds
+// entql.go generation.
+func TestEntQLNonEdgePredicates(t *testing.T) {
+	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	defer client.Close()
+	ctx := context.Background()
+	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
+
+	// Seed data: two groups, two roles, two tweets, two users.
+	hub := client.Group.Create().SetName("hub").SaveX(ctx)
+	lab := client.Group.Create().SetName("lab").SaveX(ctx)
+	adminRole := client.Role.Create().SetName("admin").SaveX(ctx)
+	client.Role.Create().SetName("member").ExecX(ctx)
+	t1 := client.Tweet.Create().SetText("hello world").SaveX(ctx)
+	t2 := client.Tweet.Create().SetText("goodbye world").SaveX(ctx)
+	a8m := client.User.Create().SetName("a8m").AddLikedTweets(t1).SaveX(ctx)
+	client.User.Create().SetName("nati").AddLikedTweets(t1, t2).ExecX(ctx)
+
+	t.Run("GroupFilter_WhereName", func(t *testing.T) {
+		q := client.Group.Query()
+		q.Filter().WhereName(entql.StringEQ(hub.Name))
+		result := q.AllX(ctx)
+		require.Len(t, result, 1)
+		require.Equal(t, hub.ID, result[0].ID)
+	})
+
+	t.Run("GroupFilter_WhereName_ExcludesOther", func(t *testing.T) {
+		q := client.Group.Query()
+		q.Filter().WhereName(entql.StringEQ(lab.Name))
+		result := q.AllX(ctx)
+		require.Len(t, result, 1)
+		require.Equal(t, lab.ID, result[0].ID)
+	})
+
+	t.Run("RoleFilter_WhereName", func(t *testing.T) {
+		q := client.Role.Query()
+		q.Filter().WhereName(entql.StringEQ(adminRole.Name))
+		result := q.AllX(ctx)
+		require.Len(t, result, 1)
+		require.Equal(t, adminRole.ID, result[0].ID)
+	})
+
+	t.Run("TweetFilter_WhereText", func(t *testing.T) {
+		q := client.Tweet.Query()
+		q.Filter().WhereText(entql.StringEQ(t1.Text))
+		result := q.AllX(ctx)
+		require.Len(t, result, 1)
+		require.Equal(t, t1.ID, result[0].ID)
+	})
+
+	t.Run("TweetFilter_WhereText_NEQ", func(t *testing.T) {
+		// t2 has different text from t1; StringNEQ should exclude t1 and return t2.
+		q := client.Tweet.Query()
+		q.Filter().WhereText(entql.StringNEQ(t1.Text))
+		result := q.AllX(ctx)
+		require.Len(t, result, 1)
+		require.Equal(t, t2.ID, result[0].ID)
+	})
+
+	t.Run("TweetFilter_WhereHasLikesWith", func(t *testing.T) {
+		// t2 was liked by nati (user ID). t1 was liked by both.
+		// Filter tweets that have a like from user a8m via the TweetLike edge.
+		q := client.Tweet.Query()
+		q.Filter().WhereHasLikesWith(tweetlike.UserID(a8m.ID))
+		result := q.AllX(ctx)
+		require.Len(t, result, 1, "only t1 was liked by a8m")
+		require.Equal(t, t1.ID, result[0].ID)
+	})
+
+	t.Run("UserFilter_WhereName", func(t *testing.T) {
+		q := client.User.Query()
+		q.Filter().WhereName(entql.StringEQ("a8m"))
+		result := q.AllX(ctx)
+		require.Len(t, result, 1)
+		require.Equal(t, a8m.ID, result[0].ID)
+	})
+
+	t.Run("UserFilter_WhereHasLikedTweetsWith", func(t *testing.T) {
+		// Only nati liked t2.
+		q := client.User.Query()
+		q.Filter().WhereHasLikedTweetsWith(tweet.ID(t2.ID))
+		result := q.AllX(ctx)
+		require.Len(t, result, 1, "only nati liked t2")
+		require.Equal(t, "nati", result[0].Name)
+	})
 }
