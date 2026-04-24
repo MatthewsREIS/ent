@@ -828,3 +828,137 @@ func TestFilterTraverseFunc(t *testing.T) {
 		t.Errorf("got %d pets, want 2", n)
 	}
 }
+
+// TestMutationStateSurface covers mutation-state machinery paths that are
+// otherwise sparsely tested: ResetX, Fields(), AddedFields(), FieldCleared,
+// AddedField, Mutation().IDs(), Mutation().Op(), Mutation().Where().
+// This is a regression net for Phase 4 of the ent code-reduction refactor,
+// which will modify generated mutation.go / internal/<schema>_mutation.go.
+func TestMutationStateSurface(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("CardMutation_Fields_ReturnsKnownFields", func(t *testing.T) {
+		client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		defer client.Close()
+		var captured []string
+		client.Card.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+			return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
+				captured = m.Fields()
+				return next.Mutate(ctx, m)
+			})
+		}, ent.OpCreate))
+		client.Card.Create().SetNumber("1234").ExecX(ctx)
+		require.Contains(t, captured, "number", "Fields() should include 'number'")
+	})
+
+	t.Run("CardMutation_ResetName_ClearsField", func(t *testing.T) {
+		client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		defer client.Close()
+		var nameAfterReset string
+		var nameSetBeforeReset bool
+		client.Card.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+			return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
+				_, nameSetBeforeReset = m.Name()
+				m.ResetName()
+				nameAfterReset, _ = m.Name()
+				return next.Mutate(ctx, m)
+			})
+		}, ent.OpCreate))
+		client.Card.Create().SetNumber("1234").SetName("before-reset").ExecX(ctx)
+		require.True(t, nameSetBeforeReset, "Name() should be set before ResetName()")
+		require.Empty(t, nameAfterReset, "Name() should be empty after ResetName()")
+	})
+
+	t.Run("UserMutation_AddWorth_VisibleViaAddedField", func(t *testing.T) {
+		client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		defer client.Close()
+		client.User.Create().SetName("a8m").ExecX(ctx)
+		var addedFields []string
+		var worthDelta ent.Value
+		var ok bool
+		// Use OpUpdate (bulk) so the VersionHook (which only fires on OpUpdateOne) is not triggered.
+		client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+				addedFields = m.AddedFields()
+				worthDelta, ok = m.AddedField(user.FieldWorth)
+				return next.Mutate(ctx, m)
+			})
+		}, ent.OpUpdate))
+		client.User.Update().AddWorth(7).ExecX(ctx)
+		require.Contains(t, addedFields, user.FieldWorth, "AddedFields() should include 'worth'")
+		require.True(t, ok, "AddedField('worth') should return true")
+		require.Equal(t, 7, worthDelta, "AddedField('worth') should return the delta")
+	})
+
+	t.Run("UserMutation_Op_ReturnsCreate", func(t *testing.T) {
+		client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		defer client.Close()
+		var observedOp ent.Op
+		client.User.Use(func(next ent.Mutator) ent.Mutator {
+			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+				observedOp = m.Op()
+				return next.Mutate(ctx, m)
+			})
+		})
+		client.User.Create().SetName("a8m").ExecX(ctx)
+		require.True(t, observedOp.Is(ent.OpCreate), "Op() should be OpCreate during Create hook")
+	})
+
+	t.Run("UserMutation_IDs_ReturnsTargetIDs", func(t *testing.T) {
+		client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		defer client.Close()
+		target := client.User.Create().SetName("target-ids").SaveX(ctx)
+		client.User.Create().SetName("other-ids").ExecX(ctx)
+		var capturedIDs []int
+		// Use OpUpdate (bulk) to avoid the VersionHook which requires SetVersion on OpUpdateOne.
+		client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+				ids, err := m.IDs(ctx)
+				if err == nil {
+					capturedIDs = ids
+				}
+				return next.Mutate(ctx, m)
+			})
+		}, ent.OpUpdate))
+		client.User.Update().Where(user.Name("target-ids")).SetName("updated-ids").ExecX(ctx)
+		require.Equal(t, []int{target.ID}, capturedIDs, "IDs() should return only the filtered user's ID")
+	})
+
+	t.Run("UserMutation_Where_FiltersPredicates", func(t *testing.T) {
+		client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		defer client.Close()
+		a8m := client.User.Create().SetName("a8m").SaveX(ctx)
+		client.User.Create().SetName("nati").SaveX(ctx)
+		// Attach a hook that restricts bulk-update to only the 'a8m' user.
+		client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
+			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
+				m.Where(user.Name("a8m"))
+				return next.Mutate(ctx, m)
+			})
+		}, ent.OpUpdate))
+		client.User.Update().AddVersion(1).ExecX(ctx)
+		// Only a8m should have been updated.
+		require.Equal(t, 1, client.User.GetX(ctx, a8m.ID).Version)
+		require.Equal(t, 0, client.User.Query().Where(user.Name("nati")).OnlyX(ctx).Version)
+	})
+
+	t.Run("HookHasFields_Combinator", func(t *testing.T) {
+		client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
+		defer client.Close()
+		var fired bool
+		client.Card.Use(hook.If(func(next ent.Mutator) ent.Mutator {
+			return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
+				fired = true
+				return next.Mutate(ctx, m)
+			})
+		}, hook.HasFields(card.FieldName)))
+		// Create without name — hook should NOT fire.
+		fired = false
+		client.Card.Create().SetNumber("0001").ExecX(ctx)
+		require.False(t, fired, "hook should not fire when 'name' field is absent")
+		// Create with name — hook SHOULD fire.
+		fired = false
+		client.Card.Create().SetNumber("0002").SetName("mycard").ExecX(ctx)
+		require.True(t, fired, "hook should fire when 'name' field is present")
+	})
+}
