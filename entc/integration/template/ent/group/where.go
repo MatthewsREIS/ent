@@ -9,72 +9,49 @@ package group
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Group { return entbuilder.FieldEQ[predicate.Group](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Group { return entbuilder.FieldEQ[predicate.Group](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Group {
-	return predicate.Group(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Group { return entbuilder.FieldNEQ[predicate.Group](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Group {
-	return predicate.Group(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Group { return predicate.Group(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Group {
-	return predicate.Group(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Group { return predicate.Group(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Group {
-	return predicate.Group(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Group { return entbuilder.FieldGT[predicate.Group](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Group {
-	return predicate.Group(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Group { return entbuilder.FieldGTE[predicate.Group](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Group {
-	return predicate.Group(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Group { return entbuilder.FieldLT[predicate.Group](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Group {
-	return predicate.Group(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Group { return entbuilder.FieldLTE[predicate.Group](FieldID, id) }
 
 // MaxUsers applies equality check predicate on the "max_users" field. It's identical to MaxUsersEQ.
-func MaxUsers(v int) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldMaxUsers, v))
-}
+func MaxUsers(v int) predicate.Group { return entbuilder.FieldEQ[predicate.Group](FieldMaxUsers, v) }
 
 // MaxUsersEQ applies the EQ predicate on the "max_users" field.
-func MaxUsersEQ(v int) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldMaxUsers, v))
-}
+func MaxUsersEQ(v int) predicate.Group { return entbuilder.FieldEQ[predicate.Group](FieldMaxUsers, v) }
 
 // MaxUsersNEQ applies the NEQ predicate on the "max_users" field.
 func MaxUsersNEQ(v int) predicate.Group {
-	return predicate.Group(sql.FieldNEQ(FieldMaxUsers, v))
+	return entbuilder.FieldNEQ[predicate.Group](FieldMaxUsers, v)
 }
 
 // MaxUsersIn applies the In predicate on the "max_users" field.
-func MaxUsersIn(vs ...int) predicate.Group {
-	return predicate.Group(sql.FieldIn(FieldMaxUsers, vs...))
-}
+func MaxUsersIn(vs ...int) predicate.Group { return predicate.Group(sql.FieldIn(FieldMaxUsers, vs...)) }
 
 // MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
 func MaxUsersNotIn(vs ...int) predicate.Group {
@@ -82,36 +59,26 @@ func MaxUsersNotIn(vs ...int) predicate.Group {
 }
 
 // MaxUsersGT applies the GT predicate on the "max_users" field.
-func MaxUsersGT(v int) predicate.Group {
-	return predicate.Group(sql.FieldGT(FieldMaxUsers, v))
-}
+func MaxUsersGT(v int) predicate.Group { return entbuilder.FieldGT[predicate.Group](FieldMaxUsers, v) }
 
 // MaxUsersGTE applies the GTE predicate on the "max_users" field.
 func MaxUsersGTE(v int) predicate.Group {
-	return predicate.Group(sql.FieldGTE(FieldMaxUsers, v))
+	return entbuilder.FieldGTE[predicate.Group](FieldMaxUsers, v)
 }
 
 // MaxUsersLT applies the LT predicate on the "max_users" field.
-func MaxUsersLT(v int) predicate.Group {
-	return predicate.Group(sql.FieldLT(FieldMaxUsers, v))
-}
+func MaxUsersLT(v int) predicate.Group { return entbuilder.FieldLT[predicate.Group](FieldMaxUsers, v) }
 
 // MaxUsersLTE applies the LTE predicate on the "max_users" field.
 func MaxUsersLTE(v int) predicate.Group {
-	return predicate.Group(sql.FieldLTE(FieldMaxUsers, v))
+	return entbuilder.FieldLTE[predicate.Group](FieldMaxUsers, v)
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Group) predicate.Group {
-	return predicate.Group(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Group) predicate.Group { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Group) predicate.Group {
-	return predicate.Group(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Group) predicate.Group { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Group) predicate.Group {
-	return predicate.Group(sql.NotPredicates(p))
-}
+func Not(p predicate.Group) predicate.Group { return entbuilder.NotPred(p) }

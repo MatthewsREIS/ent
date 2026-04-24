@@ -12,22 +12,21 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uuid.UUID) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldEQ(FieldID, id))
-}
+func ID(id uuid.UUID) predicate.TweetTag { return entbuilder.FieldEQ[predicate.TweetTag](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldEQ(FieldID, id))
+	return entbuilder.FieldEQ[predicate.TweetTag](FieldID, id)
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldNEQ(FieldID, id))
+	return entbuilder.FieldNEQ[predicate.TweetTag](FieldID, id)
 }
 
 // IDIn applies the In predicate on the ID field.
@@ -42,47 +41,45 @@ func IDNotIn(ids ...uuid.UUID) predicate.TweetTag {
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldGT(FieldID, id))
+	return entbuilder.FieldGT[predicate.TweetTag](FieldID, id)
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldGTE(FieldID, id))
+	return entbuilder.FieldGTE[predicate.TweetTag](FieldID, id)
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldLT(FieldID, id))
+	return entbuilder.FieldLT[predicate.TweetTag](FieldID, id)
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldLTE(FieldID, id))
+	return entbuilder.FieldLTE[predicate.TweetTag](FieldID, id)
 }
 
 // AddedAt applies equality check predicate on the "added_at" field. It's identical to AddedAtEQ.
 func AddedAt(v time.Time) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldEQ(FieldAddedAt, v))
+	return entbuilder.FieldEQ[predicate.TweetTag](FieldAddedAt, v)
 }
 
 // TagID applies equality check predicate on the "tag_id" field. It's identical to TagIDEQ.
-func TagID(v int) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldEQ(FieldTagID, v))
-}
+func TagID(v int) predicate.TweetTag { return entbuilder.FieldEQ[predicate.TweetTag](FieldTagID, v) }
 
 // TweetID applies equality check predicate on the "tweet_id" field. It's identical to TweetIDEQ.
 func TweetID(v int) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldEQ(FieldTweetID, v))
+	return entbuilder.FieldEQ[predicate.TweetTag](FieldTweetID, v)
 }
 
 // AddedAtEQ applies the EQ predicate on the "added_at" field.
 func AddedAtEQ(v time.Time) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldEQ(FieldAddedAt, v))
+	return entbuilder.FieldEQ[predicate.TweetTag](FieldAddedAt, v)
 }
 
 // AddedAtNEQ applies the NEQ predicate on the "added_at" field.
 func AddedAtNEQ(v time.Time) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldNEQ(FieldAddedAt, v))
+	return entbuilder.FieldNEQ[predicate.TweetTag](FieldAddedAt, v)
 }
 
 // AddedAtIn applies the In predicate on the "added_at" field.
@@ -97,38 +94,34 @@ func AddedAtNotIn(vs ...time.Time) predicate.TweetTag {
 
 // AddedAtGT applies the GT predicate on the "added_at" field.
 func AddedAtGT(v time.Time) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldGT(FieldAddedAt, v))
+	return entbuilder.FieldGT[predicate.TweetTag](FieldAddedAt, v)
 }
 
 // AddedAtGTE applies the GTE predicate on the "added_at" field.
 func AddedAtGTE(v time.Time) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldGTE(FieldAddedAt, v))
+	return entbuilder.FieldGTE[predicate.TweetTag](FieldAddedAt, v)
 }
 
 // AddedAtLT applies the LT predicate on the "added_at" field.
 func AddedAtLT(v time.Time) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldLT(FieldAddedAt, v))
+	return entbuilder.FieldLT[predicate.TweetTag](FieldAddedAt, v)
 }
 
 // AddedAtLTE applies the LTE predicate on the "added_at" field.
 func AddedAtLTE(v time.Time) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldLTE(FieldAddedAt, v))
+	return entbuilder.FieldLTE[predicate.TweetTag](FieldAddedAt, v)
 }
 
 // TagIDEQ applies the EQ predicate on the "tag_id" field.
-func TagIDEQ(v int) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldEQ(FieldTagID, v))
-}
+func TagIDEQ(v int) predicate.TweetTag { return entbuilder.FieldEQ[predicate.TweetTag](FieldTagID, v) }
 
 // TagIDNEQ applies the NEQ predicate on the "tag_id" field.
 func TagIDNEQ(v int) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldNEQ(FieldTagID, v))
+	return entbuilder.FieldNEQ[predicate.TweetTag](FieldTagID, v)
 }
 
 // TagIDIn applies the In predicate on the "tag_id" field.
-func TagIDIn(vs ...int) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldIn(FieldTagID, vs...))
-}
+func TagIDIn(vs ...int) predicate.TweetTag { return predicate.TweetTag(sql.FieldIn(FieldTagID, vs...)) }
 
 // TagIDNotIn applies the NotIn predicate on the "tag_id" field.
 func TagIDNotIn(vs ...int) predicate.TweetTag {
@@ -137,12 +130,12 @@ func TagIDNotIn(vs ...int) predicate.TweetTag {
 
 // TweetIDEQ applies the EQ predicate on the "tweet_id" field.
 func TweetIDEQ(v int) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldEQ(FieldTweetID, v))
+	return entbuilder.FieldEQ[predicate.TweetTag](FieldTweetID, v)
 }
 
 // TweetIDNEQ applies the NEQ predicate on the "tweet_id" field.
 func TweetIDNEQ(v int) predicate.TweetTag {
-	return predicate.TweetTag(sql.FieldNEQ(FieldTweetID, v))
+	return entbuilder.FieldNEQ[predicate.TweetTag](FieldTweetID, v)
 }
 
 // TweetIDIn applies the In predicate on the "tweet_id" field.
@@ -168,14 +161,15 @@ func HasTag() predicate.TweetTag {
 
 // HasTagWith applies the HasEdge predicate on the "tag" edge with a given conditions (other predicates).
 func HasTagWith(preds ...predicate.Tag) predicate.TweetTag {
-	return predicate.TweetTag(func(s *sql.Selector) {
-		step := newTagStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.TweetTag(
+		func(s *sql.Selector) {
+			step := newTagStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTweet applies the HasEdge predicate on the "tweet" edge.
@@ -191,27 +185,26 @@ func HasTweet() predicate.TweetTag {
 
 // HasTweetWith applies the HasEdge predicate on the "tweet" edge with a given conditions (other predicates).
 func HasTweetWith(preds ...predicate.Tweet) predicate.TweetTag {
-	return predicate.TweetTag(func(s *sql.Selector) {
-		step := newTweetStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.TweetTag(
+		func(s *sql.Selector) {
+			step := newTweetStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.TweetTag) predicate.TweetTag {
-	return predicate.TweetTag(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.TweetTag) predicate.TweetTag {
-	return predicate.TweetTag(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.TweetTag) predicate.TweetTag {
-	return predicate.TweetTag(sql.NotPredicates(p))
-}
+func Not(p predicate.TweetTag) predicate.TweetTag { return entbuilder.NotPred(p) }

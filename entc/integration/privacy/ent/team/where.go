@@ -10,121 +10,86 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Team { return entbuilder.FieldEQ[predicate.Team](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Team { return entbuilder.FieldEQ[predicate.Team](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Team {
-	return predicate.Team(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Team { return entbuilder.FieldNEQ[predicate.Team](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Team {
-	return predicate.Team(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Team { return predicate.Team(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Team {
-	return predicate.Team(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Team { return predicate.Team(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Team {
-	return predicate.Team(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Team { return entbuilder.FieldGT[predicate.Team](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Team {
-	return predicate.Team(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Team { return entbuilder.FieldGTE[predicate.Team](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Team {
-	return predicate.Team(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Team { return entbuilder.FieldLT[predicate.Team](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Team {
-	return predicate.Team(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Team { return entbuilder.FieldLTE[predicate.Team](FieldID, id) }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldName, v))
-}
+func Name(v string) predicate.Team { return entbuilder.FieldEQ[predicate.Team](FieldName, v) }
 
 // NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldName, v))
-}
+func NameEQ(v string) predicate.Team { return entbuilder.FieldEQ[predicate.Team](FieldName, v) }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldNEQ(FieldName, v))
-}
+func NameNEQ(v string) predicate.Team { return entbuilder.FieldNEQ[predicate.Team](FieldName, v) }
 
 // NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldIn(FieldName, vs...))
-}
+func NameIn(vs ...string) predicate.Team { return predicate.Team(sql.FieldIn(FieldName, vs...)) }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldNotIn(FieldName, vs...))
-}
+func NameNotIn(vs ...string) predicate.Team { return predicate.Team(sql.FieldNotIn(FieldName, vs...)) }
 
 // NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Team {
-	return predicate.Team(sql.FieldGT(FieldName, v))
-}
+func NameGT(v string) predicate.Team { return entbuilder.FieldGT[predicate.Team](FieldName, v) }
 
 // NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldGTE(FieldName, v))
-}
+func NameGTE(v string) predicate.Team { return entbuilder.FieldGTE[predicate.Team](FieldName, v) }
 
 // NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Team {
-	return predicate.Team(sql.FieldLT(FieldName, v))
-}
+func NameLT(v string) predicate.Team { return entbuilder.FieldLT[predicate.Team](FieldName, v) }
 
 // NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldLTE(FieldName, v))
-}
+func NameLTE(v string) predicate.Team { return entbuilder.FieldLTE[predicate.Team](FieldName, v) }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Team {
-	return predicate.Team(sql.FieldContains(FieldName, v))
+	return entbuilder.FieldContains[predicate.Team](FieldName, v)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasPrefix(FieldName, v))
+	return entbuilder.FieldHasPrefix[predicate.Team](FieldName, v)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasSuffix(FieldName, v))
+	return entbuilder.FieldHasSuffix[predicate.Team](FieldName, v)
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldEqualFold(FieldName, v))
+	return entbuilder.FieldEqualFold[predicate.Team](FieldName, v)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldContainsFold(FieldName, v))
+	return entbuilder.FieldContainsFold[predicate.Team](FieldName, v)
 }
 
 // HasTasks applies the HasEdge predicate on the "tasks" edge.
@@ -140,14 +105,15 @@ func HasTasks() predicate.Team {
 
 // HasTasksWith applies the HasEdge predicate on the "tasks" edge with a given conditions (other predicates).
 func HasTasksWith(preds ...predicate.Task) predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := newTasksStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Team(
+		func(s *sql.Selector) {
+			step := newTasksStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUsers applies the HasEdge predicate on the "users" edge.
@@ -163,27 +129,22 @@ func HasUsers() predicate.Team {
 
 // HasUsersWith applies the HasEdge predicate on the "users" edge with a given conditions (other predicates).
 func HasUsersWith(preds ...predicate.User) predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := newUsersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Team(
+		func(s *sql.Selector) {
+			step := newUsersStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Team) predicate.Team {
-	return predicate.Team(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Team) predicate.Team { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Team) predicate.Team {
-	return predicate.Team(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Team) predicate.Team { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Team) predicate.Team {
-	return predicate.Team(sql.NotPredicates(p))
-}
+func Not(p predicate.Team) predicate.Team { return entbuilder.NotPred(p) }

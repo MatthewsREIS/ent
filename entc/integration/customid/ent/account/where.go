@@ -11,27 +11,20 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id sid.ID) predicate.Account {
-	return predicate.Account(sql.FieldEQ(FieldID, id))
-}
+func ID(id sid.ID) predicate.Account { return entbuilder.FieldEQ[predicate.Account](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id sid.ID) predicate.Account {
-	return predicate.Account(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id sid.ID) predicate.Account { return entbuilder.FieldEQ[predicate.Account](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id sid.ID) predicate.Account {
-	return predicate.Account(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id sid.ID) predicate.Account { return entbuilder.FieldNEQ[predicate.Account](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...sid.ID) predicate.Account {
-	return predicate.Account(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...sid.ID) predicate.Account { return predicate.Account(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...sid.ID) predicate.Account {
@@ -39,38 +32,26 @@ func IDNotIn(ids ...sid.ID) predicate.Account {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id sid.ID) predicate.Account {
-	return predicate.Account(sql.FieldGT(FieldID, id))
-}
+func IDGT(id sid.ID) predicate.Account { return entbuilder.FieldGT[predicate.Account](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id sid.ID) predicate.Account {
-	return predicate.Account(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id sid.ID) predicate.Account { return entbuilder.FieldGTE[predicate.Account](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id sid.ID) predicate.Account {
-	return predicate.Account(sql.FieldLT(FieldID, id))
-}
+func IDLT(id sid.ID) predicate.Account { return entbuilder.FieldLT[predicate.Account](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id sid.ID) predicate.Account {
-	return predicate.Account(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id sid.ID) predicate.Account { return entbuilder.FieldLTE[predicate.Account](FieldID, id) }
 
 // Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
-func Email(v string) predicate.Account {
-	return predicate.Account(sql.FieldEQ(FieldEmail, v))
-}
+func Email(v string) predicate.Account { return entbuilder.FieldEQ[predicate.Account](FieldEmail, v) }
 
 // EmailEQ applies the EQ predicate on the "email" field.
-func EmailEQ(v string) predicate.Account {
-	return predicate.Account(sql.FieldEQ(FieldEmail, v))
-}
+func EmailEQ(v string) predicate.Account { return entbuilder.FieldEQ[predicate.Account](FieldEmail, v) }
 
 // EmailNEQ applies the NEQ predicate on the "email" field.
 func EmailNEQ(v string) predicate.Account {
-	return predicate.Account(sql.FieldNEQ(FieldEmail, v))
+	return entbuilder.FieldNEQ[predicate.Account](FieldEmail, v)
 }
 
 // EmailIn applies the In predicate on the "email" field.
@@ -84,48 +65,44 @@ func EmailNotIn(vs ...string) predicate.Account {
 }
 
 // EmailGT applies the GT predicate on the "email" field.
-func EmailGT(v string) predicate.Account {
-	return predicate.Account(sql.FieldGT(FieldEmail, v))
-}
+func EmailGT(v string) predicate.Account { return entbuilder.FieldGT[predicate.Account](FieldEmail, v) }
 
 // EmailGTE applies the GTE predicate on the "email" field.
 func EmailGTE(v string) predicate.Account {
-	return predicate.Account(sql.FieldGTE(FieldEmail, v))
+	return entbuilder.FieldGTE[predicate.Account](FieldEmail, v)
 }
 
 // EmailLT applies the LT predicate on the "email" field.
-func EmailLT(v string) predicate.Account {
-	return predicate.Account(sql.FieldLT(FieldEmail, v))
-}
+func EmailLT(v string) predicate.Account { return entbuilder.FieldLT[predicate.Account](FieldEmail, v) }
 
 // EmailLTE applies the LTE predicate on the "email" field.
 func EmailLTE(v string) predicate.Account {
-	return predicate.Account(sql.FieldLTE(FieldEmail, v))
+	return entbuilder.FieldLTE[predicate.Account](FieldEmail, v)
 }
 
 // EmailContains applies the Contains predicate on the "email" field.
 func EmailContains(v string) predicate.Account {
-	return predicate.Account(sql.FieldContains(FieldEmail, v))
+	return entbuilder.FieldContains[predicate.Account](FieldEmail, v)
 }
 
 // EmailHasPrefix applies the HasPrefix predicate on the "email" field.
 func EmailHasPrefix(v string) predicate.Account {
-	return predicate.Account(sql.FieldHasPrefix(FieldEmail, v))
+	return entbuilder.FieldHasPrefix[predicate.Account](FieldEmail, v)
 }
 
 // EmailHasSuffix applies the HasSuffix predicate on the "email" field.
 func EmailHasSuffix(v string) predicate.Account {
-	return predicate.Account(sql.FieldHasSuffix(FieldEmail, v))
+	return entbuilder.FieldHasSuffix[predicate.Account](FieldEmail, v)
 }
 
 // EmailEqualFold applies the EqualFold predicate on the "email" field.
 func EmailEqualFold(v string) predicate.Account {
-	return predicate.Account(sql.FieldEqualFold(FieldEmail, v))
+	return entbuilder.FieldEqualFold[predicate.Account](FieldEmail, v)
 }
 
 // EmailContainsFold applies the ContainsFold predicate on the "email" field.
 func EmailContainsFold(v string) predicate.Account {
-	return predicate.Account(sql.FieldContainsFold(FieldEmail, v))
+	return entbuilder.FieldContainsFold[predicate.Account](FieldEmail, v)
 }
 
 // HasToken applies the HasEdge predicate on the "token" edge.
@@ -141,27 +118,24 @@ func HasToken() predicate.Account {
 
 // HasTokenWith applies the HasEdge predicate on the "token" edge with a given conditions (other predicates).
 func HasTokenWith(preds ...predicate.Token) predicate.Account {
-	return predicate.Account(func(s *sql.Selector) {
-		step := newTokenStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Account(
+		func(s *sql.Selector) {
+			step := newTokenStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Account) predicate.Account {
-	return predicate.Account(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Account) predicate.Account {
-	return predicate.Account(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Account) predicate.Account { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Account) predicate.Account {
-	return predicate.Account(sql.NotPredicates(p))
-}
+func Not(p predicate.Account) predicate.Account { return entbuilder.NotPred(p) }

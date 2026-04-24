@@ -10,82 +10,55 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Car { return entbuilder.FieldEQ[predicate.Car](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Car { return entbuilder.FieldEQ[predicate.Car](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Car { return entbuilder.FieldNEQ[predicate.Car](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Car { return predicate.Car(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Car {
-	return predicate.Car(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Car { return predicate.Car(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Car { return entbuilder.FieldGT[predicate.Car](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Car { return entbuilder.FieldGTE[predicate.Car](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Car { return entbuilder.FieldLT[predicate.Car](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Car { return entbuilder.FieldLTE[predicate.Car](FieldID, id) }
 
 // BeforeID applies equality check predicate on the "before_id" field. It's identical to BeforeIDEQ.
-func BeforeID(v float64) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldBeforeID, v))
-}
+func BeforeID(v float64) predicate.Car { return entbuilder.FieldEQ[predicate.Car](FieldBeforeID, v) }
 
 // AfterID applies equality check predicate on the "after_id" field. It's identical to AfterIDEQ.
-func AfterID(v float64) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldAfterID, v))
-}
+func AfterID(v float64) predicate.Car { return entbuilder.FieldEQ[predicate.Car](FieldAfterID, v) }
 
 // Model applies equality check predicate on the "model" field. It's identical to ModelEQ.
-func Model(v string) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldModel, v))
-}
+func Model(v string) predicate.Car { return entbuilder.FieldEQ[predicate.Car](FieldModel, v) }
 
 // BeforeIDEQ applies the EQ predicate on the "before_id" field.
-func BeforeIDEQ(v float64) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldBeforeID, v))
-}
+func BeforeIDEQ(v float64) predicate.Car { return entbuilder.FieldEQ[predicate.Car](FieldBeforeID, v) }
 
 // BeforeIDNEQ applies the NEQ predicate on the "before_id" field.
 func BeforeIDNEQ(v float64) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldBeforeID, v))
+	return entbuilder.FieldNEQ[predicate.Car](FieldBeforeID, v)
 }
 
 // BeforeIDIn applies the In predicate on the "before_id" field.
-func BeforeIDIn(vs ...float64) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldBeforeID, vs...))
-}
+func BeforeIDIn(vs ...float64) predicate.Car { return predicate.Car(sql.FieldIn(FieldBeforeID, vs...)) }
 
 // BeforeIDNotIn applies the NotIn predicate on the "before_id" field.
 func BeforeIDNotIn(vs ...float64) predicate.Car {
@@ -93,49 +66,35 @@ func BeforeIDNotIn(vs ...float64) predicate.Car {
 }
 
 // BeforeIDGT applies the GT predicate on the "before_id" field.
-func BeforeIDGT(v float64) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldBeforeID, v))
-}
+func BeforeIDGT(v float64) predicate.Car { return entbuilder.FieldGT[predicate.Car](FieldBeforeID, v) }
 
 // BeforeIDGTE applies the GTE predicate on the "before_id" field.
 func BeforeIDGTE(v float64) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldBeforeID, v))
+	return entbuilder.FieldGTE[predicate.Car](FieldBeforeID, v)
 }
 
 // BeforeIDLT applies the LT predicate on the "before_id" field.
-func BeforeIDLT(v float64) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldBeforeID, v))
-}
+func BeforeIDLT(v float64) predicate.Car { return entbuilder.FieldLT[predicate.Car](FieldBeforeID, v) }
 
 // BeforeIDLTE applies the LTE predicate on the "before_id" field.
 func BeforeIDLTE(v float64) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldBeforeID, v))
+	return entbuilder.FieldLTE[predicate.Car](FieldBeforeID, v)
 }
 
 // BeforeIDIsNil applies the IsNil predicate on the "before_id" field.
-func BeforeIDIsNil() predicate.Car {
-	return predicate.Car(sql.FieldIsNull(FieldBeforeID))
-}
+func BeforeIDIsNil() predicate.Car { return entbuilder.FieldIsNull[predicate.Car](FieldBeforeID) }
 
 // BeforeIDNotNil applies the NotNil predicate on the "before_id" field.
-func BeforeIDNotNil() predicate.Car {
-	return predicate.Car(sql.FieldNotNull(FieldBeforeID))
-}
+func BeforeIDNotNil() predicate.Car { return entbuilder.FieldNotNull[predicate.Car](FieldBeforeID) }
 
 // AfterIDEQ applies the EQ predicate on the "after_id" field.
-func AfterIDEQ(v float64) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldAfterID, v))
-}
+func AfterIDEQ(v float64) predicate.Car { return entbuilder.FieldEQ[predicate.Car](FieldAfterID, v) }
 
 // AfterIDNEQ applies the NEQ predicate on the "after_id" field.
-func AfterIDNEQ(v float64) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldAfterID, v))
-}
+func AfterIDNEQ(v float64) predicate.Car { return entbuilder.FieldNEQ[predicate.Car](FieldAfterID, v) }
 
 // AfterIDIn applies the In predicate on the "after_id" field.
-func AfterIDIn(vs ...float64) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldAfterID, vs...))
-}
+func AfterIDIn(vs ...float64) predicate.Car { return predicate.Car(sql.FieldIn(FieldAfterID, vs...)) }
 
 // AfterIDNotIn applies the NotIn predicate on the "after_id" field.
 func AfterIDNotIn(vs ...float64) predicate.Car {
@@ -143,98 +102,70 @@ func AfterIDNotIn(vs ...float64) predicate.Car {
 }
 
 // AfterIDGT applies the GT predicate on the "after_id" field.
-func AfterIDGT(v float64) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldAfterID, v))
-}
+func AfterIDGT(v float64) predicate.Car { return entbuilder.FieldGT[predicate.Car](FieldAfterID, v) }
 
 // AfterIDGTE applies the GTE predicate on the "after_id" field.
-func AfterIDGTE(v float64) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldAfterID, v))
-}
+func AfterIDGTE(v float64) predicate.Car { return entbuilder.FieldGTE[predicate.Car](FieldAfterID, v) }
 
 // AfterIDLT applies the LT predicate on the "after_id" field.
-func AfterIDLT(v float64) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldAfterID, v))
-}
+func AfterIDLT(v float64) predicate.Car { return entbuilder.FieldLT[predicate.Car](FieldAfterID, v) }
 
 // AfterIDLTE applies the LTE predicate on the "after_id" field.
-func AfterIDLTE(v float64) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldAfterID, v))
-}
+func AfterIDLTE(v float64) predicate.Car { return entbuilder.FieldLTE[predicate.Car](FieldAfterID, v) }
 
 // AfterIDIsNil applies the IsNil predicate on the "after_id" field.
-func AfterIDIsNil() predicate.Car {
-	return predicate.Car(sql.FieldIsNull(FieldAfterID))
-}
+func AfterIDIsNil() predicate.Car { return entbuilder.FieldIsNull[predicate.Car](FieldAfterID) }
 
 // AfterIDNotNil applies the NotNil predicate on the "after_id" field.
-func AfterIDNotNil() predicate.Car {
-	return predicate.Car(sql.FieldNotNull(FieldAfterID))
-}
+func AfterIDNotNil() predicate.Car { return entbuilder.FieldNotNull[predicate.Car](FieldAfterID) }
 
 // ModelEQ applies the EQ predicate on the "model" field.
-func ModelEQ(v string) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldModel, v))
-}
+func ModelEQ(v string) predicate.Car { return entbuilder.FieldEQ[predicate.Car](FieldModel, v) }
 
 // ModelNEQ applies the NEQ predicate on the "model" field.
-func ModelNEQ(v string) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldModel, v))
-}
+func ModelNEQ(v string) predicate.Car { return entbuilder.FieldNEQ[predicate.Car](FieldModel, v) }
 
 // ModelIn applies the In predicate on the "model" field.
-func ModelIn(vs ...string) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldModel, vs...))
-}
+func ModelIn(vs ...string) predicate.Car { return predicate.Car(sql.FieldIn(FieldModel, vs...)) }
 
 // ModelNotIn applies the NotIn predicate on the "model" field.
-func ModelNotIn(vs ...string) predicate.Car {
-	return predicate.Car(sql.FieldNotIn(FieldModel, vs...))
-}
+func ModelNotIn(vs ...string) predicate.Car { return predicate.Car(sql.FieldNotIn(FieldModel, vs...)) }
 
 // ModelGT applies the GT predicate on the "model" field.
-func ModelGT(v string) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldModel, v))
-}
+func ModelGT(v string) predicate.Car { return entbuilder.FieldGT[predicate.Car](FieldModel, v) }
 
 // ModelGTE applies the GTE predicate on the "model" field.
-func ModelGTE(v string) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldModel, v))
-}
+func ModelGTE(v string) predicate.Car { return entbuilder.FieldGTE[predicate.Car](FieldModel, v) }
 
 // ModelLT applies the LT predicate on the "model" field.
-func ModelLT(v string) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldModel, v))
-}
+func ModelLT(v string) predicate.Car { return entbuilder.FieldLT[predicate.Car](FieldModel, v) }
 
 // ModelLTE applies the LTE predicate on the "model" field.
-func ModelLTE(v string) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldModel, v))
-}
+func ModelLTE(v string) predicate.Car { return entbuilder.FieldLTE[predicate.Car](FieldModel, v) }
 
 // ModelContains applies the Contains predicate on the "model" field.
 func ModelContains(v string) predicate.Car {
-	return predicate.Car(sql.FieldContains(FieldModel, v))
+	return entbuilder.FieldContains[predicate.Car](FieldModel, v)
 }
 
 // ModelHasPrefix applies the HasPrefix predicate on the "model" field.
 func ModelHasPrefix(v string) predicate.Car {
-	return predicate.Car(sql.FieldHasPrefix(FieldModel, v))
+	return entbuilder.FieldHasPrefix[predicate.Car](FieldModel, v)
 }
 
 // ModelHasSuffix applies the HasSuffix predicate on the "model" field.
 func ModelHasSuffix(v string) predicate.Car {
-	return predicate.Car(sql.FieldHasSuffix(FieldModel, v))
+	return entbuilder.FieldHasSuffix[predicate.Car](FieldModel, v)
 }
 
 // ModelEqualFold applies the EqualFold predicate on the "model" field.
 func ModelEqualFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldEqualFold(FieldModel, v))
+	return entbuilder.FieldEqualFold[predicate.Car](FieldModel, v)
 }
 
 // ModelContainsFold applies the ContainsFold predicate on the "model" field.
 func ModelContainsFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldContainsFold(FieldModel, v))
+	return entbuilder.FieldContainsFold[predicate.Car](FieldModel, v)
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
@@ -250,27 +181,22 @@ func HasOwner() predicate.Car {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.Pet) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Car(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Car) predicate.Car {
-	return predicate.Car(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Car) predicate.Car { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Car) predicate.Car {
-	return predicate.Car(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Car) predicate.Car { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Car) predicate.Car {
-	return predicate.Car(sql.NotPredicates(p))
-}
+func Not(p predicate.Car) predicate.Car { return entbuilder.NotPred(p) }

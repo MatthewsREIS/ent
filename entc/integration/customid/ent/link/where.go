@@ -10,27 +10,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldEQ(FieldID, id))
-}
+func ID(id uuidc.UUIDC) predicate.Link { return entbuilder.FieldEQ[predicate.Link](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id uuidc.UUIDC) predicate.Link { return entbuilder.FieldEQ[predicate.Link](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id uuidc.UUIDC) predicate.Link { return entbuilder.FieldNEQ[predicate.Link](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...uuidc.UUIDC) predicate.Link { return predicate.Link(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuidc.UUIDC) predicate.Link {
@@ -38,36 +31,22 @@ func IDNotIn(ids ...uuidc.UUIDC) predicate.Link {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldGT(FieldID, id))
-}
+func IDGT(id uuidc.UUIDC) predicate.Link { return entbuilder.FieldGT[predicate.Link](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id uuidc.UUIDC) predicate.Link { return entbuilder.FieldGTE[predicate.Link](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldLT(FieldID, id))
-}
+func IDLT(id uuidc.UUIDC) predicate.Link { return entbuilder.FieldLT[predicate.Link](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id uuidc.UUIDC) predicate.Link { return entbuilder.FieldLTE[predicate.Link](FieldID, id) }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Link) predicate.Link {
-	return predicate.Link(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Link) predicate.Link { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Link) predicate.Link {
-	return predicate.Link(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Link) predicate.Link { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Link) predicate.Link {
-	return predicate.Link(sql.NotPredicates(p))
-}
+func Not(p predicate.Link) predicate.Link { return entbuilder.NotPred(p) }

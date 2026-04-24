@@ -12,111 +12,76 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Pet { return entbuilder.FieldEQ[predicate.Pet](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Pet { return entbuilder.FieldEQ[predicate.Pet](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Pet { return entbuilder.FieldNEQ[predicate.Pet](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Pet { return predicate.Pet(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Pet { return predicate.Pet(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Pet { return entbuilder.FieldGT[predicate.Pet](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Pet { return entbuilder.FieldGTE[predicate.Pet](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Pet { return entbuilder.FieldLT[predicate.Pet](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Pet { return entbuilder.FieldLTE[predicate.Pet](FieldID, id) }
 
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
-func Age(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldAge, v))
-}
+func Age(v int) predicate.Pet { return entbuilder.FieldEQ[predicate.Pet](FieldAge, v) }
 
 // LicensedAt applies equality check predicate on the "licensed_at" field. It's identical to LicensedAtEQ.
 func LicensedAt(v time.Time) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldLicensedAt, v))
+	return entbuilder.FieldEQ[predicate.Pet](FieldLicensedAt, v)
 }
 
 // AgeEQ applies the EQ predicate on the "age" field.
-func AgeEQ(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldAge, v))
-}
+func AgeEQ(v int) predicate.Pet { return entbuilder.FieldEQ[predicate.Pet](FieldAge, v) }
 
 // AgeNEQ applies the NEQ predicate on the "age" field.
-func AgeNEQ(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldAge, v))
-}
+func AgeNEQ(v int) predicate.Pet { return entbuilder.FieldNEQ[predicate.Pet](FieldAge, v) }
 
 // AgeIn applies the In predicate on the "age" field.
-func AgeIn(vs ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldIn(FieldAge, vs...))
-}
+func AgeIn(vs ...int) predicate.Pet { return predicate.Pet(sql.FieldIn(FieldAge, vs...)) }
 
 // AgeNotIn applies the NotIn predicate on the "age" field.
-func AgeNotIn(vs ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldNotIn(FieldAge, vs...))
-}
+func AgeNotIn(vs ...int) predicate.Pet { return predicate.Pet(sql.FieldNotIn(FieldAge, vs...)) }
 
 // AgeGT applies the GT predicate on the "age" field.
-func AgeGT(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldGT(FieldAge, v))
-}
+func AgeGT(v int) predicate.Pet { return entbuilder.FieldGT[predicate.Pet](FieldAge, v) }
 
 // AgeGTE applies the GTE predicate on the "age" field.
-func AgeGTE(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldGTE(FieldAge, v))
-}
+func AgeGTE(v int) predicate.Pet { return entbuilder.FieldGTE[predicate.Pet](FieldAge, v) }
 
 // AgeLT applies the LT predicate on the "age" field.
-func AgeLT(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldLT(FieldAge, v))
-}
+func AgeLT(v int) predicate.Pet { return entbuilder.FieldLT[predicate.Pet](FieldAge, v) }
 
 // AgeLTE applies the LTE predicate on the "age" field.
-func AgeLTE(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldLTE(FieldAge, v))
-}
+func AgeLTE(v int) predicate.Pet { return entbuilder.FieldLTE[predicate.Pet](FieldAge, v) }
 
 // LicensedAtEQ applies the EQ predicate on the "licensed_at" field.
 func LicensedAtEQ(v time.Time) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldLicensedAt, v))
+	return entbuilder.FieldEQ[predicate.Pet](FieldLicensedAt, v)
 }
 
 // LicensedAtNEQ applies the NEQ predicate on the "licensed_at" field.
 func LicensedAtNEQ(v time.Time) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldLicensedAt, v))
+	return entbuilder.FieldNEQ[predicate.Pet](FieldLicensedAt, v)
 }
 
 // LicensedAtIn applies the In predicate on the "licensed_at" field.
@@ -131,33 +96,29 @@ func LicensedAtNotIn(vs ...time.Time) predicate.Pet {
 
 // LicensedAtGT applies the GT predicate on the "licensed_at" field.
 func LicensedAtGT(v time.Time) predicate.Pet {
-	return predicate.Pet(sql.FieldGT(FieldLicensedAt, v))
+	return entbuilder.FieldGT[predicate.Pet](FieldLicensedAt, v)
 }
 
 // LicensedAtGTE applies the GTE predicate on the "licensed_at" field.
 func LicensedAtGTE(v time.Time) predicate.Pet {
-	return predicate.Pet(sql.FieldGTE(FieldLicensedAt, v))
+	return entbuilder.FieldGTE[predicate.Pet](FieldLicensedAt, v)
 }
 
 // LicensedAtLT applies the LT predicate on the "licensed_at" field.
 func LicensedAtLT(v time.Time) predicate.Pet {
-	return predicate.Pet(sql.FieldLT(FieldLicensedAt, v))
+	return entbuilder.FieldLT[predicate.Pet](FieldLicensedAt, v)
 }
 
 // LicensedAtLTE applies the LTE predicate on the "licensed_at" field.
 func LicensedAtLTE(v time.Time) predicate.Pet {
-	return predicate.Pet(sql.FieldLTE(FieldLicensedAt, v))
+	return entbuilder.FieldLTE[predicate.Pet](FieldLicensedAt, v)
 }
 
 // LicensedAtIsNil applies the IsNil predicate on the "licensed_at" field.
-func LicensedAtIsNil() predicate.Pet {
-	return predicate.Pet(sql.FieldIsNull(FieldLicensedAt))
-}
+func LicensedAtIsNil() predicate.Pet { return entbuilder.FieldIsNull[predicate.Pet](FieldLicensedAt) }
 
 // LicensedAtNotNil applies the NotNil predicate on the "licensed_at" field.
-func LicensedAtNotNil() predicate.Pet {
-	return predicate.Pet(sql.FieldNotNull(FieldLicensedAt))
-}
+func LicensedAtNotNil() predicate.Pet { return entbuilder.FieldNotNull[predicate.Pet](FieldLicensedAt) }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Pet {
@@ -172,27 +133,22 @@ func HasOwner() predicate.Pet {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.Pet {
-	return predicate.Pet(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Pet) predicate.Pet {
-	return predicate.Pet(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Pet) predicate.Pet { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Pet) predicate.Pet {
-	return predicate.Pet(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Pet) predicate.Pet { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Pet) predicate.Pet {
-	return predicate.Pet(sql.NotPredicates(p))
-}
+func Not(p predicate.Pet) predicate.Pet { return entbuilder.NotPred(p) }

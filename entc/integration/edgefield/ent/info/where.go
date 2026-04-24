@@ -10,52 +10,35 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Info {
-	return predicate.Info(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Info { return entbuilder.FieldEQ[predicate.Info](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Info {
-	return predicate.Info(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Info { return entbuilder.FieldEQ[predicate.Info](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Info {
-	return predicate.Info(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Info { return entbuilder.FieldNEQ[predicate.Info](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Info {
-	return predicate.Info(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Info { return predicate.Info(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Info {
-	return predicate.Info(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Info { return predicate.Info(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Info {
-	return predicate.Info(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Info { return entbuilder.FieldGT[predicate.Info](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Info {
-	return predicate.Info(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Info { return entbuilder.FieldGTE[predicate.Info](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Info {
-	return predicate.Info(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Info { return entbuilder.FieldLT[predicate.Info](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Info {
-	return predicate.Info(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Info { return entbuilder.FieldLTE[predicate.Info](FieldID, id) }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Info {
@@ -70,27 +53,22 @@ func HasUser() predicate.Info {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Info {
-	return predicate.Info(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Info(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Info) predicate.Info {
-	return predicate.Info(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Info) predicate.Info { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Info) predicate.Info {
-	return predicate.Info(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Info) predicate.Info { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Info) predicate.Info {
-	return predicate.Info(sql.NotPredicates(p))
-}
+func Not(p predicate.Info) predicate.Info { return entbuilder.NotPred(p) }

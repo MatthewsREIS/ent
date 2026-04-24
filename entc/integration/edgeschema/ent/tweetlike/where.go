@@ -12,31 +12,32 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // LikedAt applies equality check predicate on the "liked_at" field. It's identical to LikedAtEQ.
 func LikedAt(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldLikedAt, v))
+	return entbuilder.FieldEQ[predicate.TweetLike](FieldLikedAt, v)
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldUserID, v))
+	return entbuilder.FieldEQ[predicate.TweetLike](FieldUserID, v)
 }
 
 // TweetID applies equality check predicate on the "tweet_id" field. It's identical to TweetIDEQ.
 func TweetID(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldTweetID, v))
+	return entbuilder.FieldEQ[predicate.TweetLike](FieldTweetID, v)
 }
 
 // LikedAtEQ applies the EQ predicate on the "liked_at" field.
 func LikedAtEQ(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldLikedAt, v))
+	return entbuilder.FieldEQ[predicate.TweetLike](FieldLikedAt, v)
 }
 
 // LikedAtNEQ applies the NEQ predicate on the "liked_at" field.
 func LikedAtNEQ(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNEQ(FieldLikedAt, v))
+	return entbuilder.FieldNEQ[predicate.TweetLike](FieldLikedAt, v)
 }
 
 // LikedAtIn applies the In predicate on the "liked_at" field.
@@ -51,32 +52,32 @@ func LikedAtNotIn(vs ...time.Time) predicate.TweetLike {
 
 // LikedAtGT applies the GT predicate on the "liked_at" field.
 func LikedAtGT(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldGT(FieldLikedAt, v))
+	return entbuilder.FieldGT[predicate.TweetLike](FieldLikedAt, v)
 }
 
 // LikedAtGTE applies the GTE predicate on the "liked_at" field.
 func LikedAtGTE(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldGTE(FieldLikedAt, v))
+	return entbuilder.FieldGTE[predicate.TweetLike](FieldLikedAt, v)
 }
 
 // LikedAtLT applies the LT predicate on the "liked_at" field.
 func LikedAtLT(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldLT(FieldLikedAt, v))
+	return entbuilder.FieldLT[predicate.TweetLike](FieldLikedAt, v)
 }
 
 // LikedAtLTE applies the LTE predicate on the "liked_at" field.
 func LikedAtLTE(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldLTE(FieldLikedAt, v))
+	return entbuilder.FieldLTE[predicate.TweetLike](FieldLikedAt, v)
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldUserID, v))
+	return entbuilder.FieldEQ[predicate.TweetLike](FieldUserID, v)
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
 func UserIDNEQ(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNEQ(FieldUserID, v))
+	return entbuilder.FieldNEQ[predicate.TweetLike](FieldUserID, v)
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
@@ -91,12 +92,12 @@ func UserIDNotIn(vs ...int) predicate.TweetLike {
 
 // TweetIDEQ applies the EQ predicate on the "tweet_id" field.
 func TweetIDEQ(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldTweetID, v))
+	return entbuilder.FieldEQ[predicate.TweetLike](FieldTweetID, v)
 }
 
 // TweetIDNEQ applies the NEQ predicate on the "tweet_id" field.
 func TweetIDNEQ(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNEQ(FieldTweetID, v))
+	return entbuilder.FieldNEQ[predicate.TweetLike](FieldTweetID, v)
 }
 
 // TweetIDIn applies the In predicate on the "tweet_id" field.
@@ -122,14 +123,15 @@ func HasTweet() predicate.TweetLike {
 
 // HasTweetWith applies the HasEdge predicate on the "tweet" edge with a given conditions (other predicates).
 func HasTweetWith(preds ...predicate.Tweet) predicate.TweetLike {
-	return predicate.TweetLike(func(s *sql.Selector) {
-		step := newTweetStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.TweetLike(
+		func(s *sql.Selector) {
+			step := newTweetStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -145,27 +147,26 @@ func HasUser() predicate.TweetLike {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.TweetLike {
-	return predicate.TweetLike(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.TweetLike(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.TweetLike) predicate.TweetLike {
-	return predicate.TweetLike(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.TweetLike) predicate.TweetLike {
-	return predicate.TweetLike(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.TweetLike) predicate.TweetLike {
-	return predicate.TweetLike(sql.NotPredicates(p))
-}
+func Not(p predicate.TweetLike) predicate.TweetLike { return entbuilder.NotPred(p) }

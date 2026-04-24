@@ -12,27 +12,22 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Friendship { return entbuilder.FieldEQ[predicate.Friendship](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Friendship { return entbuilder.FieldEQ[predicate.Friendship](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldID, id))
+	return entbuilder.FieldNEQ[predicate.Friendship](FieldID, id)
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Friendship { return predicate.Friendship(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Friendship {
@@ -40,53 +35,49 @@ func IDNotIn(ids ...int) predicate.Friendship {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Friendship { return entbuilder.FieldGT[predicate.Friendship](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGTE(FieldID, id))
+	return entbuilder.FieldGTE[predicate.Friendship](FieldID, id)
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Friendship { return entbuilder.FieldLT[predicate.Friendship](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLTE(FieldID, id))
+	return entbuilder.FieldLTE[predicate.Friendship](FieldID, id)
 }
 
 // Weight applies equality check predicate on the "weight" field. It's identical to WeightEQ.
 func Weight(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldWeight, v))
+	return entbuilder.FieldEQ[predicate.Friendship](FieldWeight, v)
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldCreatedAt, v))
+	return entbuilder.FieldEQ[predicate.Friendship](FieldCreatedAt, v)
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldUserID, v))
+	return entbuilder.FieldEQ[predicate.Friendship](FieldUserID, v)
 }
 
 // FriendID applies equality check predicate on the "friend_id" field. It's identical to FriendIDEQ.
 func FriendID(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldFriendID, v))
+	return entbuilder.FieldEQ[predicate.Friendship](FieldFriendID, v)
 }
 
 // WeightEQ applies the EQ predicate on the "weight" field.
 func WeightEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldWeight, v))
+	return entbuilder.FieldEQ[predicate.Friendship](FieldWeight, v)
 }
 
 // WeightNEQ applies the NEQ predicate on the "weight" field.
 func WeightNEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldWeight, v))
+	return entbuilder.FieldNEQ[predicate.Friendship](FieldWeight, v)
 }
 
 // WeightIn applies the In predicate on the "weight" field.
@@ -101,32 +92,32 @@ func WeightNotIn(vs ...int) predicate.Friendship {
 
 // WeightGT applies the GT predicate on the "weight" field.
 func WeightGT(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGT(FieldWeight, v))
+	return entbuilder.FieldGT[predicate.Friendship](FieldWeight, v)
 }
 
 // WeightGTE applies the GTE predicate on the "weight" field.
 func WeightGTE(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGTE(FieldWeight, v))
+	return entbuilder.FieldGTE[predicate.Friendship](FieldWeight, v)
 }
 
 // WeightLT applies the LT predicate on the "weight" field.
 func WeightLT(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLT(FieldWeight, v))
+	return entbuilder.FieldLT[predicate.Friendship](FieldWeight, v)
 }
 
 // WeightLTE applies the LTE predicate on the "weight" field.
 func WeightLTE(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLTE(FieldWeight, v))
+	return entbuilder.FieldLTE[predicate.Friendship](FieldWeight, v)
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldCreatedAt, v))
+	return entbuilder.FieldEQ[predicate.Friendship](FieldCreatedAt, v)
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
 func CreatedAtNEQ(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldCreatedAt, v))
+	return entbuilder.FieldNEQ[predicate.Friendship](FieldCreatedAt, v)
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
@@ -141,32 +132,32 @@ func CreatedAtNotIn(vs ...time.Time) predicate.Friendship {
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
 func CreatedAtGT(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGT(FieldCreatedAt, v))
+	return entbuilder.FieldGT[predicate.Friendship](FieldCreatedAt, v)
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
 func CreatedAtGTE(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGTE(FieldCreatedAt, v))
+	return entbuilder.FieldGTE[predicate.Friendship](FieldCreatedAt, v)
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
 func CreatedAtLT(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLT(FieldCreatedAt, v))
+	return entbuilder.FieldLT[predicate.Friendship](FieldCreatedAt, v)
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLTE(FieldCreatedAt, v))
+	return entbuilder.FieldLTE[predicate.Friendship](FieldCreatedAt, v)
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldUserID, v))
+	return entbuilder.FieldEQ[predicate.Friendship](FieldUserID, v)
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
 func UserIDNEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldUserID, v))
+	return entbuilder.FieldNEQ[predicate.Friendship](FieldUserID, v)
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
@@ -181,12 +172,12 @@ func UserIDNotIn(vs ...int) predicate.Friendship {
 
 // FriendIDEQ applies the EQ predicate on the "friend_id" field.
 func FriendIDEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldFriendID, v))
+	return entbuilder.FieldEQ[predicate.Friendship](FieldFriendID, v)
 }
 
 // FriendIDNEQ applies the NEQ predicate on the "friend_id" field.
 func FriendIDNEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldFriendID, v))
+	return entbuilder.FieldNEQ[predicate.Friendship](FieldFriendID, v)
 }
 
 // FriendIDIn applies the In predicate on the "friend_id" field.
@@ -212,14 +203,15 @@ func HasUser() predicate.Friendship {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Friendship {
-	return predicate.Friendship(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Friendship(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFriend applies the HasEdge predicate on the "friend" edge.
@@ -235,27 +227,26 @@ func HasFriend() predicate.Friendship {
 
 // HasFriendWith applies the HasEdge predicate on the "friend" edge with a given conditions (other predicates).
 func HasFriendWith(preds ...predicate.User) predicate.Friendship {
-	return predicate.Friendship(func(s *sql.Selector) {
-		step := newFriendStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Friendship(
+		func(s *sql.Selector) {
+			step := newFriendStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Friendship) predicate.Friendship {
-	return predicate.Friendship(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Friendship) predicate.Friendship {
-	return predicate.Friendship(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Friendship) predicate.Friendship {
-	return predicate.Friendship(sql.NotPredicates(p))
-}
+func Not(p predicate.Friendship) predicate.Friendship { return entbuilder.NotPred(p) }

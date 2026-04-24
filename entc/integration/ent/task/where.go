@@ -12,52 +12,35 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Task { return entbuilder.FieldNEQ[predicate.Task](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Task { return predicate.Task(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Task { return predicate.Task(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Task { return entbuilder.FieldGT[predicate.Task](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Task { return entbuilder.FieldGTE[predicate.Task](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Task { return entbuilder.FieldLT[predicate.Task](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Task { return entbuilder.FieldLTE[predicate.Task](FieldID, id) }
 
 // Priority applies equality check predicate on the "priority" field. It's identical to PriorityEQ.
 func Priority(v task.Priority) predicate.Task {
@@ -67,28 +50,20 @@ func Priority(v task.Priority) predicate.Task {
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldCreatedAt, v))
+	return entbuilder.FieldEQ[predicate.Task](FieldCreatedAt, v)
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldName, v))
-}
+func Name(v string) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldName, v) }
 
 // Owner applies equality check predicate on the "owner" field. It's identical to OwnerEQ.
-func Owner(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOwner, v))
-}
+func Owner(v string) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldOwner, v) }
 
 // Order applies equality check predicate on the "order" field. It's identical to OrderEQ.
-func Order(v int) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOrder, v))
-}
+func Order(v int) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldOrder, v) }
 
 // Op applies equality check predicate on the "op" field. It's identical to OpEQ.
-func Op(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOp, v))
-}
+func Op(v string) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldOp, v) }
 
 // PriorityEQ applies the EQ predicate on the "priority" field.
 func PriorityEQ(v task.Priority) predicate.Task {
@@ -156,12 +131,12 @@ func PrioritiesNotNil() predicate.Task {
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldCreatedAt, v))
+	return entbuilder.FieldEQ[predicate.Task](FieldCreatedAt, v)
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
 func CreatedAtNEQ(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldCreatedAt, v))
+	return entbuilder.FieldNEQ[predicate.Task](FieldCreatedAt, v)
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
@@ -176,113 +151,87 @@ func CreatedAtNotIn(vs ...time.Time) predicate.Task {
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
 func CreatedAtGT(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldCreatedAt, v))
+	return entbuilder.FieldGT[predicate.Task](FieldCreatedAt, v)
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
 func CreatedAtGTE(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldCreatedAt, v))
+	return entbuilder.FieldGTE[predicate.Task](FieldCreatedAt, v)
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
 func CreatedAtLT(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldCreatedAt, v))
+	return entbuilder.FieldLT[predicate.Task](FieldCreatedAt, v)
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldCreatedAt, v))
+	return entbuilder.FieldLTE[predicate.Task](FieldCreatedAt, v)
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldName, v))
-}
+func NameEQ(v string) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldName, v) }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldName, v))
-}
+func NameNEQ(v string) predicate.Task { return entbuilder.FieldNEQ[predicate.Task](FieldName, v) }
 
 // NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldName, vs...))
-}
+func NameIn(vs ...string) predicate.Task { return predicate.Task(sql.FieldIn(FieldName, vs...)) }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldName, vs...))
-}
+func NameNotIn(vs ...string) predicate.Task { return predicate.Task(sql.FieldNotIn(FieldName, vs...)) }
 
 // NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldName, v))
-}
+func NameGT(v string) predicate.Task { return entbuilder.FieldGT[predicate.Task](FieldName, v) }
 
 // NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldName, v))
-}
+func NameGTE(v string) predicate.Task { return entbuilder.FieldGTE[predicate.Task](FieldName, v) }
 
 // NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldName, v))
-}
+func NameLT(v string) predicate.Task { return entbuilder.FieldLT[predicate.Task](FieldName, v) }
 
 // NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldName, v))
-}
+func NameLTE(v string) predicate.Task { return entbuilder.FieldLTE[predicate.Task](FieldName, v) }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldName, v))
+	return entbuilder.FieldContains[predicate.Task](FieldName, v)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldName, v))
+	return entbuilder.FieldHasPrefix[predicate.Task](FieldName, v)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldName, v))
+	return entbuilder.FieldHasSuffix[predicate.Task](FieldName, v)
 }
 
 // NameIsNil applies the IsNil predicate on the "name" field.
-func NameIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldName))
-}
+func NameIsNil() predicate.Task { return entbuilder.FieldIsNull[predicate.Task](FieldName) }
 
 // NameNotNil applies the NotNil predicate on the "name" field.
-func NameNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldName))
-}
+func NameNotNil() predicate.Task { return entbuilder.FieldNotNull[predicate.Task](FieldName) }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldName, v))
+	return entbuilder.FieldEqualFold[predicate.Task](FieldName, v)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldName, v))
+	return entbuilder.FieldContainsFold[predicate.Task](FieldName, v)
 }
 
 // OwnerEQ applies the EQ predicate on the "owner" field.
-func OwnerEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOwner, v))
-}
+func OwnerEQ(v string) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldOwner, v) }
 
 // OwnerNEQ applies the NEQ predicate on the "owner" field.
-func OwnerNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldOwner, v))
-}
+func OwnerNEQ(v string) predicate.Task { return entbuilder.FieldNEQ[predicate.Task](FieldOwner, v) }
 
 // OwnerIn applies the In predicate on the "owner" field.
-func OwnerIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldOwner, vs...))
-}
+func OwnerIn(vs ...string) predicate.Task { return predicate.Task(sql.FieldIn(FieldOwner, vs...)) }
 
 // OwnerNotIn applies the NotIn predicate on the "owner" field.
 func OwnerNotIn(vs ...string) predicate.Task {
@@ -290,118 +239,86 @@ func OwnerNotIn(vs ...string) predicate.Task {
 }
 
 // OwnerGT applies the GT predicate on the "owner" field.
-func OwnerGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldOwner, v))
-}
+func OwnerGT(v string) predicate.Task { return entbuilder.FieldGT[predicate.Task](FieldOwner, v) }
 
 // OwnerGTE applies the GTE predicate on the "owner" field.
-func OwnerGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldOwner, v))
-}
+func OwnerGTE(v string) predicate.Task { return entbuilder.FieldGTE[predicate.Task](FieldOwner, v) }
 
 // OwnerLT applies the LT predicate on the "owner" field.
-func OwnerLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldOwner, v))
-}
+func OwnerLT(v string) predicate.Task { return entbuilder.FieldLT[predicate.Task](FieldOwner, v) }
 
 // OwnerLTE applies the LTE predicate on the "owner" field.
-func OwnerLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldOwner, v))
-}
+func OwnerLTE(v string) predicate.Task { return entbuilder.FieldLTE[predicate.Task](FieldOwner, v) }
 
 // OwnerContains applies the Contains predicate on the "owner" field.
 func OwnerContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldOwner, v))
+	return entbuilder.FieldContains[predicate.Task](FieldOwner, v)
 }
 
 // OwnerHasPrefix applies the HasPrefix predicate on the "owner" field.
 func OwnerHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldOwner, v))
+	return entbuilder.FieldHasPrefix[predicate.Task](FieldOwner, v)
 }
 
 // OwnerHasSuffix applies the HasSuffix predicate on the "owner" field.
 func OwnerHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldOwner, v))
+	return entbuilder.FieldHasSuffix[predicate.Task](FieldOwner, v)
 }
 
 // OwnerIsNil applies the IsNil predicate on the "owner" field.
-func OwnerIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldOwner))
-}
+func OwnerIsNil() predicate.Task { return entbuilder.FieldIsNull[predicate.Task](FieldOwner) }
 
 // OwnerNotNil applies the NotNil predicate on the "owner" field.
-func OwnerNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldOwner))
-}
+func OwnerNotNil() predicate.Task { return entbuilder.FieldNotNull[predicate.Task](FieldOwner) }
 
 // OwnerEqualFold applies the EqualFold predicate on the "owner" field.
 func OwnerEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldOwner, v))
+	return entbuilder.FieldEqualFold[predicate.Task](FieldOwner, v)
 }
 
 // OwnerContainsFold applies the ContainsFold predicate on the "owner" field.
 func OwnerContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldOwner, v))
+	return entbuilder.FieldContainsFold[predicate.Task](FieldOwner, v)
 }
 
 // OrderEQ applies the EQ predicate on the "order" field.
-func OrderEQ(v int) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOrder, v))
-}
+func OrderEQ(v int) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldOrder, v) }
 
 // OrderNEQ applies the NEQ predicate on the "order" field.
-func OrderNEQ(v int) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldOrder, v))
-}
+func OrderNEQ(v int) predicate.Task { return entbuilder.FieldNEQ[predicate.Task](FieldOrder, v) }
 
 // OrderIn applies the In predicate on the "order" field.
-func OrderIn(vs ...int) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldOrder, vs...))
-}
+func OrderIn(vs ...int) predicate.Task { return predicate.Task(sql.FieldIn(FieldOrder, vs...)) }
 
 // OrderNotIn applies the NotIn predicate on the "order" field.
-func OrderNotIn(vs ...int) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldOrder, vs...))
-}
+func OrderNotIn(vs ...int) predicate.Task { return predicate.Task(sql.FieldNotIn(FieldOrder, vs...)) }
 
 // OrderGT applies the GT predicate on the "order" field.
-func OrderGT(v int) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldOrder, v))
-}
+func OrderGT(v int) predicate.Task { return entbuilder.FieldGT[predicate.Task](FieldOrder, v) }
 
 // OrderGTE applies the GTE predicate on the "order" field.
-func OrderGTE(v int) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldOrder, v))
-}
+func OrderGTE(v int) predicate.Task { return entbuilder.FieldGTE[predicate.Task](FieldOrder, v) }
 
 // OrderLT applies the LT predicate on the "order" field.
-func OrderLT(v int) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldOrder, v))
-}
+func OrderLT(v int) predicate.Task { return entbuilder.FieldLT[predicate.Task](FieldOrder, v) }
 
 // OrderLTE applies the LTE predicate on the "order" field.
-func OrderLTE(v int) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldOrder, v))
-}
+func OrderLTE(v int) predicate.Task { return entbuilder.FieldLTE[predicate.Task](FieldOrder, v) }
 
 // OrderIsNil applies the IsNil predicate on the "order" field.
-func OrderIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldOrder))
-}
+func OrderIsNil() predicate.Task { return entbuilder.FieldIsNull[predicate.Task](FieldOrder) }
 
 // OrderNotNil applies the NotNil predicate on the "order" field.
-func OrderNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldOrder))
-}
+func OrderNotNil() predicate.Task { return entbuilder.FieldNotNull[predicate.Task](FieldOrder) }
 
 // OrderOptionEQ applies the EQ predicate on the "order_option" field.
 func OrderOptionEQ(v int) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOrderOption, v))
+	return entbuilder.FieldEQ[predicate.Task](FieldOrderOption, v)
 }
 
 // OrderOptionNEQ applies the NEQ predicate on the "order_option" field.
 func OrderOptionNEQ(v int) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldOrderOption, v))
+	return entbuilder.FieldNEQ[predicate.Task](FieldOrderOption, v)
 }
 
 // OrderOptionIn applies the In predicate on the "order_option" field.
@@ -416,110 +333,86 @@ func OrderOptionNotIn(vs ...int) predicate.Task {
 
 // OrderOptionGT applies the GT predicate on the "order_option" field.
 func OrderOptionGT(v int) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldOrderOption, v))
+	return entbuilder.FieldGT[predicate.Task](FieldOrderOption, v)
 }
 
 // OrderOptionGTE applies the GTE predicate on the "order_option" field.
 func OrderOptionGTE(v int) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldOrderOption, v))
+	return entbuilder.FieldGTE[predicate.Task](FieldOrderOption, v)
 }
 
 // OrderOptionLT applies the LT predicate on the "order_option" field.
 func OrderOptionLT(v int) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldOrderOption, v))
+	return entbuilder.FieldLT[predicate.Task](FieldOrderOption, v)
 }
 
 // OrderOptionLTE applies the LTE predicate on the "order_option" field.
 func OrderOptionLTE(v int) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldOrderOption, v))
+	return entbuilder.FieldLTE[predicate.Task](FieldOrderOption, v)
 }
 
 // OrderOptionIsNil applies the IsNil predicate on the "order_option" field.
 func OrderOptionIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldOrderOption))
+	return entbuilder.FieldIsNull[predicate.Task](FieldOrderOption)
 }
 
 // OrderOptionNotNil applies the NotNil predicate on the "order_option" field.
 func OrderOptionNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldOrderOption))
+	return entbuilder.FieldNotNull[predicate.Task](FieldOrderOption)
 }
 
 // OpEQ applies the EQ predicate on the "op" field.
-func OpEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOp, v))
-}
+func OpEQ(v string) predicate.Task { return entbuilder.FieldEQ[predicate.Task](FieldOp, v) }
 
 // OpNEQ applies the NEQ predicate on the "op" field.
-func OpNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldOp, v))
-}
+func OpNEQ(v string) predicate.Task { return entbuilder.FieldNEQ[predicate.Task](FieldOp, v) }
 
 // OpIn applies the In predicate on the "op" field.
-func OpIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldOp, vs...))
-}
+func OpIn(vs ...string) predicate.Task { return predicate.Task(sql.FieldIn(FieldOp, vs...)) }
 
 // OpNotIn applies the NotIn predicate on the "op" field.
-func OpNotIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldOp, vs...))
-}
+func OpNotIn(vs ...string) predicate.Task { return predicate.Task(sql.FieldNotIn(FieldOp, vs...)) }
 
 // OpGT applies the GT predicate on the "op" field.
-func OpGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldOp, v))
-}
+func OpGT(v string) predicate.Task { return entbuilder.FieldGT[predicate.Task](FieldOp, v) }
 
 // OpGTE applies the GTE predicate on the "op" field.
-func OpGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldOp, v))
-}
+func OpGTE(v string) predicate.Task { return entbuilder.FieldGTE[predicate.Task](FieldOp, v) }
 
 // OpLT applies the LT predicate on the "op" field.
-func OpLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldOp, v))
-}
+func OpLT(v string) predicate.Task { return entbuilder.FieldLT[predicate.Task](FieldOp, v) }
 
 // OpLTE applies the LTE predicate on the "op" field.
-func OpLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldOp, v))
-}
+func OpLTE(v string) predicate.Task { return entbuilder.FieldLTE[predicate.Task](FieldOp, v) }
 
 // OpContains applies the Contains predicate on the "op" field.
-func OpContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldOp, v))
-}
+func OpContains(v string) predicate.Task { return entbuilder.FieldContains[predicate.Task](FieldOp, v) }
 
 // OpHasPrefix applies the HasPrefix predicate on the "op" field.
 func OpHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldOp, v))
+	return entbuilder.FieldHasPrefix[predicate.Task](FieldOp, v)
 }
 
 // OpHasSuffix applies the HasSuffix predicate on the "op" field.
 func OpHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldOp, v))
+	return entbuilder.FieldHasSuffix[predicate.Task](FieldOp, v)
 }
 
 // OpEqualFold applies the EqualFold predicate on the "op" field.
 func OpEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldOp, v))
+	return entbuilder.FieldEqualFold[predicate.Task](FieldOp, v)
 }
 
 // OpContainsFold applies the ContainsFold predicate on the "op" field.
 func OpContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldOp, v))
+	return entbuilder.FieldContainsFold[predicate.Task](FieldOp, v)
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Task) predicate.Task {
-	return predicate.Task(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Task) predicate.Task { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Task) predicate.Task {
-	return predicate.Task(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Task) predicate.Task { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Task) predicate.Task {
-	return predicate.Task(sql.NotPredicates(p))
-}
+func Not(p predicate.Task) predicate.Task { return entbuilder.NotPred(p) }

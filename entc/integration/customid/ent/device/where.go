@@ -11,27 +11,20 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldEQ(FieldID, id))
-}
+func ID(id schema.ID) predicate.Device { return entbuilder.FieldEQ[predicate.Device](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id schema.ID) predicate.Device { return entbuilder.FieldEQ[predicate.Device](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id schema.ID) predicate.Device { return entbuilder.FieldNEQ[predicate.Device](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...schema.ID) predicate.Device { return predicate.Device(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...schema.ID) predicate.Device {
@@ -39,24 +32,16 @@ func IDNotIn(ids ...schema.ID) predicate.Device {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldGT(FieldID, id))
-}
+func IDGT(id schema.ID) predicate.Device { return entbuilder.FieldGT[predicate.Device](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id schema.ID) predicate.Device { return entbuilder.FieldGTE[predicate.Device](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldLT(FieldID, id))
-}
+func IDLT(id schema.ID) predicate.Device { return entbuilder.FieldLT[predicate.Device](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id schema.ID) predicate.Device { return entbuilder.FieldLTE[predicate.Device](FieldID, id) }
 
 // HasActiveSession applies the HasEdge predicate on the "active_session" edge.
 func HasActiveSession() predicate.Device {
@@ -71,14 +56,15 @@ func HasActiveSession() predicate.Device {
 
 // HasActiveSessionWith applies the HasEdge predicate on the "active_session" edge with a given conditions (other predicates).
 func HasActiveSessionWith(preds ...predicate.Session) predicate.Device {
-	return predicate.Device(func(s *sql.Selector) {
-		step := newActiveSessionStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Device(
+		func(s *sql.Selector) {
+			step := newActiveSessionStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasSessions applies the HasEdge predicate on the "sessions" edge.
@@ -94,27 +80,22 @@ func HasSessions() predicate.Device {
 
 // HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
 func HasSessionsWith(preds ...predicate.Session) predicate.Device {
-	return predicate.Device(func(s *sql.Selector) {
-		step := newSessionsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Device(
+		func(s *sql.Selector) {
+			step := newSessionsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Device) predicate.Device {
-	return predicate.Device(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Device) predicate.Device { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Device) predicate.Device {
-	return predicate.Device(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Device) predicate.Device { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Device) predicate.Device {
-	return predicate.Device(sql.NotPredicates(p))
-}
+func Not(p predicate.Device) predicate.Device { return entbuilder.NotPred(p) }

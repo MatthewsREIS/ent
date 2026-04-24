@@ -10,36 +10,37 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Weight applies equality check predicate on the "weight" field. It's identical to WeightEQ.
 func Weight(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldEQ(FieldWeight, v))
+	return entbuilder.FieldEQ[predicate.Relationship](FieldWeight, v)
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldEQ(FieldUserID, v))
+	return entbuilder.FieldEQ[predicate.Relationship](FieldUserID, v)
 }
 
 // RelativeID applies equality check predicate on the "relative_id" field. It's identical to RelativeIDEQ.
 func RelativeID(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldEQ(FieldRelativeID, v))
+	return entbuilder.FieldEQ[predicate.Relationship](FieldRelativeID, v)
 }
 
 // InfoID applies equality check predicate on the "info_id" field. It's identical to InfoIDEQ.
 func InfoID(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldEQ(FieldInfoID, v))
+	return entbuilder.FieldEQ[predicate.Relationship](FieldInfoID, v)
 }
 
 // WeightEQ applies the EQ predicate on the "weight" field.
 func WeightEQ(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldEQ(FieldWeight, v))
+	return entbuilder.FieldEQ[predicate.Relationship](FieldWeight, v)
 }
 
 // WeightNEQ applies the NEQ predicate on the "weight" field.
 func WeightNEQ(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldNEQ(FieldWeight, v))
+	return entbuilder.FieldNEQ[predicate.Relationship](FieldWeight, v)
 }
 
 // WeightIn applies the In predicate on the "weight" field.
@@ -54,32 +55,32 @@ func WeightNotIn(vs ...int) predicate.Relationship {
 
 // WeightGT applies the GT predicate on the "weight" field.
 func WeightGT(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldGT(FieldWeight, v))
+	return entbuilder.FieldGT[predicate.Relationship](FieldWeight, v)
 }
 
 // WeightGTE applies the GTE predicate on the "weight" field.
 func WeightGTE(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldGTE(FieldWeight, v))
+	return entbuilder.FieldGTE[predicate.Relationship](FieldWeight, v)
 }
 
 // WeightLT applies the LT predicate on the "weight" field.
 func WeightLT(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldLT(FieldWeight, v))
+	return entbuilder.FieldLT[predicate.Relationship](FieldWeight, v)
 }
 
 // WeightLTE applies the LTE predicate on the "weight" field.
 func WeightLTE(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldLTE(FieldWeight, v))
+	return entbuilder.FieldLTE[predicate.Relationship](FieldWeight, v)
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldEQ(FieldUserID, v))
+	return entbuilder.FieldEQ[predicate.Relationship](FieldUserID, v)
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
 func UserIDNEQ(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldNEQ(FieldUserID, v))
+	return entbuilder.FieldNEQ[predicate.Relationship](FieldUserID, v)
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
@@ -94,12 +95,12 @@ func UserIDNotIn(vs ...int) predicate.Relationship {
 
 // RelativeIDEQ applies the EQ predicate on the "relative_id" field.
 func RelativeIDEQ(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldEQ(FieldRelativeID, v))
+	return entbuilder.FieldEQ[predicate.Relationship](FieldRelativeID, v)
 }
 
 // RelativeIDNEQ applies the NEQ predicate on the "relative_id" field.
 func RelativeIDNEQ(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldNEQ(FieldRelativeID, v))
+	return entbuilder.FieldNEQ[predicate.Relationship](FieldRelativeID, v)
 }
 
 // RelativeIDIn applies the In predicate on the "relative_id" field.
@@ -114,12 +115,12 @@ func RelativeIDNotIn(vs ...int) predicate.Relationship {
 
 // InfoIDEQ applies the EQ predicate on the "info_id" field.
 func InfoIDEQ(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldEQ(FieldInfoID, v))
+	return entbuilder.FieldEQ[predicate.Relationship](FieldInfoID, v)
 }
 
 // InfoIDNEQ applies the NEQ predicate on the "info_id" field.
 func InfoIDNEQ(v int) predicate.Relationship {
-	return predicate.Relationship(sql.FieldNEQ(FieldInfoID, v))
+	return entbuilder.FieldNEQ[predicate.Relationship](FieldInfoID, v)
 }
 
 // InfoIDIn applies the In predicate on the "info_id" field.
@@ -134,12 +135,12 @@ func InfoIDNotIn(vs ...int) predicate.Relationship {
 
 // InfoIDIsNil applies the IsNil predicate on the "info_id" field.
 func InfoIDIsNil() predicate.Relationship {
-	return predicate.Relationship(sql.FieldIsNull(FieldInfoID))
+	return entbuilder.FieldIsNull[predicate.Relationship](FieldInfoID)
 }
 
 // InfoIDNotNil applies the NotNil predicate on the "info_id" field.
 func InfoIDNotNil() predicate.Relationship {
-	return predicate.Relationship(sql.FieldNotNull(FieldInfoID))
+	return entbuilder.FieldNotNull[predicate.Relationship](FieldInfoID)
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -155,14 +156,15 @@ func HasUser() predicate.Relationship {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Relationship(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRelative applies the HasEdge predicate on the "relative" edge.
@@ -178,14 +180,15 @@ func HasRelative() predicate.Relationship {
 
 // HasRelativeWith applies the HasEdge predicate on the "relative" edge with a given conditions (other predicates).
 func HasRelativeWith(preds ...predicate.User) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		step := newRelativeStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Relationship(
+		func(s *sql.Selector) {
+			step := newRelativeStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasInfo applies the HasEdge predicate on the "info" edge.
@@ -201,27 +204,26 @@ func HasInfo() predicate.Relationship {
 
 // HasInfoWith applies the HasEdge predicate on the "info" edge with a given conditions (other predicates).
 func HasInfoWith(preds ...predicate.RelationshipInfo) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		step := newInfoStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Relationship(
+		func(s *sql.Selector) {
+			step := newInfoStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Relationship) predicate.Relationship {
-	return predicate.Relationship(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Relationship) predicate.Relationship {
-	return predicate.Relationship(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Relationship) predicate.Relationship {
-	return predicate.Relationship(sql.NotPredicates(p))
-}
+func Not(p predicate.Relationship) predicate.Relationship { return entbuilder.NotPred(p) }

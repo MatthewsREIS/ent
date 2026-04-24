@@ -10,97 +10,62 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Blog {
-	return predicate.Blog(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Blog { return entbuilder.FieldEQ[predicate.Blog](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Blog {
-	return predicate.Blog(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Blog { return entbuilder.FieldEQ[predicate.Blog](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Blog {
-	return predicate.Blog(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Blog { return entbuilder.FieldNEQ[predicate.Blog](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Blog {
-	return predicate.Blog(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Blog { return predicate.Blog(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Blog {
-	return predicate.Blog(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Blog { return predicate.Blog(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Blog {
-	return predicate.Blog(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Blog { return entbuilder.FieldGT[predicate.Blog](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Blog {
-	return predicate.Blog(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Blog { return entbuilder.FieldGTE[predicate.Blog](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Blog {
-	return predicate.Blog(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Blog { return entbuilder.FieldLT[predicate.Blog](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Blog {
-	return predicate.Blog(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Blog { return entbuilder.FieldLTE[predicate.Blog](FieldID, id) }
 
 // Oid applies equality check predicate on the "oid" field. It's identical to OidEQ.
-func Oid(v int) predicate.Blog {
-	return predicate.Blog(sql.FieldEQ(FieldOid, v))
-}
+func Oid(v int) predicate.Blog { return entbuilder.FieldEQ[predicate.Blog](FieldOid, v) }
 
 // OidEQ applies the EQ predicate on the "oid" field.
-func OidEQ(v int) predicate.Blog {
-	return predicate.Blog(sql.FieldEQ(FieldOid, v))
-}
+func OidEQ(v int) predicate.Blog { return entbuilder.FieldEQ[predicate.Blog](FieldOid, v) }
 
 // OidNEQ applies the NEQ predicate on the "oid" field.
-func OidNEQ(v int) predicate.Blog {
-	return predicate.Blog(sql.FieldNEQ(FieldOid, v))
-}
+func OidNEQ(v int) predicate.Blog { return entbuilder.FieldNEQ[predicate.Blog](FieldOid, v) }
 
 // OidIn applies the In predicate on the "oid" field.
-func OidIn(vs ...int) predicate.Blog {
-	return predicate.Blog(sql.FieldIn(FieldOid, vs...))
-}
+func OidIn(vs ...int) predicate.Blog { return predicate.Blog(sql.FieldIn(FieldOid, vs...)) }
 
 // OidNotIn applies the NotIn predicate on the "oid" field.
-func OidNotIn(vs ...int) predicate.Blog {
-	return predicate.Blog(sql.FieldNotIn(FieldOid, vs...))
-}
+func OidNotIn(vs ...int) predicate.Blog { return predicate.Blog(sql.FieldNotIn(FieldOid, vs...)) }
 
 // OidGT applies the GT predicate on the "oid" field.
-func OidGT(v int) predicate.Blog {
-	return predicate.Blog(sql.FieldGT(FieldOid, v))
-}
+func OidGT(v int) predicate.Blog { return entbuilder.FieldGT[predicate.Blog](FieldOid, v) }
 
 // OidGTE applies the GTE predicate on the "oid" field.
-func OidGTE(v int) predicate.Blog {
-	return predicate.Blog(sql.FieldGTE(FieldOid, v))
-}
+func OidGTE(v int) predicate.Blog { return entbuilder.FieldGTE[predicate.Blog](FieldOid, v) }
 
 // OidLT applies the LT predicate on the "oid" field.
-func OidLT(v int) predicate.Blog {
-	return predicate.Blog(sql.FieldLT(FieldOid, v))
-}
+func OidLT(v int) predicate.Blog { return entbuilder.FieldLT[predicate.Blog](FieldOid, v) }
 
 // OidLTE applies the LTE predicate on the "oid" field.
-func OidLTE(v int) predicate.Blog {
-	return predicate.Blog(sql.FieldLTE(FieldOid, v))
-}
+func OidLTE(v int) predicate.Blog { return entbuilder.FieldLTE[predicate.Blog](FieldOid, v) }
 
 // HasAdmins applies the HasEdge predicate on the "admins" edge.
 func HasAdmins() predicate.Blog {
@@ -115,27 +80,22 @@ func HasAdmins() predicate.Blog {
 
 // HasAdminsWith applies the HasEdge predicate on the "admins" edge with a given conditions (other predicates).
 func HasAdminsWith(preds ...predicate.User) predicate.Blog {
-	return predicate.Blog(func(s *sql.Selector) {
-		step := newAdminsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Blog(
+		func(s *sql.Selector) {
+			step := newAdminsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Blog) predicate.Blog {
-	return predicate.Blog(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Blog) predicate.Blog { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Blog) predicate.Blog {
-	return predicate.Blog(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Blog) predicate.Blog { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Blog) predicate.Blog {
-	return predicate.Blog(sql.NotPredicates(p))
-}
+func Not(p predicate.Blog) predicate.Blog { return entbuilder.NotPred(p) }

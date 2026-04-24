@@ -12,136 +12,101 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Role {
-	return predicate.Role(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Role { return entbuilder.FieldEQ[predicate.Role](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Role {
-	return predicate.Role(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Role { return entbuilder.FieldEQ[predicate.Role](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Role {
-	return predicate.Role(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Role { return entbuilder.FieldNEQ[predicate.Role](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Role {
-	return predicate.Role(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Role { return predicate.Role(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Role {
-	return predicate.Role(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Role { return predicate.Role(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Role {
-	return predicate.Role(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Role { return entbuilder.FieldGT[predicate.Role](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Role {
-	return predicate.Role(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Role { return entbuilder.FieldGTE[predicate.Role](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Role {
-	return predicate.Role(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Role { return entbuilder.FieldLT[predicate.Role](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Role {
-	return predicate.Role(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Role { return entbuilder.FieldLTE[predicate.Role](FieldID, id) }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Role {
-	return predicate.Role(sql.FieldEQ(FieldName, v))
-}
+func Name(v string) predicate.Role { return entbuilder.FieldEQ[predicate.Role](FieldName, v) }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Role {
-	return predicate.Role(sql.FieldEQ(FieldCreatedAt, v))
+	return entbuilder.FieldEQ[predicate.Role](FieldCreatedAt, v)
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Role {
-	return predicate.Role(sql.FieldEQ(FieldName, v))
-}
+func NameEQ(v string) predicate.Role { return entbuilder.FieldEQ[predicate.Role](FieldName, v) }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Role {
-	return predicate.Role(sql.FieldNEQ(FieldName, v))
-}
+func NameNEQ(v string) predicate.Role { return entbuilder.FieldNEQ[predicate.Role](FieldName, v) }
 
 // NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Role {
-	return predicate.Role(sql.FieldIn(FieldName, vs...))
-}
+func NameIn(vs ...string) predicate.Role { return predicate.Role(sql.FieldIn(FieldName, vs...)) }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Role {
-	return predicate.Role(sql.FieldNotIn(FieldName, vs...))
-}
+func NameNotIn(vs ...string) predicate.Role { return predicate.Role(sql.FieldNotIn(FieldName, vs...)) }
 
 // NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Role {
-	return predicate.Role(sql.FieldGT(FieldName, v))
-}
+func NameGT(v string) predicate.Role { return entbuilder.FieldGT[predicate.Role](FieldName, v) }
 
 // NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Role {
-	return predicate.Role(sql.FieldGTE(FieldName, v))
-}
+func NameGTE(v string) predicate.Role { return entbuilder.FieldGTE[predicate.Role](FieldName, v) }
 
 // NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Role {
-	return predicate.Role(sql.FieldLT(FieldName, v))
-}
+func NameLT(v string) predicate.Role { return entbuilder.FieldLT[predicate.Role](FieldName, v) }
 
 // NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Role {
-	return predicate.Role(sql.FieldLTE(FieldName, v))
-}
+func NameLTE(v string) predicate.Role { return entbuilder.FieldLTE[predicate.Role](FieldName, v) }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Role {
-	return predicate.Role(sql.FieldContains(FieldName, v))
+	return entbuilder.FieldContains[predicate.Role](FieldName, v)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Role {
-	return predicate.Role(sql.FieldHasPrefix(FieldName, v))
+	return entbuilder.FieldHasPrefix[predicate.Role](FieldName, v)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Role {
-	return predicate.Role(sql.FieldHasSuffix(FieldName, v))
+	return entbuilder.FieldHasSuffix[predicate.Role](FieldName, v)
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Role {
-	return predicate.Role(sql.FieldEqualFold(FieldName, v))
+	return entbuilder.FieldEqualFold[predicate.Role](FieldName, v)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Role {
-	return predicate.Role(sql.FieldContainsFold(FieldName, v))
+	return entbuilder.FieldContainsFold[predicate.Role](FieldName, v)
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.Role {
-	return predicate.Role(sql.FieldEQ(FieldCreatedAt, v))
+	return entbuilder.FieldEQ[predicate.Role](FieldCreatedAt, v)
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
 func CreatedAtNEQ(v time.Time) predicate.Role {
-	return predicate.Role(sql.FieldNEQ(FieldCreatedAt, v))
+	return entbuilder.FieldNEQ[predicate.Role](FieldCreatedAt, v)
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
@@ -156,22 +121,22 @@ func CreatedAtNotIn(vs ...time.Time) predicate.Role {
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
 func CreatedAtGT(v time.Time) predicate.Role {
-	return predicate.Role(sql.FieldGT(FieldCreatedAt, v))
+	return entbuilder.FieldGT[predicate.Role](FieldCreatedAt, v)
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
 func CreatedAtGTE(v time.Time) predicate.Role {
-	return predicate.Role(sql.FieldGTE(FieldCreatedAt, v))
+	return entbuilder.FieldGTE[predicate.Role](FieldCreatedAt, v)
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
 func CreatedAtLT(v time.Time) predicate.Role {
-	return predicate.Role(sql.FieldLT(FieldCreatedAt, v))
+	return entbuilder.FieldLT[predicate.Role](FieldCreatedAt, v)
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.Role {
-	return predicate.Role(sql.FieldLTE(FieldCreatedAt, v))
+	return entbuilder.FieldLTE[predicate.Role](FieldCreatedAt, v)
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -187,14 +152,15 @@ func HasUser() predicate.Role {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Role {
-	return predicate.Role(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Role(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRolesUsers applies the HasEdge predicate on the "roles_users" edge.
@@ -210,27 +176,22 @@ func HasRolesUsers() predicate.Role {
 
 // HasRolesUsersWith applies the HasEdge predicate on the "roles_users" edge with a given conditions (other predicates).
 func HasRolesUsersWith(preds ...predicate.RoleUser) predicate.Role {
-	return predicate.Role(func(s *sql.Selector) {
-		step := newRolesUsersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Role(
+		func(s *sql.Selector) {
+			step := newRolesUsersStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Role) predicate.Role {
-	return predicate.Role(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Role) predicate.Role { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Role) predicate.Role {
-	return predicate.Role(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Role) predicate.Role { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Role) predicate.Role {
-	return predicate.Role(sql.NotPredicates(p))
-}
+func Not(p predicate.Role) predicate.Role { return entbuilder.NotPred(p) }

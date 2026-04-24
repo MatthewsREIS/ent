@@ -10,121 +10,86 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.User {
-	return predicate.User(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.User { return predicate.User(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.User { return predicate.User(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.User {
-	return predicate.User(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.User { return entbuilder.FieldGT[predicate.User](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.User {
-	return predicate.User(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.User { return entbuilder.FieldLT[predicate.User](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldID, id) }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldName, v))
-}
+func Name(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldName, v) }
 
 // NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldName, v))
-}
+func NameEQ(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldName, v) }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldName, v))
-}
+func NameNEQ(v string) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldName, v) }
 
 // NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldName, vs...))
-}
+func NameIn(vs ...string) predicate.User { return predicate.User(sql.FieldIn(FieldName, vs...)) }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldName, vs...))
-}
+func NameNotIn(vs ...string) predicate.User { return predicate.User(sql.FieldNotIn(FieldName, vs...)) }
 
 // NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldName, v))
-}
+func NameGT(v string) predicate.User { return entbuilder.FieldGT[predicate.User](FieldName, v) }
 
 // NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldName, v))
-}
+func NameGTE(v string) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldName, v) }
 
 // NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldName, v))
-}
+func NameLT(v string) predicate.User { return entbuilder.FieldLT[predicate.User](FieldName, v) }
 
 // NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldName, v))
-}
+func NameLTE(v string) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldName, v) }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldName, v))
+	return entbuilder.FieldContains[predicate.User](FieldName, v)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldName, v))
+	return entbuilder.FieldHasPrefix[predicate.User](FieldName, v)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldName, v))
+	return entbuilder.FieldHasSuffix[predicate.User](FieldName, v)
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldName, v))
+	return entbuilder.FieldEqualFold[predicate.User](FieldName, v)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldName, v))
+	return entbuilder.FieldContainsFold[predicate.User](FieldName, v)
 }
 
 // HasGroups applies the HasEdge predicate on the "groups" edge.
@@ -140,14 +105,15 @@ func HasGroups() predicate.User {
 
 // HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
 func HasGroupsWith(preds ...predicate.Group) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newGroupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newGroupsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFriends applies the HasEdge predicate on the "friends" edge.
@@ -163,14 +129,15 @@ func HasFriends() predicate.User {
 
 // HasFriendsWith applies the HasEdge predicate on the "friends" edge with a given conditions (other predicates).
 func HasFriendsWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFriendsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFriendsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRelatives applies the HasEdge predicate on the "relatives" edge.
@@ -186,14 +153,15 @@ func HasRelatives() predicate.User {
 
 // HasRelativesWith applies the HasEdge predicate on the "relatives" edge with a given conditions (other predicates).
 func HasRelativesWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newRelativesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newRelativesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasLikedTweets applies the HasEdge predicate on the "liked_tweets" edge.
@@ -209,14 +177,15 @@ func HasLikedTweets() predicate.User {
 
 // HasLikedTweetsWith applies the HasEdge predicate on the "liked_tweets" edge with a given conditions (other predicates).
 func HasLikedTweetsWith(preds ...predicate.Tweet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newLikedTweetsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newLikedTweetsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTweets applies the HasEdge predicate on the "tweets" edge.
@@ -232,14 +201,15 @@ func HasTweets() predicate.User {
 
 // HasTweetsWith applies the HasEdge predicate on the "tweets" edge with a given conditions (other predicates).
 func HasTweetsWith(preds ...predicate.Tweet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newTweetsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newTweetsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRoles applies the HasEdge predicate on the "roles" edge.
@@ -255,14 +225,15 @@ func HasRoles() predicate.User {
 
 // HasRolesWith applies the HasEdge predicate on the "roles" edge with a given conditions (other predicates).
 func HasRolesWith(preds ...predicate.Role) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newRolesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newRolesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasJoinedGroups applies the HasEdge predicate on the "joined_groups" edge.
@@ -278,14 +249,15 @@ func HasJoinedGroups() predicate.User {
 
 // HasJoinedGroupsWith applies the HasEdge predicate on the "joined_groups" edge with a given conditions (other predicates).
 func HasJoinedGroupsWith(preds ...predicate.UserGroup) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newJoinedGroupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newJoinedGroupsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFriendships applies the HasEdge predicate on the "friendships" edge.
@@ -301,14 +273,15 @@ func HasFriendships() predicate.User {
 
 // HasFriendshipsWith applies the HasEdge predicate on the "friendships" edge with a given conditions (other predicates).
 func HasFriendshipsWith(preds ...predicate.Friendship) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFriendshipsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFriendshipsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRelationship applies the HasEdge predicate on the "relationship" edge.
@@ -324,14 +297,15 @@ func HasRelationship() predicate.User {
 
 // HasRelationshipWith applies the HasEdge predicate on the "relationship" edge with a given conditions (other predicates).
 func HasRelationshipWith(preds ...predicate.Relationship) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newRelationshipStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newRelationshipStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasLikes applies the HasEdge predicate on the "likes" edge.
@@ -347,14 +321,15 @@ func HasLikes() predicate.User {
 
 // HasLikesWith applies the HasEdge predicate on the "likes" edge with a given conditions (other predicates).
 func HasLikesWith(preds ...predicate.TweetLike) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newLikesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newLikesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUserTweets applies the HasEdge predicate on the "user_tweets" edge.
@@ -370,14 +345,15 @@ func HasUserTweets() predicate.User {
 
 // HasUserTweetsWith applies the HasEdge predicate on the "user_tweets" edge with a given conditions (other predicates).
 func HasUserTweetsWith(preds ...predicate.UserTweet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newUserTweetsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newUserTweetsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRolesUsers applies the HasEdge predicate on the "roles_users" edge.
@@ -393,27 +369,22 @@ func HasRolesUsers() predicate.User {
 
 // HasRolesUsersWith applies the HasEdge predicate on the "roles_users" edge with a given conditions (other predicates).
 func HasRolesUsersWith(preds ...predicate.RoleUser) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newRolesUsersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newRolesUsersStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.User) predicate.User {
-	return predicate.User(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.User) predicate.User { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.User) predicate.User {
-	return predicate.User(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.User) predicate.User { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.User) predicate.User {
-	return predicate.User(sql.NotPredicates(p))
-}
+func Not(p predicate.User) predicate.User { return entbuilder.NotPred(p) }

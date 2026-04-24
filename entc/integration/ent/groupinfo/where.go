@@ -10,27 +10,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.GroupInfo { return entbuilder.FieldEQ[predicate.GroupInfo](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.GroupInfo { return entbuilder.FieldEQ[predicate.GroupInfo](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.GroupInfo { return entbuilder.FieldNEQ[predicate.GroupInfo](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.GroupInfo { return predicate.GroupInfo(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.GroupInfo {
@@ -38,43 +31,33 @@ func IDNotIn(ids ...int) predicate.GroupInfo {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.GroupInfo { return entbuilder.FieldGT[predicate.GroupInfo](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.GroupInfo { return entbuilder.FieldGTE[predicate.GroupInfo](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.GroupInfo { return entbuilder.FieldLT[predicate.GroupInfo](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.GroupInfo { return entbuilder.FieldLTE[predicate.GroupInfo](FieldID, id) }
 
 // Desc applies equality check predicate on the "desc" field. It's identical to DescEQ.
-func Desc(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldEQ(FieldDesc, v))
-}
+func Desc(v string) predicate.GroupInfo { return entbuilder.FieldEQ[predicate.GroupInfo](FieldDesc, v) }
 
 // MaxUsers applies equality check predicate on the "max_users" field. It's identical to MaxUsersEQ.
 func MaxUsers(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldEQ(FieldMaxUsers, v))
+	return entbuilder.FieldEQ[predicate.GroupInfo](FieldMaxUsers, v)
 }
 
 // DescEQ applies the EQ predicate on the "desc" field.
 func DescEQ(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldEQ(FieldDesc, v))
+	return entbuilder.FieldEQ[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescNEQ applies the NEQ predicate on the "desc" field.
 func DescNEQ(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldNEQ(FieldDesc, v))
+	return entbuilder.FieldNEQ[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescIn applies the In predicate on the "desc" field.
@@ -89,57 +72,57 @@ func DescNotIn(vs ...string) predicate.GroupInfo {
 
 // DescGT applies the GT predicate on the "desc" field.
 func DescGT(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldGT(FieldDesc, v))
+	return entbuilder.FieldGT[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescGTE applies the GTE predicate on the "desc" field.
 func DescGTE(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldGTE(FieldDesc, v))
+	return entbuilder.FieldGTE[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescLT applies the LT predicate on the "desc" field.
 func DescLT(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldLT(FieldDesc, v))
+	return entbuilder.FieldLT[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescLTE applies the LTE predicate on the "desc" field.
 func DescLTE(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldLTE(FieldDesc, v))
+	return entbuilder.FieldLTE[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescContains applies the Contains predicate on the "desc" field.
 func DescContains(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldContains(FieldDesc, v))
+	return entbuilder.FieldContains[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescHasPrefix applies the HasPrefix predicate on the "desc" field.
 func DescHasPrefix(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldHasPrefix(FieldDesc, v))
+	return entbuilder.FieldHasPrefix[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescHasSuffix applies the HasSuffix predicate on the "desc" field.
 func DescHasSuffix(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldHasSuffix(FieldDesc, v))
+	return entbuilder.FieldHasSuffix[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescEqualFold applies the EqualFold predicate on the "desc" field.
 func DescEqualFold(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldEqualFold(FieldDesc, v))
+	return entbuilder.FieldEqualFold[predicate.GroupInfo](FieldDesc, v)
 }
 
 // DescContainsFold applies the ContainsFold predicate on the "desc" field.
 func DescContainsFold(v string) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldContainsFold(FieldDesc, v))
+	return entbuilder.FieldContainsFold[predicate.GroupInfo](FieldDesc, v)
 }
 
 // MaxUsersEQ applies the EQ predicate on the "max_users" field.
 func MaxUsersEQ(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldEQ(FieldMaxUsers, v))
+	return entbuilder.FieldEQ[predicate.GroupInfo](FieldMaxUsers, v)
 }
 
 // MaxUsersNEQ applies the NEQ predicate on the "max_users" field.
 func MaxUsersNEQ(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldNEQ(FieldMaxUsers, v))
+	return entbuilder.FieldNEQ[predicate.GroupInfo](FieldMaxUsers, v)
 }
 
 // MaxUsersIn applies the In predicate on the "max_users" field.
@@ -154,22 +137,22 @@ func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
 
 // MaxUsersGT applies the GT predicate on the "max_users" field.
 func MaxUsersGT(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldGT(FieldMaxUsers, v))
+	return entbuilder.FieldGT[predicate.GroupInfo](FieldMaxUsers, v)
 }
 
 // MaxUsersGTE applies the GTE predicate on the "max_users" field.
 func MaxUsersGTE(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldGTE(FieldMaxUsers, v))
+	return entbuilder.FieldGTE[predicate.GroupInfo](FieldMaxUsers, v)
 }
 
 // MaxUsersLT applies the LT predicate on the "max_users" field.
 func MaxUsersLT(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldLT(FieldMaxUsers, v))
+	return entbuilder.FieldLT[predicate.GroupInfo](FieldMaxUsers, v)
 }
 
 // MaxUsersLTE applies the LTE predicate on the "max_users" field.
 func MaxUsersLTE(v int) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.FieldLTE(FieldMaxUsers, v))
+	return entbuilder.FieldLTE[predicate.GroupInfo](FieldMaxUsers, v)
 }
 
 // HasGroups applies the HasEdge predicate on the "groups" edge.
@@ -185,27 +168,26 @@ func HasGroups() predicate.GroupInfo {
 
 // HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
 func HasGroupsWith(preds ...predicate.Group) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		step := newGroupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.GroupInfo(
+		func(s *sql.Selector) {
+			step := newGroupsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.GroupInfo) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.GroupInfo) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.GroupInfo) predicate.GroupInfo {
-	return predicate.GroupInfo(sql.NotPredicates(p))
-}
+func Not(p predicate.GroupInfo) predicate.GroupInfo { return entbuilder.NotPred(p) }

@@ -12,27 +12,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.UserGroup { return entbuilder.FieldEQ[predicate.UserGroup](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.UserGroup { return entbuilder.FieldEQ[predicate.UserGroup](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.UserGroup { return entbuilder.FieldNEQ[predicate.UserGroup](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.UserGroup { return predicate.UserGroup(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.UserGroup {
@@ -40,48 +33,40 @@ func IDNotIn(ids ...int) predicate.UserGroup {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.UserGroup { return entbuilder.FieldGT[predicate.UserGroup](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.UserGroup { return entbuilder.FieldGTE[predicate.UserGroup](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.UserGroup { return entbuilder.FieldLT[predicate.UserGroup](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.UserGroup { return entbuilder.FieldLTE[predicate.UserGroup](FieldID, id) }
 
 // JoinedAt applies equality check predicate on the "joined_at" field. It's identical to JoinedAtEQ.
 func JoinedAt(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldJoinedAt, v))
+	return entbuilder.FieldEQ[predicate.UserGroup](FieldJoinedAt, v)
 }
 
 // UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
 func UserID(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldUserID, v))
+	return entbuilder.FieldEQ[predicate.UserGroup](FieldUserID, v)
 }
 
 // GroupID applies equality check predicate on the "group_id" field. It's identical to GroupIDEQ.
 func GroupID(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldGroupID, v))
+	return entbuilder.FieldEQ[predicate.UserGroup](FieldGroupID, v)
 }
 
 // JoinedAtEQ applies the EQ predicate on the "joined_at" field.
 func JoinedAtEQ(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldJoinedAt, v))
+	return entbuilder.FieldEQ[predicate.UserGroup](FieldJoinedAt, v)
 }
 
 // JoinedAtNEQ applies the NEQ predicate on the "joined_at" field.
 func JoinedAtNEQ(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNEQ(FieldJoinedAt, v))
+	return entbuilder.FieldNEQ[predicate.UserGroup](FieldJoinedAt, v)
 }
 
 // JoinedAtIn applies the In predicate on the "joined_at" field.
@@ -96,32 +81,32 @@ func JoinedAtNotIn(vs ...time.Time) predicate.UserGroup {
 
 // JoinedAtGT applies the GT predicate on the "joined_at" field.
 func JoinedAtGT(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldGT(FieldJoinedAt, v))
+	return entbuilder.FieldGT[predicate.UserGroup](FieldJoinedAt, v)
 }
 
 // JoinedAtGTE applies the GTE predicate on the "joined_at" field.
 func JoinedAtGTE(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldGTE(FieldJoinedAt, v))
+	return entbuilder.FieldGTE[predicate.UserGroup](FieldJoinedAt, v)
 }
 
 // JoinedAtLT applies the LT predicate on the "joined_at" field.
 func JoinedAtLT(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldLT(FieldJoinedAt, v))
+	return entbuilder.FieldLT[predicate.UserGroup](FieldJoinedAt, v)
 }
 
 // JoinedAtLTE applies the LTE predicate on the "joined_at" field.
 func JoinedAtLTE(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldLTE(FieldJoinedAt, v))
+	return entbuilder.FieldLTE[predicate.UserGroup](FieldJoinedAt, v)
 }
 
 // UserIDEQ applies the EQ predicate on the "user_id" field.
 func UserIDEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldUserID, v))
+	return entbuilder.FieldEQ[predicate.UserGroup](FieldUserID, v)
 }
 
 // UserIDNEQ applies the NEQ predicate on the "user_id" field.
 func UserIDNEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNEQ(FieldUserID, v))
+	return entbuilder.FieldNEQ[predicate.UserGroup](FieldUserID, v)
 }
 
 // UserIDIn applies the In predicate on the "user_id" field.
@@ -136,12 +121,12 @@ func UserIDNotIn(vs ...int) predicate.UserGroup {
 
 // GroupIDEQ applies the EQ predicate on the "group_id" field.
 func GroupIDEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldGroupID, v))
+	return entbuilder.FieldEQ[predicate.UserGroup](FieldGroupID, v)
 }
 
 // GroupIDNEQ applies the NEQ predicate on the "group_id" field.
 func GroupIDNEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNEQ(FieldGroupID, v))
+	return entbuilder.FieldNEQ[predicate.UserGroup](FieldGroupID, v)
 }
 
 // GroupIDIn applies the In predicate on the "group_id" field.
@@ -167,14 +152,15 @@ func HasUser() predicate.UserGroup {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.UserGroup(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasGroup applies the HasEdge predicate on the "group" edge.
@@ -190,27 +176,26 @@ func HasGroup() predicate.UserGroup {
 
 // HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
 func HasGroupWith(preds ...predicate.Group) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		step := newGroupStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.UserGroup(
+		func(s *sql.Selector) {
+			step := newGroupStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.UserGroup) predicate.UserGroup {
-	return predicate.UserGroup(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.UserGroup) predicate.UserGroup {
-	return predicate.UserGroup(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.UserGroup) predicate.UserGroup {
-	return predicate.UserGroup(sql.NotPredicates(p))
-}
+func Not(p predicate.UserGroup) predicate.UserGroup { return entbuilder.NotPred(p) }

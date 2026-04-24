@@ -10,52 +10,35 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Process {
-	return predicate.Process(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Process { return entbuilder.FieldEQ[predicate.Process](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Process {
-	return predicate.Process(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Process { return entbuilder.FieldEQ[predicate.Process](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Process {
-	return predicate.Process(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Process { return entbuilder.FieldNEQ[predicate.Process](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Process {
-	return predicate.Process(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Process { return predicate.Process(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Process {
-	return predicate.Process(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Process { return predicate.Process(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Process {
-	return predicate.Process(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Process { return entbuilder.FieldGT[predicate.Process](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Process {
-	return predicate.Process(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Process { return entbuilder.FieldGTE[predicate.Process](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Process {
-	return predicate.Process(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Process { return entbuilder.FieldLT[predicate.Process](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Process {
-	return predicate.Process(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Process { return entbuilder.FieldLTE[predicate.Process](FieldID, id) }
 
 // HasFiles applies the HasEdge predicate on the "files" edge.
 func HasFiles() predicate.Process {
@@ -70,14 +53,15 @@ func HasFiles() predicate.Process {
 
 // HasFilesWith applies the HasEdge predicate on the "files" edge with a given conditions (other predicates).
 func HasFilesWith(preds ...predicate.File) predicate.Process {
-	return predicate.Process(func(s *sql.Selector) {
-		step := newFilesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Process(
+		func(s *sql.Selector) {
+			step := newFilesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasAttachedFiles applies the HasEdge predicate on the "attached_files" edge.
@@ -93,27 +77,24 @@ func HasAttachedFiles() predicate.Process {
 
 // HasAttachedFilesWith applies the HasEdge predicate on the "attached_files" edge with a given conditions (other predicates).
 func HasAttachedFilesWith(preds ...predicate.AttachedFile) predicate.Process {
-	return predicate.Process(func(s *sql.Selector) {
-		step := newAttachedFilesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Process(
+		func(s *sql.Selector) {
+			step := newAttachedFilesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Process) predicate.Process {
-	return predicate.Process(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Process) predicate.Process {
-	return predicate.Process(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Process) predicate.Process { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Process) predicate.Process {
-	return predicate.Process(sql.NotPredicates(p))
-}
+func Not(p predicate.Process) predicate.Process { return entbuilder.NotPred(p) }

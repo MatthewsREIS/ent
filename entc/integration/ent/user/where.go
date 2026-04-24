@@ -10,111 +10,76 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.User {
-	return predicate.User(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.User { return predicate.User(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.User { return predicate.User(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.User {
-	return predicate.User(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.User { return entbuilder.FieldGT[predicate.User](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.User {
-	return predicate.User(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.User { return entbuilder.FieldLT[predicate.User](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldID, id) }
 
 // OptionalInt applies equality check predicate on the "optional_int" field. It's identical to OptionalIntEQ.
 func OptionalInt(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldOptionalInt, v))
+	return entbuilder.FieldEQ[predicate.User](FieldOptionalInt, v)
 }
 
 // Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
-func Age(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAge, v))
-}
+func Age(v int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldAge, v) }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldName, v))
-}
+func Name(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldName, v) }
 
 // Last applies equality check predicate on the "last" field. It's identical to LastEQ.
-func Last(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldLast, v))
-}
+func Last(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldLast, v) }
 
 // Nickname applies equality check predicate on the "nickname" field. It's identical to NicknameEQ.
-func Nickname(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldNickname, v))
-}
+func Nickname(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldNickname, v) }
 
 // Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
-func Address(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAddress, v))
-}
+func Address(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldAddress, v) }
 
 // Phone applies equality check predicate on the "phone" field. It's identical to PhoneEQ.
-func Phone(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPhone, v))
-}
+func Phone(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldPhone, v) }
 
 // Password applies equality check predicate on the "password" field. It's identical to PasswordEQ.
-func Password(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPassword, v))
-}
+func Password(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldPassword, v) }
 
 // SSOCert applies equality check predicate on the "SSOCert" field. It's identical to SSOCertEQ.
-func SSOCert(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldSSOCert, v))
-}
+func SSOCert(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldSSOCert, v) }
 
 // FilesCount applies equality check predicate on the "files_count" field. It's identical to FilesCountEQ.
-func FilesCount(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldFilesCount, v))
-}
+func FilesCount(v int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldFilesCount, v) }
 
 // OptionalIntEQ applies the EQ predicate on the "optional_int" field.
 func OptionalIntEQ(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldOptionalInt, v))
+	return entbuilder.FieldEQ[predicate.User](FieldOptionalInt, v)
 }
 
 // OptionalIntNEQ applies the NEQ predicate on the "optional_int" field.
 func OptionalIntNEQ(v int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldOptionalInt, v))
+	return entbuilder.FieldNEQ[predicate.User](FieldOptionalInt, v)
 }
 
 // OptionalIntIn applies the In predicate on the "optional_int" field.
@@ -129,212 +94,162 @@ func OptionalIntNotIn(vs ...int) predicate.User {
 
 // OptionalIntGT applies the GT predicate on the "optional_int" field.
 func OptionalIntGT(v int) predicate.User {
-	return predicate.User(sql.FieldGT(FieldOptionalInt, v))
+	return entbuilder.FieldGT[predicate.User](FieldOptionalInt, v)
 }
 
 // OptionalIntGTE applies the GTE predicate on the "optional_int" field.
 func OptionalIntGTE(v int) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldOptionalInt, v))
+	return entbuilder.FieldGTE[predicate.User](FieldOptionalInt, v)
 }
 
 // OptionalIntLT applies the LT predicate on the "optional_int" field.
 func OptionalIntLT(v int) predicate.User {
-	return predicate.User(sql.FieldLT(FieldOptionalInt, v))
+	return entbuilder.FieldLT[predicate.User](FieldOptionalInt, v)
 }
 
 // OptionalIntLTE applies the LTE predicate on the "optional_int" field.
 func OptionalIntLTE(v int) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldOptionalInt, v))
+	return entbuilder.FieldLTE[predicate.User](FieldOptionalInt, v)
 }
 
 // OptionalIntIsNil applies the IsNil predicate on the "optional_int" field.
 func OptionalIntIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldOptionalInt))
+	return entbuilder.FieldIsNull[predicate.User](FieldOptionalInt)
 }
 
 // OptionalIntNotNil applies the NotNil predicate on the "optional_int" field.
 func OptionalIntNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldOptionalInt))
+	return entbuilder.FieldNotNull[predicate.User](FieldOptionalInt)
 }
 
 // AgeEQ applies the EQ predicate on the "age" field.
-func AgeEQ(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAge, v))
-}
+func AgeEQ(v int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldAge, v) }
 
 // AgeNEQ applies the NEQ predicate on the "age" field.
-func AgeNEQ(v int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldAge, v))
-}
+func AgeNEQ(v int) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldAge, v) }
 
 // AgeIn applies the In predicate on the "age" field.
-func AgeIn(vs ...int) predicate.User {
-	return predicate.User(sql.FieldIn(FieldAge, vs...))
-}
+func AgeIn(vs ...int) predicate.User { return predicate.User(sql.FieldIn(FieldAge, vs...)) }
 
 // AgeNotIn applies the NotIn predicate on the "age" field.
-func AgeNotIn(vs ...int) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldAge, vs...))
-}
+func AgeNotIn(vs ...int) predicate.User { return predicate.User(sql.FieldNotIn(FieldAge, vs...)) }
 
 // AgeGT applies the GT predicate on the "age" field.
-func AgeGT(v int) predicate.User {
-	return predicate.User(sql.FieldGT(FieldAge, v))
-}
+func AgeGT(v int) predicate.User { return entbuilder.FieldGT[predicate.User](FieldAge, v) }
 
 // AgeGTE applies the GTE predicate on the "age" field.
-func AgeGTE(v int) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldAge, v))
-}
+func AgeGTE(v int) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldAge, v) }
 
 // AgeLT applies the LT predicate on the "age" field.
-func AgeLT(v int) predicate.User {
-	return predicate.User(sql.FieldLT(FieldAge, v))
-}
+func AgeLT(v int) predicate.User { return entbuilder.FieldLT[predicate.User](FieldAge, v) }
 
 // AgeLTE applies the LTE predicate on the "age" field.
-func AgeLTE(v int) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldAge, v))
-}
+func AgeLTE(v int) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldAge, v) }
 
 // NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldName, v))
-}
+func NameEQ(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldName, v) }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldName, v))
-}
+func NameNEQ(v string) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldName, v) }
 
 // NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldName, vs...))
-}
+func NameIn(vs ...string) predicate.User { return predicate.User(sql.FieldIn(FieldName, vs...)) }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldName, vs...))
-}
+func NameNotIn(vs ...string) predicate.User { return predicate.User(sql.FieldNotIn(FieldName, vs...)) }
 
 // NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldName, v))
-}
+func NameGT(v string) predicate.User { return entbuilder.FieldGT[predicate.User](FieldName, v) }
 
 // NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldName, v))
-}
+func NameGTE(v string) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldName, v) }
 
 // NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldName, v))
-}
+func NameLT(v string) predicate.User { return entbuilder.FieldLT[predicate.User](FieldName, v) }
 
 // NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldName, v))
-}
+func NameLTE(v string) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldName, v) }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldName, v))
+	return entbuilder.FieldContains[predicate.User](FieldName, v)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldName, v))
+	return entbuilder.FieldHasPrefix[predicate.User](FieldName, v)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldName, v))
+	return entbuilder.FieldHasSuffix[predicate.User](FieldName, v)
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldName, v))
+	return entbuilder.FieldEqualFold[predicate.User](FieldName, v)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldName, v))
+	return entbuilder.FieldContainsFold[predicate.User](FieldName, v)
 }
 
 // LastEQ applies the EQ predicate on the "last" field.
-func LastEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldLast, v))
-}
+func LastEQ(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldLast, v) }
 
 // LastNEQ applies the NEQ predicate on the "last" field.
-func LastNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldLast, v))
-}
+func LastNEQ(v string) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldLast, v) }
 
 // LastIn applies the In predicate on the "last" field.
-func LastIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldLast, vs...))
-}
+func LastIn(vs ...string) predicate.User { return predicate.User(sql.FieldIn(FieldLast, vs...)) }
 
 // LastNotIn applies the NotIn predicate on the "last" field.
-func LastNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldLast, vs...))
-}
+func LastNotIn(vs ...string) predicate.User { return predicate.User(sql.FieldNotIn(FieldLast, vs...)) }
 
 // LastGT applies the GT predicate on the "last" field.
-func LastGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldLast, v))
-}
+func LastGT(v string) predicate.User { return entbuilder.FieldGT[predicate.User](FieldLast, v) }
 
 // LastGTE applies the GTE predicate on the "last" field.
-func LastGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldLast, v))
-}
+func LastGTE(v string) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldLast, v) }
 
 // LastLT applies the LT predicate on the "last" field.
-func LastLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldLast, v))
-}
+func LastLT(v string) predicate.User { return entbuilder.FieldLT[predicate.User](FieldLast, v) }
 
 // LastLTE applies the LTE predicate on the "last" field.
-func LastLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldLast, v))
-}
+func LastLTE(v string) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldLast, v) }
 
 // LastContains applies the Contains predicate on the "last" field.
 func LastContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldLast, v))
+	return entbuilder.FieldContains[predicate.User](FieldLast, v)
 }
 
 // LastHasPrefix applies the HasPrefix predicate on the "last" field.
 func LastHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldLast, v))
+	return entbuilder.FieldHasPrefix[predicate.User](FieldLast, v)
 }
 
 // LastHasSuffix applies the HasSuffix predicate on the "last" field.
 func LastHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldLast, v))
+	return entbuilder.FieldHasSuffix[predicate.User](FieldLast, v)
 }
 
 // LastEqualFold applies the EqualFold predicate on the "last" field.
 func LastEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldLast, v))
+	return entbuilder.FieldEqualFold[predicate.User](FieldLast, v)
 }
 
 // LastContainsFold applies the ContainsFold predicate on the "last" field.
 func LastContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldLast, v))
+	return entbuilder.FieldContainsFold[predicate.User](FieldLast, v)
 }
 
 // NicknameEQ applies the EQ predicate on the "nickname" field.
-func NicknameEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldNickname, v))
-}
+func NicknameEQ(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldNickname, v) }
 
 // NicknameNEQ applies the NEQ predicate on the "nickname" field.
 func NicknameNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldNickname, v))
+	return entbuilder.FieldNEQ[predicate.User](FieldNickname, v)
 }
 
 // NicknameIn applies the In predicate on the "nickname" field.
@@ -348,74 +263,60 @@ func NicknameNotIn(vs ...string) predicate.User {
 }
 
 // NicknameGT applies the GT predicate on the "nickname" field.
-func NicknameGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldNickname, v))
-}
+func NicknameGT(v string) predicate.User { return entbuilder.FieldGT[predicate.User](FieldNickname, v) }
 
 // NicknameGTE applies the GTE predicate on the "nickname" field.
 func NicknameGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldNickname, v))
+	return entbuilder.FieldGTE[predicate.User](FieldNickname, v)
 }
 
 // NicknameLT applies the LT predicate on the "nickname" field.
-func NicknameLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldNickname, v))
-}
+func NicknameLT(v string) predicate.User { return entbuilder.FieldLT[predicate.User](FieldNickname, v) }
 
 // NicknameLTE applies the LTE predicate on the "nickname" field.
 func NicknameLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldNickname, v))
+	return entbuilder.FieldLTE[predicate.User](FieldNickname, v)
 }
 
 // NicknameContains applies the Contains predicate on the "nickname" field.
 func NicknameContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldNickname, v))
+	return entbuilder.FieldContains[predicate.User](FieldNickname, v)
 }
 
 // NicknameHasPrefix applies the HasPrefix predicate on the "nickname" field.
 func NicknameHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldNickname, v))
+	return entbuilder.FieldHasPrefix[predicate.User](FieldNickname, v)
 }
 
 // NicknameHasSuffix applies the HasSuffix predicate on the "nickname" field.
 func NicknameHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldNickname, v))
+	return entbuilder.FieldHasSuffix[predicate.User](FieldNickname, v)
 }
 
 // NicknameIsNil applies the IsNil predicate on the "nickname" field.
-func NicknameIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldNickname))
-}
+func NicknameIsNil() predicate.User { return entbuilder.FieldIsNull[predicate.User](FieldNickname) }
 
 // NicknameNotNil applies the NotNil predicate on the "nickname" field.
-func NicknameNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldNickname))
-}
+func NicknameNotNil() predicate.User { return entbuilder.FieldNotNull[predicate.User](FieldNickname) }
 
 // NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
 func NicknameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldNickname, v))
+	return entbuilder.FieldEqualFold[predicate.User](FieldNickname, v)
 }
 
 // NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
 func NicknameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldNickname, v))
+	return entbuilder.FieldContainsFold[predicate.User](FieldNickname, v)
 }
 
 // AddressEQ applies the EQ predicate on the "address" field.
-func AddressEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAddress, v))
-}
+func AddressEQ(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldAddress, v) }
 
 // AddressNEQ applies the NEQ predicate on the "address" field.
-func AddressNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldAddress, v))
-}
+func AddressNEQ(v string) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldAddress, v) }
 
 // AddressIn applies the In predicate on the "address" field.
-func AddressIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldAddress, vs...))
-}
+func AddressIn(vs ...string) predicate.User { return predicate.User(sql.FieldIn(FieldAddress, vs...)) }
 
 // AddressNotIn applies the NotIn predicate on the "address" field.
 func AddressNotIn(vs ...string) predicate.User {
@@ -423,74 +324,56 @@ func AddressNotIn(vs ...string) predicate.User {
 }
 
 // AddressGT applies the GT predicate on the "address" field.
-func AddressGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldAddress, v))
-}
+func AddressGT(v string) predicate.User { return entbuilder.FieldGT[predicate.User](FieldAddress, v) }
 
 // AddressGTE applies the GTE predicate on the "address" field.
-func AddressGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldAddress, v))
-}
+func AddressGTE(v string) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldAddress, v) }
 
 // AddressLT applies the LT predicate on the "address" field.
-func AddressLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldAddress, v))
-}
+func AddressLT(v string) predicate.User { return entbuilder.FieldLT[predicate.User](FieldAddress, v) }
 
 // AddressLTE applies the LTE predicate on the "address" field.
-func AddressLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldAddress, v))
-}
+func AddressLTE(v string) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldAddress, v) }
 
 // AddressContains applies the Contains predicate on the "address" field.
 func AddressContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldAddress, v))
+	return entbuilder.FieldContains[predicate.User](FieldAddress, v)
 }
 
 // AddressHasPrefix applies the HasPrefix predicate on the "address" field.
 func AddressHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldAddress, v))
+	return entbuilder.FieldHasPrefix[predicate.User](FieldAddress, v)
 }
 
 // AddressHasSuffix applies the HasSuffix predicate on the "address" field.
 func AddressHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldAddress, v))
+	return entbuilder.FieldHasSuffix[predicate.User](FieldAddress, v)
 }
 
 // AddressIsNil applies the IsNil predicate on the "address" field.
-func AddressIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldAddress))
-}
+func AddressIsNil() predicate.User { return entbuilder.FieldIsNull[predicate.User](FieldAddress) }
 
 // AddressNotNil applies the NotNil predicate on the "address" field.
-func AddressNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldAddress))
-}
+func AddressNotNil() predicate.User { return entbuilder.FieldNotNull[predicate.User](FieldAddress) }
 
 // AddressEqualFold applies the EqualFold predicate on the "address" field.
 func AddressEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldAddress, v))
+	return entbuilder.FieldEqualFold[predicate.User](FieldAddress, v)
 }
 
 // AddressContainsFold applies the ContainsFold predicate on the "address" field.
 func AddressContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldAddress, v))
+	return entbuilder.FieldContainsFold[predicate.User](FieldAddress, v)
 }
 
 // PhoneEQ applies the EQ predicate on the "phone" field.
-func PhoneEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPhone, v))
-}
+func PhoneEQ(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldPhone, v) }
 
 // PhoneNEQ applies the NEQ predicate on the "phone" field.
-func PhoneNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldPhone, v))
-}
+func PhoneNEQ(v string) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldPhone, v) }
 
 // PhoneIn applies the In predicate on the "phone" field.
-func PhoneIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldPhone, vs...))
-}
+func PhoneIn(vs ...string) predicate.User { return predicate.User(sql.FieldIn(FieldPhone, vs...)) }
 
 // PhoneNotIn applies the NotIn predicate on the "phone" field.
 func PhoneNotIn(vs ...string) predicate.User {
@@ -498,68 +381,54 @@ func PhoneNotIn(vs ...string) predicate.User {
 }
 
 // PhoneGT applies the GT predicate on the "phone" field.
-func PhoneGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldPhone, v))
-}
+func PhoneGT(v string) predicate.User { return entbuilder.FieldGT[predicate.User](FieldPhone, v) }
 
 // PhoneGTE applies the GTE predicate on the "phone" field.
-func PhoneGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldPhone, v))
-}
+func PhoneGTE(v string) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldPhone, v) }
 
 // PhoneLT applies the LT predicate on the "phone" field.
-func PhoneLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldPhone, v))
-}
+func PhoneLT(v string) predicate.User { return entbuilder.FieldLT[predicate.User](FieldPhone, v) }
 
 // PhoneLTE applies the LTE predicate on the "phone" field.
-func PhoneLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldPhone, v))
-}
+func PhoneLTE(v string) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldPhone, v) }
 
 // PhoneContains applies the Contains predicate on the "phone" field.
 func PhoneContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldPhone, v))
+	return entbuilder.FieldContains[predicate.User](FieldPhone, v)
 }
 
 // PhoneHasPrefix applies the HasPrefix predicate on the "phone" field.
 func PhoneHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldPhone, v))
+	return entbuilder.FieldHasPrefix[predicate.User](FieldPhone, v)
 }
 
 // PhoneHasSuffix applies the HasSuffix predicate on the "phone" field.
 func PhoneHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldPhone, v))
+	return entbuilder.FieldHasSuffix[predicate.User](FieldPhone, v)
 }
 
 // PhoneIsNil applies the IsNil predicate on the "phone" field.
-func PhoneIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldPhone))
-}
+func PhoneIsNil() predicate.User { return entbuilder.FieldIsNull[predicate.User](FieldPhone) }
 
 // PhoneNotNil applies the NotNil predicate on the "phone" field.
-func PhoneNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldPhone))
-}
+func PhoneNotNil() predicate.User { return entbuilder.FieldNotNull[predicate.User](FieldPhone) }
 
 // PhoneEqualFold applies the EqualFold predicate on the "phone" field.
 func PhoneEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldPhone, v))
+	return entbuilder.FieldEqualFold[predicate.User](FieldPhone, v)
 }
 
 // PhoneContainsFold applies the ContainsFold predicate on the "phone" field.
 func PhoneContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldPhone, v))
+	return entbuilder.FieldContainsFold[predicate.User](FieldPhone, v)
 }
 
 // PasswordEQ applies the EQ predicate on the "password" field.
-func PasswordEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldPassword, v))
-}
+func PasswordEQ(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldPassword, v) }
 
 // PasswordNEQ applies the NEQ predicate on the "password" field.
 func PasswordNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldPassword, v))
+	return entbuilder.FieldNEQ[predicate.User](FieldPassword, v)
 }
 
 // PasswordIn applies the In predicate on the "password" field.
@@ -573,88 +442,72 @@ func PasswordNotIn(vs ...string) predicate.User {
 }
 
 // PasswordGT applies the GT predicate on the "password" field.
-func PasswordGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldPassword, v))
-}
+func PasswordGT(v string) predicate.User { return entbuilder.FieldGT[predicate.User](FieldPassword, v) }
 
 // PasswordGTE applies the GTE predicate on the "password" field.
 func PasswordGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldPassword, v))
+	return entbuilder.FieldGTE[predicate.User](FieldPassword, v)
 }
 
 // PasswordLT applies the LT predicate on the "password" field.
-func PasswordLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldPassword, v))
-}
+func PasswordLT(v string) predicate.User { return entbuilder.FieldLT[predicate.User](FieldPassword, v) }
 
 // PasswordLTE applies the LTE predicate on the "password" field.
 func PasswordLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldPassword, v))
+	return entbuilder.FieldLTE[predicate.User](FieldPassword, v)
 }
 
 // PasswordContains applies the Contains predicate on the "password" field.
 func PasswordContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldPassword, v))
+	return entbuilder.FieldContains[predicate.User](FieldPassword, v)
 }
 
 // PasswordHasPrefix applies the HasPrefix predicate on the "password" field.
 func PasswordHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldPassword, v))
+	return entbuilder.FieldHasPrefix[predicate.User](FieldPassword, v)
 }
 
 // PasswordHasSuffix applies the HasSuffix predicate on the "password" field.
 func PasswordHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldPassword, v))
+	return entbuilder.FieldHasSuffix[predicate.User](FieldPassword, v)
 }
 
 // PasswordIsNil applies the IsNil predicate on the "password" field.
-func PasswordIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldPassword))
-}
+func PasswordIsNil() predicate.User { return entbuilder.FieldIsNull[predicate.User](FieldPassword) }
 
 // PasswordNotNil applies the NotNil predicate on the "password" field.
-func PasswordNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldPassword))
-}
+func PasswordNotNil() predicate.User { return entbuilder.FieldNotNull[predicate.User](FieldPassword) }
 
 // PasswordEqualFold applies the EqualFold predicate on the "password" field.
 func PasswordEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldPassword, v))
+	return entbuilder.FieldEqualFold[predicate.User](FieldPassword, v)
 }
 
 // PasswordContainsFold applies the ContainsFold predicate on the "password" field.
 func PasswordContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldPassword, v))
+	return entbuilder.FieldContainsFold[predicate.User](FieldPassword, v)
 }
 
 // RoleEQ applies the EQ predicate on the "role" field.
-func RoleEQ(v Role) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldRole, v))
-}
+func RoleEQ(v Role) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldRole, v) }
 
 // RoleNEQ applies the NEQ predicate on the "role" field.
-func RoleNEQ(v Role) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldRole, v))
-}
+func RoleNEQ(v Role) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldRole, v) }
 
 // RoleIn applies the In predicate on the "role" field.
-func RoleIn(vs ...Role) predicate.User {
-	return predicate.User(sql.FieldIn(FieldRole, vs...))
-}
+func RoleIn(vs ...Role) predicate.User { return predicate.User(sql.FieldIn(FieldRole, vs...)) }
 
 // RoleNotIn applies the NotIn predicate on the "role" field.
-func RoleNotIn(vs ...Role) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldRole, vs...))
-}
+func RoleNotIn(vs ...Role) predicate.User { return predicate.User(sql.FieldNotIn(FieldRole, vs...)) }
 
 // EmploymentEQ applies the EQ predicate on the "employment" field.
 func EmploymentEQ(v Employment) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldEmployment, v))
+	return entbuilder.FieldEQ[predicate.User](FieldEmployment, v)
 }
 
 // EmploymentNEQ applies the NEQ predicate on the "employment" field.
 func EmploymentNEQ(v Employment) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldEmployment, v))
+	return entbuilder.FieldNEQ[predicate.User](FieldEmployment, v)
 }
 
 // EmploymentIn applies the In predicate on the "employment" field.
@@ -668,19 +521,13 @@ func EmploymentNotIn(vs ...Employment) predicate.User {
 }
 
 // SSOCertEQ applies the EQ predicate on the "SSOCert" field.
-func SSOCertEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldSSOCert, v))
-}
+func SSOCertEQ(v string) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldSSOCert, v) }
 
 // SSOCertNEQ applies the NEQ predicate on the "SSOCert" field.
-func SSOCertNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldSSOCert, v))
-}
+func SSOCertNEQ(v string) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldSSOCert, v) }
 
 // SSOCertIn applies the In predicate on the "SSOCert" field.
-func SSOCertIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldSSOCert, vs...))
-}
+func SSOCertIn(vs ...string) predicate.User { return predicate.User(sql.FieldIn(FieldSSOCert, vs...)) }
 
 // SSOCertNotIn applies the NotIn predicate on the "SSOCert" field.
 func SSOCertNotIn(vs ...string) predicate.User {
@@ -688,68 +535,56 @@ func SSOCertNotIn(vs ...string) predicate.User {
 }
 
 // SSOCertGT applies the GT predicate on the "SSOCert" field.
-func SSOCertGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldSSOCert, v))
-}
+func SSOCertGT(v string) predicate.User { return entbuilder.FieldGT[predicate.User](FieldSSOCert, v) }
 
 // SSOCertGTE applies the GTE predicate on the "SSOCert" field.
-func SSOCertGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldSSOCert, v))
-}
+func SSOCertGTE(v string) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldSSOCert, v) }
 
 // SSOCertLT applies the LT predicate on the "SSOCert" field.
-func SSOCertLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldSSOCert, v))
-}
+func SSOCertLT(v string) predicate.User { return entbuilder.FieldLT[predicate.User](FieldSSOCert, v) }
 
 // SSOCertLTE applies the LTE predicate on the "SSOCert" field.
-func SSOCertLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldSSOCert, v))
-}
+func SSOCertLTE(v string) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldSSOCert, v) }
 
 // SSOCertContains applies the Contains predicate on the "SSOCert" field.
 func SSOCertContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldSSOCert, v))
+	return entbuilder.FieldContains[predicate.User](FieldSSOCert, v)
 }
 
 // SSOCertHasPrefix applies the HasPrefix predicate on the "SSOCert" field.
 func SSOCertHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldSSOCert, v))
+	return entbuilder.FieldHasPrefix[predicate.User](FieldSSOCert, v)
 }
 
 // SSOCertHasSuffix applies the HasSuffix predicate on the "SSOCert" field.
 func SSOCertHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldSSOCert, v))
+	return entbuilder.FieldHasSuffix[predicate.User](FieldSSOCert, v)
 }
 
 // SSOCertIsNil applies the IsNil predicate on the "SSOCert" field.
-func SSOCertIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldSSOCert))
-}
+func SSOCertIsNil() predicate.User { return entbuilder.FieldIsNull[predicate.User](FieldSSOCert) }
 
 // SSOCertNotNil applies the NotNil predicate on the "SSOCert" field.
-func SSOCertNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldSSOCert))
-}
+func SSOCertNotNil() predicate.User { return entbuilder.FieldNotNull[predicate.User](FieldSSOCert) }
 
 // SSOCertEqualFold applies the EqualFold predicate on the "SSOCert" field.
 func SSOCertEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldSSOCert, v))
+	return entbuilder.FieldEqualFold[predicate.User](FieldSSOCert, v)
 }
 
 // SSOCertContainsFold applies the ContainsFold predicate on the "SSOCert" field.
 func SSOCertContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldSSOCert, v))
+	return entbuilder.FieldContainsFold[predicate.User](FieldSSOCert, v)
 }
 
 // FilesCountEQ applies the EQ predicate on the "files_count" field.
 func FilesCountEQ(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldFilesCount, v))
+	return entbuilder.FieldEQ[predicate.User](FieldFilesCount, v)
 }
 
 // FilesCountNEQ applies the NEQ predicate on the "files_count" field.
 func FilesCountNEQ(v int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldFilesCount, v))
+	return entbuilder.FieldNEQ[predicate.User](FieldFilesCount, v)
 }
 
 // FilesCountIn applies the In predicate on the "files_count" field.
@@ -764,32 +599,30 @@ func FilesCountNotIn(vs ...int) predicate.User {
 
 // FilesCountGT applies the GT predicate on the "files_count" field.
 func FilesCountGT(v int) predicate.User {
-	return predicate.User(sql.FieldGT(FieldFilesCount, v))
+	return entbuilder.FieldGT[predicate.User](FieldFilesCount, v)
 }
 
 // FilesCountGTE applies the GTE predicate on the "files_count" field.
 func FilesCountGTE(v int) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldFilesCount, v))
+	return entbuilder.FieldGTE[predicate.User](FieldFilesCount, v)
 }
 
 // FilesCountLT applies the LT predicate on the "files_count" field.
 func FilesCountLT(v int) predicate.User {
-	return predicate.User(sql.FieldLT(FieldFilesCount, v))
+	return entbuilder.FieldLT[predicate.User](FieldFilesCount, v)
 }
 
 // FilesCountLTE applies the LTE predicate on the "files_count" field.
 func FilesCountLTE(v int) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldFilesCount, v))
+	return entbuilder.FieldLTE[predicate.User](FieldFilesCount, v)
 }
 
 // FilesCountIsNil applies the IsNil predicate on the "files_count" field.
-func FilesCountIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldFilesCount))
-}
+func FilesCountIsNil() predicate.User { return entbuilder.FieldIsNull[predicate.User](FieldFilesCount) }
 
 // FilesCountNotNil applies the NotNil predicate on the "files_count" field.
 func FilesCountNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldFilesCount))
+	return entbuilder.FieldNotNull[predicate.User](FieldFilesCount)
 }
 
 // HasCard applies the HasEdge predicate on the "card" edge.
@@ -805,14 +638,15 @@ func HasCard() predicate.User {
 
 // HasCardWith applies the HasEdge predicate on the "card" edge with a given conditions (other predicates).
 func HasCardWith(preds ...predicate.Card) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newCardStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newCardStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasPets applies the HasEdge predicate on the "pets" edge.
@@ -828,14 +662,15 @@ func HasPets() predicate.User {
 
 // HasPetsWith applies the HasEdge predicate on the "pets" edge with a given conditions (other predicates).
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newPetsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newPetsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFiles applies the HasEdge predicate on the "files" edge.
@@ -851,14 +686,15 @@ func HasFiles() predicate.User {
 
 // HasFilesWith applies the HasEdge predicate on the "files" edge with a given conditions (other predicates).
 func HasFilesWith(preds ...predicate.File) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFilesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFilesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasGroups applies the HasEdge predicate on the "groups" edge.
@@ -874,14 +710,15 @@ func HasGroups() predicate.User {
 
 // HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
 func HasGroupsWith(preds ...predicate.Group) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newGroupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newGroupsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFriends applies the HasEdge predicate on the "friends" edge.
@@ -897,14 +734,15 @@ func HasFriends() predicate.User {
 
 // HasFriendsWith applies the HasEdge predicate on the "friends" edge with a given conditions (other predicates).
 func HasFriendsWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFriendsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFriendsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFollowers applies the HasEdge predicate on the "followers" edge.
@@ -920,14 +758,15 @@ func HasFollowers() predicate.User {
 
 // HasFollowersWith applies the HasEdge predicate on the "followers" edge with a given conditions (other predicates).
 func HasFollowersWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFollowersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFollowersStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFollowing applies the HasEdge predicate on the "following" edge.
@@ -943,14 +782,15 @@ func HasFollowing() predicate.User {
 
 // HasFollowingWith applies the HasEdge predicate on the "following" edge with a given conditions (other predicates).
 func HasFollowingWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFollowingStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFollowingStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTeam applies the HasEdge predicate on the "team" edge.
@@ -966,14 +806,15 @@ func HasTeam() predicate.User {
 
 // HasTeamWith applies the HasEdge predicate on the "team" edge with a given conditions (other predicates).
 func HasTeamWith(preds ...predicate.Pet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newTeamStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newTeamStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasSpouse applies the HasEdge predicate on the "spouse" edge.
@@ -989,14 +830,15 @@ func HasSpouse() predicate.User {
 
 // HasSpouseWith applies the HasEdge predicate on the "spouse" edge with a given conditions (other predicates).
 func HasSpouseWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newSpouseStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newSpouseStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasChildren applies the HasEdge predicate on the "children" edge.
@@ -1012,14 +854,15 @@ func HasChildren() predicate.User {
 
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newChildrenStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newChildrenStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
@@ -1035,27 +878,22 @@ func HasParent() predicate.User {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newParentStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.User) predicate.User {
-	return predicate.User(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.User) predicate.User { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.User) predicate.User {
-	return predicate.User(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.User) predicate.User { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.User) predicate.User {
-	return predicate.User(sql.NotPredicates(p))
-}
+func Not(p predicate.User) predicate.User { return entbuilder.NotPred(p) }

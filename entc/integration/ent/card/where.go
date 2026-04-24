@@ -12,86 +12,63 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Card { return entbuilder.FieldEQ[predicate.Card](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Card { return entbuilder.FieldEQ[predicate.Card](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Card {
-	return predicate.Card(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Card { return entbuilder.FieldNEQ[predicate.Card](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Card {
-	return predicate.Card(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Card { return predicate.Card(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Card {
-	return predicate.Card(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Card { return predicate.Card(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Card {
-	return predicate.Card(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Card { return entbuilder.FieldGT[predicate.Card](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Card {
-	return predicate.Card(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Card { return entbuilder.FieldGTE[predicate.Card](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Card {
-	return predicate.Card(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Card { return entbuilder.FieldLT[predicate.Card](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Card {
-	return predicate.Card(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Card { return entbuilder.FieldLTE[predicate.Card](FieldID, id) }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldCreateTime, v))
+	return entbuilder.FieldEQ[predicate.Card](FieldCreateTime, v)
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldUpdateTime, v))
+	return entbuilder.FieldEQ[predicate.Card](FieldUpdateTime, v)
 }
 
 // Balance applies equality check predicate on the "balance" field. It's identical to BalanceEQ.
-func Balance(v float64) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldBalance, v))
-}
+func Balance(v float64) predicate.Card { return entbuilder.FieldEQ[predicate.Card](FieldBalance, v) }
 
 // Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
-func Number(v string) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldNumber, v))
-}
+func Number(v string) predicate.Card { return entbuilder.FieldEQ[predicate.Card](FieldNumber, v) }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldName, v))
-}
+func Name(v string) predicate.Card { return entbuilder.FieldEQ[predicate.Card](FieldName, v) }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldCreateTime, v))
+	return entbuilder.FieldEQ[predicate.Card](FieldCreateTime, v)
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldNEQ(FieldCreateTime, v))
+	return entbuilder.FieldNEQ[predicate.Card](FieldCreateTime, v)
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
@@ -106,32 +83,32 @@ func CreateTimeNotIn(vs ...time.Time) predicate.Card {
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldGT(FieldCreateTime, v))
+	return entbuilder.FieldGT[predicate.Card](FieldCreateTime, v)
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldGTE(FieldCreateTime, v))
+	return entbuilder.FieldGTE[predicate.Card](FieldCreateTime, v)
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldLT(FieldCreateTime, v))
+	return entbuilder.FieldLT[predicate.Card](FieldCreateTime, v)
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldLTE(FieldCreateTime, v))
+	return entbuilder.FieldLTE[predicate.Card](FieldCreateTime, v)
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldUpdateTime, v))
+	return entbuilder.FieldEQ[predicate.Card](FieldUpdateTime, v)
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldNEQ(FieldUpdateTime, v))
+	return entbuilder.FieldNEQ[predicate.Card](FieldUpdateTime, v)
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
@@ -146,38 +123,34 @@ func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldGT(FieldUpdateTime, v))
+	return entbuilder.FieldGT[predicate.Card](FieldUpdateTime, v)
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldGTE(FieldUpdateTime, v))
+	return entbuilder.FieldGTE[predicate.Card](FieldUpdateTime, v)
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldLT(FieldUpdateTime, v))
+	return entbuilder.FieldLT[predicate.Card](FieldUpdateTime, v)
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.Card {
-	return predicate.Card(sql.FieldLTE(FieldUpdateTime, v))
+	return entbuilder.FieldLTE[predicate.Card](FieldUpdateTime, v)
 }
 
 // BalanceEQ applies the EQ predicate on the "balance" field.
-func BalanceEQ(v float64) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldBalance, v))
-}
+func BalanceEQ(v float64) predicate.Card { return entbuilder.FieldEQ[predicate.Card](FieldBalance, v) }
 
 // BalanceNEQ applies the NEQ predicate on the "balance" field.
 func BalanceNEQ(v float64) predicate.Card {
-	return predicate.Card(sql.FieldNEQ(FieldBalance, v))
+	return entbuilder.FieldNEQ[predicate.Card](FieldBalance, v)
 }
 
 // BalanceIn applies the In predicate on the "balance" field.
-func BalanceIn(vs ...float64) predicate.Card {
-	return predicate.Card(sql.FieldIn(FieldBalance, vs...))
-}
+func BalanceIn(vs ...float64) predicate.Card { return predicate.Card(sql.FieldIn(FieldBalance, vs...)) }
 
 // BalanceNotIn applies the NotIn predicate on the "balance" field.
 func BalanceNotIn(vs ...float64) predicate.Card {
@@ -185,39 +158,29 @@ func BalanceNotIn(vs ...float64) predicate.Card {
 }
 
 // BalanceGT applies the GT predicate on the "balance" field.
-func BalanceGT(v float64) predicate.Card {
-	return predicate.Card(sql.FieldGT(FieldBalance, v))
-}
+func BalanceGT(v float64) predicate.Card { return entbuilder.FieldGT[predicate.Card](FieldBalance, v) }
 
 // BalanceGTE applies the GTE predicate on the "balance" field.
 func BalanceGTE(v float64) predicate.Card {
-	return predicate.Card(sql.FieldGTE(FieldBalance, v))
+	return entbuilder.FieldGTE[predicate.Card](FieldBalance, v)
 }
 
 // BalanceLT applies the LT predicate on the "balance" field.
-func BalanceLT(v float64) predicate.Card {
-	return predicate.Card(sql.FieldLT(FieldBalance, v))
-}
+func BalanceLT(v float64) predicate.Card { return entbuilder.FieldLT[predicate.Card](FieldBalance, v) }
 
 // BalanceLTE applies the LTE predicate on the "balance" field.
 func BalanceLTE(v float64) predicate.Card {
-	return predicate.Card(sql.FieldLTE(FieldBalance, v))
+	return entbuilder.FieldLTE[predicate.Card](FieldBalance, v)
 }
 
 // NumberEQ applies the EQ predicate on the "number" field.
-func NumberEQ(v string) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldNumber, v))
-}
+func NumberEQ(v string) predicate.Card { return entbuilder.FieldEQ[predicate.Card](FieldNumber, v) }
 
 // NumberNEQ applies the NEQ predicate on the "number" field.
-func NumberNEQ(v string) predicate.Card {
-	return predicate.Card(sql.FieldNEQ(FieldNumber, v))
-}
+func NumberNEQ(v string) predicate.Card { return entbuilder.FieldNEQ[predicate.Card](FieldNumber, v) }
 
 // NumberIn applies the In predicate on the "number" field.
-func NumberIn(vs ...string) predicate.Card {
-	return predicate.Card(sql.FieldIn(FieldNumber, vs...))
-}
+func NumberIn(vs ...string) predicate.Card { return predicate.Card(sql.FieldIn(FieldNumber, vs...)) }
 
 // NumberNotIn applies the NotIn predicate on the "number" field.
 func NumberNotIn(vs ...string) predicate.Card {
@@ -225,123 +188,95 @@ func NumberNotIn(vs ...string) predicate.Card {
 }
 
 // NumberGT applies the GT predicate on the "number" field.
-func NumberGT(v string) predicate.Card {
-	return predicate.Card(sql.FieldGT(FieldNumber, v))
-}
+func NumberGT(v string) predicate.Card { return entbuilder.FieldGT[predicate.Card](FieldNumber, v) }
 
 // NumberGTE applies the GTE predicate on the "number" field.
-func NumberGTE(v string) predicate.Card {
-	return predicate.Card(sql.FieldGTE(FieldNumber, v))
-}
+func NumberGTE(v string) predicate.Card { return entbuilder.FieldGTE[predicate.Card](FieldNumber, v) }
 
 // NumberLT applies the LT predicate on the "number" field.
-func NumberLT(v string) predicate.Card {
-	return predicate.Card(sql.FieldLT(FieldNumber, v))
-}
+func NumberLT(v string) predicate.Card { return entbuilder.FieldLT[predicate.Card](FieldNumber, v) }
 
 // NumberLTE applies the LTE predicate on the "number" field.
-func NumberLTE(v string) predicate.Card {
-	return predicate.Card(sql.FieldLTE(FieldNumber, v))
-}
+func NumberLTE(v string) predicate.Card { return entbuilder.FieldLTE[predicate.Card](FieldNumber, v) }
 
 // NumberContains applies the Contains predicate on the "number" field.
 func NumberContains(v string) predicate.Card {
-	return predicate.Card(sql.FieldContains(FieldNumber, v))
+	return entbuilder.FieldContains[predicate.Card](FieldNumber, v)
 }
 
 // NumberHasPrefix applies the HasPrefix predicate on the "number" field.
 func NumberHasPrefix(v string) predicate.Card {
-	return predicate.Card(sql.FieldHasPrefix(FieldNumber, v))
+	return entbuilder.FieldHasPrefix[predicate.Card](FieldNumber, v)
 }
 
 // NumberHasSuffix applies the HasSuffix predicate on the "number" field.
 func NumberHasSuffix(v string) predicate.Card {
-	return predicate.Card(sql.FieldHasSuffix(FieldNumber, v))
+	return entbuilder.FieldHasSuffix[predicate.Card](FieldNumber, v)
 }
 
 // NumberEqualFold applies the EqualFold predicate on the "number" field.
 func NumberEqualFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldEqualFold(FieldNumber, v))
+	return entbuilder.FieldEqualFold[predicate.Card](FieldNumber, v)
 }
 
 // NumberContainsFold applies the ContainsFold predicate on the "number" field.
 func NumberContainsFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldContainsFold(FieldNumber, v))
+	return entbuilder.FieldContainsFold[predicate.Card](FieldNumber, v)
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Card {
-	return predicate.Card(sql.FieldEQ(FieldName, v))
-}
+func NameEQ(v string) predicate.Card { return entbuilder.FieldEQ[predicate.Card](FieldName, v) }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Card {
-	return predicate.Card(sql.FieldNEQ(FieldName, v))
-}
+func NameNEQ(v string) predicate.Card { return entbuilder.FieldNEQ[predicate.Card](FieldName, v) }
 
 // NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Card {
-	return predicate.Card(sql.FieldIn(FieldName, vs...))
-}
+func NameIn(vs ...string) predicate.Card { return predicate.Card(sql.FieldIn(FieldName, vs...)) }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Card {
-	return predicate.Card(sql.FieldNotIn(FieldName, vs...))
-}
+func NameNotIn(vs ...string) predicate.Card { return predicate.Card(sql.FieldNotIn(FieldName, vs...)) }
 
 // NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Card {
-	return predicate.Card(sql.FieldGT(FieldName, v))
-}
+func NameGT(v string) predicate.Card { return entbuilder.FieldGT[predicate.Card](FieldName, v) }
 
 // NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Card {
-	return predicate.Card(sql.FieldGTE(FieldName, v))
-}
+func NameGTE(v string) predicate.Card { return entbuilder.FieldGTE[predicate.Card](FieldName, v) }
 
 // NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Card {
-	return predicate.Card(sql.FieldLT(FieldName, v))
-}
+func NameLT(v string) predicate.Card { return entbuilder.FieldLT[predicate.Card](FieldName, v) }
 
 // NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Card {
-	return predicate.Card(sql.FieldLTE(FieldName, v))
-}
+func NameLTE(v string) predicate.Card { return entbuilder.FieldLTE[predicate.Card](FieldName, v) }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Card {
-	return predicate.Card(sql.FieldContains(FieldName, v))
+	return entbuilder.FieldContains[predicate.Card](FieldName, v)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Card {
-	return predicate.Card(sql.FieldHasPrefix(FieldName, v))
+	return entbuilder.FieldHasPrefix[predicate.Card](FieldName, v)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Card {
-	return predicate.Card(sql.FieldHasSuffix(FieldName, v))
+	return entbuilder.FieldHasSuffix[predicate.Card](FieldName, v)
 }
 
 // NameIsNil applies the IsNil predicate on the "name" field.
-func NameIsNil() predicate.Card {
-	return predicate.Card(sql.FieldIsNull(FieldName))
-}
+func NameIsNil() predicate.Card { return entbuilder.FieldIsNull[predicate.Card](FieldName) }
 
 // NameNotNil applies the NotNil predicate on the "name" field.
-func NameNotNil() predicate.Card {
-	return predicate.Card(sql.FieldNotNull(FieldName))
-}
+func NameNotNil() predicate.Card { return entbuilder.FieldNotNull[predicate.Card](FieldName) }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldEqualFold(FieldName, v))
+	return entbuilder.FieldEqualFold[predicate.Card](FieldName, v)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Card {
-	return predicate.Card(sql.FieldContainsFold(FieldName, v))
+	return entbuilder.FieldContainsFold[predicate.Card](FieldName, v)
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
@@ -357,14 +292,15 @@ func HasOwner() predicate.Card {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Card(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasSpec applies the HasEdge predicate on the "spec" edge.
@@ -380,27 +316,22 @@ func HasSpec() predicate.Card {
 
 // HasSpecWith applies the HasEdge predicate on the "spec" edge with a given conditions (other predicates).
 func HasSpecWith(preds ...predicate.Spec) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		step := newSpecStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Card(
+		func(s *sql.Selector) {
+			step := newSpecStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Card) predicate.Card {
-	return predicate.Card(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Card) predicate.Card { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Card) predicate.Card {
-	return predicate.Card(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Card) predicate.Card { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Card) predicate.Card {
-	return predicate.Card(sql.NotPredicates(p))
-}
+func Not(p predicate.Card) predicate.Card { return entbuilder.NotPred(p) }

@@ -12,332 +12,225 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.File { return entbuilder.FieldNEQ[predicate.File](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.File {
-	return predicate.File(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.File { return predicate.File(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.File {
-	return predicate.File(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.File { return predicate.File(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.File {
-	return predicate.File(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.File { return entbuilder.FieldGT[predicate.File](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.File {
-	return predicate.File(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.File { return entbuilder.FieldGTE[predicate.File](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.File {
-	return predicate.File(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.File { return entbuilder.FieldLT[predicate.File](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.File {
-	return predicate.File(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.File { return entbuilder.FieldLTE[predicate.File](FieldID, id) }
 
 // SetID applies equality check predicate on the "set_id" field. It's identical to SetIDEQ.
-func SetID(v int) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldSetID, v))
-}
+func SetID(v int) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldSetID, v) }
 
 // Size applies equality check predicate on the "size" field. It's identical to SizeEQ.
-func Size(v int) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldSize, v))
-}
+func Size(v int) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldSize, v) }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldName, v))
-}
+func Name(v string) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldName, v) }
 
 // User applies equality check predicate on the "user" field. It's identical to UserEQ.
-func User(v string) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldUser, v))
-}
+func User(v string) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldUser, v) }
 
 // Group applies equality check predicate on the "group" field. It's identical to GroupEQ.
-func Group(v string) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldGroup, v))
-}
+func Group(v string) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldGroup, v) }
 
 // Op applies equality check predicate on the "op" field. It's identical to OpEQ.
-func Op(v bool) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldOp, v))
-}
+func Op(v bool) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldOp, v) }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldCreateTime, v))
+	return entbuilder.FieldEQ[predicate.File](FieldCreateTime, v)
 }
 
 // SetIDEQ applies the EQ predicate on the "set_id" field.
-func SetIDEQ(v int) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldSetID, v))
-}
+func SetIDEQ(v int) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldSetID, v) }
 
 // SetIDNEQ applies the NEQ predicate on the "set_id" field.
-func SetIDNEQ(v int) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldSetID, v))
-}
+func SetIDNEQ(v int) predicate.File { return entbuilder.FieldNEQ[predicate.File](FieldSetID, v) }
 
 // SetIDIn applies the In predicate on the "set_id" field.
-func SetIDIn(vs ...int) predicate.File {
-	return predicate.File(sql.FieldIn(FieldSetID, vs...))
-}
+func SetIDIn(vs ...int) predicate.File { return predicate.File(sql.FieldIn(FieldSetID, vs...)) }
 
 // SetIDNotIn applies the NotIn predicate on the "set_id" field.
-func SetIDNotIn(vs ...int) predicate.File {
-	return predicate.File(sql.FieldNotIn(FieldSetID, vs...))
-}
+func SetIDNotIn(vs ...int) predicate.File { return predicate.File(sql.FieldNotIn(FieldSetID, vs...)) }
 
 // SetIDGT applies the GT predicate on the "set_id" field.
-func SetIDGT(v int) predicate.File {
-	return predicate.File(sql.FieldGT(FieldSetID, v))
-}
+func SetIDGT(v int) predicate.File { return entbuilder.FieldGT[predicate.File](FieldSetID, v) }
 
 // SetIDGTE applies the GTE predicate on the "set_id" field.
-func SetIDGTE(v int) predicate.File {
-	return predicate.File(sql.FieldGTE(FieldSetID, v))
-}
+func SetIDGTE(v int) predicate.File { return entbuilder.FieldGTE[predicate.File](FieldSetID, v) }
 
 // SetIDLT applies the LT predicate on the "set_id" field.
-func SetIDLT(v int) predicate.File {
-	return predicate.File(sql.FieldLT(FieldSetID, v))
-}
+func SetIDLT(v int) predicate.File { return entbuilder.FieldLT[predicate.File](FieldSetID, v) }
 
 // SetIDLTE applies the LTE predicate on the "set_id" field.
-func SetIDLTE(v int) predicate.File {
-	return predicate.File(sql.FieldLTE(FieldSetID, v))
-}
+func SetIDLTE(v int) predicate.File { return entbuilder.FieldLTE[predicate.File](FieldSetID, v) }
 
 // SetIDIsNil applies the IsNil predicate on the "set_id" field.
-func SetIDIsNil() predicate.File {
-	return predicate.File(sql.FieldIsNull(FieldSetID))
-}
+func SetIDIsNil() predicate.File { return entbuilder.FieldIsNull[predicate.File](FieldSetID) }
 
 // SetIDNotNil applies the NotNil predicate on the "set_id" field.
-func SetIDNotNil() predicate.File {
-	return predicate.File(sql.FieldNotNull(FieldSetID))
-}
+func SetIDNotNil() predicate.File { return entbuilder.FieldNotNull[predicate.File](FieldSetID) }
 
 // SizeEQ applies the EQ predicate on the "size" field.
-func SizeEQ(v int) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldSize, v))
-}
+func SizeEQ(v int) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldSize, v) }
 
 // SizeNEQ applies the NEQ predicate on the "size" field.
-func SizeNEQ(v int) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldSize, v))
-}
+func SizeNEQ(v int) predicate.File { return entbuilder.FieldNEQ[predicate.File](FieldSize, v) }
 
 // SizeIn applies the In predicate on the "size" field.
-func SizeIn(vs ...int) predicate.File {
-	return predicate.File(sql.FieldIn(FieldSize, vs...))
-}
+func SizeIn(vs ...int) predicate.File { return predicate.File(sql.FieldIn(FieldSize, vs...)) }
 
 // SizeNotIn applies the NotIn predicate on the "size" field.
-func SizeNotIn(vs ...int) predicate.File {
-	return predicate.File(sql.FieldNotIn(FieldSize, vs...))
-}
+func SizeNotIn(vs ...int) predicate.File { return predicate.File(sql.FieldNotIn(FieldSize, vs...)) }
 
 // SizeGT applies the GT predicate on the "size" field.
-func SizeGT(v int) predicate.File {
-	return predicate.File(sql.FieldGT(FieldSize, v))
-}
+func SizeGT(v int) predicate.File { return entbuilder.FieldGT[predicate.File](FieldSize, v) }
 
 // SizeGTE applies the GTE predicate on the "size" field.
-func SizeGTE(v int) predicate.File {
-	return predicate.File(sql.FieldGTE(FieldSize, v))
-}
+func SizeGTE(v int) predicate.File { return entbuilder.FieldGTE[predicate.File](FieldSize, v) }
 
 // SizeLT applies the LT predicate on the "size" field.
-func SizeLT(v int) predicate.File {
-	return predicate.File(sql.FieldLT(FieldSize, v))
-}
+func SizeLT(v int) predicate.File { return entbuilder.FieldLT[predicate.File](FieldSize, v) }
 
 // SizeLTE applies the LTE predicate on the "size" field.
-func SizeLTE(v int) predicate.File {
-	return predicate.File(sql.FieldLTE(FieldSize, v))
-}
+func SizeLTE(v int) predicate.File { return entbuilder.FieldLTE[predicate.File](FieldSize, v) }
 
 // NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldName, v))
-}
+func NameEQ(v string) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldName, v) }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldName, v))
-}
+func NameNEQ(v string) predicate.File { return entbuilder.FieldNEQ[predicate.File](FieldName, v) }
 
 // NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.File {
-	return predicate.File(sql.FieldIn(FieldName, vs...))
-}
+func NameIn(vs ...string) predicate.File { return predicate.File(sql.FieldIn(FieldName, vs...)) }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.File {
-	return predicate.File(sql.FieldNotIn(FieldName, vs...))
-}
+func NameNotIn(vs ...string) predicate.File { return predicate.File(sql.FieldNotIn(FieldName, vs...)) }
 
 // NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.File {
-	return predicate.File(sql.FieldGT(FieldName, v))
-}
+func NameGT(v string) predicate.File { return entbuilder.FieldGT[predicate.File](FieldName, v) }
 
 // NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.File {
-	return predicate.File(sql.FieldGTE(FieldName, v))
-}
+func NameGTE(v string) predicate.File { return entbuilder.FieldGTE[predicate.File](FieldName, v) }
 
 // NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.File {
-	return predicate.File(sql.FieldLT(FieldName, v))
-}
+func NameLT(v string) predicate.File { return entbuilder.FieldLT[predicate.File](FieldName, v) }
 
 // NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.File {
-	return predicate.File(sql.FieldLTE(FieldName, v))
-}
+func NameLTE(v string) predicate.File { return entbuilder.FieldLTE[predicate.File](FieldName, v) }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.File {
-	return predicate.File(sql.FieldContains(FieldName, v))
+	return entbuilder.FieldContains[predicate.File](FieldName, v)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.File {
-	return predicate.File(sql.FieldHasPrefix(FieldName, v))
+	return entbuilder.FieldHasPrefix[predicate.File](FieldName, v)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.File {
-	return predicate.File(sql.FieldHasSuffix(FieldName, v))
+	return entbuilder.FieldHasSuffix[predicate.File](FieldName, v)
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.File {
-	return predicate.File(sql.FieldEqualFold(FieldName, v))
+	return entbuilder.FieldEqualFold[predicate.File](FieldName, v)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.File {
-	return predicate.File(sql.FieldContainsFold(FieldName, v))
+	return entbuilder.FieldContainsFold[predicate.File](FieldName, v)
 }
 
 // UserEQ applies the EQ predicate on the "user" field.
-func UserEQ(v string) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldUser, v))
-}
+func UserEQ(v string) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldUser, v) }
 
 // UserNEQ applies the NEQ predicate on the "user" field.
-func UserNEQ(v string) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldUser, v))
-}
+func UserNEQ(v string) predicate.File { return entbuilder.FieldNEQ[predicate.File](FieldUser, v) }
 
 // UserIn applies the In predicate on the "user" field.
-func UserIn(vs ...string) predicate.File {
-	return predicate.File(sql.FieldIn(FieldUser, vs...))
-}
+func UserIn(vs ...string) predicate.File { return predicate.File(sql.FieldIn(FieldUser, vs...)) }
 
 // UserNotIn applies the NotIn predicate on the "user" field.
-func UserNotIn(vs ...string) predicate.File {
-	return predicate.File(sql.FieldNotIn(FieldUser, vs...))
-}
+func UserNotIn(vs ...string) predicate.File { return predicate.File(sql.FieldNotIn(FieldUser, vs...)) }
 
 // UserGT applies the GT predicate on the "user" field.
-func UserGT(v string) predicate.File {
-	return predicate.File(sql.FieldGT(FieldUser, v))
-}
+func UserGT(v string) predicate.File { return entbuilder.FieldGT[predicate.File](FieldUser, v) }
 
 // UserGTE applies the GTE predicate on the "user" field.
-func UserGTE(v string) predicate.File {
-	return predicate.File(sql.FieldGTE(FieldUser, v))
-}
+func UserGTE(v string) predicate.File { return entbuilder.FieldGTE[predicate.File](FieldUser, v) }
 
 // UserLT applies the LT predicate on the "user" field.
-func UserLT(v string) predicate.File {
-	return predicate.File(sql.FieldLT(FieldUser, v))
-}
+func UserLT(v string) predicate.File { return entbuilder.FieldLT[predicate.File](FieldUser, v) }
 
 // UserLTE applies the LTE predicate on the "user" field.
-func UserLTE(v string) predicate.File {
-	return predicate.File(sql.FieldLTE(FieldUser, v))
-}
+func UserLTE(v string) predicate.File { return entbuilder.FieldLTE[predicate.File](FieldUser, v) }
 
 // UserContains applies the Contains predicate on the "user" field.
 func UserContains(v string) predicate.File {
-	return predicate.File(sql.FieldContains(FieldUser, v))
+	return entbuilder.FieldContains[predicate.File](FieldUser, v)
 }
 
 // UserHasPrefix applies the HasPrefix predicate on the "user" field.
 func UserHasPrefix(v string) predicate.File {
-	return predicate.File(sql.FieldHasPrefix(FieldUser, v))
+	return entbuilder.FieldHasPrefix[predicate.File](FieldUser, v)
 }
 
 // UserHasSuffix applies the HasSuffix predicate on the "user" field.
 func UserHasSuffix(v string) predicate.File {
-	return predicate.File(sql.FieldHasSuffix(FieldUser, v))
+	return entbuilder.FieldHasSuffix[predicate.File](FieldUser, v)
 }
 
 // UserIsNil applies the IsNil predicate on the "user" field.
-func UserIsNil() predicate.File {
-	return predicate.File(sql.FieldIsNull(FieldUser))
-}
+func UserIsNil() predicate.File { return entbuilder.FieldIsNull[predicate.File](FieldUser) }
 
 // UserNotNil applies the NotNil predicate on the "user" field.
-func UserNotNil() predicate.File {
-	return predicate.File(sql.FieldNotNull(FieldUser))
-}
+func UserNotNil() predicate.File { return entbuilder.FieldNotNull[predicate.File](FieldUser) }
 
 // UserEqualFold applies the EqualFold predicate on the "user" field.
 func UserEqualFold(v string) predicate.File {
-	return predicate.File(sql.FieldEqualFold(FieldUser, v))
+	return entbuilder.FieldEqualFold[predicate.File](FieldUser, v)
 }
 
 // UserContainsFold applies the ContainsFold predicate on the "user" field.
 func UserContainsFold(v string) predicate.File {
-	return predicate.File(sql.FieldContainsFold(FieldUser, v))
+	return entbuilder.FieldContainsFold[predicate.File](FieldUser, v)
 }
 
 // GroupEQ applies the EQ predicate on the "group" field.
-func GroupEQ(v string) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldGroup, v))
-}
+func GroupEQ(v string) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldGroup, v) }
 
 // GroupNEQ applies the NEQ predicate on the "group" field.
-func GroupNEQ(v string) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldGroup, v))
-}
+func GroupNEQ(v string) predicate.File { return entbuilder.FieldNEQ[predicate.File](FieldGroup, v) }
 
 // GroupIn applies the In predicate on the "group" field.
-func GroupIn(vs ...string) predicate.File {
-	return predicate.File(sql.FieldIn(FieldGroup, vs...))
-}
+func GroupIn(vs ...string) predicate.File { return predicate.File(sql.FieldIn(FieldGroup, vs...)) }
 
 // GroupNotIn applies the NotIn predicate on the "group" field.
 func GroupNotIn(vs ...string) predicate.File {
@@ -345,94 +238,68 @@ func GroupNotIn(vs ...string) predicate.File {
 }
 
 // GroupGT applies the GT predicate on the "group" field.
-func GroupGT(v string) predicate.File {
-	return predicate.File(sql.FieldGT(FieldGroup, v))
-}
+func GroupGT(v string) predicate.File { return entbuilder.FieldGT[predicate.File](FieldGroup, v) }
 
 // GroupGTE applies the GTE predicate on the "group" field.
-func GroupGTE(v string) predicate.File {
-	return predicate.File(sql.FieldGTE(FieldGroup, v))
-}
+func GroupGTE(v string) predicate.File { return entbuilder.FieldGTE[predicate.File](FieldGroup, v) }
 
 // GroupLT applies the LT predicate on the "group" field.
-func GroupLT(v string) predicate.File {
-	return predicate.File(sql.FieldLT(FieldGroup, v))
-}
+func GroupLT(v string) predicate.File { return entbuilder.FieldLT[predicate.File](FieldGroup, v) }
 
 // GroupLTE applies the LTE predicate on the "group" field.
-func GroupLTE(v string) predicate.File {
-	return predicate.File(sql.FieldLTE(FieldGroup, v))
-}
+func GroupLTE(v string) predicate.File { return entbuilder.FieldLTE[predicate.File](FieldGroup, v) }
 
 // GroupContains applies the Contains predicate on the "group" field.
 func GroupContains(v string) predicate.File {
-	return predicate.File(sql.FieldContains(FieldGroup, v))
+	return entbuilder.FieldContains[predicate.File](FieldGroup, v)
 }
 
 // GroupHasPrefix applies the HasPrefix predicate on the "group" field.
 func GroupHasPrefix(v string) predicate.File {
-	return predicate.File(sql.FieldHasPrefix(FieldGroup, v))
+	return entbuilder.FieldHasPrefix[predicate.File](FieldGroup, v)
 }
 
 // GroupHasSuffix applies the HasSuffix predicate on the "group" field.
 func GroupHasSuffix(v string) predicate.File {
-	return predicate.File(sql.FieldHasSuffix(FieldGroup, v))
+	return entbuilder.FieldHasSuffix[predicate.File](FieldGroup, v)
 }
 
 // GroupIsNil applies the IsNil predicate on the "group" field.
-func GroupIsNil() predicate.File {
-	return predicate.File(sql.FieldIsNull(FieldGroup))
-}
+func GroupIsNil() predicate.File { return entbuilder.FieldIsNull[predicate.File](FieldGroup) }
 
 // GroupNotNil applies the NotNil predicate on the "group" field.
-func GroupNotNil() predicate.File {
-	return predicate.File(sql.FieldNotNull(FieldGroup))
-}
+func GroupNotNil() predicate.File { return entbuilder.FieldNotNull[predicate.File](FieldGroup) }
 
 // GroupEqualFold applies the EqualFold predicate on the "group" field.
 func GroupEqualFold(v string) predicate.File {
-	return predicate.File(sql.FieldEqualFold(FieldGroup, v))
+	return entbuilder.FieldEqualFold[predicate.File](FieldGroup, v)
 }
 
 // GroupContainsFold applies the ContainsFold predicate on the "group" field.
 func GroupContainsFold(v string) predicate.File {
-	return predicate.File(sql.FieldContainsFold(FieldGroup, v))
+	return entbuilder.FieldContainsFold[predicate.File](FieldGroup, v)
 }
 
 // OpEQ applies the EQ predicate on the "op" field.
-func OpEQ(v bool) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldOp, v))
-}
+func OpEQ(v bool) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldOp, v) }
 
 // OpNEQ applies the NEQ predicate on the "op" field.
-func OpNEQ(v bool) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldOp, v))
-}
+func OpNEQ(v bool) predicate.File { return entbuilder.FieldNEQ[predicate.File](FieldOp, v) }
 
 // OpIsNil applies the IsNil predicate on the "op" field.
-func OpIsNil() predicate.File {
-	return predicate.File(sql.FieldIsNull(FieldOp))
-}
+func OpIsNil() predicate.File { return entbuilder.FieldIsNull[predicate.File](FieldOp) }
 
 // OpNotNil applies the NotNil predicate on the "op" field.
-func OpNotNil() predicate.File {
-	return predicate.File(sql.FieldNotNull(FieldOp))
-}
+func OpNotNil() predicate.File { return entbuilder.FieldNotNull[predicate.File](FieldOp) }
 
 // FieldIDEQ applies the EQ predicate on the "field_id" field.
-func FieldIDEQ(v int) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldFieldID, v))
-}
+func FieldIDEQ(v int) predicate.File { return entbuilder.FieldEQ[predicate.File](FieldFieldID, v) }
 
 // FieldIDNEQ applies the NEQ predicate on the "field_id" field.
-func FieldIDNEQ(v int) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldFieldID, v))
-}
+func FieldIDNEQ(v int) predicate.File { return entbuilder.FieldNEQ[predicate.File](FieldFieldID, v) }
 
 // FieldIDIn applies the In predicate on the "field_id" field.
-func FieldIDIn(vs ...int) predicate.File {
-	return predicate.File(sql.FieldIn(FieldFieldID, vs...))
-}
+func FieldIDIn(vs ...int) predicate.File { return predicate.File(sql.FieldIn(FieldFieldID, vs...)) }
 
 // FieldIDNotIn applies the NotIn predicate on the "field_id" field.
 func FieldIDNotIn(vs ...int) predicate.File {
@@ -440,43 +307,31 @@ func FieldIDNotIn(vs ...int) predicate.File {
 }
 
 // FieldIDGT applies the GT predicate on the "field_id" field.
-func FieldIDGT(v int) predicate.File {
-	return predicate.File(sql.FieldGT(FieldFieldID, v))
-}
+func FieldIDGT(v int) predicate.File { return entbuilder.FieldGT[predicate.File](FieldFieldID, v) }
 
 // FieldIDGTE applies the GTE predicate on the "field_id" field.
-func FieldIDGTE(v int) predicate.File {
-	return predicate.File(sql.FieldGTE(FieldFieldID, v))
-}
+func FieldIDGTE(v int) predicate.File { return entbuilder.FieldGTE[predicate.File](FieldFieldID, v) }
 
 // FieldIDLT applies the LT predicate on the "field_id" field.
-func FieldIDLT(v int) predicate.File {
-	return predicate.File(sql.FieldLT(FieldFieldID, v))
-}
+func FieldIDLT(v int) predicate.File { return entbuilder.FieldLT[predicate.File](FieldFieldID, v) }
 
 // FieldIDLTE applies the LTE predicate on the "field_id" field.
-func FieldIDLTE(v int) predicate.File {
-	return predicate.File(sql.FieldLTE(FieldFieldID, v))
-}
+func FieldIDLTE(v int) predicate.File { return entbuilder.FieldLTE[predicate.File](FieldFieldID, v) }
 
 // FieldIDIsNil applies the IsNil predicate on the "field_id" field.
-func FieldIDIsNil() predicate.File {
-	return predicate.File(sql.FieldIsNull(FieldFieldID))
-}
+func FieldIDIsNil() predicate.File { return entbuilder.FieldIsNull[predicate.File](FieldFieldID) }
 
 // FieldIDNotNil applies the NotNil predicate on the "field_id" field.
-func FieldIDNotNil() predicate.File {
-	return predicate.File(sql.FieldNotNull(FieldFieldID))
-}
+func FieldIDNotNil() predicate.File { return entbuilder.FieldNotNull[predicate.File](FieldFieldID) }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.File {
-	return predicate.File(sql.FieldEQ(FieldCreateTime, v))
+	return entbuilder.FieldEQ[predicate.File](FieldCreateTime, v)
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.File {
-	return predicate.File(sql.FieldNEQ(FieldCreateTime, v))
+	return entbuilder.FieldNEQ[predicate.File](FieldCreateTime, v)
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
@@ -491,32 +346,30 @@ func CreateTimeNotIn(vs ...time.Time) predicate.File {
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.File {
-	return predicate.File(sql.FieldGT(FieldCreateTime, v))
+	return entbuilder.FieldGT[predicate.File](FieldCreateTime, v)
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.File {
-	return predicate.File(sql.FieldGTE(FieldCreateTime, v))
+	return entbuilder.FieldGTE[predicate.File](FieldCreateTime, v)
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.File {
-	return predicate.File(sql.FieldLT(FieldCreateTime, v))
+	return entbuilder.FieldLT[predicate.File](FieldCreateTime, v)
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.File {
-	return predicate.File(sql.FieldLTE(FieldCreateTime, v))
+	return entbuilder.FieldLTE[predicate.File](FieldCreateTime, v)
 }
 
 // CreateTimeIsNil applies the IsNil predicate on the "create_time" field.
-func CreateTimeIsNil() predicate.File {
-	return predicate.File(sql.FieldIsNull(FieldCreateTime))
-}
+func CreateTimeIsNil() predicate.File { return entbuilder.FieldIsNull[predicate.File](FieldCreateTime) }
 
 // CreateTimeNotNil applies the NotNil predicate on the "create_time" field.
 func CreateTimeNotNil() predicate.File {
-	return predicate.File(sql.FieldNotNull(FieldCreateTime))
+	return entbuilder.FieldNotNull[predicate.File](FieldCreateTime)
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
@@ -532,14 +385,15 @@ func HasOwner() predicate.File {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.File(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasType applies the HasEdge predicate on the "type" edge.
@@ -555,14 +409,15 @@ func HasType() predicate.File {
 
 // HasTypeWith applies the HasEdge predicate on the "type" edge with a given conditions (other predicates).
 func HasTypeWith(preds ...predicate.FileType) predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := newTypeStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.File(
+		func(s *sql.Selector) {
+			step := newTypeStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasField applies the HasEdge predicate on the "field" edge.
@@ -578,27 +433,25 @@ func HasField() predicate.File {
 
 // HasFieldWith applies the HasEdge predicate on the "field" edge with a given conditions (other predicates).
 func HasFieldWith(preds ...predicate.FieldType) predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := newFieldStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.File(
+		func(s *sql.Selector) {
+			step := newFieldStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+				// Auto-filter soft-deleted rows — HasNeighborsWith subqueries bypass ent
+				// interceptors, so we must explicitly exclude soft-deleted records.
+				sql.FieldIsNull("deleted_at")(s)
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.File) predicate.File {
-	return predicate.File(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.File) predicate.File { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.File) predicate.File {
-	return predicate.File(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.File) predicate.File { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.File) predicate.File {
-	return predicate.File(sql.NotPredicates(p))
-}
+func Not(p predicate.File) predicate.File { return entbuilder.NotPred(p) }

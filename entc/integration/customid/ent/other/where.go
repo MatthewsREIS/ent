@@ -10,64 +10,41 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldEQ(FieldID, id))
-}
+func ID(id sid.ID) predicate.Other { return entbuilder.FieldEQ[predicate.Other](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id sid.ID) predicate.Other { return entbuilder.FieldEQ[predicate.Other](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id sid.ID) predicate.Other { return entbuilder.FieldNEQ[predicate.Other](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...sid.ID) predicate.Other { return predicate.Other(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...sid.ID) predicate.Other { return predicate.Other(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldGT(FieldID, id))
-}
+func IDGT(id sid.ID) predicate.Other { return entbuilder.FieldGT[predicate.Other](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id sid.ID) predicate.Other { return entbuilder.FieldGTE[predicate.Other](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldLT(FieldID, id))
-}
+func IDLT(id sid.ID) predicate.Other { return entbuilder.FieldLT[predicate.Other](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id sid.ID) predicate.Other { return entbuilder.FieldLTE[predicate.Other](FieldID, id) }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Other) predicate.Other {
-	return predicate.Other(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Other) predicate.Other { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Other) predicate.Other {
-	return predicate.Other(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Other) predicate.Other { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Other) predicate.Other {
-	return predicate.Other(sql.NotPredicates(p))
-}
+func Not(p predicate.Other) predicate.Other { return entbuilder.NotPred(p) }

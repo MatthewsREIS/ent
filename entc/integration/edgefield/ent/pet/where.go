@@ -10,87 +10,56 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Pet { return entbuilder.FieldEQ[predicate.Pet](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Pet { return entbuilder.FieldEQ[predicate.Pet](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Pet { return entbuilder.FieldNEQ[predicate.Pet](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Pet { return predicate.Pet(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Pet { return predicate.Pet(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Pet { return entbuilder.FieldGT[predicate.Pet](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Pet { return entbuilder.FieldGTE[predicate.Pet](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Pet { return entbuilder.FieldLT[predicate.Pet](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Pet { return entbuilder.FieldLTE[predicate.Pet](FieldID, id) }
 
 // OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
-func OwnerID(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldOwnerID, v))
-}
+func OwnerID(v int) predicate.Pet { return entbuilder.FieldEQ[predicate.Pet](FieldOwnerID, v) }
 
 // OwnerIDEQ applies the EQ predicate on the "owner_id" field.
-func OwnerIDEQ(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldOwnerID, v))
-}
+func OwnerIDEQ(v int) predicate.Pet { return entbuilder.FieldEQ[predicate.Pet](FieldOwnerID, v) }
 
 // OwnerIDNEQ applies the NEQ predicate on the "owner_id" field.
-func OwnerIDNEQ(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldOwnerID, v))
-}
+func OwnerIDNEQ(v int) predicate.Pet { return entbuilder.FieldNEQ[predicate.Pet](FieldOwnerID, v) }
 
 // OwnerIDIn applies the In predicate on the "owner_id" field.
-func OwnerIDIn(vs ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldIn(FieldOwnerID, vs...))
-}
+func OwnerIDIn(vs ...int) predicate.Pet { return predicate.Pet(sql.FieldIn(FieldOwnerID, vs...)) }
 
 // OwnerIDNotIn applies the NotIn predicate on the "owner_id" field.
-func OwnerIDNotIn(vs ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldNotIn(FieldOwnerID, vs...))
-}
+func OwnerIDNotIn(vs ...int) predicate.Pet { return predicate.Pet(sql.FieldNotIn(FieldOwnerID, vs...)) }
 
 // OwnerIDIsNil applies the IsNil predicate on the "owner_id" field.
-func OwnerIDIsNil() predicate.Pet {
-	return predicate.Pet(sql.FieldIsNull(FieldOwnerID))
-}
+func OwnerIDIsNil() predicate.Pet { return entbuilder.FieldIsNull[predicate.Pet](FieldOwnerID) }
 
 // OwnerIDNotNil applies the NotNil predicate on the "owner_id" field.
-func OwnerIDNotNil() predicate.Pet {
-	return predicate.Pet(sql.FieldNotNull(FieldOwnerID))
-}
+func OwnerIDNotNil() predicate.Pet { return entbuilder.FieldNotNull[predicate.Pet](FieldOwnerID) }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Pet {
@@ -105,27 +74,22 @@ func HasOwner() predicate.Pet {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.Pet {
-	return predicate.Pet(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Pet) predicate.Pet {
-	return predicate.Pet(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Pet) predicate.Pet { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Pet) predicate.Pet {
-	return predicate.Pet(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Pet) predicate.Pet { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Pet) predicate.Pet {
-	return predicate.Pet(sql.NotPredicates(p))
-}
+func Not(p predicate.Pet) predicate.Pet { return entbuilder.NotPred(p) }

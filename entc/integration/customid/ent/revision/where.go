@@ -9,27 +9,20 @@ package revision
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldEQ(FieldID, id))
-}
+func ID(id string) predicate.Revision { return entbuilder.FieldEQ[predicate.Revision](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id string) predicate.Revision { return entbuilder.FieldEQ[predicate.Revision](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id string) predicate.Revision { return entbuilder.FieldNEQ[predicate.Revision](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Revision {
-	return predicate.Revision(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...string) predicate.Revision { return predicate.Revision(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...string) predicate.Revision {
@@ -37,46 +30,36 @@ func IDNotIn(ids ...string) predicate.Revision {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldGT(FieldID, id))
-}
+func IDGT(id string) predicate.Revision { return entbuilder.FieldGT[predicate.Revision](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id string) predicate.Revision { return entbuilder.FieldGTE[predicate.Revision](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldLT(FieldID, id))
-}
+func IDLT(id string) predicate.Revision { return entbuilder.FieldLT[predicate.Revision](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id string) predicate.Revision { return entbuilder.FieldLTE[predicate.Revision](FieldID, id) }
 
 // IDEqualFold applies the EqualFold predicate on the ID field.
 func IDEqualFold(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldEqualFold(FieldID, id))
+	return entbuilder.FieldEqualFold[predicate.Revision](FieldID, id)
 }
 
 // IDContainsFold applies the ContainsFold predicate on the ID field.
 func IDContainsFold(id string) predicate.Revision {
-	return predicate.Revision(sql.FieldContainsFold(FieldID, id))
+	return entbuilder.FieldContainsFold[predicate.Revision](FieldID, id)
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Revision) predicate.Revision {
-	return predicate.Revision(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.Revision) predicate.Revision {
-	return predicate.Revision(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Revision) predicate.Revision {
-	return predicate.Revision(sql.NotPredicates(p))
-}
+func Not(p predicate.Revision) predicate.Revision { return entbuilder.NotPred(p) }

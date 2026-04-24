@@ -10,77 +10,50 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Comment { return entbuilder.FieldEQ[predicate.Comment](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Comment { return entbuilder.FieldEQ[predicate.Comment](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Comment {
-	return predicate.Comment(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Comment { return entbuilder.FieldNEQ[predicate.Comment](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Comment { return predicate.Comment(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Comment { return predicate.Comment(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Comment {
-	return predicate.Comment(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Comment { return entbuilder.FieldGT[predicate.Comment](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Comment {
-	return predicate.Comment(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Comment { return entbuilder.FieldGTE[predicate.Comment](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Comment {
-	return predicate.Comment(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Comment { return entbuilder.FieldLT[predicate.Comment](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Comment {
-	return predicate.Comment(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Comment { return entbuilder.FieldLTE[predicate.Comment](FieldID, id) }
 
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
-func Text(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldText, v))
-}
+func Text(v string) predicate.Comment { return entbuilder.FieldEQ[predicate.Comment](FieldText, v) }
 
 // PostID applies equality check predicate on the "post_id" field. It's identical to PostIDEQ.
-func PostID(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldPostID, v))
-}
+func PostID(v int) predicate.Comment { return entbuilder.FieldEQ[predicate.Comment](FieldPostID, v) }
 
 // TextEQ applies the EQ predicate on the "text" field.
-func TextEQ(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldText, v))
-}
+func TextEQ(v string) predicate.Comment { return entbuilder.FieldEQ[predicate.Comment](FieldText, v) }
 
 // TextNEQ applies the NEQ predicate on the "text" field.
-func TextNEQ(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldNEQ(FieldText, v))
-}
+func TextNEQ(v string) predicate.Comment { return entbuilder.FieldNEQ[predicate.Comment](FieldText, v) }
 
 // TextIn applies the In predicate on the "text" field.
-func TextIn(vs ...string) predicate.Comment {
-	return predicate.Comment(sql.FieldIn(FieldText, vs...))
-}
+func TextIn(vs ...string) predicate.Comment { return predicate.Comment(sql.FieldIn(FieldText, vs...)) }
 
 // TextNotIn applies the NotIn predicate on the "text" field.
 func TextNotIn(vs ...string) predicate.Comment {
@@ -88,64 +61,52 @@ func TextNotIn(vs ...string) predicate.Comment {
 }
 
 // TextGT applies the GT predicate on the "text" field.
-func TextGT(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldGT(FieldText, v))
-}
+func TextGT(v string) predicate.Comment { return entbuilder.FieldGT[predicate.Comment](FieldText, v) }
 
 // TextGTE applies the GTE predicate on the "text" field.
-func TextGTE(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldGTE(FieldText, v))
-}
+func TextGTE(v string) predicate.Comment { return entbuilder.FieldGTE[predicate.Comment](FieldText, v) }
 
 // TextLT applies the LT predicate on the "text" field.
-func TextLT(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldLT(FieldText, v))
-}
+func TextLT(v string) predicate.Comment { return entbuilder.FieldLT[predicate.Comment](FieldText, v) }
 
 // TextLTE applies the LTE predicate on the "text" field.
-func TextLTE(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldLTE(FieldText, v))
-}
+func TextLTE(v string) predicate.Comment { return entbuilder.FieldLTE[predicate.Comment](FieldText, v) }
 
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContains(FieldText, v))
+	return entbuilder.FieldContains[predicate.Comment](FieldText, v)
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
 func TextHasPrefix(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldHasPrefix(FieldText, v))
+	return entbuilder.FieldHasPrefix[predicate.Comment](FieldText, v)
 }
 
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldHasSuffix(FieldText, v))
+	return entbuilder.FieldHasSuffix[predicate.Comment](FieldText, v)
 }
 
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldEqualFold(FieldText, v))
+	return entbuilder.FieldEqualFold[predicate.Comment](FieldText, v)
 }
 
 // TextContainsFold applies the ContainsFold predicate on the "text" field.
 func TextContainsFold(v string) predicate.Comment {
-	return predicate.Comment(sql.FieldContainsFold(FieldText, v))
+	return entbuilder.FieldContainsFold[predicate.Comment](FieldText, v)
 }
 
 // PostIDEQ applies the EQ predicate on the "post_id" field.
-func PostIDEQ(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldEQ(FieldPostID, v))
-}
+func PostIDEQ(v int) predicate.Comment { return entbuilder.FieldEQ[predicate.Comment](FieldPostID, v) }
 
 // PostIDNEQ applies the NEQ predicate on the "post_id" field.
 func PostIDNEQ(v int) predicate.Comment {
-	return predicate.Comment(sql.FieldNEQ(FieldPostID, v))
+	return entbuilder.FieldNEQ[predicate.Comment](FieldPostID, v)
 }
 
 // PostIDIn applies the In predicate on the "post_id" field.
-func PostIDIn(vs ...int) predicate.Comment {
-	return predicate.Comment(sql.FieldIn(FieldPostID, vs...))
-}
+func PostIDIn(vs ...int) predicate.Comment { return predicate.Comment(sql.FieldIn(FieldPostID, vs...)) }
 
 // PostIDNotIn applies the NotIn predicate on the "post_id" field.
 func PostIDNotIn(vs ...int) predicate.Comment {
@@ -165,27 +126,24 @@ func HasPost() predicate.Comment {
 
 // HasPostWith applies the HasEdge predicate on the "post" edge with a given conditions (other predicates).
 func HasPostWith(preds ...predicate.Post) predicate.Comment {
-	return predicate.Comment(func(s *sql.Selector) {
-		step := newPostStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Comment(
+		func(s *sql.Selector) {
+			step := newPostStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Comment) predicate.Comment {
-	return predicate.Comment(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Comment) predicate.Comment {
-	return predicate.Comment(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Comment) predicate.Comment { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Comment) predicate.Comment {
-	return predicate.Comment(sql.NotPredicates(p))
-}
+func Not(p predicate.Comment) predicate.Comment { return entbuilder.NotPred(p) }

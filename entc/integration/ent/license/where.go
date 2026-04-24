@@ -11,71 +11,54 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.License {
-	return predicate.License(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.License { return entbuilder.FieldEQ[predicate.License](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.License {
-	return predicate.License(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.License { return entbuilder.FieldEQ[predicate.License](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.License {
-	return predicate.License(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.License { return entbuilder.FieldNEQ[predicate.License](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.License {
-	return predicate.License(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.License { return predicate.License(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.License {
-	return predicate.License(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.License { return predicate.License(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.License {
-	return predicate.License(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.License { return entbuilder.FieldGT[predicate.License](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.License {
-	return predicate.License(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.License { return entbuilder.FieldGTE[predicate.License](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.License {
-	return predicate.License(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.License { return entbuilder.FieldLT[predicate.License](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.License {
-	return predicate.License(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.License { return entbuilder.FieldLTE[predicate.License](FieldID, id) }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.License {
-	return predicate.License(sql.FieldEQ(FieldCreateTime, v))
+	return entbuilder.FieldEQ[predicate.License](FieldCreateTime, v)
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.License {
-	return predicate.License(sql.FieldEQ(FieldUpdateTime, v))
+	return entbuilder.FieldEQ[predicate.License](FieldUpdateTime, v)
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.License {
-	return predicate.License(sql.FieldEQ(FieldCreateTime, v))
+	return entbuilder.FieldEQ[predicate.License](FieldCreateTime, v)
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.License {
-	return predicate.License(sql.FieldNEQ(FieldCreateTime, v))
+	return entbuilder.FieldNEQ[predicate.License](FieldCreateTime, v)
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
@@ -90,32 +73,32 @@ func CreateTimeNotIn(vs ...time.Time) predicate.License {
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.License {
-	return predicate.License(sql.FieldGT(FieldCreateTime, v))
+	return entbuilder.FieldGT[predicate.License](FieldCreateTime, v)
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.License {
-	return predicate.License(sql.FieldGTE(FieldCreateTime, v))
+	return entbuilder.FieldGTE[predicate.License](FieldCreateTime, v)
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.License {
-	return predicate.License(sql.FieldLT(FieldCreateTime, v))
+	return entbuilder.FieldLT[predicate.License](FieldCreateTime, v)
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.License {
-	return predicate.License(sql.FieldLTE(FieldCreateTime, v))
+	return entbuilder.FieldLTE[predicate.License](FieldCreateTime, v)
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.License {
-	return predicate.License(sql.FieldEQ(FieldUpdateTime, v))
+	return entbuilder.FieldEQ[predicate.License](FieldUpdateTime, v)
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.License {
-	return predicate.License(sql.FieldNEQ(FieldUpdateTime, v))
+	return entbuilder.FieldNEQ[predicate.License](FieldUpdateTime, v)
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
@@ -130,35 +113,31 @@ func UpdateTimeNotIn(vs ...time.Time) predicate.License {
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.License {
-	return predicate.License(sql.FieldGT(FieldUpdateTime, v))
+	return entbuilder.FieldGT[predicate.License](FieldUpdateTime, v)
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.License {
-	return predicate.License(sql.FieldGTE(FieldUpdateTime, v))
+	return entbuilder.FieldGTE[predicate.License](FieldUpdateTime, v)
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.License {
-	return predicate.License(sql.FieldLT(FieldUpdateTime, v))
+	return entbuilder.FieldLT[predicate.License](FieldUpdateTime, v)
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.License {
-	return predicate.License(sql.FieldLTE(FieldUpdateTime, v))
+	return entbuilder.FieldLTE[predicate.License](FieldUpdateTime, v)
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.License) predicate.License {
-	return predicate.License(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.License) predicate.License {
-	return predicate.License(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.License) predicate.License { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.License) predicate.License {
-	return predicate.License(sql.NotPredicates(p))
-}
+func Not(p predicate.License) predicate.License { return entbuilder.NotPred(p) }

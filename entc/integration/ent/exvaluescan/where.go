@@ -13,21 +13,20 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.ExValueScan { return entbuilder.FieldEQ[predicate.ExValueScan](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldEQ(FieldID, id))
+	return entbuilder.FieldEQ[predicate.ExValueScan](FieldID, id)
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldNEQ(FieldID, id))
+	return entbuilder.FieldNEQ[predicate.ExValueScan](FieldID, id)
 }
 
 // IDIn applies the In predicate on the ID field.
@@ -42,22 +41,22 @@ func IDNotIn(ids ...int) predicate.ExValueScan {
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldGT(FieldID, id))
+	return entbuilder.FieldGT[predicate.ExValueScan](FieldID, id)
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldGTE(FieldID, id))
+	return entbuilder.FieldGTE[predicate.ExValueScan](FieldID, id)
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldLT(FieldID, id))
+	return entbuilder.FieldLT[predicate.ExValueScan](FieldID, id)
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldLTE(FieldID, id))
+	return entbuilder.FieldLTE[predicate.ExValueScan](FieldID, id)
 }
 
 // Binary applies equality check predicate on the "binary" field. It's identical to BinaryEQ.
@@ -902,12 +901,12 @@ func CustomOptionalHasSuffix(v string) predicate.ExValueScan {
 
 // CustomOptionalIsNil applies the IsNil predicate on the "custom_optional" field.
 func CustomOptionalIsNil() predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldIsNull(FieldCustomOptional))
+	return entbuilder.FieldIsNull[predicate.ExValueScan](FieldCustomOptional)
 }
 
 // CustomOptionalNotNil applies the NotNil predicate on the "custom_optional" field.
 func CustomOptionalNotNil() predicate.ExValueScan {
-	return predicate.ExValueScan(sql.FieldNotNull(FieldCustomOptional))
+	return entbuilder.FieldNotNull[predicate.ExValueScan](FieldCustomOptional)
 }
 
 // CustomOptionalEqualFold applies the EqualFold predicate on the "custom_optional" field.
@@ -932,15 +931,13 @@ func CustomOptionalContainsFold(v string) predicate.ExValueScan {
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.ExValueScan) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.ExValueScan) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.ExValueScan) predicate.ExValueScan {
-	return predicate.ExValueScan(sql.NotPredicates(p))
-}
+func Not(p predicate.ExValueScan) predicate.ExValueScan { return entbuilder.NotPred(p) }

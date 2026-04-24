@@ -10,77 +10,50 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.User {
-	return predicate.User(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.User { return predicate.User(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.User { return predicate.User(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.User {
-	return predicate.User(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.User { return entbuilder.FieldGT[predicate.User](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.User { return entbuilder.FieldGTE[predicate.User](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.User {
-	return predicate.User(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.User { return entbuilder.FieldLT[predicate.User](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.User { return entbuilder.FieldLTE[predicate.User](FieldID, id) }
 
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
-func ParentID(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldParentID, v))
-}
+func ParentID(v int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldParentID, v) }
 
 // SpouseID applies equality check predicate on the "spouse_id" field. It's identical to SpouseIDEQ.
-func SpouseID(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldSpouseID, v))
-}
+func SpouseID(v int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldSpouseID, v) }
 
 // ParentIDEQ applies the EQ predicate on the "parent_id" field.
-func ParentIDEQ(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldParentID, v))
-}
+func ParentIDEQ(v int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldParentID, v) }
 
 // ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
-func ParentIDNEQ(v int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldParentID, v))
-}
+func ParentIDNEQ(v int) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldParentID, v) }
 
 // ParentIDIn applies the In predicate on the "parent_id" field.
-func ParentIDIn(vs ...int) predicate.User {
-	return predicate.User(sql.FieldIn(FieldParentID, vs...))
-}
+func ParentIDIn(vs ...int) predicate.User { return predicate.User(sql.FieldIn(FieldParentID, vs...)) }
 
 // ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
 func ParentIDNotIn(vs ...int) predicate.User {
@@ -88,29 +61,19 @@ func ParentIDNotIn(vs ...int) predicate.User {
 }
 
 // ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
-func ParentIDIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldParentID))
-}
+func ParentIDIsNil() predicate.User { return entbuilder.FieldIsNull[predicate.User](FieldParentID) }
 
 // ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
-func ParentIDNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldParentID))
-}
+func ParentIDNotNil() predicate.User { return entbuilder.FieldNotNull[predicate.User](FieldParentID) }
 
 // SpouseIDEQ applies the EQ predicate on the "spouse_id" field.
-func SpouseIDEQ(v int) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldSpouseID, v))
-}
+func SpouseIDEQ(v int) predicate.User { return entbuilder.FieldEQ[predicate.User](FieldSpouseID, v) }
 
 // SpouseIDNEQ applies the NEQ predicate on the "spouse_id" field.
-func SpouseIDNEQ(v int) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldSpouseID, v))
-}
+func SpouseIDNEQ(v int) predicate.User { return entbuilder.FieldNEQ[predicate.User](FieldSpouseID, v) }
 
 // SpouseIDIn applies the In predicate on the "spouse_id" field.
-func SpouseIDIn(vs ...int) predicate.User {
-	return predicate.User(sql.FieldIn(FieldSpouseID, vs...))
-}
+func SpouseIDIn(vs ...int) predicate.User { return predicate.User(sql.FieldIn(FieldSpouseID, vs...)) }
 
 // SpouseIDNotIn applies the NotIn predicate on the "spouse_id" field.
 func SpouseIDNotIn(vs ...int) predicate.User {
@@ -118,14 +81,10 @@ func SpouseIDNotIn(vs ...int) predicate.User {
 }
 
 // SpouseIDIsNil applies the IsNil predicate on the "spouse_id" field.
-func SpouseIDIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldSpouseID))
-}
+func SpouseIDIsNil() predicate.User { return entbuilder.FieldIsNull[predicate.User](FieldSpouseID) }
 
 // SpouseIDNotNil applies the NotNil predicate on the "spouse_id" field.
-func SpouseIDNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldSpouseID))
-}
+func SpouseIDNotNil() predicate.User { return entbuilder.FieldNotNull[predicate.User](FieldSpouseID) }
 
 // HasPets applies the HasEdge predicate on the "pets" edge.
 func HasPets() predicate.User {
@@ -140,14 +99,15 @@ func HasPets() predicate.User {
 
 // HasPetsWith applies the HasEdge predicate on the "pets" edge with a given conditions (other predicates).
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newPetsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newPetsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
@@ -163,14 +123,15 @@ func HasParent() predicate.User {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newParentStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasChildren applies the HasEdge predicate on the "children" edge.
@@ -186,14 +147,15 @@ func HasChildren() predicate.User {
 
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newChildrenStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newChildrenStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasSpouse applies the HasEdge predicate on the "spouse" edge.
@@ -209,14 +171,15 @@ func HasSpouse() predicate.User {
 
 // HasSpouseWith applies the HasEdge predicate on the "spouse" edge with a given conditions (other predicates).
 func HasSpouseWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newSpouseStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newSpouseStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasCard applies the HasEdge predicate on the "card" edge.
@@ -232,14 +195,15 @@ func HasCard() predicate.User {
 
 // HasCardWith applies the HasEdge predicate on the "card" edge with a given conditions (other predicates).
 func HasCardWith(preds ...predicate.Card) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newCardStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newCardStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasMetadata applies the HasEdge predicate on the "metadata" edge.
@@ -255,14 +219,15 @@ func HasMetadata() predicate.User {
 
 // HasMetadataWith applies the HasEdge predicate on the "metadata" edge with a given conditions (other predicates).
 func HasMetadataWith(preds ...predicate.Metadata) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newMetadataStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newMetadataStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasInfo applies the HasEdge predicate on the "info" edge.
@@ -278,14 +243,15 @@ func HasInfo() predicate.User {
 
 // HasInfoWith applies the HasEdge predicate on the "info" edge with a given conditions (other predicates).
 func HasInfoWith(preds ...predicate.Info) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newInfoStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newInfoStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRentals applies the HasEdge predicate on the "rentals" edge.
@@ -301,27 +267,22 @@ func HasRentals() predicate.User {
 
 // HasRentalsWith applies the HasEdge predicate on the "rentals" edge with a given conditions (other predicates).
 func HasRentalsWith(preds ...predicate.Rental) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newRentalsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newRentalsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.User) predicate.User {
-	return predicate.User(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.User) predicate.User { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.User) predicate.User {
-	return predicate.User(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.User) predicate.User { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.User) predicate.User {
-	return predicate.User(sql.NotPredicates(p))
-}
+func Not(p predicate.User) predicate.User { return entbuilder.NotPred(p) }

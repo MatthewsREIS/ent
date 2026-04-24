@@ -12,21 +12,22 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldEQ(FieldID, id))
+	return entbuilder.FieldEQ[predicate.AttachedFile](FieldID, id)
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldEQ(FieldID, id))
+	return entbuilder.FieldEQ[predicate.AttachedFile](FieldID, id)
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldNEQ(FieldID, id))
+	return entbuilder.FieldNEQ[predicate.AttachedFile](FieldID, id)
 }
 
 // IDIn applies the In predicate on the ID field.
@@ -41,47 +42,47 @@ func IDNotIn(ids ...int) predicate.AttachedFile {
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldGT(FieldID, id))
+	return entbuilder.FieldGT[predicate.AttachedFile](FieldID, id)
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldGTE(FieldID, id))
+	return entbuilder.FieldGTE[predicate.AttachedFile](FieldID, id)
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldLT(FieldID, id))
+	return entbuilder.FieldLT[predicate.AttachedFile](FieldID, id)
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldLTE(FieldID, id))
+	return entbuilder.FieldLTE[predicate.AttachedFile](FieldID, id)
 }
 
 // AttachTime applies equality check predicate on the "attach_time" field. It's identical to AttachTimeEQ.
 func AttachTime(v time.Time) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldEQ(FieldAttachTime, v))
+	return entbuilder.FieldEQ[predicate.AttachedFile](FieldAttachTime, v)
 }
 
 // FID applies equality check predicate on the "f_id" field. It's identical to FIDEQ.
 func FID(v int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldEQ(FieldFID, v))
+	return entbuilder.FieldEQ[predicate.AttachedFile](FieldFID, v)
 }
 
 // ProcID applies equality check predicate on the "proc_id" field. It's identical to ProcIDEQ.
 func ProcID(v int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldEQ(FieldProcID, v))
+	return entbuilder.FieldEQ[predicate.AttachedFile](FieldProcID, v)
 }
 
 // AttachTimeEQ applies the EQ predicate on the "attach_time" field.
 func AttachTimeEQ(v time.Time) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldEQ(FieldAttachTime, v))
+	return entbuilder.FieldEQ[predicate.AttachedFile](FieldAttachTime, v)
 }
 
 // AttachTimeNEQ applies the NEQ predicate on the "attach_time" field.
 func AttachTimeNEQ(v time.Time) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldNEQ(FieldAttachTime, v))
+	return entbuilder.FieldNEQ[predicate.AttachedFile](FieldAttachTime, v)
 }
 
 // AttachTimeIn applies the In predicate on the "attach_time" field.
@@ -96,32 +97,32 @@ func AttachTimeNotIn(vs ...time.Time) predicate.AttachedFile {
 
 // AttachTimeGT applies the GT predicate on the "attach_time" field.
 func AttachTimeGT(v time.Time) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldGT(FieldAttachTime, v))
+	return entbuilder.FieldGT[predicate.AttachedFile](FieldAttachTime, v)
 }
 
 // AttachTimeGTE applies the GTE predicate on the "attach_time" field.
 func AttachTimeGTE(v time.Time) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldGTE(FieldAttachTime, v))
+	return entbuilder.FieldGTE[predicate.AttachedFile](FieldAttachTime, v)
 }
 
 // AttachTimeLT applies the LT predicate on the "attach_time" field.
 func AttachTimeLT(v time.Time) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldLT(FieldAttachTime, v))
+	return entbuilder.FieldLT[predicate.AttachedFile](FieldAttachTime, v)
 }
 
 // AttachTimeLTE applies the LTE predicate on the "attach_time" field.
 func AttachTimeLTE(v time.Time) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldLTE(FieldAttachTime, v))
+	return entbuilder.FieldLTE[predicate.AttachedFile](FieldAttachTime, v)
 }
 
 // FIDEQ applies the EQ predicate on the "f_id" field.
 func FIDEQ(v int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldEQ(FieldFID, v))
+	return entbuilder.FieldEQ[predicate.AttachedFile](FieldFID, v)
 }
 
 // FIDNEQ applies the NEQ predicate on the "f_id" field.
 func FIDNEQ(v int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldNEQ(FieldFID, v))
+	return entbuilder.FieldNEQ[predicate.AttachedFile](FieldFID, v)
 }
 
 // FIDIn applies the In predicate on the "f_id" field.
@@ -136,12 +137,12 @@ func FIDNotIn(vs ...int) predicate.AttachedFile {
 
 // ProcIDEQ applies the EQ predicate on the "proc_id" field.
 func ProcIDEQ(v int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldEQ(FieldProcID, v))
+	return entbuilder.FieldEQ[predicate.AttachedFile](FieldProcID, v)
 }
 
 // ProcIDNEQ applies the NEQ predicate on the "proc_id" field.
 func ProcIDNEQ(v int) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.FieldNEQ(FieldProcID, v))
+	return entbuilder.FieldNEQ[predicate.AttachedFile](FieldProcID, v)
 }
 
 // ProcIDIn applies the In predicate on the "proc_id" field.
@@ -167,14 +168,15 @@ func HasFi() predicate.AttachedFile {
 
 // HasFiWith applies the HasEdge predicate on the "fi" edge with a given conditions (other predicates).
 func HasFiWith(preds ...predicate.File) predicate.AttachedFile {
-	return predicate.AttachedFile(func(s *sql.Selector) {
-		step := newFiStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.AttachedFile(
+		func(s *sql.Selector) {
+			step := newFiStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasProc applies the HasEdge predicate on the "proc" edge.
@@ -190,27 +192,26 @@ func HasProc() predicate.AttachedFile {
 
 // HasProcWith applies the HasEdge predicate on the "proc" edge with a given conditions (other predicates).
 func HasProcWith(preds ...predicate.Process) predicate.AttachedFile {
-	return predicate.AttachedFile(func(s *sql.Selector) {
-		step := newProcStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.AttachedFile(
+		func(s *sql.Selector) {
+			step := newProcStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.AttachedFile) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.AttachedFile) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.AttachedFile) predicate.AttachedFile {
-	return predicate.AttachedFile(sql.NotPredicates(p))
-}
+func Not(p predicate.AttachedFile) predicate.AttachedFile { return entbuilder.NotPred(p) }

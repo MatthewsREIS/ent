@@ -9,154 +9,109 @@ package item
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Item {
-	return predicate.Item(sql.FieldEQ(FieldID, id))
-}
+func ID(id string) predicate.Item { return entbuilder.FieldEQ[predicate.Item](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Item {
-	return predicate.Item(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id string) predicate.Item { return entbuilder.FieldEQ[predicate.Item](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Item {
-	return predicate.Item(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id string) predicate.Item { return entbuilder.FieldNEQ[predicate.Item](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Item {
-	return predicate.Item(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...string) predicate.Item { return predicate.Item(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Item {
-	return predicate.Item(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...string) predicate.Item { return predicate.Item(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Item {
-	return predicate.Item(sql.FieldGT(FieldID, id))
-}
+func IDGT(id string) predicate.Item { return entbuilder.FieldGT[predicate.Item](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Item {
-	return predicate.Item(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id string) predicate.Item { return entbuilder.FieldGTE[predicate.Item](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Item {
-	return predicate.Item(sql.FieldLT(FieldID, id))
-}
+func IDLT(id string) predicate.Item { return entbuilder.FieldLT[predicate.Item](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Item {
-	return predicate.Item(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id string) predicate.Item { return entbuilder.FieldLTE[predicate.Item](FieldID, id) }
 
 // IDEqualFold applies the EqualFold predicate on the ID field.
 func IDEqualFold(id string) predicate.Item {
-	return predicate.Item(sql.FieldEqualFold(FieldID, id))
+	return entbuilder.FieldEqualFold[predicate.Item](FieldID, id)
 }
 
 // IDContainsFold applies the ContainsFold predicate on the ID field.
 func IDContainsFold(id string) predicate.Item {
-	return predicate.Item(sql.FieldContainsFold(FieldID, id))
+	return entbuilder.FieldContainsFold[predicate.Item](FieldID, id)
 }
 
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
-func Text(v string) predicate.Item {
-	return predicate.Item(sql.FieldEQ(FieldText, v))
-}
+func Text(v string) predicate.Item { return entbuilder.FieldEQ[predicate.Item](FieldText, v) }
 
 // TextEQ applies the EQ predicate on the "text" field.
-func TextEQ(v string) predicate.Item {
-	return predicate.Item(sql.FieldEQ(FieldText, v))
-}
+func TextEQ(v string) predicate.Item { return entbuilder.FieldEQ[predicate.Item](FieldText, v) }
 
 // TextNEQ applies the NEQ predicate on the "text" field.
-func TextNEQ(v string) predicate.Item {
-	return predicate.Item(sql.FieldNEQ(FieldText, v))
-}
+func TextNEQ(v string) predicate.Item { return entbuilder.FieldNEQ[predicate.Item](FieldText, v) }
 
 // TextIn applies the In predicate on the "text" field.
-func TextIn(vs ...string) predicate.Item {
-	return predicate.Item(sql.FieldIn(FieldText, vs...))
-}
+func TextIn(vs ...string) predicate.Item { return predicate.Item(sql.FieldIn(FieldText, vs...)) }
 
 // TextNotIn applies the NotIn predicate on the "text" field.
-func TextNotIn(vs ...string) predicate.Item {
-	return predicate.Item(sql.FieldNotIn(FieldText, vs...))
-}
+func TextNotIn(vs ...string) predicate.Item { return predicate.Item(sql.FieldNotIn(FieldText, vs...)) }
 
 // TextGT applies the GT predicate on the "text" field.
-func TextGT(v string) predicate.Item {
-	return predicate.Item(sql.FieldGT(FieldText, v))
-}
+func TextGT(v string) predicate.Item { return entbuilder.FieldGT[predicate.Item](FieldText, v) }
 
 // TextGTE applies the GTE predicate on the "text" field.
-func TextGTE(v string) predicate.Item {
-	return predicate.Item(sql.FieldGTE(FieldText, v))
-}
+func TextGTE(v string) predicate.Item { return entbuilder.FieldGTE[predicate.Item](FieldText, v) }
 
 // TextLT applies the LT predicate on the "text" field.
-func TextLT(v string) predicate.Item {
-	return predicate.Item(sql.FieldLT(FieldText, v))
-}
+func TextLT(v string) predicate.Item { return entbuilder.FieldLT[predicate.Item](FieldText, v) }
 
 // TextLTE applies the LTE predicate on the "text" field.
-func TextLTE(v string) predicate.Item {
-	return predicate.Item(sql.FieldLTE(FieldText, v))
-}
+func TextLTE(v string) predicate.Item { return entbuilder.FieldLTE[predicate.Item](FieldText, v) }
 
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.Item {
-	return predicate.Item(sql.FieldContains(FieldText, v))
+	return entbuilder.FieldContains[predicate.Item](FieldText, v)
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
 func TextHasPrefix(v string) predicate.Item {
-	return predicate.Item(sql.FieldHasPrefix(FieldText, v))
+	return entbuilder.FieldHasPrefix[predicate.Item](FieldText, v)
 }
 
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.Item {
-	return predicate.Item(sql.FieldHasSuffix(FieldText, v))
+	return entbuilder.FieldHasSuffix[predicate.Item](FieldText, v)
 }
 
 // TextIsNil applies the IsNil predicate on the "text" field.
-func TextIsNil() predicate.Item {
-	return predicate.Item(sql.FieldIsNull(FieldText))
-}
+func TextIsNil() predicate.Item { return entbuilder.FieldIsNull[predicate.Item](FieldText) }
 
 // TextNotNil applies the NotNil predicate on the "text" field.
-func TextNotNil() predicate.Item {
-	return predicate.Item(sql.FieldNotNull(FieldText))
-}
+func TextNotNil() predicate.Item { return entbuilder.FieldNotNull[predicate.Item](FieldText) }
 
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v string) predicate.Item {
-	return predicate.Item(sql.FieldEqualFold(FieldText, v))
+	return entbuilder.FieldEqualFold[predicate.Item](FieldText, v)
 }
 
 // TextContainsFold applies the ContainsFold predicate on the "text" field.
 func TextContainsFold(v string) predicate.Item {
-	return predicate.Item(sql.FieldContainsFold(FieldText, v))
+	return entbuilder.FieldContainsFold[predicate.Item](FieldText, v)
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Item) predicate.Item {
-	return predicate.Item(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Item) predicate.Item { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Item) predicate.Item {
-	return predicate.Item(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Item) predicate.Item { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Item) predicate.Item {
-	return predicate.Item(sql.NotPredicates(p))
-}
+func Not(p predicate.Item) predicate.Item { return entbuilder.NotPred(p) }

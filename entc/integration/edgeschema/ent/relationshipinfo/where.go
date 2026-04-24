@@ -9,21 +9,22 @@ package relationshipinfo
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldEQ(FieldID, id))
+	return entbuilder.FieldEQ[predicate.RelationshipInfo](FieldID, id)
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldEQ(FieldID, id))
+	return entbuilder.FieldEQ[predicate.RelationshipInfo](FieldID, id)
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldNEQ(FieldID, id))
+	return entbuilder.FieldNEQ[predicate.RelationshipInfo](FieldID, id)
 }
 
 // IDIn applies the In predicate on the ID field.
@@ -38,37 +39,37 @@ func IDNotIn(ids ...int) predicate.RelationshipInfo {
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldGT(FieldID, id))
+	return entbuilder.FieldGT[predicate.RelationshipInfo](FieldID, id)
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldGTE(FieldID, id))
+	return entbuilder.FieldGTE[predicate.RelationshipInfo](FieldID, id)
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldLT(FieldID, id))
+	return entbuilder.FieldLT[predicate.RelationshipInfo](FieldID, id)
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldLTE(FieldID, id))
+	return entbuilder.FieldLTE[predicate.RelationshipInfo](FieldID, id)
 }
 
 // Text applies equality check predicate on the "text" field. It's identical to TextEQ.
 func Text(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldEQ(FieldText, v))
+	return entbuilder.FieldEQ[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextEQ applies the EQ predicate on the "text" field.
 func TextEQ(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldEQ(FieldText, v))
+	return entbuilder.FieldEQ[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextNEQ applies the NEQ predicate on the "text" field.
 func TextNEQ(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldNEQ(FieldText, v))
+	return entbuilder.FieldNEQ[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextIn applies the In predicate on the "text" field.
@@ -83,60 +84,58 @@ func TextNotIn(vs ...string) predicate.RelationshipInfo {
 
 // TextGT applies the GT predicate on the "text" field.
 func TextGT(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldGT(FieldText, v))
+	return entbuilder.FieldGT[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextGTE applies the GTE predicate on the "text" field.
 func TextGTE(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldGTE(FieldText, v))
+	return entbuilder.FieldGTE[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextLT applies the LT predicate on the "text" field.
 func TextLT(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldLT(FieldText, v))
+	return entbuilder.FieldLT[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextLTE applies the LTE predicate on the "text" field.
 func TextLTE(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldLTE(FieldText, v))
+	return entbuilder.FieldLTE[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextContains applies the Contains predicate on the "text" field.
 func TextContains(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldContains(FieldText, v))
+	return entbuilder.FieldContains[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextHasPrefix applies the HasPrefix predicate on the "text" field.
 func TextHasPrefix(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldHasPrefix(FieldText, v))
+	return entbuilder.FieldHasPrefix[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldHasSuffix(FieldText, v))
+	return entbuilder.FieldHasSuffix[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldEqualFold(FieldText, v))
+	return entbuilder.FieldEqualFold[predicate.RelationshipInfo](FieldText, v)
 }
 
 // TextContainsFold applies the ContainsFold predicate on the "text" field.
 func TextContainsFold(v string) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.FieldContainsFold(FieldText, v))
+	return entbuilder.FieldContainsFold[predicate.RelationshipInfo](FieldText, v)
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.RelationshipInfo) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.RelationshipInfo) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.RelationshipInfo) predicate.RelationshipInfo {
-	return predicate.RelationshipInfo(sql.NotPredicates(p))
-}
+func Not(p predicate.RelationshipInfo) predicate.RelationshipInfo { return entbuilder.NotPred(p) }

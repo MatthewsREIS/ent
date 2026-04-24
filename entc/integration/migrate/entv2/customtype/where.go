@@ -11,27 +11,22 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.CustomType { return entbuilder.FieldEQ[predicate.CustomType](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.CustomType { return entbuilder.FieldEQ[predicate.CustomType](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.CustomType {
-	return predicate.CustomType(sql.FieldNEQ(FieldID, id))
+	return entbuilder.FieldNEQ[predicate.CustomType](FieldID, id)
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.CustomType {
-	return predicate.CustomType(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.CustomType { return predicate.CustomType(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.CustomType {
@@ -39,48 +34,44 @@ func IDNotIn(ids ...int) predicate.CustomType {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.CustomType {
-	return predicate.CustomType(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.CustomType { return entbuilder.FieldGT[predicate.CustomType](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.CustomType {
-	return predicate.CustomType(sql.FieldGTE(FieldID, id))
+	return entbuilder.FieldGTE[predicate.CustomType](FieldID, id)
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.CustomType {
-	return predicate.CustomType(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.CustomType { return entbuilder.FieldLT[predicate.CustomType](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.CustomType {
-	return predicate.CustomType(sql.FieldLTE(FieldID, id))
+	return entbuilder.FieldLTE[predicate.CustomType](FieldID, id)
 }
 
 // Custom applies equality check predicate on the "custom" field. It's identical to CustomEQ.
 func Custom(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEQ(FieldCustom, v))
+	return entbuilder.FieldEQ[predicate.CustomType](FieldCustom, v)
 }
 
 // Tz0 applies equality check predicate on the "tz0" field. It's identical to Tz0EQ.
 func Tz0(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEQ(FieldTz0, v))
+	return entbuilder.FieldEQ[predicate.CustomType](FieldTz0, v)
 }
 
 // Tz3 applies equality check predicate on the "tz3" field. It's identical to Tz3EQ.
 func Tz3(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEQ(FieldTz3, v))
+	return entbuilder.FieldEQ[predicate.CustomType](FieldTz3, v)
 }
 
 // CustomEQ applies the EQ predicate on the "custom" field.
 func CustomEQ(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEQ(FieldCustom, v))
+	return entbuilder.FieldEQ[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomNEQ applies the NEQ predicate on the "custom" field.
 func CustomNEQ(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldNEQ(FieldCustom, v))
+	return entbuilder.FieldNEQ[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomIn applies the In predicate on the "custom" field.
@@ -95,67 +86,67 @@ func CustomNotIn(vs ...string) predicate.CustomType {
 
 // CustomGT applies the GT predicate on the "custom" field.
 func CustomGT(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldGT(FieldCustom, v))
+	return entbuilder.FieldGT[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomGTE applies the GTE predicate on the "custom" field.
 func CustomGTE(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldGTE(FieldCustom, v))
+	return entbuilder.FieldGTE[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomLT applies the LT predicate on the "custom" field.
 func CustomLT(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldLT(FieldCustom, v))
+	return entbuilder.FieldLT[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomLTE applies the LTE predicate on the "custom" field.
 func CustomLTE(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldLTE(FieldCustom, v))
+	return entbuilder.FieldLTE[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomContains applies the Contains predicate on the "custom" field.
 func CustomContains(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldContains(FieldCustom, v))
+	return entbuilder.FieldContains[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomHasPrefix applies the HasPrefix predicate on the "custom" field.
 func CustomHasPrefix(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldHasPrefix(FieldCustom, v))
+	return entbuilder.FieldHasPrefix[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomHasSuffix applies the HasSuffix predicate on the "custom" field.
 func CustomHasSuffix(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldHasSuffix(FieldCustom, v))
+	return entbuilder.FieldHasSuffix[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomIsNil applies the IsNil predicate on the "custom" field.
 func CustomIsNil() predicate.CustomType {
-	return predicate.CustomType(sql.FieldIsNull(FieldCustom))
+	return entbuilder.FieldIsNull[predicate.CustomType](FieldCustom)
 }
 
 // CustomNotNil applies the NotNil predicate on the "custom" field.
 func CustomNotNil() predicate.CustomType {
-	return predicate.CustomType(sql.FieldNotNull(FieldCustom))
+	return entbuilder.FieldNotNull[predicate.CustomType](FieldCustom)
 }
 
 // CustomEqualFold applies the EqualFold predicate on the "custom" field.
 func CustomEqualFold(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEqualFold(FieldCustom, v))
+	return entbuilder.FieldEqualFold[predicate.CustomType](FieldCustom, v)
 }
 
 // CustomContainsFold applies the ContainsFold predicate on the "custom" field.
 func CustomContainsFold(v string) predicate.CustomType {
-	return predicate.CustomType(sql.FieldContainsFold(FieldCustom, v))
+	return entbuilder.FieldContainsFold[predicate.CustomType](FieldCustom, v)
 }
 
 // Tz0EQ applies the EQ predicate on the "tz0" field.
 func Tz0EQ(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEQ(FieldTz0, v))
+	return entbuilder.FieldEQ[predicate.CustomType](FieldTz0, v)
 }
 
 // Tz0NEQ applies the NEQ predicate on the "tz0" field.
 func Tz0NEQ(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldNEQ(FieldTz0, v))
+	return entbuilder.FieldNEQ[predicate.CustomType](FieldTz0, v)
 }
 
 // Tz0In applies the In predicate on the "tz0" field.
@@ -170,42 +161,38 @@ func Tz0NotIn(vs ...time.Time) predicate.CustomType {
 
 // Tz0GT applies the GT predicate on the "tz0" field.
 func Tz0GT(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldGT(FieldTz0, v))
+	return entbuilder.FieldGT[predicate.CustomType](FieldTz0, v)
 }
 
 // Tz0GTE applies the GTE predicate on the "tz0" field.
 func Tz0GTE(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldGTE(FieldTz0, v))
+	return entbuilder.FieldGTE[predicate.CustomType](FieldTz0, v)
 }
 
 // Tz0LT applies the LT predicate on the "tz0" field.
 func Tz0LT(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldLT(FieldTz0, v))
+	return entbuilder.FieldLT[predicate.CustomType](FieldTz0, v)
 }
 
 // Tz0LTE applies the LTE predicate on the "tz0" field.
 func Tz0LTE(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldLTE(FieldTz0, v))
+	return entbuilder.FieldLTE[predicate.CustomType](FieldTz0, v)
 }
 
 // Tz0IsNil applies the IsNil predicate on the "tz0" field.
-func Tz0IsNil() predicate.CustomType {
-	return predicate.CustomType(sql.FieldIsNull(FieldTz0))
-}
+func Tz0IsNil() predicate.CustomType { return entbuilder.FieldIsNull[predicate.CustomType](FieldTz0) }
 
 // Tz0NotNil applies the NotNil predicate on the "tz0" field.
-func Tz0NotNil() predicate.CustomType {
-	return predicate.CustomType(sql.FieldNotNull(FieldTz0))
-}
+func Tz0NotNil() predicate.CustomType { return entbuilder.FieldNotNull[predicate.CustomType](FieldTz0) }
 
 // Tz3EQ applies the EQ predicate on the "tz3" field.
 func Tz3EQ(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldEQ(FieldTz3, v))
+	return entbuilder.FieldEQ[predicate.CustomType](FieldTz3, v)
 }
 
 // Tz3NEQ applies the NEQ predicate on the "tz3" field.
 func Tz3NEQ(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldNEQ(FieldTz3, v))
+	return entbuilder.FieldNEQ[predicate.CustomType](FieldTz3, v)
 }
 
 // Tz3In applies the In predicate on the "tz3" field.
@@ -220,45 +207,39 @@ func Tz3NotIn(vs ...time.Time) predicate.CustomType {
 
 // Tz3GT applies the GT predicate on the "tz3" field.
 func Tz3GT(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldGT(FieldTz3, v))
+	return entbuilder.FieldGT[predicate.CustomType](FieldTz3, v)
 }
 
 // Tz3GTE applies the GTE predicate on the "tz3" field.
 func Tz3GTE(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldGTE(FieldTz3, v))
+	return entbuilder.FieldGTE[predicate.CustomType](FieldTz3, v)
 }
 
 // Tz3LT applies the LT predicate on the "tz3" field.
 func Tz3LT(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldLT(FieldTz3, v))
+	return entbuilder.FieldLT[predicate.CustomType](FieldTz3, v)
 }
 
 // Tz3LTE applies the LTE predicate on the "tz3" field.
 func Tz3LTE(v time.Time) predicate.CustomType {
-	return predicate.CustomType(sql.FieldLTE(FieldTz3, v))
+	return entbuilder.FieldLTE[predicate.CustomType](FieldTz3, v)
 }
 
 // Tz3IsNil applies the IsNil predicate on the "tz3" field.
-func Tz3IsNil() predicate.CustomType {
-	return predicate.CustomType(sql.FieldIsNull(FieldTz3))
-}
+func Tz3IsNil() predicate.CustomType { return entbuilder.FieldIsNull[predicate.CustomType](FieldTz3) }
 
 // Tz3NotNil applies the NotNil predicate on the "tz3" field.
-func Tz3NotNil() predicate.CustomType {
-	return predicate.CustomType(sql.FieldNotNull(FieldTz3))
-}
+func Tz3NotNil() predicate.CustomType { return entbuilder.FieldNotNull[predicate.CustomType](FieldTz3) }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.CustomType) predicate.CustomType {
-	return predicate.CustomType(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.CustomType) predicate.CustomType {
-	return predicate.CustomType(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.CustomType) predicate.CustomType {
-	return predicate.CustomType(sql.NotPredicates(p))
-}
+func Not(p predicate.CustomType) predicate.CustomType { return entbuilder.NotPred(p) }

@@ -10,127 +10,80 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Node { return entbuilder.FieldEQ[predicate.Node](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Node { return entbuilder.FieldEQ[predicate.Node](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Node {
-	return predicate.Node(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Node { return entbuilder.FieldNEQ[predicate.Node](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Node {
-	return predicate.Node(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Node { return predicate.Node(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Node {
-	return predicate.Node(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Node { return predicate.Node(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Node {
-	return predicate.Node(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Node { return entbuilder.FieldGT[predicate.Node](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Node {
-	return predicate.Node(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Node { return entbuilder.FieldGTE[predicate.Node](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Node {
-	return predicate.Node(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Node { return entbuilder.FieldLT[predicate.Node](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Node {
-	return predicate.Node(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Node { return entbuilder.FieldLTE[predicate.Node](FieldID, id) }
 
 // PrevID applies equality check predicate on the "prev_id" field. It's identical to PrevIDEQ.
-func PrevID(v int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldPrevID, v))
-}
+func PrevID(v int) predicate.Node { return entbuilder.FieldEQ[predicate.Node](FieldPrevID, v) }
 
 // ValueEQ applies the EQ predicate on the "value" field.
-func ValueEQ(v int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldValue, v))
-}
+func ValueEQ(v int) predicate.Node { return entbuilder.FieldEQ[predicate.Node](FieldValue, v) }
 
 // ValueNEQ applies the NEQ predicate on the "value" field.
-func ValueNEQ(v int) predicate.Node {
-	return predicate.Node(sql.FieldNEQ(FieldValue, v))
-}
+func ValueNEQ(v int) predicate.Node { return entbuilder.FieldNEQ[predicate.Node](FieldValue, v) }
 
 // ValueIn applies the In predicate on the "value" field.
-func ValueIn(vs ...int) predicate.Node {
-	return predicate.Node(sql.FieldIn(FieldValue, vs...))
-}
+func ValueIn(vs ...int) predicate.Node { return predicate.Node(sql.FieldIn(FieldValue, vs...)) }
 
 // ValueNotIn applies the NotIn predicate on the "value" field.
-func ValueNotIn(vs ...int) predicate.Node {
-	return predicate.Node(sql.FieldNotIn(FieldValue, vs...))
-}
+func ValueNotIn(vs ...int) predicate.Node { return predicate.Node(sql.FieldNotIn(FieldValue, vs...)) }
 
 // ValueGT applies the GT predicate on the "value" field.
-func ValueGT(v int) predicate.Node {
-	return predicate.Node(sql.FieldGT(FieldValue, v))
-}
+func ValueGT(v int) predicate.Node { return entbuilder.FieldGT[predicate.Node](FieldValue, v) }
 
 // ValueGTE applies the GTE predicate on the "value" field.
-func ValueGTE(v int) predicate.Node {
-	return predicate.Node(sql.FieldGTE(FieldValue, v))
-}
+func ValueGTE(v int) predicate.Node { return entbuilder.FieldGTE[predicate.Node](FieldValue, v) }
 
 // ValueLT applies the LT predicate on the "value" field.
-func ValueLT(v int) predicate.Node {
-	return predicate.Node(sql.FieldLT(FieldValue, v))
-}
+func ValueLT(v int) predicate.Node { return entbuilder.FieldLT[predicate.Node](FieldValue, v) }
 
 // ValueLTE applies the LTE predicate on the "value" field.
-func ValueLTE(v int) predicate.Node {
-	return predicate.Node(sql.FieldLTE(FieldValue, v))
-}
+func ValueLTE(v int) predicate.Node { return entbuilder.FieldLTE[predicate.Node](FieldValue, v) }
 
 // PrevIDEQ applies the EQ predicate on the "prev_id" field.
-func PrevIDEQ(v int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldPrevID, v))
-}
+func PrevIDEQ(v int) predicate.Node { return entbuilder.FieldEQ[predicate.Node](FieldPrevID, v) }
 
 // PrevIDNEQ applies the NEQ predicate on the "prev_id" field.
-func PrevIDNEQ(v int) predicate.Node {
-	return predicate.Node(sql.FieldNEQ(FieldPrevID, v))
-}
+func PrevIDNEQ(v int) predicate.Node { return entbuilder.FieldNEQ[predicate.Node](FieldPrevID, v) }
 
 // PrevIDIn applies the In predicate on the "prev_id" field.
-func PrevIDIn(vs ...int) predicate.Node {
-	return predicate.Node(sql.FieldIn(FieldPrevID, vs...))
-}
+func PrevIDIn(vs ...int) predicate.Node { return predicate.Node(sql.FieldIn(FieldPrevID, vs...)) }
 
 // PrevIDNotIn applies the NotIn predicate on the "prev_id" field.
-func PrevIDNotIn(vs ...int) predicate.Node {
-	return predicate.Node(sql.FieldNotIn(FieldPrevID, vs...))
-}
+func PrevIDNotIn(vs ...int) predicate.Node { return predicate.Node(sql.FieldNotIn(FieldPrevID, vs...)) }
 
 // PrevIDIsNil applies the IsNil predicate on the "prev_id" field.
-func PrevIDIsNil() predicate.Node {
-	return predicate.Node(sql.FieldIsNull(FieldPrevID))
-}
+func PrevIDIsNil() predicate.Node { return entbuilder.FieldIsNull[predicate.Node](FieldPrevID) }
 
 // PrevIDNotNil applies the NotNil predicate on the "prev_id" field.
-func PrevIDNotNil() predicate.Node {
-	return predicate.Node(sql.FieldNotNull(FieldPrevID))
-}
+func PrevIDNotNil() predicate.Node { return entbuilder.FieldNotNull[predicate.Node](FieldPrevID) }
 
 // HasPrev applies the HasEdge predicate on the "prev" edge.
 func HasPrev() predicate.Node {
@@ -145,14 +98,15 @@ func HasPrev() predicate.Node {
 
 // HasPrevWith applies the HasEdge predicate on the "prev" edge with a given conditions (other predicates).
 func HasPrevWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		step := newPrevStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Node(
+		func(s *sql.Selector) {
+			step := newPrevStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasNext applies the HasEdge predicate on the "next" edge.
@@ -168,27 +122,22 @@ func HasNext() predicate.Node {
 
 // HasNextWith applies the HasEdge predicate on the "next" edge with a given conditions (other predicates).
 func HasNextWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		step := newNextStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Node(
+		func(s *sql.Selector) {
+			step := newNextStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Node) predicate.Node {
-	return predicate.Node(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Node) predicate.Node { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Node) predicate.Node {
-	return predicate.Node(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Node) predicate.Node { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Node) predicate.Node {
-	return predicate.Node(sql.NotPredicates(p))
-}
+func Not(p predicate.Node) predicate.Node { return entbuilder.NotPred(p) }

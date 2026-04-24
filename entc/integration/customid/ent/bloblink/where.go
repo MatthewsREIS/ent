@@ -12,32 +12,33 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldEQ(FieldCreatedAt, v))
+	return entbuilder.FieldEQ[predicate.BlobLink](FieldCreatedAt, v)
 }
 
 // BlobID applies equality check predicate on the "blob_id" field. It's identical to BlobIDEQ.
 func BlobID(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldEQ(FieldBlobID, v))
+	return entbuilder.FieldEQ[predicate.BlobLink](FieldBlobID, v)
 }
 
 // LinkID applies equality check predicate on the "link_id" field. It's identical to LinkIDEQ.
 func LinkID(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldEQ(FieldLinkID, v))
+	return entbuilder.FieldEQ[predicate.BlobLink](FieldLinkID, v)
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldEQ(FieldCreatedAt, v))
+	return entbuilder.FieldEQ[predicate.BlobLink](FieldCreatedAt, v)
 }
 
 // CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
 func CreatedAtNEQ(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldNEQ(FieldCreatedAt, v))
+	return entbuilder.FieldNEQ[predicate.BlobLink](FieldCreatedAt, v)
 }
 
 // CreatedAtIn applies the In predicate on the "created_at" field.
@@ -52,32 +53,32 @@ func CreatedAtNotIn(vs ...time.Time) predicate.BlobLink {
 
 // CreatedAtGT applies the GT predicate on the "created_at" field.
 func CreatedAtGT(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldGT(FieldCreatedAt, v))
+	return entbuilder.FieldGT[predicate.BlobLink](FieldCreatedAt, v)
 }
 
 // CreatedAtGTE applies the GTE predicate on the "created_at" field.
 func CreatedAtGTE(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldGTE(FieldCreatedAt, v))
+	return entbuilder.FieldGTE[predicate.BlobLink](FieldCreatedAt, v)
 }
 
 // CreatedAtLT applies the LT predicate on the "created_at" field.
 func CreatedAtLT(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldLT(FieldCreatedAt, v))
+	return entbuilder.FieldLT[predicate.BlobLink](FieldCreatedAt, v)
 }
 
 // CreatedAtLTE applies the LTE predicate on the "created_at" field.
 func CreatedAtLTE(v time.Time) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldLTE(FieldCreatedAt, v))
+	return entbuilder.FieldLTE[predicate.BlobLink](FieldCreatedAt, v)
 }
 
 // BlobIDEQ applies the EQ predicate on the "blob_id" field.
 func BlobIDEQ(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldEQ(FieldBlobID, v))
+	return entbuilder.FieldEQ[predicate.BlobLink](FieldBlobID, v)
 }
 
 // BlobIDNEQ applies the NEQ predicate on the "blob_id" field.
 func BlobIDNEQ(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldNEQ(FieldBlobID, v))
+	return entbuilder.FieldNEQ[predicate.BlobLink](FieldBlobID, v)
 }
 
 // BlobIDIn applies the In predicate on the "blob_id" field.
@@ -92,12 +93,12 @@ func BlobIDNotIn(vs ...uuid.UUID) predicate.BlobLink {
 
 // LinkIDEQ applies the EQ predicate on the "link_id" field.
 func LinkIDEQ(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldEQ(FieldLinkID, v))
+	return entbuilder.FieldEQ[predicate.BlobLink](FieldLinkID, v)
 }
 
 // LinkIDNEQ applies the NEQ predicate on the "link_id" field.
 func LinkIDNEQ(v uuid.UUID) predicate.BlobLink {
-	return predicate.BlobLink(sql.FieldNEQ(FieldLinkID, v))
+	return entbuilder.FieldNEQ[predicate.BlobLink](FieldLinkID, v)
 }
 
 // LinkIDIn applies the In predicate on the "link_id" field.
@@ -123,14 +124,15 @@ func HasBlob() predicate.BlobLink {
 
 // HasBlobWith applies the HasEdge predicate on the "blob" edge with a given conditions (other predicates).
 func HasBlobWith(preds ...predicate.Blob) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		step := newBlobStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.BlobLink(
+		func(s *sql.Selector) {
+			step := newBlobStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasLink applies the HasEdge predicate on the "link" edge.
@@ -146,27 +148,26 @@ func HasLink() predicate.BlobLink {
 
 // HasLinkWith applies the HasEdge predicate on the "link" edge with a given conditions (other predicates).
 func HasLinkWith(preds ...predicate.Blob) predicate.BlobLink {
-	return predicate.BlobLink(func(s *sql.Selector) {
-		step := newLinkStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.BlobLink(
+		func(s *sql.Selector) {
+			step := newLinkStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.BlobLink) predicate.BlobLink {
-	return predicate.BlobLink(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.BlobLink) predicate.BlobLink {
-	return predicate.BlobLink(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.BlobLink) predicate.BlobLink {
-	return predicate.BlobLink(sql.NotPredicates(p))
-}
+func Not(p predicate.BlobLink) predicate.BlobLink { return entbuilder.NotPred(p) }

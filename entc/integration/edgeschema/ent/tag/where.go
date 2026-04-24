@@ -10,116 +10,83 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldEQ(FieldID, id))
-}
+func ID(id int) predicate.Tag { return entbuilder.FieldEQ[predicate.Tag](FieldID, id) }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldEQ(FieldID, id))
-}
+func IDEQ(id int) predicate.Tag { return entbuilder.FieldEQ[predicate.Tag](FieldID, id) }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldNEQ(FieldID, id))
-}
+func IDNEQ(id int) predicate.Tag { return entbuilder.FieldNEQ[predicate.Tag](FieldID, id) }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Tag {
-	return predicate.Tag(sql.FieldIn(FieldID, ids...))
-}
+func IDIn(ids ...int) predicate.Tag { return predicate.Tag(sql.FieldIn(FieldID, ids...)) }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Tag {
-	return predicate.Tag(sql.FieldNotIn(FieldID, ids...))
-}
+func IDNotIn(ids ...int) predicate.Tag { return predicate.Tag(sql.FieldNotIn(FieldID, ids...)) }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldGT(FieldID, id))
-}
+func IDGT(id int) predicate.Tag { return entbuilder.FieldGT[predicate.Tag](FieldID, id) }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldGTE(FieldID, id))
-}
+func IDGTE(id int) predicate.Tag { return entbuilder.FieldGTE[predicate.Tag](FieldID, id) }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldLT(FieldID, id))
-}
+func IDLT(id int) predicate.Tag { return entbuilder.FieldLT[predicate.Tag](FieldID, id) }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldLTE(FieldID, id))
-}
+func IDLTE(id int) predicate.Tag { return entbuilder.FieldLTE[predicate.Tag](FieldID, id) }
 
 // ValueEQ applies the EQ predicate on the "value" field.
-func ValueEQ(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldEQ(FieldValue, v))
-}
+func ValueEQ(v string) predicate.Tag { return entbuilder.FieldEQ[predicate.Tag](FieldValue, v) }
 
 // ValueNEQ applies the NEQ predicate on the "value" field.
-func ValueNEQ(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldNEQ(FieldValue, v))
-}
+func ValueNEQ(v string) predicate.Tag { return entbuilder.FieldNEQ[predicate.Tag](FieldValue, v) }
 
 // ValueIn applies the In predicate on the "value" field.
-func ValueIn(vs ...string) predicate.Tag {
-	return predicate.Tag(sql.FieldIn(FieldValue, vs...))
-}
+func ValueIn(vs ...string) predicate.Tag { return predicate.Tag(sql.FieldIn(FieldValue, vs...)) }
 
 // ValueNotIn applies the NotIn predicate on the "value" field.
-func ValueNotIn(vs ...string) predicate.Tag {
-	return predicate.Tag(sql.FieldNotIn(FieldValue, vs...))
-}
+func ValueNotIn(vs ...string) predicate.Tag { return predicate.Tag(sql.FieldNotIn(FieldValue, vs...)) }
 
 // ValueGT applies the GT predicate on the "value" field.
-func ValueGT(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldGT(FieldValue, v))
-}
+func ValueGT(v string) predicate.Tag { return entbuilder.FieldGT[predicate.Tag](FieldValue, v) }
 
 // ValueGTE applies the GTE predicate on the "value" field.
-func ValueGTE(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldGTE(FieldValue, v))
-}
+func ValueGTE(v string) predicate.Tag { return entbuilder.FieldGTE[predicate.Tag](FieldValue, v) }
 
 // ValueLT applies the LT predicate on the "value" field.
-func ValueLT(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldLT(FieldValue, v))
-}
+func ValueLT(v string) predicate.Tag { return entbuilder.FieldLT[predicate.Tag](FieldValue, v) }
 
 // ValueLTE applies the LTE predicate on the "value" field.
-func ValueLTE(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldLTE(FieldValue, v))
-}
+func ValueLTE(v string) predicate.Tag { return entbuilder.FieldLTE[predicate.Tag](FieldValue, v) }
 
 // ValueContains applies the Contains predicate on the "value" field.
 func ValueContains(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldContains(FieldValue, v))
+	return entbuilder.FieldContains[predicate.Tag](FieldValue, v)
 }
 
 // ValueHasPrefix applies the HasPrefix predicate on the "value" field.
 func ValueHasPrefix(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldHasPrefix(FieldValue, v))
+	return entbuilder.FieldHasPrefix[predicate.Tag](FieldValue, v)
 }
 
 // ValueHasSuffix applies the HasSuffix predicate on the "value" field.
 func ValueHasSuffix(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldHasSuffix(FieldValue, v))
+	return entbuilder.FieldHasSuffix[predicate.Tag](FieldValue, v)
 }
 
 // ValueEqualFold applies the EqualFold predicate on the "value" field.
 func ValueEqualFold(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldEqualFold(FieldValue, v))
+	return entbuilder.FieldEqualFold[predicate.Tag](FieldValue, v)
 }
 
 // ValueContainsFold applies the ContainsFold predicate on the "value" field.
 func ValueContainsFold(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldContainsFold(FieldValue, v))
+	return entbuilder.FieldContainsFold[predicate.Tag](FieldValue, v)
 }
 
 // HasTweets applies the HasEdge predicate on the "tweets" edge.
@@ -135,14 +102,15 @@ func HasTweets() predicate.Tag {
 
 // HasTweetsWith applies the HasEdge predicate on the "tweets" edge with a given conditions (other predicates).
 func HasTweetsWith(preds ...predicate.Tweet) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := newTweetsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tag(
+		func(s *sql.Selector) {
+			step := newTweetsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasGroups applies the HasEdge predicate on the "groups" edge.
@@ -158,14 +126,15 @@ func HasGroups() predicate.Tag {
 
 // HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
 func HasGroupsWith(preds ...predicate.Group) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := newGroupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tag(
+		func(s *sql.Selector) {
+			step := newGroupsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTweetTags applies the HasEdge predicate on the "tweet_tags" edge.
@@ -181,14 +150,15 @@ func HasTweetTags() predicate.Tag {
 
 // HasTweetTagsWith applies the HasEdge predicate on the "tweet_tags" edge with a given conditions (other predicates).
 func HasTweetTagsWith(preds ...predicate.TweetTag) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := newTweetTagsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tag(
+		func(s *sql.Selector) {
+			step := newTweetTagsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasGroupTags applies the HasEdge predicate on the "group_tags" edge.
@@ -204,27 +174,22 @@ func HasGroupTags() predicate.Tag {
 
 // HasGroupTagsWith applies the HasEdge predicate on the "group_tags" edge with a given conditions (other predicates).
 func HasGroupTagsWith(preds ...predicate.GroupTag) predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := newGroupTagsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tag(
+		func(s *sql.Selector) {
+			step := newGroupTagsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
-func And(predicates ...predicate.Tag) predicate.Tag {
-	return predicate.Tag(sql.AndPredicates(predicates...))
-}
+func And(predicates ...predicate.Tag) predicate.Tag { return entbuilder.AndPreds(predicates...) }
 
 // Or groups predicates with the OR operator between them.
-func Or(predicates ...predicate.Tag) predicate.Tag {
-	return predicate.Tag(sql.OrPredicates(predicates...))
-}
+func Or(predicates ...predicate.Tag) predicate.Tag { return entbuilder.OrPreds(predicates...) }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.Tag) predicate.Tag {
-	return predicate.Tag(sql.NotPredicates(p))
-}
+func Not(p predicate.Tag) predicate.Tag { return entbuilder.NotPred(p) }
