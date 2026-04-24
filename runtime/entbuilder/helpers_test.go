@@ -174,6 +174,13 @@ func TestNillableField_Assign_Pointer(t *testing.T) {
 	if node.Nickname == nil || *node.Nickname != "bob" {
 		t.Fatalf("expected *node.Nickname=bob, got %v", node.Nickname)
 	}
+	// Pass-through is intentional: Assign does not copy the pointee.
+	// Callsites pass freshly-allocated pointers from a row scan; copying again
+	// would be redundant. Contrast with Value, which DOES copy (see
+	// TestNillableField_Value_Set's ptr == &s check).
+	if node.Nickname != &s {
+		t.Fatalf("expected node.Nickname to alias caller pointer (pass-through contract); got %p vs %p", node.Nickname, &s)
+	}
 }
 
 func TestNillableField_Assign_WrongType_NoOp(t *testing.T) {
