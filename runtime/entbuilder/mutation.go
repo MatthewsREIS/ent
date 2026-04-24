@@ -37,6 +37,11 @@ type Mutation[T any] struct {
 	// numeric fields.
 	addedFields map[string]any
 
+	// edgeIDs maps Edge.Name -> target ID for unique-to-one edges.
+	edgeIDs map[string]any
+	// clearedEdges is the set of Edge.Name entries explicitly cleared.
+	clearedEdges map[string]struct{}
+
 	// id is the target ID for UpdateOne/DeleteOne mutations; nil otherwise.
 	id any
 }
@@ -49,6 +54,8 @@ func NewMutation[T any](schema *Schema[T], op Op) *Mutation[T] {
 		setFields:     make(map[string]any),
 		clearedFields: make(map[string]struct{}),
 		addedFields:   make(map[string]any),
+		edgeIDs:       make(map[string]any),
+		clearedEdges:  make(map[string]struct{}),
 	}
 }
 
@@ -169,4 +176,26 @@ func (m *Mutation[T]) ID() (any, bool) {
 		return nil, false
 	}
 	return m.id, true
+}
+
+// SetEdgeID stores the target ID for a unique edge. Returns an error if
+// the edge is unknown or not unique.
+func (m *Mutation[T]) SetEdgeID(name string, id any) error {
+	e, ok := m.schema.FindEdge(name)
+	if !ok {
+		return fmt.Errorf("entbuilder: schema %q has no edge %q", m.schema.Name, name)
+	}
+	if !e.Unique {
+		return fmt.Errorf("entbuilder: edge %q on schema %q is not unique; use AddEdgeIDs instead",
+			name, m.schema.Name)
+	}
+	m.edgeIDs[name] = id
+	delete(m.clearedEdges, name)
+	return nil
+}
+
+// EdgeID returns the stored target ID for a unique edge. ok=false if unset.
+func (m *Mutation[T]) EdgeID(name string) (any, bool) {
+	v, ok := m.edgeIDs[name]
+	return v, ok
 }

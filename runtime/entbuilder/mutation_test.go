@@ -208,3 +208,38 @@ func TestID_Unset(t *testing.T) {
 		t.Fatal("expected ok=false before SetID")
 	}
 }
+
+var cardEdgeSchema = &Schema[fakeCardNode]{
+	Name: "Card",
+	Fields: []Field{
+		{Name: "Number", Column: "number", Type: reflect.TypeOf("")},
+	},
+	Edges: []Edge{
+		{Name: "Owner", Unique: true, Inverse: true, Field: "owner_id", TargetID: reflect.TypeOf(int(0))},
+	},
+}
+
+func TestSetEdgeID_StoresAndReadsUniqueEdge(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpCreate)
+	if err := m.SetEdgeID("Owner", 7); err != nil {
+		t.Fatalf("SetEdgeID: %v", err)
+	}
+	id, ok := m.EdgeID("Owner")
+	if !ok || id.(int) != 7 {
+		t.Fatalf("EdgeID: ok=%v id=%v", ok, id)
+	}
+}
+
+func TestSetEdgeID_UnknownEdge_ReturnsError(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpCreate)
+	if err := m.SetEdgeID("NotAnEdge", 1); err == nil {
+		t.Fatal("expected error for unknown edge")
+	}
+}
+
+func TestEdgeID_Unset(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpCreate)
+	if _, ok := m.EdgeID("Owner"); ok {
+		t.Fatal("expected ok=false before SetEdgeID")
+	}
+}
