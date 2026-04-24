@@ -145,3 +145,50 @@ func TestAddedField_UnsetReturnsFalse(t *testing.T) {
 		t.Fatal("expected ok=false before any AddField")
 	}
 }
+
+func TestResetField_ClearsAllState(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardTestSchema, OpUpdate)
+	_ = m.SetField("Name", "alice")
+	_ = m.ClearField("Name")
+	// Re-set for good measure — ClearField removed setFields entry.
+	_ = m.SetField("Name", "bob")
+
+	if err := m.ResetField("Name"); err != nil {
+		t.Fatalf("ResetField: %v", err)
+	}
+
+	if _, ok := m.Field("Name"); ok {
+		t.Fatal("expected Field(Name) unset after ResetField")
+	}
+	if m.FieldCleared("Name") {
+		t.Fatal("expected FieldCleared(Name)=false after ResetField")
+	}
+	if len(m.Fields()) != 0 {
+		t.Fatalf("Fields: %v", m.Fields())
+	}
+	if len(m.ClearedFields()) != 0 {
+		t.Fatalf("ClearedFields: %v", m.ClearedFields())
+	}
+}
+
+func TestResetField_NumericAlsoClearsAdded(t *testing.T) {
+	m := NewMutation[fakeCardWithBalance](cardBalanceSchema, OpUpdate)
+	_ = m.AddField("Balance", 3.14)
+	_ = m.SetField("Balance", 100.0)
+	if err := m.ResetField("Balance"); err != nil {
+		t.Fatalf("ResetField: %v", err)
+	}
+	if _, ok := m.AddedField("Balance"); ok {
+		t.Fatal("expected AddedField(Balance) ok=false after ResetField")
+	}
+	if _, ok := m.Field("Balance"); ok {
+		t.Fatal("expected Field(Balance) ok=false after ResetField")
+	}
+}
+
+func TestResetField_UnknownField_ReturnsError(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardTestSchema, OpUpdate)
+	if err := m.ResetField("NotAField"); err == nil {
+		t.Fatal("expected error")
+	}
+}

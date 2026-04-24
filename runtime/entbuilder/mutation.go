@@ -147,3 +147,15 @@ func (m *Mutation[T]) AddedField(name string) (any, bool) {
 	v, ok := m.addedFields[name]
 	return v, ok
 }
+
+// ResetField clears all mutation state for `name`: set value, cleared flag,
+// and added delta. Matches the existing generated ResetX method behavior.
+func (m *Mutation[T]) ResetField(name string) error {
+	if _, ok := m.schema.FindField(name); !ok {
+		return fmt.Errorf("entbuilder: schema %q has no field %q", m.schema.Name, name)
+	}
+	delete(m.setFields, name)
+	delete(m.clearedFields, name)
+	delete(m.addedFields, name)
+	return nil
+}
