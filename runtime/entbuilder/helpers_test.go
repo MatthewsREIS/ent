@@ -1,6 +1,8 @@
 package entbuilder
 
 import (
+	"database/sql/driver"
+	"errors"
 	"testing"
 
 	"entgo.io/ent/schema/field"
@@ -198,5 +200,82 @@ func TestNillableField_Assign_WrongType_NoOp(t *testing.T) {
 	}
 	if node.Nickname != nil {
 		t.Fatal("expected node.Nickname unchanged when type assertion fails")
+	}
+}
+
+type uuidLike [16]byte
+
+func uuidScanner(v uuidLike) (driver.Value, error) {
+	return v[:], nil
+}
+
+func failingScanner(v uuidLike) (driver.Value, error) {
+	return nil, errors.New("boom")
+}
+
+type fakeMutUUID struct{ id *uuidLike }
+
+func (m fakeMutUUID) ID() (uuidLike, bool) {
+	if m.id == nil {
+		return uuidLike{}, false
+	}
+	return *m.id, true
+}
+
+type fakeNodeUUID struct{ ID uuidLike }
+
+func TestFieldWithScanner_Value_OK(t *testing.T) {
+	u := uuidLike{1, 2, 3}
+	desc := FieldWithScanner[fakeCfg, fakeNodeUUID, fakeMutUUID, uuidLike](
+		"id", field.TypeUUID, fakeMutUUID.ID, uuidScanner,
+		func(n *fakeNodeUUID, v uuidLike) { n.ID = v },
+	)
+	fv, ok, err := desc.Value(fakeMutUUID{id: &u})
+	if err != nil || !ok {
+		t.Fatalf("unexpected ok=%v err=%v", ok, err)
+	}
+	spec, isBytes := fv.Spec.([]byte)
+	if !isBytes || len(spec) != 16 || spec[0] != 1 {
+		t.Fatalf("unexpected Spec: %+v", fv.Spec)
+	}
+	if fv.Node.(uuidLike) != u {
+		t.Fatalf("unexpected Node: %+v", fv.Node)
+	}
+}
+
+func TestFieldWithScanner_ScannerError_PropagatesAsNotOK(t *testing.T) {
+	u := uuidLike{1, 2, 3}
+	desc := FieldWithScanner[fakeCfg, fakeNodeUUID, fakeMutUUID, uuidLike](
+		"id", field.TypeUUID, fakeMutUUID.ID, failingScanner,
+		func(n *fakeNodeUUID, v uuidLike) { n.ID = v },
+	)
+	fv, ok, err := desc.Value(fakeMutUUID{id: &u})
+	if err == nil {
+		t.Fatal("expected scanner error")
+	}
+	if ok {
+		t.Fatal("expected ok=false on scanner error")
+	}
+	if fv != (FieldValue{}) {
+		t.Fatalf("expected zero FieldValue on error, got %+v", fv)
+	}
+}
+
+func TestNillableFieldWithScanner_Value_OK(t *testing.T) {
+	u := uuidLike{9, 9}
+	desc := NillableFieldWithScanner[fakeCfg, fakeNodeUUID, fakeMutUUID, uuidLike](
+		"id", field.TypeUUID, fakeMutUUID.ID, uuidScanner,
+		func(n *fakeNodeUUID, v *uuidLike) { if v != nil { n.ID = *v } },
+	)
+	fv, ok, err := desc.Value(fakeMutUUID{id: &u})
+	if err != nil || !ok {
+		t.Fatalf("unexpected ok=%v err=%v", ok, err)
+	}
+	ptr, isPtr := fv.Node.(*uuidLike)
+	if !isPtr || *ptr != u {
+		t.Fatalf("unexpected Node: %+v", fv.Node)
+	}
+	if ptr == &u {
+		t.Fatal("Node must be a copy, not alias")
 	}
 }
