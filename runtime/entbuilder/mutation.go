@@ -199,3 +199,19 @@ func (m *Mutation[T]) EdgeID(name string) (any, bool) {
 	v, ok := m.edgeIDs[name]
 	return v, ok
 }
+
+// ClearEdge marks a unique edge as cleared and removes any stored target ID.
+func (m *Mutation[T]) ClearEdge(name string) error {
+	if _, ok := m.schema.FindEdge(name); !ok {
+		return fmt.Errorf("entbuilder: schema %q has no edge %q", m.schema.Name, name)
+	}
+	delete(m.edgeIDs, name)
+	m.clearedEdges[name] = struct{}{}
+	return nil
+}
+
+// EdgeCleared reports whether an edge was cleared by this mutation.
+func (m *Mutation[T]) EdgeCleared(name string) bool {
+	_, ok := m.clearedEdges[name]
+	return ok
+}

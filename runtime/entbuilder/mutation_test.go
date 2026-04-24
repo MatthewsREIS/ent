@@ -243,3 +243,31 @@ func TestEdgeID_Unset(t *testing.T) {
 		t.Fatal("expected ok=false before SetEdgeID")
 	}
 }
+
+func TestClearEdge_UniqueEdge(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpUpdate)
+	_ = m.SetEdgeID("Owner", 7)
+	if err := m.ClearEdge("Owner"); err != nil {
+		t.Fatalf("ClearEdge: %v", err)
+	}
+	if _, ok := m.EdgeID("Owner"); ok {
+		t.Fatal("expected EdgeID ok=false after ClearEdge")
+	}
+	if !m.EdgeCleared("Owner") {
+		t.Fatal("expected EdgeCleared=true")
+	}
+}
+
+func TestClearEdge_UnknownEdge_ReturnsError(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpUpdate)
+	if err := m.ClearEdge("NotAnEdge"); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestEdgeCleared_UnknownEdge_ReturnsFalse(t *testing.T) {
+	m := NewMutation[fakeCardNode](cardEdgeSchema, OpUpdate)
+	if m.EdgeCleared("NotAnEdge") {
+		t.Fatal("expected false for unknown edge")
+	}
+}
