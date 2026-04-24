@@ -1,5 +1,7 @@
 package entbuilder
 
+import "fmt"
+
 // Op is a mutation operation kind. Mirrors ent.Op bit layout at the
 // integer level so that callers can convert back and forth without an
 // explicit map lookup; the enum is redeclared here to avoid an import
@@ -79,4 +81,51 @@ func (m *Mutation[T]) ClearedFields() []string {
 		out = append(out, k)
 	}
 	return out
+}
+
+// SetField records v as the mutation's value for the field named `name`.
+// Returns an error if `name` is not declared on the schema. Does not
+// validate v's type against the field's descriptor — the façade's typed
+// setters are responsible for that.
+func (m *Mutation[T]) SetField(name string, v any) error {
+	if _, ok := m.schema.FindField(name); !ok {
+		return fmt.Errorf("entbuilder: schema %q has no field %q", m.schema.Name, name)
+	}
+	m.setFields[name] = v
+	// Setting a field after clearing it un-clears it.
+	delete(m.clearedFields, name)
+	return nil
+}
+
+// Field returns the mutation's recorded value for `name` and ok=true, or
+// (nil, false) if the field was not set (or was cleared). Unknown field
+// names return (nil, false) without error to match the existing
+// ent.Mutation.Field contract.
+func (m *Mutation[T]) Field(name string) (any, bool) {
+	v, ok := m.setFields[name]
+	return v, ok
+}
+
+// ClearField marks `name` as cleared and removes any previously-set value.
+// Returns an error if `name` is unknown or is a non-nullable field (per the
+// schema descriptor).
+func (m *Mutation[T]) ClearField(name string) error {
+	f, ok := m.schema.FindField(name)
+	if !ok {
+		return fmt.Errorf("entbuilder: schema %q has no field %q", m.schema.Name, name)
+	}
+	if !f.Nullable {
+		return fmt.Errorf("entbuilder: schema %q field %q is not Optional and cannot be cleared",
+			m.schema.Name, name)
+	}
+	delete(m.setFields, name)
+	m.clearedFields[name] = struct{}{}
+	return nil
+}
+
+// FieldCleared reports whether `name` was cleared by this mutation.
+// Returns false for unknown fields (matching the existing ent contract).
+func (m *Mutation[T]) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
 }
