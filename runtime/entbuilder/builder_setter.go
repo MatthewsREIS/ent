@@ -20,3 +20,20 @@ func BSet[B any, V any](b *B, set func(V), v V) *B {
 	set(v)
 	return b
 }
+
+// BClear is the generic shape for a generated *XxxUpdate / *XxxCreate
+// Clear-method that wraps a call into the mutation and returns the builder.
+// Generated code of the form
+//
+//	func (uu *UserUpdate) ClearBio() *UserUpdate {
+//	    uu.mutation.ClearBio()
+//	    return uu
+//	}
+//
+// collapses to
+//
+//	func (uu *UserUpdate) ClearBio() *UserUpdate { return entbuilder.BClear(uu, uu.mutation.ClearBio) }
+func BClear[B any](b *B, clear func()) *B {
+	clear()
+	return b
+}
