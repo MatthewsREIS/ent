@@ -43,35 +43,52 @@ Threshold for ✓: the directory exercises the category's API surface non-trivia
 | `api-graphql/src/ringcentral_poller` | 1 | | ✓ | | | | | | | Contact, PhoneNumber, Task |
 | `api-graphql/src/river` | 12 | ✓ | ✓ | ✓ | | | | | ✓ | DealTeam, Email, Escrow, Listing, Marketing, Property, Proposal, RoleDefinition, Task, User, WrikeProject, WrikeTask |
 | `api-graphql/src/testutil/fixtures` | 1 | ✓ | | | | | | | ✓ | SfGroup, SfGroupMember (where-predicate on sfgroupmember package) |
-| `api-graphql/src/testutil` | 212 | ✓ | ✓ | ✓ | ✓ | | ✓ | ✓ | ✓ | AgentLicensing, AiChatMessage, AiChatThread, AlphamapMartOutput, BoxFolder, BrokerOfRecord, ChatterLastReadMessage, ChatterMention, ChatterMessage, ChatterNotification, ChatterThread, CoBroker, Collateral, Commission, Company, CompanyHistory, CompanyNote, Compliance, Contact, ContactHistory, ContactList, ContactListContact, ContactListShare, ContactNote, Content, Contract, CrexiMartOutput, DealNotification, DealTeam, DmEmailStats, Email, EmailStats, EmailToBrokersTask, Escrow, HtmlEmailTask, HyperionMartOutput, Intercept, Lease, Listing, Market, MarketAgentRegion, Marketing, MreisAgentCommission, Notification, Offer, Office, OfficeUser, Opportunity, Outreach, OutreachQueue, Ownership, PartyToTransaction, PhoneNumber, PinnedContactList, PinnedContactListStatus, PinnedPropertyList, PinnedPropertyListStatus, Profile, Property, PropertyFieldHistory, PropertyFieldSelection, PropertyList, PropertyNote, Proposal, PublicWebPostsTask, RecordType, ReferralFee, RelatesTo, RequestEmailTask, RequestPhotosTask, RingCentralPhoneNumber, RingCentralPhoneNumberMdt, RoleDefinition, SalesComp, SavedFilter, Signage, Space, Task, TextEmailTask, Timeline, User, UserContact, UserReminder, UserSavedFilter, UserSettings, UserTask, Website, WrikeAttachment, WrikeProject, WrikeTask, WrikeWorkflowStatus |
+| `api-graphql/src/testutil` | 212 | ✓ | ✓ | ✓ | ✓ | | ✓ | ✓ | ✓ | AgentLicensing, AiChatMessage, AiChatThread, AlphamapMartOutput, BoxFolder, BrokerOfRecord, ChatterLastReadMessage, ChatterMention, ChatterMessage, ChatterNotification, ChatterThread, CoBroker, Collateral, Commission, Company, CompanyHistory, CompanyNote, Compliance, Contact, ContactHistory, ContactList, ContactListContact, ContactListShare, ContactNote, Content, Contract, CrexiMartOutput, DealNotification, DealTeam, DmEmailStats, Email, EmailStats, EmailToBrokersTask, Escrow, EscrowHistory, HR, HtmlEmailTask, HyperionMartOutput, Intercept, Lease, Listing, Market, MarketAgentRegion, Marketing, MreisAgentCommission, Notification, Offer, Office, OfficeUser, Opportunity, Outreach, OutreachQueue, Ownership, PartyToTransaction, PhoneNumber, PinnedContactList, PinnedPropertyList, Profile, Property, PropertyFieldHistory, PropertyFieldSelection, PropertyHistory, PropertyList, PropertyNote, Proposal, PublicWebPostsTask, RecordType, ReferralFee, RelatesTo, RequestEmailTask, RequestPhotosTask, RingCentralPhoneNumber, RingCentralPhoneNumberMdt, RoleDefinition, SalesComp, SFGroup, SFGroupMember, sfsync, Signage, Space, Task, TextEmailTask, Timeline, User, UserContact, UserReminder, UserSettings, UserTask, Website, WrikeAttachment, WrikeProject, WrikeTask, WrikeWorkflowStatus |
 | `api-graphql/src/txutil` | 1 | | | | | | ✓ | | ✓ | gen.Tx interface testing only — no entity queries |
 | `webhooks/hubspot` | 1 | | ✓ | | | | | | | Content |
 
 ## Schema coverage summary
 
-> **Note on schema count:** The task spec cited 111 schemas. The consumer's `ent/gen` directory contains 117 schema subdirectories (118 dirs minus `entsf_test`, which is a test-package directory, not an entity schema). The discrepancy is likely due to schemas added since the spec was written.
+> **Note on schema count:** The task spec cited 111 schemas. The consumer's `ent/gen` directory actually contains **125 top-level subdirs**. Removing the 11 infrastructure subdirs (`enthubspot`, `entsearch`, `entsf`, `entsf_test`, `enttest`, `hook`, `internal`, `migrate`, `predicate`, `privacy`, `runtime`) yields **114 entity schema directories**. The +3 delta from the spec reflects schemas added since the plan was written. A prior revision of this document quoted 117 because it used a narrower infra-filter; the correct count under the canonical filter is 114.
+>
+> **Coverage methodology (two-pass union):**
+> 1. **Pass 1 — direct client calls:** `grep -rohE 'client\.[A-Z][A-Za-z]+'` across all `*_test.go` files, lowercased, intersected with the 114-entity list. Yields 29 entities.
+> 2. **Pass 2 — liberal dirname mention:** for each entity dirname, case-insensitive word-boundary grep across all `*_test.go` files. Any match (imports, GraphQL schema strings containing the dirname, string literals, fixture helpers) counts. Yields 95 entities.
+>
+> The covered set is the **union** (95 entities — Pass 2 is a superset of Pass 1 here). An entity is "untested" only when *neither* pass matches. The PascalCase-to-dirname mapping is a straight `tolower()` — ent's codegen uses direct concatenation (`SavedFilter` → `savedfilter`, `UnrestrictedEscrow` → `unrestrictedescrow`, etc.).
 
-Total schemas: **117**
-Schemas with at least one test: **105**
-Schemas with no test coverage: **12**
+Total schemas: **114**
+Schemas with at least one test: **95**
+Schemas with no test coverage: **19**
 
 ### Untested schemas
 
 | Schema directory | Category | Notes |
 |---|---|---|
-| `compliancehistory` | history/audit | No test, no GraphQL reference |
-| `deletedcampaignmember` | soft-delete record | No test, no GraphQL reference |
-| `hrhistory` | history/audit | No test, no GraphQL reference |
-| `listinghistory` | history/audit | No test, no GraphQL reference |
-| `markethistory` | history/audit | No test, no GraphQL reference |
-| `mreisagentcommissionhistory` | history/audit | No test, no GraphQL reference |
-| `officehistory` | history/audit | No test, no GraphQL reference |
-| `proposalhistory` | history/audit | No test, no GraphQL reference |
-| `referralfeehistory` | history/audit | No test, no GraphQL reference |
-| `ringcentralsyncposition` | sync/position tracking | No test, no GraphQL reference |
-| `sfreconcile` | Salesforce sync | No test, no GraphQL reference |
-| `userhistory` | history/audit | No test, no GraphQL reference |
+| `compliancehistory` | history/audit | No test file mentions the dirname |
+| `contactphonenumber` | lookup / denormalized | No test file mentions the dirname (only ContactPhoneNumber appears in CamelCase-concatenated resolver names, which the word-boundary filter correctly excludes) |
+| `hrhistory` | history/audit | No test file mentions the dirname |
+| `listinghistory` | history/audit | No test file mentions the dirname |
+| `markethistory` | history/audit | No test file mentions the dirname |
+| `mreisagentcommissionhistory` | history/audit | No test file mentions the dirname |
+| `officehistory` | history/audit | No test file mentions the dirname |
+| `pinnedcontactliststatus` | pinned-list status | No test file mentions the dirname |
+| `pinnedpropertyliststatus` | pinned-list status | No test file mentions the dirname |
+| `proposalhistory` | history/audit | No test file mentions the dirname |
+| `referralfeehistory` | history/audit | No test file mentions the dirname |
+| `ringcentralsyncposition` | sync/position tracking | No test file mentions the dirname |
+| `savedfilter` | user preference | No test file mentions the dirname |
+| `sfreconcile` | Salesforce sync | No test file mentions the dirname |
+| `unrestrictedescrow` | RLS-bypass view | No test file mentions the dirname |
+| `unrestrictedlisting` | RLS-bypass view | No test file mentions the dirname |
+| `unrestrictedproposal` | RLS-bypass view | No test file mentions the dirname |
+| `userhistory` | history/audit | No test file mentions the dirname |
+| `usersavedfilter` | user preference | No test file mentions the dirname |
+
+> **Entities that *look* untested but aren't under liberal matching:** `hr` and `sfsync` both survive the untested-filter. `hr` is mentioned in 8 test files (most substantively `hr_rls_integration_test.go`, which drives the entity through GraphQL `CreateHR`/`hrs()` mutations and queries); `sfsync` is mentioned in 3 test files (a generated `gen/sfsync/river_test.go` inside the package plus `"SFSync"` string literals in `contact_sf_sync_integration_test.go` and `proposal_sf_sync_integration_test.go`). The `sfsync` coverage is weaker in practice than the dirname grep suggests — the `testutil` matches are test-data strings, not entity calls.
 
 ## Observations
 
-Coverage is concentrated almost entirely in `api-graphql/src/testutil` (212 of 274 test files), which exercises the **create** and **query** surfaces most heavily — 105 of 212 files call `.Create()` and 190 of 212 call `.Query()` or `.With*()` eager-loading — while **update** (42 files), **delete** (21 files), and **mutation** (0 files) are thin or absent across the entire consumer test suite. The `mutation` category (`internal/<entity>_mutation.go` surfaces like `OldX`, `ResetX`, `Fields()`) has **zero** direct coverage in any test directory, meaning any refactor to mutation state machinery carries no downstream test signal at all. The 12 untested schemas are overwhelmingly **history/audit tables** (9 of 12) plus three sync/tracking entities; these schemas are read-only append-only tables in practice, but a refactor to their generated query or field accessors would be invisible to CI until a production regression occurred.
+Coverage is concentrated almost entirely in `api-graphql/src/testutil` (212 of 274 test files), which exercises the **create** and **query** surfaces most heavily — 105 of 212 files call `.Create()` and 190 of 212 call `.Query()` or `.With*()` eager-loading — while **update** (42 files), **delete** (21 files), and **mutation** (0 files) are thin or absent across the entire consumer test suite. The `mutation` category (`internal/<entity>_mutation.go` surfaces like `OldX`, `ResetX`, `Fields()`) has **zero** direct coverage in any test directory, meaning any refactor to mutation state machinery carries no downstream test signal at all.
+
+The 19 untested schemas split into four risk clusters: (1) **history/audit tables** (9 schemas — `*history` variants) that are append-only in practice but whose generated query/field accessors would silently break under refactor; (2) **RLS-bypass views** (3 schemas — `unrestricted*`) used by admin paths whose absence of test coverage is particularly concerning given their security-sensitive role; (3) **user-preference tables** (`savedfilter`, `usersavedfilter`, `pinnedcontactliststatus`, `pinnedpropertyliststatus`) that DO have GraphQL resolver tests elsewhere in the consumer but never reference the ent dirname directly — a known methodology blindspot since CamelCase operation names like `CreatePropertyNote` defeat word-boundary matching; and (4) **Salesforce/sync infra** (`sfreconcile`, `ringcentralsyncposition`) whose lack of coverage reflects genuine low-signal CI for these paths. For the refactor POC, clusters (1) and (3) are the safest to modify; cluster (2) is the highest risk because the RLS-bypass surface has both zero downstream tests *and* security implications.
