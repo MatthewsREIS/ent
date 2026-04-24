@@ -12,7 +12,7 @@ Consumer repo: `/home/smoothbrain/dev/matthewsreis/worktrees/main/service-api-go
 
 ## File-category key
 
-| Column   | Meaning |
+| Category | Generated files exercised |
 |---|---|
 | where    | predicate functions in `<entity>/where.go` — `entity.FieldEQ(...)`, `entity.FieldIn(...)`, etc. |
 | create   | builder setters in `<entity>_create.go` — `.Create().SetX(...)` chains |
@@ -23,33 +23,35 @@ Consumer repo: `/home/smoothbrain/dev/matthewsreis/worktrees/main/service-api-go
 | entql    | entql predicate evaluation — `As*Predicate`, entql-specific APIs |
 | query    | `<entity>_query.go` — `.Query().All/First/Only/IDs`, `.With*()` eager loading, `.GroupBy`, `.Select` |
 
-Threshold for ✓: the directory exercises the category's API surface non-trivially across multiple files. Trivial uses (e.g. a single `.Query()` call only to assert a side effect) are left blank.
+Threshold for ✓: the directory exercises the category's API surface non-trivially across multiple files. Trivial uses (e.g. a single `.Query()` call only to assert a side effect) are left blank. **This threshold is stricter than Task 1's (`ent-integration-matrix.md`), which required at-least-one meaningful call.** The consumer's 274 test files make multi-file signal a sensible gate; Task 1's integration-scenario files are small and individually load-bearing, so at-least-one suffices there.
 
 ## Test-directory matrix
+
+Column order for the ✓ columns matches Task 1's `ent-integration-matrix.md`; see that document for the category key if needed.
 
 | Directory (relative to consumer root) | Files | where | create | update | delete | mutation | client | entql | query | Entities covered |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|---|
 | `api-graphql/e2e/tests` | 4 | ✓ | ✓ | ✓ | | | | | ✓ | Email, Listing, Marketing, Property, Task, TextEmailTask, Timeline, User, WrikeProject, WrikeTask |
 | `api-graphql/src/clients/box` | 1 | | ✓ | | | | | | | BoxFolder, Escrow, Listing, Property, Proposal |
 | `api-graphql/src/cmd` (3 subdirs) | 4 | ✓ | ✓ | | ✓ | | | | ✓ | Contact, SalesforceSyncPosition, Task, User |
-| `api-graphql/src/ent/entcontext_test` | 1 | | | | | | ✓ | | | gen package context/impersonation helpers only |
+| `api-graphql/src/ent/entcontext_test` | 1 | | | | | | ✓ | | | — *(gen package context/impersonation helpers only — no entity queries)* |
 | `api-graphql/src/ent/gen/enthubspot` | 4 | | ✓ | | | | ✓ | | ✓ | Contact, ContactList, ContactListContact, Content |
 | `api-graphql/src/ent/gen/entsf_test` | 2 | | ✓ | ✓ | ✓ | | ✓ | | ✓ | Company, Contact, ContactList, ContactListContact, Email, Escrow, Lease |
 | `api-graphql/src/ent/schema` | 9 | ✓ | ✓ | ✓ | ✓ | ✓ | | | ✓ | Contact, Contract, Escrow, Listing, Market, Marketing, Office, OfficeUser, Ownership, PartyToTransaction, Profile, Property, Proposal, User, WrikeProject, WrikeTask |
-| `api-graphql/src/export` | 1 | | | | | | | | | Company, Contact, Email (query via GraphQL export path) |
+| `api-graphql/src/export` | 1 | | | | | | | | | Company, Contact, Email *(GraphQL export path — no direct ent client calls; entity list reflects schemas referenced in the exported GraphQL types)* |
 | `api-graphql/src/extensions/entsearch` | 8 | | ✓ | | | | | | ✓ | Company, Contact, Content, Email, Escrow, Market, Property |
-| `api-graphql/src/hubspot_email_stats` | 1 | | | | | | ✓ | | | gen.Client{} struct only — no entity queries |
+| `api-graphql/src/hubspot_email_stats` | 1 | | | | | | ✓ | | | — *(`gen.Client{}` struct only — no entity queries)* |
 | `api-graphql/src/resolvers` | 11 | ✓ | ✓ | ✓ | | | ✓ | ✓ | ✓ | Company, Contact, ContactList, ContactListContact, DealTeam, Email, Escrow, Lease, Listing, Market, Marketing, Office, Property, RecordType, User |
 | `api-graphql/src/ringcentral_poller` | 1 | | ✓ | | | | | | | Contact, PhoneNumber, Task |
 | `api-graphql/src/river` | 12 | ✓ | ✓ | ✓ | | | | | ✓ | DealTeam, Email, Escrow, Listing, Marketing, Property, Proposal, RoleDefinition, Task, User, WrikeProject, WrikeTask |
-| `api-graphql/src/testutil/fixtures` | 1 | ✓ | | | | | | | ✓ | SfGroup, SfGroupMember (where-predicate on sfgroupmember package) |
-| `api-graphql/src/testutil` | 212 | ✓ | ✓ | ✓ | ✓ | | ✓ | ✓ | ✓ | AgentLicensing, AiChatMessage, AiChatThread, AlphamapMartOutput, BoxFolder, BrokerOfRecord, ChatterLastReadMessage, ChatterMention, ChatterMessage, ChatterNotification, ChatterThread, CoBroker, Collateral, Commission, Company, CompanyHistory, CompanyNote, Compliance, Contact, ContactHistory, ContactList, ContactListContact, ContactListShare, ContactNote, Content, Contract, CrexiMartOutput, DealNotification, DealTeam, DmEmailStats, Email, EmailStats, EmailToBrokersTask, Escrow, EscrowHistory, HR, HtmlEmailTask, HyperionMartOutput, Intercept, Lease, Listing, Market, MarketAgentRegion, Marketing, MreisAgentCommission, Notification, Offer, Office, OfficeUser, Opportunity, Outreach, OutreachQueue, Ownership, PartyToTransaction, PhoneNumber, PinnedContactList, PinnedPropertyList, Profile, Property, PropertyFieldHistory, PropertyFieldSelection, PropertyHistory, PropertyList, PropertyNote, Proposal, PublicWebPostsTask, RecordType, ReferralFee, RelatesTo, RequestEmailTask, RequestPhotosTask, RingCentralPhoneNumber, RingCentralPhoneNumberMdt, RoleDefinition, SalesComp, SFGroup, SFGroupMember, sfsync, Signage, Space, Task, TextEmailTask, Timeline, User, UserContact, UserReminder, UserSettings, UserTask, Website, WrikeAttachment, WrikeProject, WrikeTask, WrikeWorkflowStatus |
-| `api-graphql/src/txutil` | 1 | | | | | | ✓ | | ✓ | gen.Tx interface testing only — no entity queries |
+| `api-graphql/src/testutil/fixtures` | 1 | ✓ | | | | | | | ✓ | SfGroup, SfGroupMember *(where-predicate on sfgroupmember package)* |
+| `api-graphql/src/testutil` | 212 | ✓ | ✓ | ✓ | ✓ | | ✓ | ✓ | ✓ | AgentLicensing, AiChatMessage, AiChatThread, AlphamapMartOutput, BoxFolder, BrokerOfRecord, ChatterLastReadMessage, ChatterMention, ChatterMessage, ChatterNotification, ChatterThread, CoBroker, Collateral, Commission, Company, CompanyHistory, CompanyNote, Compliance, Contact, ContactHistory, ContactList, ContactListContact, ContactListShare, ContactNote, Content, Contract, CrexiMartOutput, DealNotification, DealTeam, DmEmailStats, Email, EmailStats, EmailToBrokersTask, Escrow, EscrowHistory, Hr, HtmlEmailTask, HyperionMartOutput, Intercept, Lease, Listing, Market, MarketAgentRegion, Marketing, MreisAgentCommission, Notification, Offer, Office, OfficeUser, Opportunity, Outreach, OutreachQueue, Ownership, PartyToTransaction, PhoneNumber, PinnedContactList, PinnedPropertyList, Profile, Property, PropertyFieldHistory, PropertyFieldSelection, PropertyHistory, PropertyList, PropertyNote, Proposal, PublicWebPostsTask, RecordType, ReferralFee, RelatesTo, RequestEmailTask, RequestPhotosTask, RingCentralPhoneNumber, RingCentralPhoneNumberMdt, RoleDefinition, SalesComp, SfGroup, SfGroupMember, SfSync, Signage, Space, Task, TextEmailTask, Timeline, User, UserContact, UserReminder, UserSettings, UserTask, Website, WrikeAttachment, WrikeProject, WrikeTask, WrikeWorkflowStatus |
+| `api-graphql/src/txutil` | 1 | | | | | | ✓ | | ✓ | — *(`gen.Tx` interface testing only — no entity queries)* |
 | `webhooks/hubspot` | 1 | | ✓ | | | | | | | Content |
 
 ## Schema coverage summary
 
-> **Note on schema count:** The task spec cited 111 schemas. The consumer's `ent/gen` directory actually contains **125 top-level subdirs**. Removing the 11 infrastructure subdirs (`enthubspot`, `entsearch`, `entsf`, `entsf_test`, `enttest`, `hook`, `internal`, `migrate`, `predicate`, `privacy`, `runtime`) yields **114 entity schema directories**. The +3 delta from the spec reflects schemas added since the plan was written. A prior revision of this document quoted 117 because it used a narrower infra-filter; the correct count under the canonical filter is 114.
+> **Note on schema count:** The task spec cited 111 schemas. The consumer's `ent/gen` directory actually contains **125 top-level subdirs**. Removing the 11 infrastructure subdirs (`enthubspot`, `entsearch`, `entsf`, `entsf_test`, `enttest`, `hook`, `internal`, `migrate`, `predicate`, `privacy`, `runtime`) yields **114 entity schema directories**. The +3 delta from the spec reflects schemas added since the plan was written.
 >
 > **Coverage methodology (two-pass union):**
 > 1. **Pass 1 — direct client calls:** `grep -rohE 'client\.[A-Z][A-Za-z]+'` across all `*_test.go` files, lowercased, intersected with the 114-entity list. Yields 29 entities.
