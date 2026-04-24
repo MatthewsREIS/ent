@@ -19,7 +19,7 @@ Task 1 threshold: at least one meaningful call per integration scenario. Task 2 
 | `where` | Strong — 10 of 15 scenarios | Strong — 6 of 17 dirs | Covered |
 | `create` | Strong — 12 of 15 scenarios | Strong — 11 of 17 dirs | Covered |
 | `update` | Good — 9 scenarios | Good — 5 dirs | Covered |
-| `delete` | Good — 7 scenarios | Thin — 2 dirs (`cmd`, `ent/schema`) | Should-fill |
+| `delete` | Good — 7 scenarios | Present but thin — 4 dirs (`cmd`, `ent/gen/entsf_test`, `ent/schema`, `testutil`) | Should-fill |
 | `mutation` | Thin — `root` + `hooks` only | **Zero** across all 274 files | **CRITICAL** |
 | `client` | Good — `root`, `gremlin`, `hooks`, `template` | Good — 5 dirs | Covered |
 | `entql` | Thin — `root` + `edgeschema` only | Present in `resolvers` + `testutil` | Partially covered |
@@ -49,14 +49,14 @@ The `entql` category (`.Filter().Where(entql.…)`, typed filter methods like `.
 
 ## Should-fill (fill in parallel with Phase 2)
 
-### 1. `delete`: Consumer coverage is thin (2 directories)
+### 1. `delete`: Consumer coverage is present but thin (4 directories, one of them flagged thin)
 
-The integration matrix shows good delete coverage (7 scenarios exercise `Delete()`, `DeleteOne()`, or cascade deletes). The consumer matrix shows only 2 of 17 directories exercise delete operations (`api-graphql/src/cmd` and `api-graphql/src/ent/schema`). The `testutil` directory — which accounts for 212 of 274 test files — shows only 21 files calling delete, which Task 2 notes as thin.
+The integration matrix shows good delete coverage (7 scenarios exercise `Delete()`, `DeleteOne()`, or cascade deletes). The consumer matrix shows delete ✓ in 4 of 17 directories: `api-graphql/src/cmd` (4 files), `api-graphql/src/ent/gen/entsf_test` (2 files of internal ent-package tooling), `api-graphql/src/ent/schema` (9 files), and `api-graphql/src/testutil` (212 files — but only 21 of them call a delete op, which Task 2 explicitly notes as thin).
 
-A template change that modifies `<entity>_delete.go`'s builder signature or removes a setter would not produce a consumer-side compile failure because the consumer's delete calls are concentrated in a small number of paths that are not exercised by the 212-file testutil suite.
+A template change that modifies `<entity>_delete.go`'s builder signature or removes a setter would compile-fail in at least one of those directories, so "silent regression" is unlikely. However, the runtime-behaviour signal is weaker than for create/query: most consumer delete sites are concentrated in `ent/schema` and `cmd`, which exercise narrow entity sets (`Contact`, `SalesforceSyncPosition`, `Task`, `User` in `cmd`; 16 entities in `ent/schema`). Behavioural regressions on delete builders for the other ~90 schemas would fall to integration alone.
 
-- **Add to:** `api-graphql/src/testutil` — add fixture teardown helpers that explicitly call `client.Entity.Delete().Where(...)` for 3–5 high-frequency entities (`Listing`, `Contact`, `Property`, `User`, `Task`). These can double as cleanup in existing integration tests.
-- **Rationale:** Integration has broad delete coverage; consumer has thin coverage. A refactor regression in `_delete.go` would pass all consumer tests and only be caught by integration, leaving business-logic-specific delete paths unguarded.
+- **Add to:** `api-graphql/src/testutil` — strengthen fixture teardown helpers that explicitly call `client.Entity.Delete().Where(...)` for 3–5 high-frequency entities outside the `cmd`/`ent/schema` set (e.g., `Listing`, `Property`, `Escrow`, `Marketing`). These can double as cleanup in existing integration tests, raising the 21/212 thin ratio in the largest test directory.
+- **Rationale:** Integration has broad delete coverage; consumer has coverage in 4 dirs but the largest one is flagged thin and the narrow ones cover only ~20 of 114 schemas. A refactor regression affecting the generated delete builder for a non-`cmd`/non-`ent/schema` entity would likely pass the consumer suite at runtime, leaving integration as the sole safety net.
 
 ### 2. `client`: `client.Tx()` and `client.Use()` integration scenarios are gated behind `root` and `hooks`
 
