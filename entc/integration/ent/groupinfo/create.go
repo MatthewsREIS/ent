@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,14 +32,12 @@ func NewGroupInfoCreate(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 
 // SetDesc sets the "desc" field.
 func (_c *GroupInfoCreate) SetDesc(v string) *GroupInfoCreate {
-	_c.mutation.SetDesc(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDesc, v)
 }
 
 // SetMaxUsers sets the "max_users" field.
 func (_c *GroupInfoCreate) SetMaxUsers(v int) *GroupInfoCreate {
-	_c.mutation.SetMaxUsers(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetMaxUsers, v)
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
@@ -56,9 +55,7 @@ func (_c *GroupInfoCreate) AddGroupIDs(ids ...int) *GroupInfoCreate {
 }
 
 // Mutation returns the GroupInfoMutation object of the builder.
-func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation {
-	return _c.mutation
-}
+func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation { return _c.mutation }
 
 // Save creates the GroupInfo in the database.
 func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
@@ -68,18 +65,11 @@ func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *GroupInfoCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *GroupInfoCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *GroupInfoCreate) ExecX(ctx context.Context) {

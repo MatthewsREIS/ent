@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // LicenseCreate is the builder for creating a License entity.
@@ -63,9 +64,7 @@ func (_c *LicenseCreate) SetID(v int) *LicenseCreate {
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (_c *LicenseCreate) Mutation() *LicenseMutation {
-	return _c.mutation
-}
+func (_c *LicenseCreate) Mutation() *LicenseMutation { return _c.mutation }
 
 // Save creates the License in the database.
 func (_c *LicenseCreate) Save(ctx context.Context) (*License, error) {
@@ -74,19 +73,10 @@ func (_c *LicenseCreate) Save(ctx context.Context) (*License, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *LicenseCreate) SaveX(ctx context.Context) *License {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *LicenseCreate) SaveX(ctx context.Context) *License { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *LicenseCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *LicenseCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *LicenseCreate) ExecX(ctx context.Context) {

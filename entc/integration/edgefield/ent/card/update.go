@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,11 @@ func NewCardUpdate(c Config, hooks []Hook, mutation *CardMutation) *CardUpdate {
 }
 
 // Where appends a list predicates to the CardUpdate builder.
-func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetNumber sets the "number" field.
 func (_u *CardUpdate) SetNumber(v string) *CardUpdate {
-	_u.mutation.SetNumber(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNumber, v)
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
@@ -51,14 +48,12 @@ func (_u *CardUpdate) SetNillableNumber(v *string) *CardUpdate {
 
 // ClearNumber clears the value of the "number" field.
 func (_u *CardUpdate) ClearNumber() *CardUpdate {
-	_u.mutation.ClearNumber()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNumber)
 }
 
 // SetOwnerID sets the "owner_id" field.
 func (_u *CardUpdate) SetOwnerID(v int) *CardUpdate {
-	_u.mutation.SetOwnerID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, v)
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
@@ -71,20 +66,14 @@ func (_u *CardUpdate) SetNillableOwnerID(v *int) *CardUpdate {
 
 // ClearOwnerID clears the value of the "owner_id" field.
 func (_u *CardUpdate) ClearOwnerID() *CardUpdate {
-	_u.mutation.ClearOwnerID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwnerID)
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (_u *CardUpdate) Mutation() *CardMutation {
-	return _u.mutation
-}
+func (_u *CardUpdate) Mutation() *CardMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *CardUpdate) ClearOwner() *CardUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *CardUpdate) ClearOwner() *CardUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
@@ -92,19 +81,10 @@ func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CardUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *CardUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *CardUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CardUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CardUpdate) ExecX(ctx context.Context) {
@@ -184,8 +164,7 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 
 // SetNumber sets the "number" field.
 func (_u *CardUpdateOne) SetNumber(v string) *CardUpdateOne {
-	_u.mutation.SetNumber(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNumber, v)
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
@@ -198,14 +177,12 @@ func (_u *CardUpdateOne) SetNillableNumber(v *string) *CardUpdateOne {
 
 // ClearNumber clears the value of the "number" field.
 func (_u *CardUpdateOne) ClearNumber() *CardUpdateOne {
-	_u.mutation.ClearNumber()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNumber)
 }
 
 // SetOwnerID sets the "owner_id" field.
 func (_u *CardUpdateOne) SetOwnerID(v int) *CardUpdateOne {
-	_u.mutation.SetOwnerID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, v)
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
@@ -218,19 +195,15 @@ func (_u *CardUpdateOne) SetNillableOwnerID(v *int) *CardUpdateOne {
 
 // ClearOwnerID clears the value of the "owner_id" field.
 func (_u *CardUpdateOne) ClearOwnerID() *CardUpdateOne {
-	_u.mutation.ClearOwnerID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwnerID)
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (_u *CardUpdateOne) Mutation() *CardMutation {
-	return _u.mutation
-}
+func (_u *CardUpdateOne) Mutation() *CardMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdateOne) ClearOwner() *CardUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // Where appends a list predicates to the CardUpdate builder.
@@ -252,19 +225,10 @@ func (_u *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CardUpdateOne) SaveX(ctx context.Context) *Card {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *CardUpdateOne) SaveX(ctx context.Context) *Card { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *CardUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CardUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CardUpdateOne) ExecX(ctx context.Context) {

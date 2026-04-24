@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -44,23 +45,14 @@ func (_q *MetadataQuery) Where(ps ...predicate.Metadata) *MetadataQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *MetadataQuery) Limit(limit int) *MetadataQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *MetadataQuery) Limit(limit int) *MetadataQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *MetadataQuery) Offset(offset int) *MetadataQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *MetadataQuery) Offset(offset int) *MetadataQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *MetadataQuery) Unique(unique bool) *MetadataQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *MetadataQuery) Unique(unique bool) *MetadataQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *MetadataQuery) Order(o ...metadata.OrderOption) *MetadataQuery {
@@ -198,13 +190,7 @@ func (_q *MetadataQuery) Only(ctx context.Context) (*Metadata, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *MetadataQuery) OnlyX(ctx context.Context) *Metadata {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *MetadataQuery) OnlyX(ctx context.Context) *Metadata { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Metadata ID in the query.
 // Returns a *NotSingularError when more than one Metadata ID is found.
@@ -226,13 +212,7 @@ func (_q *MetadataQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *MetadataQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *MetadataQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of MetadataSlice.
 func (_q *MetadataQuery) All(ctx context.Context) ([]*Metadata, error) {
@@ -245,13 +225,7 @@ func (_q *MetadataQuery) All(ctx context.Context) ([]*Metadata, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *MetadataQuery) AllX(ctx context.Context) []*Metadata {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *MetadataQuery) AllX(ctx context.Context) []*Metadata { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Metadata IDs.
 func (_q *MetadataQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -266,13 +240,7 @@ func (_q *MetadataQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *MetadataQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *MetadataQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *MetadataQuery) Count(ctx context.Context) (int, error) {
@@ -284,13 +252,7 @@ func (_q *MetadataQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *MetadataQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *MetadataQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *MetadataQuery) Exist(ctx context.Context) (bool, error) {
@@ -306,13 +268,7 @@ func (_q *MetadataQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *MetadataQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *MetadataQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the MetadataQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -499,88 +455,92 @@ func (_q *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 	return nodes, nil
 }
 
-var metadataUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Metadata, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      true,
-			Table:        metadata.UserTable,
-			Columns:      metadata.UserColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Metadata) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Metadata) *int {
-		v := n.ID
-		return &v
-	},
-}
-var metadataChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Metadata, Metadata, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      true,
-			Table:        metadata.ChildrenTable,
-			Columns:      metadata.ChildrenColumn,
-			Bidi:         false,
-			TargetColumn: metadata.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Metadata) int { return n.ID },
-	ExtractEdgeID: func(e *Metadata) int { return e.ID },
-	ExtractEdgeFK: func(e *Metadata) *int {
-		v := e.ParentID
-		return &v
-	},
-}
-var metadataParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Metadata, Metadata, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        metadata.ParentTable,
-			Columns:      metadata.ParentColumn,
-			Bidi:         false,
-			TargetColumn: metadata.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Metadata) int { return n.ID },
-	ExtractEdgeID: func(e *Metadata) int { return e.ID },
-	ExtractNodeFK: func(n *Metadata) *int {
-		v := n.ParentID
-		return &v
-	},
-}
-
 func (_q *MetadataQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &metadataUserEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Metadata)
+	for i := range nodes {
+		fk := nodes[i].ID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *MetadataQuery) loadChildren(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Metadata)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(metadata.FieldParentID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &metadataChildrenEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(metadata.ChildrenColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ParentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *MetadataQuery) loadParent(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &metadataParentEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(metadata.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Metadata)
+	for i := range nodes {
+		fk := nodes[i].ParentID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(metadata.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 

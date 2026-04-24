@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,10 +29,7 @@ func NewBlogDelete(c Config, hooks []Hook, mutation *BlogMutation) *BlogDelete {
 }
 
 // Where appends a list predicates to the BlogDelete builder.
-func (_d *BlogDelete) Where(ps ...predicate.Blog) *BlogDelete {
-	_d.mutation.Where(ps...)
-	return _d
-}
+func (_d *BlogDelete) Where(ps ...predicate.Blog) *BlogDelete { _d.mutation.Where(ps...); return _d }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *BlogDelete) Exec(ctx context.Context) (int, error) {
@@ -39,13 +37,7 @@ func (_d *BlogDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *BlogDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *BlogDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *BlogDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))

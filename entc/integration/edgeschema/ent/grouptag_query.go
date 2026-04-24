@@ -43,23 +43,14 @@ func (_q *GroupTagQuery) Where(ps ...predicate.GroupTag) *GroupTagQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *GroupTagQuery) Limit(limit int) *GroupTagQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *GroupTagQuery) Limit(limit int) *GroupTagQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *GroupTagQuery) Offset(offset int) *GroupTagQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *GroupTagQuery) Offset(offset int) *GroupTagQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *GroupTagQuery) Unique(unique bool) *GroupTagQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *GroupTagQuery) Unique(unique bool) *GroupTagQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *GroupTagQuery) Order(o ...grouptag.OrderOption) *GroupTagQuery {
@@ -175,13 +166,7 @@ func (_q *GroupTagQuery) Only(ctx context.Context) (*GroupTag, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *GroupTagQuery) OnlyX(ctx context.Context) *GroupTag {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *GroupTagQuery) OnlyX(ctx context.Context) *GroupTag { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only GroupTag ID in the query.
 // Returns a *NotSingularError when more than one GroupTag ID is found.
@@ -203,13 +188,7 @@ func (_q *GroupTagQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *GroupTagQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *GroupTagQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of GroupTags.
 func (_q *GroupTagQuery) All(ctx context.Context) ([]*GroupTag, error) {
@@ -222,13 +201,7 @@ func (_q *GroupTagQuery) All(ctx context.Context) ([]*GroupTag, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *GroupTagQuery) AllX(ctx context.Context) []*GroupTag {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *GroupTagQuery) AllX(ctx context.Context) []*GroupTag { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of GroupTag IDs.
 func (_q *GroupTagQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -243,13 +216,7 @@ func (_q *GroupTagQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *GroupTagQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *GroupTagQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *GroupTagQuery) Count(ctx context.Context) (int, error) {
@@ -261,13 +228,7 @@ func (_q *GroupTagQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *GroupTagQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *GroupTagQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *GroupTagQuery) Exist(ctx context.Context) (bool, error) {
@@ -283,13 +244,7 @@ func (_q *GroupTagQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *GroupTagQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *GroupTagQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the GroupTagQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -449,59 +404,62 @@ func (_q *GroupTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Gro
 	return nodes, nil
 }
 
-var grouptagTagEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[GroupTag, Tag, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        grouptag.TagTable,
-			Columns:      grouptag.TagColumn,
-			Bidi:         false,
-			TargetColumn: tag.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *GroupTag) int { return n.ID },
-	ExtractEdgeID: func(e *Tag) int { return e.ID },
-	ExtractNodeFK: func(n *GroupTag) *int {
-		v := n.TagID
-		return &v
-	},
-}
-var grouptagGroupEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[GroupTag, Group, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        grouptag.GroupTable,
-			Columns:      grouptag.GroupColumn,
-			Bidi:         false,
-			TargetColumn: group.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *GroupTag) int { return n.ID },
-	ExtractEdgeID: func(e *Group) int { return e.ID },
-	ExtractNodeFK: func(n *GroupTag) *int {
-		v := n.GroupID
-		return &v
-	},
-}
-
 func (_q *GroupTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*GroupTag, init func(*GroupTag), assign func(*GroupTag, *Tag)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &grouptagTagEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(tag.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*GroupTag)
+	for i := range nodes {
+		fk := nodes[i].TagID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tag.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *GroupTagQuery) loadGroup(ctx context.Context, query *GroupQuery, nodes []*GroupTag, init func(*GroupTag), assign func(*GroupTag, *Group)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &grouptagGroupEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(group.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*GroupTag)
+	for i := range nodes {
+		fk := nodes[i].GroupID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(group.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,14 +33,12 @@ func NewIntSIDCreate(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSIDCr
 
 // SetID sets the "id" field.
 func (_c *IntSIDCreate) SetID(v sid.ID) *IntSIDCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetParentID sets the "parent" edge to the IntSID entity by ID.
 func (_c *IntSIDCreate) SetParentID(id sid.ID) *IntSIDCreate {
-	_c.mutation.SetParentID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the IntSID entity by ID if the given value is not nil.
@@ -57,9 +56,7 @@ func (_c *IntSIDCreate) AddChildIDs(ids ...sid.ID) *IntSIDCreate {
 }
 
 // Mutation returns the IntSIDMutation object of the builder.
-func (_c *IntSIDCreate) Mutation() *IntSIDMutation {
-	return _c.mutation
-}
+func (_c *IntSIDCreate) Mutation() *IntSIDMutation { return _c.mutation }
 
 // Save creates the IntSID in the database.
 func (_c *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
@@ -67,19 +64,10 @@ func (_c *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *IntSIDCreate) SaveX(ctx context.Context) *IntSID {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *IntSIDCreate) SaveX(ctx context.Context) *IntSID { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *IntSIDCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *IntSIDCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *IntSIDCreate) ExecX(ctx context.Context) {

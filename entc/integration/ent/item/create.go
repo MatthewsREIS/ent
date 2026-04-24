@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewItemCreate(c Config, hooks []Hook, mutation *ItemMutation) *ItemCreate {
 
 // SetText sets the "text" field.
 func (_c *ItemCreate) SetText(v string) *ItemCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -45,10 +45,7 @@ func (_c *ItemCreate) SetNillableText(v *string) *ItemCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *ItemCreate) SetID(v string) *ItemCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *ItemCreate) SetID(v string) *ItemCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // SetNillableID sets the "id" field if the given value is not nil.
 func (_c *ItemCreate) SetNillableID(v *string) *ItemCreate {
@@ -59,9 +56,7 @@ func (_c *ItemCreate) SetNillableID(v *string) *ItemCreate {
 }
 
 // Mutation returns the ItemMutation object of the builder.
-func (_c *ItemCreate) Mutation() *ItemMutation {
-	return _c.mutation
-}
+func (_c *ItemCreate) Mutation() *ItemMutation { return _c.mutation }
 
 // Save creates the Item in the database.
 func (_c *ItemCreate) Save(ctx context.Context) (*Item, error) {
@@ -70,19 +65,10 @@ func (_c *ItemCreate) Save(ctx context.Context) (*Item, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *ItemCreate) SaveX(ctx context.Context) *Item {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *ItemCreate) SaveX(ctx context.Context) *Item { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *ItemCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *ItemCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *ItemCreate) ExecX(ctx context.Context) {

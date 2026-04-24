@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,8 +31,7 @@ func NewCardCreate(c Config, hooks []Hook, mutation *CardMutation) *CardCreate {
 
 // SetNumber sets the "number" field.
 func (_c *CardCreate) SetNumber(v string) *CardCreate {
-	_c.mutation.SetNumber(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNumber, v)
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
@@ -44,8 +44,7 @@ func (_c *CardCreate) SetNillableNumber(v *string) *CardCreate {
 
 // SetName sets the "name" field.
 func (_c *CardCreate) SetName(v string) *CardCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -58,8 +57,7 @@ func (_c *CardCreate) SetNillableName(v *string) *CardCreate {
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *CardCreate) SetCreatedAt(v time.Time) *CardCreate {
-	_c.mutation.SetCreatedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -72,14 +70,12 @@ func (_c *CardCreate) SetNillableCreatedAt(v *time.Time) *CardCreate {
 
 // SetInHook sets the "in_hook" field.
 func (_c *CardCreate) SetInHook(v string) *CardCreate {
-	_c.mutation.SetInHook(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInHook, v)
 }
 
 // SetExpiredAt sets the "expired_at" field.
 func (_c *CardCreate) SetExpiredAt(v time.Time) *CardCreate {
-	_c.mutation.SetExpiredAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetExpiredAt, v)
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
@@ -92,8 +88,7 @@ func (_c *CardCreate) SetNillableExpiredAt(v *time.Time) *CardCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *CardCreate) SetOwnerID(id int) *CardCreate {
-	_c.mutation.SetOwnerID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -105,9 +100,7 @@ func (_c *CardCreate) SetNillableOwnerID(id *int) *CardCreate {
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (_c *CardCreate) Mutation() *CardMutation {
-	return _c.mutation
-}
+func (_c *CardCreate) Mutation() *CardMutation { return _c.mutation }
 
 // Save creates the Card in the database.
 func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
@@ -118,19 +111,10 @@ func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *CardCreate) SaveX(ctx context.Context) *Card {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *CardCreate) SaveX(ctx context.Context) *Card { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *CardCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *CardCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *CardCreate) ExecX(ctx context.Context) {

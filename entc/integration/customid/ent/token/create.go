@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,15 +34,11 @@ func NewTokenCreate(c Config, hooks []Hook, mutation *TokenMutation) *TokenCreat
 
 // SetBody sets the "body" field.
 func (_c *TokenCreate) SetBody(v string) *TokenCreate {
-	_c.mutation.SetBody(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetBody, v)
 }
 
 // SetID sets the "id" field.
-func (_c *TokenCreate) SetID(v sid.ID) *TokenCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *TokenCreate) SetID(v sid.ID) *TokenCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // SetNillableID sets the "id" field if the given value is not nil.
 func (_c *TokenCreate) SetNillableID(v *sid.ID) *TokenCreate {
@@ -53,14 +50,11 @@ func (_c *TokenCreate) SetNillableID(v *sid.ID) *TokenCreate {
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (_c *TokenCreate) SetAccountID(id sid.ID) *TokenCreate {
-	_c.mutation.SetAccountID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetAccountID, id)
 }
 
 // Mutation returns the TokenMutation object of the builder.
-func (_c *TokenCreate) Mutation() *TokenMutation {
-	return _c.mutation
-}
+func (_c *TokenCreate) Mutation() *TokenMutation { return _c.mutation }
 
 // Save creates the Token in the database.
 func (_c *TokenCreate) Save(ctx context.Context) (*Token, error) {
@@ -69,19 +63,10 @@ func (_c *TokenCreate) Save(ctx context.Context) (*Token, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TokenCreate) SaveX(ctx context.Context) *Token {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *TokenCreate) SaveX(ctx context.Context) *Token { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *TokenCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TokenCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TokenCreate) ExecX(ctx context.Context) {

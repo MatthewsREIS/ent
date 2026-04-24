@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,15 +33,11 @@ func NewRoleUpdate(c Config, hooks []Hook, mutation *RoleMutation) *RoleUpdate {
 }
 
 // Where appends a list predicates to the RoleUpdate builder.
-func (_u *RoleUpdate) Where(ps ...predicate.Role) *RoleUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *RoleUpdate) Where(ps ...predicate.Role) *RoleUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
 func (_u *RoleUpdate) SetName(v string) *RoleUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -53,8 +50,7 @@ func (_u *RoleUpdate) SetNillableName(v *string) *RoleUpdate {
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *RoleUpdate) SetCreatedAt(v time.Time) *RoleUpdate {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -66,21 +62,13 @@ func (_u *RoleUpdate) SetNillableCreatedAt(v *time.Time) *RoleUpdate {
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *RoleUpdate) AddUserIDs(ids ...int) *RoleUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
+func (_u *RoleUpdate) AddUserIDs(ids ...int) *RoleUpdate { _u.mutation.AddUserIDs(ids...); return _u }
 
 // Mutation returns the RoleMutation object of the builder.
-func (_u *RoleUpdate) Mutation() *RoleMutation {
-	return _u.mutation
-}
+func (_u *RoleUpdate) Mutation() *RoleMutation { return _u.mutation }
 
 // ClearUser clears all "user" edges to the User entity.
-func (_u *RoleUpdate) ClearUser() *RoleUpdate {
-	_u.mutation.ClearUser()
-	return _u
-}
+func (_u *RoleUpdate) ClearUser() *RoleUpdate { return entbuilder.BClear(_u, _u.mutation.ClearUser) }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
 func (_u *RoleUpdate) RemoveUserIDs(ids ...int) *RoleUpdate {
@@ -94,19 +82,10 @@ func (_u *RoleUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *RoleUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *RoleUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *RoleUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RoleUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RoleUpdate) ExecX(ctx context.Context) {
@@ -208,8 +187,7 @@ func NewRoleUpdateOne(c Config, hooks []Hook, mutation *RoleMutation) *RoleUpdat
 
 // SetName sets the "name" field.
 func (_u *RoleUpdateOne) SetName(v string) *RoleUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -222,8 +200,7 @@ func (_u *RoleUpdateOne) SetNillableName(v *string) *RoleUpdateOne {
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *RoleUpdateOne) SetCreatedAt(v time.Time) *RoleUpdateOne {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -241,14 +218,11 @@ func (_u *RoleUpdateOne) AddUserIDs(ids ...int) *RoleUpdateOne {
 }
 
 // Mutation returns the RoleMutation object of the builder.
-func (_u *RoleUpdateOne) Mutation() *RoleMutation {
-	return _u.mutation
-}
+func (_u *RoleUpdateOne) Mutation() *RoleMutation { return _u.mutation }
 
 // ClearUser clears all "user" edges to the User entity.
 func (_u *RoleUpdateOne) ClearUser() *RoleUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
@@ -276,19 +250,10 @@ func (_u *RoleUpdateOne) Save(ctx context.Context) (*Role, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *RoleUpdateOne) SaveX(ctx context.Context) *Role {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *RoleUpdateOne) SaveX(ctx context.Context) *Role { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *RoleUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RoleUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RoleUpdateOne) ExecX(ctx context.Context) {

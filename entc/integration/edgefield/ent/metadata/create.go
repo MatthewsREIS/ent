@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,8 +30,7 @@ func NewMetadataCreate(c Config, hooks []Hook, mutation *MetadataMutation) *Meta
 
 // SetAge sets the "age" field.
 func (_c *MetadataCreate) SetAge(v int) *MetadataCreate {
-	_c.mutation.SetAge(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetAge, v)
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
@@ -43,8 +43,7 @@ func (_c *MetadataCreate) SetNillableAge(v *int) *MetadataCreate {
 
 // SetParentID sets the "parent_id" field.
 func (_c *MetadataCreate) SetParentID(v int) *MetadataCreate {
-	_c.mutation.SetParentID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, v)
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
@@ -57,14 +56,12 @@ func (_c *MetadataCreate) SetNillableParentID(v *int) *MetadataCreate {
 
 // SetID sets the "id" field.
 func (_c *MetadataCreate) SetID(v int) *MetadataCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_c *MetadataCreate) SetUserID(id int) *MetadataCreate {
-	_c.mutation.SetUserID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, id)
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
@@ -82,9 +79,7 @@ func (_c *MetadataCreate) AddChildIDs(ids ...int) *MetadataCreate {
 }
 
 // Mutation returns the MetadataMutation object of the builder.
-func (_c *MetadataCreate) Mutation() *MetadataMutation {
-	return _c.mutation
-}
+func (_c *MetadataCreate) Mutation() *MetadataMutation { return _c.mutation }
 
 // Save creates the Metadata in the database.
 func (_c *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
@@ -93,19 +88,10 @@ func (_c *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *MetadataCreate) SaveX(ctx context.Context) *Metadata {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *MetadataCreate) SaveX(ctx context.Context) *Metadata { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *MetadataCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *MetadataCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *MetadataCreate) ExecX(ctx context.Context) {

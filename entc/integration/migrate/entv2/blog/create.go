@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,27 +30,16 @@ func NewBlogCreate(c Config, hooks []Hook, mutation *BlogMutation) *BlogCreate {
 }
 
 // SetOid sets the "oid" field.
-func (_c *BlogCreate) SetOid(v int) *BlogCreate {
-	_c.mutation.SetOid(v)
-	return _c
-}
+func (_c *BlogCreate) SetOid(v int) *BlogCreate { return entbuilder.BSet(_c, _c.mutation.SetOid, v) }
 
 // SetID sets the "id" field.
-func (_c *BlogCreate) SetID(v int) *BlogCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *BlogCreate) SetID(v int) *BlogCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
-func (_c *BlogCreate) AddAdminIDs(ids ...int) *BlogCreate {
-	_c.mutation.AddAdminIDs(ids...)
-	return _c
-}
+func (_c *BlogCreate) AddAdminIDs(ids ...int) *BlogCreate { _c.mutation.AddAdminIDs(ids...); return _c }
 
 // Mutation returns the BlogMutation object of the builder.
-func (_c *BlogCreate) Mutation() *BlogMutation {
-	return _c.mutation
-}
+func (_c *BlogCreate) Mutation() *BlogMutation { return _c.mutation }
 
 // Save creates the Blog in the database.
 func (_c *BlogCreate) Save(ctx context.Context) (*Blog, error) {
@@ -57,19 +47,10 @@ func (_c *BlogCreate) Save(ctx context.Context) (*Blog, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *BlogCreate) SaveX(ctx context.Context) *Blog {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *BlogCreate) SaveX(ctx context.Context) *Blog { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *BlogCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *BlogCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *BlogCreate) ExecX(ctx context.Context) {

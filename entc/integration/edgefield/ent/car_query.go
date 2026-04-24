@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -43,23 +44,14 @@ func (_q *CarQuery) Where(ps ...predicate.Car) *CarQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *CarQuery) Limit(limit int) *CarQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *CarQuery) Limit(limit int) *CarQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *CarQuery) Offset(offset int) *CarQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *CarQuery) Offset(offset int) *CarQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *CarQuery) Unique(unique bool) *CarQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *CarQuery) Unique(unique bool) *CarQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *CarQuery) Order(o ...car.OrderOption) *CarQuery {
@@ -153,13 +145,7 @@ func (_q *CarQuery) Only(ctx context.Context) (*Car, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *CarQuery) OnlyX(ctx context.Context) *Car {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *CarQuery) OnlyX(ctx context.Context) *Car { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Car ID in the query.
 // Returns a *NotSingularError when more than one Car ID is found.
@@ -181,13 +167,7 @@ func (_q *CarQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *CarQuery) OnlyIDX(ctx context.Context) uuid.UUID {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *CarQuery) OnlyIDX(ctx context.Context) uuid.UUID { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Cars.
 func (_q *CarQuery) All(ctx context.Context) ([]*Car, error) {
@@ -200,13 +180,7 @@ func (_q *CarQuery) All(ctx context.Context) ([]*Car, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *CarQuery) AllX(ctx context.Context) []*Car {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *CarQuery) AllX(ctx context.Context) []*Car { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Car IDs.
 func (_q *CarQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
@@ -221,13 +195,7 @@ func (_q *CarQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *CarQuery) IDsX(ctx context.Context) []uuid.UUID {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *CarQuery) IDsX(ctx context.Context) []uuid.UUID { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *CarQuery) Count(ctx context.Context) (int, error) {
@@ -239,13 +207,7 @@ func (_q *CarQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *CarQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *CarQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *CarQuery) Exist(ctx context.Context) (bool, error) {
@@ -261,13 +223,7 @@ func (_q *CarQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *CarQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *CarQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the CarQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -416,34 +372,34 @@ func (_q *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	return nodes, nil
 }
 
-var carRentalsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Car, Rental, uuid.UUID, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        car.RentalsTable,
-			Columns:      car.RentalsColumn,
-			Bidi:         false,
-			TargetColumn: rental.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Car) uuid.UUID { return n.ID },
-	ExtractEdgeID: func(e *Rental) int { return e.ID },
-	ExtractEdgeFK: func(e *Rental) *uuid.UUID {
-		v := e.CarID
-		return &v
-	},
-}
-
 func (_q *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes []*Car, init func(*Car), assign func(*Car, *Rental)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Car)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(rental.FieldCarID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &carRentalsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(car.RentalsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CarID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "car_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 

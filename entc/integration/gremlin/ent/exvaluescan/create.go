@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ExValueScanCreate is the builder for creating a ExValueScan entity.
@@ -86,9 +87,7 @@ func (_c *ExValueScanCreate) SetNillableCustomOptional(v *string) *ExValueScanCr
 }
 
 // Mutation returns the ExValueScanMutation object of the builder.
-func (_c *ExValueScanCreate) Mutation() *ExValueScanMutation {
-	return _c.mutation
-}
+func (_c *ExValueScanCreate) Mutation() *ExValueScanMutation { return _c.mutation }
 
 // Save creates the ExValueScan in the database.
 func (_c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
@@ -97,18 +96,11 @@ func (_c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *ExValueScanCreate) SaveX(ctx context.Context) *ExValueScan {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *ExValueScanCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *ExValueScanCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *ExValueScanCreate) ExecX(ctx context.Context) {

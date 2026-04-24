@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -31,8 +32,7 @@ func NewRentalCreate(c Config, hooks []Hook, mutation *RentalMutation) *RentalCr
 
 // SetDate sets the "date" field.
 func (_c *RentalCreate) SetDate(v time.Time) *RentalCreate {
-	_c.mutation.SetDate(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDate, v)
 }
 
 // SetNillableDate sets the "date" field if the given value is not nil.
@@ -45,20 +45,16 @@ func (_c *RentalCreate) SetNillableDate(v *time.Time) *RentalCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *RentalCreate) SetUserID(v int) *RentalCreate {
-	_c.mutation.SetUserID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, v)
 }
 
 // SetCarID sets the "car_id" field.
 func (_c *RentalCreate) SetCarID(v uuid.UUID) *RentalCreate {
-	_c.mutation.SetCarID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCarID, v)
 }
 
 // Mutation returns the RentalMutation object of the builder.
-func (_c *RentalCreate) Mutation() *RentalMutation {
-	return _c.mutation
-}
+func (_c *RentalCreate) Mutation() *RentalMutation { return _c.mutation }
 
 // Save creates the Rental in the database.
 func (_c *RentalCreate) Save(ctx context.Context) (*Rental, error) {
@@ -67,19 +63,10 @@ func (_c *RentalCreate) Save(ctx context.Context) (*Rental, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *RentalCreate) SaveX(ctx context.Context) *Rental {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *RentalCreate) SaveX(ctx context.Context) *Rental { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *RentalCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *RentalCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *RentalCreate) ExecX(ctx context.Context) {

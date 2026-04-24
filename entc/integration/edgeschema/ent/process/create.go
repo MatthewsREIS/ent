@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -43,9 +44,7 @@ func (_c *ProcessCreate) AddAttachedFileIDs(ids ...int) *ProcessCreate {
 }
 
 // Mutation returns the ProcessMutation object of the builder.
-func (_c *ProcessCreate) Mutation() *ProcessMutation {
-	return _c.mutation
-}
+func (_c *ProcessCreate) Mutation() *ProcessMutation { return _c.mutation }
 
 // Save creates the Process in the database.
 func (_c *ProcessCreate) Save(ctx context.Context) (*Process, error) {
@@ -53,19 +52,10 @@ func (_c *ProcessCreate) Save(ctx context.Context) (*Process, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *ProcessCreate) SaveX(ctx context.Context) *Process {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *ProcessCreate) SaveX(ctx context.Context) *Process { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *ProcessCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *ProcessCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *ProcessCreate) ExecX(ctx context.Context) {

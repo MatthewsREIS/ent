@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -96,10 +97,7 @@ func (_c *CardCreate) SetNillableName(v *string) *CardCreate {
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *CardCreate) SetOwnerID(id string) *CardCreate {
-	_c.mutation.SetOwnerID(id)
-	return _c
-}
+func (_c *CardCreate) SetOwnerID(id string) *CardCreate { _c.mutation.SetOwnerID(id); return _c }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (_c *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
@@ -116,9 +114,7 @@ func (_c *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (_c *CardCreate) Mutation() *CardMutation {
-	return _c.mutation
-}
+func (_c *CardCreate) Mutation() *CardMutation { return _c.mutation }
 
 // Save creates the Card in the database.
 func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
@@ -127,19 +123,10 @@ func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *CardCreate) SaveX(ctx context.Context) *Card {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *CardCreate) SaveX(ctx context.Context) *Card { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *CardCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *CardCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *CardCreate) ExecX(ctx context.Context) {

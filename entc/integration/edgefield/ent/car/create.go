@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -29,8 +30,7 @@ func NewCarCreate(c Config, hooks []Hook, mutation *CarMutation) *CarCreate {
 
 // SetNumber sets the "number" field.
 func (_c *CarCreate) SetNumber(v string) *CarCreate {
-	_c.mutation.SetNumber(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNumber, v)
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
@@ -42,10 +42,7 @@ func (_c *CarCreate) SetNillableNumber(v *string) *CarCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *CarCreate) SetID(v uuid.UUID) *CarCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *CarCreate) SetID(v uuid.UUID) *CarCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // SetNillableID sets the "id" field if the given value is not nil.
 func (_c *CarCreate) SetNillableID(v *uuid.UUID) *CarCreate {
@@ -56,15 +53,10 @@ func (_c *CarCreate) SetNillableID(v *uuid.UUID) *CarCreate {
 }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (_c *CarCreate) AddRentalIDs(ids ...int) *CarCreate {
-	_c.mutation.AddRentalIDs(ids...)
-	return _c
-}
+func (_c *CarCreate) AddRentalIDs(ids ...int) *CarCreate { _c.mutation.AddRentalIDs(ids...); return _c }
 
 // Mutation returns the CarMutation object of the builder.
-func (_c *CarCreate) Mutation() *CarMutation {
-	return _c.mutation
-}
+func (_c *CarCreate) Mutation() *CarMutation { return _c.mutation }
 
 // Save creates the Car in the database.
 func (_c *CarCreate) Save(ctx context.Context) (*Car, error) {
@@ -73,19 +65,10 @@ func (_c *CarCreate) Save(ctx context.Context) (*Car, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *CarCreate) SaveX(ctx context.Context) *Car {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *CarCreate) SaveX(ctx context.Context) *Car { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *CarCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *CarCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *CarCreate) ExecX(ctx context.Context) {

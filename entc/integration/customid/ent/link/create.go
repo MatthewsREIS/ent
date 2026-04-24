@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -34,14 +35,12 @@ func NewLinkCreate(c Config, hooks []Hook, mutation *LinkMutation) *LinkCreate {
 
 // SetLinkInformation sets the "link_information" field.
 func (_c *LinkCreate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkCreate {
-	_c.mutation.SetLinkInformation(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetLinkInformation, v)
 }
 
 // SetID sets the "id" field.
 func (_c *LinkCreate) SetID(v uuidc.UUIDC) *LinkCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
@@ -53,9 +52,7 @@ func (_c *LinkCreate) SetNillableID(v *uuidc.UUIDC) *LinkCreate {
 }
 
 // Mutation returns the LinkMutation object of the builder.
-func (_c *LinkCreate) Mutation() *LinkMutation {
-	return _c.mutation
-}
+func (_c *LinkCreate) Mutation() *LinkMutation { return _c.mutation }
 
 // Save creates the Link in the database.
 func (_c *LinkCreate) Save(ctx context.Context) (*Link, error) {
@@ -64,19 +61,10 @@ func (_c *LinkCreate) Save(ctx context.Context) (*Link, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *LinkCreate) SaveX(ctx context.Context) *Link {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *LinkCreate) SaveX(ctx context.Context) *Link { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *LinkCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *LinkCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *LinkCreate) ExecX(ctx context.Context) {

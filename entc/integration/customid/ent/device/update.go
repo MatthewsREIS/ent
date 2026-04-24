@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *DeviceUpdate) Where(ps ...predicate.Device) *DeviceUpdate {
 
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
 func (_u *DeviceUpdate) SetActiveSessionID(id schema.ID) *DeviceUpdate {
-	_u.mutation.SetActiveSessionID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetActiveSessionID, id)
 }
 
 // SetNillableActiveSessionID sets the "active_session" edge to the Session entity by ID if the given value is not nil.
@@ -57,20 +57,16 @@ func (_u *DeviceUpdate) AddSessionIDs(ids ...schema.ID) *DeviceUpdate {
 }
 
 // Mutation returns the DeviceMutation object of the builder.
-func (_u *DeviceUpdate) Mutation() *DeviceMutation {
-	return _u.mutation
-}
+func (_u *DeviceUpdate) Mutation() *DeviceMutation { return _u.mutation }
 
 // ClearActiveSession clears the "active_session" edge to the Session entity.
 func (_u *DeviceUpdate) ClearActiveSession() *DeviceUpdate {
-	_u.mutation.ClearActiveSession()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearActiveSession)
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
 func (_u *DeviceUpdate) ClearSessions() *DeviceUpdate {
-	_u.mutation.ClearSessions()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSessions)
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
@@ -85,19 +81,10 @@ func (_u *DeviceUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *DeviceUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *DeviceUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *DeviceUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *DeviceUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *DeviceUpdate) ExecX(ctx context.Context) {
@@ -216,8 +203,7 @@ func NewDeviceUpdateOne(c Config, hooks []Hook, mutation *DeviceMutation) *Devic
 
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
 func (_u *DeviceUpdateOne) SetActiveSessionID(id schema.ID) *DeviceUpdateOne {
-	_u.mutation.SetActiveSessionID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetActiveSessionID, id)
 }
 
 // SetNillableActiveSessionID sets the "active_session" edge to the Session entity by ID if the given value is not nil.
@@ -235,20 +221,16 @@ func (_u *DeviceUpdateOne) AddSessionIDs(ids ...schema.ID) *DeviceUpdateOne {
 }
 
 // Mutation returns the DeviceMutation object of the builder.
-func (_u *DeviceUpdateOne) Mutation() *DeviceMutation {
-	return _u.mutation
-}
+func (_u *DeviceUpdateOne) Mutation() *DeviceMutation { return _u.mutation }
 
 // ClearActiveSession clears the "active_session" edge to the Session entity.
 func (_u *DeviceUpdateOne) ClearActiveSession() *DeviceUpdateOne {
-	_u.mutation.ClearActiveSession()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearActiveSession)
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
 func (_u *DeviceUpdateOne) ClearSessions() *DeviceUpdateOne {
-	_u.mutation.ClearSessions()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSessions)
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
@@ -276,19 +258,10 @@ func (_u *DeviceUpdateOne) Save(ctx context.Context) (*Device, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *DeviceUpdateOne) SaveX(ctx context.Context) *Device {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *DeviceUpdateOne) SaveX(ctx context.Context) *Device { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *DeviceUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *DeviceUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *DeviceUpdateOne) ExecX(ctx context.Context) {

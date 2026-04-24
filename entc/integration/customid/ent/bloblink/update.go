@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -39,8 +40,7 @@ func (_u *BlobLinkUpdate) Where(ps ...predicate.BlobLink) *BlobLinkUpdate {
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *BlobLinkUpdate) SetCreatedAt(v time.Time) *BlobLinkUpdate {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -53,8 +53,7 @@ func (_u *BlobLinkUpdate) SetNillableCreatedAt(v *time.Time) *BlobLinkUpdate {
 
 // SetBlobID sets the "blob_id" field.
 func (_u *BlobLinkUpdate) SetBlobID(v uuid.UUID) *BlobLinkUpdate {
-	_u.mutation.SetBlobID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBlobID, v)
 }
 
 // SetNillableBlobID sets the "blob_id" field if the given value is not nil.
@@ -67,8 +66,7 @@ func (_u *BlobLinkUpdate) SetNillableBlobID(v *uuid.UUID) *BlobLinkUpdate {
 
 // SetLinkID sets the "link_id" field.
 func (_u *BlobLinkUpdate) SetLinkID(v uuid.UUID) *BlobLinkUpdate {
-	_u.mutation.SetLinkID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLinkID, v)
 }
 
 // SetNillableLinkID sets the "link_id" field if the given value is not nil.
@@ -80,20 +78,16 @@ func (_u *BlobLinkUpdate) SetNillableLinkID(v *uuid.UUID) *BlobLinkUpdate {
 }
 
 // Mutation returns the BlobLinkMutation object of the builder.
-func (_u *BlobLinkUpdate) Mutation() *BlobLinkMutation {
-	return _u.mutation
-}
+func (_u *BlobLinkUpdate) Mutation() *BlobLinkMutation { return _u.mutation }
 
 // ClearBlob clears the "blob" edge to the Blob entity.
 func (_u *BlobLinkUpdate) ClearBlob() *BlobLinkUpdate {
-	_u.mutation.ClearBlob()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBlob)
 }
 
 // ClearLink clears the "link" edge to the Blob entity.
 func (_u *BlobLinkUpdate) ClearLink() *BlobLinkUpdate {
-	_u.mutation.ClearLink()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLink)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -102,19 +96,10 @@ func (_u *BlobLinkUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *BlobLinkUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *BlobLinkUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *BlobLinkUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *BlobLinkUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *BlobLinkUpdate) ExecX(ctx context.Context) {
@@ -234,8 +219,7 @@ func NewBlobLinkUpdateOne(c Config, hooks []Hook, mutation *BlobLinkMutation) *B
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *BlobLinkUpdateOne) SetCreatedAt(v time.Time) *BlobLinkUpdateOne {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -248,8 +232,7 @@ func (_u *BlobLinkUpdateOne) SetNillableCreatedAt(v *time.Time) *BlobLinkUpdateO
 
 // SetBlobID sets the "blob_id" field.
 func (_u *BlobLinkUpdateOne) SetBlobID(v uuid.UUID) *BlobLinkUpdateOne {
-	_u.mutation.SetBlobID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBlobID, v)
 }
 
 // SetNillableBlobID sets the "blob_id" field if the given value is not nil.
@@ -262,8 +245,7 @@ func (_u *BlobLinkUpdateOne) SetNillableBlobID(v *uuid.UUID) *BlobLinkUpdateOne 
 
 // SetLinkID sets the "link_id" field.
 func (_u *BlobLinkUpdateOne) SetLinkID(v uuid.UUID) *BlobLinkUpdateOne {
-	_u.mutation.SetLinkID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLinkID, v)
 }
 
 // SetNillableLinkID sets the "link_id" field if the given value is not nil.
@@ -275,20 +257,16 @@ func (_u *BlobLinkUpdateOne) SetNillableLinkID(v *uuid.UUID) *BlobLinkUpdateOne 
 }
 
 // Mutation returns the BlobLinkMutation object of the builder.
-func (_u *BlobLinkUpdateOne) Mutation() *BlobLinkMutation {
-	return _u.mutation
-}
+func (_u *BlobLinkUpdateOne) Mutation() *BlobLinkMutation { return _u.mutation }
 
 // ClearBlob clears the "blob" edge to the Blob entity.
 func (_u *BlobLinkUpdateOne) ClearBlob() *BlobLinkUpdateOne {
-	_u.mutation.ClearBlob()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBlob)
 }
 
 // ClearLink clears the "link" edge to the Blob entity.
 func (_u *BlobLinkUpdateOne) ClearLink() *BlobLinkUpdateOne {
-	_u.mutation.ClearLink()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLink)
 }
 
 // Where appends a list predicates to the BlobLinkUpdate builder.
@@ -311,18 +289,11 @@ func (_u *BlobLinkUpdateOne) Save(ctx context.Context) (*BlobLink, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *BlobLinkUpdateOne) SaveX(ctx context.Context) *BlobLink {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *BlobLinkUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *BlobLinkUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *BlobLinkUpdateOne) ExecX(ctx context.Context) {

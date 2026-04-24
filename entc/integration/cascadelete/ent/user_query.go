@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -41,23 +42,14 @@ func (_q *UserQuery) Where(ps ...predicate.User) *UserQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *UserQuery) Limit(limit int) *UserQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *UserQuery) Limit(limit int) *UserQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *UserQuery) Offset(offset int) *UserQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *UserQuery) Offset(offset int) *UserQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *UserQuery) Unique(unique bool) *UserQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *UserQuery) Unique(unique bool) *UserQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *UserQuery) Order(o ...user.OrderOption) *UserQuery {
@@ -151,13 +143,7 @@ func (_q *UserQuery) Only(ctx context.Context) (*User, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *UserQuery) OnlyX(ctx context.Context) *User {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *UserQuery) OnlyX(ctx context.Context) *User { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only User ID in the query.
 // Returns a *NotSingularError when more than one User ID is found.
@@ -179,13 +165,7 @@ func (_q *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *UserQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *UserQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Users.
 func (_q *UserQuery) All(ctx context.Context) ([]*User, error) {
@@ -198,13 +178,7 @@ func (_q *UserQuery) All(ctx context.Context) ([]*User, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *UserQuery) AllX(ctx context.Context) []*User {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *UserQuery) AllX(ctx context.Context) []*User { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of User IDs.
 func (_q *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -219,13 +193,7 @@ func (_q *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *UserQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *UserQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *UserQuery) Count(ctx context.Context) (int, error) {
@@ -237,13 +205,7 @@ func (_q *UserQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *UserQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *UserQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *UserQuery) Exist(ctx context.Context) (bool, error) {
@@ -259,13 +221,7 @@ func (_q *UserQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *UserQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *UserQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the UserQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -407,34 +363,34 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	return nodes, nil
 }
 
-var userPostsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Post, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        user.PostsTable,
-			Columns:      user.PostsColumn,
-			Bidi:         false,
-			TargetColumn: post.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *Post) int { return e.ID },
-	ExtractEdgeFK: func(e *Post) *int {
-		v := e.AuthorID
-		return &v
-	},
-}
-
 func (_q *UserQuery) loadPosts(ctx context.Context, query *PostQuery, nodes []*User, init func(*User), assign func(*User, *Post)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(post.FieldAuthorID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userPostsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Post(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.PostsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.AuthorID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "author_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 

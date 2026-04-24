@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -41,23 +42,14 @@ func (_q *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *NodeQuery) Limit(limit int) *NodeQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *NodeQuery) Limit(limit int) *NodeQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *NodeQuery) Offset(offset int) *NodeQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *NodeQuery) Offset(offset int) *NodeQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *NodeQuery) Unique(unique bool) *NodeQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *NodeQuery) Unique(unique bool) *NodeQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *NodeQuery) Order(o ...node.OrderOption) *NodeQuery {
@@ -173,13 +165,7 @@ func (_q *NodeQuery) Only(ctx context.Context) (*Node, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *NodeQuery) OnlyX(ctx context.Context) *Node {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *NodeQuery) OnlyX(ctx context.Context) *Node { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Node ID in the query.
 // Returns a *NotSingularError when more than one Node ID is found.
@@ -201,13 +187,7 @@ func (_q *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *NodeQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *NodeQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Nodes.
 func (_q *NodeQuery) All(ctx context.Context) ([]*Node, error) {
@@ -220,13 +200,7 @@ func (_q *NodeQuery) All(ctx context.Context) ([]*Node, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *NodeQuery) AllX(ctx context.Context) []*Node {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *NodeQuery) AllX(ctx context.Context) []*Node { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Node IDs.
 func (_q *NodeQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -241,13 +215,7 @@ func (_q *NodeQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *NodeQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *NodeQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *NodeQuery) Count(ctx context.Context) (int, error) {
@@ -259,13 +227,7 @@ func (_q *NodeQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *NodeQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *NodeQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *NodeQuery) Exist(ctx context.Context) (bool, error) {
@@ -281,13 +243,7 @@ func (_q *NodeQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *NodeQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *NodeQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the NodeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -447,61 +403,60 @@ func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 	return nodes, nil
 }
 
-var nodePrevEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      true,
-			Table:        node.PrevTable,
-			Columns:      node.PrevColumn,
-			Bidi:         false,
-			TargetColumn: node.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Node) int { return n.ID },
-	ExtractEdgeID: func(e *Node) int { return e.ID },
-	ExtractNodeFK: func(n *Node) *int {
-		v := n.PrevID
-		return &v
-	},
-}
-var nodeNextEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Node, Node, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      false,
-			Table:        node.NextTable,
-			Columns:      node.NextColumn,
-			Bidi:         false,
-			TargetColumn: node.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Node) int { return n.ID },
-	ExtractEdgeID: func(e *Node) int { return e.ID },
-	ExtractEdgeFK: func(e *Node) *int {
-		v := e.PrevID
-		return &v
-	},
-}
-
 func (_q *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &nodePrevEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(node.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Node)
+	for i := range nodes {
+		fk := nodes[i].PrevID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(node.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "prev_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Node)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(node.FieldPrevID)
 	}
-	return entbuilder.LoadEdgeO2O(ctx, &nodeNextEdgeLoadDescriptor, nodes, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Node(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(node.NextColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.PrevID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "prev_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 

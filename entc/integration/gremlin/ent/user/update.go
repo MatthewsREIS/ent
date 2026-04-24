@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -32,10 +33,7 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetOptionalInt sets the "optional_int" field.
 func (_u *UserUpdate) SetOptionalInt(v int) *UserUpdate {
@@ -53,16 +51,10 @@ func (_u *UserUpdate) SetNillableOptionalInt(v *int) *UserUpdate {
 }
 
 // AddOptionalInt adds value to the "optional_int" field.
-func (_u *UserUpdate) AddOptionalInt(v int) *UserUpdate {
-	_u.mutation.AddOptionalInt(v)
-	return _u
-}
+func (_u *UserUpdate) AddOptionalInt(v int) *UserUpdate { _u.mutation.AddOptionalInt(v); return _u }
 
 // ClearOptionalInt clears the value of the "optional_int" field.
-func (_u *UserUpdate) ClearOptionalInt() *UserUpdate {
-	_u.mutation.ClearOptionalInt()
-	return _u
-}
+func (_u *UserUpdate) ClearOptionalInt() *UserUpdate { _u.mutation.ClearOptionalInt(); return _u }
 
 // SetAge sets the "age" field.
 func (_u *UserUpdate) SetAge(v int) *UserUpdate {
@@ -80,10 +72,7 @@ func (_u *UserUpdate) SetNillableAge(v *int) *UserUpdate {
 }
 
 // AddAge adds value to the "age" field.
-func (_u *UserUpdate) AddAge(v int) *UserUpdate {
-	_u.mutation.AddAge(v)
-	return _u
-}
+func (_u *UserUpdate) AddAge(v int) *UserUpdate { _u.mutation.AddAge(v); return _u }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
@@ -128,10 +117,7 @@ func (_u *UserUpdate) SetNillableNickname(v *string) *UserUpdate {
 }
 
 // ClearNickname clears the value of the "nickname" field.
-func (_u *UserUpdate) ClearNickname() *UserUpdate {
-	_u.mutation.ClearNickname()
-	return _u
-}
+func (_u *UserUpdate) ClearNickname() *UserUpdate { _u.mutation.ClearNickname(); return _u }
 
 // SetAddress sets the "address" field.
 func (_u *UserUpdate) SetAddress(v string) *UserUpdate {
@@ -148,10 +134,7 @@ func (_u *UserUpdate) SetNillableAddress(v *string) *UserUpdate {
 }
 
 // ClearAddress clears the value of the "address" field.
-func (_u *UserUpdate) ClearAddress() *UserUpdate {
-	_u.mutation.ClearAddress()
-	return _u
-}
+func (_u *UserUpdate) ClearAddress() *UserUpdate { _u.mutation.ClearAddress(); return _u }
 
 // SetPhone sets the "phone" field.
 func (_u *UserUpdate) SetPhone(v string) *UserUpdate {
@@ -168,10 +151,7 @@ func (_u *UserUpdate) SetNillablePhone(v *string) *UserUpdate {
 }
 
 // ClearPhone clears the value of the "phone" field.
-func (_u *UserUpdate) ClearPhone() *UserUpdate {
-	_u.mutation.ClearPhone()
-	return _u
-}
+func (_u *UserUpdate) ClearPhone() *UserUpdate { _u.mutation.ClearPhone(); return _u }
 
 // SetPassword sets the "password" field.
 func (_u *UserUpdate) SetPassword(v string) *UserUpdate {
@@ -188,10 +168,7 @@ func (_u *UserUpdate) SetNillablePassword(v *string) *UserUpdate {
 }
 
 // ClearPassword clears the value of the "password" field.
-func (_u *UserUpdate) ClearPassword() *UserUpdate {
-	_u.mutation.ClearPassword()
-	return _u
-}
+func (_u *UserUpdate) ClearPassword() *UserUpdate { _u.mutation.ClearPassword(); return _u }
 
 // SetRole sets the "role" field.
 func (_u *UserUpdate) SetRole(v Role) *UserUpdate {
@@ -236,10 +213,7 @@ func (_u *UserUpdate) SetNillableSSOCert(v *string) *UserUpdate {
 }
 
 // ClearSSOCert clears the value of the "SSOCert" field.
-func (_u *UserUpdate) ClearSSOCert() *UserUpdate {
-	_u.mutation.ClearSSOCert()
-	return _u
-}
+func (_u *UserUpdate) ClearSSOCert() *UserUpdate { _u.mutation.ClearSSOCert(); return _u }
 
 // SetFilesCount sets the "files_count" field.
 func (_u *UserUpdate) SetFilesCount(v int) *UserUpdate {
@@ -257,22 +231,13 @@ func (_u *UserUpdate) SetNillableFilesCount(v *int) *UserUpdate {
 }
 
 // AddFilesCount adds value to the "files_count" field.
-func (_u *UserUpdate) AddFilesCount(v int) *UserUpdate {
-	_u.mutation.AddFilesCount(v)
-	return _u
-}
+func (_u *UserUpdate) AddFilesCount(v int) *UserUpdate { _u.mutation.AddFilesCount(v); return _u }
 
 // ClearFilesCount clears the value of the "files_count" field.
-func (_u *UserUpdate) ClearFilesCount() *UserUpdate {
-	_u.mutation.ClearFilesCount()
-	return _u
-}
+func (_u *UserUpdate) ClearFilesCount() *UserUpdate { _u.mutation.ClearFilesCount(); return _u }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
-func (_u *UserUpdate) SetCardID(id string) *UserUpdate {
-	_u.mutation.SetCardID(id)
-	return _u
-}
+func (_u *UserUpdate) SetCardID(id string) *UserUpdate { _u.mutation.SetCardID(id); return _u }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
 func (_u *UserUpdate) SetNillableCardID(id *string) *UserUpdate {
@@ -283,10 +248,7 @@ func (_u *UserUpdate) SetNillableCardID(id *string) *UserUpdate {
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_u *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
-	_u.mutation.AddPetIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddPetIDs(ids ...string) *UserUpdate { _u.mutation.AddPetIDs(ids...); return _u }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_u *UserUpdate) AddFileIDs(ids ...string) *UserUpdate {
@@ -319,10 +281,7 @@ func (_u *UserUpdate) AddFollowingIDs(ids ...string) *UserUpdate {
 }
 
 // SetTeamID sets the "team" edge to the Pet entity by ID.
-func (_u *UserUpdate) SetTeamID(id string) *UserUpdate {
-	_u.mutation.SetTeamID(id)
-	return _u
-}
+func (_u *UserUpdate) SetTeamID(id string) *UserUpdate { _u.mutation.SetTeamID(id); return _u }
 
 // SetNillableTeamID sets the "team" edge to the Pet entity by ID if the given value is not nil.
 func (_u *UserUpdate) SetNillableTeamID(id *string) *UserUpdate {
@@ -333,10 +292,7 @@ func (_u *UserUpdate) SetNillableTeamID(id *string) *UserUpdate {
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (_u *UserUpdate) SetSpouseID(id string) *UserUpdate {
-	_u.mutation.SetSpouseID(id)
-	return _u
-}
+func (_u *UserUpdate) SetSpouseID(id string) *UserUpdate { _u.mutation.SetSpouseID(id); return _u }
 
 // SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (_u *UserUpdate) SetNillableSpouseID(id *string) *UserUpdate {
@@ -353,10 +309,7 @@ func (_u *UserUpdate) AddChildIDs(ids ...string) *UserUpdate {
 }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
-func (_u *UserUpdate) SetParentID(id string) *UserUpdate {
-	_u.mutation.SetParentID(id)
-	return _u
-}
+func (_u *UserUpdate) SetParentID(id string) *UserUpdate { _u.mutation.SetParentID(id); return _u }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
 func (_u *UserUpdate) SetNillableParentID(id *string) *UserUpdate {
@@ -367,21 +320,13 @@ func (_u *UserUpdate) SetNillableParentID(id *string) *UserUpdate {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdate) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdate) Mutation() *UserMutation { return _u.mutation }
 
 // ClearCard clears the "card" edge to the Card entity.
-func (_u *UserUpdate) ClearCard() *UserUpdate {
-	_u.mutation.ClearCard()
-	return _u
-}
+func (_u *UserUpdate) ClearCard() *UserUpdate { _u.mutation.ClearCard(); return _u }
 
 // ClearPets clears all "pets" edges to the Pet entity.
-func (_u *UserUpdate) ClearPets() *UserUpdate {
-	_u.mutation.ClearPets()
-	return _u
-}
+func (_u *UserUpdate) ClearPets() *UserUpdate { _u.mutation.ClearPets(); return _u }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
@@ -390,10 +335,7 @@ func (_u *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
 }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (_u *UserUpdate) ClearFiles() *UserUpdate {
-	_u.mutation.ClearFiles()
-	return _u
-}
+func (_u *UserUpdate) ClearFiles() *UserUpdate { _u.mutation.ClearFiles(); return _u }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *UserUpdate) RemoveFileIDs(ids ...string) *UserUpdate {
@@ -402,10 +344,7 @@ func (_u *UserUpdate) RemoveFileIDs(ids ...string) *UserUpdate {
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (_u *UserUpdate) ClearGroups() *UserUpdate {
-	_u.mutation.ClearGroups()
-	return _u
-}
+func (_u *UserUpdate) ClearGroups() *UserUpdate { _u.mutation.ClearGroups(); return _u }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *UserUpdate) RemoveGroupIDs(ids ...string) *UserUpdate {
@@ -414,10 +353,7 @@ func (_u *UserUpdate) RemoveGroupIDs(ids ...string) *UserUpdate {
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
-func (_u *UserUpdate) ClearFriends() *UserUpdate {
-	_u.mutation.ClearFriends()
-	return _u
-}
+func (_u *UserUpdate) ClearFriends() *UserUpdate { _u.mutation.ClearFriends(); return _u }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveFriendIDs(ids ...string) *UserUpdate {
@@ -426,10 +362,7 @@ func (_u *UserUpdate) RemoveFriendIDs(ids ...string) *UserUpdate {
 }
 
 // ClearFollowers clears all "followers" edges to the User entity.
-func (_u *UserUpdate) ClearFollowers() *UserUpdate {
-	_u.mutation.ClearFollowers()
-	return _u
-}
+func (_u *UserUpdate) ClearFollowers() *UserUpdate { _u.mutation.ClearFollowers(); return _u }
 
 // RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveFollowerIDs(ids ...string) *UserUpdate {
@@ -438,10 +371,7 @@ func (_u *UserUpdate) RemoveFollowerIDs(ids ...string) *UserUpdate {
 }
 
 // ClearFollowing clears all "following" edges to the User entity.
-func (_u *UserUpdate) ClearFollowing() *UserUpdate {
-	_u.mutation.ClearFollowing()
-	return _u
-}
+func (_u *UserUpdate) ClearFollowing() *UserUpdate { _u.mutation.ClearFollowing(); return _u }
 
 // RemoveFollowingIDs removes the "following" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveFollowingIDs(ids ...string) *UserUpdate {
@@ -450,22 +380,13 @@ func (_u *UserUpdate) RemoveFollowingIDs(ids ...string) *UserUpdate {
 }
 
 // ClearTeam clears the "team" edge to the Pet entity.
-func (_u *UserUpdate) ClearTeam() *UserUpdate {
-	_u.mutation.ClearTeam()
-	return _u
-}
+func (_u *UserUpdate) ClearTeam() *UserUpdate { _u.mutation.ClearTeam(); return _u }
 
 // ClearSpouse clears the "spouse" edge to the User entity.
-func (_u *UserUpdate) ClearSpouse() *UserUpdate {
-	_u.mutation.ClearSpouse()
-	return _u
-}
+func (_u *UserUpdate) ClearSpouse() *UserUpdate { _u.mutation.ClearSpouse(); return _u }
 
 // ClearChildren clears all "children" edges to the User entity.
-func (_u *UserUpdate) ClearChildren() *UserUpdate {
-	_u.mutation.ClearChildren()
-	return _u
-}
+func (_u *UserUpdate) ClearChildren() *UserUpdate { _u.mutation.ClearChildren(); return _u }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveChildIDs(ids ...string) *UserUpdate {
@@ -474,10 +395,7 @@ func (_u *UserUpdate) RemoveChildIDs(ids ...string) *UserUpdate {
 }
 
 // ClearParent clears the "parent" edge to the User entity.
-func (_u *UserUpdate) ClearParent() *UserUpdate {
-	_u.mutation.ClearParent()
-	return _u
-}
+func (_u *UserUpdate) ClearParent() *UserUpdate { _u.mutation.ClearParent(); return _u }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
@@ -485,19 +403,10 @@ func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *UserUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *UserUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdate) ExecX(ctx context.Context) {
@@ -791,10 +700,7 @@ func (_u *UserUpdateOne) AddOptionalInt(v int) *UserUpdateOne {
 }
 
 // ClearOptionalInt clears the value of the "optional_int" field.
-func (_u *UserUpdateOne) ClearOptionalInt() *UserUpdateOne {
-	_u.mutation.ClearOptionalInt()
-	return _u
-}
+func (_u *UserUpdateOne) ClearOptionalInt() *UserUpdateOne { _u.mutation.ClearOptionalInt(); return _u }
 
 // SetAge sets the "age" field.
 func (_u *UserUpdateOne) SetAge(v int) *UserUpdateOne {
@@ -812,10 +718,7 @@ func (_u *UserUpdateOne) SetNillableAge(v *int) *UserUpdateOne {
 }
 
 // AddAge adds value to the "age" field.
-func (_u *UserUpdateOne) AddAge(v int) *UserUpdateOne {
-	_u.mutation.AddAge(v)
-	return _u
-}
+func (_u *UserUpdateOne) AddAge(v int) *UserUpdateOne { _u.mutation.AddAge(v); return _u }
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
@@ -860,10 +763,7 @@ func (_u *UserUpdateOne) SetNillableNickname(v *string) *UserUpdateOne {
 }
 
 // ClearNickname clears the value of the "nickname" field.
-func (_u *UserUpdateOne) ClearNickname() *UserUpdateOne {
-	_u.mutation.ClearNickname()
-	return _u
-}
+func (_u *UserUpdateOne) ClearNickname() *UserUpdateOne { _u.mutation.ClearNickname(); return _u }
 
 // SetAddress sets the "address" field.
 func (_u *UserUpdateOne) SetAddress(v string) *UserUpdateOne {
@@ -880,10 +780,7 @@ func (_u *UserUpdateOne) SetNillableAddress(v *string) *UserUpdateOne {
 }
 
 // ClearAddress clears the value of the "address" field.
-func (_u *UserUpdateOne) ClearAddress() *UserUpdateOne {
-	_u.mutation.ClearAddress()
-	return _u
-}
+func (_u *UserUpdateOne) ClearAddress() *UserUpdateOne { _u.mutation.ClearAddress(); return _u }
 
 // SetPhone sets the "phone" field.
 func (_u *UserUpdateOne) SetPhone(v string) *UserUpdateOne {
@@ -900,10 +797,7 @@ func (_u *UserUpdateOne) SetNillablePhone(v *string) *UserUpdateOne {
 }
 
 // ClearPhone clears the value of the "phone" field.
-func (_u *UserUpdateOne) ClearPhone() *UserUpdateOne {
-	_u.mutation.ClearPhone()
-	return _u
-}
+func (_u *UserUpdateOne) ClearPhone() *UserUpdateOne { _u.mutation.ClearPhone(); return _u }
 
 // SetPassword sets the "password" field.
 func (_u *UserUpdateOne) SetPassword(v string) *UserUpdateOne {
@@ -920,10 +814,7 @@ func (_u *UserUpdateOne) SetNillablePassword(v *string) *UserUpdateOne {
 }
 
 // ClearPassword clears the value of the "password" field.
-func (_u *UserUpdateOne) ClearPassword() *UserUpdateOne {
-	_u.mutation.ClearPassword()
-	return _u
-}
+func (_u *UserUpdateOne) ClearPassword() *UserUpdateOne { _u.mutation.ClearPassword(); return _u }
 
 // SetRole sets the "role" field.
 func (_u *UserUpdateOne) SetRole(v Role) *UserUpdateOne {
@@ -968,10 +859,7 @@ func (_u *UserUpdateOne) SetNillableSSOCert(v *string) *UserUpdateOne {
 }
 
 // ClearSSOCert clears the value of the "SSOCert" field.
-func (_u *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
-	_u.mutation.ClearSSOCert()
-	return _u
-}
+func (_u *UserUpdateOne) ClearSSOCert() *UserUpdateOne { _u.mutation.ClearSSOCert(); return _u }
 
 // SetFilesCount sets the "files_count" field.
 func (_u *UserUpdateOne) SetFilesCount(v int) *UserUpdateOne {
@@ -989,22 +877,13 @@ func (_u *UserUpdateOne) SetNillableFilesCount(v *int) *UserUpdateOne {
 }
 
 // AddFilesCount adds value to the "files_count" field.
-func (_u *UserUpdateOne) AddFilesCount(v int) *UserUpdateOne {
-	_u.mutation.AddFilesCount(v)
-	return _u
-}
+func (_u *UserUpdateOne) AddFilesCount(v int) *UserUpdateOne { _u.mutation.AddFilesCount(v); return _u }
 
 // ClearFilesCount clears the value of the "files_count" field.
-func (_u *UserUpdateOne) ClearFilesCount() *UserUpdateOne {
-	_u.mutation.ClearFilesCount()
-	return _u
-}
+func (_u *UserUpdateOne) ClearFilesCount() *UserUpdateOne { _u.mutation.ClearFilesCount(); return _u }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
-func (_u *UserUpdateOne) SetCardID(id string) *UserUpdateOne {
-	_u.mutation.SetCardID(id)
-	return _u
-}
+func (_u *UserUpdateOne) SetCardID(id string) *UserUpdateOne { _u.mutation.SetCardID(id); return _u }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
 func (_u *UserUpdateOne) SetNillableCardID(id *string) *UserUpdateOne {
@@ -1051,10 +930,7 @@ func (_u *UserUpdateOne) AddFollowingIDs(ids ...string) *UserUpdateOne {
 }
 
 // SetTeamID sets the "team" edge to the Pet entity by ID.
-func (_u *UserUpdateOne) SetTeamID(id string) *UserUpdateOne {
-	_u.mutation.SetTeamID(id)
-	return _u
-}
+func (_u *UserUpdateOne) SetTeamID(id string) *UserUpdateOne { _u.mutation.SetTeamID(id); return _u }
 
 // SetNillableTeamID sets the "team" edge to the Pet entity by ID if the given value is not nil.
 func (_u *UserUpdateOne) SetNillableTeamID(id *string) *UserUpdateOne {
@@ -1099,21 +975,13 @@ func (_u *UserUpdateOne) SetNillableParentID(id *string) *UserUpdateOne {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdateOne) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdateOne) Mutation() *UserMutation { return _u.mutation }
 
 // ClearCard clears the "card" edge to the Card entity.
-func (_u *UserUpdateOne) ClearCard() *UserUpdateOne {
-	_u.mutation.ClearCard()
-	return _u
-}
+func (_u *UserUpdateOne) ClearCard() *UserUpdateOne { _u.mutation.ClearCard(); return _u }
 
 // ClearPets clears all "pets" edges to the Pet entity.
-func (_u *UserUpdateOne) ClearPets() *UserUpdateOne {
-	_u.mutation.ClearPets()
-	return _u
-}
+func (_u *UserUpdateOne) ClearPets() *UserUpdateOne { _u.mutation.ClearPets(); return _u }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
@@ -1122,10 +990,7 @@ func (_u *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
 }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (_u *UserUpdateOne) ClearFiles() *UserUpdateOne {
-	_u.mutation.ClearFiles()
-	return _u
-}
+func (_u *UserUpdateOne) ClearFiles() *UserUpdateOne { _u.mutation.ClearFiles(); return _u }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *UserUpdateOne) RemoveFileIDs(ids ...string) *UserUpdateOne {
@@ -1134,10 +999,7 @@ func (_u *UserUpdateOne) RemoveFileIDs(ids ...string) *UserUpdateOne {
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (_u *UserUpdateOne) ClearGroups() *UserUpdateOne {
-	_u.mutation.ClearGroups()
-	return _u
-}
+func (_u *UserUpdateOne) ClearGroups() *UserUpdateOne { _u.mutation.ClearGroups(); return _u }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *UserUpdateOne) RemoveGroupIDs(ids ...string) *UserUpdateOne {
@@ -1146,10 +1008,7 @@ func (_u *UserUpdateOne) RemoveGroupIDs(ids ...string) *UserUpdateOne {
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
-func (_u *UserUpdateOne) ClearFriends() *UserUpdateOne {
-	_u.mutation.ClearFriends()
-	return _u
-}
+func (_u *UserUpdateOne) ClearFriends() *UserUpdateOne { _u.mutation.ClearFriends(); return _u }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveFriendIDs(ids ...string) *UserUpdateOne {
@@ -1158,10 +1017,7 @@ func (_u *UserUpdateOne) RemoveFriendIDs(ids ...string) *UserUpdateOne {
 }
 
 // ClearFollowers clears all "followers" edges to the User entity.
-func (_u *UserUpdateOne) ClearFollowers() *UserUpdateOne {
-	_u.mutation.ClearFollowers()
-	return _u
-}
+func (_u *UserUpdateOne) ClearFollowers() *UserUpdateOne { _u.mutation.ClearFollowers(); return _u }
 
 // RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveFollowerIDs(ids ...string) *UserUpdateOne {
@@ -1170,10 +1026,7 @@ func (_u *UserUpdateOne) RemoveFollowerIDs(ids ...string) *UserUpdateOne {
 }
 
 // ClearFollowing clears all "following" edges to the User entity.
-func (_u *UserUpdateOne) ClearFollowing() *UserUpdateOne {
-	_u.mutation.ClearFollowing()
-	return _u
-}
+func (_u *UserUpdateOne) ClearFollowing() *UserUpdateOne { _u.mutation.ClearFollowing(); return _u }
 
 // RemoveFollowingIDs removes the "following" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveFollowingIDs(ids ...string) *UserUpdateOne {
@@ -1182,22 +1035,13 @@ func (_u *UserUpdateOne) RemoveFollowingIDs(ids ...string) *UserUpdateOne {
 }
 
 // ClearTeam clears the "team" edge to the Pet entity.
-func (_u *UserUpdateOne) ClearTeam() *UserUpdateOne {
-	_u.mutation.ClearTeam()
-	return _u
-}
+func (_u *UserUpdateOne) ClearTeam() *UserUpdateOne { _u.mutation.ClearTeam(); return _u }
 
 // ClearSpouse clears the "spouse" edge to the User entity.
-func (_u *UserUpdateOne) ClearSpouse() *UserUpdateOne {
-	_u.mutation.ClearSpouse()
-	return _u
-}
+func (_u *UserUpdateOne) ClearSpouse() *UserUpdateOne { _u.mutation.ClearSpouse(); return _u }
 
 // ClearChildren clears all "children" edges to the User entity.
-func (_u *UserUpdateOne) ClearChildren() *UserUpdateOne {
-	_u.mutation.ClearChildren()
-	return _u
-}
+func (_u *UserUpdateOne) ClearChildren() *UserUpdateOne { _u.mutation.ClearChildren(); return _u }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveChildIDs(ids ...string) *UserUpdateOne {
@@ -1206,10 +1050,7 @@ func (_u *UserUpdateOne) RemoveChildIDs(ids ...string) *UserUpdateOne {
 }
 
 // ClearParent clears the "parent" edge to the User entity.
-func (_u *UserUpdateOne) ClearParent() *UserUpdateOne {
-	_u.mutation.ClearParent()
-	return _u
-}
+func (_u *UserUpdateOne) ClearParent() *UserUpdateOne { _u.mutation.ClearParent(); return _u }
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
@@ -1230,19 +1071,10 @@ func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdateOne) ExecX(ctx context.Context) {

@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // SpecDelete is the builder for deleting a Spec entity.
 type SpecDelete struct {
 	Config
-	hooks    []Hook
-	mutation *SpecMutation
+	hooks     []Hook
+	mutation  *SpecMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewSpecDelete returns a new SpecDelete initialized with the given config, hooks, and mutation.
@@ -28,10 +30,7 @@ func NewSpecDelete(c Config, hooks []Hook, mutation *SpecMutation) *SpecDelete {
 }
 
 // Where appends a list predicates to the SpecDelete builder.
-func (_d *SpecDelete) Where(ps ...predicate.Spec) *SpecDelete {
-	_d.mutation.Where(ps...)
-	return _d
-}
+func (_d *SpecDelete) Where(ps ...predicate.Spec) *SpecDelete { _d.mutation.Where(ps...); return _d }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *SpecDelete) Exec(ctx context.Context) (int, error) {
@@ -39,16 +38,11 @@ func (_d *SpecDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *SpecDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *SpecDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *SpecDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

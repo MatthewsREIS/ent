@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,8 +38,7 @@ func (_u *RelationshipInfoUpdate) Where(ps ...predicate.RelationshipInfo) *Relat
 
 // SetText sets the "text" field.
 func (_u *RelationshipInfoUpdate) SetText(v string) *RelationshipInfoUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -50,9 +50,7 @@ func (_u *RelationshipInfoUpdate) SetNillableText(v *string) *RelationshipInfoUp
 }
 
 // Mutation returns the RelationshipInfoMutation object of the builder.
-func (_u *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation {
-	return _u.mutation
-}
+func (_u *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
@@ -61,18 +59,11 @@ func (_u *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *RelationshipInfoUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query.
-func (_u *RelationshipInfoUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RelationshipInfoUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RelationshipInfoUpdate) ExecX(ctx context.Context) {
@@ -120,8 +111,7 @@ func NewRelationshipInfoUpdateOne(c Config, hooks []Hook, mutation *Relationship
 
 // SetText sets the "text" field.
 func (_u *RelationshipInfoUpdateOne) SetText(v string) *RelationshipInfoUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -133,9 +123,7 @@ func (_u *RelationshipInfoUpdateOne) SetNillableText(v *string) *RelationshipInf
 }
 
 // Mutation returns the RelationshipInfoMutation object of the builder.
-func (_u *RelationshipInfoUpdateOne) Mutation() *RelationshipInfoMutation {
-	return _u.mutation
-}
+func (_u *RelationshipInfoUpdateOne) Mutation() *RelationshipInfoMutation { return _u.mutation }
 
 // Where appends a list predicates to the RelationshipInfoUpdate builder.
 func (_u *RelationshipInfoUpdateOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdateOne {
@@ -157,11 +145,7 @@ func (_u *RelationshipInfoUpdateOne) Save(ctx context.Context) (*RelationshipInf
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *RelationshipInfoUpdateOne) SaveX(ctx context.Context) *RelationshipInfo {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.

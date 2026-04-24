@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,27 +33,21 @@ func NewInfoUpdate(c Config, hooks []Hook, mutation *InfoMutation) *InfoUpdate {
 }
 
 // Where appends a list predicates to the InfoUpdate builder.
-func (_u *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetContent sets the "content" field.
 func (_u *InfoUpdate) SetContent(v json.RawMessage) *InfoUpdate {
-	_u.mutation.SetContent(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetContent, v)
 }
 
 // AppendContent appends value to the "content" field.
 func (_u *InfoUpdate) AppendContent(v json.RawMessage) *InfoUpdate {
-	_u.mutation.AppendContent(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AppendContent, v)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *InfoUpdate) SetUserID(id int) *InfoUpdate {
-	_u.mutation.SetUserID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, id)
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
@@ -64,15 +59,10 @@ func (_u *InfoUpdate) SetNillableUserID(id *int) *InfoUpdate {
 }
 
 // Mutation returns the InfoMutation object of the builder.
-func (_u *InfoUpdate) Mutation() *InfoMutation {
-	return _u.mutation
-}
+func (_u *InfoUpdate) Mutation() *InfoMutation { return _u.mutation }
 
 // ClearUser clears the "user" edge to the User entity.
-func (_u *InfoUpdate) ClearUser() *InfoUpdate {
-	_u.mutation.ClearUser()
-	return _u
-}
+func (_u *InfoUpdate) ClearUser() *InfoUpdate { return entbuilder.BClear(_u, _u.mutation.ClearUser) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *InfoUpdate) Save(ctx context.Context) (int, error) {
@@ -80,19 +70,10 @@ func (_u *InfoUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *InfoUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *InfoUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *InfoUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *InfoUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *InfoUpdate) ExecX(ctx context.Context) {
@@ -174,20 +155,17 @@ func NewInfoUpdateOne(c Config, hooks []Hook, mutation *InfoMutation) *InfoUpdat
 
 // SetContent sets the "content" field.
 func (_u *InfoUpdateOne) SetContent(v json.RawMessage) *InfoUpdateOne {
-	_u.mutation.SetContent(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetContent, v)
 }
 
 // AppendContent appends value to the "content" field.
 func (_u *InfoUpdateOne) AppendContent(v json.RawMessage) *InfoUpdateOne {
-	_u.mutation.AppendContent(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AppendContent, v)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *InfoUpdateOne) SetUserID(id int) *InfoUpdateOne {
-	_u.mutation.SetUserID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, id)
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
@@ -199,14 +177,11 @@ func (_u *InfoUpdateOne) SetNillableUserID(id *int) *InfoUpdateOne {
 }
 
 // Mutation returns the InfoMutation object of the builder.
-func (_u *InfoUpdateOne) Mutation() *InfoMutation {
-	return _u.mutation
-}
+func (_u *InfoUpdateOne) Mutation() *InfoMutation { return _u.mutation }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *InfoUpdateOne) ClearUser() *InfoUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // Where appends a list predicates to the InfoUpdate builder.
@@ -228,19 +203,10 @@ func (_u *InfoUpdateOne) Save(ctx context.Context) (*Info, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *InfoUpdateOne) SaveX(ctx context.Context) *Info {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *InfoUpdateOne) SaveX(ctx context.Context) *Info { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *InfoUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *InfoUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *InfoUpdateOne) ExecX(ctx context.Context) {

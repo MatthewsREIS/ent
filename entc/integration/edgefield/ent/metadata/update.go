@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -52,14 +53,12 @@ func (_u *MetadataUpdate) SetNillableAge(v *int) *MetadataUpdate {
 
 // AddAge adds value to the "age" field.
 func (_u *MetadataUpdate) AddAge(v int) *MetadataUpdate {
-	_u.mutation.AddAge(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddAge, v)
 }
 
 // SetParentID sets the "parent_id" field.
 func (_u *MetadataUpdate) SetParentID(v int) *MetadataUpdate {
-	_u.mutation.SetParentID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, v)
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
@@ -72,14 +71,12 @@ func (_u *MetadataUpdate) SetNillableParentID(v *int) *MetadataUpdate {
 
 // ClearParentID clears the value of the "parent_id" field.
 func (_u *MetadataUpdate) ClearParentID() *MetadataUpdate {
-	_u.mutation.ClearParentID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParentID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *MetadataUpdate) SetUserID(id int) *MetadataUpdate {
-	_u.mutation.SetUserID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, id)
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
@@ -97,20 +94,16 @@ func (_u *MetadataUpdate) AddChildIDs(ids ...int) *MetadataUpdate {
 }
 
 // Mutation returns the MetadataMutation object of the builder.
-func (_u *MetadataUpdate) Mutation() *MetadataMutation {
-	return _u.mutation
-}
+func (_u *MetadataUpdate) Mutation() *MetadataMutation { return _u.mutation }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *MetadataUpdate) ClearUser() *MetadataUpdate {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // ClearChildren clears all "children" edges to the Metadata entity.
 func (_u *MetadataUpdate) ClearChildren() *MetadataUpdate {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to Metadata entities by IDs.
@@ -121,8 +114,7 @@ func (_u *MetadataUpdate) RemoveChildIDs(ids ...int) *MetadataUpdate {
 
 // ClearParent clears the "parent" edge to the Metadata entity.
 func (_u *MetadataUpdate) ClearParent() *MetadataUpdate {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -131,19 +123,10 @@ func (_u *MetadataUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *MetadataUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *MetadataUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *MetadataUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *MetadataUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *MetadataUpdate) ExecX(ctx context.Context) {
@@ -312,14 +295,12 @@ func (_u *MetadataUpdateOne) SetNillableAge(v *int) *MetadataUpdateOne {
 
 // AddAge adds value to the "age" field.
 func (_u *MetadataUpdateOne) AddAge(v int) *MetadataUpdateOne {
-	_u.mutation.AddAge(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddAge, v)
 }
 
 // SetParentID sets the "parent_id" field.
 func (_u *MetadataUpdateOne) SetParentID(v int) *MetadataUpdateOne {
-	_u.mutation.SetParentID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, v)
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
@@ -332,14 +313,12 @@ func (_u *MetadataUpdateOne) SetNillableParentID(v *int) *MetadataUpdateOne {
 
 // ClearParentID clears the value of the "parent_id" field.
 func (_u *MetadataUpdateOne) ClearParentID() *MetadataUpdateOne {
-	_u.mutation.ClearParentID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParentID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *MetadataUpdateOne) SetUserID(id int) *MetadataUpdateOne {
-	_u.mutation.SetUserID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, id)
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
@@ -357,20 +336,16 @@ func (_u *MetadataUpdateOne) AddChildIDs(ids ...int) *MetadataUpdateOne {
 }
 
 // Mutation returns the MetadataMutation object of the builder.
-func (_u *MetadataUpdateOne) Mutation() *MetadataMutation {
-	return _u.mutation
-}
+func (_u *MetadataUpdateOne) Mutation() *MetadataMutation { return _u.mutation }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *MetadataUpdateOne) ClearUser() *MetadataUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // ClearChildren clears all "children" edges to the Metadata entity.
 func (_u *MetadataUpdateOne) ClearChildren() *MetadataUpdateOne {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to Metadata entities by IDs.
@@ -381,8 +356,7 @@ func (_u *MetadataUpdateOne) RemoveChildIDs(ids ...int) *MetadataUpdateOne {
 
 // ClearParent clears the "parent" edge to the Metadata entity.
 func (_u *MetadataUpdateOne) ClearParent() *MetadataUpdateOne {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // Where appends a list predicates to the MetadataUpdate builder.
@@ -405,18 +379,11 @@ func (_u *MetadataUpdateOne) Save(ctx context.Context) (*Metadata, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *MetadataUpdateOne) SaveX(ctx context.Context) *Metadata {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *MetadataUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *MetadataUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *MetadataUpdateOne) ExecX(ctx context.Context) {

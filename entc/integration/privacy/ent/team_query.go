@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
@@ -44,23 +45,14 @@ func (_q *TeamQuery) Where(ps ...predicate.Team) *TeamQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *TeamQuery) Limit(limit int) *TeamQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *TeamQuery) Limit(limit int) *TeamQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *TeamQuery) Offset(offset int) *TeamQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *TeamQuery) Offset(offset int) *TeamQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *TeamQuery) Unique(unique bool) *TeamQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *TeamQuery) Unique(unique bool) *TeamQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *TeamQuery) Order(o ...team.OrderOption) *TeamQuery {
@@ -176,13 +168,7 @@ func (_q *TeamQuery) Only(ctx context.Context) (*Team, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *TeamQuery) OnlyX(ctx context.Context) *Team {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *TeamQuery) OnlyX(ctx context.Context) *Team { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Team ID in the query.
 // Returns a *NotSingularError when more than one Team ID is found.
@@ -204,13 +190,7 @@ func (_q *TeamQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *TeamQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *TeamQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Teams.
 func (_q *TeamQuery) All(ctx context.Context) ([]*Team, error) {
@@ -223,13 +203,7 @@ func (_q *TeamQuery) All(ctx context.Context) ([]*Team, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *TeamQuery) AllX(ctx context.Context) []*Team {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *TeamQuery) AllX(ctx context.Context) []*Team { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Team IDs.
 func (_q *TeamQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -244,13 +218,7 @@ func (_q *TeamQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *TeamQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *TeamQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *TeamQuery) Count(ctx context.Context) (int, error) {
@@ -262,13 +230,7 @@ func (_q *TeamQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *TeamQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *TeamQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *TeamQuery) Exist(ctx context.Context) (bool, error) {
@@ -284,13 +246,7 @@ func (_q *TeamQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *TeamQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *TeamQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the TeamQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -458,111 +414,126 @@ func (_q *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 	return nodes, nil
 }
 
-var teamTasksEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Team, Task, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2M,
-			Inverse:      true,
-			Table:        team.TasksTable,
-			Columns:      team.TasksPrimaryKey,
-			Bidi:         false,
-			TargetColumn: task.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Team) int { return n.ID },
-	ExtractEdgeID: func(e *Task) int { return e.ID },
-	ConvertNodeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	ConvertEdgeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	NewNodeIDScanner: func() any { return new(sql.NullInt64) },
-	NewEdgeIDScanner: func() any { return new(sql.NullInt64) },
-}
-var teamUsersEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Team, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2M,
-			Inverse:      true,
-			Table:        team.UsersTable,
-			Columns:      team.UsersPrimaryKey,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Team) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ConvertNodeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	ConvertEdgeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	NewNodeIDScanner: func() any { return new(sql.NullInt64) },
-	NewEdgeIDScanner: func() any { return new(sql.NullInt64) },
-}
-
 func (_q *TeamQuery) loadTasks(ctx context.Context, query *TaskQuery, nodes []*Team, init func(*Team), assign func(*Team, *Task)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &teamTasksEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.prepareQuery,
-		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Task, error) {
-			hooks := make([]queryHook, len(modifiers))
-			for i := range modifiers {
-				hooks[i] = modifiers[i]
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Team)
+	nids := make(map[int]map[*Team]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(team.TasksTable)
+		s.Join(joinT).On(s.C(task.FieldID), joinT.C(team.TasksPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(team.TasksPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(team.TasksPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return query.sqlAll(ctx, hooks...)
-		},
-		func(ctx context.Context, q, qr, inters any) (any, error) {
-			// Wrap the entbuilder.querierFunc into an ent.Querier
-			querierFn, ok := qr.(interface {
-				Query(context.Context, any) (any, error)
-			})
-			if !ok {
-				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Team]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
-				return querierFn.Query(ctx, query)
-			})
-			return withInterceptors[[]*Task](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
-		},
-		query,
-		query.inters,
-		func(joinT *sql.SelectTable) {
 		})
+	})
+	neighbors, err := withInterceptors[[]*Task](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "tasks" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
 	return nil
 }
 func (_q *TeamQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*Team, init func(*Team), assign func(*Team, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &teamUsersEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.prepareQuery,
-		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
-			hooks := make([]queryHook, len(modifiers))
-			for i := range modifiers {
-				hooks[i] = modifiers[i]
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Team)
+	nids := make(map[int]map[*Team]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(team.UsersTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(team.UsersPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(team.UsersPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(team.UsersPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return query.sqlAll(ctx, hooks...)
-		},
-		func(ctx context.Context, q, qr, inters any) (any, error) {
-			// Wrap the entbuilder.querierFunc into an ent.Querier
-			querierFn, ok := qr.(interface {
-				Query(context.Context, any) (any, error)
-			})
-			if !ok {
-				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Team]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
-				return querierFn.Query(ctx, query)
-			})
-			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
-		},
-		query,
-		query.inters,
-		func(joinT *sql.SelectTable) {
 		})
+	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
 	return nil
 }
 

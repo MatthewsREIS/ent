@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,8 +34,7 @@ func NewDeviceCreate(c Config, hooks []Hook, mutation *DeviceMutation) *DeviceCr
 
 // SetID sets the "id" field.
 func (_c *DeviceCreate) SetID(v schema.ID) *DeviceCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
@@ -47,8 +47,7 @@ func (_c *DeviceCreate) SetNillableID(v *schema.ID) *DeviceCreate {
 
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
 func (_c *DeviceCreate) SetActiveSessionID(id schema.ID) *DeviceCreate {
-	_c.mutation.SetActiveSessionID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetActiveSessionID, id)
 }
 
 // SetNillableActiveSessionID sets the "active_session" edge to the Session entity by ID if the given value is not nil.
@@ -66,9 +65,7 @@ func (_c *DeviceCreate) AddSessionIDs(ids ...schema.ID) *DeviceCreate {
 }
 
 // Mutation returns the DeviceMutation object of the builder.
-func (_c *DeviceCreate) Mutation() *DeviceMutation {
-	return _c.mutation
-}
+func (_c *DeviceCreate) Mutation() *DeviceMutation { return _c.mutation }
 
 // Save creates the Device in the database.
 func (_c *DeviceCreate) Save(ctx context.Context) (*Device, error) {
@@ -77,19 +74,10 @@ func (_c *DeviceCreate) Save(ctx context.Context) (*Device, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *DeviceCreate) SaveX(ctx context.Context) *Device {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *DeviceCreate) SaveX(ctx context.Context) *Device { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *DeviceCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *DeviceCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *DeviceCreate) ExecX(ctx context.Context) {

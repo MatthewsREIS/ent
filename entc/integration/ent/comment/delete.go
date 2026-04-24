@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // CommentDelete is the builder for deleting a Comment entity.
 type CommentDelete struct {
 	Config
-	hooks    []Hook
-	mutation *CommentMutation
+	hooks     []Hook
+	mutation  *CommentMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewCommentDelete returns a new CommentDelete initialized with the given config, hooks, and mutation.
@@ -39,16 +41,11 @@ func (_d *CommentDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *CommentDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *CommentDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *CommentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

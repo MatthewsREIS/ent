@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // NodeUpdate is the builder for updating Node entities.
@@ -32,10 +33,7 @@ func NewNodeUpdate(c Config, hooks []Hook, mutation *NodeMutation) *NodeUpdate {
 }
 
 // Where appends a list predicates to the NodeUpdate builder.
-func (_u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetValue sets the "value" field.
 func (_u *NodeUpdate) SetValue(v int) *NodeUpdate {
@@ -53,16 +51,10 @@ func (_u *NodeUpdate) SetNillableValue(v *int) *NodeUpdate {
 }
 
 // AddValue adds value to the "value" field.
-func (_u *NodeUpdate) AddValue(v int) *NodeUpdate {
-	_u.mutation.AddValue(v)
-	return _u
-}
+func (_u *NodeUpdate) AddValue(v int) *NodeUpdate { _u.mutation.AddValue(v); return _u }
 
 // ClearValue clears the value of the "value" field.
-func (_u *NodeUpdate) ClearValue() *NodeUpdate {
-	_u.mutation.ClearValue()
-	return _u
-}
+func (_u *NodeUpdate) ClearValue() *NodeUpdate { _u.mutation.ClearValue(); return _u }
 
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *NodeUpdate) SetUpdatedAt(v time.Time) *NodeUpdate {
@@ -71,16 +63,10 @@ func (_u *NodeUpdate) SetUpdatedAt(v time.Time) *NodeUpdate {
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
-func (_u *NodeUpdate) ClearUpdatedAt() *NodeUpdate {
-	_u.mutation.ClearUpdatedAt()
-	return _u
-}
+func (_u *NodeUpdate) ClearUpdatedAt() *NodeUpdate { _u.mutation.ClearUpdatedAt(); return _u }
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
-func (_u *NodeUpdate) SetPrevID(id string) *NodeUpdate {
-	_u.mutation.SetPrevID(id)
-	return _u
-}
+func (_u *NodeUpdate) SetPrevID(id string) *NodeUpdate { _u.mutation.SetPrevID(id); return _u }
 
 // SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
 func (_u *NodeUpdate) SetNillablePrevID(id *string) *NodeUpdate {
@@ -91,10 +77,7 @@ func (_u *NodeUpdate) SetNillablePrevID(id *string) *NodeUpdate {
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
-func (_u *NodeUpdate) SetNextID(id string) *NodeUpdate {
-	_u.mutation.SetNextID(id)
-	return _u
-}
+func (_u *NodeUpdate) SetNextID(id string) *NodeUpdate { _u.mutation.SetNextID(id); return _u }
 
 // SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
 func (_u *NodeUpdate) SetNillableNextID(id *string) *NodeUpdate {
@@ -105,21 +88,13 @@ func (_u *NodeUpdate) SetNillableNextID(id *string) *NodeUpdate {
 }
 
 // Mutation returns the NodeMutation object of the builder.
-func (_u *NodeUpdate) Mutation() *NodeMutation {
-	return _u.mutation
-}
+func (_u *NodeUpdate) Mutation() *NodeMutation { return _u.mutation }
 
 // ClearPrev clears the "prev" edge to the Node entity.
-func (_u *NodeUpdate) ClearPrev() *NodeUpdate {
-	_u.mutation.ClearPrev()
-	return _u
-}
+func (_u *NodeUpdate) ClearPrev() *NodeUpdate { _u.mutation.ClearPrev(); return _u }
 
 // ClearNext clears the "next" edge to the Node entity.
-func (_u *NodeUpdate) ClearNext() *NodeUpdate {
-	_u.mutation.ClearNext()
-	return _u
-}
+func (_u *NodeUpdate) ClearNext() *NodeUpdate { _u.mutation.ClearNext(); return _u }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *NodeUpdate) Save(ctx context.Context) (int, error) {
@@ -128,19 +103,10 @@ func (_u *NodeUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *NodeUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *NodeUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *NodeUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *NodeUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *NodeUpdate) ExecX(ctx context.Context) {
@@ -271,16 +237,10 @@ func (_u *NodeUpdateOne) SetNillableValue(v *int) *NodeUpdateOne {
 }
 
 // AddValue adds value to the "value" field.
-func (_u *NodeUpdateOne) AddValue(v int) *NodeUpdateOne {
-	_u.mutation.AddValue(v)
-	return _u
-}
+func (_u *NodeUpdateOne) AddValue(v int) *NodeUpdateOne { _u.mutation.AddValue(v); return _u }
 
 // ClearValue clears the value of the "value" field.
-func (_u *NodeUpdateOne) ClearValue() *NodeUpdateOne {
-	_u.mutation.ClearValue()
-	return _u
-}
+func (_u *NodeUpdateOne) ClearValue() *NodeUpdateOne { _u.mutation.ClearValue(); return _u }
 
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *NodeUpdateOne) SetUpdatedAt(v time.Time) *NodeUpdateOne {
@@ -289,16 +249,10 @@ func (_u *NodeUpdateOne) SetUpdatedAt(v time.Time) *NodeUpdateOne {
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
-func (_u *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne {
-	_u.mutation.ClearUpdatedAt()
-	return _u
-}
+func (_u *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne { _u.mutation.ClearUpdatedAt(); return _u }
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
-func (_u *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne {
-	_u.mutation.SetPrevID(id)
-	return _u
-}
+func (_u *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne { _u.mutation.SetPrevID(id); return _u }
 
 // SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
 func (_u *NodeUpdateOne) SetNillablePrevID(id *string) *NodeUpdateOne {
@@ -309,10 +263,7 @@ func (_u *NodeUpdateOne) SetNillablePrevID(id *string) *NodeUpdateOne {
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
-func (_u *NodeUpdateOne) SetNextID(id string) *NodeUpdateOne {
-	_u.mutation.SetNextID(id)
-	return _u
-}
+func (_u *NodeUpdateOne) SetNextID(id string) *NodeUpdateOne { _u.mutation.SetNextID(id); return _u }
 
 // SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
 func (_u *NodeUpdateOne) SetNillableNextID(id *string) *NodeUpdateOne {
@@ -323,21 +274,13 @@ func (_u *NodeUpdateOne) SetNillableNextID(id *string) *NodeUpdateOne {
 }
 
 // Mutation returns the NodeMutation object of the builder.
-func (_u *NodeUpdateOne) Mutation() *NodeMutation {
-	return _u.mutation
-}
+func (_u *NodeUpdateOne) Mutation() *NodeMutation { return _u.mutation }
 
 // ClearPrev clears the "prev" edge to the Node entity.
-func (_u *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
-	_u.mutation.ClearPrev()
-	return _u
-}
+func (_u *NodeUpdateOne) ClearPrev() *NodeUpdateOne { _u.mutation.ClearPrev(); return _u }
 
 // ClearNext clears the "next" edge to the Node entity.
-func (_u *NodeUpdateOne) ClearNext() *NodeUpdateOne {
-	_u.mutation.ClearNext()
-	return _u
-}
+func (_u *NodeUpdateOne) ClearNext() *NodeUpdateOne { _u.mutation.ClearNext(); return _u }
 
 // Where appends a list predicates to the NodeUpdate builder.
 func (_u *NodeUpdateOne) Where(ps ...predicate.Node) *NodeUpdateOne {
@@ -359,19 +302,10 @@ func (_u *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *NodeUpdateOne) SaveX(ctx context.Context) *Node {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *NodeUpdateOne) SaveX(ctx context.Context) *Node { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *NodeUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *NodeUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *NodeUpdateOne) ExecX(ctx context.Context) {

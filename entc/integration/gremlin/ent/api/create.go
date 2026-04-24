@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // APICreate is the builder for creating a Api entity.
@@ -27,9 +28,7 @@ func NewAPICreate(c Config, hooks []Hook, mutation *APIMutation) *APICreate {
 }
 
 // Mutation returns the APIMutation object of the builder.
-func (_c *APICreate) Mutation() *APIMutation {
-	return _c.mutation
-}
+func (_c *APICreate) Mutation() *APIMutation { return _c.mutation }
 
 // Save creates the Api in the database.
 func (_c *APICreate) Save(ctx context.Context) (*Api, error) {
@@ -37,19 +36,10 @@ func (_c *APICreate) Save(ctx context.Context) (*Api, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *APICreate) SaveX(ctx context.Context) *Api {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *APICreate) SaveX(ctx context.Context) *Api { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *APICreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *APICreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *APICreate) ExecX(ctx context.Context) {

@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,8 +29,7 @@ func NewMediaCreate(c Config, hooks []Hook, mutation *MediaMutation) *MediaCreat
 
 // SetSource sets the "source" field.
 func (_c *MediaCreate) SetSource(v string) *MediaCreate {
-	_c.mutation.SetSource(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSource, v)
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
@@ -42,8 +42,7 @@ func (_c *MediaCreate) SetNillableSource(v *string) *MediaCreate {
 
 // SetSourceURI sets the "source_uri" field.
 func (_c *MediaCreate) SetSourceURI(v string) *MediaCreate {
-	_c.mutation.SetSourceURI(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSourceURI, v)
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
@@ -56,8 +55,7 @@ func (_c *MediaCreate) SetNillableSourceURI(v *string) *MediaCreate {
 
 // SetText sets the "text" field.
 func (_c *MediaCreate) SetText(v string) *MediaCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -69,9 +67,7 @@ func (_c *MediaCreate) SetNillableText(v *string) *MediaCreate {
 }
 
 // Mutation returns the MediaMutation object of the builder.
-func (_c *MediaCreate) Mutation() *MediaMutation {
-	return _c.mutation
-}
+func (_c *MediaCreate) Mutation() *MediaMutation { return _c.mutation }
 
 // Save creates the Media in the database.
 func (_c *MediaCreate) Save(ctx context.Context) (*Media, error) {
@@ -79,19 +75,10 @@ func (_c *MediaCreate) Save(ctx context.Context) (*Media, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *MediaCreate) SaveX(ctx context.Context) *Media {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *MediaCreate) SaveX(ctx context.Context) *Media { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *MediaCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *MediaCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *MediaCreate) ExecX(ctx context.Context) {

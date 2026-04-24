@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -135,9 +136,7 @@ func (_c *TaskCreate) SetNillableOp(v *string) *TaskCreate {
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (_c *TaskCreate) Mutation() *TaskMutation {
-	return _c.mutation
-}
+func (_c *TaskCreate) Mutation() *TaskMutation { return _c.mutation }
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
@@ -146,19 +145,10 @@ func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TaskCreate) SaveX(ctx context.Context) *Task {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *TaskCreate) SaveX(ctx context.Context) *Task { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *TaskCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TaskCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TaskCreate) ExecX(ctx context.Context) {

@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupUpdate is the builder for updating Group entities.
@@ -34,10 +35,7 @@ func NewGroupUpdate(c Config, hooks []Hook, mutation *GroupMutation) *GroupUpdat
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
-func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetActive sets the "active" field.
 func (_u *GroupUpdate) SetActive(v bool) *GroupUpdate {
@@ -82,10 +80,7 @@ func (_u *GroupUpdate) SetNillableType(v *string) *GroupUpdate {
 }
 
 // ClearType clears the value of the "type" field.
-func (_u *GroupUpdate) ClearType() *GroupUpdate {
-	_u.mutation.ClearType()
-	return _u
-}
+func (_u *GroupUpdate) ClearType() *GroupUpdate { _u.mutation.ClearType(); return _u }
 
 // SetMaxUsers sets the "max_users" field.
 func (_u *GroupUpdate) SetMaxUsers(v int) *GroupUpdate {
@@ -103,16 +98,10 @@ func (_u *GroupUpdate) SetNillableMaxUsers(v *int) *GroupUpdate {
 }
 
 // AddMaxUsers adds value to the "max_users" field.
-func (_u *GroupUpdate) AddMaxUsers(v int) *GroupUpdate {
-	_u.mutation.AddMaxUsers(v)
-	return _u
-}
+func (_u *GroupUpdate) AddMaxUsers(v int) *GroupUpdate { _u.mutation.AddMaxUsers(v); return _u }
 
 // ClearMaxUsers clears the value of the "max_users" field.
-func (_u *GroupUpdate) ClearMaxUsers() *GroupUpdate {
-	_u.mutation.ClearMaxUsers()
-	return _u
-}
+func (_u *GroupUpdate) ClearMaxUsers() *GroupUpdate { _u.mutation.ClearMaxUsers(); return _u }
 
 // SetName sets the "name" field.
 func (_u *GroupUpdate) SetName(v string) *GroupUpdate {
@@ -147,21 +136,13 @@ func (_u *GroupUpdate) AddUserIDs(ids ...string) *GroupUpdate {
 }
 
 // SetInfoID sets the "info" edge to the GroupInfo entity by ID.
-func (_u *GroupUpdate) SetInfoID(id string) *GroupUpdate {
-	_u.mutation.SetInfoID(id)
-	return _u
-}
+func (_u *GroupUpdate) SetInfoID(id string) *GroupUpdate { _u.mutation.SetInfoID(id); return _u }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_u *GroupUpdate) Mutation() *GroupMutation {
-	return _u.mutation
-}
+func (_u *GroupUpdate) Mutation() *GroupMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (_u *GroupUpdate) ClearFiles() *GroupUpdate {
-	_u.mutation.ClearFiles()
-	return _u
-}
+func (_u *GroupUpdate) ClearFiles() *GroupUpdate { _u.mutation.ClearFiles(); return _u }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *GroupUpdate) RemoveFileIDs(ids ...string) *GroupUpdate {
@@ -170,10 +151,7 @@ func (_u *GroupUpdate) RemoveFileIDs(ids ...string) *GroupUpdate {
 }
 
 // ClearBlocked clears all "blocked" edges to the User entity.
-func (_u *GroupUpdate) ClearBlocked() *GroupUpdate {
-	_u.mutation.ClearBlocked()
-	return _u
-}
+func (_u *GroupUpdate) ClearBlocked() *GroupUpdate { _u.mutation.ClearBlocked(); return _u }
 
 // RemoveBlockedIDs removes the "blocked" edge to User entities by IDs.
 func (_u *GroupUpdate) RemoveBlockedIDs(ids ...string) *GroupUpdate {
@@ -182,10 +160,7 @@ func (_u *GroupUpdate) RemoveBlockedIDs(ids ...string) *GroupUpdate {
 }
 
 // ClearUsers clears all "users" edges to the User entity.
-func (_u *GroupUpdate) ClearUsers() *GroupUpdate {
-	_u.mutation.ClearUsers()
-	return _u
-}
+func (_u *GroupUpdate) ClearUsers() *GroupUpdate { _u.mutation.ClearUsers(); return _u }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (_u *GroupUpdate) RemoveUserIDs(ids ...string) *GroupUpdate {
@@ -194,10 +169,7 @@ func (_u *GroupUpdate) RemoveUserIDs(ids ...string) *GroupUpdate {
 }
 
 // ClearInfo clears the "info" edge to the GroupInfo entity.
-func (_u *GroupUpdate) ClearInfo() *GroupUpdate {
-	_u.mutation.ClearInfo()
-	return _u
-}
+func (_u *GroupUpdate) ClearInfo() *GroupUpdate { _u.mutation.ClearInfo(); return _u }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
@@ -205,19 +177,10 @@ func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *GroupUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *GroupUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupUpdate) ExecX(ctx context.Context) {
@@ -416,10 +379,7 @@ func (_u *GroupUpdateOne) SetNillableType(v *string) *GroupUpdateOne {
 }
 
 // ClearType clears the value of the "type" field.
-func (_u *GroupUpdateOne) ClearType() *GroupUpdateOne {
-	_u.mutation.ClearType()
-	return _u
-}
+func (_u *GroupUpdateOne) ClearType() *GroupUpdateOne { _u.mutation.ClearType(); return _u }
 
 // SetMaxUsers sets the "max_users" field.
 func (_u *GroupUpdateOne) SetMaxUsers(v int) *GroupUpdateOne {
@@ -437,16 +397,10 @@ func (_u *GroupUpdateOne) SetNillableMaxUsers(v *int) *GroupUpdateOne {
 }
 
 // AddMaxUsers adds value to the "max_users" field.
-func (_u *GroupUpdateOne) AddMaxUsers(v int) *GroupUpdateOne {
-	_u.mutation.AddMaxUsers(v)
-	return _u
-}
+func (_u *GroupUpdateOne) AddMaxUsers(v int) *GroupUpdateOne { _u.mutation.AddMaxUsers(v); return _u }
 
 // ClearMaxUsers clears the value of the "max_users" field.
-func (_u *GroupUpdateOne) ClearMaxUsers() *GroupUpdateOne {
-	_u.mutation.ClearMaxUsers()
-	return _u
-}
+func (_u *GroupUpdateOne) ClearMaxUsers() *GroupUpdateOne { _u.mutation.ClearMaxUsers(); return _u }
 
 // SetName sets the "name" field.
 func (_u *GroupUpdateOne) SetName(v string) *GroupUpdateOne {
@@ -481,21 +435,13 @@ func (_u *GroupUpdateOne) AddUserIDs(ids ...string) *GroupUpdateOne {
 }
 
 // SetInfoID sets the "info" edge to the GroupInfo entity by ID.
-func (_u *GroupUpdateOne) SetInfoID(id string) *GroupUpdateOne {
-	_u.mutation.SetInfoID(id)
-	return _u
-}
+func (_u *GroupUpdateOne) SetInfoID(id string) *GroupUpdateOne { _u.mutation.SetInfoID(id); return _u }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_u *GroupUpdateOne) Mutation() *GroupMutation {
-	return _u.mutation
-}
+func (_u *GroupUpdateOne) Mutation() *GroupMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (_u *GroupUpdateOne) ClearFiles() *GroupUpdateOne {
-	_u.mutation.ClearFiles()
-	return _u
-}
+func (_u *GroupUpdateOne) ClearFiles() *GroupUpdateOne { _u.mutation.ClearFiles(); return _u }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *GroupUpdateOne) RemoveFileIDs(ids ...string) *GroupUpdateOne {
@@ -504,10 +450,7 @@ func (_u *GroupUpdateOne) RemoveFileIDs(ids ...string) *GroupUpdateOne {
 }
 
 // ClearBlocked clears all "blocked" edges to the User entity.
-func (_u *GroupUpdateOne) ClearBlocked() *GroupUpdateOne {
-	_u.mutation.ClearBlocked()
-	return _u
-}
+func (_u *GroupUpdateOne) ClearBlocked() *GroupUpdateOne { _u.mutation.ClearBlocked(); return _u }
 
 // RemoveBlockedIDs removes the "blocked" edge to User entities by IDs.
 func (_u *GroupUpdateOne) RemoveBlockedIDs(ids ...string) *GroupUpdateOne {
@@ -516,10 +459,7 @@ func (_u *GroupUpdateOne) RemoveBlockedIDs(ids ...string) *GroupUpdateOne {
 }
 
 // ClearUsers clears all "users" edges to the User entity.
-func (_u *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
-	_u.mutation.ClearUsers()
-	return _u
-}
+func (_u *GroupUpdateOne) ClearUsers() *GroupUpdateOne { _u.mutation.ClearUsers(); return _u }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (_u *GroupUpdateOne) RemoveUserIDs(ids ...string) *GroupUpdateOne {
@@ -528,10 +468,7 @@ func (_u *GroupUpdateOne) RemoveUserIDs(ids ...string) *GroupUpdateOne {
 }
 
 // ClearInfo clears the "info" edge to the GroupInfo entity.
-func (_u *GroupUpdateOne) ClearInfo() *GroupUpdateOne {
-	_u.mutation.ClearInfo()
-	return _u
-}
+func (_u *GroupUpdateOne) ClearInfo() *GroupUpdateOne { _u.mutation.ClearInfo(); return _u }
 
 // Where appends a list predicates to the GroupUpdate builder.
 func (_u *GroupUpdateOne) Where(ps ...predicate.Group) *GroupUpdateOne {
@@ -552,19 +489,10 @@ func (_u *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *GroupUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupUpdateOne) ExecX(ctx context.Context) {

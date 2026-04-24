@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -32,15 +33,11 @@ func NewBlobUpdate(c Config, hooks []Hook, mutation *BlobMutation) *BlobUpdate {
 }
 
 // Where appends a list predicates to the BlobUpdate builder.
-func (_u *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetUUID sets the "uuid" field.
 func (_u *BlobUpdate) SetUUID(v uuid.UUID) *BlobUpdate {
-	_u.mutation.SetUUID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUUID, v)
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
@@ -68,14 +65,12 @@ func (_u *BlobUpdate) SetNillableCount(v *int) *BlobUpdate {
 
 // AddCount adds value to the "count" field.
 func (_u *BlobUpdate) AddCount(v int) *BlobUpdate {
-	_u.mutation.AddCount(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddCount, v)
 }
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
 func (_u *BlobUpdate) SetParentID(id uuid.UUID) *BlobUpdate {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
@@ -93,21 +88,15 @@ func (_u *BlobUpdate) AddLinkIDs(ids ...uuid.UUID) *BlobUpdate {
 }
 
 // Mutation returns the BlobMutation object of the builder.
-func (_u *BlobUpdate) Mutation() *BlobMutation {
-	return _u.mutation
-}
+func (_u *BlobUpdate) Mutation() *BlobMutation { return _u.mutation }
 
 // ClearParent clears the "parent" edge to the Blob entity.
 func (_u *BlobUpdate) ClearParent() *BlobUpdate {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearLinks clears all "links" edges to the Blob entity.
-func (_u *BlobUpdate) ClearLinks() *BlobUpdate {
-	_u.mutation.ClearLinks()
-	return _u
-}
+func (_u *BlobUpdate) ClearLinks() *BlobUpdate { return entbuilder.BClear(_u, _u.mutation.ClearLinks) }
 
 // RemoveLinkIDs removes the "links" edge to Blob entities by IDs.
 func (_u *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
@@ -121,19 +110,10 @@ func (_u *BlobUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *BlobUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *BlobUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *BlobUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *BlobUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *BlobUpdate) ExecX(ctx context.Context) {
@@ -267,8 +247,7 @@ func NewBlobUpdateOne(c Config, hooks []Hook, mutation *BlobMutation) *BlobUpdat
 
 // SetUUID sets the "uuid" field.
 func (_u *BlobUpdateOne) SetUUID(v uuid.UUID) *BlobUpdateOne {
-	_u.mutation.SetUUID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUUID, v)
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
@@ -296,14 +275,12 @@ func (_u *BlobUpdateOne) SetNillableCount(v *int) *BlobUpdateOne {
 
 // AddCount adds value to the "count" field.
 func (_u *BlobUpdateOne) AddCount(v int) *BlobUpdateOne {
-	_u.mutation.AddCount(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddCount, v)
 }
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
 func (_u *BlobUpdateOne) SetParentID(id uuid.UUID) *BlobUpdateOne {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
@@ -321,20 +298,16 @@ func (_u *BlobUpdateOne) AddLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
 }
 
 // Mutation returns the BlobMutation object of the builder.
-func (_u *BlobUpdateOne) Mutation() *BlobMutation {
-	return _u.mutation
-}
+func (_u *BlobUpdateOne) Mutation() *BlobMutation { return _u.mutation }
 
 // ClearParent clears the "parent" edge to the Blob entity.
 func (_u *BlobUpdateOne) ClearParent() *BlobUpdateOne {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearLinks clears all "links" edges to the Blob entity.
 func (_u *BlobUpdateOne) ClearLinks() *BlobUpdateOne {
-	_u.mutation.ClearLinks()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLinks)
 }
 
 // RemoveLinkIDs removes the "links" edge to Blob entities by IDs.
@@ -362,19 +335,10 @@ func (_u *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *BlobUpdateOne) SaveX(ctx context.Context) *Blob {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *BlobUpdateOne) SaveX(ctx context.Context) *Blob { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *BlobUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *BlobUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *BlobUpdateOne) ExecX(ctx context.Context) {

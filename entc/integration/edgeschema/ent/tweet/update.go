@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -34,15 +35,11 @@ func NewTweetUpdate(c Config, hooks []Hook, mutation *TweetMutation) *TweetUpdat
 }
 
 // Where appends a list predicates to the TweetUpdate builder.
-func (_u *TweetUpdate) Where(ps ...predicate.Tweet) *TweetUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *TweetUpdate) Where(ps ...predicate.Tweet) *TweetUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetText sets the "text" field.
 func (_u *TweetUpdate) SetText(v string) *TweetUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -60,16 +57,10 @@ func (_u *TweetUpdate) AddLikedUserIDs(ids ...int) *TweetUpdate {
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *TweetUpdate) AddUserIDs(ids ...int) *TweetUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
+func (_u *TweetUpdate) AddUserIDs(ids ...int) *TweetUpdate { _u.mutation.AddUserIDs(ids...); return _u }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (_u *TweetUpdate) AddTagIDs(ids ...int) *TweetUpdate {
-	_u.mutation.AddTagIDs(ids...)
-	return _u
-}
+func (_u *TweetUpdate) AddTagIDs(ids ...int) *TweetUpdate { _u.mutation.AddTagIDs(ids...); return _u }
 
 // AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
 func (_u *TweetUpdate) AddTweetUserIDs(ids ...int) *TweetUpdate {
@@ -84,14 +75,11 @@ func (_u *TweetUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
 }
 
 // Mutation returns the TweetMutation object of the builder.
-func (_u *TweetUpdate) Mutation() *TweetMutation {
-	return _u.mutation
-}
+func (_u *TweetUpdate) Mutation() *TweetMutation { return _u.mutation }
 
 // ClearLikedUsers clears all "liked_users" edges to the User entity.
 func (_u *TweetUpdate) ClearLikedUsers() *TweetUpdate {
-	_u.mutation.ClearLikedUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLikedUsers)
 }
 
 // RemoveLikedUserIDs removes the "liked_users" edge to User entities by IDs.
@@ -101,10 +89,7 @@ func (_u *TweetUpdate) RemoveLikedUserIDs(ids ...int) *TweetUpdate {
 }
 
 // ClearUser clears all "user" edges to the User entity.
-func (_u *TweetUpdate) ClearUser() *TweetUpdate {
-	_u.mutation.ClearUser()
-	return _u
-}
+func (_u *TweetUpdate) ClearUser() *TweetUpdate { return entbuilder.BClear(_u, _u.mutation.ClearUser) }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
 func (_u *TweetUpdate) RemoveUserIDs(ids ...int) *TweetUpdate {
@@ -113,10 +98,7 @@ func (_u *TweetUpdate) RemoveUserIDs(ids ...int) *TweetUpdate {
 }
 
 // ClearTags clears all "tags" edges to the Tag entity.
-func (_u *TweetUpdate) ClearTags() *TweetUpdate {
-	_u.mutation.ClearTags()
-	return _u
-}
+func (_u *TweetUpdate) ClearTags() *TweetUpdate { return entbuilder.BClear(_u, _u.mutation.ClearTags) }
 
 // RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
 func (_u *TweetUpdate) RemoveTagIDs(ids ...int) *TweetUpdate {
@@ -126,8 +108,7 @@ func (_u *TweetUpdate) RemoveTagIDs(ids ...int) *TweetUpdate {
 
 // ClearTweetUser clears all "tweet_user" edges to the UserTweet entity.
 func (_u *TweetUpdate) ClearTweetUser() *TweetUpdate {
-	_u.mutation.ClearTweetUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweetUser)
 }
 
 // RemoveTweetUserIDs removes the "tweet_user" edge to UserTweet entities by IDs.
@@ -138,8 +119,7 @@ func (_u *TweetUpdate) RemoveTweetUserIDs(ids ...int) *TweetUpdate {
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
 func (_u *TweetUpdate) ClearTweetTags() *TweetUpdate {
-	_u.mutation.ClearTweetTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweetTags)
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
@@ -154,19 +134,10 @@ func (_u *TweetUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TweetUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *TweetUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *TweetUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TweetUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TweetUpdate) ExecX(ctx context.Context) {
@@ -466,8 +437,7 @@ func NewTweetUpdateOne(c Config, hooks []Hook, mutation *TweetMutation) *TweetUp
 
 // SetText sets the "text" field.
 func (_u *TweetUpdateOne) SetText(v string) *TweetUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -509,14 +479,11 @@ func (_u *TweetUpdateOne) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdateOne {
 }
 
 // Mutation returns the TweetMutation object of the builder.
-func (_u *TweetUpdateOne) Mutation() *TweetMutation {
-	return _u.mutation
-}
+func (_u *TweetUpdateOne) Mutation() *TweetMutation { return _u.mutation }
 
 // ClearLikedUsers clears all "liked_users" edges to the User entity.
 func (_u *TweetUpdateOne) ClearLikedUsers() *TweetUpdateOne {
-	_u.mutation.ClearLikedUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLikedUsers)
 }
 
 // RemoveLikedUserIDs removes the "liked_users" edge to User entities by IDs.
@@ -527,8 +494,7 @@ func (_u *TweetUpdateOne) RemoveLikedUserIDs(ids ...int) *TweetUpdateOne {
 
 // ClearUser clears all "user" edges to the User entity.
 func (_u *TweetUpdateOne) ClearUser() *TweetUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
@@ -539,8 +505,7 @@ func (_u *TweetUpdateOne) RemoveUserIDs(ids ...int) *TweetUpdateOne {
 
 // ClearTags clears all "tags" edges to the Tag entity.
 func (_u *TweetUpdateOne) ClearTags() *TweetUpdateOne {
-	_u.mutation.ClearTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTags)
 }
 
 // RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
@@ -551,8 +516,7 @@ func (_u *TweetUpdateOne) RemoveTagIDs(ids ...int) *TweetUpdateOne {
 
 // ClearTweetUser clears all "tweet_user" edges to the UserTweet entity.
 func (_u *TweetUpdateOne) ClearTweetUser() *TweetUpdateOne {
-	_u.mutation.ClearTweetUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweetUser)
 }
 
 // RemoveTweetUserIDs removes the "tweet_user" edge to UserTweet entities by IDs.
@@ -563,8 +527,7 @@ func (_u *TweetUpdateOne) RemoveTweetUserIDs(ids ...int) *TweetUpdateOne {
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
 func (_u *TweetUpdateOne) ClearTweetTags() *TweetUpdateOne {
-	_u.mutation.ClearTweetTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweetTags)
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
@@ -592,19 +555,10 @@ func (_u *TweetUpdateOne) Save(ctx context.Context) (*Tweet, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TweetUpdateOne) SaveX(ctx context.Context) *Tweet {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *TweetUpdateOne) SaveX(ctx context.Context) *Tweet { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *TweetUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TweetUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TweetUpdateOne) ExecX(ctx context.Context) {

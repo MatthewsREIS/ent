@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewUserGroupCreate(c Config, hooks []Hook, mutation *UserGroupMutation) *Us
 
 // SetJoinedAt sets the "joined_at" field.
 func (_c *UserGroupCreate) SetJoinedAt(v time.Time) *UserGroupCreate {
-	_c.mutation.SetJoinedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetJoinedAt, v)
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
@@ -46,20 +46,16 @@ func (_c *UserGroupCreate) SetNillableJoinedAt(v *time.Time) *UserGroupCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *UserGroupCreate) SetUserID(v int) *UserGroupCreate {
-	_c.mutation.SetUserID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, v)
 }
 
 // SetGroupID sets the "group_id" field.
 func (_c *UserGroupCreate) SetGroupID(v int) *UserGroupCreate {
-	_c.mutation.SetGroupID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetGroupID, v)
 }
 
 // Mutation returns the UserGroupMutation object of the builder.
-func (_c *UserGroupCreate) Mutation() *UserGroupMutation {
-	return _c.mutation
-}
+func (_c *UserGroupCreate) Mutation() *UserGroupMutation { return _c.mutation }
 
 // Save creates the UserGroup in the database.
 func (_c *UserGroupCreate) Save(ctx context.Context) (*UserGroup, error) {
@@ -69,18 +65,11 @@ func (_c *UserGroupCreate) Save(ctx context.Context) (*UserGroup, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *UserGroupCreate) SaveX(ctx context.Context) *UserGroup {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *UserGroupCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *UserGroupCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *UserGroupCreate) ExecX(ctx context.Context) {

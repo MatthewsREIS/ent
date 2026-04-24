@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TaskUpdate is the builder for updating Task entities.
@@ -32,10 +33,7 @@ func NewTaskUpdate(c Config, hooks []Hook, mutation *TaskMutation) *TaskUpdate {
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
-func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetPriority sets the "priority" field.
 func (_u *TaskUpdate) SetPriority(v task.Priority) *TaskUpdate {
@@ -53,10 +51,7 @@ func (_u *TaskUpdate) SetNillablePriority(v *task.Priority) *TaskUpdate {
 }
 
 // AddPriority adds value to the "priority" field.
-func (_u *TaskUpdate) AddPriority(v task.Priority) *TaskUpdate {
-	_u.mutation.AddPriority(v)
-	return _u
-}
+func (_u *TaskUpdate) AddPriority(v task.Priority) *TaskUpdate { _u.mutation.AddPriority(v); return _u }
 
 // SetPriorities sets the "priorities" field.
 func (_u *TaskUpdate) SetPriorities(v map[string]task.Priority) *TaskUpdate {
@@ -65,10 +60,7 @@ func (_u *TaskUpdate) SetPriorities(v map[string]task.Priority) *TaskUpdate {
 }
 
 // ClearPriorities clears the value of the "priorities" field.
-func (_u *TaskUpdate) ClearPriorities() *TaskUpdate {
-	_u.mutation.ClearPriorities()
-	return _u
-}
+func (_u *TaskUpdate) ClearPriorities() *TaskUpdate { _u.mutation.ClearPriorities(); return _u }
 
 // SetName sets the "name" field.
 func (_u *TaskUpdate) SetName(v string) *TaskUpdate {
@@ -85,10 +77,7 @@ func (_u *TaskUpdate) SetNillableName(v *string) *TaskUpdate {
 }
 
 // ClearName clears the value of the "name" field.
-func (_u *TaskUpdate) ClearName() *TaskUpdate {
-	_u.mutation.ClearName()
-	return _u
-}
+func (_u *TaskUpdate) ClearName() *TaskUpdate { _u.mutation.ClearName(); return _u }
 
 // SetOwner sets the "owner" field.
 func (_u *TaskUpdate) SetOwner(v string) *TaskUpdate {
@@ -105,10 +94,7 @@ func (_u *TaskUpdate) SetNillableOwner(v *string) *TaskUpdate {
 }
 
 // ClearOwner clears the value of the "owner" field.
-func (_u *TaskUpdate) ClearOwner() *TaskUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *TaskUpdate) ClearOwner() *TaskUpdate { _u.mutation.ClearOwner(); return _u }
 
 // SetOrder sets the "order" field.
 func (_u *TaskUpdate) SetOrder(v int) *TaskUpdate {
@@ -126,16 +112,10 @@ func (_u *TaskUpdate) SetNillableOrder(v *int) *TaskUpdate {
 }
 
 // AddOrder adds value to the "order" field.
-func (_u *TaskUpdate) AddOrder(v int) *TaskUpdate {
-	_u.mutation.AddOrder(v)
-	return _u
-}
+func (_u *TaskUpdate) AddOrder(v int) *TaskUpdate { _u.mutation.AddOrder(v); return _u }
 
 // ClearOrder clears the value of the "order" field.
-func (_u *TaskUpdate) ClearOrder() *TaskUpdate {
-	_u.mutation.ClearOrder()
-	return _u
-}
+func (_u *TaskUpdate) ClearOrder() *TaskUpdate { _u.mutation.ClearOrder(); return _u }
 
 // SetOrderOption sets the "order_option" field.
 func (_u *TaskUpdate) SetOrderOption(v int) *TaskUpdate {
@@ -153,16 +133,10 @@ func (_u *TaskUpdate) SetNillableOrderOption(v *int) *TaskUpdate {
 }
 
 // AddOrderOption adds value to the "order_option" field.
-func (_u *TaskUpdate) AddOrderOption(v int) *TaskUpdate {
-	_u.mutation.AddOrderOption(v)
-	return _u
-}
+func (_u *TaskUpdate) AddOrderOption(v int) *TaskUpdate { _u.mutation.AddOrderOption(v); return _u }
 
 // ClearOrderOption clears the value of the "order_option" field.
-func (_u *TaskUpdate) ClearOrderOption() *TaskUpdate {
-	_u.mutation.ClearOrderOption()
-	return _u
-}
+func (_u *TaskUpdate) ClearOrderOption() *TaskUpdate { _u.mutation.ClearOrderOption(); return _u }
 
 // SetOp sets the "op" field.
 func (_u *TaskUpdate) SetOp(v string) *TaskUpdate {
@@ -179,9 +153,7 @@ func (_u *TaskUpdate) SetNillableOp(v *string) *TaskUpdate {
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (_u *TaskUpdate) Mutation() *TaskMutation {
-	return _u.mutation
-}
+func (_u *TaskUpdate) Mutation() *TaskMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TaskUpdate) Save(ctx context.Context) (int, error) {
@@ -189,19 +161,10 @@ func (_u *TaskUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TaskUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *TaskUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *TaskUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TaskUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TaskUpdate) ExecX(ctx context.Context) {
@@ -344,10 +307,7 @@ func (_u *TaskUpdateOne) SetPriorities(v map[string]task.Priority) *TaskUpdateOn
 }
 
 // ClearPriorities clears the value of the "priorities" field.
-func (_u *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
-	_u.mutation.ClearPriorities()
-	return _u
-}
+func (_u *TaskUpdateOne) ClearPriorities() *TaskUpdateOne { _u.mutation.ClearPriorities(); return _u }
 
 // SetName sets the "name" field.
 func (_u *TaskUpdateOne) SetName(v string) *TaskUpdateOne {
@@ -364,10 +324,7 @@ func (_u *TaskUpdateOne) SetNillableName(v *string) *TaskUpdateOne {
 }
 
 // ClearName clears the value of the "name" field.
-func (_u *TaskUpdateOne) ClearName() *TaskUpdateOne {
-	_u.mutation.ClearName()
-	return _u
-}
+func (_u *TaskUpdateOne) ClearName() *TaskUpdateOne { _u.mutation.ClearName(); return _u }
 
 // SetOwner sets the "owner" field.
 func (_u *TaskUpdateOne) SetOwner(v string) *TaskUpdateOne {
@@ -384,10 +341,7 @@ func (_u *TaskUpdateOne) SetNillableOwner(v *string) *TaskUpdateOne {
 }
 
 // ClearOwner clears the value of the "owner" field.
-func (_u *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *TaskUpdateOne) ClearOwner() *TaskUpdateOne { _u.mutation.ClearOwner(); return _u }
 
 // SetOrder sets the "order" field.
 func (_u *TaskUpdateOne) SetOrder(v int) *TaskUpdateOne {
@@ -405,16 +359,10 @@ func (_u *TaskUpdateOne) SetNillableOrder(v *int) *TaskUpdateOne {
 }
 
 // AddOrder adds value to the "order" field.
-func (_u *TaskUpdateOne) AddOrder(v int) *TaskUpdateOne {
-	_u.mutation.AddOrder(v)
-	return _u
-}
+func (_u *TaskUpdateOne) AddOrder(v int) *TaskUpdateOne { _u.mutation.AddOrder(v); return _u }
 
 // ClearOrder clears the value of the "order" field.
-func (_u *TaskUpdateOne) ClearOrder() *TaskUpdateOne {
-	_u.mutation.ClearOrder()
-	return _u
-}
+func (_u *TaskUpdateOne) ClearOrder() *TaskUpdateOne { _u.mutation.ClearOrder(); return _u }
 
 // SetOrderOption sets the "order_option" field.
 func (_u *TaskUpdateOne) SetOrderOption(v int) *TaskUpdateOne {
@@ -438,10 +386,7 @@ func (_u *TaskUpdateOne) AddOrderOption(v int) *TaskUpdateOne {
 }
 
 // ClearOrderOption clears the value of the "order_option" field.
-func (_u *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne {
-	_u.mutation.ClearOrderOption()
-	return _u
-}
+func (_u *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne { _u.mutation.ClearOrderOption(); return _u }
 
 // SetOp sets the "op" field.
 func (_u *TaskUpdateOne) SetOp(v string) *TaskUpdateOne {
@@ -458,9 +403,7 @@ func (_u *TaskUpdateOne) SetNillableOp(v *string) *TaskUpdateOne {
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (_u *TaskUpdateOne) Mutation() *TaskMutation {
-	return _u.mutation
-}
+func (_u *TaskUpdateOne) Mutation() *TaskMutation { return _u.mutation }
 
 // Where appends a list predicates to the TaskUpdate builder.
 func (_u *TaskUpdateOne) Where(ps ...predicate.Task) *TaskUpdateOne {
@@ -481,19 +424,10 @@ func (_u *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TaskUpdateOne) SaveX(ctx context.Context) *Task {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *TaskUpdateOne) SaveX(ctx context.Context) *Task { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *TaskUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TaskUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TaskUpdateOne) ExecX(ctx context.Context) {

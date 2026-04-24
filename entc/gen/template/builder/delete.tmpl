@@ -13,7 +13,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ template "import" $ }}
+{{ with extend $ "DeleteUsesEntbuilder" true }}
+    {{ template "import" . }}
+{{ end }}
 
 {{ $builder := $.DeleteName }}
 {{ $receiver := $.DeleteReceiver }}
@@ -22,8 +24,7 @@ in the LICENSE file in the root directory of this source tree.
 // {{ $builder }} is the builder for deleting a {{ $.Name }} entity.
 type {{ $builder }} struct {
 	Config
-	hooks      []Hook
-	mutation   *{{ $.MutationName }}
+	{{- template "delete/fields" $ }}
 }
 
 // New{{ $builder }} returns a new {{ $builder }} initialized with the given config, hooks, and mutation.
@@ -32,10 +33,7 @@ func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *
 }
 
 // Where appends a list predicates to the {{ $builder }} builder.
-func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $mutation }}.Where(ps...)
-	return {{ $receiver }}
-}
+func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} { {{ $mutation }}.Where(ps...); return {{ $receiver }} }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
@@ -43,13 +41,7 @@ func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
-	n, err := {{ $receiver }}.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int { return entbuilder.Must({{ $receiver }}.Exec(ctx)) }
 
 {{ with extend $ "Receiver" $receiver "Builder" $builder }}
 	{{ $tmpl := printf "dialect/%s/delete" $.Storage }}
@@ -77,10 +69,7 @@ func New{{ $onebuilder }}(d *{{ $builder }}) *{{ $onebuilder }} {
 }
 
 // Where appends a list predicates to the {{ $builder }} builder.
-func ({{ $oneReceiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
-	{{ $oneReceiver }}.{{ $mutation }}.Where(ps...)
-	return {{ $oneReceiver }}
-}
+func ({{ $oneReceiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} { {{ $oneReceiver }}.{{ $mutation }}.Where(ps...); return {{ $oneReceiver }} }
 
 // Exec executes the deletion query.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
@@ -96,10 +85,16 @@ func ({{ $oneReceiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func ({{ $oneReceiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
-	if err := {{ $oneReceiver }}.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
+func ({{ $oneReceiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) { if err := {{ $oneReceiver }}.Exec(ctx); err != nil { panic(err) } }
 
+{{ end }}
+
+{{ define "delete/fields"}}
+	hooks []Hook
+	mutation *{{ $.MutationName }}
+	{{- /* Additional fields to add to the builder. */}}
+	{{- $tmpl := printf "dialect/%s/delete/fields" $.Storage }}
+	{{- if hasTemplate $tmpl }}
+		{{- xtemplate $tmpl . }}
+	{{- end }}
 {{ end }}

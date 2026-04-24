@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,8 +32,7 @@ func NewRelationshipCreate(c Config, hooks []Hook, mutation *RelationshipMutatio
 
 // SetWeight sets the "weight" field.
 func (_c *RelationshipCreate) SetWeight(v int) *RelationshipCreate {
-	_c.mutation.SetWeight(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetWeight, v)
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
@@ -45,20 +45,17 @@ func (_c *RelationshipCreate) SetNillableWeight(v *int) *RelationshipCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *RelationshipCreate) SetUserID(v int) *RelationshipCreate {
-	_c.mutation.SetUserID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, v)
 }
 
 // SetRelativeID sets the "relative_id" field.
 func (_c *RelationshipCreate) SetRelativeID(v int) *RelationshipCreate {
-	_c.mutation.SetRelativeID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetRelativeID, v)
 }
 
 // SetInfoID sets the "info_id" field.
 func (_c *RelationshipCreate) SetInfoID(v int) *RelationshipCreate {
-	_c.mutation.SetInfoID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInfoID, v)
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
@@ -70,9 +67,7 @@ func (_c *RelationshipCreate) SetNillableInfoID(v *int) *RelationshipCreate {
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
-func (_c *RelationshipCreate) Mutation() *RelationshipMutation {
-	return _c.mutation
-}
+func (_c *RelationshipCreate) Mutation() *RelationshipMutation { return _c.mutation }
 
 // Save creates the Relationship in the database.
 func (_c *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
@@ -84,18 +79,11 @@ func (_c *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *RelationshipCreate) SaveX(ctx context.Context) *Relationship {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *RelationshipCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *RelationshipCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *RelationshipCreate) ExecX(ctx context.Context) {

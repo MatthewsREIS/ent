@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -127,11 +128,7 @@ func (_q *RelationshipInfoQuery) Only(ctx context.Context) (*RelationshipInfo, e
 
 // OnlyX is like Only, but panics if an error occurs.
 func (_q *RelationshipInfoQuery) OnlyX(ctx context.Context) *RelationshipInfo {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_q.Only(ctx))
 }
 
 // OnlyID is like Only, but returns the only RelationshipInfo ID in the query.
@@ -155,11 +152,7 @@ func (_q *RelationshipInfoQuery) OnlyID(ctx context.Context) (id int, err error)
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
 func (_q *RelationshipInfoQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.Must(_q.OnlyID(ctx))
 }
 
 // All executes the query and returns a list of RelationshipInfos.
@@ -174,11 +167,7 @@ func (_q *RelationshipInfoQuery) All(ctx context.Context) ([]*RelationshipInfo, 
 
 // AllX is like All, but panics if an error occurs.
 func (_q *RelationshipInfoQuery) AllX(ctx context.Context) []*RelationshipInfo {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
+	return entbuilder.Must(_q.All(ctx))
 }
 
 // IDs executes the query and returns a list of RelationshipInfo IDs.
@@ -194,13 +183,7 @@ func (_q *RelationshipInfoQuery) IDs(ctx context.Context) (ids []int, err error)
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *RelationshipInfoQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *RelationshipInfoQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *RelationshipInfoQuery) Count(ctx context.Context) (int, error) {
@@ -213,11 +196,7 @@ func (_q *RelationshipInfoQuery) Count(ctx context.Context) (int, error) {
 
 // CountX is like Count, but panics if an error occurs.
 func (_q *RelationshipInfoQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
+	return entbuilder.Must(_q.Count(ctx))
 }
 
 // Exist returns true if the query has elements in the graph.
@@ -235,11 +214,7 @@ func (_q *RelationshipInfoQuery) Exist(ctx context.Context) (bool, error) {
 
 // ExistX is like Exist, but panics if an error occurs.
 func (_q *RelationshipInfoQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
+	return entbuilder.Must(_q.Exist(ctx))
 }
 
 // Clone returns a duplicate of the RelationshipInfoQuery builder, including all associated steps. It can be

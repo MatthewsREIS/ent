@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/cleanuser"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CleanUserQuery is the builder for querying CleanUser entities.
@@ -39,23 +40,14 @@ func (_q *CleanUserQuery) Where(ps ...predicate.CleanUser) *CleanUserQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *CleanUserQuery) Limit(limit int) *CleanUserQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *CleanUserQuery) Limit(limit int) *CleanUserQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *CleanUserQuery) Offset(offset int) *CleanUserQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *CleanUserQuery) Offset(offset int) *CleanUserQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *CleanUserQuery) Unique(unique bool) *CleanUserQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *CleanUserQuery) Unique(unique bool) *CleanUserQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *CleanUserQuery) Order(o ...cleanuser.OrderOption) *CleanUserQuery {
@@ -104,13 +96,7 @@ func (_q *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser { return entbuilder.Must(_q.Only(ctx)) }
 
 // All executes the query and returns a list of CleanUsers.
 func (_q *CleanUserQuery) All(ctx context.Context) ([]*CleanUser, error) {
@@ -123,13 +109,7 @@ func (_q *CleanUserQuery) All(ctx context.Context) ([]*CleanUser, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *CleanUserQuery) AllX(ctx context.Context) []*CleanUser {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *CleanUserQuery) AllX(ctx context.Context) []*CleanUser { return entbuilder.Must(_q.All(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *CleanUserQuery) Count(ctx context.Context) (int, error) {
@@ -141,13 +121,7 @@ func (_q *CleanUserQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *CleanUserQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *CleanUserQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
@@ -163,13 +137,7 @@ func (_q *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *CleanUserQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *CleanUserQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the CleanUserQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

@@ -16,6 +16,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/json/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,75 +33,61 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 }
 
 // SetT sets the "t" field.
-func (_c *UserCreate) SetT(v *schema.T) *UserCreate {
-	_c.mutation.SetT(v)
-	return _c
-}
+func (_c *UserCreate) SetT(v *schema.T) *UserCreate { return entbuilder.BSet(_c, _c.mutation.SetT, v) }
 
 // SetURL sets the "url" field.
 func (_c *UserCreate) SetURL(v *url.URL) *UserCreate {
-	_c.mutation.SetURL(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetURL, v)
 }
 
 // SetURLs sets the "URLs" field.
 func (_c *UserCreate) SetURLs(v []*url.URL) *UserCreate {
-	_c.mutation.SetURLs(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetURLs, v)
 }
 
 // SetRaw sets the "raw" field.
 func (_c *UserCreate) SetRaw(v json.RawMessage) *UserCreate {
-	_c.mutation.SetRaw(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetRaw, v)
 }
 
 // SetDirs sets the "dirs" field.
 func (_c *UserCreate) SetDirs(v []http.Dir) *UserCreate {
-	_c.mutation.SetDirs(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDirs, v)
 }
 
 // SetInts sets the "ints" field.
 func (_c *UserCreate) SetInts(v []int) *UserCreate {
-	_c.mutation.SetInts(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInts, v)
 }
 
 // SetFloats sets the "floats" field.
 func (_c *UserCreate) SetFloats(v []float64) *UserCreate {
-	_c.mutation.SetFloats(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetFloats, v)
 }
 
 // SetStrings sets the "strings" field.
 func (_c *UserCreate) SetStrings(v []string) *UserCreate {
-	_c.mutation.SetStrings(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetStrings, v)
 }
 
 // SetIntsValidate sets the "ints_validate" field.
 func (_c *UserCreate) SetIntsValidate(v []int) *UserCreate {
-	_c.mutation.SetIntsValidate(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetIntsValidate, v)
 }
 
 // SetFloatsValidate sets the "floats_validate" field.
 func (_c *UserCreate) SetFloatsValidate(v []float64) *UserCreate {
-	_c.mutation.SetFloatsValidate(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetFloatsValidate, v)
 }
 
 // SetStringsValidate sets the "strings_validate" field.
 func (_c *UserCreate) SetStringsValidate(v []string) *UserCreate {
-	_c.mutation.SetStringsValidate(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetStringsValidate, v)
 }
 
 // SetAddr sets the "addr" field.
 func (_c *UserCreate) SetAddr(v schema.Addr) *UserCreate {
-	_c.mutation.SetAddr(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetAddr, v)
 }
 
 // SetNillableAddr sets the "addr" field if the given value is not nil.
@@ -113,14 +100,11 @@ func (_c *UserCreate) SetNillableAddr(v *schema.Addr) *UserCreate {
 
 // SetUnknown sets the "unknown" field.
 func (_c *UserCreate) SetUnknown(v any) *UserCreate {
-	_c.mutation.SetUnknown(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUnknown, v)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_c *UserCreate) Mutation() *UserMutation {
-	return _c.mutation
-}
+func (_c *UserCreate) Mutation() *UserMutation { return _c.mutation }
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
@@ -129,19 +113,10 @@ func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *UserCreate) SaveX(ctx context.Context) *User { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *UserCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *UserCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *UserCreate) ExecX(ctx context.Context) {

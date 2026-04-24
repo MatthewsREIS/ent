@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,16 +31,10 @@ func NewCarUpdate(c Config, hooks []Hook, mutation *CarMutation) *CarUpdate {
 }
 
 // Where appends a list predicates to the CarUpdate builder.
-func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
-func (_u *CarUpdate) SetName(v string) *CarUpdate {
-	_u.mutation.SetName(v)
-	return _u
-}
+func (_u *CarUpdate) SetName(v string) *CarUpdate { return entbuilder.BSet(_u, _u.mutation.SetName, v) }
 
 // SetNillableName sets the "name" field if the given value is not nil.
 func (_u *CarUpdate) SetNillableName(v *string) *CarUpdate {
@@ -50,27 +45,18 @@ func (_u *CarUpdate) SetNillableName(v *string) *CarUpdate {
 }
 
 // ClearName clears the value of the "name" field.
-func (_u *CarUpdate) ClearName() *CarUpdate {
-	_u.mutation.ClearName()
-	return _u
-}
+func (_u *CarUpdate) ClearName() *CarUpdate { return entbuilder.BClear(_u, _u.mutation.ClearName) }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CarUpdate) SetOwnerID(id int) *CarUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (_u *CarUpdate) Mutation() *CarMutation {
-	return _u.mutation
-}
+func (_u *CarUpdate) Mutation() *CarMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *CarUpdate) ClearOwner() *CarUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *CarUpdate) ClearOwner() *CarUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
@@ -78,19 +64,10 @@ func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CarUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *CarUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *CarUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CarUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CarUpdate) ExecX(ctx context.Context) {
@@ -181,8 +158,7 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 
 // SetName sets the "name" field.
 func (_u *CarUpdateOne) SetName(v string) *CarUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -195,32 +171,24 @@ func (_u *CarUpdateOne) SetNillableName(v *string) *CarUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *CarUpdateOne) ClearName() *CarUpdateOne {
-	_u.mutation.ClearName()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearName)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (_u *CarUpdateOne) Mutation() *CarMutation {
-	return _u.mutation
-}
+func (_u *CarUpdateOne) Mutation() *CarMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CarUpdateOne) ClearOwner() *CarUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // Where appends a list predicates to the CarUpdate builder.
-func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -235,19 +203,10 @@ func (_u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CarUpdateOne) SaveX(ctx context.Context) *Car {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *CarUpdateOne) SaveX(ctx context.Context) *Car { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *CarUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CarUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CarUpdateOne) ExecX(ctx context.Context) {

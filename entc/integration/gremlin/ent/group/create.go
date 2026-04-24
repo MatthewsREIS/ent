@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -105,15 +106,10 @@ func (_c *GroupCreate) AddUserIDs(ids ...string) *GroupCreate {
 }
 
 // SetInfoID sets the "info" edge to the GroupInfo entity by ID.
-func (_c *GroupCreate) SetInfoID(id string) *GroupCreate {
-	_c.mutation.SetInfoID(id)
-	return _c
-}
+func (_c *GroupCreate) SetInfoID(id string) *GroupCreate { _c.mutation.SetInfoID(id); return _c }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_c *GroupCreate) Mutation() *GroupMutation {
-	return _c.mutation
-}
+func (_c *GroupCreate) Mutation() *GroupMutation { return _c.mutation }
 
 // Save creates the Group in the database.
 func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
@@ -122,19 +118,10 @@ func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *GroupCreate) SaveX(ctx context.Context) *Group {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *GroupCreate) SaveX(ctx context.Context) *Group { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *GroupCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *GroupCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *GroupCreate) ExecX(ctx context.Context) {

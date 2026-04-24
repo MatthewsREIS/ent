@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,20 +30,16 @@ func NewCommentCreate(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 
 // SetText sets the "text" field.
 func (_c *CommentCreate) SetText(v string) *CommentCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // SetPostID sets the "post_id" field.
 func (_c *CommentCreate) SetPostID(v int) *CommentCreate {
-	_c.mutation.SetPostID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetPostID, v)
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (_c *CommentCreate) Mutation() *CommentMutation {
-	return _c.mutation
-}
+func (_c *CommentCreate) Mutation() *CommentMutation { return _c.mutation }
 
 // Save creates the Comment in the database.
 func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
@@ -50,19 +47,10 @@ func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *CommentCreate) SaveX(ctx context.Context) *Comment {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *CommentCreate) SaveX(ctx context.Context) *Comment { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *CommentCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *CommentCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *CommentCreate) ExecX(ctx context.Context) {

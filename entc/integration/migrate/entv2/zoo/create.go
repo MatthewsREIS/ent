@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -27,15 +28,10 @@ func NewZooCreate(c Config, hooks []Hook, mutation *ZooMutation) *ZooCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *ZooCreate) SetID(v int) *ZooCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *ZooCreate) SetID(v int) *ZooCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // Mutation returns the ZooMutation object of the builder.
-func (_c *ZooCreate) Mutation() *ZooMutation {
-	return _c.mutation
-}
+func (_c *ZooCreate) Mutation() *ZooMutation { return _c.mutation }
 
 // Save creates the Zoo in the database.
 func (_c *ZooCreate) Save(ctx context.Context) (*Zoo, error) {
@@ -43,19 +39,10 @@ func (_c *ZooCreate) Save(ctx context.Context) (*Zoo, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *ZooCreate) SaveX(ctx context.Context) *Zoo {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *ZooCreate) SaveX(ctx context.Context) *Zoo { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *ZooCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *ZooCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *ZooCreate) ExecX(ctx context.Context) {

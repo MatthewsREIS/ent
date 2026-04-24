@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GoodsUpdate is the builder for updating Goods entities.
@@ -29,15 +30,10 @@ func NewGoodsUpdate(c Config, hooks []Hook, mutation *GoodsMutation) *GoodsUpdat
 }
 
 // Where appends a list predicates to the GoodsUpdate builder.
-func (_u *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate { _u.mutation.Where(ps...); return _u }
 
 // Mutation returns the GoodsMutation object of the builder.
-func (_u *GoodsUpdate) Mutation() *GoodsMutation {
-	return _u.mutation
-}
+func (_u *GoodsUpdate) Mutation() *GoodsMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GoodsUpdate) Save(ctx context.Context) (int, error) {
@@ -45,19 +41,10 @@ func (_u *GoodsUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GoodsUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *GoodsUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *GoodsUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GoodsUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GoodsUpdate) ExecX(ctx context.Context) {
@@ -106,9 +93,7 @@ func NewGoodsUpdateOne(c Config, hooks []Hook, mutation *GoodsMutation) *GoodsUp
 }
 
 // Mutation returns the GoodsMutation object of the builder.
-func (_u *GoodsUpdateOne) Mutation() *GoodsMutation {
-	return _u.mutation
-}
+func (_u *GoodsUpdateOne) Mutation() *GoodsMutation { return _u.mutation }
 
 // Where appends a list predicates to the GoodsUpdate builder.
 func (_u *GoodsUpdateOne) Where(ps ...predicate.Goods) *GoodsUpdateOne {
@@ -129,19 +114,10 @@ func (_u *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GoodsUpdateOne) SaveX(ctx context.Context) *Goods {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *GoodsUpdateOne) SaveX(ctx context.Context) *Goods { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *GoodsUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GoodsUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GoodsUpdateOne) ExecX(ctx context.Context) {

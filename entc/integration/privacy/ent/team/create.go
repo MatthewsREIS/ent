@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,26 +30,17 @@ func NewTeamCreate(c Config, hooks []Hook, mutation *TeamMutation) *TeamCreate {
 
 // SetName sets the "name" field.
 func (_c *TeamCreate) SetName(v string) *TeamCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (_c *TeamCreate) AddTaskIDs(ids ...int) *TeamCreate {
-	_c.mutation.AddTaskIDs(ids...)
-	return _c
-}
+func (_c *TeamCreate) AddTaskIDs(ids ...int) *TeamCreate { _c.mutation.AddTaskIDs(ids...); return _c }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_c *TeamCreate) AddUserIDs(ids ...int) *TeamCreate {
-	_c.mutation.AddUserIDs(ids...)
-	return _c
-}
+func (_c *TeamCreate) AddUserIDs(ids ...int) *TeamCreate { _c.mutation.AddUserIDs(ids...); return _c }
 
 // Mutation returns the TeamMutation object of the builder.
-func (_c *TeamCreate) Mutation() *TeamMutation {
-	return _c.mutation
-}
+func (_c *TeamCreate) Mutation() *TeamMutation { return _c.mutation }
 
 // Save creates the Team in the database.
 func (_c *TeamCreate) Save(ctx context.Context) (*Team, error) {
@@ -56,19 +48,10 @@ func (_c *TeamCreate) Save(ctx context.Context) (*Team, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TeamCreate) SaveX(ctx context.Context) *Team {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *TeamCreate) SaveX(ctx context.Context) *Team { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *TeamCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TeamCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TeamCreate) ExecX(ctx context.Context) {

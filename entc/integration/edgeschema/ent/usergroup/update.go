@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *UserGroupUpdate) Where(ps ...predicate.UserGroup) *UserGroupUpdate {
 
 // SetJoinedAt sets the "joined_at" field.
 func (_u *UserGroupUpdate) SetJoinedAt(v time.Time) *UserGroupUpdate {
-	_u.mutation.SetJoinedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetJoinedAt, v)
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
@@ -52,8 +52,7 @@ func (_u *UserGroupUpdate) SetNillableJoinedAt(v *time.Time) *UserGroupUpdate {
 
 // SetUserID sets the "user_id" field.
 func (_u *UserGroupUpdate) SetUserID(v int) *UserGroupUpdate {
-	_u.mutation.SetUserID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, v)
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
@@ -66,8 +65,7 @@ func (_u *UserGroupUpdate) SetNillableUserID(v *int) *UserGroupUpdate {
 
 // SetGroupID sets the "group_id" field.
 func (_u *UserGroupUpdate) SetGroupID(v int) *UserGroupUpdate {
-	_u.mutation.SetGroupID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetGroupID, v)
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
@@ -79,20 +77,16 @@ func (_u *UserGroupUpdate) SetNillableGroupID(v *int) *UserGroupUpdate {
 }
 
 // Mutation returns the UserGroupMutation object of the builder.
-func (_u *UserGroupUpdate) Mutation() *UserGroupMutation {
-	return _u.mutation
-}
+func (_u *UserGroupUpdate) Mutation() *UserGroupMutation { return _u.mutation }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *UserGroupUpdate) ClearUser() *UserGroupUpdate {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
 func (_u *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
-	_u.mutation.ClearGroup()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroup)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -101,19 +95,10 @@ func (_u *UserGroupUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserGroupUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *UserGroupUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *UserGroupUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserGroupUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserGroupUpdate) ExecX(ctx context.Context) {
@@ -233,8 +218,7 @@ func NewUserGroupUpdateOne(c Config, hooks []Hook, mutation *UserGroupMutation) 
 
 // SetJoinedAt sets the "joined_at" field.
 func (_u *UserGroupUpdateOne) SetJoinedAt(v time.Time) *UserGroupUpdateOne {
-	_u.mutation.SetJoinedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetJoinedAt, v)
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
@@ -247,8 +231,7 @@ func (_u *UserGroupUpdateOne) SetNillableJoinedAt(v *time.Time) *UserGroupUpdate
 
 // SetUserID sets the "user_id" field.
 func (_u *UserGroupUpdateOne) SetUserID(v int) *UserGroupUpdateOne {
-	_u.mutation.SetUserID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, v)
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
@@ -261,8 +244,7 @@ func (_u *UserGroupUpdateOne) SetNillableUserID(v *int) *UserGroupUpdateOne {
 
 // SetGroupID sets the "group_id" field.
 func (_u *UserGroupUpdateOne) SetGroupID(v int) *UserGroupUpdateOne {
-	_u.mutation.SetGroupID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetGroupID, v)
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
@@ -274,20 +256,16 @@ func (_u *UserGroupUpdateOne) SetNillableGroupID(v *int) *UserGroupUpdateOne {
 }
 
 // Mutation returns the UserGroupMutation object of the builder.
-func (_u *UserGroupUpdateOne) Mutation() *UserGroupMutation {
-	return _u.mutation
-}
+func (_u *UserGroupUpdateOne) Mutation() *UserGroupMutation { return _u.mutation }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *UserGroupUpdateOne) ClearUser() *UserGroupUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
 func (_u *UserGroupUpdateOne) ClearGroup() *UserGroupUpdateOne {
-	_u.mutation.ClearGroup()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroup)
 }
 
 // Where appends a list predicates to the UserGroupUpdate builder.
@@ -310,18 +288,11 @@ func (_u *UserGroupUpdateOne) Save(ctx context.Context) (*UserGroup, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *UserGroupUpdateOne) SaveX(ctx context.Context) *UserGroup {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *UserGroupUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserGroupUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserGroupUpdateOne) ExecX(ctx context.Context) {

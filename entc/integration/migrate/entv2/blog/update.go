@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,10 +31,7 @@ func NewBlogUpdate(c Config, hooks []Hook, mutation *BlogMutation) *BlogUpdate {
 }
 
 // Where appends a list predicates to the BlogUpdate builder.
-func (_u *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetOid sets the "oid" field.
 func (_u *BlogUpdate) SetOid(v int) *BlogUpdate {
@@ -51,26 +49,17 @@ func (_u *BlogUpdate) SetNillableOid(v *int) *BlogUpdate {
 }
 
 // AddOid adds value to the "oid" field.
-func (_u *BlogUpdate) AddOid(v int) *BlogUpdate {
-	_u.mutation.AddOid(v)
-	return _u
-}
+func (_u *BlogUpdate) AddOid(v int) *BlogUpdate { return entbuilder.BSet(_u, _u.mutation.AddOid, v) }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
-func (_u *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate {
-	_u.mutation.AddAdminIDs(ids...)
-	return _u
-}
+func (_u *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate { _u.mutation.AddAdminIDs(ids...); return _u }
 
 // Mutation returns the BlogMutation object of the builder.
-func (_u *BlogUpdate) Mutation() *BlogMutation {
-	return _u.mutation
-}
+func (_u *BlogUpdate) Mutation() *BlogMutation { return _u.mutation }
 
 // ClearAdmins clears all "admins" edges to the User entity.
 func (_u *BlogUpdate) ClearAdmins() *BlogUpdate {
-	_u.mutation.ClearAdmins()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAdmins)
 }
 
 // RemoveAdminIDs removes the "admins" edge to User entities by IDs.
@@ -85,19 +74,10 @@ func (_u *BlogUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *BlogUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *BlogUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *BlogUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *BlogUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *BlogUpdate) ExecX(ctx context.Context) {
@@ -208,8 +188,7 @@ func (_u *BlogUpdateOne) SetNillableOid(v *int) *BlogUpdateOne {
 
 // AddOid adds value to the "oid" field.
 func (_u *BlogUpdateOne) AddOid(v int) *BlogUpdateOne {
-	_u.mutation.AddOid(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOid, v)
 }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
@@ -219,14 +198,11 @@ func (_u *BlogUpdateOne) AddAdminIDs(ids ...int) *BlogUpdateOne {
 }
 
 // Mutation returns the BlogMutation object of the builder.
-func (_u *BlogUpdateOne) Mutation() *BlogMutation {
-	return _u.mutation
-}
+func (_u *BlogUpdateOne) Mutation() *BlogMutation { return _u.mutation }
 
 // ClearAdmins clears all "admins" edges to the User entity.
 func (_u *BlogUpdateOne) ClearAdmins() *BlogUpdateOne {
-	_u.mutation.ClearAdmins()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAdmins)
 }
 
 // RemoveAdminIDs removes the "admins" edge to User entities by IDs.
@@ -254,19 +230,10 @@ func (_u *BlogUpdateOne) Save(ctx context.Context) (*Blog, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *BlogUpdateOne) SaveX(ctx context.Context) *Blog {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *BlogUpdateOne) SaveX(ctx context.Context) *Blog { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *BlogUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *BlogUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *BlogUpdateOne) ExecX(ctx context.Context) {

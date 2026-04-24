@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FileTypeUpdate is the builder for updating FileType entities.
@@ -86,15 +87,10 @@ func (_u *FileTypeUpdate) AddFileIDs(ids ...string) *FileTypeUpdate {
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (_u *FileTypeUpdate) Mutation() *FileTypeMutation {
-	return _u.mutation
-}
+func (_u *FileTypeUpdate) Mutation() *FileTypeMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (_u *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
-	_u.mutation.ClearFiles()
-	return _u
-}
+func (_u *FileTypeUpdate) ClearFiles() *FileTypeUpdate { _u.mutation.ClearFiles(); return _u }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *FileTypeUpdate) RemoveFileIDs(ids ...string) *FileTypeUpdate {
@@ -108,19 +104,10 @@ func (_u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FileTypeUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *FileTypeUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *FileTypeUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FileTypeUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FileTypeUpdate) ExecX(ctx context.Context) {
@@ -277,15 +264,10 @@ func (_u *FileTypeUpdateOne) AddFileIDs(ids ...string) *FileTypeUpdateOne {
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation {
-	return _u.mutation
-}
+func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (_u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
-	_u.mutation.ClearFiles()
-	return _u
-}
+func (_u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne { _u.mutation.ClearFiles(); return _u }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *FileTypeUpdateOne) RemoveFileIDs(ids ...string) *FileTypeUpdateOne {
@@ -313,18 +295,11 @@ func (_u *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *FileTypeUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FileTypeUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FileTypeUpdateOne) ExecX(ctx context.Context) {

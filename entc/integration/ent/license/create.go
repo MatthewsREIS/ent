@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewLicenseCreate(c Config, hooks []Hook, mutation *LicenseMutation) *Licens
 
 // SetCreateTime sets the "create_time" field.
 func (_c *LicenseCreate) SetCreateTime(v time.Time) *LicenseCreate {
-	_c.mutation.SetCreateTime(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCreateTime, v)
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
@@ -46,8 +46,7 @@ func (_c *LicenseCreate) SetNillableCreateTime(v *time.Time) *LicenseCreate {
 
 // SetUpdateTime sets the "update_time" field.
 func (_c *LicenseCreate) SetUpdateTime(v time.Time) *LicenseCreate {
-	_c.mutation.SetUpdateTime(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUpdateTime, v)
 }
 
 // SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
@@ -60,14 +59,11 @@ func (_c *LicenseCreate) SetNillableUpdateTime(v *time.Time) *LicenseCreate {
 
 // SetID sets the "id" field.
 func (_c *LicenseCreate) SetID(v int) *LicenseCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (_c *LicenseCreate) Mutation() *LicenseMutation {
-	return _c.mutation
-}
+func (_c *LicenseCreate) Mutation() *LicenseMutation { return _c.mutation }
 
 // Save creates the License in the database.
 func (_c *LicenseCreate) Save(ctx context.Context) (*License, error) {
@@ -76,19 +72,10 @@ func (_c *LicenseCreate) Save(ctx context.Context) (*License, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *LicenseCreate) SaveX(ctx context.Context) *License {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *LicenseCreate) SaveX(ctx context.Context) *License { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *LicenseCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *LicenseCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *LicenseCreate) ExecX(ctx context.Context) {

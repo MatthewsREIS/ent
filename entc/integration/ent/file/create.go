@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewFileCreate(c Config, hooks []Hook, mutation *FileMutation) *FileCreate {
 
 // SetSetID sets the "set_id" field.
 func (_c *FileCreate) SetSetID(v int) *FileCreate {
-	_c.mutation.SetSetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSetID, v)
 }
 
 // SetNillableSetID sets the "set_id" field if the given value is not nil.
@@ -45,10 +45,7 @@ func (_c *FileCreate) SetNillableSetID(v *int) *FileCreate {
 }
 
 // SetSize sets the "size" field.
-func (_c *FileCreate) SetSize(v int) *FileCreate {
-	_c.mutation.SetSize(v)
-	return _c
-}
+func (_c *FileCreate) SetSize(v int) *FileCreate { return entbuilder.BSet(_c, _c.mutation.SetSize, v) }
 
 // SetNillableSize sets the "size" field if the given value is not nil.
 func (_c *FileCreate) SetNillableSize(v *int) *FileCreate {
@@ -60,14 +57,12 @@ func (_c *FileCreate) SetNillableSize(v *int) *FileCreate {
 
 // SetName sets the "name" field.
 func (_c *FileCreate) SetName(v string) *FileCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // SetUser sets the "user" field.
 func (_c *FileCreate) SetUser(v string) *FileCreate {
-	_c.mutation.SetUser(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUser, v)
 }
 
 // SetNillableUser sets the "user" field if the given value is not nil.
@@ -80,8 +75,7 @@ func (_c *FileCreate) SetNillableUser(v *string) *FileCreate {
 
 // SetGroup sets the "group" field.
 func (_c *FileCreate) SetGroup(v string) *FileCreate {
-	_c.mutation.SetGroup(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetGroup, v)
 }
 
 // SetNillableGroup sets the "group" field if the given value is not nil.
@@ -94,8 +88,7 @@ func (_c *FileCreate) SetNillableGroup(v *string) *FileCreate {
 
 // SetOp sets the "op" field.
 func (_c *FileCreate) SetOp(v bool) *FileCreate {
-	_c.mutation.SetOpField(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOpField, v)
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
@@ -108,8 +101,7 @@ func (_c *FileCreate) SetNillableOp(v *bool) *FileCreate {
 
 // SetFieldID sets the "field_id" field.
 func (_c *FileCreate) SetFieldID(v int) *FileCreate {
-	_c.mutation.SetFieldID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetFieldID, v)
 }
 
 // SetNillableFieldID sets the "field_id" field if the given value is not nil.
@@ -122,8 +114,7 @@ func (_c *FileCreate) SetNillableFieldID(v *int) *FileCreate {
 
 // SetCreateTime sets the "create_time" field.
 func (_c *FileCreate) SetCreateTime(v time.Time) *FileCreate {
-	_c.mutation.SetCreateTime(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCreateTime, v)
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
@@ -136,8 +127,7 @@ func (_c *FileCreate) SetNillableCreateTime(v *time.Time) *FileCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *FileCreate) SetOwnerID(id int) *FileCreate {
-	_c.mutation.SetOwnerID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -150,8 +140,7 @@ func (_c *FileCreate) SetNillableOwnerID(id *int) *FileCreate {
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
 func (_c *FileCreate) SetTypeID(id int) *FileCreate {
-	_c.mutation.SetTypeID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTypeID, id)
 }
 
 // SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
@@ -163,15 +152,10 @@ func (_c *FileCreate) SetNillableTypeID(id *int) *FileCreate {
 }
 
 // AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
-func (_c *FileCreate) AddFieldIDs(ids ...int) *FileCreate {
-	_c.mutation.AddFieldIDs(ids...)
-	return _c
-}
+func (_c *FileCreate) AddFieldIDs(ids ...int) *FileCreate { _c.mutation.AddFieldIDs(ids...); return _c }
 
 // Mutation returns the FileMutation object of the builder.
-func (_c *FileCreate) Mutation() *FileMutation {
-	return _c.mutation
-}
+func (_c *FileCreate) Mutation() *FileMutation { return _c.mutation }
 
 // Save creates the File in the database.
 func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
@@ -180,19 +164,10 @@ func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *FileCreate) SaveX(ctx context.Context) *File {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *FileCreate) SaveX(ctx context.Context) *File { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *FileCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *FileCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *FileCreate) ExecX(ctx context.Context) {

@@ -21,18 +21,27 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $fields = append $fields $.ID }}
 {{- end }}
 
+{{ $isSQL := eq $.Storage.Name "sql" }}
+
 {{ range $f := $fields }}
 	{{ $func := print "Set" $f.StructField }}
 	{{ $ft := $f.Type.String }}{{ if and $.Scope.InSubPackage $f.IsEnum }}{{ $ft = trimPackage $f.Type.String $.Package }}{{ end }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $ft }}) *{{ $builder }} {
-		{{- /* setting numeric type override previous calls to Add. */}}
-		{{- if and $updater $f.SupportsMutationAdd }}
-			{{ $receiver }}.mutation.{{ $f.MutationReset }}()
-		{{- end }}
-		{{ $receiver }}.mutation.{{ $f.MutationSet }}(v)
-		return {{ $receiver }}
-	}
+	{{- if and $updater $f.SupportsMutationAdd }}
+		{{- /* Numeric update setter: Reset then Set (two mutation calls).
+		       Generic wrapper doesn't cleanly express two calls; emit a
+		       compact 1-line multi-statement body. */}}
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $ft }}) *{{ $builder }} { {{ $receiver }}.mutation.{{ $f.MutationReset }}(); {{ $receiver }}.mutation.{{ $f.MutationSet }}(v); return {{ $receiver }} }
+	{{- else if $isSQL }}
+		{{- /* SQL simple scalar setter: route through entbuilder.BSet. */}}
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $ft }}) *{{ $builder }} { return entbuilder.BSet({{ $receiver }}, {{ $receiver }}.mutation.{{ $f.MutationSet }}, v) }
+	{{- else }}
+		{{- /* Non-SQL (e.g. gremlin) fallback: preserve original multi-line body. */}}
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $ft }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $f.MutationSet }}(v)
+			return {{ $receiver }}
+		}
+	{{- end }}
 
 	{{/* Avoid generating nillable setters for nillable types. */}}
 	{{ $nillableC := and $creator (or $f.Optional $f.Default) }}
@@ -41,37 +50,35 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $skipNillable := false }}{{ range $fields }}{{ if and (ne .Name $f.Name) (eq .MutationSet $nillableFunc) }}{{ $skipNillable = true }}{{ break }}{{ end }}{{ end }}
 	{{ if and (not $f.Type.Nillable) (not $skipNillable) (or $nillableC $nillableU) }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}(v *{{ $ft }}) *{{ $builder }} {
-			if v != nil {
-				{{ $receiver }}.{{ $func }}(*v)
-			}
-			return {{ $receiver }}
-		}
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}(v *{{ $ft }}) *{{ $builder }} { if v != nil { {{ $receiver }}.{{ $func }}(*v) }; return {{ $receiver }} }
 	{{ end }}
 
 	{{ if and $updater $f.SupportsMutationAdd }}
 		// {{ $f.MutationAdd }} adds value to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}(v {{ $f.SignedType }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $f.MutationAdd }}(v)
-			return {{ $receiver }}
-		}
+		{{- if $isSQL }}
+			func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}(v {{ $f.SignedType }}) *{{ $builder }} { return entbuilder.BSet({{ $receiver }}, {{ $receiver }}.mutation.{{ $f.MutationAdd }}, v) }
+		{{- else }}
+			func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}(v {{ $f.SignedType }}) *{{ $builder }} { {{ $receiver }}.mutation.{{ $f.MutationAdd }}(v); return {{ $receiver }} }
+		{{- end }}
 	{{ end }}
 
 	{{ if and $updater $f.SupportsMutationAppend }}
 		// {{ $f.MutationAppend }} appends value to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}(v {{ $f.Type }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $f.MutationAppend }}(v)
-			return {{ $receiver }}
-		}
+		{{- if $isSQL }}
+			func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}(v {{ $f.Type }}) *{{ $builder }} { return entbuilder.BSet({{ $receiver }}, {{ $receiver }}.mutation.{{ $f.MutationAppend }}, v) }
+		{{- else }}
+			func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}(v {{ $f.Type }}) *{{ $builder }} { {{ $receiver }}.mutation.{{ $f.MutationAppend }}(v); return {{ $receiver }} }
+		{{- end }}
 	{{ end }}
 
 	{{ if and $f.Optional $updater }}
 		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $func }}()
-			return {{ $receiver }}
-		}
+		{{- if $isSQL }}
+			func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} { return entbuilder.BClear({{ $receiver }}, {{ $receiver }}.mutation.{{ $func }}) }
+		{{- else }}
+			func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} { {{ $receiver }}.mutation.{{ $func }}(); return {{ $receiver }} }
+		{{- end }}
 	{{ end }}
 {{ end }}
 
@@ -85,26 +92,24 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $withSetter := not $e.HasFieldSetter }}
 	{{ if $withSetter }}
 		// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID{{ if not $e.Unique }}s{{ end }}.
-		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
-			return {{ $receiver }}
-		}
+		{{- if $e.Unique }}
+			{{- if $isSQL }}
+				func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(id {{ $e.Type.ID.Type }}) *{{ $builder }} { return entbuilder.BSet({{ $receiver }}, {{ $receiver }}.mutation.{{ $idsFunc }}, id) }
+			{{- else }}
+				func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(id {{ $e.Type.ID.Type }}) *{{ $builder }} { {{ $receiver }}.mutation.{{ $idsFunc }}(id); return {{ $receiver }} }
+			{{- end }}
+		{{- else }}
+			func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} { {{ $receiver }}.mutation.{{ $idsFunc }}(ids...); return {{ $receiver }} }
+		{{- end }}
 	{{ end }}
 	{{ if and $e.Unique $e.Optional $withSetter }}
 		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
 		// {{ $nillableIDsFunc }} sets the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {
-			if id != nil {
-				{{ $receiver}} = {{ $receiver }}.{{ $idsFunc }}(*id)
-			}
-			return {{ $receiver }}
-		}
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} { if id != nil { {{ $receiver }} = {{ $receiver }}.{{ $idsFunc }}(*id) }; return {{ $receiver }} }
 	{{ end }}
 {{ end }}
 
 // Mutation returns the {{ $.MutationName }} object of the builder.
-func ({{ $receiver }} *{{ $builder }}) Mutation() *{{ $.MutationName }} {
-	return {{ $receiver }}.mutation
-}
+func ({{ $receiver }} *{{ $builder }}) Mutation() *{{ $.MutationName }} { return {{ $receiver }}.mutation }
 
 {{ end }}

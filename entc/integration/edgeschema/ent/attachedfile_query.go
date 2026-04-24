@@ -43,10 +43,7 @@ func (_q *AttachedFileQuery) Where(ps ...predicate.AttachedFile) *AttachedFileQu
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *AttachedFileQuery) Limit(limit int) *AttachedFileQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *AttachedFileQuery) Limit(limit int) *AttachedFileQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
 func (_q *AttachedFileQuery) Offset(offset int) *AttachedFileQuery {
@@ -176,11 +173,7 @@ func (_q *AttachedFileQuery) Only(ctx context.Context) (*AttachedFile, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (_q *AttachedFileQuery) OnlyX(ctx context.Context) *AttachedFile {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_q.Only(ctx))
 }
 
 // OnlyID is like Only, but returns the only AttachedFile ID in the query.
@@ -203,13 +196,7 @@ func (_q *AttachedFileQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *AttachedFileQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *AttachedFileQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of AttachedFiles.
 func (_q *AttachedFileQuery) All(ctx context.Context) ([]*AttachedFile, error) {
@@ -223,11 +210,7 @@ func (_q *AttachedFileQuery) All(ctx context.Context) ([]*AttachedFile, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (_q *AttachedFileQuery) AllX(ctx context.Context) []*AttachedFile {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
+	return entbuilder.Must(_q.All(ctx))
 }
 
 // IDs executes the query and returns a list of AttachedFile IDs.
@@ -243,13 +226,7 @@ func (_q *AttachedFileQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *AttachedFileQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *AttachedFileQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *AttachedFileQuery) Count(ctx context.Context) (int, error) {
@@ -261,13 +238,7 @@ func (_q *AttachedFileQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *AttachedFileQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *AttachedFileQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *AttachedFileQuery) Exist(ctx context.Context) (bool, error) {
@@ -283,13 +254,7 @@ func (_q *AttachedFileQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *AttachedFileQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *AttachedFileQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the AttachedFileQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -449,59 +414,62 @@ func (_q *AttachedFileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	return nodes, nil
 }
 
-var attachedfileFiEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[AttachedFile, File, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        attachedfile.FiTable,
-			Columns:      attachedfile.FiColumn,
-			Bidi:         false,
-			TargetColumn: file.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *AttachedFile) int { return n.ID },
-	ExtractEdgeID: func(e *File) int { return e.ID },
-	ExtractNodeFK: func(n *AttachedFile) *int {
-		v := n.FID
-		return &v
-	},
-}
-var attachedfileProcEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[AttachedFile, Process, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        attachedfile.ProcTable,
-			Columns:      attachedfile.ProcColumn,
-			Bidi:         false,
-			TargetColumn: process.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *AttachedFile) int { return n.ID },
-	ExtractEdgeID: func(e *Process) int { return e.ID },
-	ExtractNodeFK: func(n *AttachedFile) *int {
-		v := n.ProcID
-		return &v
-	},
-}
-
 func (_q *AttachedFileQuery) loadFi(ctx context.Context, query *FileQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *File)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &attachedfileFiEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(file.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*AttachedFile)
+	for i := range nodes {
+		fk := nodes[i].FID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(file.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "f_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *AttachedFileQuery) loadProc(ctx context.Context, query *ProcessQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *Process)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &attachedfileProcEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(process.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*AttachedFile)
+	for i := range nodes {
+		fk := nodes[i].ProcID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(process.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "proc_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 

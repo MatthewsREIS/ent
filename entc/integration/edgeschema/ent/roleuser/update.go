@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *RoleUserUpdate) Where(ps ...predicate.RoleUser) *RoleUserUpdate {
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *RoleUserUpdate) SetCreatedAt(v time.Time) *RoleUserUpdate {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -52,8 +52,7 @@ func (_u *RoleUserUpdate) SetNillableCreatedAt(v *time.Time) *RoleUserUpdate {
 
 // SetRoleID sets the "role_id" field.
 func (_u *RoleUserUpdate) SetRoleID(v int) *RoleUserUpdate {
-	_u.mutation.SetRoleID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetRoleID, v)
 }
 
 // SetNillableRoleID sets the "role_id" field if the given value is not nil.
@@ -66,8 +65,7 @@ func (_u *RoleUserUpdate) SetNillableRoleID(v *int) *RoleUserUpdate {
 
 // SetUserID sets the "user_id" field.
 func (_u *RoleUserUpdate) SetUserID(v int) *RoleUserUpdate {
-	_u.mutation.SetUserID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, v)
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
@@ -79,20 +77,16 @@ func (_u *RoleUserUpdate) SetNillableUserID(v *int) *RoleUserUpdate {
 }
 
 // Mutation returns the RoleUserMutation object of the builder.
-func (_u *RoleUserUpdate) Mutation() *RoleUserMutation {
-	return _u.mutation
-}
+func (_u *RoleUserUpdate) Mutation() *RoleUserMutation { return _u.mutation }
 
 // ClearRole clears the "role" edge to the Role entity.
 func (_u *RoleUserUpdate) ClearRole() *RoleUserUpdate {
-	_u.mutation.ClearRole()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRole)
 }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *RoleUserUpdate) ClearUser() *RoleUserUpdate {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -101,19 +95,10 @@ func (_u *RoleUserUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *RoleUserUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *RoleUserUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *RoleUserUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RoleUserUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RoleUserUpdate) ExecX(ctx context.Context) {
@@ -233,8 +218,7 @@ func NewRoleUserUpdateOne(c Config, hooks []Hook, mutation *RoleUserMutation) *R
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *RoleUserUpdateOne) SetCreatedAt(v time.Time) *RoleUserUpdateOne {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -247,8 +231,7 @@ func (_u *RoleUserUpdateOne) SetNillableCreatedAt(v *time.Time) *RoleUserUpdateO
 
 // SetRoleID sets the "role_id" field.
 func (_u *RoleUserUpdateOne) SetRoleID(v int) *RoleUserUpdateOne {
-	_u.mutation.SetRoleID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetRoleID, v)
 }
 
 // SetNillableRoleID sets the "role_id" field if the given value is not nil.
@@ -261,8 +244,7 @@ func (_u *RoleUserUpdateOne) SetNillableRoleID(v *int) *RoleUserUpdateOne {
 
 // SetUserID sets the "user_id" field.
 func (_u *RoleUserUpdateOne) SetUserID(v int) *RoleUserUpdateOne {
-	_u.mutation.SetUserID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, v)
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
@@ -274,20 +256,16 @@ func (_u *RoleUserUpdateOne) SetNillableUserID(v *int) *RoleUserUpdateOne {
 }
 
 // Mutation returns the RoleUserMutation object of the builder.
-func (_u *RoleUserUpdateOne) Mutation() *RoleUserMutation {
-	return _u.mutation
-}
+func (_u *RoleUserUpdateOne) Mutation() *RoleUserMutation { return _u.mutation }
 
 // ClearRole clears the "role" edge to the Role entity.
 func (_u *RoleUserUpdateOne) ClearRole() *RoleUserUpdateOne {
-	_u.mutation.ClearRole()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRole)
 }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *RoleUserUpdateOne) ClearUser() *RoleUserUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // Where appends a list predicates to the RoleUserUpdate builder.
@@ -310,18 +288,11 @@ func (_u *RoleUserUpdateOne) Save(ctx context.Context) (*RoleUser, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *RoleUserUpdateOne) SaveX(ctx context.Context) *RoleUser {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *RoleUserUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RoleUserUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RoleUserUpdateOne) ExecX(ctx context.Context) {

@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -44,23 +45,14 @@ func (_q *DeviceQuery) Where(ps ...predicate.Device) *DeviceQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *DeviceQuery) Limit(limit int) *DeviceQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *DeviceQuery) Limit(limit int) *DeviceQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *DeviceQuery) Offset(offset int) *DeviceQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *DeviceQuery) Offset(offset int) *DeviceQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *DeviceQuery) Unique(unique bool) *DeviceQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *DeviceQuery) Unique(unique bool) *DeviceQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *DeviceQuery) Order(o ...device.OrderOption) *DeviceQuery {
@@ -176,13 +168,7 @@ func (_q *DeviceQuery) Only(ctx context.Context) (*Device, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *DeviceQuery) OnlyX(ctx context.Context) *Device {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *DeviceQuery) OnlyX(ctx context.Context) *Device { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Device ID in the query.
 // Returns a *NotSingularError when more than one Device ID is found.
@@ -204,13 +190,7 @@ func (_q *DeviceQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *DeviceQuery) OnlyIDX(ctx context.Context) schema.ID {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *DeviceQuery) OnlyIDX(ctx context.Context) schema.ID { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Devices.
 func (_q *DeviceQuery) All(ctx context.Context) ([]*Device, error) {
@@ -223,13 +203,7 @@ func (_q *DeviceQuery) All(ctx context.Context) ([]*Device, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *DeviceQuery) AllX(ctx context.Context) []*Device {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *DeviceQuery) AllX(ctx context.Context) []*Device { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Device IDs.
 func (_q *DeviceQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
@@ -244,13 +218,7 @@ func (_q *DeviceQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *DeviceQuery) IDsX(ctx context.Context) []schema.ID {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *DeviceQuery) IDsX(ctx context.Context) []schema.ID { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *DeviceQuery) Count(ctx context.Context) (int, error) {
@@ -262,13 +230,7 @@ func (_q *DeviceQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *DeviceQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *DeviceQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *DeviceQuery) Exist(ctx context.Context) (bool, error) {
@@ -284,13 +246,7 @@ func (_q *DeviceQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *DeviceQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *DeviceQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the DeviceQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

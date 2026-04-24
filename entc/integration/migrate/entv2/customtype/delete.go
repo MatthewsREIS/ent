@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -39,13 +40,7 @@ func (_d *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *CustomTypeDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *CustomTypeDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *CustomTypeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))

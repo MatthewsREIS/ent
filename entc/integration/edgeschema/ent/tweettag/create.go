@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -34,8 +35,7 @@ func NewTweetTagCreate(c Config, hooks []Hook, mutation *TweetTagMutation) *Twee
 
 // SetAddedAt sets the "added_at" field.
 func (_c *TweetTagCreate) SetAddedAt(v time.Time) *TweetTagCreate {
-	_c.mutation.SetAddedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetAddedAt, v)
 }
 
 // SetNillableAddedAt sets the "added_at" field if the given value is not nil.
@@ -48,20 +48,17 @@ func (_c *TweetTagCreate) SetNillableAddedAt(v *time.Time) *TweetTagCreate {
 
 // SetTagID sets the "tag_id" field.
 func (_c *TweetTagCreate) SetTagID(v int) *TweetTagCreate {
-	_c.mutation.SetTagID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTagID, v)
 }
 
 // SetTweetID sets the "tweet_id" field.
 func (_c *TweetTagCreate) SetTweetID(v int) *TweetTagCreate {
-	_c.mutation.SetTweetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTweetID, v)
 }
 
 // SetID sets the "id" field.
 func (_c *TweetTagCreate) SetID(v uuid.UUID) *TweetTagCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
@@ -73,9 +70,7 @@ func (_c *TweetTagCreate) SetNillableID(v *uuid.UUID) *TweetTagCreate {
 }
 
 // Mutation returns the TweetTagMutation object of the builder.
-func (_c *TweetTagCreate) Mutation() *TweetTagMutation {
-	return _c.mutation
-}
+func (_c *TweetTagCreate) Mutation() *TweetTagMutation { return _c.mutation }
 
 // Save creates the TweetTag in the database.
 func (_c *TweetTagCreate) Save(ctx context.Context) (*TweetTag, error) {
@@ -84,19 +79,10 @@ func (_c *TweetTagCreate) Save(ctx context.Context) (*TweetTag, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TweetTagCreate) SaveX(ctx context.Context) *TweetTag {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *TweetTagCreate) SaveX(ctx context.Context) *TweetTag { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *TweetTagCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TweetTagCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TweetTagCreate) ExecX(ctx context.Context) {

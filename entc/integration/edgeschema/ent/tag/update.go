@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -32,15 +33,11 @@ func NewTagUpdate(c Config, hooks []Hook, mutation *TagMutation) *TagUpdate {
 }
 
 // Where appends a list predicates to the TagUpdate builder.
-func (_u *TagUpdate) Where(ps ...predicate.Tag) *TagUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *TagUpdate) Where(ps ...predicate.Tag) *TagUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetValue sets the "value" field.
 func (_u *TagUpdate) SetValue(v string) *TagUpdate {
-	_u.mutation.SetValue(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetValue, v)
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
@@ -52,16 +49,10 @@ func (_u *TagUpdate) SetNillableValue(v *string) *TagUpdate {
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_u *TagUpdate) AddTweetIDs(ids ...int) *TagUpdate {
-	_u.mutation.AddTweetIDs(ids...)
-	return _u
-}
+func (_u *TagUpdate) AddTweetIDs(ids ...int) *TagUpdate { _u.mutation.AddTweetIDs(ids...); return _u }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *TagUpdate) AddGroupIDs(ids ...int) *TagUpdate {
-	_u.mutation.AddGroupIDs(ids...)
-	return _u
-}
+func (_u *TagUpdate) AddGroupIDs(ids ...int) *TagUpdate { _u.mutation.AddGroupIDs(ids...); return _u }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (_u *TagUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TagUpdate {
@@ -76,15 +67,10 @@ func (_u *TagUpdate) AddGroupTagIDs(ids ...int) *TagUpdate {
 }
 
 // Mutation returns the TagMutation object of the builder.
-func (_u *TagUpdate) Mutation() *TagMutation {
-	return _u.mutation
-}
+func (_u *TagUpdate) Mutation() *TagMutation { return _u.mutation }
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
-func (_u *TagUpdate) ClearTweets() *TagUpdate {
-	_u.mutation.ClearTweets()
-	return _u
-}
+func (_u *TagUpdate) ClearTweets() *TagUpdate { return entbuilder.BClear(_u, _u.mutation.ClearTweets) }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
 func (_u *TagUpdate) RemoveTweetIDs(ids ...int) *TagUpdate {
@@ -93,10 +79,7 @@ func (_u *TagUpdate) RemoveTweetIDs(ids ...int) *TagUpdate {
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (_u *TagUpdate) ClearGroups() *TagUpdate {
-	_u.mutation.ClearGroups()
-	return _u
-}
+func (_u *TagUpdate) ClearGroups() *TagUpdate { return entbuilder.BClear(_u, _u.mutation.ClearGroups) }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *TagUpdate) RemoveGroupIDs(ids ...int) *TagUpdate {
@@ -106,8 +89,7 @@ func (_u *TagUpdate) RemoveGroupIDs(ids ...int) *TagUpdate {
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
 func (_u *TagUpdate) ClearTweetTags() *TagUpdate {
-	_u.mutation.ClearTweetTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweetTags)
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
@@ -118,8 +100,7 @@ func (_u *TagUpdate) RemoveTweetTagIDs(ids ...uuid.UUID) *TagUpdate {
 
 // ClearGroupTags clears all "group_tags" edges to the GroupTag entity.
 func (_u *TagUpdate) ClearGroupTags() *TagUpdate {
-	_u.mutation.ClearGroupTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroupTags)
 }
 
 // RemoveGroupTagIDs removes the "group_tags" edge to GroupTag entities by IDs.
@@ -134,19 +115,10 @@ func (_u *TagUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TagUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *TagUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *TagUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TagUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TagUpdate) ExecX(ctx context.Context) {
@@ -389,8 +361,7 @@ func NewTagUpdateOne(c Config, hooks []Hook, mutation *TagMutation) *TagUpdateOn
 
 // SetValue sets the "value" field.
 func (_u *TagUpdateOne) SetValue(v string) *TagUpdateOne {
-	_u.mutation.SetValue(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetValue, v)
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
@@ -426,14 +397,11 @@ func (_u *TagUpdateOne) AddGroupTagIDs(ids ...int) *TagUpdateOne {
 }
 
 // Mutation returns the TagMutation object of the builder.
-func (_u *TagUpdateOne) Mutation() *TagMutation {
-	return _u.mutation
-}
+func (_u *TagUpdateOne) Mutation() *TagMutation { return _u.mutation }
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
 func (_u *TagUpdateOne) ClearTweets() *TagUpdateOne {
-	_u.mutation.ClearTweets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweets)
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
@@ -444,8 +412,7 @@ func (_u *TagUpdateOne) RemoveTweetIDs(ids ...int) *TagUpdateOne {
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *TagUpdateOne) ClearGroups() *TagUpdateOne {
-	_u.mutation.ClearGroups()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroups)
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
@@ -456,8 +423,7 @@ func (_u *TagUpdateOne) RemoveGroupIDs(ids ...int) *TagUpdateOne {
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
 func (_u *TagUpdateOne) ClearTweetTags() *TagUpdateOne {
-	_u.mutation.ClearTweetTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweetTags)
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
@@ -468,8 +434,7 @@ func (_u *TagUpdateOne) RemoveTweetTagIDs(ids ...uuid.UUID) *TagUpdateOne {
 
 // ClearGroupTags clears all "group_tags" edges to the GroupTag entity.
 func (_u *TagUpdateOne) ClearGroupTags() *TagUpdateOne {
-	_u.mutation.ClearGroupTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroupTags)
 }
 
 // RemoveGroupTagIDs removes the "group_tags" edge to GroupTag entities by IDs.
@@ -479,10 +444,7 @@ func (_u *TagUpdateOne) RemoveGroupTagIDs(ids ...int) *TagUpdateOne {
 }
 
 // Where appends a list predicates to the TagUpdate builder.
-func (_u *TagUpdateOne) Where(ps ...predicate.Tag) *TagUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *TagUpdateOne) Where(ps ...predicate.Tag) *TagUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -497,19 +459,10 @@ func (_u *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TagUpdateOne) SaveX(ctx context.Context) *Tag {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *TagUpdateOne) SaveX(ctx context.Context) *Tag { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *TagUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TagUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TagUpdateOne) ExecX(ctx context.Context) {

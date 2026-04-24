@@ -12,7 +12,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $mutation := print $receiver ".mutation"  }}
 
 func ({{ $receiver }} *{{ $builder }}) gremlinSave(ctx context.Context) (*{{ $.Name }}, error) {
-	if err := entgen.CheckCreate({{ $receiver }}.driver.Dialect(), {{ $mutation }}, {{ index $.Scope "SpecVar" }}); err != nil {
+	if err := {{ $receiver }}.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,8 +30,7 @@ func NewParentCreate(c Config, hooks []Hook, mutation *ParentMutation) *ParentCr
 
 // SetByAdoption sets the "by_adoption" field.
 func (_c *ParentCreate) SetByAdoption(v bool) *ParentCreate {
-	_c.mutation.SetByAdoption(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetByAdoption, v)
 }
 
 // SetNillableByAdoption sets the "by_adoption" field if the given value is not nil.
@@ -43,26 +43,21 @@ func (_c *ParentCreate) SetNillableByAdoption(v *bool) *ParentCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *ParentCreate) SetUserID(v int) *ParentCreate {
-	_c.mutation.SetUserID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, v)
 }
 
 // SetParentID sets the "parent_id" field.
 func (_c *ParentCreate) SetParentID(v int) *ParentCreate {
-	_c.mutation.SetParentID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, v)
 }
 
 // SetChildID sets the "child" edge to the User entity by ID.
 func (_c *ParentCreate) SetChildID(id int) *ParentCreate {
-	_c.mutation.SetChildID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetChildID, id)
 }
 
 // Mutation returns the ParentMutation object of the builder.
-func (_c *ParentCreate) Mutation() *ParentMutation {
-	return _c.mutation
-}
+func (_c *ParentCreate) Mutation() *ParentMutation { return _c.mutation }
 
 // Save creates the Parent in the database.
 func (_c *ParentCreate) Save(ctx context.Context) (*Parent, error) {
@@ -71,19 +66,10 @@ func (_c *ParentCreate) Save(ctx context.Context) (*Parent, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *ParentCreate) SaveX(ctx context.Context) *Parent {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *ParentCreate) SaveX(ctx context.Context) *Parent { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *ParentCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *ParentCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *ParentCreate) ExecX(ctx context.Context) {

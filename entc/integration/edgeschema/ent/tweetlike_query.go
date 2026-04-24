@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TweetLikeQuery is the builder for querying TweetLike entities.
@@ -42,23 +43,14 @@ func (_q *TweetLikeQuery) Where(ps ...predicate.TweetLike) *TweetLikeQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *TweetLikeQuery) Limit(limit int) *TweetLikeQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *TweetLikeQuery) Limit(limit int) *TweetLikeQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *TweetLikeQuery) Offset(offset int) *TweetLikeQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *TweetLikeQuery) Offset(offset int) *TweetLikeQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *TweetLikeQuery) Unique(unique bool) *TweetLikeQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *TweetLikeQuery) Unique(unique bool) *TweetLikeQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *TweetLikeQuery) Order(o ...tweetlike.OrderOption) *TweetLikeQuery {
@@ -151,13 +143,7 @@ func (_q *TweetLikeQuery) Only(ctx context.Context) (*TweetLike, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *TweetLikeQuery) OnlyX(ctx context.Context) *TweetLike {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *TweetLikeQuery) OnlyX(ctx context.Context) *TweetLike { return entbuilder.Must(_q.Only(ctx)) }
 
 // All executes the query and returns a list of TweetLikes.
 func (_q *TweetLikeQuery) All(ctx context.Context) ([]*TweetLike, error) {
@@ -170,13 +156,7 @@ func (_q *TweetLikeQuery) All(ctx context.Context) ([]*TweetLike, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *TweetLikeQuery) AllX(ctx context.Context) []*TweetLike {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *TweetLikeQuery) AllX(ctx context.Context) []*TweetLike { return entbuilder.Must(_q.All(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *TweetLikeQuery) Count(ctx context.Context) (int, error) {
@@ -188,13 +168,7 @@ func (_q *TweetLikeQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *TweetLikeQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *TweetLikeQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *TweetLikeQuery) Exist(ctx context.Context) (bool, error) {
@@ -210,13 +184,7 @@ func (_q *TweetLikeQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *TweetLikeQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *TweetLikeQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the TweetLikeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

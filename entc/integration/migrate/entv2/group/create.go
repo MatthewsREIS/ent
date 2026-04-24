@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -27,9 +28,7 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_c *GroupCreate) Mutation() *GroupMutation {
-	return _c.mutation
-}
+func (_c *GroupCreate) Mutation() *GroupMutation { return _c.mutation }
 
 // Save creates the Group in the database.
 func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
@@ -37,19 +36,10 @@ func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *GroupCreate) SaveX(ctx context.Context) *Group {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *GroupCreate) SaveX(ctx context.Context) *Group { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *GroupCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *GroupCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *GroupCreate) ExecX(ctx context.Context) {

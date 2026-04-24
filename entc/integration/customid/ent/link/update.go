@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,21 +32,15 @@ func NewLinkUpdate(c Config, hooks []Hook, mutation *LinkMutation) *LinkUpdate {
 }
 
 // Where appends a list predicates to the LinkUpdate builder.
-func (_u *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetLinkInformation sets the "link_information" field.
 func (_u *LinkUpdate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdate {
-	_u.mutation.SetLinkInformation(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLinkInformation, v)
 }
 
 // Mutation returns the LinkMutation object of the builder.
-func (_u *LinkUpdate) Mutation() *LinkMutation {
-	return _u.mutation
-}
+func (_u *LinkUpdate) Mutation() *LinkMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LinkUpdate) Save(ctx context.Context) (int, error) {
@@ -53,19 +48,10 @@ func (_u *LinkUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *LinkUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *LinkUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *LinkUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *LinkUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *LinkUpdate) ExecX(ctx context.Context) {
@@ -113,14 +99,11 @@ func NewLinkUpdateOne(c Config, hooks []Hook, mutation *LinkMutation) *LinkUpdat
 
 // SetLinkInformation sets the "link_information" field.
 func (_u *LinkUpdateOne) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdateOne {
-	_u.mutation.SetLinkInformation(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLinkInformation, v)
 }
 
 // Mutation returns the LinkMutation object of the builder.
-func (_u *LinkUpdateOne) Mutation() *LinkMutation {
-	return _u.mutation
-}
+func (_u *LinkUpdateOne) Mutation() *LinkMutation { return _u.mutation }
 
 // Where appends a list predicates to the LinkUpdate builder.
 func (_u *LinkUpdateOne) Where(ps ...predicate.Link) *LinkUpdateOne {
@@ -141,19 +124,10 @@ func (_u *LinkUpdateOne) Save(ctx context.Context) (*Link, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *LinkUpdateOne) SaveX(ctx context.Context) *Link {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *LinkUpdateOne) SaveX(ctx context.Context) *Link { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *LinkUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *LinkUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *LinkUpdateOne) ExecX(ctx context.Context) {

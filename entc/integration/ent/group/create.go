@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 
 // SetActive sets the "active" field.
 func (_c *GroupCreate) SetActive(v bool) *GroupCreate {
-	_c.mutation.SetActive(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetActive, v)
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
@@ -46,14 +46,12 @@ func (_c *GroupCreate) SetNillableActive(v *bool) *GroupCreate {
 
 // SetExpire sets the "expire" field.
 func (_c *GroupCreate) SetExpire(v time.Time) *GroupCreate {
-	_c.mutation.SetExpire(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetExpire, v)
 }
 
 // SetType sets the "type" field.
 func (_c *GroupCreate) SetType(v string) *GroupCreate {
-	_c.mutation.SetType(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetType, v)
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
@@ -66,8 +64,7 @@ func (_c *GroupCreate) SetNillableType(v *string) *GroupCreate {
 
 // SetMaxUsers sets the "max_users" field.
 func (_c *GroupCreate) SetMaxUsers(v int) *GroupCreate {
-	_c.mutation.SetMaxUsers(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetMaxUsers, v)
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
@@ -80,15 +77,11 @@ func (_c *GroupCreate) SetNillableMaxUsers(v *int) *GroupCreate {
 
 // SetName sets the "name" field.
 func (_c *GroupCreate) SetName(v string) *GroupCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_c *GroupCreate) AddFileIDs(ids ...int) *GroupCreate {
-	_c.mutation.AddFileIDs(ids...)
-	return _c
-}
+func (_c *GroupCreate) AddFileIDs(ids ...int) *GroupCreate { _c.mutation.AddFileIDs(ids...); return _c }
 
 // AddBlockedIDs adds the "blocked" edge to the User entity by IDs.
 func (_c *GroupCreate) AddBlockedIDs(ids ...int) *GroupCreate {
@@ -97,21 +90,15 @@ func (_c *GroupCreate) AddBlockedIDs(ids ...int) *GroupCreate {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
-	_c.mutation.AddUserIDs(ids...)
-	return _c
-}
+func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate { _c.mutation.AddUserIDs(ids...); return _c }
 
 // SetInfoID sets the "info" edge to the GroupInfo entity by ID.
 func (_c *GroupCreate) SetInfoID(id int) *GroupCreate {
-	_c.mutation.SetInfoID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInfoID, id)
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_c *GroupCreate) Mutation() *GroupMutation {
-	return _c.mutation
-}
+func (_c *GroupCreate) Mutation() *GroupMutation { return _c.mutation }
 
 // Save creates the Group in the database.
 func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
@@ -120,19 +107,10 @@ func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *GroupCreate) SaveX(ctx context.Context) *Group {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *GroupCreate) SaveX(ctx context.Context) *Group { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *GroupCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *GroupCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *GroupCreate) ExecX(ctx context.Context) {

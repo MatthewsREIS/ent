@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,16 +32,10 @@ func NewDocUpdate(c Config, hooks []Hook, mutation *DocMutation) *DocUpdate {
 }
 
 // Where appends a list predicates to the DocUpdate builder.
-func (_u *DocUpdate) Where(ps ...predicate.Doc) *DocUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *DocUpdate) Where(ps ...predicate.Doc) *DocUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetText sets the "text" field.
-func (_u *DocUpdate) SetText(v string) *DocUpdate {
-	_u.mutation.SetText(v)
-	return _u
-}
+func (_u *DocUpdate) SetText(v string) *DocUpdate { return entbuilder.BSet(_u, _u.mutation.SetText, v) }
 
 // SetNillableText sets the "text" field if the given value is not nil.
 func (_u *DocUpdate) SetNillableText(v *string) *DocUpdate {
@@ -51,15 +46,11 @@ func (_u *DocUpdate) SetNillableText(v *string) *DocUpdate {
 }
 
 // ClearText clears the value of the "text" field.
-func (_u *DocUpdate) ClearText() *DocUpdate {
-	_u.mutation.ClearText()
-	return _u
-}
+func (_u *DocUpdate) ClearText() *DocUpdate { return entbuilder.BClear(_u, _u.mutation.ClearText) }
 
 // SetParentID sets the "parent" edge to the Doc entity by ID.
 func (_u *DocUpdate) SetParentID(id schema.DocID) *DocUpdate {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Doc entity by ID if the given value is not nil.
@@ -83,20 +74,14 @@ func (_u *DocUpdate) AddRelatedIDs(ids ...schema.DocID) *DocUpdate {
 }
 
 // Mutation returns the DocMutation object of the builder.
-func (_u *DocUpdate) Mutation() *DocMutation {
-	return _u.mutation
-}
+func (_u *DocUpdate) Mutation() *DocMutation { return _u.mutation }
 
 // ClearParent clears the "parent" edge to the Doc entity.
-func (_u *DocUpdate) ClearParent() *DocUpdate {
-	_u.mutation.ClearParent()
-	return _u
-}
+func (_u *DocUpdate) ClearParent() *DocUpdate { return entbuilder.BClear(_u, _u.mutation.ClearParent) }
 
 // ClearChildren clears all "children" edges to the Doc entity.
 func (_u *DocUpdate) ClearChildren() *DocUpdate {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to Doc entities by IDs.
@@ -107,8 +92,7 @@ func (_u *DocUpdate) RemoveChildIDs(ids ...schema.DocID) *DocUpdate {
 
 // ClearRelated clears all "related" edges to the Doc entity.
 func (_u *DocUpdate) ClearRelated() *DocUpdate {
-	_u.mutation.ClearRelated()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRelated)
 }
 
 // RemoveRelatedIDs removes the "related" edge to Doc entities by IDs.
@@ -123,19 +107,10 @@ func (_u *DocUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *DocUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *DocUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *DocUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *DocUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *DocUpdate) ExecX(ctx context.Context) {
@@ -305,8 +280,7 @@ func NewDocUpdateOne(c Config, hooks []Hook, mutation *DocMutation) *DocUpdateOn
 
 // SetText sets the "text" field.
 func (_u *DocUpdateOne) SetText(v string) *DocUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -319,14 +293,12 @@ func (_u *DocUpdateOne) SetNillableText(v *string) *DocUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *DocUpdateOne) ClearText() *DocUpdateOne {
-	_u.mutation.ClearText()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearText)
 }
 
 // SetParentID sets the "parent" edge to the Doc entity by ID.
 func (_u *DocUpdateOne) SetParentID(id schema.DocID) *DocUpdateOne {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Doc entity by ID if the given value is not nil.
@@ -350,20 +322,16 @@ func (_u *DocUpdateOne) AddRelatedIDs(ids ...schema.DocID) *DocUpdateOne {
 }
 
 // Mutation returns the DocMutation object of the builder.
-func (_u *DocUpdateOne) Mutation() *DocMutation {
-	return _u.mutation
-}
+func (_u *DocUpdateOne) Mutation() *DocMutation { return _u.mutation }
 
 // ClearParent clears the "parent" edge to the Doc entity.
 func (_u *DocUpdateOne) ClearParent() *DocUpdateOne {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearChildren clears all "children" edges to the Doc entity.
 func (_u *DocUpdateOne) ClearChildren() *DocUpdateOne {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to Doc entities by IDs.
@@ -374,8 +342,7 @@ func (_u *DocUpdateOne) RemoveChildIDs(ids ...schema.DocID) *DocUpdateOne {
 
 // ClearRelated clears all "related" edges to the Doc entity.
 func (_u *DocUpdateOne) ClearRelated() *DocUpdateOne {
-	_u.mutation.ClearRelated()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRelated)
 }
 
 // RemoveRelatedIDs removes the "related" edge to Doc entities by IDs.
@@ -385,10 +352,7 @@ func (_u *DocUpdateOne) RemoveRelatedIDs(ids ...schema.DocID) *DocUpdateOne {
 }
 
 // Where appends a list predicates to the DocUpdate builder.
-func (_u *DocUpdateOne) Where(ps ...predicate.Doc) *DocUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *DocUpdateOne) Where(ps ...predicate.Doc) *DocUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -403,19 +367,10 @@ func (_u *DocUpdateOne) Save(ctx context.Context) (*Doc, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *DocUpdateOne) SaveX(ctx context.Context) *Doc {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *DocUpdateOne) SaveX(ctx context.Context) *Doc { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *DocUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *DocUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *DocUpdateOne) ExecX(ctx context.Context) {

@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -42,23 +43,14 @@ func (_q *SessionQuery) Where(ps ...predicate.Session) *SessionQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *SessionQuery) Limit(limit int) *SessionQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *SessionQuery) Limit(limit int) *SessionQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *SessionQuery) Offset(offset int) *SessionQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *SessionQuery) Offset(offset int) *SessionQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *SessionQuery) Unique(unique bool) *SessionQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *SessionQuery) Unique(unique bool) *SessionQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *SessionQuery) Order(o ...session.OrderOption) *SessionQuery {
@@ -152,13 +144,7 @@ func (_q *SessionQuery) Only(ctx context.Context) (*Session, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *SessionQuery) OnlyX(ctx context.Context) *Session {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *SessionQuery) OnlyX(ctx context.Context) *Session { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Session ID in the query.
 // Returns a *NotSingularError when more than one Session ID is found.
@@ -181,11 +167,7 @@ func (_q *SessionQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
 func (_q *SessionQuery) OnlyIDX(ctx context.Context) schema.ID {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.Must(_q.OnlyID(ctx))
 }
 
 // All executes the query and returns a list of Sessions.
@@ -199,13 +181,7 @@ func (_q *SessionQuery) All(ctx context.Context) ([]*Session, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *SessionQuery) AllX(ctx context.Context) []*Session {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *SessionQuery) AllX(ctx context.Context) []*Session { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Session IDs.
 func (_q *SessionQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
@@ -220,13 +196,7 @@ func (_q *SessionQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *SessionQuery) IDsX(ctx context.Context) []schema.ID {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *SessionQuery) IDsX(ctx context.Context) []schema.ID { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *SessionQuery) Count(ctx context.Context) (int, error) {
@@ -238,13 +208,7 @@ func (_q *SessionQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *SessionQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *SessionQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *SessionQuery) Exist(ctx context.Context) (bool, error) {
@@ -260,13 +224,7 @@ func (_q *SessionQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *SessionQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *SessionQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the SessionQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

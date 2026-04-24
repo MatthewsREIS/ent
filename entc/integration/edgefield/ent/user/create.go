@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,8 +29,7 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetParentID sets the "parent_id" field.
 func (_c *UserCreate) SetParentID(v int) *UserCreate {
-	_c.mutation.SetParentID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, v)
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
@@ -42,8 +42,7 @@ func (_c *UserCreate) SetNillableParentID(v *int) *UserCreate {
 
 // SetSpouseID sets the "spouse_id" field.
 func (_c *UserCreate) SetSpouseID(v int) *UserCreate {
-	_c.mutation.SetSpouseID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSpouseID, v)
 }
 
 // SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
@@ -55,27 +54,17 @@ func (_c *UserCreate) SetNillableSpouseID(v *int) *UserCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *UserCreate) SetID(v int) *UserCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *UserCreate) SetID(v int) *UserCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
-	_c.mutation.AddPetIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate { _c.mutation.AddPetIDs(ids...); return _c }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	_c.mutation.AddChildIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate { _c.mutation.AddChildIDs(ids...); return _c }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (_c *UserCreate) SetCardID(id int) *UserCreate {
-	_c.mutation.SetCardID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCardID, id)
 }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
@@ -88,8 +77,7 @@ func (_c *UserCreate) SetNillableCardID(id *int) *UserCreate {
 
 // SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
 func (_c *UserCreate) SetMetadataID(id int) *UserCreate {
-	_c.mutation.SetMetadataID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetMetadataID, id)
 }
 
 // SetNillableMetadataID sets the "metadata" edge to the Metadata entity by ID if the given value is not nil.
@@ -101,10 +89,7 @@ func (_c *UserCreate) SetNillableMetadataID(id *int) *UserCreate {
 }
 
 // AddInfoIDs adds the "info" edge to the Info entity by IDs.
-func (_c *UserCreate) AddInfoIDs(ids ...int) *UserCreate {
-	_c.mutation.AddInfoIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddInfoIDs(ids ...int) *UserCreate { _c.mutation.AddInfoIDs(ids...); return _c }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
 func (_c *UserCreate) AddRentalIDs(ids ...int) *UserCreate {
@@ -113,9 +98,7 @@ func (_c *UserCreate) AddRentalIDs(ids ...int) *UserCreate {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_c *UserCreate) Mutation() *UserMutation {
-	return _c.mutation
-}
+func (_c *UserCreate) Mutation() *UserMutation { return _c.mutation }
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
@@ -123,19 +106,10 @@ func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *UserCreate) SaveX(ctx context.Context) *User { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *UserCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *UserCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *UserCreate) ExecX(ctx context.Context) {

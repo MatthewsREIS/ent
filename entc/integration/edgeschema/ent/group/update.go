@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,15 +32,11 @@ func NewGroupUpdate(c Config, hooks []Hook, mutation *GroupMutation) *GroupUpdat
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
-func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
 func (_u *GroupUpdate) SetName(v string) *GroupUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -51,16 +48,10 @@ func (_u *GroupUpdate) SetNillableName(v *string) *GroupUpdate {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
+func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate { _u.mutation.AddUserIDs(ids...); return _u }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (_u *GroupUpdate) AddTagIDs(ids ...int) *GroupUpdate {
-	_u.mutation.AddTagIDs(ids...)
-	return _u
-}
+func (_u *GroupUpdate) AddTagIDs(ids ...int) *GroupUpdate { _u.mutation.AddTagIDs(ids...); return _u }
 
 // AddJoinedUserIDs adds the "joined_users" edge to the UserGroup entity by IDs.
 func (_u *GroupUpdate) AddJoinedUserIDs(ids ...int) *GroupUpdate {
@@ -75,14 +66,11 @@ func (_u *GroupUpdate) AddGroupTagIDs(ids ...int) *GroupUpdate {
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_u *GroupUpdate) Mutation() *GroupMutation {
-	return _u.mutation
-}
+func (_u *GroupUpdate) Mutation() *GroupMutation { return _u.mutation }
 
 // ClearUsers clears all "users" edges to the User entity.
 func (_u *GroupUpdate) ClearUsers() *GroupUpdate {
-	_u.mutation.ClearUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUsers)
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
@@ -92,10 +80,7 @@ func (_u *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 }
 
 // ClearTags clears all "tags" edges to the Tag entity.
-func (_u *GroupUpdate) ClearTags() *GroupUpdate {
-	_u.mutation.ClearTags()
-	return _u
-}
+func (_u *GroupUpdate) ClearTags() *GroupUpdate { return entbuilder.BClear(_u, _u.mutation.ClearTags) }
 
 // RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
 func (_u *GroupUpdate) RemoveTagIDs(ids ...int) *GroupUpdate {
@@ -105,8 +90,7 @@ func (_u *GroupUpdate) RemoveTagIDs(ids ...int) *GroupUpdate {
 
 // ClearJoinedUsers clears all "joined_users" edges to the UserGroup entity.
 func (_u *GroupUpdate) ClearJoinedUsers() *GroupUpdate {
-	_u.mutation.ClearJoinedUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearJoinedUsers)
 }
 
 // RemoveJoinedUserIDs removes the "joined_users" edge to UserGroup entities by IDs.
@@ -117,8 +101,7 @@ func (_u *GroupUpdate) RemoveJoinedUserIDs(ids ...int) *GroupUpdate {
 
 // ClearGroupTags clears all "group_tags" edges to the GroupTag entity.
 func (_u *GroupUpdate) ClearGroupTags() *GroupUpdate {
-	_u.mutation.ClearGroupTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroupTags)
 }
 
 // RemoveGroupTagIDs removes the "group_tags" edge to GroupTag entities by IDs.
@@ -133,19 +116,10 @@ func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *GroupUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *GroupUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupUpdate) ExecX(ctx context.Context) {
@@ -379,8 +353,7 @@ func NewGroupUpdateOne(c Config, hooks []Hook, mutation *GroupMutation) *GroupUp
 
 // SetName sets the "name" field.
 func (_u *GroupUpdateOne) SetName(v string) *GroupUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -416,14 +389,11 @@ func (_u *GroupUpdateOne) AddGroupTagIDs(ids ...int) *GroupUpdateOne {
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_u *GroupUpdateOne) Mutation() *GroupMutation {
-	return _u.mutation
-}
+func (_u *GroupUpdateOne) Mutation() *GroupMutation { return _u.mutation }
 
 // ClearUsers clears all "users" edges to the User entity.
 func (_u *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
-	_u.mutation.ClearUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUsers)
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
@@ -434,8 +404,7 @@ func (_u *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 
 // ClearTags clears all "tags" edges to the Tag entity.
 func (_u *GroupUpdateOne) ClearTags() *GroupUpdateOne {
-	_u.mutation.ClearTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTags)
 }
 
 // RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
@@ -446,8 +415,7 @@ func (_u *GroupUpdateOne) RemoveTagIDs(ids ...int) *GroupUpdateOne {
 
 // ClearJoinedUsers clears all "joined_users" edges to the UserGroup entity.
 func (_u *GroupUpdateOne) ClearJoinedUsers() *GroupUpdateOne {
-	_u.mutation.ClearJoinedUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearJoinedUsers)
 }
 
 // RemoveJoinedUserIDs removes the "joined_users" edge to UserGroup entities by IDs.
@@ -458,8 +426,7 @@ func (_u *GroupUpdateOne) RemoveJoinedUserIDs(ids ...int) *GroupUpdateOne {
 
 // ClearGroupTags clears all "group_tags" edges to the GroupTag entity.
 func (_u *GroupUpdateOne) ClearGroupTags() *GroupUpdateOne {
-	_u.mutation.ClearGroupTags()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroupTags)
 }
 
 // RemoveGroupTagIDs removes the "group_tags" edge to GroupTag entities by IDs.
@@ -487,19 +454,10 @@ func (_u *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *GroupUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupUpdateOne) ExecX(ctx context.Context) {

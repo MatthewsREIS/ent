@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -33,8 +34,7 @@ func NewBlobLinkCreate(c Config, hooks []Hook, mutation *BlobLinkMutation) *Blob
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *BlobLinkCreate) SetCreatedAt(v time.Time) *BlobLinkCreate {
-	_c.mutation.SetCreatedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -47,20 +47,16 @@ func (_c *BlobLinkCreate) SetNillableCreatedAt(v *time.Time) *BlobLinkCreate {
 
 // SetBlobID sets the "blob_id" field.
 func (_c *BlobLinkCreate) SetBlobID(v uuid.UUID) *BlobLinkCreate {
-	_c.mutation.SetBlobID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetBlobID, v)
 }
 
 // SetLinkID sets the "link_id" field.
 func (_c *BlobLinkCreate) SetLinkID(v uuid.UUID) *BlobLinkCreate {
-	_c.mutation.SetLinkID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetLinkID, v)
 }
 
 // Mutation returns the BlobLinkMutation object of the builder.
-func (_c *BlobLinkCreate) Mutation() *BlobLinkMutation {
-	return _c.mutation
-}
+func (_c *BlobLinkCreate) Mutation() *BlobLinkMutation { return _c.mutation }
 
 // Save creates the BlobLink in the database.
 func (_c *BlobLinkCreate) Save(ctx context.Context) (*BlobLink, error) {
@@ -69,19 +65,10 @@ func (_c *BlobLinkCreate) Save(ctx context.Context) (*BlobLink, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *BlobLinkCreate) SaveX(ctx context.Context) *BlobLink {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *BlobLinkCreate) SaveX(ctx context.Context) *BlobLink { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *BlobLinkCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *BlobLinkCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *BlobLinkCreate) ExecX(ctx context.Context) {

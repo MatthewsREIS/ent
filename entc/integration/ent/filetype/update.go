@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 
 // SetName sets the "name" field.
 func (_u *FileTypeUpdate) SetName(v string) *FileTypeUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -52,8 +52,7 @@ func (_u *FileTypeUpdate) SetNillableName(v *string) *FileTypeUpdate {
 
 // SetType sets the "type" field.
 func (_u *FileTypeUpdate) SetType(v Type) *FileTypeUpdate {
-	_u.mutation.SetType(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetType, v)
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
@@ -66,8 +65,7 @@ func (_u *FileTypeUpdate) SetNillableType(v *Type) *FileTypeUpdate {
 
 // SetState sets the "state" field.
 func (_u *FileTypeUpdate) SetState(v State) *FileTypeUpdate {
-	_u.mutation.SetState(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetState, v)
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
@@ -85,14 +83,11 @@ func (_u *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (_u *FileTypeUpdate) Mutation() *FileTypeMutation {
-	return _u.mutation
-}
+func (_u *FileTypeUpdate) Mutation() *FileTypeMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
-	_u.mutation.ClearFiles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFiles)
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
@@ -107,19 +102,10 @@ func (_u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FileTypeUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *FileTypeUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *FileTypeUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FileTypeUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FileTypeUpdate) ExecX(ctx context.Context) {
@@ -244,8 +230,7 @@ func NewFileTypeUpdateOne(c Config, hooks []Hook, mutation *FileTypeMutation) *F
 
 // SetName sets the "name" field.
 func (_u *FileTypeUpdateOne) SetName(v string) *FileTypeUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -258,8 +243,7 @@ func (_u *FileTypeUpdateOne) SetNillableName(v *string) *FileTypeUpdateOne {
 
 // SetType sets the "type" field.
 func (_u *FileTypeUpdateOne) SetType(v Type) *FileTypeUpdateOne {
-	_u.mutation.SetType(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetType, v)
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
@@ -272,8 +256,7 @@ func (_u *FileTypeUpdateOne) SetNillableType(v *Type) *FileTypeUpdateOne {
 
 // SetState sets the "state" field.
 func (_u *FileTypeUpdateOne) SetState(v State) *FileTypeUpdateOne {
-	_u.mutation.SetState(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetState, v)
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
@@ -291,14 +274,11 @@ func (_u *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation {
-	return _u.mutation
-}
+func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
-	_u.mutation.ClearFiles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFiles)
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
@@ -327,18 +307,11 @@ func (_u *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *FileTypeUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FileTypeUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FileTypeUpdateOne) ExecX(ctx context.Context) {

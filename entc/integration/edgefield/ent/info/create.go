@@ -13,6 +13,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,20 +31,15 @@ func NewInfoCreate(c Config, hooks []Hook, mutation *InfoMutation) *InfoCreate {
 
 // SetContent sets the "content" field.
 func (_c *InfoCreate) SetContent(v json.RawMessage) *InfoCreate {
-	_c.mutation.SetContent(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetContent, v)
 }
 
 // SetID sets the "id" field.
-func (_c *InfoCreate) SetID(v int) *InfoCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *InfoCreate) SetID(v int) *InfoCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_c *InfoCreate) SetUserID(id int) *InfoCreate {
-	_c.mutation.SetUserID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, id)
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
@@ -55,9 +51,7 @@ func (_c *InfoCreate) SetNillableUserID(id *int) *InfoCreate {
 }
 
 // Mutation returns the InfoMutation object of the builder.
-func (_c *InfoCreate) Mutation() *InfoMutation {
-	return _c.mutation
-}
+func (_c *InfoCreate) Mutation() *InfoMutation { return _c.mutation }
 
 // Save creates the Info in the database.
 func (_c *InfoCreate) Save(ctx context.Context) (*Info, error) {
@@ -65,19 +59,10 @@ func (_c *InfoCreate) Save(ctx context.Context) (*Info, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *InfoCreate) SaveX(ctx context.Context) *Info {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *InfoCreate) SaveX(ctx context.Context) *Info { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *InfoCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *InfoCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *InfoCreate) ExecX(ctx context.Context) {

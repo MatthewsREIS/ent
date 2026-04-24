@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,10 +29,7 @@ func NewFileDelete(c Config, hooks []Hook, mutation *FileMutation) *FileDelete {
 }
 
 // Where appends a list predicates to the FileDelete builder.
-func (_d *FileDelete) Where(ps ...predicate.File) *FileDelete {
-	_d.mutation.Where(ps...)
-	return _d
-}
+func (_d *FileDelete) Where(ps ...predicate.File) *FileDelete { _d.mutation.Where(ps...); return _d }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *FileDelete) Exec(ctx context.Context) (int, error) {
@@ -39,13 +37,7 @@ func (_d *FileDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *FileDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *FileDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *FileDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))

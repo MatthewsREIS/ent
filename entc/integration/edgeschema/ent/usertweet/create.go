@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewUserTweetCreate(c Config, hooks []Hook, mutation *UserTweetMutation) *Us
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *UserTweetCreate) SetCreatedAt(v time.Time) *UserTweetCreate {
-	_c.mutation.SetCreatedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -46,20 +46,16 @@ func (_c *UserTweetCreate) SetNillableCreatedAt(v *time.Time) *UserTweetCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *UserTweetCreate) SetUserID(v int) *UserTweetCreate {
-	_c.mutation.SetUserID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, v)
 }
 
 // SetTweetID sets the "tweet_id" field.
 func (_c *UserTweetCreate) SetTweetID(v int) *UserTweetCreate {
-	_c.mutation.SetTweetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTweetID, v)
 }
 
 // Mutation returns the UserTweetMutation object of the builder.
-func (_c *UserTweetCreate) Mutation() *UserTweetMutation {
-	return _c.mutation
-}
+func (_c *UserTweetCreate) Mutation() *UserTweetMutation { return _c.mutation }
 
 // Save creates the UserTweet in the database.
 func (_c *UserTweetCreate) Save(ctx context.Context) (*UserTweet, error) {
@@ -69,18 +65,11 @@ func (_c *UserTweetCreate) Save(ctx context.Context) (*UserTweet, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *UserTweetCreate) SaveX(ctx context.Context) *UserTweet {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *UserTweetCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *UserTweetCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *UserTweetCreate) ExecX(ctx context.Context) {

@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,10 @@ func NewSpecCreate(c Config, hooks []Hook, mutation *SpecMutation) *SpecCreate {
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (_c *SpecCreate) AddCardIDs(ids ...int) *SpecCreate {
-	_c.mutation.AddCardIDs(ids...)
-	return _c
-}
+func (_c *SpecCreate) AddCardIDs(ids ...int) *SpecCreate { _c.mutation.AddCardIDs(ids...); return _c }
 
 // Mutation returns the SpecMutation object of the builder.
-func (_c *SpecCreate) Mutation() *SpecMutation {
-	return _c.mutation
-}
+func (_c *SpecCreate) Mutation() *SpecMutation { return _c.mutation }
 
 // Save creates the Spec in the database.
 func (_c *SpecCreate) Save(ctx context.Context) (*Spec, error) {
@@ -46,19 +42,10 @@ func (_c *SpecCreate) Save(ctx context.Context) (*Spec, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *SpecCreate) SaveX(ctx context.Context) *Spec {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *SpecCreate) SaveX(ctx context.Context) *Spec { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *SpecCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *SpecCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *SpecCreate) ExecX(ctx context.Context) {

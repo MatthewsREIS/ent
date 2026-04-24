@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-{{ with extend $ "Imports" $.SiblingImports }}
+{{ with extend $ "Imports" $.SiblingImports "QueryUsesEntbuilder" true }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -40,35 +40,20 @@ type {{ $builder }} struct {
 }
 
 // Where adds a new predicate for the {{ $builder }} builder.
-func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $receiver}}.predicates = append({{ $receiver }}.predicates, ps...)
-	return {{ $receiver }}
-}
+func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} { {{ $receiver}}.predicates = append({{ $receiver }}.predicates, ps...); return {{ $receiver }} }
 
 // Limit the number of records to be returned by this query.
-func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} {
-	{{ $receiver }}.ctx.Limit = &limit
-	return {{ $receiver }}
-}
+func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} { {{ $receiver }}.ctx.Limit = &limit; return {{ $receiver }} }
 
 // Offset to start from.
-func ({{ $receiver }} *{{ $builder }}) Offset(offset int) *{{ $builder }} {
-	{{ $receiver }}.ctx.Offset = &offset
-	return {{ $receiver }}
-}
+func ({{ $receiver }} *{{ $builder }}) Offset(offset int) *{{ $builder }} { {{ $receiver }}.ctx.Offset = &offset; return {{ $receiver }} }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func ({{ $receiver }} *{{ $builder }}) Unique(unique bool) *{{ $builder }} {
-	{{ $receiver }}.ctx.Unique = &unique
-	return {{ $receiver }}
-}
+func ({{ $receiver }} *{{ $builder }}) Unique(unique bool) *{{ $builder }} { {{ $receiver }}.ctx.Unique = &unique; return {{ $receiver }} }
 
 // Order specifies how the records should be ordered.
-func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.Package }}.OrderOption) *{{ $builder }} {
-	{{ $receiver }}.order = append({{ $receiver }}.order, o...)
-	return {{ $receiver }}
-}
+func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.Package }}.OrderOption) *{{ $builder }} { {{ $receiver }}.order = append({{ $receiver }}.order, o...); return {{ $receiver }} }
 
 {{/* this code has similarity with edge queries in client.tmpl */}}
 {{ range $e := $.Edges }}
@@ -104,13 +89,7 @@ func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}
 }
 
 // FirstX is like First, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }} {
-	node, err := {{ $receiver }}.First(ctx)
-	if err != nil && !IsNotFound(err) {
-		panic(err)
-	}
-	return node
-}
+func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }} { node, err := {{ $receiver }}.First(ctx); if err != nil && !IsNotFound(err) { panic(err) }; return node }
 
 {{ if $.HasOneFieldID }}
 	// FirstID returns the first {{ $.Name }} ID from the query.
@@ -128,13 +107,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 	}
 
 	// FirstIDX is like FirstID, but panics if an error occurs.
-	func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} {
-		id, err := {{ $receiver }}.FirstID(ctx)
-		if err != nil && !IsNotFound(err) {
-			panic(err)
-		}
-		return id
-	}
+	func ({{ $receiver }} *{{ $builder }}) FirstIDX(ctx context.Context) {{ $.ID.Type }} { id, err := {{ $receiver }}.FirstID(ctx); if err != nil && !IsNotFound(err) { panic(err) }; return id }
 {{ end }}
 
 // Only returns a single {{ $.Name }} entity found by the query, ensuring it only returns one.
@@ -156,13 +129,7 @@ func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }},
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} {
-	node, err := {{ $receiver }}.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} { return entbuilder.Must({{ $receiver }}.Only(ctx)) }
 
 {{ if $.HasOneFieldID }}
 	// OnlyID is like Only, but returns the only {{ $.Name }} ID in the query.
@@ -185,13 +152,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 	}
 
 	// OnlyIDX is like OnlyID, but panics if an error occurs.
-	func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} {
-		id, err := {{ $receiver }}.OnlyID(ctx)
-		if err != nil {
-			panic(err)
-		}
-		return id
-	}
+	func ({{ $receiver }} *{{ $builder }}) OnlyIDX(ctx context.Context) {{ $.ID.Type }} { return entbuilder.Must({{ $receiver }}.OnlyID(ctx)) }
 {{ end }}
 
 // All executes the query and returns a list of {{ plural $.Name }}.
@@ -205,13 +166,7 @@ func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}
 }
 
 // AllX is like All, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }} {
-	nodes, err := {{ $receiver }}.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }} { return entbuilder.Must({{ $receiver }}.All(ctx)) }
 
 {{ if $.HasOneFieldID }}
 	// IDs executes the query and returns a list of {{ $.Name }} IDs.
@@ -228,13 +183,7 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 	}
 
 	// IDsX is like IDs, but panics if an error occurs.
-	func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type }} {
-		ids, err := {{ $receiver }}.IDs(ctx)
-		if err != nil {
-			panic(err)
-		}
-		return ids
-	}
+	func ({{ $receiver }} *{{ $builder }}) IDsX(ctx context.Context) []{{ $.ID.Type }} { return entbuilder.Must({{ $receiver }}.IDs(ctx)) }
 {{ end }}
 
 // Count returns the count of the given query.
@@ -247,13 +196,7 @@ func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
-	count, err := {{ $receiver }}.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int { return entbuilder.Must({{ $receiver }}.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
@@ -269,13 +212,7 @@ func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) 
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) ExistX(ctx context.Context) bool {
-	exist, err := {{ $receiver }}.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func ({{ $receiver }} *{{ $builder }}) ExistX(ctx context.Context) bool { return entbuilder.Must({{ $receiver }}.Exist(ctx)) }
 
 // Clone returns a duplicate of the {{ $builder }} builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

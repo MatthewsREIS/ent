@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // PCCreate is the builder for creating a PC entity.
@@ -27,9 +28,7 @@ func NewPCCreate(c Config, hooks []Hook, mutation *PCMutation) *PCCreate {
 }
 
 // Mutation returns the PCMutation object of the builder.
-func (_c *PCCreate) Mutation() *PCMutation {
-	return _c.mutation
-}
+func (_c *PCCreate) Mutation() *PCMutation { return _c.mutation }
 
 // Save creates the PC in the database.
 func (_c *PCCreate) Save(ctx context.Context) (*PC, error) {
@@ -37,19 +36,10 @@ func (_c *PCCreate) Save(ctx context.Context) (*PC, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *PCCreate) SaveX(ctx context.Context) *PC {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *PCCreate) SaveX(ctx context.Context) *PC { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *PCCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *PCCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *PCCreate) ExecX(ctx context.Context) {

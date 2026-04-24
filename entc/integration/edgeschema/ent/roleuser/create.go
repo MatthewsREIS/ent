@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewRoleUserCreate(c Config, hooks []Hook, mutation *RoleUserMutation) *Role
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *RoleUserCreate) SetCreatedAt(v time.Time) *RoleUserCreate {
-	_c.mutation.SetCreatedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -46,20 +46,16 @@ func (_c *RoleUserCreate) SetNillableCreatedAt(v *time.Time) *RoleUserCreate {
 
 // SetRoleID sets the "role_id" field.
 func (_c *RoleUserCreate) SetRoleID(v int) *RoleUserCreate {
-	_c.mutation.SetRoleID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetRoleID, v)
 }
 
 // SetUserID sets the "user_id" field.
 func (_c *RoleUserCreate) SetUserID(v int) *RoleUserCreate {
-	_c.mutation.SetUserID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, v)
 }
 
 // Mutation returns the RoleUserMutation object of the builder.
-func (_c *RoleUserCreate) Mutation() *RoleUserMutation {
-	return _c.mutation
-}
+func (_c *RoleUserCreate) Mutation() *RoleUserMutation { return _c.mutation }
 
 // Save creates the RoleUser in the database.
 func (_c *RoleUserCreate) Save(ctx context.Context) (*RoleUser, error) {
@@ -68,19 +64,10 @@ func (_c *RoleUserCreate) Save(ctx context.Context) (*RoleUser, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *RoleUserCreate) SaveX(ctx context.Context) *RoleUser {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *RoleUserCreate) SaveX(ctx context.Context) *RoleUser { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *RoleUserCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *RoleUserCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *RoleUserCreate) ExecX(ctx context.Context) {

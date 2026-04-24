@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // APIDelete is the builder for deleting a Api entity.
@@ -29,10 +30,7 @@ func NewAPIDelete(c Config, hooks []Hook, mutation *APIMutation) *APIDelete {
 }
 
 // Where appends a list predicates to the APIDelete builder.
-func (_d *APIDelete) Where(ps ...predicate.Api) *APIDelete {
-	_d.mutation.Where(ps...)
-	return _d
-}
+func (_d *APIDelete) Where(ps ...predicate.Api) *APIDelete { _d.mutation.Where(ps...); return _d }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *APIDelete) Exec(ctx context.Context) (int, error) {
@@ -40,13 +38,7 @@ func (_d *APIDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *APIDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *APIDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *APIDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}

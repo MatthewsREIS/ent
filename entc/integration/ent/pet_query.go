@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -44,23 +45,14 @@ func (_q *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *PetQuery) Limit(limit int) *PetQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *PetQuery) Limit(limit int) *PetQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *PetQuery) Offset(offset int) *PetQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *PetQuery) Offset(offset int) *PetQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *PetQuery) Unique(unique bool) *PetQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *PetQuery) Unique(unique bool) *PetQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *PetQuery) Order(o ...pet.OrderOption) *PetQuery {
@@ -176,13 +168,7 @@ func (_q *PetQuery) Only(ctx context.Context) (*Pet, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *PetQuery) OnlyX(ctx context.Context) *Pet {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *PetQuery) OnlyX(ctx context.Context) *Pet { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Pet ID in the query.
 // Returns a *NotSingularError when more than one Pet ID is found.
@@ -204,13 +190,7 @@ func (_q *PetQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *PetQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *PetQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Pets.
 func (_q *PetQuery) All(ctx context.Context) ([]*Pet, error) {
@@ -223,13 +203,7 @@ func (_q *PetQuery) All(ctx context.Context) ([]*Pet, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *PetQuery) AllX(ctx context.Context) []*Pet {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *PetQuery) AllX(ctx context.Context) []*Pet { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Pet IDs.
 func (_q *PetQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -244,13 +218,7 @@ func (_q *PetQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *PetQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *PetQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *PetQuery) Count(ctx context.Context) (int, error) {
@@ -262,13 +230,7 @@ func (_q *PetQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *PetQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *PetQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *PetQuery) Exist(ctx context.Context) (bool, error) {
@@ -284,13 +246,7 @@ func (_q *PetQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *PetQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *PetQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the PetQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

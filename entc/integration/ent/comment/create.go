@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,20 +33,17 @@ func NewCommentCreate(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 
 // SetUniqueInt sets the "unique_int" field.
 func (_c *CommentCreate) SetUniqueInt(v int) *CommentCreate {
-	_c.mutation.SetUniqueInt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUniqueInt, v)
 }
 
 // SetUniqueFloat sets the "unique_float" field.
 func (_c *CommentCreate) SetUniqueFloat(v float64) *CommentCreate {
-	_c.mutation.SetUniqueFloat(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUniqueFloat, v)
 }
 
 // SetNillableInt sets the "nillable_int" field.
 func (_c *CommentCreate) SetNillableInt(v int) *CommentCreate {
-	_c.mutation.SetNillableInt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNillableInt, v)
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
@@ -58,8 +56,7 @@ func (_c *CommentCreate) SetNillableNillableInt(v *int) *CommentCreate {
 
 // SetTable sets the "table" field.
 func (_c *CommentCreate) SetTable(v string) *CommentCreate {
-	_c.mutation.SetTable(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTable, v)
 }
 
 // SetNillableTable sets the "table" field if the given value is not nil.
@@ -72,8 +69,7 @@ func (_c *CommentCreate) SetNillableTable(v *string) *CommentCreate {
 
 // SetDir sets the "dir" field.
 func (_c *CommentCreate) SetDir(v schemadir.Dir) *CommentCreate {
-	_c.mutation.SetDir(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDir, v)
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
@@ -86,8 +82,7 @@ func (_c *CommentCreate) SetNillableDir(v *schemadir.Dir) *CommentCreate {
 
 // SetClient sets the "client" field.
 func (_c *CommentCreate) SetClient(v string) *CommentCreate {
-	_c.mutation.SetClient(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetClient, v)
 }
 
 // SetNillableClient sets the "client" field if the given value is not nil.
@@ -99,9 +94,7 @@ func (_c *CommentCreate) SetNillableClient(v *string) *CommentCreate {
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (_c *CommentCreate) Mutation() *CommentMutation {
-	return _c.mutation
-}
+func (_c *CommentCreate) Mutation() *CommentMutation { return _c.mutation }
 
 // Save creates the Comment in the database.
 func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
@@ -109,19 +102,10 @@ func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *CommentCreate) SaveX(ctx context.Context) *Comment {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *CommentCreate) SaveX(ctx context.Context) *Comment { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *CommentCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *CommentCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *CommentCreate) ExecX(ctx context.Context) {

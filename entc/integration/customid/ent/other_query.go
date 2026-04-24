@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -39,23 +40,14 @@ func (_q *OtherQuery) Where(ps ...predicate.Other) *OtherQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *OtherQuery) Limit(limit int) *OtherQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *OtherQuery) Limit(limit int) *OtherQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *OtherQuery) Offset(offset int) *OtherQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *OtherQuery) Offset(offset int) *OtherQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *OtherQuery) Unique(unique bool) *OtherQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *OtherQuery) Unique(unique bool) *OtherQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *OtherQuery) Order(o ...other.OrderOption) *OtherQuery {
@@ -127,13 +119,7 @@ func (_q *OtherQuery) Only(ctx context.Context) (*Other, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *OtherQuery) OnlyX(ctx context.Context) *Other {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *OtherQuery) OnlyX(ctx context.Context) *Other { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Other ID in the query.
 // Returns a *NotSingularError when more than one Other ID is found.
@@ -155,13 +141,7 @@ func (_q *OtherQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *OtherQuery) OnlyIDX(ctx context.Context) sid.ID {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *OtherQuery) OnlyIDX(ctx context.Context) sid.ID { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Others.
 func (_q *OtherQuery) All(ctx context.Context) ([]*Other, error) {
@@ -174,13 +154,7 @@ func (_q *OtherQuery) All(ctx context.Context) ([]*Other, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *OtherQuery) AllX(ctx context.Context) []*Other {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *OtherQuery) AllX(ctx context.Context) []*Other { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Other IDs.
 func (_q *OtherQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
@@ -195,13 +169,7 @@ func (_q *OtherQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *OtherQuery) IDsX(ctx context.Context) []sid.ID {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *OtherQuery) IDsX(ctx context.Context) []sid.ID { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *OtherQuery) Count(ctx context.Context) (int, error) {
@@ -213,13 +181,7 @@ func (_q *OtherQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *OtherQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *OtherQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *OtherQuery) Exist(ctx context.Context) (bool, error) {
@@ -235,13 +197,7 @@ func (_q *OtherQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *OtherQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *OtherQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the OtherQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

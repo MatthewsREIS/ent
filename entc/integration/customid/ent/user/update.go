@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,21 +31,14 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate { _u.mutation.Where(ps...); return _u }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddGroupIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate { _u.mutation.AddGroupIDs(ids...); return _u }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
 func (_u *UserUpdate) SetParentID(id int) *UserUpdate {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
@@ -56,26 +50,17 @@ func (_u *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddChildIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate { _u.mutation.AddChildIDs(ids...); return _u }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_u *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
-	_u.mutation.AddPetIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddPetIDs(ids ...string) *UserUpdate { _u.mutation.AddPetIDs(ids...); return _u }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdate) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdate) Mutation() *UserMutation { return _u.mutation }
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *UserUpdate) ClearGroups() *UserUpdate {
-	_u.mutation.ClearGroups()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroups)
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
@@ -86,14 +71,12 @@ func (_u *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 
 // ClearParent clears the "parent" edge to the User entity.
 func (_u *UserUpdate) ClearParent() *UserUpdate {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearChildren clears all "children" edges to the User entity.
 func (_u *UserUpdate) ClearChildren() *UserUpdate {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
@@ -103,10 +86,7 @@ func (_u *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
 }
 
 // ClearPets clears all "pets" edges to the Pet entity.
-func (_u *UserUpdate) ClearPets() *UserUpdate {
-	_u.mutation.ClearPets()
-	return _u
-}
+func (_u *UserUpdate) ClearPets() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearPets) }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
@@ -120,19 +100,10 @@ func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *UserUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *UserUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdate) ExecX(ctx context.Context) {
@@ -347,8 +318,7 @@ func (_u *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 
 // SetParentID sets the "parent" edge to the User entity by ID.
 func (_u *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
@@ -372,14 +342,11 @@ func (_u *UserUpdateOne) AddPetIDs(ids ...string) *UserUpdateOne {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdateOne) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdateOne) Mutation() *UserMutation { return _u.mutation }
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *UserUpdateOne) ClearGroups() *UserUpdateOne {
-	_u.mutation.ClearGroups()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroups)
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
@@ -390,14 +357,12 @@ func (_u *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 
 // ClearParent clears the "parent" edge to the User entity.
 func (_u *UserUpdateOne) ClearParent() *UserUpdateOne {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearChildren clears all "children" edges to the User entity.
 func (_u *UserUpdateOne) ClearChildren() *UserUpdateOne {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
@@ -408,8 +373,7 @@ func (_u *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
 
 // ClearPets clears all "pets" edges to the Pet entity.
 func (_u *UserUpdateOne) ClearPets() *UserUpdateOne {
-	_u.mutation.ClearPets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPets)
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
@@ -437,19 +401,10 @@ func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdateOne) ExecX(ctx context.Context) {

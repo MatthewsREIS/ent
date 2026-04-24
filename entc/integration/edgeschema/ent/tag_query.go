@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -22,7 +23,6 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // TagQuery is the builder for querying Tag entities.
@@ -48,23 +48,14 @@ func (_q *TagQuery) Where(ps ...predicate.Tag) *TagQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *TagQuery) Limit(limit int) *TagQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *TagQuery) Limit(limit int) *TagQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *TagQuery) Offset(offset int) *TagQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *TagQuery) Offset(offset int) *TagQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *TagQuery) Unique(unique bool) *TagQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *TagQuery) Unique(unique bool) *TagQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *TagQuery) Order(o ...tag.OrderOption) *TagQuery {
@@ -224,13 +215,7 @@ func (_q *TagQuery) Only(ctx context.Context) (*Tag, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *TagQuery) OnlyX(ctx context.Context) *Tag {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *TagQuery) OnlyX(ctx context.Context) *Tag { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Tag ID in the query.
 // Returns a *NotSingularError when more than one Tag ID is found.
@@ -252,13 +237,7 @@ func (_q *TagQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *TagQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *TagQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Tags.
 func (_q *TagQuery) All(ctx context.Context) ([]*Tag, error) {
@@ -271,13 +250,7 @@ func (_q *TagQuery) All(ctx context.Context) ([]*Tag, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *TagQuery) AllX(ctx context.Context) []*Tag {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *TagQuery) AllX(ctx context.Context) []*Tag { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Tag IDs.
 func (_q *TagQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -292,13 +265,7 @@ func (_q *TagQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *TagQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *TagQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *TagQuery) Count(ctx context.Context) (int, error) {
@@ -310,13 +277,7 @@ func (_q *TagQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *TagQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *TagQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *TagQuery) Exist(ctx context.Context) (bool, error) {
@@ -332,13 +293,7 @@ func (_q *TagQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *TagQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *TagQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the TagQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -540,169 +495,186 @@ func (_q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 	return nodes, nil
 }
 
-var tagTweetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Tag, Tweet, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2M,
-			Inverse:      false,
-			Table:        tag.TweetsTable,
-			Columns:      tag.TweetsPrimaryKey,
-			Bidi:         false,
-			TargetColumn: tweet.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Tag) int { return n.ID },
-	ExtractEdgeID: func(e *Tweet) int { return e.ID },
-	ConvertNodeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	ConvertEdgeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	NewNodeIDScanner: func() any { return new(sql.NullInt64) },
-	NewEdgeIDScanner: func() any { return new(sql.NullInt64) },
-}
-var tagGroupsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Tag, Group, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2M,
-			Inverse:      false,
-			Table:        tag.GroupsTable,
-			Columns:      tag.GroupsPrimaryKey,
-			Bidi:         false,
-			TargetColumn: group.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Tag) int { return n.ID },
-	ExtractEdgeID: func(e *Group) int { return e.ID },
-	ConvertNodeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	ConvertEdgeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	NewNodeIDScanner: func() any { return new(sql.NullInt64) },
-	NewEdgeIDScanner: func() any { return new(sql.NullInt64) },
-}
-var tagTweetTagsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Tag, TweetTag, int, uuid.UUID]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      true,
-			Table:        tag.TweetTagsTable,
-			Columns:      tag.TweetTagsColumn,
-			Bidi:         false,
-			TargetColumn: tweettag.FieldID,
-			TargetType:   field.TypeUUID,
-		})
-	},
-	ExtractNodeID: func(n *Tag) int { return n.ID },
-	ExtractEdgeID: func(e *TweetTag) uuid.UUID { return e.ID },
-	ExtractEdgeFK: func(e *TweetTag) *int {
-		v := e.TagID
-		return &v
-	},
-}
-var tagGroupTagsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Tag, GroupTag, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      true,
-			Table:        tag.GroupTagsTable,
-			Columns:      tag.GroupTagsColumn,
-			Bidi:         false,
-			TargetColumn: grouptag.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Tag) int { return n.ID },
-	ExtractEdgeID: func(e *GroupTag) int { return e.ID },
-	ExtractEdgeFK: func(e *GroupTag) *int {
-		v := e.TagID
-		return &v
-	},
-}
-
 func (_q *TagQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Tweet)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &tagTweetsEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.prepareQuery,
-		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Tweet, error) {
-			hooks := make([]queryHook, len(modifiers))
-			for i := range modifiers {
-				hooks[i] = modifiers[i]
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Tag)
+	nids := make(map[int]map[*Tag]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(tag.TweetsTable)
+		s.Join(joinT).On(s.C(tweet.FieldID), joinT.C(tag.TweetsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(tag.TweetsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(tag.TweetsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return query.sqlAll(ctx, hooks...)
-		},
-		func(ctx context.Context, q, qr, inters any) (any, error) {
-			// Wrap the entbuilder.querierFunc into an ent.Querier
-			querierFn, ok := qr.(interface {
-				Query(context.Context, any) (any, error)
-			})
-			if !ok {
-				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Tag]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
-				return querierFn.Query(ctx, query)
-			})
-			return withInterceptors[[]*Tweet](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
-		},
-		query,
-		query.inters,
-		func(joinT *sql.SelectTable) {
 		})
+	})
+	neighbors, err := withInterceptors[[]*Tweet](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "tweets" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
 	return nil
 }
 func (_q *TagQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Group)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &tagGroupsEdgeLoadDescriptor, nodes, init, assign, [2]int{0, 1},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.prepareQuery,
-		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Group, error) {
-			hooks := make([]queryHook, len(modifiers))
-			for i := range modifiers {
-				hooks[i] = modifiers[i]
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Tag)
+	nids := make(map[int]map[*Tag]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(tag.GroupsTable)
+		s.Join(joinT).On(s.C(group.FieldID), joinT.C(tag.GroupsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(tag.GroupsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(tag.GroupsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return query.sqlAll(ctx, hooks...)
-		},
-		func(ctx context.Context, q, qr, inters any) (any, error) {
-			// Wrap the entbuilder.querierFunc into an ent.Querier
-			querierFn, ok := qr.(interface {
-				Query(context.Context, any) (any, error)
-			})
-			if !ok {
-				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Tag]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
-				return querierFn.Query(ctx, query)
-			})
-			return withInterceptors[[]*Group](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
-		},
-		query,
-		query.inters,
-		func(joinT *sql.SelectTable) {
 		})
+	})
+	neighbors, err := withInterceptors[[]*Group](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "groups" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
 	return nil
 }
 func (_q *TagQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *TweetTag)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tag)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(tweettag.FieldTagID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &tagTweetTagsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.TweetTag(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tag.TweetTagsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.TagID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tag_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *TagQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *GroupTag)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Tag)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(grouptag.FieldTagID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &tagGroupTagsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.GroupTag(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(tag.GroupTagsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.TagID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "tag_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 

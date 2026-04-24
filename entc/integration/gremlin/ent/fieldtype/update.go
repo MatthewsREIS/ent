@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -51,10 +52,7 @@ func (_u *FieldTypeUpdate) SetInt(v int) *FieldTypeUpdate {
 }
 
 // AddInt adds value to the "int" field.
-func (_u *FieldTypeUpdate) AddInt(v int) *FieldTypeUpdate {
-	_u.mutation.AddInt(v)
-	return _u
-}
+func (_u *FieldTypeUpdate) AddInt(v int) *FieldTypeUpdate { _u.mutation.AddInt(v); return _u }
 
 // SetInt8 sets the "int8" field.
 func (_u *FieldTypeUpdate) SetInt8(v int8) *FieldTypeUpdate {
@@ -64,10 +62,7 @@ func (_u *FieldTypeUpdate) SetInt8(v int8) *FieldTypeUpdate {
 }
 
 // AddInt8 adds value to the "int8" field.
-func (_u *FieldTypeUpdate) AddInt8(v int8) *FieldTypeUpdate {
-	_u.mutation.AddInt8(v)
-	return _u
-}
+func (_u *FieldTypeUpdate) AddInt8(v int8) *FieldTypeUpdate { _u.mutation.AddInt8(v); return _u }
 
 // SetInt16 sets the "int16" field.
 func (_u *FieldTypeUpdate) SetInt16(v int16) *FieldTypeUpdate {
@@ -77,10 +72,7 @@ func (_u *FieldTypeUpdate) SetInt16(v int16) *FieldTypeUpdate {
 }
 
 // AddInt16 adds value to the "int16" field.
-func (_u *FieldTypeUpdate) AddInt16(v int16) *FieldTypeUpdate {
-	_u.mutation.AddInt16(v)
-	return _u
-}
+func (_u *FieldTypeUpdate) AddInt16(v int16) *FieldTypeUpdate { _u.mutation.AddInt16(v); return _u }
 
 // SetInt32 sets the "int32" field.
 func (_u *FieldTypeUpdate) SetInt32(v int32) *FieldTypeUpdate {
@@ -90,10 +82,7 @@ func (_u *FieldTypeUpdate) SetInt32(v int32) *FieldTypeUpdate {
 }
 
 // AddInt32 adds value to the "int32" field.
-func (_u *FieldTypeUpdate) AddInt32(v int32) *FieldTypeUpdate {
-	_u.mutation.AddInt32(v)
-	return _u
-}
+func (_u *FieldTypeUpdate) AddInt32(v int32) *FieldTypeUpdate { _u.mutation.AddInt32(v); return _u }
 
 // SetInt64 sets the "int64" field.
 func (_u *FieldTypeUpdate) SetInt64(v int64) *FieldTypeUpdate {
@@ -103,10 +92,7 @@ func (_u *FieldTypeUpdate) SetInt64(v int64) *FieldTypeUpdate {
 }
 
 // AddInt64 adds value to the "int64" field.
-func (_u *FieldTypeUpdate) AddInt64(v int64) *FieldTypeUpdate {
-	_u.mutation.AddInt64(v)
-	return _u
-}
+func (_u *FieldTypeUpdate) AddInt64(v int64) *FieldTypeUpdate { _u.mutation.AddInt64(v); return _u }
 
 // SetOptionalInt sets the "optional_int" field.
 func (_u *FieldTypeUpdate) SetOptionalInt(v int) *FieldTypeUpdate {
@@ -555,10 +541,7 @@ func (_u *FieldTypeUpdate) SetNillableState(v *State) *FieldTypeUpdate {
 }
 
 // ClearState clears the value of the "state" field.
-func (_u *FieldTypeUpdate) ClearState() *FieldTypeUpdate {
-	_u.mutation.ClearState()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearState() *FieldTypeUpdate { _u.mutation.ClearState(); return _u }
 
 // SetOptionalFloat sets the "optional_float" field.
 func (_u *FieldTypeUpdate) SetOptionalFloat(v float64) *FieldTypeUpdate {
@@ -629,10 +612,7 @@ func (_u *FieldTypeUpdate) SetNillableText(v *string) *FieldTypeUpdate {
 }
 
 // ClearText clears the value of the "text" field.
-func (_u *FieldTypeUpdate) ClearText() *FieldTypeUpdate {
-	_u.mutation.ClearText()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearText() *FieldTypeUpdate { _u.mutation.ClearText(); return _u }
 
 // SetDatetime sets the "datetime" field.
 func (_u *FieldTypeUpdate) SetDatetime(v time.Time) *FieldTypeUpdate {
@@ -649,10 +629,7 @@ func (_u *FieldTypeUpdate) SetNillableDatetime(v *time.Time) *FieldTypeUpdate {
 }
 
 // ClearDatetime clears the value of the "datetime" field.
-func (_u *FieldTypeUpdate) ClearDatetime() *FieldTypeUpdate {
-	_u.mutation.ClearDatetime()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearDatetime() *FieldTypeUpdate { _u.mutation.ClearDatetime(); return _u }
 
 // SetDecimal sets the "decimal" field.
 func (_u *FieldTypeUpdate) SetDecimal(v float64) *FieldTypeUpdate {
@@ -676,10 +653,7 @@ func (_u *FieldTypeUpdate) AddDecimal(v float64) *FieldTypeUpdate {
 }
 
 // ClearDecimal clears the value of the "decimal" field.
-func (_u *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate {
-	_u.mutation.ClearDecimal()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate { _u.mutation.ClearDecimal(); return _u }
 
 // SetLinkOther sets the "link_other" field.
 func (_u *FieldTypeUpdate) SetLinkOther(v *schema.Link) *FieldTypeUpdate {
@@ -688,10 +662,7 @@ func (_u *FieldTypeUpdate) SetLinkOther(v *schema.Link) *FieldTypeUpdate {
 }
 
 // ClearLinkOther clears the value of the "link_other" field.
-func (_u *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate {
-	_u.mutation.ClearLinkOther()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate { _u.mutation.ClearLinkOther(); return _u }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
 func (_u *FieldTypeUpdate) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpdate {
@@ -720,10 +691,7 @@ func (_u *FieldTypeUpdate) SetNillableMAC(v *schema.MAC) *FieldTypeUpdate {
 }
 
 // ClearMAC clears the value of the "mac" field.
-func (_u *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
-	_u.mutation.ClearMAC()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate { _u.mutation.ClearMAC(); return _u }
 
 // SetStringArray sets the "string_array" field.
 func (_u *FieldTypeUpdate) SetStringArray(v schema.Strings) *FieldTypeUpdate {
@@ -752,10 +720,7 @@ func (_u *FieldTypeUpdate) SetNillablePassword(v *string) *FieldTypeUpdate {
 }
 
 // ClearPassword clears the value of the "password" field.
-func (_u *FieldTypeUpdate) ClearPassword() *FieldTypeUpdate {
-	_u.mutation.ClearPassword()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearPassword() *FieldTypeUpdate { _u.mutation.ClearPassword(); return _u }
 
 // SetStringScanner sets the "string_scanner" field.
 func (_u *FieldTypeUpdate) SetStringScanner(v schema.StringScanner) *FieldTypeUpdate {
@@ -791,10 +756,7 @@ func (_u *FieldTypeUpdate) AddDuration(v time.Duration) *FieldTypeUpdate {
 }
 
 // ClearDuration clears the value of the "duration" field.
-func (_u *FieldTypeUpdate) ClearDuration() *FieldTypeUpdate {
-	_u.mutation.ClearDuration()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearDuration() *FieldTypeUpdate { _u.mutation.ClearDuration(); return _u }
 
 // SetDir sets the "dir" field.
 func (_u *FieldTypeUpdate) SetDir(v http.Dir) *FieldTypeUpdate {
@@ -825,10 +787,7 @@ func (_u *FieldTypeUpdate) SetNillableNdir(v *http.Dir) *FieldTypeUpdate {
 }
 
 // ClearNdir clears the value of the "ndir" field.
-func (_u *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate {
-	_u.mutation.ClearNdir()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate { _u.mutation.ClearNdir(); return _u }
 
 // SetStr sets the "str" field.
 func (_u *FieldTypeUpdate) SetStr(v sql.NullString) *FieldTypeUpdate {
@@ -845,10 +804,7 @@ func (_u *FieldTypeUpdate) SetNillableStr(v *sql.NullString) *FieldTypeUpdate {
 }
 
 // ClearStr clears the value of the "str" field.
-func (_u *FieldTypeUpdate) ClearStr() *FieldTypeUpdate {
-	_u.mutation.ClearStr()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearStr() *FieldTypeUpdate { _u.mutation.ClearStr(); return _u }
 
 // SetNullStr sets the "null_str" field.
 func (_u *FieldTypeUpdate) SetNullStr(v *sql.NullString) *FieldTypeUpdate {
@@ -857,10 +813,7 @@ func (_u *FieldTypeUpdate) SetNullStr(v *sql.NullString) *FieldTypeUpdate {
 }
 
 // ClearNullStr clears the value of the "null_str" field.
-func (_u *FieldTypeUpdate) ClearNullStr() *FieldTypeUpdate {
-	_u.mutation.ClearNullStr()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearNullStr() *FieldTypeUpdate { _u.mutation.ClearNullStr(); return _u }
 
 // SetLink sets the "link" field.
 func (_u *FieldTypeUpdate) SetLink(v schema.Link) *FieldTypeUpdate {
@@ -877,10 +830,7 @@ func (_u *FieldTypeUpdate) SetNillableLink(v *schema.Link) *FieldTypeUpdate {
 }
 
 // ClearLink clears the value of the "link" field.
-func (_u *FieldTypeUpdate) ClearLink() *FieldTypeUpdate {
-	_u.mutation.ClearLink()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearLink() *FieldTypeUpdate { _u.mutation.ClearLink(); return _u }
 
 // SetNullLink sets the "null_link" field.
 func (_u *FieldTypeUpdate) SetNullLink(v *schema.Link) *FieldTypeUpdate {
@@ -889,10 +839,7 @@ func (_u *FieldTypeUpdate) SetNullLink(v *schema.Link) *FieldTypeUpdate {
 }
 
 // ClearNullLink clears the value of the "null_link" field.
-func (_u *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
-	_u.mutation.ClearNullLink()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate { _u.mutation.ClearNullLink(); return _u }
 
 // SetActive sets the "active" field.
 func (_u *FieldTypeUpdate) SetActive(v schema.Status) *FieldTypeUpdate {
@@ -909,10 +856,7 @@ func (_u *FieldTypeUpdate) SetNillableActive(v *schema.Status) *FieldTypeUpdate 
 }
 
 // ClearActive clears the value of the "active" field.
-func (_u *FieldTypeUpdate) ClearActive() *FieldTypeUpdate {
-	_u.mutation.ClearActive()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearActive() *FieldTypeUpdate { _u.mutation.ClearActive(); return _u }
 
 // SetNullActive sets the "null_active" field.
 func (_u *FieldTypeUpdate) SetNullActive(v schema.Status) *FieldTypeUpdate {
@@ -941,10 +885,7 @@ func (_u *FieldTypeUpdate) SetDeleted(v *sql.NullBool) *FieldTypeUpdate {
 }
 
 // ClearDeleted clears the value of the "deleted" field.
-func (_u *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate {
-	_u.mutation.ClearDeleted()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate { _u.mutation.ClearDeleted(); return _u }
 
 // SetDeletedAt sets the "deleted_at" field.
 func (_u *FieldTypeUpdate) SetDeletedAt(v *sql.NullTime) *FieldTypeUpdate {
@@ -953,10 +894,7 @@ func (_u *FieldTypeUpdate) SetDeletedAt(v *sql.NullTime) *FieldTypeUpdate {
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
-func (_u *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate { _u.mutation.ClearDeletedAt(); return _u }
 
 // SetRawData sets the "raw_data" field.
 func (_u *FieldTypeUpdate) SetRawData(v []byte) *FieldTypeUpdate {
@@ -965,10 +903,7 @@ func (_u *FieldTypeUpdate) SetRawData(v []byte) *FieldTypeUpdate {
 }
 
 // ClearRawData clears the value of the "raw_data" field.
-func (_u *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
-	_u.mutation.ClearRawData()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate { _u.mutation.ClearRawData(); return _u }
 
 // SetSensitive sets the "sensitive" field.
 func (_u *FieldTypeUpdate) SetSensitive(v []byte) *FieldTypeUpdate {
@@ -977,10 +912,7 @@ func (_u *FieldTypeUpdate) SetSensitive(v []byte) *FieldTypeUpdate {
 }
 
 // ClearSensitive clears the value of the "sensitive" field.
-func (_u *FieldTypeUpdate) ClearSensitive() *FieldTypeUpdate {
-	_u.mutation.ClearSensitive()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearSensitive() *FieldTypeUpdate { _u.mutation.ClearSensitive(); return _u }
 
 // SetIP sets the "ip" field.
 func (_u *FieldTypeUpdate) SetIP(v net.IP) *FieldTypeUpdate {
@@ -989,10 +921,7 @@ func (_u *FieldTypeUpdate) SetIP(v net.IP) *FieldTypeUpdate {
 }
 
 // ClearIP clears the value of the "ip" field.
-func (_u *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
-	_u.mutation.ClearIP()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearIP() *FieldTypeUpdate { _u.mutation.ClearIP(); return _u }
 
 // SetNullInt64 sets the "null_int64" field.
 func (_u *FieldTypeUpdate) SetNullInt64(v *sql.NullInt64) *FieldTypeUpdate {
@@ -1001,10 +930,7 @@ func (_u *FieldTypeUpdate) SetNullInt64(v *sql.NullInt64) *FieldTypeUpdate {
 }
 
 // ClearNullInt64 clears the value of the "null_int64" field.
-func (_u *FieldTypeUpdate) ClearNullInt64() *FieldTypeUpdate {
-	_u.mutation.ClearNullInt64()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearNullInt64() *FieldTypeUpdate { _u.mutation.ClearNullInt64(); return _u }
 
 // SetSchemaInt sets the "schema_int" field.
 func (_u *FieldTypeUpdate) SetSchemaInt(v schema.Int) *FieldTypeUpdate {
@@ -1028,10 +954,7 @@ func (_u *FieldTypeUpdate) AddSchemaInt(v schema.Int) *FieldTypeUpdate {
 }
 
 // ClearSchemaInt clears the value of the "schema_int" field.
-func (_u *FieldTypeUpdate) ClearSchemaInt() *FieldTypeUpdate {
-	_u.mutation.ClearSchemaInt()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearSchemaInt() *FieldTypeUpdate { _u.mutation.ClearSchemaInt(); return _u }
 
 // SetSchemaInt8 sets the "schema_int8" field.
 func (_u *FieldTypeUpdate) SetSchemaInt8(v schema.Int8) *FieldTypeUpdate {
@@ -1148,10 +1071,7 @@ func (_u *FieldTypeUpdate) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpdate {
 }
 
 // ClearNullFloat clears the value of the "null_float" field.
-func (_u *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
-	_u.mutation.ClearNullFloat()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate { _u.mutation.ClearNullFloat(); return _u }
 
 // SetRole sets the "role" field.
 func (_u *FieldTypeUpdate) SetRole(v role.Role) *FieldTypeUpdate {
@@ -1182,10 +1102,7 @@ func (_u *FieldTypeUpdate) SetNillablePriority(v *role.Priority) *FieldTypeUpdat
 }
 
 // ClearPriority clears the value of the "priority" field.
-func (_u *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
-	_u.mutation.ClearPriority()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate { _u.mutation.ClearPriority(); return _u }
 
 // SetOptionalUUID sets the "optional_uuid" field.
 func (_u *FieldTypeUpdate) SetOptionalUUID(v uuid.UUID) *FieldTypeUpdate {
@@ -1240,10 +1157,7 @@ func (_u *FieldTypeUpdate) AppendStrings(v []string) *FieldTypeUpdate {
 }
 
 // ClearStrings clears the value of the "strings" field.
-func (_u *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate {
-	_u.mutation.ClearStrings()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate { _u.mutation.ClearStrings(); return _u }
 
 // SetPair sets the "pair" field.
 func (_u *FieldTypeUpdate) SetPair(v schema.Pair) *FieldTypeUpdate {
@@ -1266,10 +1180,7 @@ func (_u *FieldTypeUpdate) SetNilPair(v *schema.Pair) *FieldTypeUpdate {
 }
 
 // ClearNilPair clears the value of the "nil_pair" field.
-func (_u *FieldTypeUpdate) ClearNilPair() *FieldTypeUpdate {
-	_u.mutation.ClearNilPair()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearNilPair() *FieldTypeUpdate { _u.mutation.ClearNilPair(); return _u }
 
 // SetVstring sets the "vstring" field.
 func (_u *FieldTypeUpdate) SetVstring(v schema.VString) *FieldTypeUpdate {
@@ -1321,10 +1232,7 @@ func (_u *FieldTypeUpdate) AddBigInt(v schema.BigInt) *FieldTypeUpdate {
 }
 
 // ClearBigInt clears the value of the "big_int" field.
-func (_u *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate {
-	_u.mutation.ClearBigInt()
-	return _u
-}
+func (_u *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate { _u.mutation.ClearBigInt(); return _u }
 
 // SetPasswordOther sets the "password_other" field.
 func (_u *FieldTypeUpdate) SetPasswordOther(v schema.Password) *FieldTypeUpdate {
@@ -1347,9 +1255,7 @@ func (_u *FieldTypeUpdate) ClearPasswordOther() *FieldTypeUpdate {
 }
 
 // Mutation returns the FieldTypeMutation object of the builder.
-func (_u *FieldTypeUpdate) Mutation() *FieldTypeMutation {
-	return _u.mutation
-}
+func (_u *FieldTypeUpdate) Mutation() *FieldTypeMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
@@ -1358,19 +1264,10 @@ func (_u *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FieldTypeUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *FieldTypeUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *FieldTypeUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FieldTypeUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FieldTypeUpdate) ExecX(ctx context.Context) {
@@ -1952,10 +1849,7 @@ func (_u *FieldTypeUpdateOne) SetInt(v int) *FieldTypeUpdateOne {
 }
 
 // AddInt adds value to the "int" field.
-func (_u *FieldTypeUpdateOne) AddInt(v int) *FieldTypeUpdateOne {
-	_u.mutation.AddInt(v)
-	return _u
-}
+func (_u *FieldTypeUpdateOne) AddInt(v int) *FieldTypeUpdateOne { _u.mutation.AddInt(v); return _u }
 
 // SetInt8 sets the "int8" field.
 func (_u *FieldTypeUpdateOne) SetInt8(v int8) *FieldTypeUpdateOne {
@@ -1965,10 +1859,7 @@ func (_u *FieldTypeUpdateOne) SetInt8(v int8) *FieldTypeUpdateOne {
 }
 
 // AddInt8 adds value to the "int8" field.
-func (_u *FieldTypeUpdateOne) AddInt8(v int8) *FieldTypeUpdateOne {
-	_u.mutation.AddInt8(v)
-	return _u
-}
+func (_u *FieldTypeUpdateOne) AddInt8(v int8) *FieldTypeUpdateOne { _u.mutation.AddInt8(v); return _u }
 
 // SetInt16 sets the "int16" field.
 func (_u *FieldTypeUpdateOne) SetInt16(v int16) *FieldTypeUpdateOne {
@@ -2456,10 +2347,7 @@ func (_u *FieldTypeUpdateOne) SetNillableState(v *State) *FieldTypeUpdateOne {
 }
 
 // ClearState clears the value of the "state" field.
-func (_u *FieldTypeUpdateOne) ClearState() *FieldTypeUpdateOne {
-	_u.mutation.ClearState()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearState() *FieldTypeUpdateOne { _u.mutation.ClearState(); return _u }
 
 // SetOptionalFloat sets the "optional_float" field.
 func (_u *FieldTypeUpdateOne) SetOptionalFloat(v float64) *FieldTypeUpdateOne {
@@ -2530,10 +2418,7 @@ func (_u *FieldTypeUpdateOne) SetNillableText(v *string) *FieldTypeUpdateOne {
 }
 
 // ClearText clears the value of the "text" field.
-func (_u *FieldTypeUpdateOne) ClearText() *FieldTypeUpdateOne {
-	_u.mutation.ClearText()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearText() *FieldTypeUpdateOne { _u.mutation.ClearText(); return _u }
 
 // SetDatetime sets the "datetime" field.
 func (_u *FieldTypeUpdateOne) SetDatetime(v time.Time) *FieldTypeUpdateOne {
@@ -2621,10 +2506,7 @@ func (_u *FieldTypeUpdateOne) SetNillableMAC(v *schema.MAC) *FieldTypeUpdateOne 
 }
 
 // ClearMAC clears the value of the "mac" field.
-func (_u *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
-	_u.mutation.ClearMAC()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne { _u.mutation.ClearMAC(); return _u }
 
 // SetStringArray sets the "string_array" field.
 func (_u *FieldTypeUpdateOne) SetStringArray(v schema.Strings) *FieldTypeUpdateOne {
@@ -2726,10 +2608,7 @@ func (_u *FieldTypeUpdateOne) SetNillableNdir(v *http.Dir) *FieldTypeUpdateOne {
 }
 
 // ClearNdir clears the value of the "ndir" field.
-func (_u *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne {
-	_u.mutation.ClearNdir()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne { _u.mutation.ClearNdir(); return _u }
 
 // SetStr sets the "str" field.
 func (_u *FieldTypeUpdateOne) SetStr(v sql.NullString) *FieldTypeUpdateOne {
@@ -2746,10 +2625,7 @@ func (_u *FieldTypeUpdateOne) SetNillableStr(v *sql.NullString) *FieldTypeUpdate
 }
 
 // ClearStr clears the value of the "str" field.
-func (_u *FieldTypeUpdateOne) ClearStr() *FieldTypeUpdateOne {
-	_u.mutation.ClearStr()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearStr() *FieldTypeUpdateOne { _u.mutation.ClearStr(); return _u }
 
 // SetNullStr sets the "null_str" field.
 func (_u *FieldTypeUpdateOne) SetNullStr(v *sql.NullString) *FieldTypeUpdateOne {
@@ -2778,10 +2654,7 @@ func (_u *FieldTypeUpdateOne) SetNillableLink(v *schema.Link) *FieldTypeUpdateOn
 }
 
 // ClearLink clears the value of the "link" field.
-func (_u *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne {
-	_u.mutation.ClearLink()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne { _u.mutation.ClearLink(); return _u }
 
 // SetNullLink sets the "null_link" field.
 func (_u *FieldTypeUpdateOne) SetNullLink(v *schema.Link) *FieldTypeUpdateOne {
@@ -2810,10 +2683,7 @@ func (_u *FieldTypeUpdateOne) SetNillableActive(v *schema.Status) *FieldTypeUpda
 }
 
 // ClearActive clears the value of the "active" field.
-func (_u *FieldTypeUpdateOne) ClearActive() *FieldTypeUpdateOne {
-	_u.mutation.ClearActive()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearActive() *FieldTypeUpdateOne { _u.mutation.ClearActive(); return _u }
 
 // SetNullActive sets the "null_active" field.
 func (_u *FieldTypeUpdateOne) SetNullActive(v schema.Status) *FieldTypeUpdateOne {
@@ -2890,10 +2760,7 @@ func (_u *FieldTypeUpdateOne) SetIP(v net.IP) *FieldTypeUpdateOne {
 }
 
 // ClearIP clears the value of the "ip" field.
-func (_u *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
-	_u.mutation.ClearIP()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne { _u.mutation.ClearIP(); return _u }
 
 // SetNullInt64 sets the "null_int64" field.
 func (_u *FieldTypeUpdateOne) SetNullInt64(v *sql.NullInt64) *FieldTypeUpdateOne {
@@ -3222,10 +3089,7 @@ func (_u *FieldTypeUpdateOne) AddBigInt(v schema.BigInt) *FieldTypeUpdateOne {
 }
 
 // ClearBigInt clears the value of the "big_int" field.
-func (_u *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne {
-	_u.mutation.ClearBigInt()
-	return _u
-}
+func (_u *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne { _u.mutation.ClearBigInt(); return _u }
 
 // SetPasswordOther sets the "password_other" field.
 func (_u *FieldTypeUpdateOne) SetPasswordOther(v schema.Password) *FieldTypeUpdateOne {
@@ -3248,9 +3112,7 @@ func (_u *FieldTypeUpdateOne) ClearPasswordOther() *FieldTypeUpdateOne {
 }
 
 // Mutation returns the FieldTypeMutation object of the builder.
-func (_u *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
-	return _u.mutation
-}
+func (_u *FieldTypeUpdateOne) Mutation() *FieldTypeMutation { return _u.mutation }
 
 // Where appends a list predicates to the FieldTypeUpdate builder.
 func (_u *FieldTypeUpdateOne) Where(ps ...predicate.FieldType) *FieldTypeUpdateOne {
@@ -3273,18 +3135,11 @@ func (_u *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *FieldTypeUpdateOne) SaveX(ctx context.Context) *FieldType {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *FieldTypeUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FieldTypeUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FieldTypeUpdateOne) ExecX(ctx context.Context) {

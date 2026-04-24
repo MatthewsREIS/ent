@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *AttachedFileUpdate) Where(ps ...predicate.AttachedFile) *AttachedFileU
 
 // SetAttachTime sets the "attach_time" field.
 func (_u *AttachedFileUpdate) SetAttachTime(v time.Time) *AttachedFileUpdate {
-	_u.mutation.SetAttachTime(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetAttachTime, v)
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
@@ -52,8 +52,7 @@ func (_u *AttachedFileUpdate) SetNillableAttachTime(v *time.Time) *AttachedFileU
 
 // SetFID sets the "f_id" field.
 func (_u *AttachedFileUpdate) SetFID(v int) *AttachedFileUpdate {
-	_u.mutation.SetFID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetFID, v)
 }
 
 // SetNillableFID sets the "f_id" field if the given value is not nil.
@@ -66,8 +65,7 @@ func (_u *AttachedFileUpdate) SetNillableFID(v *int) *AttachedFileUpdate {
 
 // SetProcID sets the "proc_id" field.
 func (_u *AttachedFileUpdate) SetProcID(v int) *AttachedFileUpdate {
-	_u.mutation.SetProcID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetProcID, v)
 }
 
 // SetNillableProcID sets the "proc_id" field if the given value is not nil.
@@ -80,25 +78,20 @@ func (_u *AttachedFileUpdate) SetNillableProcID(v *int) *AttachedFileUpdate {
 
 // SetFiID sets the "fi" edge to the File entity by ID.
 func (_u *AttachedFileUpdate) SetFiID(id int) *AttachedFileUpdate {
-	_u.mutation.SetFiID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetFiID, id)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.
-func (_u *AttachedFileUpdate) Mutation() *AttachedFileMutation {
-	return _u.mutation
-}
+func (_u *AttachedFileUpdate) Mutation() *AttachedFileMutation { return _u.mutation }
 
 // ClearFi clears the "fi" edge to the File entity.
 func (_u *AttachedFileUpdate) ClearFi() *AttachedFileUpdate {
-	_u.mutation.ClearFi()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFi)
 }
 
 // ClearProc clears the "proc" edge to the Process entity.
 func (_u *AttachedFileUpdate) ClearProc() *AttachedFileUpdate {
-	_u.mutation.ClearProc()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearProc)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -107,19 +100,10 @@ func (_u *AttachedFileUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *AttachedFileUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *AttachedFileUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *AttachedFileUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *AttachedFileUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *AttachedFileUpdate) ExecX(ctx context.Context) {
@@ -239,8 +223,7 @@ func NewAttachedFileUpdateOne(c Config, hooks []Hook, mutation *AttachedFileMuta
 
 // SetAttachTime sets the "attach_time" field.
 func (_u *AttachedFileUpdateOne) SetAttachTime(v time.Time) *AttachedFileUpdateOne {
-	_u.mutation.SetAttachTime(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetAttachTime, v)
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
@@ -253,8 +236,7 @@ func (_u *AttachedFileUpdateOne) SetNillableAttachTime(v *time.Time) *AttachedFi
 
 // SetFID sets the "f_id" field.
 func (_u *AttachedFileUpdateOne) SetFID(v int) *AttachedFileUpdateOne {
-	_u.mutation.SetFID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetFID, v)
 }
 
 // SetNillableFID sets the "f_id" field if the given value is not nil.
@@ -267,8 +249,7 @@ func (_u *AttachedFileUpdateOne) SetNillableFID(v *int) *AttachedFileUpdateOne {
 
 // SetProcID sets the "proc_id" field.
 func (_u *AttachedFileUpdateOne) SetProcID(v int) *AttachedFileUpdateOne {
-	_u.mutation.SetProcID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetProcID, v)
 }
 
 // SetNillableProcID sets the "proc_id" field if the given value is not nil.
@@ -281,25 +262,20 @@ func (_u *AttachedFileUpdateOne) SetNillableProcID(v *int) *AttachedFileUpdateOn
 
 // SetFiID sets the "fi" edge to the File entity by ID.
 func (_u *AttachedFileUpdateOne) SetFiID(id int) *AttachedFileUpdateOne {
-	_u.mutation.SetFiID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetFiID, id)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.
-func (_u *AttachedFileUpdateOne) Mutation() *AttachedFileMutation {
-	return _u.mutation
-}
+func (_u *AttachedFileUpdateOne) Mutation() *AttachedFileMutation { return _u.mutation }
 
 // ClearFi clears the "fi" edge to the File entity.
 func (_u *AttachedFileUpdateOne) ClearFi() *AttachedFileUpdateOne {
-	_u.mutation.ClearFi()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFi)
 }
 
 // ClearProc clears the "proc" edge to the Process entity.
 func (_u *AttachedFileUpdateOne) ClearProc() *AttachedFileUpdateOne {
-	_u.mutation.ClearProc()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearProc)
 }
 
 // Where appends a list predicates to the AttachedFileUpdate builder.
@@ -322,18 +298,11 @@ func (_u *AttachedFileUpdateOne) Save(ctx context.Context) (*AttachedFile, error
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *AttachedFileUpdateOne) SaveX(ctx context.Context) *AttachedFile {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *AttachedFileUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *AttachedFileUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *AttachedFileUpdateOne) ExecX(ctx context.Context) {

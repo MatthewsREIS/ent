@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/hooks/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,10 +31,7 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetVersion sets the "version" field.
 func (_u *UserUpdate) SetVersion(v int) *UserUpdate {
@@ -52,14 +50,12 @@ func (_u *UserUpdate) SetNillableVersion(v *int) *UserUpdate {
 
 // AddVersion adds value to the "version" field.
 func (_u *UserUpdate) AddVersion(v int) *UserUpdate {
-	_u.mutation.AddVersion(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddVersion, v)
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -87,20 +83,15 @@ func (_u *UserUpdate) SetNillableWorth(v *uint) *UserUpdate {
 
 // AddWorth adds value to the "worth" field.
 func (_u *UserUpdate) AddWorth(v int) *UserUpdate {
-	_u.mutation.AddWorth(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddWorth, v)
 }
 
 // ClearWorth clears the value of the "worth" field.
-func (_u *UserUpdate) ClearWorth() *UserUpdate {
-	_u.mutation.ClearWorth()
-	return _u
-}
+func (_u *UserUpdate) ClearWorth() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearWorth) }
 
 // SetPassword sets the "password" field.
 func (_u *UserUpdate) SetPassword(v string) *UserUpdate {
-	_u.mutation.SetPassword(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPassword, v)
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
@@ -113,14 +104,12 @@ func (_u *UserUpdate) SetNillablePassword(v *string) *UserUpdate {
 
 // ClearPassword clears the value of the "password" field.
 func (_u *UserUpdate) ClearPassword() *UserUpdate {
-	_u.mutation.ClearPassword()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPassword)
 }
 
 // SetActive sets the "active" field.
 func (_u *UserUpdate) SetActive(v bool) *UserUpdate {
-	_u.mutation.SetActive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetActive, v)
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
@@ -132,16 +121,10 @@ func (_u *UserUpdate) SetNillableActive(v *bool) *UserUpdate {
 }
 
 // AddCardIDs adds the "cards" edge to the Card entity by IDs.
-func (_u *UserUpdate) AddCardIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddCardIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddCardIDs(ids ...int) *UserUpdate { _u.mutation.AddCardIDs(ids...); return _u }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddPetIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate { _u.mutation.AddPetIDs(ids...); return _u }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
@@ -151,8 +134,7 @@ func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
 
 // SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (_u *UserUpdate) SetBestFriendID(id int) *UserUpdate {
-	_u.mutation.SetBestFriendID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBestFriendID, id)
 }
 
 // SetNillableBestFriendID sets the "best_friend" edge to the User entity by ID if the given value is not nil.
@@ -164,15 +146,10 @@ func (_u *UserUpdate) SetNillableBestFriendID(id *int) *UserUpdate {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdate) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdate) Mutation() *UserMutation { return _u.mutation }
 
 // ClearCards clears all "cards" edges to the Card entity.
-func (_u *UserUpdate) ClearCards() *UserUpdate {
-	_u.mutation.ClearCards()
-	return _u
-}
+func (_u *UserUpdate) ClearCards() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearCards) }
 
 // RemoveCardIDs removes the "cards" edge to Card entities by IDs.
 func (_u *UserUpdate) RemoveCardIDs(ids ...int) *UserUpdate {
@@ -181,10 +158,7 @@ func (_u *UserUpdate) RemoveCardIDs(ids ...int) *UserUpdate {
 }
 
 // ClearPets clears all "pets" edges to the Pet entity.
-func (_u *UserUpdate) ClearPets() *UserUpdate {
-	_u.mutation.ClearPets()
-	return _u
-}
+func (_u *UserUpdate) ClearPets() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearPets) }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
@@ -194,8 +168,7 @@ func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
 
 // ClearFriends clears all "friends" edges to the User entity.
 func (_u *UserUpdate) ClearFriends() *UserUpdate {
-	_u.mutation.ClearFriends()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFriends)
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
@@ -206,8 +179,7 @@ func (_u *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
 
 // ClearBestFriend clears the "best_friend" edge to the User entity.
 func (_u *UserUpdate) ClearBestFriend() *UserUpdate {
-	_u.mutation.ClearBestFriend()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBestFriend)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -216,19 +188,10 @@ func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *UserUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *UserUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdate) ExecX(ctx context.Context) {
@@ -479,14 +442,12 @@ func (_u *UserUpdateOne) SetNillableVersion(v *int) *UserUpdateOne {
 
 // AddVersion adds value to the "version" field.
 func (_u *UserUpdateOne) AddVersion(v int) *UserUpdateOne {
-	_u.mutation.AddVersion(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddVersion, v)
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -514,20 +475,17 @@ func (_u *UserUpdateOne) SetNillableWorth(v *uint) *UserUpdateOne {
 
 // AddWorth adds value to the "worth" field.
 func (_u *UserUpdateOne) AddWorth(v int) *UserUpdateOne {
-	_u.mutation.AddWorth(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddWorth, v)
 }
 
 // ClearWorth clears the value of the "worth" field.
 func (_u *UserUpdateOne) ClearWorth() *UserUpdateOne {
-	_u.mutation.ClearWorth()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearWorth)
 }
 
 // SetPassword sets the "password" field.
 func (_u *UserUpdateOne) SetPassword(v string) *UserUpdateOne {
-	_u.mutation.SetPassword(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPassword, v)
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
@@ -540,14 +498,12 @@ func (_u *UserUpdateOne) SetNillablePassword(v *string) *UserUpdateOne {
 
 // ClearPassword clears the value of the "password" field.
 func (_u *UserUpdateOne) ClearPassword() *UserUpdateOne {
-	_u.mutation.ClearPassword()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPassword)
 }
 
 // SetActive sets the "active" field.
 func (_u *UserUpdateOne) SetActive(v bool) *UserUpdateOne {
-	_u.mutation.SetActive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetActive, v)
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
@@ -578,8 +534,7 @@ func (_u *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
 
 // SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (_u *UserUpdateOne) SetBestFriendID(id int) *UserUpdateOne {
-	_u.mutation.SetBestFriendID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBestFriendID, id)
 }
 
 // SetNillableBestFriendID sets the "best_friend" edge to the User entity by ID if the given value is not nil.
@@ -591,14 +546,11 @@ func (_u *UserUpdateOne) SetNillableBestFriendID(id *int) *UserUpdateOne {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdateOne) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdateOne) Mutation() *UserMutation { return _u.mutation }
 
 // ClearCards clears all "cards" edges to the Card entity.
 func (_u *UserUpdateOne) ClearCards() *UserUpdateOne {
-	_u.mutation.ClearCards()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearCards)
 }
 
 // RemoveCardIDs removes the "cards" edge to Card entities by IDs.
@@ -609,8 +561,7 @@ func (_u *UserUpdateOne) RemoveCardIDs(ids ...int) *UserUpdateOne {
 
 // ClearPets clears all "pets" edges to the Pet entity.
 func (_u *UserUpdateOne) ClearPets() *UserUpdateOne {
-	_u.mutation.ClearPets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPets)
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
@@ -621,8 +572,7 @@ func (_u *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
 
 // ClearFriends clears all "friends" edges to the User entity.
 func (_u *UserUpdateOne) ClearFriends() *UserUpdateOne {
-	_u.mutation.ClearFriends()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFriends)
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
@@ -633,8 +583,7 @@ func (_u *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
 
 // ClearBestFriend clears the "best_friend" edge to the User entity.
 func (_u *UserUpdateOne) ClearBestFriend() *UserUpdateOne {
-	_u.mutation.ClearBestFriend()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBestFriend)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -656,19 +605,10 @@ func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdateOne) ExecX(ctx context.Context) {

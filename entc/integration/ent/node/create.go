@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewNodeCreate(c Config, hooks []Hook, mutation *NodeMutation) *NodeCreate {
 
 // SetValue sets the "value" field.
 func (_c *NodeCreate) SetValue(v int) *NodeCreate {
-	_c.mutation.SetValue(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetValue, v)
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
@@ -46,8 +46,7 @@ func (_c *NodeCreate) SetNillableValue(v *int) *NodeCreate {
 
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *NodeCreate) SetUpdatedAt(v time.Time) *NodeCreate {
-	_c.mutation.SetUpdatedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUpdatedAt, v)
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
@@ -60,8 +59,7 @@ func (_c *NodeCreate) SetNillableUpdatedAt(v *time.Time) *NodeCreate {
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
 func (_c *NodeCreate) SetPrevID(id int) *NodeCreate {
-	_c.mutation.SetPrevID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetPrevID, id)
 }
 
 // SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
@@ -74,8 +72,7 @@ func (_c *NodeCreate) SetNillablePrevID(id *int) *NodeCreate {
 
 // SetNextID sets the "next" edge to the Node entity by ID.
 func (_c *NodeCreate) SetNextID(id int) *NodeCreate {
-	_c.mutation.SetNextID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNextID, id)
 }
 
 // SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
@@ -87,9 +84,7 @@ func (_c *NodeCreate) SetNillableNextID(id *int) *NodeCreate {
 }
 
 // Mutation returns the NodeMutation object of the builder.
-func (_c *NodeCreate) Mutation() *NodeMutation {
-	return _c.mutation
-}
+func (_c *NodeCreate) Mutation() *NodeMutation { return _c.mutation }
 
 // Save creates the Node in the database.
 func (_c *NodeCreate) Save(ctx context.Context) (*Node, error) {
@@ -97,19 +92,10 @@ func (_c *NodeCreate) Save(ctx context.Context) (*Node, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *NodeCreate) SaveX(ctx context.Context) *Node {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *NodeCreate) SaveX(ctx context.Context) *Node { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *NodeCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *NodeCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *NodeCreate) ExecX(ctx context.Context) {

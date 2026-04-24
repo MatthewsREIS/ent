@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -31,15 +32,11 @@ func NewTaskUpdate(c Config, hooks []Hook, mutation *TaskMutation) *TaskUpdate {
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
-func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetTitle sets the "title" field.
 func (_u *TaskUpdate) SetTitle(v string) *TaskUpdate {
-	_u.mutation.SetTitle(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTitle, v)
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
@@ -52,8 +49,7 @@ func (_u *TaskUpdate) SetNillableTitle(v *string) *TaskUpdate {
 
 // SetDescription sets the "description" field.
 func (_u *TaskUpdate) SetDescription(v string) *TaskUpdate {
-	_u.mutation.SetDescription(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDescription, v)
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
@@ -66,14 +62,12 @@ func (_u *TaskUpdate) SetNillableDescription(v *string) *TaskUpdate {
 
 // ClearDescription clears the value of the "description" field.
 func (_u *TaskUpdate) ClearDescription() *TaskUpdate {
-	_u.mutation.ClearDescription()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDescription)
 }
 
 // SetStatus sets the "status" field.
 func (_u *TaskUpdate) SetStatus(v Status) *TaskUpdate {
-	_u.mutation.SetStatus(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStatus, v)
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
@@ -86,8 +80,7 @@ func (_u *TaskUpdate) SetNillableStatus(v *Status) *TaskUpdate {
 
 // SetUUID sets the "uuid" field.
 func (_u *TaskUpdate) SetUUID(v uuid.UUID) *TaskUpdate {
-	_u.mutation.SetUUID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUUID, v)
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
@@ -99,21 +92,14 @@ func (_u *TaskUpdate) SetNillableUUID(v *uuid.UUID) *TaskUpdate {
 }
 
 // ClearUUID clears the value of the "uuid" field.
-func (_u *TaskUpdate) ClearUUID() *TaskUpdate {
-	_u.mutation.ClearUUID()
-	return _u
-}
+func (_u *TaskUpdate) ClearUUID() *TaskUpdate { return entbuilder.BClear(_u, _u.mutation.ClearUUID) }
 
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (_u *TaskUpdate) AddTeamIDs(ids ...int) *TaskUpdate {
-	_u.mutation.AddTeamIDs(ids...)
-	return _u
-}
+func (_u *TaskUpdate) AddTeamIDs(ids ...int) *TaskUpdate { _u.mutation.AddTeamIDs(ids...); return _u }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *TaskUpdate) SetOwnerID(id int) *TaskUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -125,15 +111,10 @@ func (_u *TaskUpdate) SetNillableOwnerID(id *int) *TaskUpdate {
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (_u *TaskUpdate) Mutation() *TaskMutation {
-	return _u.mutation
-}
+func (_u *TaskUpdate) Mutation() *TaskMutation { return _u.mutation }
 
 // ClearTeams clears all "teams" edges to the Team entity.
-func (_u *TaskUpdate) ClearTeams() *TaskUpdate {
-	_u.mutation.ClearTeams()
-	return _u
-}
+func (_u *TaskUpdate) ClearTeams() *TaskUpdate { return entbuilder.BClear(_u, _u.mutation.ClearTeams) }
 
 // RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
 func (_u *TaskUpdate) RemoveTeamIDs(ids ...int) *TaskUpdate {
@@ -142,10 +123,7 @@ func (_u *TaskUpdate) RemoveTeamIDs(ids ...int) *TaskUpdate {
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *TaskUpdate) ClearOwner() *TaskUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *TaskUpdate) ClearOwner() *TaskUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TaskUpdate) Save(ctx context.Context) (int, error) {
@@ -153,19 +131,10 @@ func (_u *TaskUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TaskUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *TaskUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *TaskUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TaskUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TaskUpdate) ExecX(ctx context.Context) {
@@ -320,8 +289,7 @@ func NewTaskUpdateOne(c Config, hooks []Hook, mutation *TaskMutation) *TaskUpdat
 
 // SetTitle sets the "title" field.
 func (_u *TaskUpdateOne) SetTitle(v string) *TaskUpdateOne {
-	_u.mutation.SetTitle(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTitle, v)
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
@@ -334,8 +302,7 @@ func (_u *TaskUpdateOne) SetNillableTitle(v *string) *TaskUpdateOne {
 
 // SetDescription sets the "description" field.
 func (_u *TaskUpdateOne) SetDescription(v string) *TaskUpdateOne {
-	_u.mutation.SetDescription(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDescription, v)
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
@@ -348,14 +315,12 @@ func (_u *TaskUpdateOne) SetNillableDescription(v *string) *TaskUpdateOne {
 
 // ClearDescription clears the value of the "description" field.
 func (_u *TaskUpdateOne) ClearDescription() *TaskUpdateOne {
-	_u.mutation.ClearDescription()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDescription)
 }
 
 // SetStatus sets the "status" field.
 func (_u *TaskUpdateOne) SetStatus(v Status) *TaskUpdateOne {
-	_u.mutation.SetStatus(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStatus, v)
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
@@ -368,8 +333,7 @@ func (_u *TaskUpdateOne) SetNillableStatus(v *Status) *TaskUpdateOne {
 
 // SetUUID sets the "uuid" field.
 func (_u *TaskUpdateOne) SetUUID(v uuid.UUID) *TaskUpdateOne {
-	_u.mutation.SetUUID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUUID, v)
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
@@ -382,8 +346,7 @@ func (_u *TaskUpdateOne) SetNillableUUID(v *uuid.UUID) *TaskUpdateOne {
 
 // ClearUUID clears the value of the "uuid" field.
 func (_u *TaskUpdateOne) ClearUUID() *TaskUpdateOne {
-	_u.mutation.ClearUUID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUUID)
 }
 
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
@@ -394,8 +357,7 @@ func (_u *TaskUpdateOne) AddTeamIDs(ids ...int) *TaskUpdateOne {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *TaskUpdateOne) SetOwnerID(id int) *TaskUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -407,14 +369,11 @@ func (_u *TaskUpdateOne) SetNillableOwnerID(id *int) *TaskUpdateOne {
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (_u *TaskUpdateOne) Mutation() *TaskMutation {
-	return _u.mutation
-}
+func (_u *TaskUpdateOne) Mutation() *TaskMutation { return _u.mutation }
 
 // ClearTeams clears all "teams" edges to the Team entity.
 func (_u *TaskUpdateOne) ClearTeams() *TaskUpdateOne {
-	_u.mutation.ClearTeams()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTeams)
 }
 
 // RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
@@ -425,8 +384,7 @@ func (_u *TaskUpdateOne) RemoveTeamIDs(ids ...int) *TaskUpdateOne {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
@@ -448,19 +406,10 @@ func (_u *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TaskUpdateOne) SaveX(ctx context.Context) *Task {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *TaskUpdateOne) SaveX(ctx context.Context) *Task { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *TaskUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TaskUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TaskUpdateOne) ExecX(ctx context.Context) {

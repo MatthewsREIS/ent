@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -55,14 +56,12 @@ func (_u *FriendshipUpdate) SetNillableWeight(v *int) *FriendshipUpdate {
 
 // AddWeight adds value to the "weight" field.
 func (_u *FriendshipUpdate) AddWeight(v int) *FriendshipUpdate {
-	_u.mutation.AddWeight(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddWeight, v)
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *FriendshipUpdate) SetCreatedAt(v time.Time) *FriendshipUpdate {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -74,9 +73,7 @@ func (_u *FriendshipUpdate) SetNillableCreatedAt(v *time.Time) *FriendshipUpdate
 }
 
 // Mutation returns the FriendshipMutation object of the builder.
-func (_u *FriendshipUpdate) Mutation() *FriendshipMutation {
-	return _u.mutation
-}
+func (_u *FriendshipUpdate) Mutation() *FriendshipMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FriendshipUpdate) Save(ctx context.Context) (int, error) {
@@ -84,19 +81,10 @@ func (_u *FriendshipUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FriendshipUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *FriendshipUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *FriendshipUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FriendshipUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FriendshipUpdate) ExecX(ctx context.Context) {
@@ -190,14 +178,12 @@ func (_u *FriendshipUpdateOne) SetNillableWeight(v *int) *FriendshipUpdateOne {
 
 // AddWeight adds value to the "weight" field.
 func (_u *FriendshipUpdateOne) AddWeight(v int) *FriendshipUpdateOne {
-	_u.mutation.AddWeight(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddWeight, v)
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *FriendshipUpdateOne) SetCreatedAt(v time.Time) *FriendshipUpdateOne {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -209,9 +195,7 @@ func (_u *FriendshipUpdateOne) SetNillableCreatedAt(v *time.Time) *FriendshipUpd
 }
 
 // Mutation returns the FriendshipMutation object of the builder.
-func (_u *FriendshipUpdateOne) Mutation() *FriendshipMutation {
-	return _u.mutation
-}
+func (_u *FriendshipUpdateOne) Mutation() *FriendshipMutation { return _u.mutation }
 
 // Where appends a list predicates to the FriendshipUpdate builder.
 func (_u *FriendshipUpdateOne) Where(ps ...predicate.Friendship) *FriendshipUpdateOne {
@@ -233,18 +217,11 @@ func (_u *FriendshipUpdateOne) Save(ctx context.Context) (*Friendship, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *FriendshipUpdateOne) SaveX(ctx context.Context) *Friendship {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *FriendshipUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FriendshipUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FriendshipUpdateOne) ExecX(ctx context.Context) {

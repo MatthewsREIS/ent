@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewFriendshipCreate(c Config, hooks []Hook, mutation *FriendshipMutation) *
 
 // SetWeight sets the "weight" field.
 func (_c *FriendshipCreate) SetWeight(v int) *FriendshipCreate {
-	_c.mutation.SetWeight(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetWeight, v)
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
@@ -46,8 +46,7 @@ func (_c *FriendshipCreate) SetNillableWeight(v *int) *FriendshipCreate {
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *FriendshipCreate) SetCreatedAt(v time.Time) *FriendshipCreate {
-	_c.mutation.SetCreatedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -60,20 +59,16 @@ func (_c *FriendshipCreate) SetNillableCreatedAt(v *time.Time) *FriendshipCreate
 
 // SetUserID sets the "user_id" field.
 func (_c *FriendshipCreate) SetUserID(v int) *FriendshipCreate {
-	_c.mutation.SetUserID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, v)
 }
 
 // SetFriendID sets the "friend_id" field.
 func (_c *FriendshipCreate) SetFriendID(v int) *FriendshipCreate {
-	_c.mutation.SetFriendID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetFriendID, v)
 }
 
 // Mutation returns the FriendshipMutation object of the builder.
-func (_c *FriendshipCreate) Mutation() *FriendshipMutation {
-	return _c.mutation
-}
+func (_c *FriendshipCreate) Mutation() *FriendshipMutation { return _c.mutation }
 
 // Save creates the Friendship in the database.
 func (_c *FriendshipCreate) Save(ctx context.Context) (*Friendship, error) {
@@ -83,18 +78,11 @@ func (_c *FriendshipCreate) Save(ctx context.Context) (*Friendship, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *FriendshipCreate) SaveX(ctx context.Context) *Friendship {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *FriendshipCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *FriendshipCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *FriendshipCreate) ExecX(ctx context.Context) {

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/config/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,11 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -50,15 +47,11 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 }
 
 // ClearName clears the value of the "name" field.
-func (_u *UserUpdate) ClearName() *UserUpdate {
-	_u.mutation.ClearName()
-	return _u
-}
+func (_u *UserUpdate) ClearName() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearName) }
 
 // SetLabel sets the "label" field.
 func (_u *UserUpdate) SetLabel(v string) *UserUpdate {
-	_u.mutation.SetLabel(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLabel, v)
 }
 
 // SetNillableLabel sets the "label" field if the given value is not nil.
@@ -70,15 +63,10 @@ func (_u *UserUpdate) SetNillableLabel(v *string) *UserUpdate {
 }
 
 // ClearLabel clears the value of the "label" field.
-func (_u *UserUpdate) ClearLabel() *UserUpdate {
-	_u.mutation.ClearLabel()
-	return _u
-}
+func (_u *UserUpdate) ClearLabel() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearLabel) }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdate) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdate) Mutation() *UserMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
@@ -86,19 +74,10 @@ func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *UserUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *UserUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdate) ExecX(ctx context.Context) {
@@ -155,8 +134,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -169,14 +147,12 @@ func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *UserUpdateOne) ClearName() *UserUpdateOne {
-	_u.mutation.ClearName()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearName)
 }
 
 // SetLabel sets the "label" field.
 func (_u *UserUpdateOne) SetLabel(v string) *UserUpdateOne {
-	_u.mutation.SetLabel(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLabel, v)
 }
 
 // SetNillableLabel sets the "label" field if the given value is not nil.
@@ -189,14 +165,11 @@ func (_u *UserUpdateOne) SetNillableLabel(v *string) *UserUpdateOne {
 
 // ClearLabel clears the value of the "label" field.
 func (_u *UserUpdateOne) ClearLabel() *UserUpdateOne {
-	_u.mutation.ClearLabel()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLabel)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdateOne) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdateOne) Mutation() *UserMutation { return _u.mutation }
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
@@ -217,19 +190,10 @@ func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdateOne) ExecX(ctx context.Context) {

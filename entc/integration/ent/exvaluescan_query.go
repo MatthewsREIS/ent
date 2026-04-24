@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -40,23 +41,14 @@ func (_q *ExValueScanQuery) Where(ps ...predicate.ExValueScan) *ExValueScanQuery
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *ExValueScanQuery) Limit(limit int) *ExValueScanQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *ExValueScanQuery) Limit(limit int) *ExValueScanQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *ExValueScanQuery) Offset(offset int) *ExValueScanQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *ExValueScanQuery) Offset(offset int) *ExValueScanQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *ExValueScanQuery) Unique(unique bool) *ExValueScanQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *ExValueScanQuery) Unique(unique bool) *ExValueScanQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *ExValueScanQuery) Order(o ...exvaluescan.OrderOption) *ExValueScanQuery {
@@ -129,11 +121,7 @@ func (_q *ExValueScanQuery) Only(ctx context.Context) (*ExValueScan, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (_q *ExValueScanQuery) OnlyX(ctx context.Context) *ExValueScan {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_q.Only(ctx))
 }
 
 // OnlyID is like Only, but returns the only ExValueScan ID in the query.
@@ -156,13 +144,7 @@ func (_q *ExValueScanQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *ExValueScanQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *ExValueScanQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of ExValueScans.
 func (_q *ExValueScanQuery) All(ctx context.Context) ([]*ExValueScan, error) {
@@ -176,11 +158,7 @@ func (_q *ExValueScanQuery) All(ctx context.Context) ([]*ExValueScan, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (_q *ExValueScanQuery) AllX(ctx context.Context) []*ExValueScan {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
+	return entbuilder.Must(_q.All(ctx))
 }
 
 // IDs executes the query and returns a list of ExValueScan IDs.
@@ -196,13 +174,7 @@ func (_q *ExValueScanQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *ExValueScanQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *ExValueScanQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *ExValueScanQuery) Count(ctx context.Context) (int, error) {
@@ -214,13 +186,7 @@ func (_q *ExValueScanQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *ExValueScanQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *ExValueScanQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *ExValueScanQuery) Exist(ctx context.Context) (bool, error) {
@@ -236,13 +202,7 @@ func (_q *ExValueScanQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *ExValueScanQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *ExValueScanQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the ExValueScanQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

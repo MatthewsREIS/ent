@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/hooks/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,15 +32,11 @@ func NewCardUpdate(c Config, hooks []Hook, mutation *CardMutation) *CardUpdate {
 }
 
 // Where appends a list predicates to the CardUpdate builder.
-func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
 func (_u *CardUpdate) SetName(v string) *CardUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -51,15 +48,11 @@ func (_u *CardUpdate) SetNillableName(v *string) *CardUpdate {
 }
 
 // ClearName clears the value of the "name" field.
-func (_u *CardUpdate) ClearName() *CardUpdate {
-	_u.mutation.ClearName()
-	return _u
-}
+func (_u *CardUpdate) ClearName() *CardUpdate { return entbuilder.BClear(_u, _u.mutation.ClearName) }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *CardUpdate) SetCreatedAt(v time.Time) *CardUpdate {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -72,8 +65,7 @@ func (_u *CardUpdate) SetNillableCreatedAt(v *time.Time) *CardUpdate {
 
 // SetInHook sets the "in_hook" field.
 func (_u *CardUpdate) SetInHook(v string) *CardUpdate {
-	_u.mutation.SetInHook(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInHook, v)
 }
 
 // SetNillableInHook sets the "in_hook" field if the given value is not nil.
@@ -86,8 +78,7 @@ func (_u *CardUpdate) SetNillableInHook(v *string) *CardUpdate {
 
 // SetExpiredAt sets the "expired_at" field.
 func (_u *CardUpdate) SetExpiredAt(v time.Time) *CardUpdate {
-	_u.mutation.SetExpiredAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetExpiredAt, v)
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
@@ -100,14 +91,12 @@ func (_u *CardUpdate) SetNillableExpiredAt(v *time.Time) *CardUpdate {
 
 // ClearExpiredAt clears the value of the "expired_at" field.
 func (_u *CardUpdate) ClearExpiredAt() *CardUpdate {
-	_u.mutation.ClearExpiredAt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearExpiredAt)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardUpdate) SetOwnerID(id int) *CardUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -119,15 +108,10 @@ func (_u *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (_u *CardUpdate) Mutation() *CardMutation {
-	return _u.mutation
-}
+func (_u *CardUpdate) Mutation() *CardMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *CardUpdate) ClearOwner() *CardUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *CardUpdate) ClearOwner() *CardUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
@@ -135,19 +119,10 @@ func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CardUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *CardUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *CardUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CardUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CardUpdate) ExecX(ctx context.Context) {
@@ -239,8 +214,7 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 
 // SetName sets the "name" field.
 func (_u *CardUpdateOne) SetName(v string) *CardUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -253,14 +227,12 @@ func (_u *CardUpdateOne) SetNillableName(v *string) *CardUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *CardUpdateOne) ClearName() *CardUpdateOne {
-	_u.mutation.ClearName()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearName)
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *CardUpdateOne) SetCreatedAt(v time.Time) *CardUpdateOne {
-	_u.mutation.SetCreatedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -273,8 +245,7 @@ func (_u *CardUpdateOne) SetNillableCreatedAt(v *time.Time) *CardUpdateOne {
 
 // SetInHook sets the "in_hook" field.
 func (_u *CardUpdateOne) SetInHook(v string) *CardUpdateOne {
-	_u.mutation.SetInHook(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInHook, v)
 }
 
 // SetNillableInHook sets the "in_hook" field if the given value is not nil.
@@ -287,8 +258,7 @@ func (_u *CardUpdateOne) SetNillableInHook(v *string) *CardUpdateOne {
 
 // SetExpiredAt sets the "expired_at" field.
 func (_u *CardUpdateOne) SetExpiredAt(v time.Time) *CardUpdateOne {
-	_u.mutation.SetExpiredAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetExpiredAt, v)
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
@@ -301,14 +271,12 @@ func (_u *CardUpdateOne) SetNillableExpiredAt(v *time.Time) *CardUpdateOne {
 
 // ClearExpiredAt clears the value of the "expired_at" field.
 func (_u *CardUpdateOne) ClearExpiredAt() *CardUpdateOne {
-	_u.mutation.ClearExpiredAt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearExpiredAt)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -320,14 +288,11 @@ func (_u *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (_u *CardUpdateOne) Mutation() *CardMutation {
-	return _u.mutation
-}
+func (_u *CardUpdateOne) Mutation() *CardMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdateOne) ClearOwner() *CardUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // Where appends a list predicates to the CardUpdate builder.
@@ -349,19 +314,10 @@ func (_u *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CardUpdateOne) SaveX(ctx context.Context) *Card {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *CardUpdateOne) SaveX(ctx context.Context) *Card { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *CardUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CardUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CardUpdateOne) ExecX(ctx context.Context) {

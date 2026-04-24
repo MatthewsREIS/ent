@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *IntSIDUpdate) Where(ps ...predicate.IntSID) *IntSIDUpdate {
 
 // SetParentID sets the "parent" edge to the IntSID entity by ID.
 func (_u *IntSIDUpdate) SetParentID(id sid.ID) *IntSIDUpdate {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the IntSID entity by ID if the given value is not nil.
@@ -57,20 +57,16 @@ func (_u *IntSIDUpdate) AddChildIDs(ids ...sid.ID) *IntSIDUpdate {
 }
 
 // Mutation returns the IntSIDMutation object of the builder.
-func (_u *IntSIDUpdate) Mutation() *IntSIDMutation {
-	return _u.mutation
-}
+func (_u *IntSIDUpdate) Mutation() *IntSIDMutation { return _u.mutation }
 
 // ClearParent clears the "parent" edge to the IntSID entity.
 func (_u *IntSIDUpdate) ClearParent() *IntSIDUpdate {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearChildren clears all "children" edges to the IntSID entity.
 func (_u *IntSIDUpdate) ClearChildren() *IntSIDUpdate {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to IntSID entities by IDs.
@@ -85,19 +81,10 @@ func (_u *IntSIDUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *IntSIDUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *IntSIDUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *IntSIDUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *IntSIDUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *IntSIDUpdate) ExecX(ctx context.Context) {
@@ -216,8 +203,7 @@ func NewIntSIDUpdateOne(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSI
 
 // SetParentID sets the "parent" edge to the IntSID entity by ID.
 func (_u *IntSIDUpdateOne) SetParentID(id sid.ID) *IntSIDUpdateOne {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the IntSID entity by ID if the given value is not nil.
@@ -235,20 +221,16 @@ func (_u *IntSIDUpdateOne) AddChildIDs(ids ...sid.ID) *IntSIDUpdateOne {
 }
 
 // Mutation returns the IntSIDMutation object of the builder.
-func (_u *IntSIDUpdateOne) Mutation() *IntSIDMutation {
-	return _u.mutation
-}
+func (_u *IntSIDUpdateOne) Mutation() *IntSIDMutation { return _u.mutation }
 
 // ClearParent clears the "parent" edge to the IntSID entity.
 func (_u *IntSIDUpdateOne) ClearParent() *IntSIDUpdateOne {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearChildren clears all "children" edges to the IntSID entity.
 func (_u *IntSIDUpdateOne) ClearChildren() *IntSIDUpdateOne {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to IntSID entities by IDs.
@@ -276,19 +258,10 @@ func (_u *IntSIDUpdateOne) Save(ctx context.Context) (*IntSID, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *IntSIDUpdateOne) SaveX(ctx context.Context) *IntSID {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *IntSIDUpdateOne) SaveX(ctx context.Context) *IntSID { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *IntSIDUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *IntSIDUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *IntSIDUpdateOne) ExecX(ctx context.Context) {

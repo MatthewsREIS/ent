@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -49,14 +50,11 @@ func (_u *ProcessUpdate) AddAttachedFileIDs(ids ...int) *ProcessUpdate {
 }
 
 // Mutation returns the ProcessMutation object of the builder.
-func (_u *ProcessUpdate) Mutation() *ProcessMutation {
-	return _u.mutation
-}
+func (_u *ProcessUpdate) Mutation() *ProcessMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *ProcessUpdate) ClearFiles() *ProcessUpdate {
-	_u.mutation.ClearFiles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFiles)
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
@@ -67,8 +65,7 @@ func (_u *ProcessUpdate) RemoveFileIDs(ids ...int) *ProcessUpdate {
 
 // ClearAttachedFiles clears all "attached_files" edges to the AttachedFile entity.
 func (_u *ProcessUpdate) ClearAttachedFiles() *ProcessUpdate {
-	_u.mutation.ClearAttachedFiles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAttachedFiles)
 }
 
 // RemoveAttachedFileIDs removes the "attached_files" edge to AttachedFile entities by IDs.
@@ -83,19 +80,10 @@ func (_u *ProcessUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ProcessUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *ProcessUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *ProcessUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ProcessUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ProcessUpdate) ExecX(ctx context.Context) {
@@ -247,14 +235,11 @@ func (_u *ProcessUpdateOne) AddAttachedFileIDs(ids ...int) *ProcessUpdateOne {
 }
 
 // Mutation returns the ProcessMutation object of the builder.
-func (_u *ProcessUpdateOne) Mutation() *ProcessMutation {
-	return _u.mutation
-}
+func (_u *ProcessUpdateOne) Mutation() *ProcessMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *ProcessUpdateOne) ClearFiles() *ProcessUpdateOne {
-	_u.mutation.ClearFiles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFiles)
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
@@ -265,8 +250,7 @@ func (_u *ProcessUpdateOne) RemoveFileIDs(ids ...int) *ProcessUpdateOne {
 
 // ClearAttachedFiles clears all "attached_files" edges to the AttachedFile entity.
 func (_u *ProcessUpdateOne) ClearAttachedFiles() *ProcessUpdateOne {
-	_u.mutation.ClearAttachedFiles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAttachedFiles)
 }
 
 // RemoveAttachedFileIDs removes the "attached_files" edge to AttachedFile entities by IDs.
@@ -294,19 +278,10 @@ func (_u *ProcessUpdateOne) Save(ctx context.Context) (*Process, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ProcessUpdateOne) SaveX(ctx context.Context) *Process {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *ProcessUpdateOne) SaveX(ctx context.Context) *Process { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *ProcessUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ProcessUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ProcessUpdateOne) ExecX(ctx context.Context) {

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,10 +31,7 @@ func NewGroupUpdate(c Config, hooks []Hook, mutation *GroupMutation) *GroupUpdat
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
-func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetMaxUsers sets the "max_users" field.
 func (_u *GroupUpdate) SetMaxUsers(v int) *GroupUpdate {
@@ -52,14 +50,11 @@ func (_u *GroupUpdate) SetNillableMaxUsers(v *int) *GroupUpdate {
 
 // AddMaxUsers adds value to the "max_users" field.
 func (_u *GroupUpdate) AddMaxUsers(v int) *GroupUpdate {
-	_u.mutation.AddMaxUsers(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddMaxUsers, v)
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_u *GroupUpdate) Mutation() *GroupMutation {
-	return _u.mutation
-}
+func (_u *GroupUpdate) Mutation() *GroupMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
@@ -67,19 +62,10 @@ func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *GroupUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *GroupUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupUpdate) ExecX(ctx context.Context) {
@@ -145,14 +131,11 @@ func (_u *GroupUpdateOne) SetNillableMaxUsers(v *int) *GroupUpdateOne {
 
 // AddMaxUsers adds value to the "max_users" field.
 func (_u *GroupUpdateOne) AddMaxUsers(v int) *GroupUpdateOne {
-	_u.mutation.AddMaxUsers(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddMaxUsers, v)
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_u *GroupUpdateOne) Mutation() *GroupMutation {
-	return _u.mutation
-}
+func (_u *GroupUpdateOne) Mutation() *GroupMutation { return _u.mutation }
 
 // Where appends a list predicates to the GroupUpdate builder.
 func (_u *GroupUpdateOne) Where(ps ...predicate.Group) *GroupUpdateOne {
@@ -173,19 +156,10 @@ func (_u *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *GroupUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupUpdateOne) ExecX(ctx context.Context) {

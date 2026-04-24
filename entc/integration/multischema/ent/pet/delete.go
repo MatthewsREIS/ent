@@ -13,14 +13,16 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	Config
-	hooks    []Hook
-	mutation *PetMutation
+	hooks     []Hook
+	mutation  *PetMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewPetDelete returns a new PetDelete initialized with the given config, hooks, and mutation.
@@ -29,10 +31,7 @@ func NewPetDelete(c Config, hooks []Hook, mutation *PetMutation) *PetDelete {
 }
 
 // Where appends a list predicates to the PetDelete builder.
-func (_d *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
-	_d.mutation.Where(ps...)
-	return _d
-}
+func (_d *PetDelete) Where(ps ...predicate.Pet) *PetDelete { _d.mutation.Where(ps...); return _d }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *PetDelete) Exec(ctx context.Context) (int, error) {
@@ -40,19 +39,14 @@ func (_d *PetDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *PetDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *PetDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *PetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	schemaConfig := _d.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Pet
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

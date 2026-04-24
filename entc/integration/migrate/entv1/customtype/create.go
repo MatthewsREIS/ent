@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,8 +29,7 @@ func NewCustomTypeCreate(c Config, hooks []Hook, mutation *CustomTypeMutation) *
 
 // SetCustom sets the "custom" field.
 func (_c *CustomTypeCreate) SetCustom(v string) *CustomTypeCreate {
-	_c.mutation.SetCustom(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCustom, v)
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
@@ -41,9 +41,7 @@ func (_c *CustomTypeCreate) SetNillableCustom(v *string) *CustomTypeCreate {
 }
 
 // Mutation returns the CustomTypeMutation object of the builder.
-func (_c *CustomTypeCreate) Mutation() *CustomTypeMutation {
-	return _c.mutation
-}
+func (_c *CustomTypeCreate) Mutation() *CustomTypeMutation { return _c.mutation }
 
 // Save creates the CustomType in the database.
 func (_c *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
@@ -52,18 +50,11 @@ func (_c *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *CustomTypeCreate) SaveX(ctx context.Context) *CustomType {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *CustomTypeCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *CustomTypeCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *CustomTypeCreate) ExecX(ctx context.Context) {

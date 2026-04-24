@@ -41,23 +41,14 @@ func (_q *PostQuery) Where(ps ...predicate.Post) *PostQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *PostQuery) Limit(limit int) *PostQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *PostQuery) Limit(limit int) *PostQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *PostQuery) Offset(offset int) *PostQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *PostQuery) Offset(offset int) *PostQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *PostQuery) Unique(unique bool) *PostQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *PostQuery) Unique(unique bool) *PostQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *PostQuery) Order(o ...post.OrderOption) *PostQuery {
@@ -151,13 +142,7 @@ func (_q *PostQuery) Only(ctx context.Context) (*Post, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *PostQuery) OnlyX(ctx context.Context) *Post {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *PostQuery) OnlyX(ctx context.Context) *Post { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Post ID in the query.
 // Returns a *NotSingularError when more than one Post ID is found.
@@ -179,13 +164,7 @@ func (_q *PostQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *PostQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *PostQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Posts.
 func (_q *PostQuery) All(ctx context.Context) ([]*Post, error) {
@@ -198,13 +177,7 @@ func (_q *PostQuery) All(ctx context.Context) ([]*Post, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *PostQuery) AllX(ctx context.Context) []*Post {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *PostQuery) AllX(ctx context.Context) []*Post { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Post IDs.
 func (_q *PostQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -219,13 +192,7 @@ func (_q *PostQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *PostQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *PostQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *PostQuery) Count(ctx context.Context) (int, error) {
@@ -237,13 +204,7 @@ func (_q *PostQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *PostQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *PostQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *PostQuery) Exist(ctx context.Context) (bool, error) {
@@ -259,13 +220,7 @@ func (_q *PostQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *PostQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *PostQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the PostQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -406,31 +361,36 @@ func (_q *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 	return nodes, nil
 }
 
-var postAuthorEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        post.AuthorTable,
-			Columns:      post.AuthorColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Post) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Post) *int {
-		return n.AuthorID
-	},
-}
-
 func (_q *PostQuery) loadAuthor(ctx context.Context, query *UserQuery, nodes []*Post, init func(*Post), assign func(*Post, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &postAuthorEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Post)
+	for i := range nodes {
+		if nodes[i].AuthorID == nil {
+			continue
+		}
+		fk := *nodes[i].AuthorID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "author_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 

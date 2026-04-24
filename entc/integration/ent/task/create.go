@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,8 +34,7 @@ func NewTaskCreate(c Config, hooks []Hook, mutation *TaskMutation) *TaskCreate {
 
 // SetPriority sets the "priority" field.
 func (_c *TaskCreate) SetPriority(v task.Priority) *TaskCreate {
-	_c.mutation.SetPriority(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetPriority, v)
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
@@ -47,14 +47,12 @@ func (_c *TaskCreate) SetNillablePriority(v *task.Priority) *TaskCreate {
 
 // SetPriorities sets the "priorities" field.
 func (_c *TaskCreate) SetPriorities(v map[string]task.Priority) *TaskCreate {
-	_c.mutation.SetPriorities(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetPriorities, v)
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *TaskCreate) SetCreatedAt(v time.Time) *TaskCreate {
-	_c.mutation.SetCreatedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCreatedAt, v)
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
@@ -67,8 +65,7 @@ func (_c *TaskCreate) SetNillableCreatedAt(v *time.Time) *TaskCreate {
 
 // SetName sets the "name" field.
 func (_c *TaskCreate) SetName(v string) *TaskCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -81,8 +78,7 @@ func (_c *TaskCreate) SetNillableName(v *string) *TaskCreate {
 
 // SetOwner sets the "owner" field.
 func (_c *TaskCreate) SetOwner(v string) *TaskCreate {
-	_c.mutation.SetOwner(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOwner, v)
 }
 
 // SetNillableOwner sets the "owner" field if the given value is not nil.
@@ -95,8 +91,7 @@ func (_c *TaskCreate) SetNillableOwner(v *string) *TaskCreate {
 
 // SetOrder sets the "order" field.
 func (_c *TaskCreate) SetOrder(v int) *TaskCreate {
-	_c.mutation.SetOrder(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOrder, v)
 }
 
 // SetNillableOrder sets the "order" field if the given value is not nil.
@@ -109,8 +104,7 @@ func (_c *TaskCreate) SetNillableOrder(v *int) *TaskCreate {
 
 // SetOrderOption sets the "order_option" field.
 func (_c *TaskCreate) SetOrderOption(v int) *TaskCreate {
-	_c.mutation.SetOrderOption(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOrderOption, v)
 }
 
 // SetNillableOrderOption sets the "order_option" field if the given value is not nil.
@@ -123,8 +117,7 @@ func (_c *TaskCreate) SetNillableOrderOption(v *int) *TaskCreate {
 
 // SetOp sets the "op" field.
 func (_c *TaskCreate) SetOp(v string) *TaskCreate {
-	_c.mutation.SetOpField(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOpField, v)
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
@@ -136,9 +129,7 @@ func (_c *TaskCreate) SetNillableOp(v *string) *TaskCreate {
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (_c *TaskCreate) Mutation() *TaskMutation {
-	return _c.mutation
-}
+func (_c *TaskCreate) Mutation() *TaskMutation { return _c.mutation }
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
@@ -147,19 +138,10 @@ func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TaskCreate) SaveX(ctx context.Context) *Task {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *TaskCreate) SaveX(ctx context.Context) *Task { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *TaskCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TaskCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TaskCreate) ExecX(ctx context.Context) {

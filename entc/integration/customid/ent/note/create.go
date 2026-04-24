@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,8 +34,7 @@ func NewNoteCreate(c Config, hooks []Hook, mutation *NoteMutation) *NoteCreate {
 
 // SetText sets the "text" field.
 func (_c *NoteCreate) SetText(v string) *NoteCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -47,8 +47,7 @@ func (_c *NoteCreate) SetNillableText(v *string) *NoteCreate {
 
 // SetID sets the "id" field.
 func (_c *NoteCreate) SetID(v schema.NoteID) *NoteCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
@@ -61,8 +60,7 @@ func (_c *NoteCreate) SetNillableID(v *schema.NoteID) *NoteCreate {
 
 // SetParentID sets the "parent" edge to the Note entity by ID.
 func (_c *NoteCreate) SetParentID(id schema.NoteID) *NoteCreate {
-	_c.mutation.SetParentID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Note entity by ID if the given value is not nil.
@@ -80,9 +78,7 @@ func (_c *NoteCreate) AddChildIDs(ids ...schema.NoteID) *NoteCreate {
 }
 
 // Mutation returns the NoteMutation object of the builder.
-func (_c *NoteCreate) Mutation() *NoteMutation {
-	return _c.mutation
-}
+func (_c *NoteCreate) Mutation() *NoteMutation { return _c.mutation }
 
 // Save creates the Note in the database.
 func (_c *NoteCreate) Save(ctx context.Context) (*Note, error) {
@@ -91,19 +87,10 @@ func (_c *NoteCreate) Save(ctx context.Context) (*Note, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *NoteCreate) SaveX(ctx context.Context) *Note {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *NoteCreate) SaveX(ctx context.Context) *Note { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *NoteCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *NoteCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *NoteCreate) ExecX(ctx context.Context) {

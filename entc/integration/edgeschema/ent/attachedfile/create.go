@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewAttachedFileCreate(c Config, hooks []Hook, mutation *AttachedFileMutatio
 
 // SetAttachTime sets the "attach_time" field.
 func (_c *AttachedFileCreate) SetAttachTime(v time.Time) *AttachedFileCreate {
-	_c.mutation.SetAttachTime(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetAttachTime, v)
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
@@ -46,26 +46,21 @@ func (_c *AttachedFileCreate) SetNillableAttachTime(v *time.Time) *AttachedFileC
 
 // SetFID sets the "f_id" field.
 func (_c *AttachedFileCreate) SetFID(v int) *AttachedFileCreate {
-	_c.mutation.SetFID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetFID, v)
 }
 
 // SetProcID sets the "proc_id" field.
 func (_c *AttachedFileCreate) SetProcID(v int) *AttachedFileCreate {
-	_c.mutation.SetProcID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetProcID, v)
 }
 
 // SetFiID sets the "fi" edge to the File entity by ID.
 func (_c *AttachedFileCreate) SetFiID(id int) *AttachedFileCreate {
-	_c.mutation.SetFiID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetFiID, id)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.
-func (_c *AttachedFileCreate) Mutation() *AttachedFileMutation {
-	return _c.mutation
-}
+func (_c *AttachedFileCreate) Mutation() *AttachedFileMutation { return _c.mutation }
 
 // Save creates the AttachedFile in the database.
 func (_c *AttachedFileCreate) Save(ctx context.Context) (*AttachedFile, error) {
@@ -75,18 +70,11 @@ func (_c *AttachedFileCreate) Save(ctx context.Context) (*AttachedFile, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *AttachedFileCreate) SaveX(ctx context.Context) *AttachedFile {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *AttachedFileCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *AttachedFileCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *AttachedFileCreate) ExecX(ctx context.Context) {

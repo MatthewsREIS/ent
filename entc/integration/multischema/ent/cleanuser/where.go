@@ -9,21 +9,20 @@ package cleanuser
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldEQ(FieldName, v))
-}
+func Name(v string) predicate.CleanUser { return entbuilder.FieldEQ[predicate.CleanUser](FieldName, v) }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldEQ(FieldName, v))
+	return entbuilder.FieldEQ[predicate.CleanUser](FieldName, v)
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldNEQ(FieldName, v))
+	return entbuilder.FieldNEQ[predicate.CleanUser](FieldName, v)
 }
 
 // NameIn applies the In predicate on the "name" field.
@@ -38,60 +37,58 @@ func NameNotIn(vs ...string) predicate.CleanUser {
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldGT(FieldName, v))
+	return entbuilder.FieldGT[predicate.CleanUser](FieldName, v)
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldGTE(FieldName, v))
+	return entbuilder.FieldGTE[predicate.CleanUser](FieldName, v)
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldLT(FieldName, v))
+	return entbuilder.FieldLT[predicate.CleanUser](FieldName, v)
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldLTE(FieldName, v))
+	return entbuilder.FieldLTE[predicate.CleanUser](FieldName, v)
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldContains(FieldName, v))
+	return entbuilder.FieldContains[predicate.CleanUser](FieldName, v)
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldHasPrefix(FieldName, v))
+	return entbuilder.FieldHasPrefix[predicate.CleanUser](FieldName, v)
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldHasSuffix(FieldName, v))
+	return entbuilder.FieldHasSuffix[predicate.CleanUser](FieldName, v)
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldEqualFold(FieldName, v))
+	return entbuilder.FieldEqualFold[predicate.CleanUser](FieldName, v)
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldContainsFold(FieldName, v))
+	return entbuilder.FieldContainsFold[predicate.CleanUser](FieldName, v)
 }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.CleanUser) predicate.CleanUser {
-	return predicate.CleanUser(sql.AndPredicates(predicates...))
+	return entbuilder.AndPreds(predicates...)
 }
 
 // Or groups predicates with the OR operator between them.
 func Or(predicates ...predicate.CleanUser) predicate.CleanUser {
-	return predicate.CleanUser(sql.OrPredicates(predicates...))
+	return entbuilder.OrPreds(predicates...)
 }
 
 // Not applies the not operator on the given predicate.
-func Not(p predicate.CleanUser) predicate.CleanUser {
-	return predicate.CleanUser(sql.NotPredicates(p))
-}
+func Not(p predicate.CleanUser) predicate.CleanUser { return entbuilder.NotPred(p) }

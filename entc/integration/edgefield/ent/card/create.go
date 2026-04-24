@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,8 +29,7 @@ func NewCardCreate(c Config, hooks []Hook, mutation *CardMutation) *CardCreate {
 
 // SetNumber sets the "number" field.
 func (_c *CardCreate) SetNumber(v string) *CardCreate {
-	_c.mutation.SetNumber(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNumber, v)
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
@@ -42,8 +42,7 @@ func (_c *CardCreate) SetNillableNumber(v *string) *CardCreate {
 
 // SetOwnerID sets the "owner_id" field.
 func (_c *CardCreate) SetOwnerID(v int) *CardCreate {
-	_c.mutation.SetOwnerID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOwnerID, v)
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
@@ -55,9 +54,7 @@ func (_c *CardCreate) SetNillableOwnerID(v *int) *CardCreate {
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (_c *CardCreate) Mutation() *CardMutation {
-	return _c.mutation
-}
+func (_c *CardCreate) Mutation() *CardMutation { return _c.mutation }
 
 // Save creates the Card in the database.
 func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
@@ -65,19 +62,10 @@ func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *CardCreate) SaveX(ctx context.Context) *Card {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *CardCreate) SaveX(ctx context.Context) *Card { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *CardCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *CardCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *CardCreate) ExecX(ctx context.Context) {

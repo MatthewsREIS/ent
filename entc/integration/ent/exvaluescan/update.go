@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -40,50 +41,42 @@ func (_u *ExValueScanUpdate) Where(ps ...predicate.ExValueScan) *ExValueScanUpda
 
 // SetBinary sets the "binary" field.
 func (_u *ExValueScanUpdate) SetBinary(v *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinary(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBinary, v)
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
 func (_u *ExValueScanUpdate) SetBinaryBytes(v *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinaryBytes(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBinaryBytes, v)
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
 func (_u *ExValueScanUpdate) SetBinaryOptional(v *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinaryOptional(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBinaryOptional, v)
 }
 
 // ClearBinaryOptional clears the value of the "binary_optional" field.
 func (_u *ExValueScanUpdate) ClearBinaryOptional() *ExValueScanUpdate {
-	_u.mutation.ClearBinaryOptional()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBinaryOptional)
 }
 
 // SetText sets the "text" field.
 func (_u *ExValueScanUpdate) SetText(v *big.Int) *ExValueScanUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetTextOptional sets the "text_optional" field.
 func (_u *ExValueScanUpdate) SetTextOptional(v *big.Int) *ExValueScanUpdate {
-	_u.mutation.SetTextOptional(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTextOptional, v)
 }
 
 // ClearTextOptional clears the value of the "text_optional" field.
 func (_u *ExValueScanUpdate) ClearTextOptional() *ExValueScanUpdate {
-	_u.mutation.ClearTextOptional()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTextOptional)
 }
 
 // SetBase64 sets the "base64" field.
 func (_u *ExValueScanUpdate) SetBase64(v string) *ExValueScanUpdate {
-	_u.mutation.SetBase64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBase64, v)
 }
 
 // SetNillableBase64 sets the "base64" field if the given value is not nil.
@@ -96,8 +89,7 @@ func (_u *ExValueScanUpdate) SetNillableBase64(v *string) *ExValueScanUpdate {
 
 // SetCustom sets the "custom" field.
 func (_u *ExValueScanUpdate) SetCustom(v string) *ExValueScanUpdate {
-	_u.mutation.SetCustom(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCustom, v)
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
@@ -110,8 +102,7 @@ func (_u *ExValueScanUpdate) SetNillableCustom(v *string) *ExValueScanUpdate {
 
 // SetCustomOptional sets the "custom_optional" field.
 func (_u *ExValueScanUpdate) SetCustomOptional(v string) *ExValueScanUpdate {
-	_u.mutation.SetCustomOptional(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCustomOptional, v)
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
@@ -124,14 +115,11 @@ func (_u *ExValueScanUpdate) SetNillableCustomOptional(v *string) *ExValueScanUp
 
 // ClearCustomOptional clears the value of the "custom_optional" field.
 func (_u *ExValueScanUpdate) ClearCustomOptional() *ExValueScanUpdate {
-	_u.mutation.ClearCustomOptional()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearCustomOptional)
 }
 
 // Mutation returns the ExValueScanMutation object of the builder.
-func (_u *ExValueScanUpdate) Mutation() *ExValueScanMutation {
-	return _u.mutation
-}
+func (_u *ExValueScanUpdate) Mutation() *ExValueScanMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ExValueScanUpdate) Save(ctx context.Context) (int, error) {
@@ -139,19 +127,10 @@ func (_u *ExValueScanUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ExValueScanUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *ExValueScanUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *ExValueScanUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ExValueScanUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ExValueScanUpdate) ExecX(ctx context.Context) {
@@ -269,50 +248,42 @@ func NewExValueScanUpdateOne(c Config, hooks []Hook, mutation *ExValueScanMutati
 
 // SetBinary sets the "binary" field.
 func (_u *ExValueScanUpdateOne) SetBinary(v *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinary(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBinary, v)
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
 func (_u *ExValueScanUpdateOne) SetBinaryBytes(v *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinaryBytes(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBinaryBytes, v)
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
 func (_u *ExValueScanUpdateOne) SetBinaryOptional(v *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinaryOptional(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBinaryOptional, v)
 }
 
 // ClearBinaryOptional clears the value of the "binary_optional" field.
 func (_u *ExValueScanUpdateOne) ClearBinaryOptional() *ExValueScanUpdateOne {
-	_u.mutation.ClearBinaryOptional()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBinaryOptional)
 }
 
 // SetText sets the "text" field.
 func (_u *ExValueScanUpdateOne) SetText(v *big.Int) *ExValueScanUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetTextOptional sets the "text_optional" field.
 func (_u *ExValueScanUpdateOne) SetTextOptional(v *big.Int) *ExValueScanUpdateOne {
-	_u.mutation.SetTextOptional(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTextOptional, v)
 }
 
 // ClearTextOptional clears the value of the "text_optional" field.
 func (_u *ExValueScanUpdateOne) ClearTextOptional() *ExValueScanUpdateOne {
-	_u.mutation.ClearTextOptional()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTextOptional)
 }
 
 // SetBase64 sets the "base64" field.
 func (_u *ExValueScanUpdateOne) SetBase64(v string) *ExValueScanUpdateOne {
-	_u.mutation.SetBase64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBase64, v)
 }
 
 // SetNillableBase64 sets the "base64" field if the given value is not nil.
@@ -325,8 +296,7 @@ func (_u *ExValueScanUpdateOne) SetNillableBase64(v *string) *ExValueScanUpdateO
 
 // SetCustom sets the "custom" field.
 func (_u *ExValueScanUpdateOne) SetCustom(v string) *ExValueScanUpdateOne {
-	_u.mutation.SetCustom(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCustom, v)
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
@@ -339,8 +309,7 @@ func (_u *ExValueScanUpdateOne) SetNillableCustom(v *string) *ExValueScanUpdateO
 
 // SetCustomOptional sets the "custom_optional" field.
 func (_u *ExValueScanUpdateOne) SetCustomOptional(v string) *ExValueScanUpdateOne {
-	_u.mutation.SetCustomOptional(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCustomOptional, v)
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
@@ -353,14 +322,11 @@ func (_u *ExValueScanUpdateOne) SetNillableCustomOptional(v *string) *ExValueSca
 
 // ClearCustomOptional clears the value of the "custom_optional" field.
 func (_u *ExValueScanUpdateOne) ClearCustomOptional() *ExValueScanUpdateOne {
-	_u.mutation.ClearCustomOptional()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearCustomOptional)
 }
 
 // Mutation returns the ExValueScanMutation object of the builder.
-func (_u *ExValueScanUpdateOne) Mutation() *ExValueScanMutation {
-	return _u.mutation
-}
+func (_u *ExValueScanUpdateOne) Mutation() *ExValueScanMutation { return _u.mutation }
 
 // Where appends a list predicates to the ExValueScanUpdate builder.
 func (_u *ExValueScanUpdateOne) Where(ps ...predicate.ExValueScan) *ExValueScanUpdateOne {
@@ -382,18 +348,11 @@ func (_u *ExValueScanUpdateOne) Save(ctx context.Context) (*ExValueScan, error) 
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *ExValueScanUpdateOne) SaveX(ctx context.Context) *ExValueScan {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *ExValueScanUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ExValueScanUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ExValueScanUpdateOne) ExecX(ctx context.Context) {

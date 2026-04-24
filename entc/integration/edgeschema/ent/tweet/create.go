@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -35,8 +36,7 @@ func NewTweetCreate(c Config, hooks []Hook, mutation *TweetMutation) *TweetCreat
 
 // SetText sets the "text" field.
 func (_c *TweetCreate) SetText(v string) *TweetCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
@@ -46,16 +46,10 @@ func (_c *TweetCreate) AddLikedUserIDs(ids ...int) *TweetCreate {
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_c *TweetCreate) AddUserIDs(ids ...int) *TweetCreate {
-	_c.mutation.AddUserIDs(ids...)
-	return _c
-}
+func (_c *TweetCreate) AddUserIDs(ids ...int) *TweetCreate { _c.mutation.AddUserIDs(ids...); return _c }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (_c *TweetCreate) AddTagIDs(ids ...int) *TweetCreate {
-	_c.mutation.AddTagIDs(ids...)
-	return _c
-}
+func (_c *TweetCreate) AddTagIDs(ids ...int) *TweetCreate { _c.mutation.AddTagIDs(ids...); return _c }
 
 // AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
 func (_c *TweetCreate) AddTweetUserIDs(ids ...int) *TweetCreate {
@@ -70,9 +64,7 @@ func (_c *TweetCreate) AddTweetTagIDs(ids ...uuid.UUID) *TweetCreate {
 }
 
 // Mutation returns the TweetMutation object of the builder.
-func (_c *TweetCreate) Mutation() *TweetMutation {
-	return _c.mutation
-}
+func (_c *TweetCreate) Mutation() *TweetMutation { return _c.mutation }
 
 // Save creates the Tweet in the database.
 func (_c *TweetCreate) Save(ctx context.Context) (*Tweet, error) {
@@ -80,19 +72,10 @@ func (_c *TweetCreate) Save(ctx context.Context) (*Tweet, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TweetCreate) SaveX(ctx context.Context) *Tweet {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *TweetCreate) SaveX(ctx context.Context) *Tweet { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *TweetCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TweetCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TweetCreate) ExecX(ctx context.Context) {

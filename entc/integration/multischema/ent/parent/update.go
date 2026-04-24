@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -39,8 +40,7 @@ func (_u *ParentUpdate) Where(ps ...predicate.Parent) *ParentUpdate {
 
 // SetByAdoption sets the "by_adoption" field.
 func (_u *ParentUpdate) SetByAdoption(v bool) *ParentUpdate {
-	_u.mutation.SetByAdoption(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetByAdoption, v)
 }
 
 // SetNillableByAdoption sets the "by_adoption" field if the given value is not nil.
@@ -52,9 +52,7 @@ func (_u *ParentUpdate) SetNillableByAdoption(v *bool) *ParentUpdate {
 }
 
 // Mutation returns the ParentMutation object of the builder.
-func (_u *ParentUpdate) Mutation() *ParentMutation {
-	return _u.mutation
-}
+func (_u *ParentUpdate) Mutation() *ParentMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ParentUpdate) Save(ctx context.Context) (int, error) {
@@ -62,19 +60,10 @@ func (_u *ParentUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ParentUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *ParentUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *ParentUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ParentUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ParentUpdate) ExecX(ctx context.Context) {
@@ -147,8 +136,7 @@ func NewParentUpdateOne(c Config, hooks []Hook, mutation *ParentMutation) *Paren
 
 // SetByAdoption sets the "by_adoption" field.
 func (_u *ParentUpdateOne) SetByAdoption(v bool) *ParentUpdateOne {
-	_u.mutation.SetByAdoption(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetByAdoption, v)
 }
 
 // SetNillableByAdoption sets the "by_adoption" field if the given value is not nil.
@@ -160,9 +148,7 @@ func (_u *ParentUpdateOne) SetNillableByAdoption(v *bool) *ParentUpdateOne {
 }
 
 // Mutation returns the ParentMutation object of the builder.
-func (_u *ParentUpdateOne) Mutation() *ParentMutation {
-	return _u.mutation
-}
+func (_u *ParentUpdateOne) Mutation() *ParentMutation { return _u.mutation }
 
 // Where appends a list predicates to the ParentUpdate builder.
 func (_u *ParentUpdateOne) Where(ps ...predicate.Parent) *ParentUpdateOne {
@@ -183,19 +169,10 @@ func (_u *ParentUpdateOne) Save(ctx context.Context) (*Parent, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ParentUpdateOne) SaveX(ctx context.Context) *Parent {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *ParentUpdateOne) SaveX(ctx context.Context) *Parent { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *ParentUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ParentUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ParentUpdateOne) ExecX(ctx context.Context) {

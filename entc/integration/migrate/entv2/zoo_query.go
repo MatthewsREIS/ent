@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,23 +39,14 @@ func (_q *ZooQuery) Where(ps ...predicate.Zoo) *ZooQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *ZooQuery) Limit(limit int) *ZooQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *ZooQuery) Limit(limit int) *ZooQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *ZooQuery) Offset(offset int) *ZooQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *ZooQuery) Offset(offset int) *ZooQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *ZooQuery) Unique(unique bool) *ZooQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *ZooQuery) Unique(unique bool) *ZooQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *ZooQuery) Order(o ...zoo.OrderOption) *ZooQuery {
@@ -126,13 +118,7 @@ func (_q *ZooQuery) Only(ctx context.Context) (*Zoo, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *ZooQuery) OnlyX(ctx context.Context) *Zoo {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *ZooQuery) OnlyX(ctx context.Context) *Zoo { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Zoo ID in the query.
 // Returns a *NotSingularError when more than one Zoo ID is found.
@@ -154,13 +140,7 @@ func (_q *ZooQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *ZooQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *ZooQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Zoos.
 func (_q *ZooQuery) All(ctx context.Context) ([]*Zoo, error) {
@@ -173,13 +153,7 @@ func (_q *ZooQuery) All(ctx context.Context) ([]*Zoo, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *ZooQuery) AllX(ctx context.Context) []*Zoo {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *ZooQuery) AllX(ctx context.Context) []*Zoo { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Zoo IDs.
 func (_q *ZooQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -194,13 +168,7 @@ func (_q *ZooQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *ZooQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *ZooQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *ZooQuery) Count(ctx context.Context) (int, error) {
@@ -212,13 +180,7 @@ func (_q *ZooQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *ZooQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *ZooQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *ZooQuery) Exist(ctx context.Context) (bool, error) {
@@ -234,13 +196,7 @@ func (_q *ZooQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *ZooQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *ZooQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the ZooQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

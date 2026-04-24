@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // SpecUpdate is the builder for updating Spec entities.
@@ -30,10 +31,7 @@ func NewSpecUpdate(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdate {
 }
 
 // Where appends a list predicates to the SpecUpdate builder.
-func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate { _u.mutation.Where(ps...); return _u }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (_u *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
@@ -42,15 +40,10 @@ func (_u *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
 }
 
 // Mutation returns the SpecMutation object of the builder.
-func (_u *SpecUpdate) Mutation() *SpecMutation {
-	return _u.mutation
-}
+func (_u *SpecUpdate) Mutation() *SpecMutation { return _u.mutation }
 
 // ClearCard clears all "card" edges to the Card entity.
-func (_u *SpecUpdate) ClearCard() *SpecUpdate {
-	_u.mutation.ClearCard()
-	return _u
-}
+func (_u *SpecUpdate) ClearCard() *SpecUpdate { _u.mutation.ClearCard(); return _u }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (_u *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
@@ -64,19 +57,10 @@ func (_u *SpecUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SpecUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *SpecUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *SpecUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *SpecUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *SpecUpdate) ExecX(ctx context.Context) {
@@ -141,15 +125,10 @@ func (_u *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
 }
 
 // Mutation returns the SpecMutation object of the builder.
-func (_u *SpecUpdateOne) Mutation() *SpecMutation {
-	return _u.mutation
-}
+func (_u *SpecUpdateOne) Mutation() *SpecMutation { return _u.mutation }
 
 // ClearCard clears all "card" edges to the Card entity.
-func (_u *SpecUpdateOne) ClearCard() *SpecUpdateOne {
-	_u.mutation.ClearCard()
-	return _u
-}
+func (_u *SpecUpdateOne) ClearCard() *SpecUpdateOne { _u.mutation.ClearCard(); return _u }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (_u *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
@@ -176,19 +155,10 @@ func (_u *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *SpecUpdateOne) SaveX(ctx context.Context) *Spec {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *SpecUpdateOne) SaveX(ctx context.Context) *Spec { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *SpecUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *SpecUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *SpecUpdateOne) ExecX(ctx context.Context) {

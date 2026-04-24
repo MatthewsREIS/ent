@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,11 @@ func NewTeamUpdate(c Config, hooks []Hook, mutation *TeamMutation) *TeamUpdate {
 }
 
 // Where appends a list predicates to the TeamUpdate builder.
-func (_u *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
 func (_u *TeamUpdate) SetName(v string) *TeamUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -50,27 +47,16 @@ func (_u *TeamUpdate) SetNillableName(v *string) *TeamUpdate {
 }
 
 // AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (_u *TeamUpdate) AddTaskIDs(ids ...int) *TeamUpdate {
-	_u.mutation.AddTaskIDs(ids...)
-	return _u
-}
+func (_u *TeamUpdate) AddTaskIDs(ids ...int) *TeamUpdate { _u.mutation.AddTaskIDs(ids...); return _u }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *TeamUpdate) AddUserIDs(ids ...int) *TeamUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
+func (_u *TeamUpdate) AddUserIDs(ids ...int) *TeamUpdate { _u.mutation.AddUserIDs(ids...); return _u }
 
 // Mutation returns the TeamMutation object of the builder.
-func (_u *TeamUpdate) Mutation() *TeamMutation {
-	return _u.mutation
-}
+func (_u *TeamUpdate) Mutation() *TeamMutation { return _u.mutation }
 
 // ClearTasks clears all "tasks" edges to the Task entity.
-func (_u *TeamUpdate) ClearTasks() *TeamUpdate {
-	_u.mutation.ClearTasks()
-	return _u
-}
+func (_u *TeamUpdate) ClearTasks() *TeamUpdate { return entbuilder.BClear(_u, _u.mutation.ClearTasks) }
 
 // RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
 func (_u *TeamUpdate) RemoveTaskIDs(ids ...int) *TeamUpdate {
@@ -79,10 +65,7 @@ func (_u *TeamUpdate) RemoveTaskIDs(ids ...int) *TeamUpdate {
 }
 
 // ClearUsers clears all "users" edges to the User entity.
-func (_u *TeamUpdate) ClearUsers() *TeamUpdate {
-	_u.mutation.ClearUsers()
-	return _u
-}
+func (_u *TeamUpdate) ClearUsers() *TeamUpdate { return entbuilder.BClear(_u, _u.mutation.ClearUsers) }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (_u *TeamUpdate) RemoveUserIDs(ids ...int) *TeamUpdate {
@@ -96,19 +79,10 @@ func (_u *TeamUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TeamUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *TeamUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *TeamUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TeamUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TeamUpdate) ExecX(ctx context.Context) {
@@ -259,8 +233,7 @@ func NewTeamUpdateOne(c Config, hooks []Hook, mutation *TeamMutation) *TeamUpdat
 
 // SetName sets the "name" field.
 func (_u *TeamUpdateOne) SetName(v string) *TeamUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -284,14 +257,11 @@ func (_u *TeamUpdateOne) AddUserIDs(ids ...int) *TeamUpdateOne {
 }
 
 // Mutation returns the TeamMutation object of the builder.
-func (_u *TeamUpdateOne) Mutation() *TeamMutation {
-	return _u.mutation
-}
+func (_u *TeamUpdateOne) Mutation() *TeamMutation { return _u.mutation }
 
 // ClearTasks clears all "tasks" edges to the Task entity.
 func (_u *TeamUpdateOne) ClearTasks() *TeamUpdateOne {
-	_u.mutation.ClearTasks()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTasks)
 }
 
 // RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
@@ -302,8 +272,7 @@ func (_u *TeamUpdateOne) RemoveTaskIDs(ids ...int) *TeamUpdateOne {
 
 // ClearUsers clears all "users" edges to the User entity.
 func (_u *TeamUpdateOne) ClearUsers() *TeamUpdateOne {
-	_u.mutation.ClearUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUsers)
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
@@ -331,19 +300,10 @@ func (_u *TeamUpdateOne) Save(ctx context.Context) (*Team, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TeamUpdateOne) SaveX(ctx context.Context) *Team {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *TeamUpdateOne) SaveX(ctx context.Context) *Team { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *TeamUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TeamUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TeamUpdateOne) ExecX(ctx context.Context) {

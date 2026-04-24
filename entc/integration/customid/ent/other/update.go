@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,10 @@ func NewOtherUpdate(c Config, hooks []Hook, mutation *OtherMutation) *OtherUpdat
 }
 
 // Where appends a list predicates to the OtherUpdate builder.
-func (_u *OtherUpdate) Where(ps ...predicate.Other) *OtherUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *OtherUpdate) Where(ps ...predicate.Other) *OtherUpdate { _u.mutation.Where(ps...); return _u }
 
 // Mutation returns the OtherMutation object of the builder.
-func (_u *OtherUpdate) Mutation() *OtherMutation {
-	return _u.mutation
-}
+func (_u *OtherUpdate) Mutation() *OtherMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *OtherUpdate) Save(ctx context.Context) (int, error) {
@@ -46,19 +42,10 @@ func (_u *OtherUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *OtherUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *OtherUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *OtherUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *OtherUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *OtherUpdate) ExecX(ctx context.Context) {
@@ -102,9 +89,7 @@ func NewOtherUpdateOne(c Config, hooks []Hook, mutation *OtherMutation) *OtherUp
 }
 
 // Mutation returns the OtherMutation object of the builder.
-func (_u *OtherUpdateOne) Mutation() *OtherMutation {
-	return _u.mutation
-}
+func (_u *OtherUpdateOne) Mutation() *OtherMutation { return _u.mutation }
 
 // Where appends a list predicates to the OtherUpdate builder.
 func (_u *OtherUpdateOne) Where(ps ...predicate.Other) *OtherUpdateOne {
@@ -125,19 +110,10 @@ func (_u *OtherUpdateOne) Save(ctx context.Context) (*Other, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *OtherUpdateOne) SaveX(ctx context.Context) *Other {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *OtherUpdateOne) SaveX(ctx context.Context) *Other { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *OtherUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *OtherUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *OtherUpdateOne) ExecX(ctx context.Context) {

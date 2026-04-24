@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,20 +32,16 @@ func NewGroupTagCreate(c Config, hooks []Hook, mutation *GroupTagMutation) *Grou
 
 // SetTagID sets the "tag_id" field.
 func (_c *GroupTagCreate) SetTagID(v int) *GroupTagCreate {
-	_c.mutation.SetTagID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTagID, v)
 }
 
 // SetGroupID sets the "group_id" field.
 func (_c *GroupTagCreate) SetGroupID(v int) *GroupTagCreate {
-	_c.mutation.SetGroupID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetGroupID, v)
 }
 
 // Mutation returns the GroupTagMutation object of the builder.
-func (_c *GroupTagCreate) Mutation() *GroupTagMutation {
-	return _c.mutation
-}
+func (_c *GroupTagCreate) Mutation() *GroupTagMutation { return _c.mutation }
 
 // Save creates the GroupTag in the database.
 func (_c *GroupTagCreate) Save(ctx context.Context) (*GroupTag, error) {
@@ -52,19 +49,10 @@ func (_c *GroupTagCreate) Save(ctx context.Context) (*GroupTag, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *GroupTagCreate) SaveX(ctx context.Context) *GroupTag {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *GroupTagCreate) SaveX(ctx context.Context) *GroupTag { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *GroupTagCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *GroupTagCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *GroupTagCreate) ExecX(ctx context.Context) {

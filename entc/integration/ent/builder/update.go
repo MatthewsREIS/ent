@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,9 +38,7 @@ func (_u *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
 }
 
 // Mutation returns the BuilderMutation object of the builder.
-func (_u *BuilderUpdate) Mutation() *BuilderMutation {
-	return _u.mutation
-}
+func (_u *BuilderUpdate) Mutation() *BuilderMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BuilderUpdate) Save(ctx context.Context) (int, error) {
@@ -47,19 +46,10 @@ func (_u *BuilderUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *BuilderUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *BuilderUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *BuilderUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *BuilderUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *BuilderUpdate) ExecX(ctx context.Context) {
@@ -111,9 +101,7 @@ func NewBuilderUpdateOne(c Config, hooks []Hook, mutation *BuilderMutation) *Bui
 }
 
 // Mutation returns the BuilderMutation object of the builder.
-func (_u *BuilderUpdateOne) Mutation() *BuilderMutation {
-	return _u.mutation
-}
+func (_u *BuilderUpdateOne) Mutation() *BuilderMutation { return _u.mutation }
 
 // Where appends a list predicates to the BuilderUpdate builder.
 func (_u *BuilderUpdateOne) Where(ps ...predicate.Builder) *BuilderUpdateOne {
@@ -134,19 +122,10 @@ func (_u *BuilderUpdateOne) Save(ctx context.Context) (*Builder, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *BuilderUpdateOne) SaveX(ctx context.Context) *Builder {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *BuilderUpdateOne) SaveX(ctx context.Context) *Builder { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *BuilderUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *BuilderUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *BuilderUpdateOne) ExecX(ctx context.Context) {

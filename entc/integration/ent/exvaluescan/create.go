@@ -15,6 +15,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,50 +34,42 @@ func NewExValueScanCreate(c Config, hooks []Hook, mutation *ExValueScanMutation)
 
 // SetBinary sets the "binary" field.
 func (_c *ExValueScanCreate) SetBinary(v *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinary(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetBinary, v)
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
 func (_c *ExValueScanCreate) SetBinaryBytes(v *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinaryBytes(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetBinaryBytes, v)
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
 func (_c *ExValueScanCreate) SetBinaryOptional(v *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinaryOptional(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetBinaryOptional, v)
 }
 
 // SetText sets the "text" field.
 func (_c *ExValueScanCreate) SetText(v *big.Int) *ExValueScanCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // SetTextOptional sets the "text_optional" field.
 func (_c *ExValueScanCreate) SetTextOptional(v *big.Int) *ExValueScanCreate {
-	_c.mutation.SetTextOptional(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTextOptional, v)
 }
 
 // SetBase64 sets the "base64" field.
 func (_c *ExValueScanCreate) SetBase64(v string) *ExValueScanCreate {
-	_c.mutation.SetBase64(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetBase64, v)
 }
 
 // SetCustom sets the "custom" field.
 func (_c *ExValueScanCreate) SetCustom(v string) *ExValueScanCreate {
-	_c.mutation.SetCustom(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCustom, v)
 }
 
 // SetCustomOptional sets the "custom_optional" field.
 func (_c *ExValueScanCreate) SetCustomOptional(v string) *ExValueScanCreate {
-	_c.mutation.SetCustomOptional(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCustomOptional, v)
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
@@ -88,9 +81,7 @@ func (_c *ExValueScanCreate) SetNillableCustomOptional(v *string) *ExValueScanCr
 }
 
 // Mutation returns the ExValueScanMutation object of the builder.
-func (_c *ExValueScanCreate) Mutation() *ExValueScanMutation {
-	return _c.mutation
-}
+func (_c *ExValueScanCreate) Mutation() *ExValueScanMutation { return _c.mutation }
 
 // Save creates the ExValueScan in the database.
 func (_c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
@@ -99,18 +90,11 @@ func (_c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *ExValueScanCreate) SaveX(ctx context.Context) *ExValueScan {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *ExValueScanCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *ExValueScanCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *ExValueScanCreate) ExecX(ctx context.Context) {

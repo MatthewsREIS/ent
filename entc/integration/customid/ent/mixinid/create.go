@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -33,20 +34,17 @@ func NewMixinIDCreate(c Config, hooks []Hook, mutation *MixinIDMutation) *MixinI
 
 // SetSomeField sets the "some_field" field.
 func (_c *MixinIDCreate) SetSomeField(v string) *MixinIDCreate {
-	_c.mutation.SetSomeField(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSomeField, v)
 }
 
 // SetMixinField sets the "mixin_field" field.
 func (_c *MixinIDCreate) SetMixinField(v string) *MixinIDCreate {
-	_c.mutation.SetMixinField(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetMixinField, v)
 }
 
 // SetID sets the "id" field.
 func (_c *MixinIDCreate) SetID(v uuid.UUID) *MixinIDCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
@@ -58,9 +56,7 @@ func (_c *MixinIDCreate) SetNillableID(v *uuid.UUID) *MixinIDCreate {
 }
 
 // Mutation returns the MixinIDMutation object of the builder.
-func (_c *MixinIDCreate) Mutation() *MixinIDMutation {
-	return _c.mutation
-}
+func (_c *MixinIDCreate) Mutation() *MixinIDMutation { return _c.mutation }
 
 // Save creates the MixinID in the database.
 func (_c *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
@@ -69,19 +65,10 @@ func (_c *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *MixinIDCreate) SaveX(ctx context.Context) *MixinID {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *MixinIDCreate) SaveX(ctx context.Context) *MixinID { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *MixinIDCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *MixinIDCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *MixinIDCreate) ExecX(ctx context.Context) {

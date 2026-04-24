@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,21 +31,14 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *UserCreate) SetID(v int) *UserCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *UserCreate) SetID(v int) *UserCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_c *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
-	_c.mutation.AddGroupIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddGroupIDs(ids ...int) *UserCreate { _c.mutation.AddGroupIDs(ids...); return _c }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
 func (_c *UserCreate) SetParentID(id int) *UserCreate {
-	_c.mutation.SetParentID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
@@ -56,21 +50,13 @@ func (_c *UserCreate) SetNillableParentID(id *int) *UserCreate {
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	_c.mutation.AddChildIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate { _c.mutation.AddChildIDs(ids...); return _c }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_c *UserCreate) AddPetIDs(ids ...string) *UserCreate {
-	_c.mutation.AddPetIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddPetIDs(ids ...string) *UserCreate { _c.mutation.AddPetIDs(ids...); return _c }
 
 // Mutation returns the UserMutation object of the builder.
-func (_c *UserCreate) Mutation() *UserMutation {
-	return _c.mutation
-}
+func (_c *UserCreate) Mutation() *UserMutation { return _c.mutation }
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
@@ -78,19 +64,10 @@ func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *UserCreate) SaveX(ctx context.Context) *User { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *UserCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *UserCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *UserCreate) ExecX(ctx context.Context) {

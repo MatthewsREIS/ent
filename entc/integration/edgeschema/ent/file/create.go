@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,8 +32,7 @@ func NewFileCreate(c Config, hooks []Hook, mutation *FileMutation) *FileCreate {
 
 // SetName sets the "name" field.
 func (_c *FileCreate) SetName(v string) *FileCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // AddProcessIDs adds the "processes" edge to the Process entity by IDs.
@@ -42,9 +42,7 @@ func (_c *FileCreate) AddProcessIDs(ids ...int) *FileCreate {
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (_c *FileCreate) Mutation() *FileMutation {
-	return _c.mutation
-}
+func (_c *FileCreate) Mutation() *FileMutation { return _c.mutation }
 
 // Save creates the File in the database.
 func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
@@ -52,19 +50,10 @@ func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *FileCreate) SaveX(ctx context.Context) *File {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *FileCreate) SaveX(ctx context.Context) *File { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *FileCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *FileCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *FileCreate) ExecX(ctx context.Context) {

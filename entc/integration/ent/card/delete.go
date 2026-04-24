@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // CardDelete is the builder for deleting a Card entity.
 type CardDelete struct {
 	Config
-	hooks    []Hook
-	mutation *CardMutation
+	hooks     []Hook
+	mutation  *CardMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewCardDelete returns a new CardDelete initialized with the given config, hooks, and mutation.
@@ -28,10 +30,7 @@ func NewCardDelete(c Config, hooks []Hook, mutation *CardMutation) *CardDelete {
 }
 
 // Where appends a list predicates to the CardDelete builder.
-func (_d *CardDelete) Where(ps ...predicate.Card) *CardDelete {
-	_d.mutation.Where(ps...)
-	return _d
-}
+func (_d *CardDelete) Where(ps ...predicate.Card) *CardDelete { _d.mutation.Where(ps...); return _d }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *CardDelete) Exec(ctx context.Context) (int, error) {
@@ -39,16 +38,11 @@ func (_d *CardDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *CardDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *CardDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *CardDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

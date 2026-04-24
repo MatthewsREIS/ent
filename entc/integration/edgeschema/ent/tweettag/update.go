@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *TweetTagUpdate) Where(ps ...predicate.TweetTag) *TweetTagUpdate {
 
 // SetAddedAt sets the "added_at" field.
 func (_u *TweetTagUpdate) SetAddedAt(v time.Time) *TweetTagUpdate {
-	_u.mutation.SetAddedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetAddedAt, v)
 }
 
 // SetNillableAddedAt sets the "added_at" field if the given value is not nil.
@@ -52,8 +52,7 @@ func (_u *TweetTagUpdate) SetNillableAddedAt(v *time.Time) *TweetTagUpdate {
 
 // SetTagID sets the "tag_id" field.
 func (_u *TweetTagUpdate) SetTagID(v int) *TweetTagUpdate {
-	_u.mutation.SetTagID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTagID, v)
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
@@ -66,8 +65,7 @@ func (_u *TweetTagUpdate) SetNillableTagID(v *int) *TweetTagUpdate {
 
 // SetTweetID sets the "tweet_id" field.
 func (_u *TweetTagUpdate) SetTweetID(v int) *TweetTagUpdate {
-	_u.mutation.SetTweetID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTweetID, v)
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
@@ -79,20 +77,16 @@ func (_u *TweetTagUpdate) SetNillableTweetID(v *int) *TweetTagUpdate {
 }
 
 // Mutation returns the TweetTagMutation object of the builder.
-func (_u *TweetTagUpdate) Mutation() *TweetTagMutation {
-	return _u.mutation
-}
+func (_u *TweetTagUpdate) Mutation() *TweetTagMutation { return _u.mutation }
 
 // ClearTag clears the "tag" edge to the Tag entity.
 func (_u *TweetTagUpdate) ClearTag() *TweetTagUpdate {
-	_u.mutation.ClearTag()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTag)
 }
 
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (_u *TweetTagUpdate) ClearTweet() *TweetTagUpdate {
-	_u.mutation.ClearTweet()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweet)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -101,19 +95,10 @@ func (_u *TweetTagUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TweetTagUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *TweetTagUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *TweetTagUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TweetTagUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TweetTagUpdate) ExecX(ctx context.Context) {
@@ -233,8 +218,7 @@ func NewTweetTagUpdateOne(c Config, hooks []Hook, mutation *TweetTagMutation) *T
 
 // SetAddedAt sets the "added_at" field.
 func (_u *TweetTagUpdateOne) SetAddedAt(v time.Time) *TweetTagUpdateOne {
-	_u.mutation.SetAddedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetAddedAt, v)
 }
 
 // SetNillableAddedAt sets the "added_at" field if the given value is not nil.
@@ -247,8 +231,7 @@ func (_u *TweetTagUpdateOne) SetNillableAddedAt(v *time.Time) *TweetTagUpdateOne
 
 // SetTagID sets the "tag_id" field.
 func (_u *TweetTagUpdateOne) SetTagID(v int) *TweetTagUpdateOne {
-	_u.mutation.SetTagID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTagID, v)
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
@@ -261,8 +244,7 @@ func (_u *TweetTagUpdateOne) SetNillableTagID(v *int) *TweetTagUpdateOne {
 
 // SetTweetID sets the "tweet_id" field.
 func (_u *TweetTagUpdateOne) SetTweetID(v int) *TweetTagUpdateOne {
-	_u.mutation.SetTweetID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTweetID, v)
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
@@ -274,20 +256,16 @@ func (_u *TweetTagUpdateOne) SetNillableTweetID(v *int) *TweetTagUpdateOne {
 }
 
 // Mutation returns the TweetTagMutation object of the builder.
-func (_u *TweetTagUpdateOne) Mutation() *TweetTagMutation {
-	return _u.mutation
-}
+func (_u *TweetTagUpdateOne) Mutation() *TweetTagMutation { return _u.mutation }
 
 // ClearTag clears the "tag" edge to the Tag entity.
 func (_u *TweetTagUpdateOne) ClearTag() *TweetTagUpdateOne {
-	_u.mutation.ClearTag()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTag)
 }
 
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (_u *TweetTagUpdateOne) ClearTweet() *TweetTagUpdateOne {
-	_u.mutation.ClearTweet()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweet)
 }
 
 // Where appends a list predicates to the TweetTagUpdate builder.
@@ -310,18 +288,11 @@ func (_u *TweetTagUpdateOne) Save(ctx context.Context) (*TweetTag, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *TweetTagUpdateOne) SaveX(ctx context.Context) *TweetTag {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *TweetTagUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TweetTagUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TweetTagUpdateOne) ExecX(ctx context.Context) {

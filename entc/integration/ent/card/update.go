@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,15 +33,11 @@ func NewCardUpdate(c Config, hooks []Hook, mutation *CardMutation) *CardUpdate {
 }
 
 // Where appends a list predicates to the CardUpdate builder.
-func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetUpdateTime sets the "update_time" field.
 func (_u *CardUpdate) SetUpdateTime(v time.Time) *CardUpdate {
-	_u.mutation.SetUpdateTime(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUpdateTime, v)
 }
 
 // SetBalance sets the "balance" field.
@@ -60,14 +57,12 @@ func (_u *CardUpdate) SetNillableBalance(v *float64) *CardUpdate {
 
 // AddBalance adds value to the "balance" field.
 func (_u *CardUpdate) AddBalance(v float64) *CardUpdate {
-	_u.mutation.AddBalance(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddBalance, v)
 }
 
 // SetName sets the "name" field.
 func (_u *CardUpdate) SetName(v string) *CardUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -79,15 +74,11 @@ func (_u *CardUpdate) SetNillableName(v *string) *CardUpdate {
 }
 
 // ClearName clears the value of the "name" field.
-func (_u *CardUpdate) ClearName() *CardUpdate {
-	_u.mutation.ClearName()
-	return _u
-}
+func (_u *CardUpdate) ClearName() *CardUpdate { return entbuilder.BClear(_u, _u.mutation.ClearName) }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardUpdate) SetOwnerID(id int) *CardUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -99,27 +90,16 @@ func (_u *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 }
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
-func (_u *CardUpdate) AddSpecIDs(ids ...int) *CardUpdate {
-	_u.mutation.AddSpecIDs(ids...)
-	return _u
-}
+func (_u *CardUpdate) AddSpecIDs(ids ...int) *CardUpdate { _u.mutation.AddSpecIDs(ids...); return _u }
 
 // Mutation returns the CardMutation object of the builder.
-func (_u *CardUpdate) Mutation() *CardMutation {
-	return _u.mutation
-}
+func (_u *CardUpdate) Mutation() *CardMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *CardUpdate) ClearOwner() *CardUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *CardUpdate) ClearOwner() *CardUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // ClearSpec clears all "spec" edges to the Spec entity.
-func (_u *CardUpdate) ClearSpec() *CardUpdate {
-	_u.mutation.ClearSpec()
-	return _u
-}
+func (_u *CardUpdate) ClearSpec() *CardUpdate { return entbuilder.BClear(_u, _u.mutation.ClearSpec) }
 
 // RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (_u *CardUpdate) RemoveSpecIDs(ids ...int) *CardUpdate {
@@ -134,19 +114,10 @@ func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CardUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *CardUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *CardUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CardUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CardUpdate) ExecX(ctx context.Context) {
@@ -309,8 +280,7 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 
 // SetUpdateTime sets the "update_time" field.
 func (_u *CardUpdateOne) SetUpdateTime(v time.Time) *CardUpdateOne {
-	_u.mutation.SetUpdateTime(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUpdateTime, v)
 }
 
 // SetBalance sets the "balance" field.
@@ -330,14 +300,12 @@ func (_u *CardUpdateOne) SetNillableBalance(v *float64) *CardUpdateOne {
 
 // AddBalance adds value to the "balance" field.
 func (_u *CardUpdateOne) AddBalance(v float64) *CardUpdateOne {
-	_u.mutation.AddBalance(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddBalance, v)
 }
 
 // SetName sets the "name" field.
 func (_u *CardUpdateOne) SetName(v string) *CardUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -350,14 +318,12 @@ func (_u *CardUpdateOne) SetNillableName(v *string) *CardUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *CardUpdateOne) ClearName() *CardUpdateOne {
-	_u.mutation.ClearName()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearName)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -375,20 +341,16 @@ func (_u *CardUpdateOne) AddSpecIDs(ids ...int) *CardUpdateOne {
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (_u *CardUpdateOne) Mutation() *CardMutation {
-	return _u.mutation
-}
+func (_u *CardUpdateOne) Mutation() *CardMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdateOne) ClearOwner() *CardUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // ClearSpec clears all "spec" edges to the Spec entity.
 func (_u *CardUpdateOne) ClearSpec() *CardUpdateOne {
-	_u.mutation.ClearSpec()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSpec)
 }
 
 // RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
@@ -417,19 +379,10 @@ func (_u *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CardUpdateOne) SaveX(ctx context.Context) *Card {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *CardUpdateOne) SaveX(ctx context.Context) *Card { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *CardUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CardUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CardUpdateOne) ExecX(ctx context.Context) {

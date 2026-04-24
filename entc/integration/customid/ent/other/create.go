@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,10 +33,7 @@ func NewOtherCreate(c Config, hooks []Hook, mutation *OtherMutation) *OtherCreat
 }
 
 // SetID sets the "id" field.
-func (_c *OtherCreate) SetID(v sid.ID) *OtherCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *OtherCreate) SetID(v sid.ID) *OtherCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // SetNillableID sets the "id" field if the given value is not nil.
 func (_c *OtherCreate) SetNillableID(v *sid.ID) *OtherCreate {
@@ -46,9 +44,7 @@ func (_c *OtherCreate) SetNillableID(v *sid.ID) *OtherCreate {
 }
 
 // Mutation returns the OtherMutation object of the builder.
-func (_c *OtherCreate) Mutation() *OtherMutation {
-	return _c.mutation
-}
+func (_c *OtherCreate) Mutation() *OtherMutation { return _c.mutation }
 
 // Save creates the Other in the database.
 func (_c *OtherCreate) Save(ctx context.Context) (*Other, error) {
@@ -57,19 +53,10 @@ func (_c *OtherCreate) Save(ctx context.Context) (*Other, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *OtherCreate) SaveX(ctx context.Context) *Other {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *OtherCreate) SaveX(ctx context.Context) *Other { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *OtherCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *OtherCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *OtherCreate) ExecX(ctx context.Context) {

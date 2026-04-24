@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,8 +38,7 @@ func (_u *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate 
 
 // SetCustom sets the "custom" field.
 func (_u *CustomTypeUpdate) SetCustom(v string) *CustomTypeUpdate {
-	_u.mutation.SetCustom(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCustom, v)
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
@@ -51,14 +51,11 @@ func (_u *CustomTypeUpdate) SetNillableCustom(v *string) *CustomTypeUpdate {
 
 // ClearCustom clears the value of the "custom" field.
 func (_u *CustomTypeUpdate) ClearCustom() *CustomTypeUpdate {
-	_u.mutation.ClearCustom()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearCustom)
 }
 
 // Mutation returns the CustomTypeMutation object of the builder.
-func (_u *CustomTypeUpdate) Mutation() *CustomTypeMutation {
-	return _u.mutation
-}
+func (_u *CustomTypeUpdate) Mutation() *CustomTypeMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CustomTypeUpdate) Save(ctx context.Context) (int, error) {
@@ -66,19 +63,10 @@ func (_u *CustomTypeUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CustomTypeUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *CustomTypeUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *CustomTypeUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CustomTypeUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CustomTypeUpdate) ExecX(ctx context.Context) {
@@ -129,8 +117,7 @@ func NewCustomTypeUpdateOne(c Config, hooks []Hook, mutation *CustomTypeMutation
 
 // SetCustom sets the "custom" field.
 func (_u *CustomTypeUpdateOne) SetCustom(v string) *CustomTypeUpdateOne {
-	_u.mutation.SetCustom(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCustom, v)
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
@@ -143,14 +130,11 @@ func (_u *CustomTypeUpdateOne) SetNillableCustom(v *string) *CustomTypeUpdateOne
 
 // ClearCustom clears the value of the "custom" field.
 func (_u *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
-	_u.mutation.ClearCustom()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearCustom)
 }
 
 // Mutation returns the CustomTypeMutation object of the builder.
-func (_u *CustomTypeUpdateOne) Mutation() *CustomTypeMutation {
-	return _u.mutation
-}
+func (_u *CustomTypeUpdateOne) Mutation() *CustomTypeMutation { return _u.mutation }
 
 // Where appends a list predicates to the CustomTypeUpdate builder.
 func (_u *CustomTypeUpdateOne) Where(ps ...predicate.CustomType) *CustomTypeUpdateOne {
@@ -172,18 +156,11 @@ func (_u *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *CustomTypeUpdateOne) SaveX(ctx context.Context) *CustomType {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *CustomTypeUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CustomTypeUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CustomTypeUpdateOne) ExecX(ctx context.Context) {

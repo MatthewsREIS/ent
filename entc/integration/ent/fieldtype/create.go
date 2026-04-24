@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -37,38 +38,32 @@ func NewFieldTypeCreate(c Config, hooks []Hook, mutation *FieldTypeMutation) *Fi
 
 // SetInt sets the "int" field.
 func (_c *FieldTypeCreate) SetInt(v int) *FieldTypeCreate {
-	_c.mutation.SetInt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInt, v)
 }
 
 // SetInt8 sets the "int8" field.
 func (_c *FieldTypeCreate) SetInt8(v int8) *FieldTypeCreate {
-	_c.mutation.SetInt8(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInt8, v)
 }
 
 // SetInt16 sets the "int16" field.
 func (_c *FieldTypeCreate) SetInt16(v int16) *FieldTypeCreate {
-	_c.mutation.SetInt16(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInt16, v)
 }
 
 // SetInt32 sets the "int32" field.
 func (_c *FieldTypeCreate) SetInt32(v int32) *FieldTypeCreate {
-	_c.mutation.SetInt32(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInt32, v)
 }
 
 // SetInt64 sets the "int64" field.
 func (_c *FieldTypeCreate) SetInt64(v int64) *FieldTypeCreate {
-	_c.mutation.SetInt64(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetInt64, v)
 }
 
 // SetOptionalInt sets the "optional_int" field.
 func (_c *FieldTypeCreate) SetOptionalInt(v int) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalInt, v)
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
@@ -81,8 +76,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt(v *int) *FieldTypeCreate {
 
 // SetOptionalInt8 sets the "optional_int8" field.
 func (_c *FieldTypeCreate) SetOptionalInt8(v int8) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt8(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalInt8, v)
 }
 
 // SetNillableOptionalInt8 sets the "optional_int8" field if the given value is not nil.
@@ -95,8 +89,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt8(v *int8) *FieldTypeCreate {
 
 // SetOptionalInt16 sets the "optional_int16" field.
 func (_c *FieldTypeCreate) SetOptionalInt16(v int16) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt16(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalInt16, v)
 }
 
 // SetNillableOptionalInt16 sets the "optional_int16" field if the given value is not nil.
@@ -109,8 +102,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt16(v *int16) *FieldTypeCreate {
 
 // SetOptionalInt32 sets the "optional_int32" field.
 func (_c *FieldTypeCreate) SetOptionalInt32(v int32) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt32(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalInt32, v)
 }
 
 // SetNillableOptionalInt32 sets the "optional_int32" field if the given value is not nil.
@@ -123,8 +115,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt32(v *int32) *FieldTypeCreate {
 
 // SetOptionalInt64 sets the "optional_int64" field.
 func (_c *FieldTypeCreate) SetOptionalInt64(v int64) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt64(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalInt64, v)
 }
 
 // SetNillableOptionalInt64 sets the "optional_int64" field if the given value is not nil.
@@ -137,8 +128,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt64(v *int64) *FieldTypeCreate {
 
 // SetNillableInt sets the "nillable_int" field.
 func (_c *FieldTypeCreate) SetNillableInt(v int) *FieldTypeCreate {
-	_c.mutation.SetNillableInt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNillableInt, v)
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
@@ -151,8 +141,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt(v *int) *FieldTypeCreate {
 
 // SetNillableInt8 sets the "nillable_int8" field.
 func (_c *FieldTypeCreate) SetNillableInt8(v int8) *FieldTypeCreate {
-	_c.mutation.SetNillableInt8(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNillableInt8, v)
 }
 
 // SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
@@ -165,8 +154,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt8(v *int8) *FieldTypeCreate {
 
 // SetNillableInt16 sets the "nillable_int16" field.
 func (_c *FieldTypeCreate) SetNillableInt16(v int16) *FieldTypeCreate {
-	_c.mutation.SetNillableInt16(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNillableInt16, v)
 }
 
 // SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
@@ -179,8 +167,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt16(v *int16) *FieldTypeCreate {
 
 // SetNillableInt32 sets the "nillable_int32" field.
 func (_c *FieldTypeCreate) SetNillableInt32(v int32) *FieldTypeCreate {
-	_c.mutation.SetNillableInt32(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNillableInt32, v)
 }
 
 // SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
@@ -193,8 +180,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt32(v *int32) *FieldTypeCreate {
 
 // SetNillableInt64 sets the "nillable_int64" field.
 func (_c *FieldTypeCreate) SetNillableInt64(v int64) *FieldTypeCreate {
-	_c.mutation.SetNillableInt64(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNillableInt64, v)
 }
 
 // SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
@@ -207,8 +193,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt64(v *int64) *FieldTypeCreate {
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
 func (_c *FieldTypeCreate) SetValidateOptionalInt32(v int32) *FieldTypeCreate {
-	_c.mutation.SetValidateOptionalInt32(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetValidateOptionalInt32, v)
 }
 
 // SetNillableValidateOptionalInt32 sets the "validate_optional_int32" field if the given value is not nil.
@@ -221,8 +206,7 @@ func (_c *FieldTypeCreate) SetNillableValidateOptionalInt32(v *int32) *FieldType
 
 // SetOptionalUint sets the "optional_uint" field.
 func (_c *FieldTypeCreate) SetOptionalUint(v uint) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalUint, v)
 }
 
 // SetNillableOptionalUint sets the "optional_uint" field if the given value is not nil.
@@ -235,8 +219,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint(v *uint) *FieldTypeCreate {
 
 // SetOptionalUint8 sets the "optional_uint8" field.
 func (_c *FieldTypeCreate) SetOptionalUint8(v uint8) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint8(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalUint8, v)
 }
 
 // SetNillableOptionalUint8 sets the "optional_uint8" field if the given value is not nil.
@@ -249,8 +232,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint8(v *uint8) *FieldTypeCreate {
 
 // SetOptionalUint16 sets the "optional_uint16" field.
 func (_c *FieldTypeCreate) SetOptionalUint16(v uint16) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint16(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalUint16, v)
 }
 
 // SetNillableOptionalUint16 sets the "optional_uint16" field if the given value is not nil.
@@ -263,8 +245,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint16(v *uint16) *FieldTypeCreate
 
 // SetOptionalUint32 sets the "optional_uint32" field.
 func (_c *FieldTypeCreate) SetOptionalUint32(v uint32) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint32(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalUint32, v)
 }
 
 // SetNillableOptionalUint32 sets the "optional_uint32" field if the given value is not nil.
@@ -277,8 +258,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint32(v *uint32) *FieldTypeCreate
 
 // SetOptionalUint64 sets the "optional_uint64" field.
 func (_c *FieldTypeCreate) SetOptionalUint64(v uint64) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint64(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalUint64, v)
 }
 
 // SetNillableOptionalUint64 sets the "optional_uint64" field if the given value is not nil.
@@ -291,8 +271,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint64(v *uint64) *FieldTypeCreate
 
 // SetState sets the "state" field.
 func (_c *FieldTypeCreate) SetState(v State) *FieldTypeCreate {
-	_c.mutation.SetState(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetState, v)
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
@@ -305,8 +284,7 @@ func (_c *FieldTypeCreate) SetNillableState(v *State) *FieldTypeCreate {
 
 // SetOptionalFloat sets the "optional_float" field.
 func (_c *FieldTypeCreate) SetOptionalFloat(v float64) *FieldTypeCreate {
-	_c.mutation.SetOptionalFloat(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalFloat, v)
 }
 
 // SetNillableOptionalFloat sets the "optional_float" field if the given value is not nil.
@@ -319,8 +297,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalFloat(v *float64) *FieldTypeCreate
 
 // SetOptionalFloat32 sets the "optional_float32" field.
 func (_c *FieldTypeCreate) SetOptionalFloat32(v float32) *FieldTypeCreate {
-	_c.mutation.SetOptionalFloat32(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalFloat32, v)
 }
 
 // SetNillableOptionalFloat32 sets the "optional_float32" field if the given value is not nil.
@@ -333,8 +310,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalFloat32(v *float32) *FieldTypeCrea
 
 // SetText sets the "text" field.
 func (_c *FieldTypeCreate) SetText(v string) *FieldTypeCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -347,8 +323,7 @@ func (_c *FieldTypeCreate) SetNillableText(v *string) *FieldTypeCreate {
 
 // SetDatetime sets the "datetime" field.
 func (_c *FieldTypeCreate) SetDatetime(v time.Time) *FieldTypeCreate {
-	_c.mutation.SetDatetime(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDatetime, v)
 }
 
 // SetNillableDatetime sets the "datetime" field if the given value is not nil.
@@ -361,8 +336,7 @@ func (_c *FieldTypeCreate) SetNillableDatetime(v *time.Time) *FieldTypeCreate {
 
 // SetDecimal sets the "decimal" field.
 func (_c *FieldTypeCreate) SetDecimal(v float64) *FieldTypeCreate {
-	_c.mutation.SetDecimal(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDecimal, v)
 }
 
 // SetNillableDecimal sets the "decimal" field if the given value is not nil.
@@ -375,20 +349,17 @@ func (_c *FieldTypeCreate) SetNillableDecimal(v *float64) *FieldTypeCreate {
 
 // SetLinkOther sets the "link_other" field.
 func (_c *FieldTypeCreate) SetLinkOther(v *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLinkOther(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetLinkOther, v)
 }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
 func (_c *FieldTypeCreate) SetLinkOtherFunc(v *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLinkOtherFunc(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetLinkOtherFunc, v)
 }
 
 // SetMAC sets the "mac" field.
 func (_c *FieldTypeCreate) SetMAC(v schema.MAC) *FieldTypeCreate {
-	_c.mutation.SetMAC(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetMAC, v)
 }
 
 // SetNillableMAC sets the "mac" field if the given value is not nil.
@@ -401,14 +372,12 @@ func (_c *FieldTypeCreate) SetNillableMAC(v *schema.MAC) *FieldTypeCreate {
 
 // SetStringArray sets the "string_array" field.
 func (_c *FieldTypeCreate) SetStringArray(v schema.Strings) *FieldTypeCreate {
-	_c.mutation.SetStringArray(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetStringArray, v)
 }
 
 // SetPassword sets the "password" field.
 func (_c *FieldTypeCreate) SetPassword(v string) *FieldTypeCreate {
-	_c.mutation.SetPassword(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetPassword, v)
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
@@ -421,8 +390,7 @@ func (_c *FieldTypeCreate) SetNillablePassword(v *string) *FieldTypeCreate {
 
 // SetStringScanner sets the "string_scanner" field.
 func (_c *FieldTypeCreate) SetStringScanner(v schema.StringScanner) *FieldTypeCreate {
-	_c.mutation.SetStringScanner(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetStringScanner, v)
 }
 
 // SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
@@ -435,8 +403,7 @@ func (_c *FieldTypeCreate) SetNillableStringScanner(v *schema.StringScanner) *Fi
 
 // SetDuration sets the "duration" field.
 func (_c *FieldTypeCreate) SetDuration(v time.Duration) *FieldTypeCreate {
-	_c.mutation.SetDuration(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDuration, v)
 }
 
 // SetNillableDuration sets the "duration" field if the given value is not nil.
@@ -449,8 +416,7 @@ func (_c *FieldTypeCreate) SetNillableDuration(v *time.Duration) *FieldTypeCreat
 
 // SetDir sets the "dir" field.
 func (_c *FieldTypeCreate) SetDir(v http.Dir) *FieldTypeCreate {
-	_c.mutation.SetDir(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDir, v)
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
@@ -463,8 +429,7 @@ func (_c *FieldTypeCreate) SetNillableDir(v *http.Dir) *FieldTypeCreate {
 
 // SetNdir sets the "ndir" field.
 func (_c *FieldTypeCreate) SetNdir(v http.Dir) *FieldTypeCreate {
-	_c.mutation.SetNdir(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNdir, v)
 }
 
 // SetNillableNdir sets the "ndir" field if the given value is not nil.
@@ -477,8 +442,7 @@ func (_c *FieldTypeCreate) SetNillableNdir(v *http.Dir) *FieldTypeCreate {
 
 // SetStr sets the "str" field.
 func (_c *FieldTypeCreate) SetStr(v sql.NullString) *FieldTypeCreate {
-	_c.mutation.SetStr(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetStr, v)
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
@@ -491,14 +455,12 @@ func (_c *FieldTypeCreate) SetNillableStr(v *sql.NullString) *FieldTypeCreate {
 
 // SetNullStr sets the "null_str" field.
 func (_c *FieldTypeCreate) SetNullStr(v *sql.NullString) *FieldTypeCreate {
-	_c.mutation.SetNullStr(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNullStr, v)
 }
 
 // SetLink sets the "link" field.
 func (_c *FieldTypeCreate) SetLink(v schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLink(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetLink, v)
 }
 
 // SetNillableLink sets the "link" field if the given value is not nil.
@@ -511,14 +473,12 @@ func (_c *FieldTypeCreate) SetNillableLink(v *schema.Link) *FieldTypeCreate {
 
 // SetNullLink sets the "null_link" field.
 func (_c *FieldTypeCreate) SetNullLink(v *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetNullLink(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNullLink, v)
 }
 
 // SetActive sets the "active" field.
 func (_c *FieldTypeCreate) SetActive(v schema.Status) *FieldTypeCreate {
-	_c.mutation.SetActive(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetActive, v)
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
@@ -531,8 +491,7 @@ func (_c *FieldTypeCreate) SetNillableActive(v *schema.Status) *FieldTypeCreate 
 
 // SetNullActive sets the "null_active" field.
 func (_c *FieldTypeCreate) SetNullActive(v schema.Status) *FieldTypeCreate {
-	_c.mutation.SetNullActive(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNullActive, v)
 }
 
 // SetNillableNullActive sets the "null_active" field if the given value is not nil.
@@ -545,44 +504,37 @@ func (_c *FieldTypeCreate) SetNillableNullActive(v *schema.Status) *FieldTypeCre
 
 // SetDeleted sets the "deleted" field.
 func (_c *FieldTypeCreate) SetDeleted(v *sql.NullBool) *FieldTypeCreate {
-	_c.mutation.SetDeleted(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDeleted, v)
 }
 
 // SetDeletedAt sets the "deleted_at" field.
 func (_c *FieldTypeCreate) SetDeletedAt(v *sql.NullTime) *FieldTypeCreate {
-	_c.mutation.SetDeletedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDeletedAt, v)
 }
 
 // SetRawData sets the "raw_data" field.
 func (_c *FieldTypeCreate) SetRawData(v []byte) *FieldTypeCreate {
-	_c.mutation.SetRawData(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetRawData, v)
 }
 
 // SetSensitive sets the "sensitive" field.
 func (_c *FieldTypeCreate) SetSensitive(v []byte) *FieldTypeCreate {
-	_c.mutation.SetSensitive(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSensitive, v)
 }
 
 // SetIP sets the "ip" field.
 func (_c *FieldTypeCreate) SetIP(v net.IP) *FieldTypeCreate {
-	_c.mutation.SetIP(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetIP, v)
 }
 
 // SetNullInt64 sets the "null_int64" field.
 func (_c *FieldTypeCreate) SetNullInt64(v *sql.NullInt64) *FieldTypeCreate {
-	_c.mutation.SetNullInt64(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNullInt64, v)
 }
 
 // SetSchemaInt sets the "schema_int" field.
 func (_c *FieldTypeCreate) SetSchemaInt(v schema.Int) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSchemaInt, v)
 }
 
 // SetNillableSchemaInt sets the "schema_int" field if the given value is not nil.
@@ -595,8 +547,7 @@ func (_c *FieldTypeCreate) SetNillableSchemaInt(v *schema.Int) *FieldTypeCreate 
 
 // SetSchemaInt8 sets the "schema_int8" field.
 func (_c *FieldTypeCreate) SetSchemaInt8(v schema.Int8) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt8(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSchemaInt8, v)
 }
 
 // SetNillableSchemaInt8 sets the "schema_int8" field if the given value is not nil.
@@ -609,8 +560,7 @@ func (_c *FieldTypeCreate) SetNillableSchemaInt8(v *schema.Int8) *FieldTypeCreat
 
 // SetSchemaInt64 sets the "schema_int64" field.
 func (_c *FieldTypeCreate) SetSchemaInt64(v schema.Int64) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt64(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSchemaInt64, v)
 }
 
 // SetNillableSchemaInt64 sets the "schema_int64" field if the given value is not nil.
@@ -623,8 +573,7 @@ func (_c *FieldTypeCreate) SetNillableSchemaInt64(v *schema.Int64) *FieldTypeCre
 
 // SetSchemaFloat sets the "schema_float" field.
 func (_c *FieldTypeCreate) SetSchemaFloat(v schema.Float64) *FieldTypeCreate {
-	_c.mutation.SetSchemaFloat(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSchemaFloat, v)
 }
 
 // SetNillableSchemaFloat sets the "schema_float" field if the given value is not nil.
@@ -637,8 +586,7 @@ func (_c *FieldTypeCreate) SetNillableSchemaFloat(v *schema.Float64) *FieldTypeC
 
 // SetSchemaFloat32 sets the "schema_float32" field.
 func (_c *FieldTypeCreate) SetSchemaFloat32(v schema.Float32) *FieldTypeCreate {
-	_c.mutation.SetSchemaFloat32(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSchemaFloat32, v)
 }
 
 // SetNillableSchemaFloat32 sets the "schema_float32" field if the given value is not nil.
@@ -651,14 +599,12 @@ func (_c *FieldTypeCreate) SetNillableSchemaFloat32(v *schema.Float32) *FieldTyp
 
 // SetNullFloat sets the "null_float" field.
 func (_c *FieldTypeCreate) SetNullFloat(v *sql.NullFloat64) *FieldTypeCreate {
-	_c.mutation.SetNullFloat(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNullFloat, v)
 }
 
 // SetRole sets the "role" field.
 func (_c *FieldTypeCreate) SetRole(v role.Role) *FieldTypeCreate {
-	_c.mutation.SetRole(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetRole, v)
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
@@ -671,8 +617,7 @@ func (_c *FieldTypeCreate) SetNillableRole(v *role.Role) *FieldTypeCreate {
 
 // SetPriority sets the "priority" field.
 func (_c *FieldTypeCreate) SetPriority(v role.Priority) *FieldTypeCreate {
-	_c.mutation.SetPriority(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetPriority, v)
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
@@ -685,8 +630,7 @@ func (_c *FieldTypeCreate) SetNillablePriority(v *role.Priority) *FieldTypeCreat
 
 // SetOptionalUUID sets the "optional_uuid" field.
 func (_c *FieldTypeCreate) SetOptionalUUID(v uuid.UUID) *FieldTypeCreate {
-	_c.mutation.SetOptionalUUID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOptionalUUID, v)
 }
 
 // SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
@@ -699,8 +643,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUUID(v *uuid.UUID) *FieldTypeCreat
 
 // SetNillableUUID sets the "nillable_uuid" field.
 func (_c *FieldTypeCreate) SetNillableUUID(v uuid.UUID) *FieldTypeCreate {
-	_c.mutation.SetNillableUUID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNillableUUID, v)
 }
 
 // SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
@@ -713,14 +656,12 @@ func (_c *FieldTypeCreate) SetNillableNillableUUID(v *uuid.UUID) *FieldTypeCreat
 
 // SetStrings sets the "strings" field.
 func (_c *FieldTypeCreate) SetStrings(v []string) *FieldTypeCreate {
-	_c.mutation.SetStrings(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetStrings, v)
 }
 
 // SetPair sets the "pair" field.
 func (_c *FieldTypeCreate) SetPair(v schema.Pair) *FieldTypeCreate {
-	_c.mutation.SetPair(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetPair, v)
 }
 
 // SetNillablePair sets the "pair" field if the given value is not nil.
@@ -733,14 +674,12 @@ func (_c *FieldTypeCreate) SetNillablePair(v *schema.Pair) *FieldTypeCreate {
 
 // SetNilPair sets the "nil_pair" field.
 func (_c *FieldTypeCreate) SetNilPair(v *schema.Pair) *FieldTypeCreate {
-	_c.mutation.SetNilPair(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNilPair, v)
 }
 
 // SetVstring sets the "vstring" field.
 func (_c *FieldTypeCreate) SetVstring(v schema.VString) *FieldTypeCreate {
-	_c.mutation.SetVstring(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetVstring, v)
 }
 
 // SetNillableVstring sets the "vstring" field if the given value is not nil.
@@ -753,8 +692,7 @@ func (_c *FieldTypeCreate) SetNillableVstring(v *schema.VString) *FieldTypeCreat
 
 // SetTriple sets the "triple" field.
 func (_c *FieldTypeCreate) SetTriple(v schema.Triple) *FieldTypeCreate {
-	_c.mutation.SetTriple(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTriple, v)
 }
 
 // SetNillableTriple sets the "triple" field if the given value is not nil.
@@ -767,8 +705,7 @@ func (_c *FieldTypeCreate) SetNillableTriple(v *schema.Triple) *FieldTypeCreate 
 
 // SetBigInt sets the "big_int" field.
 func (_c *FieldTypeCreate) SetBigInt(v schema.BigInt) *FieldTypeCreate {
-	_c.mutation.SetBigInt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetBigInt, v)
 }
 
 // SetNillableBigInt sets the "big_int" field if the given value is not nil.
@@ -781,8 +718,7 @@ func (_c *FieldTypeCreate) SetNillableBigInt(v *schema.BigInt) *FieldTypeCreate 
 
 // SetPasswordOther sets the "password_other" field.
 func (_c *FieldTypeCreate) SetPasswordOther(v schema.Password) *FieldTypeCreate {
-	_c.mutation.SetPasswordOther(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetPasswordOther, v)
 }
 
 // SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
@@ -794,9 +730,7 @@ func (_c *FieldTypeCreate) SetNillablePasswordOther(v *schema.Password) *FieldTy
 }
 
 // Mutation returns the FieldTypeMutation object of the builder.
-func (_c *FieldTypeCreate) Mutation() *FieldTypeMutation {
-	return _c.mutation
-}
+func (_c *FieldTypeCreate) Mutation() *FieldTypeMutation { return _c.mutation }
 
 // Save creates the FieldType in the database.
 func (_c *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
@@ -806,18 +740,11 @@ func (_c *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *FieldTypeCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *FieldTypeCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *FieldTypeCreate) ExecX(ctx context.Context) {

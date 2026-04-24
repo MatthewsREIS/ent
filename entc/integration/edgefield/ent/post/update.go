@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,11 @@ func NewPostUpdate(c Config, hooks []Hook, mutation *PostMutation) *PostUpdate {
 }
 
 // Where appends a list predicates to the PostUpdate builder.
-func (_u *PostUpdate) Where(ps ...predicate.Post) *PostUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PostUpdate) Where(ps ...predicate.Post) *PostUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetText sets the "text" field.
 func (_u *PostUpdate) SetText(v string) *PostUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -51,8 +48,7 @@ func (_u *PostUpdate) SetNillableText(v *string) *PostUpdate {
 
 // SetAuthorID sets the "author_id" field.
 func (_u *PostUpdate) SetAuthorID(v int) *PostUpdate {
-	_u.mutation.SetAuthorID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetAuthorID, v)
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
@@ -65,19 +61,15 @@ func (_u *PostUpdate) SetNillableAuthorID(v *int) *PostUpdate {
 
 // ClearAuthorID clears the value of the "author_id" field.
 func (_u *PostUpdate) ClearAuthorID() *PostUpdate {
-	_u.mutation.ClearAuthorID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAuthorID)
 }
 
 // Mutation returns the PostMutation object of the builder.
-func (_u *PostUpdate) Mutation() *PostMutation {
-	return _u.mutation
-}
+func (_u *PostUpdate) Mutation() *PostMutation { return _u.mutation }
 
 // ClearAuthor clears the "author" edge to the User entity.
 func (_u *PostUpdate) ClearAuthor() *PostUpdate {
-	_u.mutation.ClearAuthor()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAuthor)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -86,19 +78,10 @@ func (_u *PostUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PostUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *PostUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *PostUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PostUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PostUpdate) ExecX(ctx context.Context) {
@@ -175,8 +158,7 @@ func NewPostUpdateOne(c Config, hooks []Hook, mutation *PostMutation) *PostUpdat
 
 // SetText sets the "text" field.
 func (_u *PostUpdateOne) SetText(v string) *PostUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -189,8 +171,7 @@ func (_u *PostUpdateOne) SetNillableText(v *string) *PostUpdateOne {
 
 // SetAuthorID sets the "author_id" field.
 func (_u *PostUpdateOne) SetAuthorID(v int) *PostUpdateOne {
-	_u.mutation.SetAuthorID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetAuthorID, v)
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
@@ -203,19 +184,15 @@ func (_u *PostUpdateOne) SetNillableAuthorID(v *int) *PostUpdateOne {
 
 // ClearAuthorID clears the value of the "author_id" field.
 func (_u *PostUpdateOne) ClearAuthorID() *PostUpdateOne {
-	_u.mutation.ClearAuthorID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAuthorID)
 }
 
 // Mutation returns the PostMutation object of the builder.
-func (_u *PostUpdateOne) Mutation() *PostMutation {
-	return _u.mutation
-}
+func (_u *PostUpdateOne) Mutation() *PostMutation { return _u.mutation }
 
 // ClearAuthor clears the "author" edge to the User entity.
 func (_u *PostUpdateOne) ClearAuthor() *PostUpdateOne {
-	_u.mutation.ClearAuthor()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAuthor)
 }
 
 // Where appends a list predicates to the PostUpdate builder.
@@ -237,19 +214,10 @@ func (_u *PostUpdateOne) Save(ctx context.Context) (*Post, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PostUpdateOne) SaveX(ctx context.Context) *Post {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *PostUpdateOne) SaveX(ctx context.Context) *Post { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *PostUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PostUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PostUpdateOne) ExecX(ctx context.Context) {

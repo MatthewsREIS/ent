@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,21 +29,16 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 }
 
 // SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(v int32) *UserCreate {
-	_c.mutation.SetAge(v)
-	return _c
-}
+func (_c *UserCreate) SetAge(v int32) *UserCreate { return entbuilder.BSet(_c, _c.mutation.SetAge, v) }
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // SetDescription sets the "description" field.
 func (_c *UserCreate) SetDescription(v string) *UserCreate {
-	_c.mutation.SetDescription(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDescription, v)
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
@@ -55,14 +51,12 @@ func (_c *UserCreate) SetNillableDescription(v *string) *UserCreate {
 
 // SetNickname sets the "nickname" field.
 func (_c *UserCreate) SetNickname(v string) *UserCreate {
-	_c.mutation.SetNickname(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetNickname, v)
 }
 
 // SetAddress sets the "address" field.
 func (_c *UserCreate) SetAddress(v string) *UserCreate {
-	_c.mutation.SetAddress(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetAddress, v)
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
@@ -75,8 +69,7 @@ func (_c *UserCreate) SetNillableAddress(v *string) *UserCreate {
 
 // SetRenamed sets the "renamed" field.
 func (_c *UserCreate) SetRenamed(v string) *UserCreate {
-	_c.mutation.SetRenamed(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetRenamed, v)
 }
 
 // SetNillableRenamed sets the "renamed" field if the given value is not nil.
@@ -89,8 +82,7 @@ func (_c *UserCreate) SetNillableRenamed(v *string) *UserCreate {
 
 // SetOldToken sets the "old_token" field.
 func (_c *UserCreate) SetOldToken(v string) *UserCreate {
-	_c.mutation.SetOldToken(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOldToken, v)
 }
 
 // SetNillableOldToken sets the "old_token" field if the given value is not nil.
@@ -103,14 +95,12 @@ func (_c *UserCreate) SetNillableOldToken(v *string) *UserCreate {
 
 // SetBlob sets the "blob" field.
 func (_c *UserCreate) SetBlob(v []byte) *UserCreate {
-	_c.mutation.SetBlob(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetBlob, v)
 }
 
 // SetState sets the "state" field.
 func (_c *UserCreate) SetState(v State) *UserCreate {
-	_c.mutation.SetState(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetState, v)
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
@@ -123,8 +113,7 @@ func (_c *UserCreate) SetNillableState(v *State) *UserCreate {
 
 // SetStatus sets the "status" field.
 func (_c *UserCreate) SetStatus(v string) *UserCreate {
-	_c.mutation.SetStatus(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetStatus, v)
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
@@ -137,8 +126,7 @@ func (_c *UserCreate) SetNillableStatus(v *string) *UserCreate {
 
 // SetWorkplace sets the "workplace" field.
 func (_c *UserCreate) SetWorkplace(v string) *UserCreate {
-	_c.mutation.SetWorkplace(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetWorkplace, v)
 }
 
 // SetNillableWorkplace sets the "workplace" field if the given value is not nil.
@@ -151,8 +139,7 @@ func (_c *UserCreate) SetNillableWorkplace(v *string) *UserCreate {
 
 // SetDropOptional sets the "drop_optional" field.
 func (_c *UserCreate) SetDropOptional(v string) *UserCreate {
-	_c.mutation.SetDropOptional(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDropOptional, v)
 }
 
 // SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
@@ -164,15 +151,11 @@ func (_c *UserCreate) SetNillableDropOptional(v *string) *UserCreate {
 }
 
 // SetID sets the "id" field.
-func (_c *UserCreate) SetID(v int) *UserCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
+func (_c *UserCreate) SetID(v int) *UserCreate { return entbuilder.BSet(_c, _c.mutation.SetID, v) }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
 func (_c *UserCreate) SetParentID(id int) *UserCreate {
-	_c.mutation.SetParentID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
@@ -184,15 +167,11 @@ func (_c *UserCreate) SetNillableParentID(id *int) *UserCreate {
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	_c.mutation.AddChildIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate { _c.mutation.AddChildIDs(ids...); return _c }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (_c *UserCreate) SetSpouseID(id int) *UserCreate {
-	_c.mutation.SetSpouseID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetSpouseID, id)
 }
 
 // SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
@@ -205,8 +184,7 @@ func (_c *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
 
 // SetCarID sets the "car" edge to the Car entity by ID.
 func (_c *UserCreate) SetCarID(id int) *UserCreate {
-	_c.mutation.SetCarID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCarID, id)
 }
 
 // SetNillableCarID sets the "car" edge to the Car entity by ID if the given value is not nil.
@@ -218,9 +196,7 @@ func (_c *UserCreate) SetNillableCarID(id *int) *UserCreate {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_c *UserCreate) Mutation() *UserMutation {
-	return _c.mutation
-}
+func (_c *UserCreate) Mutation() *UserMutation { return _c.mutation }
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
@@ -229,19 +205,10 @@ func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *UserCreate) SaveX(ctx context.Context) *User { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *UserCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *UserCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *UserCreate) ExecX(ctx context.Context) {

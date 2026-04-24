@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,10 @@ func NewZooUpdate(c Config, hooks []Hook, mutation *ZooMutation) *ZooUpdate {
 }
 
 // Where appends a list predicates to the ZooUpdate builder.
-func (_u *ZooUpdate) Where(ps ...predicate.Zoo) *ZooUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *ZooUpdate) Where(ps ...predicate.Zoo) *ZooUpdate { _u.mutation.Where(ps...); return _u }
 
 // Mutation returns the ZooMutation object of the builder.
-func (_u *ZooUpdate) Mutation() *ZooMutation {
-	return _u.mutation
-}
+func (_u *ZooUpdate) Mutation() *ZooMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ZooUpdate) Save(ctx context.Context) (int, error) {
@@ -46,19 +42,10 @@ func (_u *ZooUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ZooUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *ZooUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *ZooUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ZooUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ZooUpdate) ExecX(ctx context.Context) {
@@ -102,15 +89,10 @@ func NewZooUpdateOne(c Config, hooks []Hook, mutation *ZooMutation) *ZooUpdateOn
 }
 
 // Mutation returns the ZooMutation object of the builder.
-func (_u *ZooUpdateOne) Mutation() *ZooMutation {
-	return _u.mutation
-}
+func (_u *ZooUpdateOne) Mutation() *ZooMutation { return _u.mutation }
 
 // Where appends a list predicates to the ZooUpdate builder.
-func (_u *ZooUpdateOne) Where(ps ...predicate.Zoo) *ZooUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *ZooUpdateOne) Where(ps ...predicate.Zoo) *ZooUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -125,19 +107,10 @@ func (_u *ZooUpdateOne) Save(ctx context.Context) (*Zoo, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ZooUpdateOne) SaveX(ctx context.Context) *Zoo {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *ZooUpdateOne) SaveX(ctx context.Context) *Zoo { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *ZooUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ZooUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ZooUpdateOne) ExecX(ctx context.Context) {

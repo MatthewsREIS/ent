@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FieldTypeQuery is the builder for querying FieldType entities.
@@ -39,23 +40,14 @@ func (_q *FieldTypeQuery) Where(ps ...predicate.FieldType) *FieldTypeQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *FieldTypeQuery) Limit(limit int) *FieldTypeQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *FieldTypeQuery) Limit(limit int) *FieldTypeQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *FieldTypeQuery) Offset(offset int) *FieldTypeQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *FieldTypeQuery) Unique(unique bool) *FieldTypeQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *FieldTypeQuery) Unique(unique bool) *FieldTypeQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *FieldTypeQuery) Order(o ...fieldtype.OrderOption) *FieldTypeQuery {
@@ -127,13 +119,7 @@ func (_q *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only FieldType ID in the query.
 // Returns a *NotSingularError when more than one FieldType ID is found.
@@ -155,13 +141,7 @@ func (_q *FieldTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *FieldTypeQuery) OnlyIDX(ctx context.Context) string {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *FieldTypeQuery) OnlyIDX(ctx context.Context) string { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of FieldTypes.
 func (_q *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
@@ -174,13 +154,7 @@ func (_q *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *FieldTypeQuery) AllX(ctx context.Context) []*FieldType { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of FieldType IDs.
 func (_q *FieldTypeQuery) IDs(ctx context.Context) (ids []string, err error) {
@@ -195,13 +169,7 @@ func (_q *FieldTypeQuery) IDs(ctx context.Context) (ids []string, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *FieldTypeQuery) IDsX(ctx context.Context) []string {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *FieldTypeQuery) IDsX(ctx context.Context) []string { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *FieldTypeQuery) Count(ctx context.Context) (int, error) {
@@ -213,13 +181,7 @@ func (_q *FieldTypeQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *FieldTypeQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *FieldTypeQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
@@ -235,13 +197,7 @@ func (_q *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *FieldTypeQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *FieldTypeQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the FieldTypeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

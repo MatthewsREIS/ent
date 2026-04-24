@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -138,10 +139,7 @@ func (_c *FileCreate) SetNillableCreateTime(v *time.Time) *FileCreate {
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *FileCreate) SetOwnerID(id string) *FileCreate {
-	_c.mutation.SetOwnerID(id)
-	return _c
-}
+func (_c *FileCreate) SetOwnerID(id string) *FileCreate { _c.mutation.SetOwnerID(id); return _c }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (_c *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
@@ -152,10 +150,7 @@ func (_c *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
 }
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
-func (_c *FileCreate) SetTypeID(id string) *FileCreate {
-	_c.mutation.SetTypeID(id)
-	return _c
-}
+func (_c *FileCreate) SetTypeID(id string) *FileCreate { _c.mutation.SetTypeID(id); return _c }
 
 // SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
 func (_c *FileCreate) SetNillableTypeID(id *string) *FileCreate {
@@ -172,9 +167,7 @@ func (_c *FileCreate) AddFieldIDs(ids ...string) *FileCreate {
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (_c *FileCreate) Mutation() *FileMutation {
-	return _c.mutation
-}
+func (_c *FileCreate) Mutation() *FileMutation { return _c.mutation }
 
 // Save creates the File in the database.
 func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
@@ -183,19 +176,10 @@ func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *FileCreate) SaveX(ctx context.Context) *File {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *FileCreate) SaveX(ctx context.Context) *File { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *FileCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *FileCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *FileCreate) ExecX(ctx context.Context) {

@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -34,10 +35,7 @@ func NewPetUpdate(c Config, hooks []Hook, mutation *PetMutation) *PetUpdate {
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetAge sets the "age" field.
 func (_u *PetUpdate) SetAge(v float64) *PetUpdate {
@@ -55,10 +53,7 @@ func (_u *PetUpdate) SetNillableAge(v *float64) *PetUpdate {
 }
 
 // AddAge adds value to the "age" field.
-func (_u *PetUpdate) AddAge(v float64) *PetUpdate {
-	_u.mutation.AddAge(v)
-	return _u
-}
+func (_u *PetUpdate) AddAge(v float64) *PetUpdate { _u.mutation.AddAge(v); return _u }
 
 // SetName sets the "name" field.
 func (_u *PetUpdate) SetName(v string) *PetUpdate {
@@ -89,10 +84,7 @@ func (_u *PetUpdate) SetNillableUUID(v *uuid.UUID) *PetUpdate {
 }
 
 // ClearUUID clears the value of the "uuid" field.
-func (_u *PetUpdate) ClearUUID() *PetUpdate {
-	_u.mutation.ClearUUID()
-	return _u
-}
+func (_u *PetUpdate) ClearUUID() *PetUpdate { _u.mutation.ClearUUID(); return _u }
 
 // SetNickname sets the "nickname" field.
 func (_u *PetUpdate) SetNickname(v string) *PetUpdate {
@@ -109,10 +101,7 @@ func (_u *PetUpdate) SetNillableNickname(v *string) *PetUpdate {
 }
 
 // ClearNickname clears the value of the "nickname" field.
-func (_u *PetUpdate) ClearNickname() *PetUpdate {
-	_u.mutation.ClearNickname()
-	return _u
-}
+func (_u *PetUpdate) ClearNickname() *PetUpdate { _u.mutation.ClearNickname(); return _u }
 
 // SetTrained sets the "trained" field.
 func (_u *PetUpdate) SetTrained(v bool) *PetUpdate {
@@ -143,16 +132,10 @@ func (_u *PetUpdate) SetNillableOptionalTime(v *time.Time) *PetUpdate {
 }
 
 // ClearOptionalTime clears the value of the "optional_time" field.
-func (_u *PetUpdate) ClearOptionalTime() *PetUpdate {
-	_u.mutation.ClearOptionalTime()
-	return _u
-}
+func (_u *PetUpdate) ClearOptionalTime() *PetUpdate { _u.mutation.ClearOptionalTime(); return _u }
 
 // SetTeamID sets the "team" edge to the User entity by ID.
-func (_u *PetUpdate) SetTeamID(id string) *PetUpdate {
-	_u.mutation.SetTeamID(id)
-	return _u
-}
+func (_u *PetUpdate) SetTeamID(id string) *PetUpdate { _u.mutation.SetTeamID(id); return _u }
 
 // SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
 func (_u *PetUpdate) SetNillableTeamID(id *string) *PetUpdate {
@@ -163,10 +146,7 @@ func (_u *PetUpdate) SetNillableTeamID(id *string) *PetUpdate {
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *PetUpdate) SetOwnerID(id string) *PetUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
-}
+func (_u *PetUpdate) SetOwnerID(id string) *PetUpdate { _u.mutation.SetOwnerID(id); return _u }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (_u *PetUpdate) SetNillableOwnerID(id *string) *PetUpdate {
@@ -177,21 +157,13 @@ func (_u *PetUpdate) SetNillableOwnerID(id *string) *PetUpdate {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_u *PetUpdate) Mutation() *PetMutation {
-	return _u.mutation
-}
+func (_u *PetUpdate) Mutation() *PetMutation { return _u.mutation }
 
 // ClearTeam clears the "team" edge to the User entity.
-func (_u *PetUpdate) ClearTeam() *PetUpdate {
-	_u.mutation.ClearTeam()
-	return _u
-}
+func (_u *PetUpdate) ClearTeam() *PetUpdate { _u.mutation.ClearTeam(); return _u }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *PetUpdate) ClearOwner() *PetUpdate { _u.mutation.ClearOwner(); return _u }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
@@ -199,19 +171,10 @@ func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PetUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *PetUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *PetUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PetUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PetUpdate) ExecX(ctx context.Context) {
@@ -345,10 +308,7 @@ func (_u *PetUpdateOne) SetNillableAge(v *float64) *PetUpdateOne {
 }
 
 // AddAge adds value to the "age" field.
-func (_u *PetUpdateOne) AddAge(v float64) *PetUpdateOne {
-	_u.mutation.AddAge(v)
-	return _u
-}
+func (_u *PetUpdateOne) AddAge(v float64) *PetUpdateOne { _u.mutation.AddAge(v); return _u }
 
 // SetName sets the "name" field.
 func (_u *PetUpdateOne) SetName(v string) *PetUpdateOne {
@@ -379,10 +339,7 @@ func (_u *PetUpdateOne) SetNillableUUID(v *uuid.UUID) *PetUpdateOne {
 }
 
 // ClearUUID clears the value of the "uuid" field.
-func (_u *PetUpdateOne) ClearUUID() *PetUpdateOne {
-	_u.mutation.ClearUUID()
-	return _u
-}
+func (_u *PetUpdateOne) ClearUUID() *PetUpdateOne { _u.mutation.ClearUUID(); return _u }
 
 // SetNickname sets the "nickname" field.
 func (_u *PetUpdateOne) SetNickname(v string) *PetUpdateOne {
@@ -399,10 +356,7 @@ func (_u *PetUpdateOne) SetNillableNickname(v *string) *PetUpdateOne {
 }
 
 // ClearNickname clears the value of the "nickname" field.
-func (_u *PetUpdateOne) ClearNickname() *PetUpdateOne {
-	_u.mutation.ClearNickname()
-	return _u
-}
+func (_u *PetUpdateOne) ClearNickname() *PetUpdateOne { _u.mutation.ClearNickname(); return _u }
 
 // SetTrained sets the "trained" field.
 func (_u *PetUpdateOne) SetTrained(v bool) *PetUpdateOne {
@@ -433,16 +387,10 @@ func (_u *PetUpdateOne) SetNillableOptionalTime(v *time.Time) *PetUpdateOne {
 }
 
 // ClearOptionalTime clears the value of the "optional_time" field.
-func (_u *PetUpdateOne) ClearOptionalTime() *PetUpdateOne {
-	_u.mutation.ClearOptionalTime()
-	return _u
-}
+func (_u *PetUpdateOne) ClearOptionalTime() *PetUpdateOne { _u.mutation.ClearOptionalTime(); return _u }
 
 // SetTeamID sets the "team" edge to the User entity by ID.
-func (_u *PetUpdateOne) SetTeamID(id string) *PetUpdateOne {
-	_u.mutation.SetTeamID(id)
-	return _u
-}
+func (_u *PetUpdateOne) SetTeamID(id string) *PetUpdateOne { _u.mutation.SetTeamID(id); return _u }
 
 // SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
 func (_u *PetUpdateOne) SetNillableTeamID(id *string) *PetUpdateOne {
@@ -453,10 +401,7 @@ func (_u *PetUpdateOne) SetNillableTeamID(id *string) *PetUpdateOne {
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *PetUpdateOne) SetOwnerID(id string) *PetUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
-}
+func (_u *PetUpdateOne) SetOwnerID(id string) *PetUpdateOne { _u.mutation.SetOwnerID(id); return _u }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (_u *PetUpdateOne) SetNillableOwnerID(id *string) *PetUpdateOne {
@@ -467,27 +412,16 @@ func (_u *PetUpdateOne) SetNillableOwnerID(id *string) *PetUpdateOne {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_u *PetUpdateOne) Mutation() *PetMutation {
-	return _u.mutation
-}
+func (_u *PetUpdateOne) Mutation() *PetMutation { return _u.mutation }
 
 // ClearTeam clears the "team" edge to the User entity.
-func (_u *PetUpdateOne) ClearTeam() *PetUpdateOne {
-	_u.mutation.ClearTeam()
-	return _u
-}
+func (_u *PetUpdateOne) ClearTeam() *PetUpdateOne { _u.mutation.ClearTeam(); return _u }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne { _u.mutation.ClearOwner(); return _u }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -502,19 +436,10 @@ func (_u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PetUpdateOne) SaveX(ctx context.Context) *Pet {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *PetUpdateOne) SaveX(ctx context.Context) *Pet { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *PetUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PetUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PetUpdateOne) ExecX(ctx context.Context) {

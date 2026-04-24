@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
 
 // SetEmail sets the "email" field.
 func (_u *AccountUpdate) SetEmail(v string) *AccountUpdate {
-	_u.mutation.SetEmail(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetEmail, v)
 }
 
 // SetNillableEmail sets the "email" field if the given value is not nil.
@@ -57,14 +57,11 @@ func (_u *AccountUpdate) AddTokenIDs(ids ...sid.ID) *AccountUpdate {
 }
 
 // Mutation returns the AccountMutation object of the builder.
-func (_u *AccountUpdate) Mutation() *AccountMutation {
-	return _u.mutation
-}
+func (_u *AccountUpdate) Mutation() *AccountMutation { return _u.mutation }
 
 // ClearToken clears all "token" edges to the Token entity.
 func (_u *AccountUpdate) ClearToken() *AccountUpdate {
-	_u.mutation.ClearToken()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearToken)
 }
 
 // RemoveTokenIDs removes the "token" edge to Token entities by IDs.
@@ -79,19 +76,10 @@ func (_u *AccountUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *AccountUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *AccountUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *AccountUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *AccountUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *AccountUpdate) ExecX(ctx context.Context) {
@@ -197,8 +185,7 @@ func NewAccountUpdateOne(c Config, hooks []Hook, mutation *AccountMutation) *Acc
 
 // SetEmail sets the "email" field.
 func (_u *AccountUpdateOne) SetEmail(v string) *AccountUpdateOne {
-	_u.mutation.SetEmail(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetEmail, v)
 }
 
 // SetNillableEmail sets the "email" field if the given value is not nil.
@@ -216,14 +203,11 @@ func (_u *AccountUpdateOne) AddTokenIDs(ids ...sid.ID) *AccountUpdateOne {
 }
 
 // Mutation returns the AccountMutation object of the builder.
-func (_u *AccountUpdateOne) Mutation() *AccountMutation {
-	return _u.mutation
-}
+func (_u *AccountUpdateOne) Mutation() *AccountMutation { return _u.mutation }
 
 // ClearToken clears all "token" edges to the Token entity.
 func (_u *AccountUpdateOne) ClearToken() *AccountUpdateOne {
-	_u.mutation.ClearToken()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearToken)
 }
 
 // RemoveTokenIDs removes the "token" edge to Token entities by IDs.
@@ -251,19 +235,10 @@ func (_u *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *AccountUpdateOne) SaveX(ctx context.Context) *Account {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *AccountUpdateOne) SaveX(ctx context.Context) *Account { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *AccountUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *AccountUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *AccountUpdateOne) ExecX(ctx context.Context) {

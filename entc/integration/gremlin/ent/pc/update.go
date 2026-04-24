@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // PCUpdate is the builder for updating PC entities.
@@ -29,15 +30,10 @@ func NewPCUpdate(c Config, hooks []Hook, mutation *PCMutation) *PCUpdate {
 }
 
 // Where appends a list predicates to the PCUpdate builder.
-func (_u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate { _u.mutation.Where(ps...); return _u }
 
 // Mutation returns the PCMutation object of the builder.
-func (_u *PCUpdate) Mutation() *PCMutation {
-	return _u.mutation
-}
+func (_u *PCUpdate) Mutation() *PCMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PCUpdate) Save(ctx context.Context) (int, error) {
@@ -45,19 +41,10 @@ func (_u *PCUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PCUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *PCUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *PCUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PCUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PCUpdate) ExecX(ctx context.Context) {
@@ -106,15 +93,10 @@ func NewPCUpdateOne(c Config, hooks []Hook, mutation *PCMutation) *PCUpdateOne {
 }
 
 // Mutation returns the PCMutation object of the builder.
-func (_u *PCUpdateOne) Mutation() *PCMutation {
-	return _u.mutation
-}
+func (_u *PCUpdateOne) Mutation() *PCMutation { return _u.mutation }
 
 // Where appends a list predicates to the PCUpdate builder.
-func (_u *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -129,19 +111,10 @@ func (_u *PCUpdateOne) Save(ctx context.Context) (*PC, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PCUpdateOne) SaveX(ctx context.Context) *PC {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *PCUpdateOne) SaveX(ctx context.Context) *PC { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *PCUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PCUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PCUpdateOne) ExecX(ctx context.Context) {

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,8 +39,7 @@ func (_u *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
 
 // SetDate sets the "date" field.
 func (_u *RentalUpdate) SetDate(v time.Time) *RentalUpdate {
-	_u.mutation.SetDate(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDate, v)
 }
 
 // SetNillableDate sets the "date" field if the given value is not nil.
@@ -51,9 +51,7 @@ func (_u *RentalUpdate) SetNillableDate(v *time.Time) *RentalUpdate {
 }
 
 // Mutation returns the RentalMutation object of the builder.
-func (_u *RentalUpdate) Mutation() *RentalMutation {
-	return _u.mutation
-}
+func (_u *RentalUpdate) Mutation() *RentalMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RentalUpdate) Save(ctx context.Context) (int, error) {
@@ -61,19 +59,10 @@ func (_u *RentalUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *RentalUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *RentalUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *RentalUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RentalUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RentalUpdate) ExecX(ctx context.Context) {
@@ -135,8 +124,7 @@ func NewRentalUpdateOne(c Config, hooks []Hook, mutation *RentalMutation) *Renta
 
 // SetDate sets the "date" field.
 func (_u *RentalUpdateOne) SetDate(v time.Time) *RentalUpdateOne {
-	_u.mutation.SetDate(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDate, v)
 }
 
 // SetNillableDate sets the "date" field if the given value is not nil.
@@ -148,9 +136,7 @@ func (_u *RentalUpdateOne) SetNillableDate(v *time.Time) *RentalUpdateOne {
 }
 
 // Mutation returns the RentalMutation object of the builder.
-func (_u *RentalUpdateOne) Mutation() *RentalMutation {
-	return _u.mutation
-}
+func (_u *RentalUpdateOne) Mutation() *RentalMutation { return _u.mutation }
 
 // Where appends a list predicates to the RentalUpdate builder.
 func (_u *RentalUpdateOne) Where(ps ...predicate.Rental) *RentalUpdateOne {
@@ -171,19 +157,10 @@ func (_u *RentalUpdateOne) Save(ctx context.Context) (*Rental, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *RentalUpdateOne) SaveX(ctx context.Context) *Rental {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *RentalUpdateOne) SaveX(ctx context.Context) *Rental { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *RentalUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RentalUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RentalUpdateOne) ExecX(ctx context.Context) {

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,8 +38,7 @@ func (_u *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
 
 // SetSomeField sets the "some_field" field.
 func (_u *MixinIDUpdate) SetSomeField(v string) *MixinIDUpdate {
-	_u.mutation.SetSomeField(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSomeField, v)
 }
 
 // SetNillableSomeField sets the "some_field" field if the given value is not nil.
@@ -51,8 +51,7 @@ func (_u *MixinIDUpdate) SetNillableSomeField(v *string) *MixinIDUpdate {
 
 // SetMixinField sets the "mixin_field" field.
 func (_u *MixinIDUpdate) SetMixinField(v string) *MixinIDUpdate {
-	_u.mutation.SetMixinField(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetMixinField, v)
 }
 
 // SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
@@ -64,9 +63,7 @@ func (_u *MixinIDUpdate) SetNillableMixinField(v *string) *MixinIDUpdate {
 }
 
 // Mutation returns the MixinIDMutation object of the builder.
-func (_u *MixinIDUpdate) Mutation() *MixinIDMutation {
-	return _u.mutation
-}
+func (_u *MixinIDUpdate) Mutation() *MixinIDMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MixinIDUpdate) Save(ctx context.Context) (int, error) {
@@ -74,19 +71,10 @@ func (_u *MixinIDUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *MixinIDUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *MixinIDUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *MixinIDUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *MixinIDUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *MixinIDUpdate) ExecX(ctx context.Context) {
@@ -137,8 +125,7 @@ func NewMixinIDUpdateOne(c Config, hooks []Hook, mutation *MixinIDMutation) *Mix
 
 // SetSomeField sets the "some_field" field.
 func (_u *MixinIDUpdateOne) SetSomeField(v string) *MixinIDUpdateOne {
-	_u.mutation.SetSomeField(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSomeField, v)
 }
 
 // SetNillableSomeField sets the "some_field" field if the given value is not nil.
@@ -151,8 +138,7 @@ func (_u *MixinIDUpdateOne) SetNillableSomeField(v *string) *MixinIDUpdateOne {
 
 // SetMixinField sets the "mixin_field" field.
 func (_u *MixinIDUpdateOne) SetMixinField(v string) *MixinIDUpdateOne {
-	_u.mutation.SetMixinField(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetMixinField, v)
 }
 
 // SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
@@ -164,9 +150,7 @@ func (_u *MixinIDUpdateOne) SetNillableMixinField(v *string) *MixinIDUpdateOne {
 }
 
 // Mutation returns the MixinIDMutation object of the builder.
-func (_u *MixinIDUpdateOne) Mutation() *MixinIDMutation {
-	return _u.mutation
-}
+func (_u *MixinIDUpdateOne) Mutation() *MixinIDMutation { return _u.mutation }
 
 // Where appends a list predicates to the MixinIDUpdate builder.
 func (_u *MixinIDUpdateOne) Where(ps ...predicate.MixinID) *MixinIDUpdateOne {
@@ -187,19 +171,10 @@ func (_u *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *MixinIDUpdateOne) SaveX(ctx context.Context) *MixinID {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *MixinIDUpdateOne) SaveX(ctx context.Context) *MixinID { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *MixinIDUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *MixinIDUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *MixinIDUpdateOne) ExecX(ctx context.Context) {

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,15 +32,11 @@ func NewTokenUpdate(c Config, hooks []Hook, mutation *TokenMutation) *TokenUpdat
 }
 
 // Where appends a list predicates to the TokenUpdate builder.
-func (_u *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetBody sets the "body" field.
 func (_u *TokenUpdate) SetBody(v string) *TokenUpdate {
-	_u.mutation.SetBody(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBody, v)
 }
 
 // SetNillableBody sets the "body" field if the given value is not nil.
@@ -52,19 +49,15 @@ func (_u *TokenUpdate) SetNillableBody(v *string) *TokenUpdate {
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (_u *TokenUpdate) SetAccountID(id sid.ID) *TokenUpdate {
-	_u.mutation.SetAccountID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetAccountID, id)
 }
 
 // Mutation returns the TokenMutation object of the builder.
-func (_u *TokenUpdate) Mutation() *TokenMutation {
-	return _u.mutation
-}
+func (_u *TokenUpdate) Mutation() *TokenMutation { return _u.mutation }
 
 // ClearAccount clears the "account" edge to the Account entity.
 func (_u *TokenUpdate) ClearAccount() *TokenUpdate {
-	_u.mutation.ClearAccount()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAccount)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -73,19 +66,10 @@ func (_u *TokenUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TokenUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *TokenUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *TokenUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TokenUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TokenUpdate) ExecX(ctx context.Context) {
@@ -178,8 +162,7 @@ func NewTokenUpdateOne(c Config, hooks []Hook, mutation *TokenMutation) *TokenUp
 
 // SetBody sets the "body" field.
 func (_u *TokenUpdateOne) SetBody(v string) *TokenUpdateOne {
-	_u.mutation.SetBody(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBody, v)
 }
 
 // SetNillableBody sets the "body" field if the given value is not nil.
@@ -192,19 +175,15 @@ func (_u *TokenUpdateOne) SetNillableBody(v *string) *TokenUpdateOne {
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (_u *TokenUpdateOne) SetAccountID(id sid.ID) *TokenUpdateOne {
-	_u.mutation.SetAccountID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetAccountID, id)
 }
 
 // Mutation returns the TokenMutation object of the builder.
-func (_u *TokenUpdateOne) Mutation() *TokenMutation {
-	return _u.mutation
-}
+func (_u *TokenUpdateOne) Mutation() *TokenMutation { return _u.mutation }
 
 // ClearAccount clears the "account" edge to the Account entity.
 func (_u *TokenUpdateOne) ClearAccount() *TokenUpdateOne {
-	_u.mutation.ClearAccount()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAccount)
 }
 
 // Where appends a list predicates to the TokenUpdate builder.
@@ -226,19 +205,10 @@ func (_u *TokenUpdateOne) Save(ctx context.Context) (*Token, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *TokenUpdateOne) SaveX(ctx context.Context) *Token {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *TokenUpdateOne) SaveX(ctx context.Context) *Token { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *TokenUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *TokenUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *TokenUpdateOne) ExecX(ctx context.Context) {

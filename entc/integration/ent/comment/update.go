@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -54,8 +55,7 @@ func (_u *CommentUpdate) SetNillableUniqueInt(v *int) *CommentUpdate {
 
 // AddUniqueInt adds value to the "unique_int" field.
 func (_u *CommentUpdate) AddUniqueInt(v int) *CommentUpdate {
-	_u.mutation.AddUniqueInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddUniqueInt, v)
 }
 
 // SetUniqueFloat sets the "unique_float" field.
@@ -75,8 +75,7 @@ func (_u *CommentUpdate) SetNillableUniqueFloat(v *float64) *CommentUpdate {
 
 // AddUniqueFloat adds value to the "unique_float" field.
 func (_u *CommentUpdate) AddUniqueFloat(v float64) *CommentUpdate {
-	_u.mutation.AddUniqueFloat(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddUniqueFloat, v)
 }
 
 // SetNillableInt sets the "nillable_int" field.
@@ -96,20 +95,17 @@ func (_u *CommentUpdate) SetNillableNillableInt(v *int) *CommentUpdate {
 
 // AddNillableInt adds value to the "nillable_int" field.
 func (_u *CommentUpdate) AddNillableInt(v int) *CommentUpdate {
-	_u.mutation.AddNillableInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt, v)
 }
 
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (_u *CommentUpdate) ClearNillableInt() *CommentUpdate {
-	_u.mutation.ClearNillableInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt)
 }
 
 // SetTable sets the "table" field.
 func (_u *CommentUpdate) SetTable(v string) *CommentUpdate {
-	_u.mutation.SetTable(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTable, v)
 }
 
 // SetNillableTable sets the "table" field if the given value is not nil.
@@ -122,14 +118,12 @@ func (_u *CommentUpdate) SetNillableTable(v *string) *CommentUpdate {
 
 // ClearTable clears the value of the "table" field.
 func (_u *CommentUpdate) ClearTable() *CommentUpdate {
-	_u.mutation.ClearTable()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTable)
 }
 
 // SetDir sets the "dir" field.
 func (_u *CommentUpdate) SetDir(v schemadir.Dir) *CommentUpdate {
-	_u.mutation.SetDir(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDir, v)
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
@@ -142,14 +136,12 @@ func (_u *CommentUpdate) SetNillableDir(v *schemadir.Dir) *CommentUpdate {
 
 // ClearDir clears the value of the "dir" field.
 func (_u *CommentUpdate) ClearDir() *CommentUpdate {
-	_u.mutation.ClearDir()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDir)
 }
 
 // SetClient sets the "client" field.
 func (_u *CommentUpdate) SetClient(v string) *CommentUpdate {
-	_u.mutation.SetClient(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetClient, v)
 }
 
 // SetNillableClient sets the "client" field if the given value is not nil.
@@ -162,14 +154,11 @@ func (_u *CommentUpdate) SetNillableClient(v *string) *CommentUpdate {
 
 // ClearClient clears the value of the "client" field.
 func (_u *CommentUpdate) ClearClient() *CommentUpdate {
-	_u.mutation.ClearClient()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearClient)
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (_u *CommentUpdate) Mutation() *CommentMutation {
-	return _u.mutation
-}
+func (_u *CommentUpdate) Mutation() *CommentMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CommentUpdate) Save(ctx context.Context) (int, error) {
@@ -177,19 +166,10 @@ func (_u *CommentUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CommentUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *CommentUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *CommentUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CommentUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CommentUpdate) ExecX(ctx context.Context) {
@@ -296,8 +276,7 @@ func (_u *CommentUpdateOne) SetNillableUniqueInt(v *int) *CommentUpdateOne {
 
 // AddUniqueInt adds value to the "unique_int" field.
 func (_u *CommentUpdateOne) AddUniqueInt(v int) *CommentUpdateOne {
-	_u.mutation.AddUniqueInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddUniqueInt, v)
 }
 
 // SetUniqueFloat sets the "unique_float" field.
@@ -317,8 +296,7 @@ func (_u *CommentUpdateOne) SetNillableUniqueFloat(v *float64) *CommentUpdateOne
 
 // AddUniqueFloat adds value to the "unique_float" field.
 func (_u *CommentUpdateOne) AddUniqueFloat(v float64) *CommentUpdateOne {
-	_u.mutation.AddUniqueFloat(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddUniqueFloat, v)
 }
 
 // SetNillableInt sets the "nillable_int" field.
@@ -338,20 +316,17 @@ func (_u *CommentUpdateOne) SetNillableNillableInt(v *int) *CommentUpdateOne {
 
 // AddNillableInt adds value to the "nillable_int" field.
 func (_u *CommentUpdateOne) AddNillableInt(v int) *CommentUpdateOne {
-	_u.mutation.AddNillableInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt, v)
 }
 
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (_u *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
-	_u.mutation.ClearNillableInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt)
 }
 
 // SetTable sets the "table" field.
 func (_u *CommentUpdateOne) SetTable(v string) *CommentUpdateOne {
-	_u.mutation.SetTable(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTable, v)
 }
 
 // SetNillableTable sets the "table" field if the given value is not nil.
@@ -364,14 +339,12 @@ func (_u *CommentUpdateOne) SetNillableTable(v *string) *CommentUpdateOne {
 
 // ClearTable clears the value of the "table" field.
 func (_u *CommentUpdateOne) ClearTable() *CommentUpdateOne {
-	_u.mutation.ClearTable()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTable)
 }
 
 // SetDir sets the "dir" field.
 func (_u *CommentUpdateOne) SetDir(v schemadir.Dir) *CommentUpdateOne {
-	_u.mutation.SetDir(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDir, v)
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
@@ -384,14 +357,12 @@ func (_u *CommentUpdateOne) SetNillableDir(v *schemadir.Dir) *CommentUpdateOne {
 
 // ClearDir clears the value of the "dir" field.
 func (_u *CommentUpdateOne) ClearDir() *CommentUpdateOne {
-	_u.mutation.ClearDir()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDir)
 }
 
 // SetClient sets the "client" field.
 func (_u *CommentUpdateOne) SetClient(v string) *CommentUpdateOne {
-	_u.mutation.SetClient(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetClient, v)
 }
 
 // SetNillableClient sets the "client" field if the given value is not nil.
@@ -404,14 +375,11 @@ func (_u *CommentUpdateOne) SetNillableClient(v *string) *CommentUpdateOne {
 
 // ClearClient clears the value of the "client" field.
 func (_u *CommentUpdateOne) ClearClient() *CommentUpdateOne {
-	_u.mutation.ClearClient()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearClient)
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (_u *CommentUpdateOne) Mutation() *CommentMutation {
-	return _u.mutation
-}
+func (_u *CommentUpdateOne) Mutation() *CommentMutation { return _u.mutation }
 
 // Where appends a list predicates to the CommentUpdate builder.
 func (_u *CommentUpdateOne) Where(ps ...predicate.Comment) *CommentUpdateOne {
@@ -432,19 +400,10 @@ func (_u *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *CommentUpdateOne) SaveX(ctx context.Context) *Comment { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *CommentUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CommentUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CommentUpdateOne) ExecX(ctx context.Context) {

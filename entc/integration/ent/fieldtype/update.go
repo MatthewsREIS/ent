@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -52,8 +53,7 @@ func (_u *FieldTypeUpdate) SetInt(v int) *FieldTypeUpdate {
 
 // AddInt adds value to the "int" field.
 func (_u *FieldTypeUpdate) AddInt(v int) *FieldTypeUpdate {
-	_u.mutation.AddInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt, v)
 }
 
 // SetInt8 sets the "int8" field.
@@ -65,8 +65,7 @@ func (_u *FieldTypeUpdate) SetInt8(v int8) *FieldTypeUpdate {
 
 // AddInt8 adds value to the "int8" field.
 func (_u *FieldTypeUpdate) AddInt8(v int8) *FieldTypeUpdate {
-	_u.mutation.AddInt8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt8, v)
 }
 
 // SetInt16 sets the "int16" field.
@@ -78,8 +77,7 @@ func (_u *FieldTypeUpdate) SetInt16(v int16) *FieldTypeUpdate {
 
 // AddInt16 adds value to the "int16" field.
 func (_u *FieldTypeUpdate) AddInt16(v int16) *FieldTypeUpdate {
-	_u.mutation.AddInt16(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt16, v)
 }
 
 // SetInt32 sets the "int32" field.
@@ -91,8 +89,7 @@ func (_u *FieldTypeUpdate) SetInt32(v int32) *FieldTypeUpdate {
 
 // AddInt32 adds value to the "int32" field.
 func (_u *FieldTypeUpdate) AddInt32(v int32) *FieldTypeUpdate {
-	_u.mutation.AddInt32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt32, v)
 }
 
 // SetInt64 sets the "int64" field.
@@ -104,8 +101,7 @@ func (_u *FieldTypeUpdate) SetInt64(v int64) *FieldTypeUpdate {
 
 // AddInt64 adds value to the "int64" field.
 func (_u *FieldTypeUpdate) AddInt64(v int64) *FieldTypeUpdate {
-	_u.mutation.AddInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt64, v)
 }
 
 // SetOptionalInt sets the "optional_int" field.
@@ -125,14 +121,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalInt(v *int) *FieldTypeUpdate {
 
 // AddOptionalInt adds value to the "optional_int" field.
 func (_u *FieldTypeUpdate) AddOptionalInt(v int) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt, v)
 }
 
 // ClearOptionalInt clears the value of the "optional_int" field.
 func (_u *FieldTypeUpdate) ClearOptionalInt() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt)
 }
 
 // SetOptionalInt8 sets the "optional_int8" field.
@@ -152,14 +146,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalInt8(v *int8) *FieldTypeUpdate {
 
 // AddOptionalInt8 adds value to the "optional_int8" field.
 func (_u *FieldTypeUpdate) AddOptionalInt8(v int8) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt8, v)
 }
 
 // ClearOptionalInt8 clears the value of the "optional_int8" field.
 func (_u *FieldTypeUpdate) ClearOptionalInt8() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalInt8()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt8)
 }
 
 // SetOptionalInt16 sets the "optional_int16" field.
@@ -179,14 +171,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalInt16(v *int16) *FieldTypeUpdate {
 
 // AddOptionalInt16 adds value to the "optional_int16" field.
 func (_u *FieldTypeUpdate) AddOptionalInt16(v int16) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt16(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt16, v)
 }
 
 // ClearOptionalInt16 clears the value of the "optional_int16" field.
 func (_u *FieldTypeUpdate) ClearOptionalInt16() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalInt16()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt16)
 }
 
 // SetOptionalInt32 sets the "optional_int32" field.
@@ -206,14 +196,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalInt32(v *int32) *FieldTypeUpdate {
 
 // AddOptionalInt32 adds value to the "optional_int32" field.
 func (_u *FieldTypeUpdate) AddOptionalInt32(v int32) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt32, v)
 }
 
 // ClearOptionalInt32 clears the value of the "optional_int32" field.
 func (_u *FieldTypeUpdate) ClearOptionalInt32() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalInt32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt32)
 }
 
 // SetOptionalInt64 sets the "optional_int64" field.
@@ -233,14 +221,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalInt64(v *int64) *FieldTypeUpdate {
 
 // AddOptionalInt64 adds value to the "optional_int64" field.
 func (_u *FieldTypeUpdate) AddOptionalInt64(v int64) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt64, v)
 }
 
 // ClearOptionalInt64 clears the value of the "optional_int64" field.
 func (_u *FieldTypeUpdate) ClearOptionalInt64() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalInt64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt64)
 }
 
 // SetNillableInt sets the "nillable_int" field.
@@ -260,14 +246,12 @@ func (_u *FieldTypeUpdate) SetNillableNillableInt(v *int) *FieldTypeUpdate {
 
 // AddNillableInt adds value to the "nillable_int" field.
 func (_u *FieldTypeUpdate) AddNillableInt(v int) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt, v)
 }
 
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (_u *FieldTypeUpdate) ClearNillableInt() *FieldTypeUpdate {
-	_u.mutation.ClearNillableInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt)
 }
 
 // SetNillableInt8 sets the "nillable_int8" field.
@@ -287,14 +271,12 @@ func (_u *FieldTypeUpdate) SetNillableNillableInt8(v *int8) *FieldTypeUpdate {
 
 // AddNillableInt8 adds value to the "nillable_int8" field.
 func (_u *FieldTypeUpdate) AddNillableInt8(v int8) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt8, v)
 }
 
 // ClearNillableInt8 clears the value of the "nillable_int8" field.
 func (_u *FieldTypeUpdate) ClearNillableInt8() *FieldTypeUpdate {
-	_u.mutation.ClearNillableInt8()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt8)
 }
 
 // SetNillableInt16 sets the "nillable_int16" field.
@@ -314,14 +296,12 @@ func (_u *FieldTypeUpdate) SetNillableNillableInt16(v *int16) *FieldTypeUpdate {
 
 // AddNillableInt16 adds value to the "nillable_int16" field.
 func (_u *FieldTypeUpdate) AddNillableInt16(v int16) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt16(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt16, v)
 }
 
 // ClearNillableInt16 clears the value of the "nillable_int16" field.
 func (_u *FieldTypeUpdate) ClearNillableInt16() *FieldTypeUpdate {
-	_u.mutation.ClearNillableInt16()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt16)
 }
 
 // SetNillableInt32 sets the "nillable_int32" field.
@@ -341,14 +321,12 @@ func (_u *FieldTypeUpdate) SetNillableNillableInt32(v *int32) *FieldTypeUpdate {
 
 // AddNillableInt32 adds value to the "nillable_int32" field.
 func (_u *FieldTypeUpdate) AddNillableInt32(v int32) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt32, v)
 }
 
 // ClearNillableInt32 clears the value of the "nillable_int32" field.
 func (_u *FieldTypeUpdate) ClearNillableInt32() *FieldTypeUpdate {
-	_u.mutation.ClearNillableInt32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt32)
 }
 
 // SetNillableInt64 sets the "nillable_int64" field.
@@ -368,14 +346,12 @@ func (_u *FieldTypeUpdate) SetNillableNillableInt64(v *int64) *FieldTypeUpdate {
 
 // AddNillableInt64 adds value to the "nillable_int64" field.
 func (_u *FieldTypeUpdate) AddNillableInt64(v int64) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt64, v)
 }
 
 // ClearNillableInt64 clears the value of the "nillable_int64" field.
 func (_u *FieldTypeUpdate) ClearNillableInt64() *FieldTypeUpdate {
-	_u.mutation.ClearNillableInt64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt64)
 }
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
@@ -395,14 +371,12 @@ func (_u *FieldTypeUpdate) SetNillableValidateOptionalInt32(v *int32) *FieldType
 
 // AddValidateOptionalInt32 adds value to the "validate_optional_int32" field.
 func (_u *FieldTypeUpdate) AddValidateOptionalInt32(v int32) *FieldTypeUpdate {
-	_u.mutation.AddValidateOptionalInt32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddValidateOptionalInt32, v)
 }
 
 // ClearValidateOptionalInt32 clears the value of the "validate_optional_int32" field.
 func (_u *FieldTypeUpdate) ClearValidateOptionalInt32() *FieldTypeUpdate {
-	_u.mutation.ClearValidateOptionalInt32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearValidateOptionalInt32)
 }
 
 // SetOptionalUint sets the "optional_uint" field.
@@ -422,14 +396,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalUint(v *uint) *FieldTypeUpdate {
 
 // AddOptionalUint adds value to the "optional_uint" field.
 func (_u *FieldTypeUpdate) AddOptionalUint(v int) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint, v)
 }
 
 // ClearOptionalUint clears the value of the "optional_uint" field.
 func (_u *FieldTypeUpdate) ClearOptionalUint() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalUint()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint)
 }
 
 // SetOptionalUint8 sets the "optional_uint8" field.
@@ -449,14 +421,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalUint8(v *uint8) *FieldTypeUpdate {
 
 // AddOptionalUint8 adds value to the "optional_uint8" field.
 func (_u *FieldTypeUpdate) AddOptionalUint8(v int8) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint8, v)
 }
 
 // ClearOptionalUint8 clears the value of the "optional_uint8" field.
 func (_u *FieldTypeUpdate) ClearOptionalUint8() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalUint8()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint8)
 }
 
 // SetOptionalUint16 sets the "optional_uint16" field.
@@ -476,14 +446,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalUint16(v *uint16) *FieldTypeUpdate
 
 // AddOptionalUint16 adds value to the "optional_uint16" field.
 func (_u *FieldTypeUpdate) AddOptionalUint16(v int16) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint16(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint16, v)
 }
 
 // ClearOptionalUint16 clears the value of the "optional_uint16" field.
 func (_u *FieldTypeUpdate) ClearOptionalUint16() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalUint16()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint16)
 }
 
 // SetOptionalUint32 sets the "optional_uint32" field.
@@ -503,14 +471,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalUint32(v *uint32) *FieldTypeUpdate
 
 // AddOptionalUint32 adds value to the "optional_uint32" field.
 func (_u *FieldTypeUpdate) AddOptionalUint32(v int32) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint32, v)
 }
 
 // ClearOptionalUint32 clears the value of the "optional_uint32" field.
 func (_u *FieldTypeUpdate) ClearOptionalUint32() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalUint32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint32)
 }
 
 // SetOptionalUint64 sets the "optional_uint64" field.
@@ -530,20 +496,17 @@ func (_u *FieldTypeUpdate) SetNillableOptionalUint64(v *uint64) *FieldTypeUpdate
 
 // AddOptionalUint64 adds value to the "optional_uint64" field.
 func (_u *FieldTypeUpdate) AddOptionalUint64(v int64) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint64, v)
 }
 
 // ClearOptionalUint64 clears the value of the "optional_uint64" field.
 func (_u *FieldTypeUpdate) ClearOptionalUint64() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalUint64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint64)
 }
 
 // SetState sets the "state" field.
 func (_u *FieldTypeUpdate) SetState(v State) *FieldTypeUpdate {
-	_u.mutation.SetState(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetState, v)
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
@@ -556,8 +519,7 @@ func (_u *FieldTypeUpdate) SetNillableState(v *State) *FieldTypeUpdate {
 
 // ClearState clears the value of the "state" field.
 func (_u *FieldTypeUpdate) ClearState() *FieldTypeUpdate {
-	_u.mutation.ClearState()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearState)
 }
 
 // SetOptionalFloat sets the "optional_float" field.
@@ -577,14 +539,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalFloat(v *float64) *FieldTypeUpdate
 
 // AddOptionalFloat adds value to the "optional_float" field.
 func (_u *FieldTypeUpdate) AddOptionalFloat(v float64) *FieldTypeUpdate {
-	_u.mutation.AddOptionalFloat(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalFloat, v)
 }
 
 // ClearOptionalFloat clears the value of the "optional_float" field.
 func (_u *FieldTypeUpdate) ClearOptionalFloat() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalFloat()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalFloat)
 }
 
 // SetOptionalFloat32 sets the "optional_float32" field.
@@ -604,20 +564,17 @@ func (_u *FieldTypeUpdate) SetNillableOptionalFloat32(v *float32) *FieldTypeUpda
 
 // AddOptionalFloat32 adds value to the "optional_float32" field.
 func (_u *FieldTypeUpdate) AddOptionalFloat32(v float32) *FieldTypeUpdate {
-	_u.mutation.AddOptionalFloat32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalFloat32, v)
 }
 
 // ClearOptionalFloat32 clears the value of the "optional_float32" field.
 func (_u *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalFloat32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalFloat32)
 }
 
 // SetText sets the "text" field.
 func (_u *FieldTypeUpdate) SetText(v string) *FieldTypeUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -630,14 +587,12 @@ func (_u *FieldTypeUpdate) SetNillableText(v *string) *FieldTypeUpdate {
 
 // ClearText clears the value of the "text" field.
 func (_u *FieldTypeUpdate) ClearText() *FieldTypeUpdate {
-	_u.mutation.ClearText()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearText)
 }
 
 // SetDatetime sets the "datetime" field.
 func (_u *FieldTypeUpdate) SetDatetime(v time.Time) *FieldTypeUpdate {
-	_u.mutation.SetDatetime(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDatetime, v)
 }
 
 // SetNillableDatetime sets the "datetime" field if the given value is not nil.
@@ -650,8 +605,7 @@ func (_u *FieldTypeUpdate) SetNillableDatetime(v *time.Time) *FieldTypeUpdate {
 
 // ClearDatetime clears the value of the "datetime" field.
 func (_u *FieldTypeUpdate) ClearDatetime() *FieldTypeUpdate {
-	_u.mutation.ClearDatetime()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDatetime)
 }
 
 // SetDecimal sets the "decimal" field.
@@ -671,44 +625,37 @@ func (_u *FieldTypeUpdate) SetNillableDecimal(v *float64) *FieldTypeUpdate {
 
 // AddDecimal adds value to the "decimal" field.
 func (_u *FieldTypeUpdate) AddDecimal(v float64) *FieldTypeUpdate {
-	_u.mutation.AddDecimal(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddDecimal, v)
 }
 
 // ClearDecimal clears the value of the "decimal" field.
 func (_u *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate {
-	_u.mutation.ClearDecimal()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDecimal)
 }
 
 // SetLinkOther sets the "link_other" field.
 func (_u *FieldTypeUpdate) SetLinkOther(v *schema.Link) *FieldTypeUpdate {
-	_u.mutation.SetLinkOther(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLinkOther, v)
 }
 
 // ClearLinkOther clears the value of the "link_other" field.
 func (_u *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate {
-	_u.mutation.ClearLinkOther()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLinkOther)
 }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
 func (_u *FieldTypeUpdate) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpdate {
-	_u.mutation.SetLinkOtherFunc(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLinkOtherFunc, v)
 }
 
 // ClearLinkOtherFunc clears the value of the "link_other_func" field.
 func (_u *FieldTypeUpdate) ClearLinkOtherFunc() *FieldTypeUpdate {
-	_u.mutation.ClearLinkOtherFunc()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLinkOtherFunc)
 }
 
 // SetMAC sets the "mac" field.
 func (_u *FieldTypeUpdate) SetMAC(v schema.MAC) *FieldTypeUpdate {
-	_u.mutation.SetMAC(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetMAC, v)
 }
 
 // SetNillableMAC sets the "mac" field if the given value is not nil.
@@ -721,26 +668,22 @@ func (_u *FieldTypeUpdate) SetNillableMAC(v *schema.MAC) *FieldTypeUpdate {
 
 // ClearMAC clears the value of the "mac" field.
 func (_u *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
-	_u.mutation.ClearMAC()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearMAC)
 }
 
 // SetStringArray sets the "string_array" field.
 func (_u *FieldTypeUpdate) SetStringArray(v schema.Strings) *FieldTypeUpdate {
-	_u.mutation.SetStringArray(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStringArray, v)
 }
 
 // ClearStringArray clears the value of the "string_array" field.
 func (_u *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
-	_u.mutation.ClearStringArray()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearStringArray)
 }
 
 // SetPassword sets the "password" field.
 func (_u *FieldTypeUpdate) SetPassword(v string) *FieldTypeUpdate {
-	_u.mutation.SetPassword(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPassword, v)
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
@@ -753,14 +696,12 @@ func (_u *FieldTypeUpdate) SetNillablePassword(v *string) *FieldTypeUpdate {
 
 // ClearPassword clears the value of the "password" field.
 func (_u *FieldTypeUpdate) ClearPassword() *FieldTypeUpdate {
-	_u.mutation.ClearPassword()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPassword)
 }
 
 // SetStringScanner sets the "string_scanner" field.
 func (_u *FieldTypeUpdate) SetStringScanner(v schema.StringScanner) *FieldTypeUpdate {
-	_u.mutation.SetStringScanner(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStringScanner, v)
 }
 
 // SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
@@ -773,8 +714,7 @@ func (_u *FieldTypeUpdate) SetNillableStringScanner(v *schema.StringScanner) *Fi
 
 // ClearStringScanner clears the value of the "string_scanner" field.
 func (_u *FieldTypeUpdate) ClearStringScanner() *FieldTypeUpdate {
-	_u.mutation.ClearStringScanner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearStringScanner)
 }
 
 // SetDuration sets the "duration" field.
@@ -786,20 +726,17 @@ func (_u *FieldTypeUpdate) SetDuration(v time.Duration) *FieldTypeUpdate {
 
 // AddDuration adds value to the "duration" field.
 func (_u *FieldTypeUpdate) AddDuration(v time.Duration) *FieldTypeUpdate {
-	_u.mutation.AddDuration(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddDuration, v)
 }
 
 // ClearDuration clears the value of the "duration" field.
 func (_u *FieldTypeUpdate) ClearDuration() *FieldTypeUpdate {
-	_u.mutation.ClearDuration()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDuration)
 }
 
 // SetDir sets the "dir" field.
 func (_u *FieldTypeUpdate) SetDir(v http.Dir) *FieldTypeUpdate {
-	_u.mutation.SetDir(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDir, v)
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
@@ -812,8 +749,7 @@ func (_u *FieldTypeUpdate) SetNillableDir(v *http.Dir) *FieldTypeUpdate {
 
 // SetNdir sets the "ndir" field.
 func (_u *FieldTypeUpdate) SetNdir(v http.Dir) *FieldTypeUpdate {
-	_u.mutation.SetNdir(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNdir, v)
 }
 
 // SetNillableNdir sets the "ndir" field if the given value is not nil.
@@ -826,14 +762,12 @@ func (_u *FieldTypeUpdate) SetNillableNdir(v *http.Dir) *FieldTypeUpdate {
 
 // ClearNdir clears the value of the "ndir" field.
 func (_u *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate {
-	_u.mutation.ClearNdir()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNdir)
 }
 
 // SetStr sets the "str" field.
 func (_u *FieldTypeUpdate) SetStr(v sql.NullString) *FieldTypeUpdate {
-	_u.mutation.SetStr(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStr, v)
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
@@ -846,26 +780,22 @@ func (_u *FieldTypeUpdate) SetNillableStr(v *sql.NullString) *FieldTypeUpdate {
 
 // ClearStr clears the value of the "str" field.
 func (_u *FieldTypeUpdate) ClearStr() *FieldTypeUpdate {
-	_u.mutation.ClearStr()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearStr)
 }
 
 // SetNullStr sets the "null_str" field.
 func (_u *FieldTypeUpdate) SetNullStr(v *sql.NullString) *FieldTypeUpdate {
-	_u.mutation.SetNullStr(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullStr, v)
 }
 
 // ClearNullStr clears the value of the "null_str" field.
 func (_u *FieldTypeUpdate) ClearNullStr() *FieldTypeUpdate {
-	_u.mutation.ClearNullStr()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullStr)
 }
 
 // SetLink sets the "link" field.
 func (_u *FieldTypeUpdate) SetLink(v schema.Link) *FieldTypeUpdate {
-	_u.mutation.SetLink(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLink, v)
 }
 
 // SetNillableLink sets the "link" field if the given value is not nil.
@@ -878,26 +808,22 @@ func (_u *FieldTypeUpdate) SetNillableLink(v *schema.Link) *FieldTypeUpdate {
 
 // ClearLink clears the value of the "link" field.
 func (_u *FieldTypeUpdate) ClearLink() *FieldTypeUpdate {
-	_u.mutation.ClearLink()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLink)
 }
 
 // SetNullLink sets the "null_link" field.
 func (_u *FieldTypeUpdate) SetNullLink(v *schema.Link) *FieldTypeUpdate {
-	_u.mutation.SetNullLink(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullLink, v)
 }
 
 // ClearNullLink clears the value of the "null_link" field.
 func (_u *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
-	_u.mutation.ClearNullLink()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullLink)
 }
 
 // SetActive sets the "active" field.
 func (_u *FieldTypeUpdate) SetActive(v schema.Status) *FieldTypeUpdate {
-	_u.mutation.SetActive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetActive, v)
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
@@ -910,14 +836,12 @@ func (_u *FieldTypeUpdate) SetNillableActive(v *schema.Status) *FieldTypeUpdate 
 
 // ClearActive clears the value of the "active" field.
 func (_u *FieldTypeUpdate) ClearActive() *FieldTypeUpdate {
-	_u.mutation.ClearActive()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearActive)
 }
 
 // SetNullActive sets the "null_active" field.
 func (_u *FieldTypeUpdate) SetNullActive(v schema.Status) *FieldTypeUpdate {
-	_u.mutation.SetNullActive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullActive, v)
 }
 
 // SetNillableNullActive sets the "null_active" field if the given value is not nil.
@@ -930,80 +854,67 @@ func (_u *FieldTypeUpdate) SetNillableNullActive(v *schema.Status) *FieldTypeUpd
 
 // ClearNullActive clears the value of the "null_active" field.
 func (_u *FieldTypeUpdate) ClearNullActive() *FieldTypeUpdate {
-	_u.mutation.ClearNullActive()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullActive)
 }
 
 // SetDeleted sets the "deleted" field.
 func (_u *FieldTypeUpdate) SetDeleted(v *sql.NullBool) *FieldTypeUpdate {
-	_u.mutation.SetDeleted(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDeleted, v)
 }
 
 // ClearDeleted clears the value of the "deleted" field.
 func (_u *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate {
-	_u.mutation.ClearDeleted()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDeleted)
 }
 
 // SetDeletedAt sets the "deleted_at" field.
 func (_u *FieldTypeUpdate) SetDeletedAt(v *sql.NullTime) *FieldTypeUpdate {
-	_u.mutation.SetDeletedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDeletedAt, v)
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (_u *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
-	_u.mutation.ClearDeletedAt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDeletedAt)
 }
 
 // SetRawData sets the "raw_data" field.
 func (_u *FieldTypeUpdate) SetRawData(v []byte) *FieldTypeUpdate {
-	_u.mutation.SetRawData(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetRawData, v)
 }
 
 // ClearRawData clears the value of the "raw_data" field.
 func (_u *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
-	_u.mutation.ClearRawData()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRawData)
 }
 
 // SetSensitive sets the "sensitive" field.
 func (_u *FieldTypeUpdate) SetSensitive(v []byte) *FieldTypeUpdate {
-	_u.mutation.SetSensitive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSensitive, v)
 }
 
 // ClearSensitive clears the value of the "sensitive" field.
 func (_u *FieldTypeUpdate) ClearSensitive() *FieldTypeUpdate {
-	_u.mutation.ClearSensitive()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSensitive)
 }
 
 // SetIP sets the "ip" field.
 func (_u *FieldTypeUpdate) SetIP(v net.IP) *FieldTypeUpdate {
-	_u.mutation.SetIP(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetIP, v)
 }
 
 // ClearIP clears the value of the "ip" field.
 func (_u *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
-	_u.mutation.ClearIP()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearIP)
 }
 
 // SetNullInt64 sets the "null_int64" field.
 func (_u *FieldTypeUpdate) SetNullInt64(v *sql.NullInt64) *FieldTypeUpdate {
-	_u.mutation.SetNullInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullInt64, v)
 }
 
 // ClearNullInt64 clears the value of the "null_int64" field.
 func (_u *FieldTypeUpdate) ClearNullInt64() *FieldTypeUpdate {
-	_u.mutation.ClearNullInt64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullInt64)
 }
 
 // SetSchemaInt sets the "schema_int" field.
@@ -1023,14 +934,12 @@ func (_u *FieldTypeUpdate) SetNillableSchemaInt(v *schema.Int) *FieldTypeUpdate 
 
 // AddSchemaInt adds value to the "schema_int" field.
 func (_u *FieldTypeUpdate) AddSchemaInt(v schema.Int) *FieldTypeUpdate {
-	_u.mutation.AddSchemaInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaInt, v)
 }
 
 // ClearSchemaInt clears the value of the "schema_int" field.
 func (_u *FieldTypeUpdate) ClearSchemaInt() *FieldTypeUpdate {
-	_u.mutation.ClearSchemaInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaInt)
 }
 
 // SetSchemaInt8 sets the "schema_int8" field.
@@ -1050,14 +959,12 @@ func (_u *FieldTypeUpdate) SetNillableSchemaInt8(v *schema.Int8) *FieldTypeUpdat
 
 // AddSchemaInt8 adds value to the "schema_int8" field.
 func (_u *FieldTypeUpdate) AddSchemaInt8(v schema.Int8) *FieldTypeUpdate {
-	_u.mutation.AddSchemaInt8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaInt8, v)
 }
 
 // ClearSchemaInt8 clears the value of the "schema_int8" field.
 func (_u *FieldTypeUpdate) ClearSchemaInt8() *FieldTypeUpdate {
-	_u.mutation.ClearSchemaInt8()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaInt8)
 }
 
 // SetSchemaInt64 sets the "schema_int64" field.
@@ -1077,14 +984,12 @@ func (_u *FieldTypeUpdate) SetNillableSchemaInt64(v *schema.Int64) *FieldTypeUpd
 
 // AddSchemaInt64 adds value to the "schema_int64" field.
 func (_u *FieldTypeUpdate) AddSchemaInt64(v schema.Int64) *FieldTypeUpdate {
-	_u.mutation.AddSchemaInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaInt64, v)
 }
 
 // ClearSchemaInt64 clears the value of the "schema_int64" field.
 func (_u *FieldTypeUpdate) ClearSchemaInt64() *FieldTypeUpdate {
-	_u.mutation.ClearSchemaInt64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaInt64)
 }
 
 // SetSchemaFloat sets the "schema_float" field.
@@ -1104,14 +1009,12 @@ func (_u *FieldTypeUpdate) SetNillableSchemaFloat(v *schema.Float64) *FieldTypeU
 
 // AddSchemaFloat adds value to the "schema_float" field.
 func (_u *FieldTypeUpdate) AddSchemaFloat(v schema.Float64) *FieldTypeUpdate {
-	_u.mutation.AddSchemaFloat(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaFloat, v)
 }
 
 // ClearSchemaFloat clears the value of the "schema_float" field.
 func (_u *FieldTypeUpdate) ClearSchemaFloat() *FieldTypeUpdate {
-	_u.mutation.ClearSchemaFloat()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaFloat)
 }
 
 // SetSchemaFloat32 sets the "schema_float32" field.
@@ -1131,32 +1034,27 @@ func (_u *FieldTypeUpdate) SetNillableSchemaFloat32(v *schema.Float32) *FieldTyp
 
 // AddSchemaFloat32 adds value to the "schema_float32" field.
 func (_u *FieldTypeUpdate) AddSchemaFloat32(v schema.Float32) *FieldTypeUpdate {
-	_u.mutation.AddSchemaFloat32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaFloat32, v)
 }
 
 // ClearSchemaFloat32 clears the value of the "schema_float32" field.
 func (_u *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
-	_u.mutation.ClearSchemaFloat32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaFloat32)
 }
 
 // SetNullFloat sets the "null_float" field.
 func (_u *FieldTypeUpdate) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpdate {
-	_u.mutation.SetNullFloat(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullFloat, v)
 }
 
 // ClearNullFloat clears the value of the "null_float" field.
 func (_u *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
-	_u.mutation.ClearNullFloat()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullFloat)
 }
 
 // SetRole sets the "role" field.
 func (_u *FieldTypeUpdate) SetRole(v role.Role) *FieldTypeUpdate {
-	_u.mutation.SetRole(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetRole, v)
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
@@ -1169,8 +1067,7 @@ func (_u *FieldTypeUpdate) SetNillableRole(v *role.Role) *FieldTypeUpdate {
 
 // SetPriority sets the "priority" field.
 func (_u *FieldTypeUpdate) SetPriority(v role.Priority) *FieldTypeUpdate {
-	_u.mutation.SetPriority(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPriority, v)
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
@@ -1183,14 +1080,12 @@ func (_u *FieldTypeUpdate) SetNillablePriority(v *role.Priority) *FieldTypeUpdat
 
 // ClearPriority clears the value of the "priority" field.
 func (_u *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
-	_u.mutation.ClearPriority()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPriority)
 }
 
 // SetOptionalUUID sets the "optional_uuid" field.
 func (_u *FieldTypeUpdate) SetOptionalUUID(v uuid.UUID) *FieldTypeUpdate {
-	_u.mutation.SetOptionalUUID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOptionalUUID, v)
 }
 
 // SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
@@ -1203,14 +1098,12 @@ func (_u *FieldTypeUpdate) SetNillableOptionalUUID(v *uuid.UUID) *FieldTypeUpdat
 
 // ClearOptionalUUID clears the value of the "optional_uuid" field.
 func (_u *FieldTypeUpdate) ClearOptionalUUID() *FieldTypeUpdate {
-	_u.mutation.ClearOptionalUUID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUUID)
 }
 
 // SetNillableUUID sets the "nillable_uuid" field.
 func (_u *FieldTypeUpdate) SetNillableUUID(v uuid.UUID) *FieldTypeUpdate {
-	_u.mutation.SetNillableUUID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNillableUUID, v)
 }
 
 // SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
@@ -1223,32 +1116,27 @@ func (_u *FieldTypeUpdate) SetNillableNillableUUID(v *uuid.UUID) *FieldTypeUpdat
 
 // ClearNillableUUID clears the value of the "nillable_uuid" field.
 func (_u *FieldTypeUpdate) ClearNillableUUID() *FieldTypeUpdate {
-	_u.mutation.ClearNillableUUID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableUUID)
 }
 
 // SetStrings sets the "strings" field.
 func (_u *FieldTypeUpdate) SetStrings(v []string) *FieldTypeUpdate {
-	_u.mutation.SetStrings(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStrings, v)
 }
 
 // AppendStrings appends value to the "strings" field.
 func (_u *FieldTypeUpdate) AppendStrings(v []string) *FieldTypeUpdate {
-	_u.mutation.AppendStrings(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AppendStrings, v)
 }
 
 // ClearStrings clears the value of the "strings" field.
 func (_u *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate {
-	_u.mutation.ClearStrings()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearStrings)
 }
 
 // SetPair sets the "pair" field.
 func (_u *FieldTypeUpdate) SetPair(v schema.Pair) *FieldTypeUpdate {
-	_u.mutation.SetPair(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPair, v)
 }
 
 // SetNillablePair sets the "pair" field if the given value is not nil.
@@ -1261,20 +1149,17 @@ func (_u *FieldTypeUpdate) SetNillablePair(v *schema.Pair) *FieldTypeUpdate {
 
 // SetNilPair sets the "nil_pair" field.
 func (_u *FieldTypeUpdate) SetNilPair(v *schema.Pair) *FieldTypeUpdate {
-	_u.mutation.SetNilPair(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNilPair, v)
 }
 
 // ClearNilPair clears the value of the "nil_pair" field.
 func (_u *FieldTypeUpdate) ClearNilPair() *FieldTypeUpdate {
-	_u.mutation.ClearNilPair()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNilPair)
 }
 
 // SetVstring sets the "vstring" field.
 func (_u *FieldTypeUpdate) SetVstring(v schema.VString) *FieldTypeUpdate {
-	_u.mutation.SetVstring(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetVstring, v)
 }
 
 // SetNillableVstring sets the "vstring" field if the given value is not nil.
@@ -1287,8 +1172,7 @@ func (_u *FieldTypeUpdate) SetNillableVstring(v *schema.VString) *FieldTypeUpdat
 
 // SetTriple sets the "triple" field.
 func (_u *FieldTypeUpdate) SetTriple(v schema.Triple) *FieldTypeUpdate {
-	_u.mutation.SetTriple(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTriple, v)
 }
 
 // SetNillableTriple sets the "triple" field if the given value is not nil.
@@ -1316,20 +1200,17 @@ func (_u *FieldTypeUpdate) SetNillableBigInt(v *schema.BigInt) *FieldTypeUpdate 
 
 // AddBigInt adds value to the "big_int" field.
 func (_u *FieldTypeUpdate) AddBigInt(v schema.BigInt) *FieldTypeUpdate {
-	_u.mutation.AddBigInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddBigInt, v)
 }
 
 // ClearBigInt clears the value of the "big_int" field.
 func (_u *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate {
-	_u.mutation.ClearBigInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBigInt)
 }
 
 // SetPasswordOther sets the "password_other" field.
 func (_u *FieldTypeUpdate) SetPasswordOther(v schema.Password) *FieldTypeUpdate {
-	_u.mutation.SetPasswordOther(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPasswordOther, v)
 }
 
 // SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
@@ -1342,14 +1223,11 @@ func (_u *FieldTypeUpdate) SetNillablePasswordOther(v *schema.Password) *FieldTy
 
 // ClearPasswordOther clears the value of the "password_other" field.
 func (_u *FieldTypeUpdate) ClearPasswordOther() *FieldTypeUpdate {
-	_u.mutation.ClearPasswordOther()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPasswordOther)
 }
 
 // Mutation returns the FieldTypeMutation object of the builder.
-func (_u *FieldTypeUpdate) Mutation() *FieldTypeMutation {
-	return _u.mutation
-}
+func (_u *FieldTypeUpdate) Mutation() *FieldTypeMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
@@ -1358,19 +1236,10 @@ func (_u *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FieldTypeUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *FieldTypeUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *FieldTypeUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FieldTypeUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FieldTypeUpdate) ExecX(ctx context.Context) {
@@ -1957,8 +1826,7 @@ func (_u *FieldTypeUpdateOne) SetInt(v int) *FieldTypeUpdateOne {
 
 // AddInt adds value to the "int" field.
 func (_u *FieldTypeUpdateOne) AddInt(v int) *FieldTypeUpdateOne {
-	_u.mutation.AddInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt, v)
 }
 
 // SetInt8 sets the "int8" field.
@@ -1970,8 +1838,7 @@ func (_u *FieldTypeUpdateOne) SetInt8(v int8) *FieldTypeUpdateOne {
 
 // AddInt8 adds value to the "int8" field.
 func (_u *FieldTypeUpdateOne) AddInt8(v int8) *FieldTypeUpdateOne {
-	_u.mutation.AddInt8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt8, v)
 }
 
 // SetInt16 sets the "int16" field.
@@ -1983,8 +1850,7 @@ func (_u *FieldTypeUpdateOne) SetInt16(v int16) *FieldTypeUpdateOne {
 
 // AddInt16 adds value to the "int16" field.
 func (_u *FieldTypeUpdateOne) AddInt16(v int16) *FieldTypeUpdateOne {
-	_u.mutation.AddInt16(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt16, v)
 }
 
 // SetInt32 sets the "int32" field.
@@ -1996,8 +1862,7 @@ func (_u *FieldTypeUpdateOne) SetInt32(v int32) *FieldTypeUpdateOne {
 
 // AddInt32 adds value to the "int32" field.
 func (_u *FieldTypeUpdateOne) AddInt32(v int32) *FieldTypeUpdateOne {
-	_u.mutation.AddInt32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt32, v)
 }
 
 // SetInt64 sets the "int64" field.
@@ -2009,8 +1874,7 @@ func (_u *FieldTypeUpdateOne) SetInt64(v int64) *FieldTypeUpdateOne {
 
 // AddInt64 adds value to the "int64" field.
 func (_u *FieldTypeUpdateOne) AddInt64(v int64) *FieldTypeUpdateOne {
-	_u.mutation.AddInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddInt64, v)
 }
 
 // SetOptionalInt sets the "optional_int" field.
@@ -2030,14 +1894,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalInt(v *int) *FieldTypeUpdateOne
 
 // AddOptionalInt adds value to the "optional_int" field.
 func (_u *FieldTypeUpdateOne) AddOptionalInt(v int) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt, v)
 }
 
 // ClearOptionalInt clears the value of the "optional_int" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalInt() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt)
 }
 
 // SetOptionalInt8 sets the "optional_int8" field.
@@ -2057,14 +1919,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalInt8(v *int8) *FieldTypeUpdateO
 
 // AddOptionalInt8 adds value to the "optional_int8" field.
 func (_u *FieldTypeUpdateOne) AddOptionalInt8(v int8) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt8, v)
 }
 
 // ClearOptionalInt8 clears the value of the "optional_int8" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalInt8() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalInt8()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt8)
 }
 
 // SetOptionalInt16 sets the "optional_int16" field.
@@ -2084,14 +1944,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalInt16(v *int16) *FieldTypeUpdat
 
 // AddOptionalInt16 adds value to the "optional_int16" field.
 func (_u *FieldTypeUpdateOne) AddOptionalInt16(v int16) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt16(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt16, v)
 }
 
 // ClearOptionalInt16 clears the value of the "optional_int16" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalInt16() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalInt16()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt16)
 }
 
 // SetOptionalInt32 sets the "optional_int32" field.
@@ -2111,14 +1969,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalInt32(v *int32) *FieldTypeUpdat
 
 // AddOptionalInt32 adds value to the "optional_int32" field.
 func (_u *FieldTypeUpdateOne) AddOptionalInt32(v int32) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt32, v)
 }
 
 // ClearOptionalInt32 clears the value of the "optional_int32" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalInt32() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalInt32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt32)
 }
 
 // SetOptionalInt64 sets the "optional_int64" field.
@@ -2138,14 +1994,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalInt64(v *int64) *FieldTypeUpdat
 
 // AddOptionalInt64 adds value to the "optional_int64" field.
 func (_u *FieldTypeUpdateOne) AddOptionalInt64(v int64) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalInt64, v)
 }
 
 // ClearOptionalInt64 clears the value of the "optional_int64" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalInt64() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalInt64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalInt64)
 }
 
 // SetNillableInt sets the "nillable_int" field.
@@ -2165,14 +2019,12 @@ func (_u *FieldTypeUpdateOne) SetNillableNillableInt(v *int) *FieldTypeUpdateOne
 
 // AddNillableInt adds value to the "nillable_int" field.
 func (_u *FieldTypeUpdateOne) AddNillableInt(v int) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt, v)
 }
 
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (_u *FieldTypeUpdateOne) ClearNillableInt() *FieldTypeUpdateOne {
-	_u.mutation.ClearNillableInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt)
 }
 
 // SetNillableInt8 sets the "nillable_int8" field.
@@ -2192,14 +2044,12 @@ func (_u *FieldTypeUpdateOne) SetNillableNillableInt8(v *int8) *FieldTypeUpdateO
 
 // AddNillableInt8 adds value to the "nillable_int8" field.
 func (_u *FieldTypeUpdateOne) AddNillableInt8(v int8) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt8, v)
 }
 
 // ClearNillableInt8 clears the value of the "nillable_int8" field.
 func (_u *FieldTypeUpdateOne) ClearNillableInt8() *FieldTypeUpdateOne {
-	_u.mutation.ClearNillableInt8()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt8)
 }
 
 // SetNillableInt16 sets the "nillable_int16" field.
@@ -2219,14 +2069,12 @@ func (_u *FieldTypeUpdateOne) SetNillableNillableInt16(v *int16) *FieldTypeUpdat
 
 // AddNillableInt16 adds value to the "nillable_int16" field.
 func (_u *FieldTypeUpdateOne) AddNillableInt16(v int16) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt16(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt16, v)
 }
 
 // ClearNillableInt16 clears the value of the "nillable_int16" field.
 func (_u *FieldTypeUpdateOne) ClearNillableInt16() *FieldTypeUpdateOne {
-	_u.mutation.ClearNillableInt16()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt16)
 }
 
 // SetNillableInt32 sets the "nillable_int32" field.
@@ -2246,14 +2094,12 @@ func (_u *FieldTypeUpdateOne) SetNillableNillableInt32(v *int32) *FieldTypeUpdat
 
 // AddNillableInt32 adds value to the "nillable_int32" field.
 func (_u *FieldTypeUpdateOne) AddNillableInt32(v int32) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt32, v)
 }
 
 // ClearNillableInt32 clears the value of the "nillable_int32" field.
 func (_u *FieldTypeUpdateOne) ClearNillableInt32() *FieldTypeUpdateOne {
-	_u.mutation.ClearNillableInt32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt32)
 }
 
 // SetNillableInt64 sets the "nillable_int64" field.
@@ -2273,14 +2119,12 @@ func (_u *FieldTypeUpdateOne) SetNillableNillableInt64(v *int64) *FieldTypeUpdat
 
 // AddNillableInt64 adds value to the "nillable_int64" field.
 func (_u *FieldTypeUpdateOne) AddNillableInt64(v int64) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddNillableInt64, v)
 }
 
 // ClearNillableInt64 clears the value of the "nillable_int64" field.
 func (_u *FieldTypeUpdateOne) ClearNillableInt64() *FieldTypeUpdateOne {
-	_u.mutation.ClearNillableInt64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableInt64)
 }
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
@@ -2300,14 +2144,12 @@ func (_u *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(v *int32) *FieldT
 
 // AddValidateOptionalInt32 adds value to the "validate_optional_int32" field.
 func (_u *FieldTypeUpdateOne) AddValidateOptionalInt32(v int32) *FieldTypeUpdateOne {
-	_u.mutation.AddValidateOptionalInt32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddValidateOptionalInt32, v)
 }
 
 // ClearValidateOptionalInt32 clears the value of the "validate_optional_int32" field.
 func (_u *FieldTypeUpdateOne) ClearValidateOptionalInt32() *FieldTypeUpdateOne {
-	_u.mutation.ClearValidateOptionalInt32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearValidateOptionalInt32)
 }
 
 // SetOptionalUint sets the "optional_uint" field.
@@ -2327,14 +2169,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalUint(v *uint) *FieldTypeUpdateO
 
 // AddOptionalUint adds value to the "optional_uint" field.
 func (_u *FieldTypeUpdateOne) AddOptionalUint(v int) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint, v)
 }
 
 // ClearOptionalUint clears the value of the "optional_uint" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalUint() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalUint()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint)
 }
 
 // SetOptionalUint8 sets the "optional_uint8" field.
@@ -2354,14 +2194,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalUint8(v *uint8) *FieldTypeUpdat
 
 // AddOptionalUint8 adds value to the "optional_uint8" field.
 func (_u *FieldTypeUpdateOne) AddOptionalUint8(v int8) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint8, v)
 }
 
 // ClearOptionalUint8 clears the value of the "optional_uint8" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalUint8() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalUint8()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint8)
 }
 
 // SetOptionalUint16 sets the "optional_uint16" field.
@@ -2381,14 +2219,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalUint16(v *uint16) *FieldTypeUpd
 
 // AddOptionalUint16 adds value to the "optional_uint16" field.
 func (_u *FieldTypeUpdateOne) AddOptionalUint16(v int16) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint16(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint16, v)
 }
 
 // ClearOptionalUint16 clears the value of the "optional_uint16" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalUint16() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalUint16()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint16)
 }
 
 // SetOptionalUint32 sets the "optional_uint32" field.
@@ -2408,14 +2244,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalUint32(v *uint32) *FieldTypeUpd
 
 // AddOptionalUint32 adds value to the "optional_uint32" field.
 func (_u *FieldTypeUpdateOne) AddOptionalUint32(v int32) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint32, v)
 }
 
 // ClearOptionalUint32 clears the value of the "optional_uint32" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalUint32() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalUint32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint32)
 }
 
 // SetOptionalUint64 sets the "optional_uint64" field.
@@ -2435,20 +2269,17 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalUint64(v *uint64) *FieldTypeUpd
 
 // AddOptionalUint64 adds value to the "optional_uint64" field.
 func (_u *FieldTypeUpdateOne) AddOptionalUint64(v int64) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalUint64, v)
 }
 
 // ClearOptionalUint64 clears the value of the "optional_uint64" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalUint64() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalUint64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUint64)
 }
 
 // SetState sets the "state" field.
 func (_u *FieldTypeUpdateOne) SetState(v State) *FieldTypeUpdateOne {
-	_u.mutation.SetState(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetState, v)
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
@@ -2461,8 +2292,7 @@ func (_u *FieldTypeUpdateOne) SetNillableState(v *State) *FieldTypeUpdateOne {
 
 // ClearState clears the value of the "state" field.
 func (_u *FieldTypeUpdateOne) ClearState() *FieldTypeUpdateOne {
-	_u.mutation.ClearState()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearState)
 }
 
 // SetOptionalFloat sets the "optional_float" field.
@@ -2482,14 +2312,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalFloat(v *float64) *FieldTypeUpd
 
 // AddOptionalFloat adds value to the "optional_float" field.
 func (_u *FieldTypeUpdateOne) AddOptionalFloat(v float64) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalFloat(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalFloat, v)
 }
 
 // ClearOptionalFloat clears the value of the "optional_float" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalFloat() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalFloat()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalFloat)
 }
 
 // SetOptionalFloat32 sets the "optional_float32" field.
@@ -2509,20 +2337,17 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalFloat32(v *float32) *FieldTypeU
 
 // AddOptionalFloat32 adds value to the "optional_float32" field.
 func (_u *FieldTypeUpdateOne) AddOptionalFloat32(v float32) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalFloat32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddOptionalFloat32, v)
 }
 
 // ClearOptionalFloat32 clears the value of the "optional_float32" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalFloat32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalFloat32)
 }
 
 // SetText sets the "text" field.
 func (_u *FieldTypeUpdateOne) SetText(v string) *FieldTypeUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -2535,14 +2360,12 @@ func (_u *FieldTypeUpdateOne) SetNillableText(v *string) *FieldTypeUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *FieldTypeUpdateOne) ClearText() *FieldTypeUpdateOne {
-	_u.mutation.ClearText()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearText)
 }
 
 // SetDatetime sets the "datetime" field.
 func (_u *FieldTypeUpdateOne) SetDatetime(v time.Time) *FieldTypeUpdateOne {
-	_u.mutation.SetDatetime(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDatetime, v)
 }
 
 // SetNillableDatetime sets the "datetime" field if the given value is not nil.
@@ -2555,8 +2378,7 @@ func (_u *FieldTypeUpdateOne) SetNillableDatetime(v *time.Time) *FieldTypeUpdate
 
 // ClearDatetime clears the value of the "datetime" field.
 func (_u *FieldTypeUpdateOne) ClearDatetime() *FieldTypeUpdateOne {
-	_u.mutation.ClearDatetime()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDatetime)
 }
 
 // SetDecimal sets the "decimal" field.
@@ -2576,44 +2398,37 @@ func (_u *FieldTypeUpdateOne) SetNillableDecimal(v *float64) *FieldTypeUpdateOne
 
 // AddDecimal adds value to the "decimal" field.
 func (_u *FieldTypeUpdateOne) AddDecimal(v float64) *FieldTypeUpdateOne {
-	_u.mutation.AddDecimal(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddDecimal, v)
 }
 
 // ClearDecimal clears the value of the "decimal" field.
 func (_u *FieldTypeUpdateOne) ClearDecimal() *FieldTypeUpdateOne {
-	_u.mutation.ClearDecimal()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDecimal)
 }
 
 // SetLinkOther sets the "link_other" field.
 func (_u *FieldTypeUpdateOne) SetLinkOther(v *schema.Link) *FieldTypeUpdateOne {
-	_u.mutation.SetLinkOther(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLinkOther, v)
 }
 
 // ClearLinkOther clears the value of the "link_other" field.
 func (_u *FieldTypeUpdateOne) ClearLinkOther() *FieldTypeUpdateOne {
-	_u.mutation.ClearLinkOther()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLinkOther)
 }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
 func (_u *FieldTypeUpdateOne) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpdateOne {
-	_u.mutation.SetLinkOtherFunc(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLinkOtherFunc, v)
 }
 
 // ClearLinkOtherFunc clears the value of the "link_other_func" field.
 func (_u *FieldTypeUpdateOne) ClearLinkOtherFunc() *FieldTypeUpdateOne {
-	_u.mutation.ClearLinkOtherFunc()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLinkOtherFunc)
 }
 
 // SetMAC sets the "mac" field.
 func (_u *FieldTypeUpdateOne) SetMAC(v schema.MAC) *FieldTypeUpdateOne {
-	_u.mutation.SetMAC(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetMAC, v)
 }
 
 // SetNillableMAC sets the "mac" field if the given value is not nil.
@@ -2626,26 +2441,22 @@ func (_u *FieldTypeUpdateOne) SetNillableMAC(v *schema.MAC) *FieldTypeUpdateOne 
 
 // ClearMAC clears the value of the "mac" field.
 func (_u *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
-	_u.mutation.ClearMAC()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearMAC)
 }
 
 // SetStringArray sets the "string_array" field.
 func (_u *FieldTypeUpdateOne) SetStringArray(v schema.Strings) *FieldTypeUpdateOne {
-	_u.mutation.SetStringArray(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStringArray, v)
 }
 
 // ClearStringArray clears the value of the "string_array" field.
 func (_u *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
-	_u.mutation.ClearStringArray()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearStringArray)
 }
 
 // SetPassword sets the "password" field.
 func (_u *FieldTypeUpdateOne) SetPassword(v string) *FieldTypeUpdateOne {
-	_u.mutation.SetPassword(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPassword, v)
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
@@ -2658,14 +2469,12 @@ func (_u *FieldTypeUpdateOne) SetNillablePassword(v *string) *FieldTypeUpdateOne
 
 // ClearPassword clears the value of the "password" field.
 func (_u *FieldTypeUpdateOne) ClearPassword() *FieldTypeUpdateOne {
-	_u.mutation.ClearPassword()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPassword)
 }
 
 // SetStringScanner sets the "string_scanner" field.
 func (_u *FieldTypeUpdateOne) SetStringScanner(v schema.StringScanner) *FieldTypeUpdateOne {
-	_u.mutation.SetStringScanner(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStringScanner, v)
 }
 
 // SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
@@ -2678,8 +2487,7 @@ func (_u *FieldTypeUpdateOne) SetNillableStringScanner(v *schema.StringScanner) 
 
 // ClearStringScanner clears the value of the "string_scanner" field.
 func (_u *FieldTypeUpdateOne) ClearStringScanner() *FieldTypeUpdateOne {
-	_u.mutation.ClearStringScanner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearStringScanner)
 }
 
 // SetDuration sets the "duration" field.
@@ -2691,20 +2499,17 @@ func (_u *FieldTypeUpdateOne) SetDuration(v time.Duration) *FieldTypeUpdateOne {
 
 // AddDuration adds value to the "duration" field.
 func (_u *FieldTypeUpdateOne) AddDuration(v time.Duration) *FieldTypeUpdateOne {
-	_u.mutation.AddDuration(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddDuration, v)
 }
 
 // ClearDuration clears the value of the "duration" field.
 func (_u *FieldTypeUpdateOne) ClearDuration() *FieldTypeUpdateOne {
-	_u.mutation.ClearDuration()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDuration)
 }
 
 // SetDir sets the "dir" field.
 func (_u *FieldTypeUpdateOne) SetDir(v http.Dir) *FieldTypeUpdateOne {
-	_u.mutation.SetDir(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDir, v)
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
@@ -2717,8 +2522,7 @@ func (_u *FieldTypeUpdateOne) SetNillableDir(v *http.Dir) *FieldTypeUpdateOne {
 
 // SetNdir sets the "ndir" field.
 func (_u *FieldTypeUpdateOne) SetNdir(v http.Dir) *FieldTypeUpdateOne {
-	_u.mutation.SetNdir(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNdir, v)
 }
 
 // SetNillableNdir sets the "ndir" field if the given value is not nil.
@@ -2731,14 +2535,12 @@ func (_u *FieldTypeUpdateOne) SetNillableNdir(v *http.Dir) *FieldTypeUpdateOne {
 
 // ClearNdir clears the value of the "ndir" field.
 func (_u *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne {
-	_u.mutation.ClearNdir()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNdir)
 }
 
 // SetStr sets the "str" field.
 func (_u *FieldTypeUpdateOne) SetStr(v sql.NullString) *FieldTypeUpdateOne {
-	_u.mutation.SetStr(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStr, v)
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
@@ -2751,26 +2553,22 @@ func (_u *FieldTypeUpdateOne) SetNillableStr(v *sql.NullString) *FieldTypeUpdate
 
 // ClearStr clears the value of the "str" field.
 func (_u *FieldTypeUpdateOne) ClearStr() *FieldTypeUpdateOne {
-	_u.mutation.ClearStr()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearStr)
 }
 
 // SetNullStr sets the "null_str" field.
 func (_u *FieldTypeUpdateOne) SetNullStr(v *sql.NullString) *FieldTypeUpdateOne {
-	_u.mutation.SetNullStr(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullStr, v)
 }
 
 // ClearNullStr clears the value of the "null_str" field.
 func (_u *FieldTypeUpdateOne) ClearNullStr() *FieldTypeUpdateOne {
-	_u.mutation.ClearNullStr()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullStr)
 }
 
 // SetLink sets the "link" field.
 func (_u *FieldTypeUpdateOne) SetLink(v schema.Link) *FieldTypeUpdateOne {
-	_u.mutation.SetLink(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLink, v)
 }
 
 // SetNillableLink sets the "link" field if the given value is not nil.
@@ -2783,26 +2581,22 @@ func (_u *FieldTypeUpdateOne) SetNillableLink(v *schema.Link) *FieldTypeUpdateOn
 
 // ClearLink clears the value of the "link" field.
 func (_u *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne {
-	_u.mutation.ClearLink()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLink)
 }
 
 // SetNullLink sets the "null_link" field.
 func (_u *FieldTypeUpdateOne) SetNullLink(v *schema.Link) *FieldTypeUpdateOne {
-	_u.mutation.SetNullLink(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullLink, v)
 }
 
 // ClearNullLink clears the value of the "null_link" field.
 func (_u *FieldTypeUpdateOne) ClearNullLink() *FieldTypeUpdateOne {
-	_u.mutation.ClearNullLink()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullLink)
 }
 
 // SetActive sets the "active" field.
 func (_u *FieldTypeUpdateOne) SetActive(v schema.Status) *FieldTypeUpdateOne {
-	_u.mutation.SetActive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetActive, v)
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
@@ -2815,14 +2609,12 @@ func (_u *FieldTypeUpdateOne) SetNillableActive(v *schema.Status) *FieldTypeUpda
 
 // ClearActive clears the value of the "active" field.
 func (_u *FieldTypeUpdateOne) ClearActive() *FieldTypeUpdateOne {
-	_u.mutation.ClearActive()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearActive)
 }
 
 // SetNullActive sets the "null_active" field.
 func (_u *FieldTypeUpdateOne) SetNullActive(v schema.Status) *FieldTypeUpdateOne {
-	_u.mutation.SetNullActive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullActive, v)
 }
 
 // SetNillableNullActive sets the "null_active" field if the given value is not nil.
@@ -2835,80 +2627,67 @@ func (_u *FieldTypeUpdateOne) SetNillableNullActive(v *schema.Status) *FieldType
 
 // ClearNullActive clears the value of the "null_active" field.
 func (_u *FieldTypeUpdateOne) ClearNullActive() *FieldTypeUpdateOne {
-	_u.mutation.ClearNullActive()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullActive)
 }
 
 // SetDeleted sets the "deleted" field.
 func (_u *FieldTypeUpdateOne) SetDeleted(v *sql.NullBool) *FieldTypeUpdateOne {
-	_u.mutation.SetDeleted(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDeleted, v)
 }
 
 // ClearDeleted clears the value of the "deleted" field.
 func (_u *FieldTypeUpdateOne) ClearDeleted() *FieldTypeUpdateOne {
-	_u.mutation.ClearDeleted()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDeleted)
 }
 
 // SetDeletedAt sets the "deleted_at" field.
 func (_u *FieldTypeUpdateOne) SetDeletedAt(v *sql.NullTime) *FieldTypeUpdateOne {
-	_u.mutation.SetDeletedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetDeletedAt, v)
 }
 
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (_u *FieldTypeUpdateOne) ClearDeletedAt() *FieldTypeUpdateOne {
-	_u.mutation.ClearDeletedAt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearDeletedAt)
 }
 
 // SetRawData sets the "raw_data" field.
 func (_u *FieldTypeUpdateOne) SetRawData(v []byte) *FieldTypeUpdateOne {
-	_u.mutation.SetRawData(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetRawData, v)
 }
 
 // ClearRawData clears the value of the "raw_data" field.
 func (_u *FieldTypeUpdateOne) ClearRawData() *FieldTypeUpdateOne {
-	_u.mutation.ClearRawData()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRawData)
 }
 
 // SetSensitive sets the "sensitive" field.
 func (_u *FieldTypeUpdateOne) SetSensitive(v []byte) *FieldTypeUpdateOne {
-	_u.mutation.SetSensitive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSensitive, v)
 }
 
 // ClearSensitive clears the value of the "sensitive" field.
 func (_u *FieldTypeUpdateOne) ClearSensitive() *FieldTypeUpdateOne {
-	_u.mutation.ClearSensitive()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSensitive)
 }
 
 // SetIP sets the "ip" field.
 func (_u *FieldTypeUpdateOne) SetIP(v net.IP) *FieldTypeUpdateOne {
-	_u.mutation.SetIP(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetIP, v)
 }
 
 // ClearIP clears the value of the "ip" field.
 func (_u *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
-	_u.mutation.ClearIP()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearIP)
 }
 
 // SetNullInt64 sets the "null_int64" field.
 func (_u *FieldTypeUpdateOne) SetNullInt64(v *sql.NullInt64) *FieldTypeUpdateOne {
-	_u.mutation.SetNullInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullInt64, v)
 }
 
 // ClearNullInt64 clears the value of the "null_int64" field.
 func (_u *FieldTypeUpdateOne) ClearNullInt64() *FieldTypeUpdateOne {
-	_u.mutation.ClearNullInt64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullInt64)
 }
 
 // SetSchemaInt sets the "schema_int" field.
@@ -2928,14 +2707,12 @@ func (_u *FieldTypeUpdateOne) SetNillableSchemaInt(v *schema.Int) *FieldTypeUpda
 
 // AddSchemaInt adds value to the "schema_int" field.
 func (_u *FieldTypeUpdateOne) AddSchemaInt(v schema.Int) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaInt, v)
 }
 
 // ClearSchemaInt clears the value of the "schema_int" field.
 func (_u *FieldTypeUpdateOne) ClearSchemaInt() *FieldTypeUpdateOne {
-	_u.mutation.ClearSchemaInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaInt)
 }
 
 // SetSchemaInt8 sets the "schema_int8" field.
@@ -2955,14 +2732,12 @@ func (_u *FieldTypeUpdateOne) SetNillableSchemaInt8(v *schema.Int8) *FieldTypeUp
 
 // AddSchemaInt8 adds value to the "schema_int8" field.
 func (_u *FieldTypeUpdateOne) AddSchemaInt8(v schema.Int8) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaInt8(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaInt8, v)
 }
 
 // ClearSchemaInt8 clears the value of the "schema_int8" field.
 func (_u *FieldTypeUpdateOne) ClearSchemaInt8() *FieldTypeUpdateOne {
-	_u.mutation.ClearSchemaInt8()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaInt8)
 }
 
 // SetSchemaInt64 sets the "schema_int64" field.
@@ -2982,14 +2757,12 @@ func (_u *FieldTypeUpdateOne) SetNillableSchemaInt64(v *schema.Int64) *FieldType
 
 // AddSchemaInt64 adds value to the "schema_int64" field.
 func (_u *FieldTypeUpdateOne) AddSchemaInt64(v schema.Int64) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaInt64(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaInt64, v)
 }
 
 // ClearSchemaInt64 clears the value of the "schema_int64" field.
 func (_u *FieldTypeUpdateOne) ClearSchemaInt64() *FieldTypeUpdateOne {
-	_u.mutation.ClearSchemaInt64()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaInt64)
 }
 
 // SetSchemaFloat sets the "schema_float" field.
@@ -3009,14 +2782,12 @@ func (_u *FieldTypeUpdateOne) SetNillableSchemaFloat(v *schema.Float64) *FieldTy
 
 // AddSchemaFloat adds value to the "schema_float" field.
 func (_u *FieldTypeUpdateOne) AddSchemaFloat(v schema.Float64) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaFloat(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaFloat, v)
 }
 
 // ClearSchemaFloat clears the value of the "schema_float" field.
 func (_u *FieldTypeUpdateOne) ClearSchemaFloat() *FieldTypeUpdateOne {
-	_u.mutation.ClearSchemaFloat()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaFloat)
 }
 
 // SetSchemaFloat32 sets the "schema_float32" field.
@@ -3036,32 +2807,27 @@ func (_u *FieldTypeUpdateOne) SetNillableSchemaFloat32(v *schema.Float32) *Field
 
 // AddSchemaFloat32 adds value to the "schema_float32" field.
 func (_u *FieldTypeUpdateOne) AddSchemaFloat32(v schema.Float32) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaFloat32(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddSchemaFloat32, v)
 }
 
 // ClearSchemaFloat32 clears the value of the "schema_float32" field.
 func (_u *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
-	_u.mutation.ClearSchemaFloat32()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSchemaFloat32)
 }
 
 // SetNullFloat sets the "null_float" field.
 func (_u *FieldTypeUpdateOne) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpdateOne {
-	_u.mutation.SetNullFloat(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNullFloat, v)
 }
 
 // ClearNullFloat clears the value of the "null_float" field.
 func (_u *FieldTypeUpdateOne) ClearNullFloat() *FieldTypeUpdateOne {
-	_u.mutation.ClearNullFloat()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNullFloat)
 }
 
 // SetRole sets the "role" field.
 func (_u *FieldTypeUpdateOne) SetRole(v role.Role) *FieldTypeUpdateOne {
-	_u.mutation.SetRole(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetRole, v)
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
@@ -3074,8 +2840,7 @@ func (_u *FieldTypeUpdateOne) SetNillableRole(v *role.Role) *FieldTypeUpdateOne 
 
 // SetPriority sets the "priority" field.
 func (_u *FieldTypeUpdateOne) SetPriority(v role.Priority) *FieldTypeUpdateOne {
-	_u.mutation.SetPriority(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPriority, v)
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
@@ -3088,14 +2853,12 @@ func (_u *FieldTypeUpdateOne) SetNillablePriority(v *role.Priority) *FieldTypeUp
 
 // ClearPriority clears the value of the "priority" field.
 func (_u *FieldTypeUpdateOne) ClearPriority() *FieldTypeUpdateOne {
-	_u.mutation.ClearPriority()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPriority)
 }
 
 // SetOptionalUUID sets the "optional_uuid" field.
 func (_u *FieldTypeUpdateOne) SetOptionalUUID(v uuid.UUID) *FieldTypeUpdateOne {
-	_u.mutation.SetOptionalUUID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOptionalUUID, v)
 }
 
 // SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
@@ -3108,14 +2871,12 @@ func (_u *FieldTypeUpdateOne) SetNillableOptionalUUID(v *uuid.UUID) *FieldTypeUp
 
 // ClearOptionalUUID clears the value of the "optional_uuid" field.
 func (_u *FieldTypeUpdateOne) ClearOptionalUUID() *FieldTypeUpdateOne {
-	_u.mutation.ClearOptionalUUID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOptionalUUID)
 }
 
 // SetNillableUUID sets the "nillable_uuid" field.
 func (_u *FieldTypeUpdateOne) SetNillableUUID(v uuid.UUID) *FieldTypeUpdateOne {
-	_u.mutation.SetNillableUUID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNillableUUID, v)
 }
 
 // SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
@@ -3128,32 +2889,27 @@ func (_u *FieldTypeUpdateOne) SetNillableNillableUUID(v *uuid.UUID) *FieldTypeUp
 
 // ClearNillableUUID clears the value of the "nillable_uuid" field.
 func (_u *FieldTypeUpdateOne) ClearNillableUUID() *FieldTypeUpdateOne {
-	_u.mutation.ClearNillableUUID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNillableUUID)
 }
 
 // SetStrings sets the "strings" field.
 func (_u *FieldTypeUpdateOne) SetStrings(v []string) *FieldTypeUpdateOne {
-	_u.mutation.SetStrings(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetStrings, v)
 }
 
 // AppendStrings appends value to the "strings" field.
 func (_u *FieldTypeUpdateOne) AppendStrings(v []string) *FieldTypeUpdateOne {
-	_u.mutation.AppendStrings(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AppendStrings, v)
 }
 
 // ClearStrings clears the value of the "strings" field.
 func (_u *FieldTypeUpdateOne) ClearStrings() *FieldTypeUpdateOne {
-	_u.mutation.ClearStrings()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearStrings)
 }
 
 // SetPair sets the "pair" field.
 func (_u *FieldTypeUpdateOne) SetPair(v schema.Pair) *FieldTypeUpdateOne {
-	_u.mutation.SetPair(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPair, v)
 }
 
 // SetNillablePair sets the "pair" field if the given value is not nil.
@@ -3166,20 +2922,17 @@ func (_u *FieldTypeUpdateOne) SetNillablePair(v *schema.Pair) *FieldTypeUpdateOn
 
 // SetNilPair sets the "nil_pair" field.
 func (_u *FieldTypeUpdateOne) SetNilPair(v *schema.Pair) *FieldTypeUpdateOne {
-	_u.mutation.SetNilPair(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetNilPair, v)
 }
 
 // ClearNilPair clears the value of the "nil_pair" field.
 func (_u *FieldTypeUpdateOne) ClearNilPair() *FieldTypeUpdateOne {
-	_u.mutation.ClearNilPair()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearNilPair)
 }
 
 // SetVstring sets the "vstring" field.
 func (_u *FieldTypeUpdateOne) SetVstring(v schema.VString) *FieldTypeUpdateOne {
-	_u.mutation.SetVstring(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetVstring, v)
 }
 
 // SetNillableVstring sets the "vstring" field if the given value is not nil.
@@ -3192,8 +2945,7 @@ func (_u *FieldTypeUpdateOne) SetNillableVstring(v *schema.VString) *FieldTypeUp
 
 // SetTriple sets the "triple" field.
 func (_u *FieldTypeUpdateOne) SetTriple(v schema.Triple) *FieldTypeUpdateOne {
-	_u.mutation.SetTriple(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTriple, v)
 }
 
 // SetNillableTriple sets the "triple" field if the given value is not nil.
@@ -3221,20 +2973,17 @@ func (_u *FieldTypeUpdateOne) SetNillableBigInt(v *schema.BigInt) *FieldTypeUpda
 
 // AddBigInt adds value to the "big_int" field.
 func (_u *FieldTypeUpdateOne) AddBigInt(v schema.BigInt) *FieldTypeUpdateOne {
-	_u.mutation.AddBigInt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddBigInt, v)
 }
 
 // ClearBigInt clears the value of the "big_int" field.
 func (_u *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne {
-	_u.mutation.ClearBigInt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBigInt)
 }
 
 // SetPasswordOther sets the "password_other" field.
 func (_u *FieldTypeUpdateOne) SetPasswordOther(v schema.Password) *FieldTypeUpdateOne {
-	_u.mutation.SetPasswordOther(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPasswordOther, v)
 }
 
 // SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
@@ -3247,14 +2996,11 @@ func (_u *FieldTypeUpdateOne) SetNillablePasswordOther(v *schema.Password) *Fiel
 
 // ClearPasswordOther clears the value of the "password_other" field.
 func (_u *FieldTypeUpdateOne) ClearPasswordOther() *FieldTypeUpdateOne {
-	_u.mutation.ClearPasswordOther()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPasswordOther)
 }
 
 // Mutation returns the FieldTypeMutation object of the builder.
-func (_u *FieldTypeUpdateOne) Mutation() *FieldTypeMutation {
-	return _u.mutation
-}
+func (_u *FieldTypeUpdateOne) Mutation() *FieldTypeMutation { return _u.mutation }
 
 // Where appends a list predicates to the FieldTypeUpdate builder.
 func (_u *FieldTypeUpdateOne) Where(ps ...predicate.FieldType) *FieldTypeUpdateOne {
@@ -3277,18 +3023,11 @@ func (_u *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *FieldTypeUpdateOne) SaveX(ctx context.Context) *FieldType {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *FieldTypeUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FieldTypeUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FieldTypeUpdateOne) ExecX(ctx context.Context) {

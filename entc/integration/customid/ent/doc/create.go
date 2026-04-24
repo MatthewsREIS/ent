@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,10 +33,7 @@ func NewDocCreate(c Config, hooks []Hook, mutation *DocMutation) *DocCreate {
 }
 
 // SetText sets the "text" field.
-func (_c *DocCreate) SetText(v string) *DocCreate {
-	_c.mutation.SetText(v)
-	return _c
-}
+func (_c *DocCreate) SetText(v string) *DocCreate { return entbuilder.BSet(_c, _c.mutation.SetText, v) }
 
 // SetNillableText sets the "text" field if the given value is not nil.
 func (_c *DocCreate) SetNillableText(v *string) *DocCreate {
@@ -47,8 +45,7 @@ func (_c *DocCreate) SetNillableText(v *string) *DocCreate {
 
 // SetID sets the "id" field.
 func (_c *DocCreate) SetID(v schema.DocID) *DocCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
@@ -61,8 +58,7 @@ func (_c *DocCreate) SetNillableID(v *schema.DocID) *DocCreate {
 
 // SetParentID sets the "parent" edge to the Doc entity by ID.
 func (_c *DocCreate) SetParentID(id schema.DocID) *DocCreate {
-	_c.mutation.SetParentID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Doc entity by ID if the given value is not nil.
@@ -86,9 +82,7 @@ func (_c *DocCreate) AddRelatedIDs(ids ...schema.DocID) *DocCreate {
 }
 
 // Mutation returns the DocMutation object of the builder.
-func (_c *DocCreate) Mutation() *DocMutation {
-	return _c.mutation
-}
+func (_c *DocCreate) Mutation() *DocMutation { return _c.mutation }
 
 // Save creates the Doc in the database.
 func (_c *DocCreate) Save(ctx context.Context) (*Doc, error) {
@@ -97,19 +91,10 @@ func (_c *DocCreate) Save(ctx context.Context) (*Doc, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *DocCreate) SaveX(ctx context.Context) *Doc {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *DocCreate) SaveX(ctx context.Context) *Doc { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *DocCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *DocCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *DocCreate) ExecX(ctx context.Context) {

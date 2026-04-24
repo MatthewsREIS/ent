@@ -14,7 +14,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "Imports" $.BuilderImports }}
+{{ with extend $ "Imports" $.BuilderImports "CreateUsesEntbuilder" true }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -58,26 +58,13 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }},
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} {
-	v, err := {{ $receiver }}.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) *{{ $.Name }} { return entbuilder.Must({{ $receiver }}.Save(ctx)) }
 
 // Exec executes the query.
-func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) error {
-	_, err := {{ $receiver }}.Save(ctx)
-	return err
-}
+func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) error { _, err := {{ $receiver }}.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
-	if err := {{ $receiver }}.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
+func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) { if err := {{ $receiver }}.Exec(ctx); err != nil { panic(err) } }
 
 {{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 {{ if $.HasDefault }}

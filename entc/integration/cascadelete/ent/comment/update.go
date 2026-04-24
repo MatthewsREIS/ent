@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,8 +38,7 @@ func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 
 // SetText sets the "text" field.
 func (_u *CommentUpdate) SetText(v string) *CommentUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -51,8 +51,7 @@ func (_u *CommentUpdate) SetNillableText(v *string) *CommentUpdate {
 
 // SetPostID sets the "post_id" field.
 func (_u *CommentUpdate) SetPostID(v int) *CommentUpdate {
-	_u.mutation.SetPostID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPostID, v)
 }
 
 // SetNillablePostID sets the "post_id" field if the given value is not nil.
@@ -64,14 +63,11 @@ func (_u *CommentUpdate) SetNillablePostID(v *int) *CommentUpdate {
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (_u *CommentUpdate) Mutation() *CommentMutation {
-	return _u.mutation
-}
+func (_u *CommentUpdate) Mutation() *CommentMutation { return _u.mutation }
 
 // ClearPost clears the "post" edge to the Post entity.
 func (_u *CommentUpdate) ClearPost() *CommentUpdate {
-	_u.mutation.ClearPost()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPost)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -80,19 +76,10 @@ func (_u *CommentUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CommentUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *CommentUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *CommentUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CommentUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CommentUpdate) ExecX(ctx context.Context) {
@@ -180,8 +167,7 @@ func NewCommentUpdateOne(c Config, hooks []Hook, mutation *CommentMutation) *Com
 
 // SetText sets the "text" field.
 func (_u *CommentUpdateOne) SetText(v string) *CommentUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -194,8 +180,7 @@ func (_u *CommentUpdateOne) SetNillableText(v *string) *CommentUpdateOne {
 
 // SetPostID sets the "post_id" field.
 func (_u *CommentUpdateOne) SetPostID(v int) *CommentUpdateOne {
-	_u.mutation.SetPostID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetPostID, v)
 }
 
 // SetNillablePostID sets the "post_id" field if the given value is not nil.
@@ -207,14 +192,11 @@ func (_u *CommentUpdateOne) SetNillablePostID(v *int) *CommentUpdateOne {
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (_u *CommentUpdateOne) Mutation() *CommentMutation {
-	return _u.mutation
-}
+func (_u *CommentUpdateOne) Mutation() *CommentMutation { return _u.mutation }
 
 // ClearPost clears the "post" edge to the Post entity.
 func (_u *CommentUpdateOne) ClearPost() *CommentUpdateOne {
-	_u.mutation.ClearPost()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPost)
 }
 
 // Where appends a list predicates to the CommentUpdate builder.
@@ -236,19 +218,10 @@ func (_u *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *CommentUpdateOne) SaveX(ctx context.Context) *Comment { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *CommentUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CommentUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CommentUpdateOne) ExecX(ctx context.Context) {

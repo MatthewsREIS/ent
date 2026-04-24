@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -36,15 +37,11 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -56,10 +53,7 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddGroupIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate { _u.mutation.AddGroupIDs(ids...); return _u }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
@@ -80,16 +74,10 @@ func (_u *UserUpdate) AddLikedTweetIDs(ids ...int) *UserUpdate {
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_u *UserUpdate) AddTweetIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddTweetIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddTweetIDs(ids ...int) *UserUpdate { _u.mutation.AddTweetIDs(ids...); return _u }
 
 // AddRoleIDs adds the "roles" edge to the Role entity by IDs.
-func (_u *UserUpdate) AddRoleIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddRoleIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddRoleIDs(ids ...int) *UserUpdate { _u.mutation.AddRoleIDs(ids...); return _u }
 
 // AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
 func (_u *UserUpdate) AddJoinedGroupIDs(ids ...int) *UserUpdate {
@@ -110,14 +98,11 @@ func (_u *UserUpdate) AddUserTweetIDs(ids ...int) *UserUpdate {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdate) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdate) Mutation() *UserMutation { return _u.mutation }
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *UserUpdate) ClearGroups() *UserUpdate {
-	_u.mutation.ClearGroups()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroups)
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
@@ -128,8 +113,7 @@ func (_u *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 
 // ClearFriends clears all "friends" edges to the User entity.
 func (_u *UserUpdate) ClearFriends() *UserUpdate {
-	_u.mutation.ClearFriends()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFriends)
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
@@ -140,8 +124,7 @@ func (_u *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
 
 // ClearRelatives clears all "relatives" edges to the User entity.
 func (_u *UserUpdate) ClearRelatives() *UserUpdate {
-	_u.mutation.ClearRelatives()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRelatives)
 }
 
 // RemoveRelativeIDs removes the "relatives" edge to User entities by IDs.
@@ -152,8 +135,7 @@ func (_u *UserUpdate) RemoveRelativeIDs(ids ...int) *UserUpdate {
 
 // ClearLikedTweets clears all "liked_tweets" edges to the Tweet entity.
 func (_u *UserUpdate) ClearLikedTweets() *UserUpdate {
-	_u.mutation.ClearLikedTweets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLikedTweets)
 }
 
 // RemoveLikedTweetIDs removes the "liked_tweets" edge to Tweet entities by IDs.
@@ -164,8 +146,7 @@ func (_u *UserUpdate) RemoveLikedTweetIDs(ids ...int) *UserUpdate {
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
 func (_u *UserUpdate) ClearTweets() *UserUpdate {
-	_u.mutation.ClearTweets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweets)
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
@@ -175,10 +156,7 @@ func (_u *UserUpdate) RemoveTweetIDs(ids ...int) *UserUpdate {
 }
 
 // ClearRoles clears all "roles" edges to the Role entity.
-func (_u *UserUpdate) ClearRoles() *UserUpdate {
-	_u.mutation.ClearRoles()
-	return _u
-}
+func (_u *UserUpdate) ClearRoles() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearRoles) }
 
 // RemoveRoleIDs removes the "roles" edge to Role entities by IDs.
 func (_u *UserUpdate) RemoveRoleIDs(ids ...int) *UserUpdate {
@@ -188,8 +166,7 @@ func (_u *UserUpdate) RemoveRoleIDs(ids ...int) *UserUpdate {
 
 // ClearJoinedGroups clears all "joined_groups" edges to the UserGroup entity.
 func (_u *UserUpdate) ClearJoinedGroups() *UserUpdate {
-	_u.mutation.ClearJoinedGroups()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearJoinedGroups)
 }
 
 // RemoveJoinedGroupIDs removes the "joined_groups" edge to UserGroup entities by IDs.
@@ -200,8 +177,7 @@ func (_u *UserUpdate) RemoveJoinedGroupIDs(ids ...int) *UserUpdate {
 
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
 func (_u *UserUpdate) ClearFriendships() *UserUpdate {
-	_u.mutation.ClearFriendships()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFriendships)
 }
 
 // RemoveFriendshipIDs removes the "friendships" edge to Friendship entities by IDs.
@@ -212,8 +188,7 @@ func (_u *UserUpdate) RemoveFriendshipIDs(ids ...int) *UserUpdate {
 
 // ClearUserTweets clears all "user_tweets" edges to the UserTweet entity.
 func (_u *UserUpdate) ClearUserTweets() *UserUpdate {
-	_u.mutation.ClearUserTweets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUserTweets)
 }
 
 // RemoveUserTweetIDs removes the "user_tweets" edge to UserTweet entities by IDs.
@@ -228,19 +203,10 @@ func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *UserUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *UserUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdate) ExecX(ctx context.Context) {
@@ -729,8 +695,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -796,14 +761,11 @@ func (_u *UserUpdateOne) AddUserTweetIDs(ids ...int) *UserUpdateOne {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdateOne) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdateOne) Mutation() *UserMutation { return _u.mutation }
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *UserUpdateOne) ClearGroups() *UserUpdateOne {
-	_u.mutation.ClearGroups()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroups)
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
@@ -814,8 +776,7 @@ func (_u *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 
 // ClearFriends clears all "friends" edges to the User entity.
 func (_u *UserUpdateOne) ClearFriends() *UserUpdateOne {
-	_u.mutation.ClearFriends()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFriends)
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
@@ -826,8 +787,7 @@ func (_u *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
 
 // ClearRelatives clears all "relatives" edges to the User entity.
 func (_u *UserUpdateOne) ClearRelatives() *UserUpdateOne {
-	_u.mutation.ClearRelatives()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRelatives)
 }
 
 // RemoveRelativeIDs removes the "relatives" edge to User entities by IDs.
@@ -838,8 +798,7 @@ func (_u *UserUpdateOne) RemoveRelativeIDs(ids ...int) *UserUpdateOne {
 
 // ClearLikedTweets clears all "liked_tweets" edges to the Tweet entity.
 func (_u *UserUpdateOne) ClearLikedTweets() *UserUpdateOne {
-	_u.mutation.ClearLikedTweets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLikedTweets)
 }
 
 // RemoveLikedTweetIDs removes the "liked_tweets" edge to Tweet entities by IDs.
@@ -850,8 +809,7 @@ func (_u *UserUpdateOne) RemoveLikedTweetIDs(ids ...int) *UserUpdateOne {
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
 func (_u *UserUpdateOne) ClearTweets() *UserUpdateOne {
-	_u.mutation.ClearTweets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTweets)
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
@@ -862,8 +820,7 @@ func (_u *UserUpdateOne) RemoveTweetIDs(ids ...int) *UserUpdateOne {
 
 // ClearRoles clears all "roles" edges to the Role entity.
 func (_u *UserUpdateOne) ClearRoles() *UserUpdateOne {
-	_u.mutation.ClearRoles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRoles)
 }
 
 // RemoveRoleIDs removes the "roles" edge to Role entities by IDs.
@@ -874,8 +831,7 @@ func (_u *UserUpdateOne) RemoveRoleIDs(ids ...int) *UserUpdateOne {
 
 // ClearJoinedGroups clears all "joined_groups" edges to the UserGroup entity.
 func (_u *UserUpdateOne) ClearJoinedGroups() *UserUpdateOne {
-	_u.mutation.ClearJoinedGroups()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearJoinedGroups)
 }
 
 // RemoveJoinedGroupIDs removes the "joined_groups" edge to UserGroup entities by IDs.
@@ -886,8 +842,7 @@ func (_u *UserUpdateOne) RemoveJoinedGroupIDs(ids ...int) *UserUpdateOne {
 
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
 func (_u *UserUpdateOne) ClearFriendships() *UserUpdateOne {
-	_u.mutation.ClearFriendships()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFriendships)
 }
 
 // RemoveFriendshipIDs removes the "friendships" edge to Friendship entities by IDs.
@@ -898,8 +853,7 @@ func (_u *UserUpdateOne) RemoveFriendshipIDs(ids ...int) *UserUpdateOne {
 
 // ClearUserTweets clears all "user_tweets" edges to the UserTweet entity.
 func (_u *UserUpdateOne) ClearUserTweets() *UserUpdateOne {
-	_u.mutation.ClearUserTweets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUserTweets)
 }
 
 // RemoveUserTweetIDs removes the "user_tweets" edge to UserTweet entities by IDs.
@@ -927,19 +881,10 @@ func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdateOne) ExecX(ctx context.Context) {

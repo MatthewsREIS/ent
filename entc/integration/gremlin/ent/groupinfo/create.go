@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
@@ -57,9 +58,7 @@ func (_c *GroupInfoCreate) AddGroupIDs(ids ...string) *GroupInfoCreate {
 }
 
 // Mutation returns the GroupInfoMutation object of the builder.
-func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation {
-	return _c.mutation
-}
+func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation { return _c.mutation }
 
 // Save creates the GroupInfo in the database.
 func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
@@ -69,18 +68,11 @@ func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *GroupInfoCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *GroupInfoCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *GroupInfoCreate) ExecX(ctx context.Context) {

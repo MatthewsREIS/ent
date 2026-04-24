@@ -13,14 +13,16 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // ParentDelete is the builder for deleting a Parent entity.
 type ParentDelete struct {
 	Config
-	hooks    []Hook
-	mutation *ParentMutation
+	hooks     []Hook
+	mutation  *ParentMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewParentDelete returns a new ParentDelete initialized with the given config, hooks, and mutation.
@@ -40,19 +42,14 @@ func (_d *ParentDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_d *ParentDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
+func (_d *ParentDelete) ExecX(ctx context.Context) int { return entbuilder.Must(_d.Exec(ctx)) }
 
 func (_d *ParentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	schemaConfig := _d.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Parent
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

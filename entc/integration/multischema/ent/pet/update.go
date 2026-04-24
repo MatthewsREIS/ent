@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,16 +33,10 @@ func NewPetUpdate(c Config, hooks []Hook, mutation *PetMutation) *PetUpdate {
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
-func (_u *PetUpdate) SetName(v string) *PetUpdate {
-	_u.mutation.SetName(v)
-	return _u
-}
+func (_u *PetUpdate) SetName(v string) *PetUpdate { return entbuilder.BSet(_u, _u.mutation.SetName, v) }
 
 // SetNillableName sets the "name" field if the given value is not nil.
 func (_u *PetUpdate) SetNillableName(v *string) *PetUpdate {
@@ -53,8 +48,7 @@ func (_u *PetUpdate) SetNillableName(v *string) *PetUpdate {
 
 // SetOwnerID sets the "owner_id" field.
 func (_u *PetUpdate) SetOwnerID(v int) *PetUpdate {
-	_u.mutation.SetOwnerID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, v)
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
@@ -67,20 +61,14 @@ func (_u *PetUpdate) SetNillableOwnerID(v *int) *PetUpdate {
 
 // ClearOwnerID clears the value of the "owner_id" field.
 func (_u *PetUpdate) ClearOwnerID() *PetUpdate {
-	_u.mutation.ClearOwnerID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwnerID)
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_u *PetUpdate) Mutation() *PetMutation {
-	return _u.mutation
-}
+func (_u *PetUpdate) Mutation() *PetMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *PetUpdate) ClearOwner() *PetUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
@@ -88,19 +76,10 @@ func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PetUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *PetUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *PetUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PetUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PetUpdate) ExecX(ctx context.Context) {
@@ -190,8 +169,7 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 
 // SetName sets the "name" field.
 func (_u *PetUpdateOne) SetName(v string) *PetUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -204,8 +182,7 @@ func (_u *PetUpdateOne) SetNillableName(v *string) *PetUpdateOne {
 
 // SetOwnerID sets the "owner_id" field.
 func (_u *PetUpdateOne) SetOwnerID(v int) *PetUpdateOne {
-	_u.mutation.SetOwnerID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, v)
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
@@ -218,26 +195,19 @@ func (_u *PetUpdateOne) SetNillableOwnerID(v *int) *PetUpdateOne {
 
 // ClearOwnerID clears the value of the "owner_id" field.
 func (_u *PetUpdateOne) ClearOwnerID() *PetUpdateOne {
-	_u.mutation.ClearOwnerID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwnerID)
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_u *PetUpdateOne) Mutation() *PetMutation {
-	return _u.mutation
-}
+func (_u *PetUpdateOne) Mutation() *PetMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -252,19 +222,10 @@ func (_u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PetUpdateOne) SaveX(ctx context.Context) *Pet {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *PetUpdateOne) SaveX(ctx context.Context) *Pet { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *PetUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PetUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PetUpdateOne) ExecX(ctx context.Context) {

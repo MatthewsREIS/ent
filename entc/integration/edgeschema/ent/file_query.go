@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -41,23 +42,14 @@ func (_q *FileQuery) Where(ps ...predicate.File) *FileQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *FileQuery) Limit(limit int) *FileQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *FileQuery) Limit(limit int) *FileQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *FileQuery) Offset(offset int) *FileQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *FileQuery) Offset(offset int) *FileQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *FileQuery) Unique(unique bool) *FileQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *FileQuery) Unique(unique bool) *FileQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *FileQuery) Order(o ...file.OrderOption) *FileQuery {
@@ -151,13 +143,7 @@ func (_q *FileQuery) Only(ctx context.Context) (*File, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *FileQuery) OnlyX(ctx context.Context) *File {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *FileQuery) OnlyX(ctx context.Context) *File { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only File ID in the query.
 // Returns a *NotSingularError when more than one File ID is found.
@@ -179,13 +165,7 @@ func (_q *FileQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *FileQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *FileQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Files.
 func (_q *FileQuery) All(ctx context.Context) ([]*File, error) {
@@ -198,13 +178,7 @@ func (_q *FileQuery) All(ctx context.Context) ([]*File, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *FileQuery) AllX(ctx context.Context) []*File {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *FileQuery) AllX(ctx context.Context) []*File { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of File IDs.
 func (_q *FileQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -219,13 +193,7 @@ func (_q *FileQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *FileQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *FileQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *FileQuery) Count(ctx context.Context) (int, error) {
@@ -237,13 +205,7 @@ func (_q *FileQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *FileQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *FileQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *FileQuery) Exist(ctx context.Context) (bool, error) {
@@ -259,13 +221,7 @@ func (_q *FileQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *FileQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *FileQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the FileQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -407,58 +363,65 @@ func (_q *FileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*File, e
 	return nodes, nil
 }
 
-var fileProcessesEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[File, Process, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2M,
-			Inverse:      true,
-			Table:        file.ProcessesTable,
-			Columns:      file.ProcessesPrimaryKey,
-			Bidi:         false,
-			TargetColumn: process.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *File) int { return n.ID },
-	ExtractEdgeID: func(e *Process) int { return e.ID },
-	ConvertNodeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	ConvertEdgeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	NewNodeIDScanner: func() any { return new(sql.NullInt64) },
-	NewEdgeIDScanner: func() any { return new(sql.NullInt64) },
-}
-
 func (_q *FileQuery) loadProcesses(ctx context.Context, query *ProcessQuery, nodes []*File, init func(*File), assign func(*File, *Process)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &fileProcessesEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.prepareQuery,
-		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*Process, error) {
-			hooks := make([]queryHook, len(modifiers))
-			for i := range modifiers {
-				hooks[i] = modifiers[i]
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*File)
+	nids := make(map[int]map[*File]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(file.ProcessesTable)
+		s.Join(joinT).On(s.C(process.FieldID), joinT.C(file.ProcessesPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(file.ProcessesPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(file.ProcessesPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return query.sqlAll(ctx, hooks...)
-		},
-		func(ctx context.Context, q, qr, inters any) (any, error) {
-			// Wrap the entbuilder.querierFunc into an ent.Querier
-			querierFn, ok := qr.(interface {
-				Query(context.Context, any) (any, error)
-			})
-			if !ok {
-				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*File]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
-				return querierFn.Query(ctx, query)
-			})
-			return withInterceptors[[]*Process](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
-		},
-		query,
-		query.inters,
-		func(joinT *sql.SelectTable) {
 		})
+	})
+	neighbors, err := withInterceptors[[]*Process](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "processes" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
 	return nil
 }
 

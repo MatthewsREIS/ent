@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,8 +38,7 @@ func (_u *ConversionUpdate) Where(ps ...predicate.Conversion) *ConversionUpdate 
 
 // SetName sets the "name" field.
 func (_u *ConversionUpdate) SetName(v string) *ConversionUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -51,14 +51,12 @@ func (_u *ConversionUpdate) SetNillableName(v *string) *ConversionUpdate {
 
 // ClearName clears the value of the "name" field.
 func (_u *ConversionUpdate) ClearName() *ConversionUpdate {
-	_u.mutation.ClearName()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearName)
 }
 
 // SetInt8ToString sets the "int8_to_string" field.
 func (_u *ConversionUpdate) SetInt8ToString(v string) *ConversionUpdate {
-	_u.mutation.SetInt8ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInt8ToString, v)
 }
 
 // SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
@@ -71,14 +69,12 @@ func (_u *ConversionUpdate) SetNillableInt8ToString(v *string) *ConversionUpdate
 
 // ClearInt8ToString clears the value of the "int8_to_string" field.
 func (_u *ConversionUpdate) ClearInt8ToString() *ConversionUpdate {
-	_u.mutation.ClearInt8ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInt8ToString)
 }
 
 // SetUint8ToString sets the "uint8_to_string" field.
 func (_u *ConversionUpdate) SetUint8ToString(v string) *ConversionUpdate {
-	_u.mutation.SetUint8ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUint8ToString, v)
 }
 
 // SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
@@ -91,14 +87,12 @@ func (_u *ConversionUpdate) SetNillableUint8ToString(v *string) *ConversionUpdat
 
 // ClearUint8ToString clears the value of the "uint8_to_string" field.
 func (_u *ConversionUpdate) ClearUint8ToString() *ConversionUpdate {
-	_u.mutation.ClearUint8ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUint8ToString)
 }
 
 // SetInt16ToString sets the "int16_to_string" field.
 func (_u *ConversionUpdate) SetInt16ToString(v string) *ConversionUpdate {
-	_u.mutation.SetInt16ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInt16ToString, v)
 }
 
 // SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
@@ -111,14 +105,12 @@ func (_u *ConversionUpdate) SetNillableInt16ToString(v *string) *ConversionUpdat
 
 // ClearInt16ToString clears the value of the "int16_to_string" field.
 func (_u *ConversionUpdate) ClearInt16ToString() *ConversionUpdate {
-	_u.mutation.ClearInt16ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInt16ToString)
 }
 
 // SetUint16ToString sets the "uint16_to_string" field.
 func (_u *ConversionUpdate) SetUint16ToString(v string) *ConversionUpdate {
-	_u.mutation.SetUint16ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUint16ToString, v)
 }
 
 // SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
@@ -131,14 +123,12 @@ func (_u *ConversionUpdate) SetNillableUint16ToString(v *string) *ConversionUpda
 
 // ClearUint16ToString clears the value of the "uint16_to_string" field.
 func (_u *ConversionUpdate) ClearUint16ToString() *ConversionUpdate {
-	_u.mutation.ClearUint16ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUint16ToString)
 }
 
 // SetInt32ToString sets the "int32_to_string" field.
 func (_u *ConversionUpdate) SetInt32ToString(v string) *ConversionUpdate {
-	_u.mutation.SetInt32ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInt32ToString, v)
 }
 
 // SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
@@ -151,14 +141,12 @@ func (_u *ConversionUpdate) SetNillableInt32ToString(v *string) *ConversionUpdat
 
 // ClearInt32ToString clears the value of the "int32_to_string" field.
 func (_u *ConversionUpdate) ClearInt32ToString() *ConversionUpdate {
-	_u.mutation.ClearInt32ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInt32ToString)
 }
 
 // SetUint32ToString sets the "uint32_to_string" field.
 func (_u *ConversionUpdate) SetUint32ToString(v string) *ConversionUpdate {
-	_u.mutation.SetUint32ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUint32ToString, v)
 }
 
 // SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
@@ -171,14 +159,12 @@ func (_u *ConversionUpdate) SetNillableUint32ToString(v *string) *ConversionUpda
 
 // ClearUint32ToString clears the value of the "uint32_to_string" field.
 func (_u *ConversionUpdate) ClearUint32ToString() *ConversionUpdate {
-	_u.mutation.ClearUint32ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUint32ToString)
 }
 
 // SetInt64ToString sets the "int64_to_string" field.
 func (_u *ConversionUpdate) SetInt64ToString(v string) *ConversionUpdate {
-	_u.mutation.SetInt64ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInt64ToString, v)
 }
 
 // SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
@@ -191,14 +177,12 @@ func (_u *ConversionUpdate) SetNillableInt64ToString(v *string) *ConversionUpdat
 
 // ClearInt64ToString clears the value of the "int64_to_string" field.
 func (_u *ConversionUpdate) ClearInt64ToString() *ConversionUpdate {
-	_u.mutation.ClearInt64ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInt64ToString)
 }
 
 // SetUint64ToString sets the "uint64_to_string" field.
 func (_u *ConversionUpdate) SetUint64ToString(v string) *ConversionUpdate {
-	_u.mutation.SetUint64ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUint64ToString, v)
 }
 
 // SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
@@ -211,14 +195,11 @@ func (_u *ConversionUpdate) SetNillableUint64ToString(v *string) *ConversionUpda
 
 // ClearUint64ToString clears the value of the "uint64_to_string" field.
 func (_u *ConversionUpdate) ClearUint64ToString() *ConversionUpdate {
-	_u.mutation.ClearUint64ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUint64ToString)
 }
 
 // Mutation returns the ConversionMutation object of the builder.
-func (_u *ConversionUpdate) Mutation() *ConversionMutation {
-	return _u.mutation
-}
+func (_u *ConversionUpdate) Mutation() *ConversionMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ConversionUpdate) Save(ctx context.Context) (int, error) {
@@ -226,19 +207,10 @@ func (_u *ConversionUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ConversionUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *ConversionUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *ConversionUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ConversionUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ConversionUpdate) ExecX(ctx context.Context) {
@@ -337,8 +309,7 @@ func NewConversionUpdateOne(c Config, hooks []Hook, mutation *ConversionMutation
 
 // SetName sets the "name" field.
 func (_u *ConversionUpdateOne) SetName(v string) *ConversionUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -351,14 +322,12 @@ func (_u *ConversionUpdateOne) SetNillableName(v *string) *ConversionUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *ConversionUpdateOne) ClearName() *ConversionUpdateOne {
-	_u.mutation.ClearName()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearName)
 }
 
 // SetInt8ToString sets the "int8_to_string" field.
 func (_u *ConversionUpdateOne) SetInt8ToString(v string) *ConversionUpdateOne {
-	_u.mutation.SetInt8ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInt8ToString, v)
 }
 
 // SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
@@ -371,14 +340,12 @@ func (_u *ConversionUpdateOne) SetNillableInt8ToString(v *string) *ConversionUpd
 
 // ClearInt8ToString clears the value of the "int8_to_string" field.
 func (_u *ConversionUpdateOne) ClearInt8ToString() *ConversionUpdateOne {
-	_u.mutation.ClearInt8ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInt8ToString)
 }
 
 // SetUint8ToString sets the "uint8_to_string" field.
 func (_u *ConversionUpdateOne) SetUint8ToString(v string) *ConversionUpdateOne {
-	_u.mutation.SetUint8ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUint8ToString, v)
 }
 
 // SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
@@ -391,14 +358,12 @@ func (_u *ConversionUpdateOne) SetNillableUint8ToString(v *string) *ConversionUp
 
 // ClearUint8ToString clears the value of the "uint8_to_string" field.
 func (_u *ConversionUpdateOne) ClearUint8ToString() *ConversionUpdateOne {
-	_u.mutation.ClearUint8ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUint8ToString)
 }
 
 // SetInt16ToString sets the "int16_to_string" field.
 func (_u *ConversionUpdateOne) SetInt16ToString(v string) *ConversionUpdateOne {
-	_u.mutation.SetInt16ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInt16ToString, v)
 }
 
 // SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
@@ -411,14 +376,12 @@ func (_u *ConversionUpdateOne) SetNillableInt16ToString(v *string) *ConversionUp
 
 // ClearInt16ToString clears the value of the "int16_to_string" field.
 func (_u *ConversionUpdateOne) ClearInt16ToString() *ConversionUpdateOne {
-	_u.mutation.ClearInt16ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInt16ToString)
 }
 
 // SetUint16ToString sets the "uint16_to_string" field.
 func (_u *ConversionUpdateOne) SetUint16ToString(v string) *ConversionUpdateOne {
-	_u.mutation.SetUint16ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUint16ToString, v)
 }
 
 // SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
@@ -431,14 +394,12 @@ func (_u *ConversionUpdateOne) SetNillableUint16ToString(v *string) *ConversionU
 
 // ClearUint16ToString clears the value of the "uint16_to_string" field.
 func (_u *ConversionUpdateOne) ClearUint16ToString() *ConversionUpdateOne {
-	_u.mutation.ClearUint16ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUint16ToString)
 }
 
 // SetInt32ToString sets the "int32_to_string" field.
 func (_u *ConversionUpdateOne) SetInt32ToString(v string) *ConversionUpdateOne {
-	_u.mutation.SetInt32ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInt32ToString, v)
 }
 
 // SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
@@ -451,14 +412,12 @@ func (_u *ConversionUpdateOne) SetNillableInt32ToString(v *string) *ConversionUp
 
 // ClearInt32ToString clears the value of the "int32_to_string" field.
 func (_u *ConversionUpdateOne) ClearInt32ToString() *ConversionUpdateOne {
-	_u.mutation.ClearInt32ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInt32ToString)
 }
 
 // SetUint32ToString sets the "uint32_to_string" field.
 func (_u *ConversionUpdateOne) SetUint32ToString(v string) *ConversionUpdateOne {
-	_u.mutation.SetUint32ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUint32ToString, v)
 }
 
 // SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
@@ -471,14 +430,12 @@ func (_u *ConversionUpdateOne) SetNillableUint32ToString(v *string) *ConversionU
 
 // ClearUint32ToString clears the value of the "uint32_to_string" field.
 func (_u *ConversionUpdateOne) ClearUint32ToString() *ConversionUpdateOne {
-	_u.mutation.ClearUint32ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUint32ToString)
 }
 
 // SetInt64ToString sets the "int64_to_string" field.
 func (_u *ConversionUpdateOne) SetInt64ToString(v string) *ConversionUpdateOne {
-	_u.mutation.SetInt64ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInt64ToString, v)
 }
 
 // SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
@@ -491,14 +448,12 @@ func (_u *ConversionUpdateOne) SetNillableInt64ToString(v *string) *ConversionUp
 
 // ClearInt64ToString clears the value of the "int64_to_string" field.
 func (_u *ConversionUpdateOne) ClearInt64ToString() *ConversionUpdateOne {
-	_u.mutation.ClearInt64ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInt64ToString)
 }
 
 // SetUint64ToString sets the "uint64_to_string" field.
 func (_u *ConversionUpdateOne) SetUint64ToString(v string) *ConversionUpdateOne {
-	_u.mutation.SetUint64ToString(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUint64ToString, v)
 }
 
 // SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
@@ -511,14 +466,11 @@ func (_u *ConversionUpdateOne) SetNillableUint64ToString(v *string) *ConversionU
 
 // ClearUint64ToString clears the value of the "uint64_to_string" field.
 func (_u *ConversionUpdateOne) ClearUint64ToString() *ConversionUpdateOne {
-	_u.mutation.ClearUint64ToString()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUint64ToString)
 }
 
 // Mutation returns the ConversionMutation object of the builder.
-func (_u *ConversionUpdateOne) Mutation() *ConversionMutation {
-	return _u.mutation
-}
+func (_u *ConversionUpdateOne) Mutation() *ConversionMutation { return _u.mutation }
 
 // Where appends a list predicates to the ConversionUpdate builder.
 func (_u *ConversionUpdateOne) Where(ps ...predicate.Conversion) *ConversionUpdateOne {
@@ -540,18 +492,11 @@ func (_u *ConversionUpdateOne) Save(ctx context.Context) (*Conversion, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *ConversionUpdateOne) SaveX(ctx context.Context) *Conversion {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *ConversionUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ConversionUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ConversionUpdateOne) ExecX(ctx context.Context) {

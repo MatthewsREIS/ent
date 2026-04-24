@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -183,10 +184,7 @@ func (_c *UserCreate) SetNillableFilesCount(v *int) *UserCreate {
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
-func (_c *UserCreate) SetCardID(id string) *UserCreate {
-	_c.mutation.SetCardID(id)
-	return _c
-}
+func (_c *UserCreate) SetCardID(id string) *UserCreate { _c.mutation.SetCardID(id); return _c }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
 func (_c *UserCreate) SetNillableCardID(id *string) *UserCreate {
@@ -197,10 +195,7 @@ func (_c *UserCreate) SetNillableCardID(id *string) *UserCreate {
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_c *UserCreate) AddPetIDs(ids ...string) *UserCreate {
-	_c.mutation.AddPetIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddPetIDs(ids ...string) *UserCreate { _c.mutation.AddPetIDs(ids...); return _c }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_c *UserCreate) AddFileIDs(ids ...string) *UserCreate {
@@ -233,10 +228,7 @@ func (_c *UserCreate) AddFollowingIDs(ids ...string) *UserCreate {
 }
 
 // SetTeamID sets the "team" edge to the Pet entity by ID.
-func (_c *UserCreate) SetTeamID(id string) *UserCreate {
-	_c.mutation.SetTeamID(id)
-	return _c
-}
+func (_c *UserCreate) SetTeamID(id string) *UserCreate { _c.mutation.SetTeamID(id); return _c }
 
 // SetNillableTeamID sets the "team" edge to the Pet entity by ID if the given value is not nil.
 func (_c *UserCreate) SetNillableTeamID(id *string) *UserCreate {
@@ -247,10 +239,7 @@ func (_c *UserCreate) SetNillableTeamID(id *string) *UserCreate {
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (_c *UserCreate) SetSpouseID(id string) *UserCreate {
-	_c.mutation.SetSpouseID(id)
-	return _c
-}
+func (_c *UserCreate) SetSpouseID(id string) *UserCreate { _c.mutation.SetSpouseID(id); return _c }
 
 // SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
 func (_c *UserCreate) SetNillableSpouseID(id *string) *UserCreate {
@@ -267,10 +256,7 @@ func (_c *UserCreate) AddChildIDs(ids ...string) *UserCreate {
 }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
-func (_c *UserCreate) SetParentID(id string) *UserCreate {
-	_c.mutation.SetParentID(id)
-	return _c
-}
+func (_c *UserCreate) SetParentID(id string) *UserCreate { _c.mutation.SetParentID(id); return _c }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
 func (_c *UserCreate) SetNillableParentID(id *string) *UserCreate {
@@ -281,9 +267,7 @@ func (_c *UserCreate) SetNillableParentID(id *string) *UserCreate {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_c *UserCreate) Mutation() *UserMutation {
-	return _c.mutation
-}
+func (_c *UserCreate) Mutation() *UserMutation { return _c.mutation }
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
@@ -292,19 +276,10 @@ func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *UserCreate) SaveX(ctx context.Context) *User { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *UserCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *UserCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *UserCreate) ExecX(ctx context.Context) {

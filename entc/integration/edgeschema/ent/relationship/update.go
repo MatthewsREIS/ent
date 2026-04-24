@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -52,14 +53,12 @@ func (_u *RelationshipUpdate) SetNillableWeight(v *int) *RelationshipUpdate {
 
 // AddWeight adds value to the "weight" field.
 func (_u *RelationshipUpdate) AddWeight(v int) *RelationshipUpdate {
-	_u.mutation.AddWeight(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddWeight, v)
 }
 
 // SetUserID sets the "user_id" field.
 func (_u *RelationshipUpdate) SetUserID(v int) *RelationshipUpdate {
-	_u.mutation.SetUserID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, v)
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
@@ -72,8 +71,7 @@ func (_u *RelationshipUpdate) SetNillableUserID(v *int) *RelationshipUpdate {
 
 // SetRelativeID sets the "relative_id" field.
 func (_u *RelationshipUpdate) SetRelativeID(v int) *RelationshipUpdate {
-	_u.mutation.SetRelativeID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetRelativeID, v)
 }
 
 // SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
@@ -86,8 +84,7 @@ func (_u *RelationshipUpdate) SetNillableRelativeID(v *int) *RelationshipUpdate 
 
 // SetInfoID sets the "info_id" field.
 func (_u *RelationshipUpdate) SetInfoID(v int) *RelationshipUpdate {
-	_u.mutation.SetInfoID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInfoID, v)
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
@@ -100,31 +97,25 @@ func (_u *RelationshipUpdate) SetNillableInfoID(v *int) *RelationshipUpdate {
 
 // ClearInfoID clears the value of the "info_id" field.
 func (_u *RelationshipUpdate) ClearInfoID() *RelationshipUpdate {
-	_u.mutation.ClearInfoID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInfoID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
-func (_u *RelationshipUpdate) Mutation() *RelationshipMutation {
-	return _u.mutation
-}
+func (_u *RelationshipUpdate) Mutation() *RelationshipMutation { return _u.mutation }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *RelationshipUpdate) ClearUser() *RelationshipUpdate {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // ClearRelative clears the "relative" edge to the User entity.
 func (_u *RelationshipUpdate) ClearRelative() *RelationshipUpdate {
-	_u.mutation.ClearRelative()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRelative)
 }
 
 // ClearInfo clears the "info" edge to the RelationshipInfo entity.
 func (_u *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
-	_u.mutation.ClearInfo()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInfo)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -133,19 +124,10 @@ func (_u *RelationshipUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *RelationshipUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *RelationshipUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *RelationshipUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RelationshipUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RelationshipUpdate) ExecX(ctx context.Context) {
@@ -312,14 +294,12 @@ func (_u *RelationshipUpdateOne) SetNillableWeight(v *int) *RelationshipUpdateOn
 
 // AddWeight adds value to the "weight" field.
 func (_u *RelationshipUpdateOne) AddWeight(v int) *RelationshipUpdateOne {
-	_u.mutation.AddWeight(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddWeight, v)
 }
 
 // SetUserID sets the "user_id" field.
 func (_u *RelationshipUpdateOne) SetUserID(v int) *RelationshipUpdateOne {
-	_u.mutation.SetUserID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetUserID, v)
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
@@ -332,8 +312,7 @@ func (_u *RelationshipUpdateOne) SetNillableUserID(v *int) *RelationshipUpdateOn
 
 // SetRelativeID sets the "relative_id" field.
 func (_u *RelationshipUpdateOne) SetRelativeID(v int) *RelationshipUpdateOne {
-	_u.mutation.SetRelativeID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetRelativeID, v)
 }
 
 // SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
@@ -346,8 +325,7 @@ func (_u *RelationshipUpdateOne) SetNillableRelativeID(v *int) *RelationshipUpda
 
 // SetInfoID sets the "info_id" field.
 func (_u *RelationshipUpdateOne) SetInfoID(v int) *RelationshipUpdateOne {
-	_u.mutation.SetInfoID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInfoID, v)
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
@@ -360,31 +338,25 @@ func (_u *RelationshipUpdateOne) SetNillableInfoID(v *int) *RelationshipUpdateOn
 
 // ClearInfoID clears the value of the "info_id" field.
 func (_u *RelationshipUpdateOne) ClearInfoID() *RelationshipUpdateOne {
-	_u.mutation.ClearInfoID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInfoID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
-func (_u *RelationshipUpdateOne) Mutation() *RelationshipMutation {
-	return _u.mutation
-}
+func (_u *RelationshipUpdateOne) Mutation() *RelationshipMutation { return _u.mutation }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *RelationshipUpdateOne) ClearUser() *RelationshipUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUser)
 }
 
 // ClearRelative clears the "relative" edge to the User entity.
 func (_u *RelationshipUpdateOne) ClearRelative() *RelationshipUpdateOne {
-	_u.mutation.ClearRelative()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRelative)
 }
 
 // ClearInfo clears the "info" edge to the RelationshipInfo entity.
 func (_u *RelationshipUpdateOne) ClearInfo() *RelationshipUpdateOne {
-	_u.mutation.ClearInfo()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInfo)
 }
 
 // Where appends a list predicates to the RelationshipUpdate builder.
@@ -407,18 +379,11 @@ func (_u *RelationshipUpdateOne) Save(ctx context.Context) (*Relationship, error
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *RelationshipUpdateOne) SaveX(ctx context.Context) *Relationship {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *RelationshipUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RelationshipUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RelationshipUpdateOne) ExecX(ctx context.Context) {

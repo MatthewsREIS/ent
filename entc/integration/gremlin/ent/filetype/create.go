@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FileTypeCreate is the builder for creating a FileType entity.
@@ -71,9 +72,7 @@ func (_c *FileTypeCreate) AddFileIDs(ids ...string) *FileTypeCreate {
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (_c *FileTypeCreate) Mutation() *FileTypeMutation {
-	return _c.mutation
-}
+func (_c *FileTypeCreate) Mutation() *FileTypeMutation { return _c.mutation }
 
 // Save creates the FileType in the database.
 func (_c *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
@@ -82,19 +81,10 @@ func (_c *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *FileTypeCreate) SaveX(ctx context.Context) *FileType {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *FileTypeCreate) SaveX(ctx context.Context) *FileType { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *FileTypeCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *FileTypeCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *FileTypeCreate) ExecX(ctx context.Context) {

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,8 +30,7 @@ func NewPostCreate(c Config, hooks []Hook, mutation *PostMutation) *PostCreate {
 
 // SetText sets the "text" field.
 func (_c *PostCreate) SetText(v string) *PostCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -43,8 +43,7 @@ func (_c *PostCreate) SetNillableText(v *string) *PostCreate {
 
 // SetAuthorID sets the "author_id" field.
 func (_c *PostCreate) SetAuthorID(v int) *PostCreate {
-	_c.mutation.SetAuthorID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetAuthorID, v)
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
@@ -62,9 +61,7 @@ func (_c *PostCreate) AddCommentIDs(ids ...int) *PostCreate {
 }
 
 // Mutation returns the PostMutation object of the builder.
-func (_c *PostCreate) Mutation() *PostMutation {
-	return _c.mutation
-}
+func (_c *PostCreate) Mutation() *PostMutation { return _c.mutation }
 
 // Save creates the Post in the database.
 func (_c *PostCreate) Save(ctx context.Context) (*Post, error) {
@@ -73,19 +70,10 @@ func (_c *PostCreate) Save(ctx context.Context) (*Post, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *PostCreate) SaveX(ctx context.Context) *Post {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *PostCreate) SaveX(ctx context.Context) *Post { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *PostCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *PostCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *PostCreate) ExecX(ctx context.Context) {

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -30,14 +31,12 @@ func NewTaskCreate(c Config, hooks []Hook, mutation *TaskMutation) *TaskCreate {
 
 // SetTitle sets the "title" field.
 func (_c *TaskCreate) SetTitle(v string) *TaskCreate {
-	_c.mutation.SetTitle(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTitle, v)
 }
 
 // SetDescription sets the "description" field.
 func (_c *TaskCreate) SetDescription(v string) *TaskCreate {
-	_c.mutation.SetDescription(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDescription, v)
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
@@ -50,8 +49,7 @@ func (_c *TaskCreate) SetNillableDescription(v *string) *TaskCreate {
 
 // SetStatus sets the "status" field.
 func (_c *TaskCreate) SetStatus(v Status) *TaskCreate {
-	_c.mutation.SetStatus(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetStatus, v)
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
@@ -64,8 +62,7 @@ func (_c *TaskCreate) SetNillableStatus(v *Status) *TaskCreate {
 
 // SetUUID sets the "uuid" field.
 func (_c *TaskCreate) SetUUID(v uuid.UUID) *TaskCreate {
-	_c.mutation.SetUUID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUUID, v)
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
@@ -77,15 +74,11 @@ func (_c *TaskCreate) SetNillableUUID(v *uuid.UUID) *TaskCreate {
 }
 
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (_c *TaskCreate) AddTeamIDs(ids ...int) *TaskCreate {
-	_c.mutation.AddTeamIDs(ids...)
-	return _c
-}
+func (_c *TaskCreate) AddTeamIDs(ids ...int) *TaskCreate { _c.mutation.AddTeamIDs(ids...); return _c }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *TaskCreate) SetOwnerID(id int) *TaskCreate {
-	_c.mutation.SetOwnerID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -97,9 +90,7 @@ func (_c *TaskCreate) SetNillableOwnerID(id *int) *TaskCreate {
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (_c *TaskCreate) Mutation() *TaskMutation {
-	return _c.mutation
-}
+func (_c *TaskCreate) Mutation() *TaskMutation { return _c.mutation }
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
@@ -110,19 +101,10 @@ func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TaskCreate) SaveX(ctx context.Context) *Task {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *TaskCreate) SaveX(ctx context.Context) *Task { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *TaskCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TaskCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TaskCreate) ExecX(ctx context.Context) {

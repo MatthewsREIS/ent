@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,11 @@ func NewPetUpdate(c Config, hooks []Hook, mutation *PetMutation) *PetUpdate {
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -50,10 +47,7 @@ func (_u *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 }
 
 // AddCarIDs adds the "cars" edge to the Car entity by IDs.
-func (_u *PetUpdate) AddCarIDs(ids ...int) *PetUpdate {
-	_u.mutation.AddCarIDs(ids...)
-	return _u
-}
+func (_u *PetUpdate) AddCarIDs(ids ...int) *PetUpdate { _u.mutation.AddCarIDs(ids...); return _u }
 
 // AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (_u *PetUpdate) AddFriendIDs(ids ...string) *PetUpdate {
@@ -63,8 +57,7 @@ func (_u *PetUpdate) AddFriendIDs(ids ...string) *PetUpdate {
 
 // SetBestFriendID sets the "best_friend" edge to the Pet entity by ID.
 func (_u *PetUpdate) SetBestFriendID(id string) *PetUpdate {
-	_u.mutation.SetBestFriendID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBestFriendID, id)
 }
 
 // SetNillableBestFriendID sets the "best_friend" edge to the Pet entity by ID if the given value is not nil.
@@ -76,32 +69,20 @@ func (_u *PetUpdate) SetNillableBestFriendID(id *string) *PetUpdate {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_u *PetUpdate) Mutation() *PetMutation {
-	return _u.mutation
-}
+func (_u *PetUpdate) Mutation() *PetMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *PetUpdate) ClearOwner() *PetUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // ClearCars clears all "cars" edges to the Car entity.
-func (_u *PetUpdate) ClearCars() *PetUpdate {
-	_u.mutation.ClearCars()
-	return _u
-}
+func (_u *PetUpdate) ClearCars() *PetUpdate { return entbuilder.BClear(_u, _u.mutation.ClearCars) }
 
 // RemoveCarIDs removes the "cars" edge to Car entities by IDs.
-func (_u *PetUpdate) RemoveCarIDs(ids ...int) *PetUpdate {
-	_u.mutation.RemoveCarIDs(ids...)
-	return _u
-}
+func (_u *PetUpdate) RemoveCarIDs(ids ...int) *PetUpdate { _u.mutation.RemoveCarIDs(ids...); return _u }
 
 // ClearFriends clears all "friends" edges to the Pet entity.
 func (_u *PetUpdate) ClearFriends() *PetUpdate {
-	_u.mutation.ClearFriends()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFriends)
 }
 
 // RemoveFriendIDs removes the "friends" edge to Pet entities by IDs.
@@ -112,8 +93,7 @@ func (_u *PetUpdate) RemoveFriendIDs(ids ...string) *PetUpdate {
 
 // ClearBestFriend clears the "best_friend" edge to the Pet entity.
 func (_u *PetUpdate) ClearBestFriend() *PetUpdate {
-	_u.mutation.ClearBestFriend()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBestFriend)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -122,19 +102,10 @@ func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PetUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *PetUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *PetUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PetUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PetUpdate) ExecX(ctx context.Context) {
@@ -327,8 +298,7 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -340,10 +310,7 @@ func (_u *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 }
 
 // AddCarIDs adds the "cars" edge to the Car entity by IDs.
-func (_u *PetUpdateOne) AddCarIDs(ids ...int) *PetUpdateOne {
-	_u.mutation.AddCarIDs(ids...)
-	return _u
-}
+func (_u *PetUpdateOne) AddCarIDs(ids ...int) *PetUpdateOne { _u.mutation.AddCarIDs(ids...); return _u }
 
 // AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (_u *PetUpdateOne) AddFriendIDs(ids ...string) *PetUpdateOne {
@@ -353,8 +320,7 @@ func (_u *PetUpdateOne) AddFriendIDs(ids ...string) *PetUpdateOne {
 
 // SetBestFriendID sets the "best_friend" edge to the Pet entity by ID.
 func (_u *PetUpdateOne) SetBestFriendID(id string) *PetUpdateOne {
-	_u.mutation.SetBestFriendID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetBestFriendID, id)
 }
 
 // SetNillableBestFriendID sets the "best_friend" edge to the Pet entity by ID if the given value is not nil.
@@ -366,20 +332,16 @@ func (_u *PetUpdateOne) SetNillableBestFriendID(id *string) *PetUpdateOne {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_u *PetUpdateOne) Mutation() *PetMutation {
-	return _u.mutation
-}
+func (_u *PetUpdateOne) Mutation() *PetMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // ClearCars clears all "cars" edges to the Car entity.
 func (_u *PetUpdateOne) ClearCars() *PetUpdateOne {
-	_u.mutation.ClearCars()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearCars)
 }
 
 // RemoveCarIDs removes the "cars" edge to Car entities by IDs.
@@ -390,8 +352,7 @@ func (_u *PetUpdateOne) RemoveCarIDs(ids ...int) *PetUpdateOne {
 
 // ClearFriends clears all "friends" edges to the Pet entity.
 func (_u *PetUpdateOne) ClearFriends() *PetUpdateOne {
-	_u.mutation.ClearFriends()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFriends)
 }
 
 // RemoveFriendIDs removes the "friends" edge to Pet entities by IDs.
@@ -402,15 +363,11 @@ func (_u *PetUpdateOne) RemoveFriendIDs(ids ...string) *PetUpdateOne {
 
 // ClearBestFriend clears the "best_friend" edge to the Pet entity.
 func (_u *PetUpdateOne) ClearBestFriend() *PetUpdateOne {
-	_u.mutation.ClearBestFriend()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBestFriend)
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -425,19 +382,10 @@ func (_u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PetUpdateOne) SaveX(ctx context.Context) *Pet {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *PetUpdateOne) SaveX(ctx context.Context) *Pet { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *PetUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PetUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PetUpdateOne) ExecX(ctx context.Context) {

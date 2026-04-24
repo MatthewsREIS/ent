@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,14 +32,12 @@ func NewFileTypeCreate(c Config, hooks []Hook, mutation *FileTypeMutation) *File
 
 // SetName sets the "name" field.
 func (_c *FileTypeCreate) SetName(v string) *FileTypeCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // SetType sets the "type" field.
 func (_c *FileTypeCreate) SetType(v Type) *FileTypeCreate {
-	_c.mutation.SetType(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetType, v)
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
@@ -51,8 +50,7 @@ func (_c *FileTypeCreate) SetNillableType(v *Type) *FileTypeCreate {
 
 // SetState sets the "state" field.
 func (_c *FileTypeCreate) SetState(v State) *FileTypeCreate {
-	_c.mutation.SetState(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetState, v)
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
@@ -70,9 +68,7 @@ func (_c *FileTypeCreate) AddFileIDs(ids ...int) *FileTypeCreate {
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (_c *FileTypeCreate) Mutation() *FileTypeMutation {
-	return _c.mutation
-}
+func (_c *FileTypeCreate) Mutation() *FileTypeMutation { return _c.mutation }
 
 // Save creates the FileType in the database.
 func (_c *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
@@ -81,19 +77,10 @@ func (_c *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *FileTypeCreate) SaveX(ctx context.Context) *FileType {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *FileTypeCreate) SaveX(ctx context.Context) *FileType { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *FileTypeCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *FileTypeCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *FileTypeCreate) ExecX(ctx context.Context) {

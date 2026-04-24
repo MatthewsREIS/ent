@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,14 +34,12 @@ func NewAccountCreate(c Config, hooks []Hook, mutation *AccountMutation) *Accoun
 
 // SetEmail sets the "email" field.
 func (_c *AccountCreate) SetEmail(v string) *AccountCreate {
-	_c.mutation.SetEmail(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetEmail, v)
 }
 
 // SetID sets the "id" field.
 func (_c *AccountCreate) SetID(v sid.ID) *AccountCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
@@ -58,9 +57,7 @@ func (_c *AccountCreate) AddTokenIDs(ids ...sid.ID) *AccountCreate {
 }
 
 // Mutation returns the AccountMutation object of the builder.
-func (_c *AccountCreate) Mutation() *AccountMutation {
-	return _c.mutation
-}
+func (_c *AccountCreate) Mutation() *AccountMutation { return _c.mutation }
 
 // Save creates the Account in the database.
 func (_c *AccountCreate) Save(ctx context.Context) (*Account, error) {
@@ -69,19 +66,10 @@ func (_c *AccountCreate) Save(ctx context.Context) (*Account, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *AccountCreate) SaveX(ctx context.Context) *Account {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *AccountCreate) SaveX(ctx context.Context) *Account { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *AccountCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *AccountCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *AccountCreate) ExecX(ctx context.Context) {

@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,9 +31,7 @@ func NewBuilderCreate(c Config, hooks []Hook, mutation *BuilderMutation) *Builde
 }
 
 // Mutation returns the BuilderMutation object of the builder.
-func (_c *BuilderCreate) Mutation() *BuilderMutation {
-	return _c.mutation
-}
+func (_c *BuilderCreate) Mutation() *BuilderMutation { return _c.mutation }
 
 // Save creates the Builder in the database.
 func (_c *BuilderCreate) Save(ctx context.Context) (*Builder, error) {
@@ -40,19 +39,10 @@ func (_c *BuilderCreate) Save(ctx context.Context) (*Builder, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *BuilderCreate) SaveX(ctx context.Context) *Builder {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *BuilderCreate) SaveX(ctx context.Context) *Builder { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *BuilderCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *BuilderCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *BuilderCreate) ExecX(ctx context.Context) {

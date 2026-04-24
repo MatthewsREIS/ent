@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -34,8 +35,7 @@ func NewBlobCreate(c Config, hooks []Hook, mutation *BlobMutation) *BlobCreate {
 
 // SetUUID sets the "uuid" field.
 func (_c *BlobCreate) SetUUID(v uuid.UUID) *BlobCreate {
-	_c.mutation.SetUUID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUUID, v)
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
@@ -48,8 +48,7 @@ func (_c *BlobCreate) SetNillableUUID(v *uuid.UUID) *BlobCreate {
 
 // SetCount sets the "count" field.
 func (_c *BlobCreate) SetCount(v int) *BlobCreate {
-	_c.mutation.SetCount(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetCount, v)
 }
 
 // SetNillableCount sets the "count" field if the given value is not nil.
@@ -62,8 +61,7 @@ func (_c *BlobCreate) SetNillableCount(v *int) *BlobCreate {
 
 // SetID sets the "id" field.
 func (_c *BlobCreate) SetID(v uuid.UUID) *BlobCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
@@ -76,8 +74,7 @@ func (_c *BlobCreate) SetNillableID(v *uuid.UUID) *BlobCreate {
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
 func (_c *BlobCreate) SetParentID(id uuid.UUID) *BlobCreate {
-	_c.mutation.SetParentID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
@@ -95,9 +92,7 @@ func (_c *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
 }
 
 // Mutation returns the BlobMutation object of the builder.
-func (_c *BlobCreate) Mutation() *BlobMutation {
-	return _c.mutation
-}
+func (_c *BlobCreate) Mutation() *BlobMutation { return _c.mutation }
 
 // Save creates the Blob in the database.
 func (_c *BlobCreate) Save(ctx context.Context) (*Blob, error) {
@@ -106,19 +101,10 @@ func (_c *BlobCreate) Save(ctx context.Context) (*Blob, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *BlobCreate) SaveX(ctx context.Context) *Blob {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *BlobCreate) SaveX(ctx context.Context) *Blob { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *BlobCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *BlobCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *BlobCreate) ExecX(ctx context.Context) {

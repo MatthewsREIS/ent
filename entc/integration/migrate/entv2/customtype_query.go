@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/customtype"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,23 +39,14 @@ func (_q *CustomTypeQuery) Where(ps ...predicate.CustomType) *CustomTypeQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *CustomTypeQuery) Limit(limit int) *CustomTypeQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *CustomTypeQuery) Limit(limit int) *CustomTypeQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *CustomTypeQuery) Offset(offset int) *CustomTypeQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *CustomTypeQuery) Offset(offset int) *CustomTypeQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *CustomTypeQuery) Unique(unique bool) *CustomTypeQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *CustomTypeQuery) Unique(unique bool) *CustomTypeQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *CustomTypeQuery) Order(o ...customtype.OrderOption) *CustomTypeQuery {
@@ -127,11 +119,7 @@ func (_q *CustomTypeQuery) Only(ctx context.Context) (*CustomType, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (_q *CustomTypeQuery) OnlyX(ctx context.Context) *CustomType {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_q.Only(ctx))
 }
 
 // OnlyID is like Only, but returns the only CustomType ID in the query.
@@ -154,13 +142,7 @@ func (_q *CustomTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *CustomTypeQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *CustomTypeQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of CustomTypes.
 func (_q *CustomTypeQuery) All(ctx context.Context) ([]*CustomType, error) {
@@ -174,11 +156,7 @@ func (_q *CustomTypeQuery) All(ctx context.Context) ([]*CustomType, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (_q *CustomTypeQuery) AllX(ctx context.Context) []*CustomType {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
+	return entbuilder.Must(_q.All(ctx))
 }
 
 // IDs executes the query and returns a list of CustomType IDs.
@@ -194,13 +172,7 @@ func (_q *CustomTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *CustomTypeQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *CustomTypeQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *CustomTypeQuery) Count(ctx context.Context) (int, error) {
@@ -212,13 +184,7 @@ func (_q *CustomTypeQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *CustomTypeQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *CustomTypeQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *CustomTypeQuery) Exist(ctx context.Context) (bool, error) {
@@ -234,13 +200,7 @@ func (_q *CustomTypeQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *CustomTypeQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *CustomTypeQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the CustomTypeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

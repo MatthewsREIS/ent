@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,14 +32,11 @@ func NewRelationshipInfoCreate(c Config, hooks []Hook, mutation *RelationshipInf
 
 // SetText sets the "text" field.
 func (_c *RelationshipInfoCreate) SetText(v string) *RelationshipInfoCreate {
-	_c.mutation.SetText(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetText, v)
 }
 
 // Mutation returns the RelationshipInfoMutation object of the builder.
-func (_c *RelationshipInfoCreate) Mutation() *RelationshipInfoMutation {
-	return _c.mutation
-}
+func (_c *RelationshipInfoCreate) Mutation() *RelationshipInfoMutation { return _c.mutation }
 
 // Save creates the RelationshipInfo in the database.
 func (_c *RelationshipInfoCreate) Save(ctx context.Context) (*RelationshipInfo, error) {
@@ -47,18 +45,11 @@ func (_c *RelationshipInfoCreate) Save(ctx context.Context) (*RelationshipInfo, 
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *RelationshipInfoCreate) SaveX(ctx context.Context) *RelationshipInfo {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *RelationshipInfoCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *RelationshipInfoCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *RelationshipInfoCreate) ExecX(ctx context.Context) {

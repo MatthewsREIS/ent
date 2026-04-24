@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,10 +31,7 @@ func NewCarUpdate(c Config, hooks []Hook, mutation *CarMutation) *CarUpdate {
 }
 
 // Where appends a list predicates to the CarUpdate builder.
-func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetBeforeID sets the "before_id" field.
 func (_u *CarUpdate) SetBeforeID(v float64) *CarUpdate {
@@ -52,14 +50,12 @@ func (_u *CarUpdate) SetNillableBeforeID(v *float64) *CarUpdate {
 
 // AddBeforeID adds value to the "before_id" field.
 func (_u *CarUpdate) AddBeforeID(v float64) *CarUpdate {
-	_u.mutation.AddBeforeID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddBeforeID, v)
 }
 
 // ClearBeforeID clears the value of the "before_id" field.
 func (_u *CarUpdate) ClearBeforeID() *CarUpdate {
-	_u.mutation.ClearBeforeID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBeforeID)
 }
 
 // SetAfterID sets the "after_id" field.
@@ -79,20 +75,17 @@ func (_u *CarUpdate) SetNillableAfterID(v *float64) *CarUpdate {
 
 // AddAfterID adds value to the "after_id" field.
 func (_u *CarUpdate) AddAfterID(v float64) *CarUpdate {
-	_u.mutation.AddAfterID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddAfterID, v)
 }
 
 // ClearAfterID clears the value of the "after_id" field.
 func (_u *CarUpdate) ClearAfterID() *CarUpdate {
-	_u.mutation.ClearAfterID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAfterID)
 }
 
 // SetModel sets the "model" field.
 func (_u *CarUpdate) SetModel(v string) *CarUpdate {
-	_u.mutation.SetModel(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetModel, v)
 }
 
 // SetNillableModel sets the "model" field if the given value is not nil.
@@ -105,8 +98,7 @@ func (_u *CarUpdate) SetNillableModel(v *string) *CarUpdate {
 
 // SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (_u *CarUpdate) SetOwnerID(id string) *CarUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
@@ -118,15 +110,10 @@ func (_u *CarUpdate) SetNillableOwnerID(id *string) *CarUpdate {
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (_u *CarUpdate) Mutation() *CarMutation {
-	return _u.mutation
-}
+func (_u *CarUpdate) Mutation() *CarMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the Pet entity.
-func (_u *CarUpdate) ClearOwner() *CarUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *CarUpdate) ClearOwner() *CarUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
@@ -134,19 +121,10 @@ func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CarUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *CarUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *CarUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CarUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CarUpdate) ExecX(ctx context.Context) {
@@ -274,14 +252,12 @@ func (_u *CarUpdateOne) SetNillableBeforeID(v *float64) *CarUpdateOne {
 
 // AddBeforeID adds value to the "before_id" field.
 func (_u *CarUpdateOne) AddBeforeID(v float64) *CarUpdateOne {
-	_u.mutation.AddBeforeID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddBeforeID, v)
 }
 
 // ClearBeforeID clears the value of the "before_id" field.
 func (_u *CarUpdateOne) ClearBeforeID() *CarUpdateOne {
-	_u.mutation.ClearBeforeID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBeforeID)
 }
 
 // SetAfterID sets the "after_id" field.
@@ -301,20 +277,17 @@ func (_u *CarUpdateOne) SetNillableAfterID(v *float64) *CarUpdateOne {
 
 // AddAfterID adds value to the "after_id" field.
 func (_u *CarUpdateOne) AddAfterID(v float64) *CarUpdateOne {
-	_u.mutation.AddAfterID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddAfterID, v)
 }
 
 // ClearAfterID clears the value of the "after_id" field.
 func (_u *CarUpdateOne) ClearAfterID() *CarUpdateOne {
-	_u.mutation.ClearAfterID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearAfterID)
 }
 
 // SetModel sets the "model" field.
 func (_u *CarUpdateOne) SetModel(v string) *CarUpdateOne {
-	_u.mutation.SetModel(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetModel, v)
 }
 
 // SetNillableModel sets the "model" field if the given value is not nil.
@@ -327,8 +300,7 @@ func (_u *CarUpdateOne) SetNillableModel(v *string) *CarUpdateOne {
 
 // SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (_u *CarUpdateOne) SetOwnerID(id string) *CarUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
@@ -340,21 +312,15 @@ func (_u *CarUpdateOne) SetNillableOwnerID(id *string) *CarUpdateOne {
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (_u *CarUpdateOne) Mutation() *CarMutation {
-	return _u.mutation
-}
+func (_u *CarUpdateOne) Mutation() *CarMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the Pet entity.
 func (_u *CarUpdateOne) ClearOwner() *CarUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // Where appends a list predicates to the CarUpdate builder.
-func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -369,19 +335,10 @@ func (_u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *CarUpdateOne) SaveX(ctx context.Context) *Car {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *CarUpdateOne) SaveX(ctx context.Context) *Car { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *CarUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *CarUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *CarUpdateOne) ExecX(ctx context.Context) {

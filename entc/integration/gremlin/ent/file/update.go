@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FileUpdate is the builder for updating File entities.
@@ -35,10 +36,7 @@ func NewFileUpdate(c Config, hooks []Hook, mutation *FileMutation) *FileUpdate {
 }
 
 // Where appends a list predicates to the FileUpdate builder.
-func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetSetID sets the "set_id" field.
 func (_u *FileUpdate) SetSetID(v int) *FileUpdate {
@@ -56,16 +54,10 @@ func (_u *FileUpdate) SetNillableSetID(v *int) *FileUpdate {
 }
 
 // AddSetID adds value to the "set_id" field.
-func (_u *FileUpdate) AddSetID(v int) *FileUpdate {
-	_u.mutation.AddSetID(v)
-	return _u
-}
+func (_u *FileUpdate) AddSetID(v int) *FileUpdate { _u.mutation.AddSetID(v); return _u }
 
 // ClearSetID clears the value of the "set_id" field.
-func (_u *FileUpdate) ClearSetID() *FileUpdate {
-	_u.mutation.ClearSetID()
-	return _u
-}
+func (_u *FileUpdate) ClearSetID() *FileUpdate { _u.mutation.ClearSetID(); return _u }
 
 // SetSize sets the "size" field.
 func (_u *FileUpdate) SetSize(v int) *FileUpdate {
@@ -83,10 +75,7 @@ func (_u *FileUpdate) SetNillableSize(v *int) *FileUpdate {
 }
 
 // AddSize adds value to the "size" field.
-func (_u *FileUpdate) AddSize(v int) *FileUpdate {
-	_u.mutation.AddSize(v)
-	return _u
-}
+func (_u *FileUpdate) AddSize(v int) *FileUpdate { _u.mutation.AddSize(v); return _u }
 
 // SetName sets the "name" field.
 func (_u *FileUpdate) SetName(v string) *FileUpdate {
@@ -117,10 +106,7 @@ func (_u *FileUpdate) SetNillableUser(v *string) *FileUpdate {
 }
 
 // ClearUser clears the value of the "user" field.
-func (_u *FileUpdate) ClearUser() *FileUpdate {
-	_u.mutation.ClearUser()
-	return _u
-}
+func (_u *FileUpdate) ClearUser() *FileUpdate { _u.mutation.ClearUser(); return _u }
 
 // SetGroup sets the "group" field.
 func (_u *FileUpdate) SetGroup(v string) *FileUpdate {
@@ -137,10 +123,7 @@ func (_u *FileUpdate) SetNillableGroup(v *string) *FileUpdate {
 }
 
 // ClearGroup clears the value of the "group" field.
-func (_u *FileUpdate) ClearGroup() *FileUpdate {
-	_u.mutation.ClearGroup()
-	return _u
-}
+func (_u *FileUpdate) ClearGroup() *FileUpdate { _u.mutation.ClearGroup(); return _u }
 
 // SetOp sets the "op" field.
 func (_u *FileUpdate) SetOp(v bool) *FileUpdate {
@@ -157,10 +140,7 @@ func (_u *FileUpdate) SetNillableOp(v *bool) *FileUpdate {
 }
 
 // ClearOp clears the value of the "op" field.
-func (_u *FileUpdate) ClearOp() *FileUpdate {
-	_u.mutation.ClearOp()
-	return _u
-}
+func (_u *FileUpdate) ClearOp() *FileUpdate { _u.mutation.ClearOp(); return _u }
 
 // SetFieldID sets the "field_id" field.
 func (_u *FileUpdate) SetFieldID(v int) *FileUpdate {
@@ -178,16 +158,10 @@ func (_u *FileUpdate) SetNillableFieldID(v *int) *FileUpdate {
 }
 
 // AddFieldID adds value to the "field_id" field.
-func (_u *FileUpdate) AddFieldID(v int) *FileUpdate {
-	_u.mutation.AddFieldID(v)
-	return _u
-}
+func (_u *FileUpdate) AddFieldID(v int) *FileUpdate { _u.mutation.AddFieldID(v); return _u }
 
 // ClearFieldID clears the value of the "field_id" field.
-func (_u *FileUpdate) ClearFieldID() *FileUpdate {
-	_u.mutation.ClearFieldID()
-	return _u
-}
+func (_u *FileUpdate) ClearFieldID() *FileUpdate { _u.mutation.ClearFieldID(); return _u }
 
 // SetCreateTime sets the "create_time" field.
 func (_u *FileUpdate) SetCreateTime(v time.Time) *FileUpdate {
@@ -204,16 +178,10 @@ func (_u *FileUpdate) SetNillableCreateTime(v *time.Time) *FileUpdate {
 }
 
 // ClearCreateTime clears the value of the "create_time" field.
-func (_u *FileUpdate) ClearCreateTime() *FileUpdate {
-	_u.mutation.ClearCreateTime()
-	return _u
-}
+func (_u *FileUpdate) ClearCreateTime() *FileUpdate { _u.mutation.ClearCreateTime(); return _u }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *FileUpdate) SetOwnerID(id string) *FileUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
-}
+func (_u *FileUpdate) SetOwnerID(id string) *FileUpdate { _u.mutation.SetOwnerID(id); return _u }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (_u *FileUpdate) SetNillableOwnerID(id *string) *FileUpdate {
@@ -224,10 +192,7 @@ func (_u *FileUpdate) SetNillableOwnerID(id *string) *FileUpdate {
 }
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
-func (_u *FileUpdate) SetTypeID(id string) *FileUpdate {
-	_u.mutation.SetTypeID(id)
-	return _u
-}
+func (_u *FileUpdate) SetTypeID(id string) *FileUpdate { _u.mutation.SetTypeID(id); return _u }
 
 // SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
 func (_u *FileUpdate) SetNillableTypeID(id *string) *FileUpdate {
@@ -244,27 +209,16 @@ func (_u *FileUpdate) AddFieldIDs(ids ...string) *FileUpdate {
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (_u *FileUpdate) Mutation() *FileMutation {
-	return _u.mutation
-}
+func (_u *FileUpdate) Mutation() *FileMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *FileUpdate) ClearOwner() *FileUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *FileUpdate) ClearOwner() *FileUpdate { _u.mutation.ClearOwner(); return _u }
 
 // ClearType clears the "type" edge to the FileType entity.
-func (_u *FileUpdate) ClearType() *FileUpdate {
-	_u.mutation.ClearType()
-	return _u
-}
+func (_u *FileUpdate) ClearType() *FileUpdate { _u.mutation.ClearType(); return _u }
 
 // ClearFieldEdge clears all "field" edges to the FieldType entity.
-func (_u *FileUpdate) ClearFieldEdge() *FileUpdate {
-	_u.mutation.ClearFieldEdge()
-	return _u
-}
+func (_u *FileUpdate) ClearFieldEdge() *FileUpdate { _u.mutation.ClearFieldEdge(); return _u }
 
 // RemoveFieldIDs removes the "field" edge to FieldType entities by IDs.
 func (_u *FileUpdate) RemoveFieldIDs(ids ...string) *FileUpdate {
@@ -278,19 +232,10 @@ func (_u *FileUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FileUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *FileUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *FileUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FileUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FileUpdate) ExecX(ctx context.Context) {
@@ -474,16 +419,10 @@ func (_u *FileUpdateOne) SetNillableSetID(v *int) *FileUpdateOne {
 }
 
 // AddSetID adds value to the "set_id" field.
-func (_u *FileUpdateOne) AddSetID(v int) *FileUpdateOne {
-	_u.mutation.AddSetID(v)
-	return _u
-}
+func (_u *FileUpdateOne) AddSetID(v int) *FileUpdateOne { _u.mutation.AddSetID(v); return _u }
 
 // ClearSetID clears the value of the "set_id" field.
-func (_u *FileUpdateOne) ClearSetID() *FileUpdateOne {
-	_u.mutation.ClearSetID()
-	return _u
-}
+func (_u *FileUpdateOne) ClearSetID() *FileUpdateOne { _u.mutation.ClearSetID(); return _u }
 
 // SetSize sets the "size" field.
 func (_u *FileUpdateOne) SetSize(v int) *FileUpdateOne {
@@ -501,10 +440,7 @@ func (_u *FileUpdateOne) SetNillableSize(v *int) *FileUpdateOne {
 }
 
 // AddSize adds value to the "size" field.
-func (_u *FileUpdateOne) AddSize(v int) *FileUpdateOne {
-	_u.mutation.AddSize(v)
-	return _u
-}
+func (_u *FileUpdateOne) AddSize(v int) *FileUpdateOne { _u.mutation.AddSize(v); return _u }
 
 // SetName sets the "name" field.
 func (_u *FileUpdateOne) SetName(v string) *FileUpdateOne {
@@ -535,10 +471,7 @@ func (_u *FileUpdateOne) SetNillableUser(v *string) *FileUpdateOne {
 }
 
 // ClearUser clears the value of the "user" field.
-func (_u *FileUpdateOne) ClearUser() *FileUpdateOne {
-	_u.mutation.ClearUser()
-	return _u
-}
+func (_u *FileUpdateOne) ClearUser() *FileUpdateOne { _u.mutation.ClearUser(); return _u }
 
 // SetGroup sets the "group" field.
 func (_u *FileUpdateOne) SetGroup(v string) *FileUpdateOne {
@@ -555,10 +488,7 @@ func (_u *FileUpdateOne) SetNillableGroup(v *string) *FileUpdateOne {
 }
 
 // ClearGroup clears the value of the "group" field.
-func (_u *FileUpdateOne) ClearGroup() *FileUpdateOne {
-	_u.mutation.ClearGroup()
-	return _u
-}
+func (_u *FileUpdateOne) ClearGroup() *FileUpdateOne { _u.mutation.ClearGroup(); return _u }
 
 // SetOp sets the "op" field.
 func (_u *FileUpdateOne) SetOp(v bool) *FileUpdateOne {
@@ -575,10 +505,7 @@ func (_u *FileUpdateOne) SetNillableOp(v *bool) *FileUpdateOne {
 }
 
 // ClearOp clears the value of the "op" field.
-func (_u *FileUpdateOne) ClearOp() *FileUpdateOne {
-	_u.mutation.ClearOp()
-	return _u
-}
+func (_u *FileUpdateOne) ClearOp() *FileUpdateOne { _u.mutation.ClearOp(); return _u }
 
 // SetFieldID sets the "field_id" field.
 func (_u *FileUpdateOne) SetFieldID(v int) *FileUpdateOne {
@@ -596,16 +523,10 @@ func (_u *FileUpdateOne) SetNillableFieldID(v *int) *FileUpdateOne {
 }
 
 // AddFieldID adds value to the "field_id" field.
-func (_u *FileUpdateOne) AddFieldID(v int) *FileUpdateOne {
-	_u.mutation.AddFieldID(v)
-	return _u
-}
+func (_u *FileUpdateOne) AddFieldID(v int) *FileUpdateOne { _u.mutation.AddFieldID(v); return _u }
 
 // ClearFieldID clears the value of the "field_id" field.
-func (_u *FileUpdateOne) ClearFieldID() *FileUpdateOne {
-	_u.mutation.ClearFieldID()
-	return _u
-}
+func (_u *FileUpdateOne) ClearFieldID() *FileUpdateOne { _u.mutation.ClearFieldID(); return _u }
 
 // SetCreateTime sets the "create_time" field.
 func (_u *FileUpdateOne) SetCreateTime(v time.Time) *FileUpdateOne {
@@ -622,16 +543,10 @@ func (_u *FileUpdateOne) SetNillableCreateTime(v *time.Time) *FileUpdateOne {
 }
 
 // ClearCreateTime clears the value of the "create_time" field.
-func (_u *FileUpdateOne) ClearCreateTime() *FileUpdateOne {
-	_u.mutation.ClearCreateTime()
-	return _u
-}
+func (_u *FileUpdateOne) ClearCreateTime() *FileUpdateOne { _u.mutation.ClearCreateTime(); return _u }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
-}
+func (_u *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne { _u.mutation.SetOwnerID(id); return _u }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (_u *FileUpdateOne) SetNillableOwnerID(id *string) *FileUpdateOne {
@@ -642,10 +557,7 @@ func (_u *FileUpdateOne) SetNillableOwnerID(id *string) *FileUpdateOne {
 }
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
-func (_u *FileUpdateOne) SetTypeID(id string) *FileUpdateOne {
-	_u.mutation.SetTypeID(id)
-	return _u
-}
+func (_u *FileUpdateOne) SetTypeID(id string) *FileUpdateOne { _u.mutation.SetTypeID(id); return _u }
 
 // SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
 func (_u *FileUpdateOne) SetNillableTypeID(id *string) *FileUpdateOne {
@@ -662,27 +574,16 @@ func (_u *FileUpdateOne) AddFieldIDs(ids ...string) *FileUpdateOne {
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (_u *FileUpdateOne) Mutation() *FileMutation {
-	return _u.mutation
-}
+func (_u *FileUpdateOne) Mutation() *FileMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *FileUpdateOne) ClearOwner() *FileUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *FileUpdateOne) ClearOwner() *FileUpdateOne { _u.mutation.ClearOwner(); return _u }
 
 // ClearType clears the "type" edge to the FileType entity.
-func (_u *FileUpdateOne) ClearType() *FileUpdateOne {
-	_u.mutation.ClearType()
-	return _u
-}
+func (_u *FileUpdateOne) ClearType() *FileUpdateOne { _u.mutation.ClearType(); return _u }
 
 // ClearFieldEdge clears all "field" edges to the FieldType entity.
-func (_u *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
-	_u.mutation.ClearFieldEdge()
-	return _u
-}
+func (_u *FileUpdateOne) ClearFieldEdge() *FileUpdateOne { _u.mutation.ClearFieldEdge(); return _u }
 
 // RemoveFieldIDs removes the "field" edge to FieldType entities by IDs.
 func (_u *FileUpdateOne) RemoveFieldIDs(ids ...string) *FileUpdateOne {
@@ -709,19 +610,10 @@ func (_u *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FileUpdateOne) SaveX(ctx context.Context) *File {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *FileUpdateOne) SaveX(ctx context.Context) *File { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *FileUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FileUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FileUpdateOne) ExecX(ctx context.Context) {

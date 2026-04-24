@@ -44,23 +44,14 @@ func (_q *RentalQuery) Where(ps ...predicate.Rental) *RentalQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *RentalQuery) Limit(limit int) *RentalQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *RentalQuery) Limit(limit int) *RentalQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *RentalQuery) Offset(offset int) *RentalQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *RentalQuery) Offset(offset int) *RentalQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *RentalQuery) Unique(unique bool) *RentalQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *RentalQuery) Unique(unique bool) *RentalQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *RentalQuery) Order(o ...rental.OrderOption) *RentalQuery {
@@ -176,13 +167,7 @@ func (_q *RentalQuery) Only(ctx context.Context) (*Rental, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *RentalQuery) OnlyX(ctx context.Context) *Rental {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *RentalQuery) OnlyX(ctx context.Context) *Rental { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Rental ID in the query.
 // Returns a *NotSingularError when more than one Rental ID is found.
@@ -204,13 +189,7 @@ func (_q *RentalQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *RentalQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *RentalQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Rentals.
 func (_q *RentalQuery) All(ctx context.Context) ([]*Rental, error) {
@@ -223,13 +202,7 @@ func (_q *RentalQuery) All(ctx context.Context) ([]*Rental, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *RentalQuery) AllX(ctx context.Context) []*Rental {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *RentalQuery) AllX(ctx context.Context) []*Rental { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Rental IDs.
 func (_q *RentalQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -244,13 +217,7 @@ func (_q *RentalQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *RentalQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *RentalQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *RentalQuery) Count(ctx context.Context) (int, error) {
@@ -262,13 +229,7 @@ func (_q *RentalQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *RentalQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *RentalQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *RentalQuery) Exist(ctx context.Context) (bool, error) {
@@ -284,13 +245,7 @@ func (_q *RentalQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *RentalQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *RentalQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the RentalQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -450,59 +405,62 @@ func (_q *RentalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Renta
 	return nodes, nil
 }
 
-var rentalUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Rental, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        rental.UserTable,
-			Columns:      rental.UserColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Rental) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Rental) *int {
-		v := n.UserID
-		return &v
-	},
-}
-var rentalCarEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Rental, Car, int, uuid.UUID]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        rental.CarTable,
-			Columns:      rental.CarColumn,
-			Bidi:         false,
-			TargetColumn: car.FieldID,
-			TargetType:   field.TypeUUID,
-		})
-	},
-	ExtractNodeID: func(n *Rental) int { return n.ID },
-	ExtractEdgeID: func(e *Car) uuid.UUID { return e.ID },
-	ExtractNodeFK: func(n *Rental) *uuid.UUID {
-		v := n.CarID
-		return &v
-	},
-}
-
 func (_q *RentalQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Rental, init func(*Rental), assign func(*Rental, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &rentalUserEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Rental)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *RentalQuery) loadCar(ctx context.Context, query *CarQuery, nodes []*Rental, init func(*Rental), assign func(*Rental, *Car)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &rentalCarEdgeLoadDescriptor, nodes, assign,
-		func(ids []uuid.UUID) {
-			query.Where(car.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Rental)
+	for i := range nodes {
+		fk := nodes[i].CarID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(car.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "car_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 

@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,8 +38,7 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -50,10 +50,7 @@ func (_c *UserCreate) SetNillableName(v *string) *UserCreate {
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_c *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
-	_c.mutation.AddGroupIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddGroupIDs(ids ...int) *UserCreate { _c.mutation.AddGroupIDs(ids...); return _c }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
@@ -74,16 +71,10 @@ func (_c *UserCreate) AddLikedTweetIDs(ids ...int) *UserCreate {
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_c *UserCreate) AddTweetIDs(ids ...int) *UserCreate {
-	_c.mutation.AddTweetIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddTweetIDs(ids ...int) *UserCreate { _c.mutation.AddTweetIDs(ids...); return _c }
 
 // AddRoleIDs adds the "roles" edge to the Role entity by IDs.
-func (_c *UserCreate) AddRoleIDs(ids ...int) *UserCreate {
-	_c.mutation.AddRoleIDs(ids...)
-	return _c
-}
+func (_c *UserCreate) AddRoleIDs(ids ...int) *UserCreate { _c.mutation.AddRoleIDs(ids...); return _c }
 
 // AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
 func (_c *UserCreate) AddJoinedGroupIDs(ids ...int) *UserCreate {
@@ -104,9 +95,7 @@ func (_c *UserCreate) AddUserTweetIDs(ids ...int) *UserCreate {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_c *UserCreate) Mutation() *UserMutation {
-	return _c.mutation
-}
+func (_c *UserCreate) Mutation() *UserMutation { return _c.mutation }
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
@@ -117,19 +106,10 @@ func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *UserCreate) SaveX(ctx context.Context) *User { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *UserCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *UserCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *UserCreate) ExecX(ctx context.Context) {

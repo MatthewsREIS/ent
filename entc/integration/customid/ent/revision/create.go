@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,14 +33,11 @@ func NewRevisionCreate(c Config, hooks []Hook, mutation *RevisionMutation) *Revi
 
 // SetID sets the "id" field.
 func (_c *RevisionCreate) SetID(v string) *RevisionCreate {
-	_c.mutation.SetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetID, v)
 }
 
 // Mutation returns the RevisionMutation object of the builder.
-func (_c *RevisionCreate) Mutation() *RevisionMutation {
-	return _c.mutation
-}
+func (_c *RevisionCreate) Mutation() *RevisionMutation { return _c.mutation }
 
 // Save creates the Revision in the database.
 func (_c *RevisionCreate) Save(ctx context.Context) (*Revision, error) {
@@ -47,19 +45,10 @@ func (_c *RevisionCreate) Save(ctx context.Context) (*Revision, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *RevisionCreate) SaveX(ctx context.Context) *Revision {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *RevisionCreate) SaveX(ctx context.Context) *Revision { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *RevisionCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *RevisionCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *RevisionCreate) ExecX(ctx context.Context) {

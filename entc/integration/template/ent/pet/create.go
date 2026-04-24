@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,15 +30,11 @@ func NewPetCreate(c Config, hooks []Hook, mutation *PetMutation) *PetCreate {
 }
 
 // SetAge sets the "age" field.
-func (_c *PetCreate) SetAge(v int) *PetCreate {
-	_c.mutation.SetAge(v)
-	return _c
-}
+func (_c *PetCreate) SetAge(v int) *PetCreate { return entbuilder.BSet(_c, _c.mutation.SetAge, v) }
 
 // SetLicensedAt sets the "licensed_at" field.
 func (_c *PetCreate) SetLicensedAt(v time.Time) *PetCreate {
-	_c.mutation.SetLicensedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetLicensedAt, v)
 }
 
 // SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
@@ -50,8 +47,7 @@ func (_c *PetCreate) SetNillableLicensedAt(v *time.Time) *PetCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *PetCreate) SetOwnerID(id int) *PetCreate {
-	_c.mutation.SetOwnerID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -63,9 +59,7 @@ func (_c *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_c *PetCreate) Mutation() *PetMutation {
-	return _c.mutation
-}
+func (_c *PetCreate) Mutation() *PetMutation { return _c.mutation }
 
 // Save creates the Pet in the database.
 func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
@@ -73,19 +67,10 @@ func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *PetCreate) SaveX(ctx context.Context) *Pet {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *PetCreate) SaveX(ctx context.Context) *Pet { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *PetCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *PetCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *PetCreate) ExecX(ctx context.Context) {

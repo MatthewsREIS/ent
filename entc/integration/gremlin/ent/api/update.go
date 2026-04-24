@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // APIUpdate is the builder for updating Api entities.
@@ -29,15 +30,10 @@ func NewAPIUpdate(c Config, hooks []Hook, mutation *APIMutation) *APIUpdate {
 }
 
 // Where appends a list predicates to the APIUpdate builder.
-func (_u *APIUpdate) Where(ps ...predicate.Api) *APIUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *APIUpdate) Where(ps ...predicate.Api) *APIUpdate { _u.mutation.Where(ps...); return _u }
 
 // Mutation returns the APIMutation object of the builder.
-func (_u *APIUpdate) Mutation() *APIMutation {
-	return _u.mutation
-}
+func (_u *APIUpdate) Mutation() *APIMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *APIUpdate) Save(ctx context.Context) (int, error) {
@@ -45,19 +41,10 @@ func (_u *APIUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *APIUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *APIUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *APIUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *APIUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *APIUpdate) ExecX(ctx context.Context) {
@@ -106,15 +93,10 @@ func NewAPIUpdateOne(c Config, hooks []Hook, mutation *APIMutation) *APIUpdateOn
 }
 
 // Mutation returns the APIMutation object of the builder.
-func (_u *APIUpdateOne) Mutation() *APIMutation {
-	return _u.mutation
-}
+func (_u *APIUpdateOne) Mutation() *APIMutation { return _u.mutation }
 
 // Where appends a list predicates to the APIUpdate builder.
-func (_u *APIUpdateOne) Where(ps ...predicate.Api) *APIUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *APIUpdateOne) Where(ps ...predicate.Api) *APIUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -129,19 +111,10 @@ func (_u *APIUpdateOne) Save(ctx context.Context) (*Api, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *APIUpdateOne) SaveX(ctx context.Context) *Api {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *APIUpdateOne) SaveX(ctx context.Context) *Api { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *APIUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *APIUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *APIUpdateOne) ExecX(ctx context.Context) {

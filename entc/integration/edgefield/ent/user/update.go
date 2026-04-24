@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,11 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetSpouseID sets the "spouse_id" field.
 func (_u *UserUpdate) SetSpouseID(v int) *UserUpdate {
-	_u.mutation.SetSpouseID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSpouseID, v)
 }
 
 // SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
@@ -51,26 +48,18 @@ func (_u *UserUpdate) SetNillableSpouseID(v *int) *UserUpdate {
 
 // ClearSpouseID clears the value of the "spouse_id" field.
 func (_u *UserUpdate) ClearSpouseID() *UserUpdate {
-	_u.mutation.ClearSpouseID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSpouseID)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddPetIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate { _u.mutation.AddPetIDs(ids...); return _u }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddChildIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate { _u.mutation.AddChildIDs(ids...); return _u }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (_u *UserUpdate) SetCardID(id int) *UserUpdate {
-	_u.mutation.SetCardID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCardID, id)
 }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
@@ -83,8 +72,7 @@ func (_u *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 
 // SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
 func (_u *UserUpdate) SetMetadataID(id int) *UserUpdate {
-	_u.mutation.SetMetadataID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetMetadataID, id)
 }
 
 // SetNillableMetadataID sets the "metadata" edge to the Metadata entity by ID if the given value is not nil.
@@ -96,10 +84,7 @@ func (_u *UserUpdate) SetNillableMetadataID(id *int) *UserUpdate {
 }
 
 // AddInfoIDs adds the "info" edge to the Info entity by IDs.
-func (_u *UserUpdate) AddInfoIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddInfoIDs(ids...)
-	return _u
-}
+func (_u *UserUpdate) AddInfoIDs(ids ...int) *UserUpdate { _u.mutation.AddInfoIDs(ids...); return _u }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
 func (_u *UserUpdate) AddRentalIDs(ids ...int) *UserUpdate {
@@ -108,15 +93,10 @@ func (_u *UserUpdate) AddRentalIDs(ids ...int) *UserUpdate {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdate) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdate) Mutation() *UserMutation { return _u.mutation }
 
 // ClearPets clears all "pets" edges to the Pet entity.
-func (_u *UserUpdate) ClearPets() *UserUpdate {
-	_u.mutation.ClearPets()
-	return _u
-}
+func (_u *UserUpdate) ClearPets() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearPets) }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
@@ -126,8 +106,7 @@ func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
 
 // ClearChildren clears all "children" edges to the User entity.
 func (_u *UserUpdate) ClearChildren() *UserUpdate {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
@@ -138,27 +117,19 @@ func (_u *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
 
 // ClearSpouse clears the "spouse" edge to the User entity.
 func (_u *UserUpdate) ClearSpouse() *UserUpdate {
-	_u.mutation.ClearSpouse()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSpouse)
 }
 
 // ClearCard clears the "card" edge to the Card entity.
-func (_u *UserUpdate) ClearCard() *UserUpdate {
-	_u.mutation.ClearCard()
-	return _u
-}
+func (_u *UserUpdate) ClearCard() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearCard) }
 
 // ClearMetadata clears the "metadata" edge to the Metadata entity.
 func (_u *UserUpdate) ClearMetadata() *UserUpdate {
-	_u.mutation.ClearMetadata()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearMetadata)
 }
 
 // ClearInfo clears all "info" edges to the Info entity.
-func (_u *UserUpdate) ClearInfo() *UserUpdate {
-	_u.mutation.ClearInfo()
-	return _u
-}
+func (_u *UserUpdate) ClearInfo() *UserUpdate { return entbuilder.BClear(_u, _u.mutation.ClearInfo) }
 
 // RemoveInfoIDs removes the "info" edge to Info entities by IDs.
 func (_u *UserUpdate) RemoveInfoIDs(ids ...int) *UserUpdate {
@@ -168,8 +139,7 @@ func (_u *UserUpdate) RemoveInfoIDs(ids ...int) *UserUpdate {
 
 // ClearRentals clears all "rentals" edges to the Rental entity.
 func (_u *UserUpdate) ClearRentals() *UserUpdate {
-	_u.mutation.ClearRentals()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRentals)
 }
 
 // RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
@@ -184,19 +154,10 @@ func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *UserUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *UserUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdate) ExecX(ctx context.Context) {
@@ -508,8 +469,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetSpouseID sets the "spouse_id" field.
 func (_u *UserUpdateOne) SetSpouseID(v int) *UserUpdateOne {
-	_u.mutation.SetSpouseID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSpouseID, v)
 }
 
 // SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
@@ -522,8 +482,7 @@ func (_u *UserUpdateOne) SetNillableSpouseID(v *int) *UserUpdateOne {
 
 // ClearSpouseID clears the value of the "spouse_id" field.
 func (_u *UserUpdateOne) ClearSpouseID() *UserUpdateOne {
-	_u.mutation.ClearSpouseID()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSpouseID)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
@@ -540,8 +499,7 @@ func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
 
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (_u *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
-	_u.mutation.SetCardID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetCardID, id)
 }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
@@ -554,8 +512,7 @@ func (_u *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 
 // SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
 func (_u *UserUpdateOne) SetMetadataID(id int) *UserUpdateOne {
-	_u.mutation.SetMetadataID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetMetadataID, id)
 }
 
 // SetNillableMetadataID sets the "metadata" edge to the Metadata entity by ID if the given value is not nil.
@@ -579,14 +536,11 @@ func (_u *UserUpdateOne) AddRentalIDs(ids ...int) *UserUpdateOne {
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (_u *UserUpdateOne) Mutation() *UserMutation {
-	return _u.mutation
-}
+func (_u *UserUpdateOne) Mutation() *UserMutation { return _u.mutation }
 
 // ClearPets clears all "pets" edges to the Pet entity.
 func (_u *UserUpdateOne) ClearPets() *UserUpdateOne {
-	_u.mutation.ClearPets()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearPets)
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
@@ -597,8 +551,7 @@ func (_u *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
 
 // ClearChildren clears all "children" edges to the User entity.
 func (_u *UserUpdateOne) ClearChildren() *UserUpdateOne {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
@@ -609,26 +562,22 @@ func (_u *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
 
 // ClearSpouse clears the "spouse" edge to the User entity.
 func (_u *UserUpdateOne) ClearSpouse() *UserUpdateOne {
-	_u.mutation.ClearSpouse()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSpouse)
 }
 
 // ClearCard clears the "card" edge to the Card entity.
 func (_u *UserUpdateOne) ClearCard() *UserUpdateOne {
-	_u.mutation.ClearCard()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearCard)
 }
 
 // ClearMetadata clears the "metadata" edge to the Metadata entity.
 func (_u *UserUpdateOne) ClearMetadata() *UserUpdateOne {
-	_u.mutation.ClearMetadata()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearMetadata)
 }
 
 // ClearInfo clears all "info" edges to the Info entity.
 func (_u *UserUpdateOne) ClearInfo() *UserUpdateOne {
-	_u.mutation.ClearInfo()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInfo)
 }
 
 // RemoveInfoIDs removes the "info" edge to Info entities by IDs.
@@ -639,8 +588,7 @@ func (_u *UserUpdateOne) RemoveInfoIDs(ids ...int) *UserUpdateOne {
 
 // ClearRentals clears all "rentals" edges to the Rental entity.
 func (_u *UserUpdateOne) ClearRentals() *UserUpdateOne {
-	_u.mutation.ClearRentals()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearRentals)
 }
 
 // RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
@@ -668,19 +616,10 @@ func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *UserUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *UserUpdateOne) ExecX(ctx context.Context) {

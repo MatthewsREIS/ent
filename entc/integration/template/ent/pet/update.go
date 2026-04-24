@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,10 +32,7 @@ func NewPetUpdate(c Config, hooks []Hook, mutation *PetMutation) *PetUpdate {
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetAge sets the "age" field.
 func (_u *PetUpdate) SetAge(v int) *PetUpdate {
@@ -52,15 +50,11 @@ func (_u *PetUpdate) SetNillableAge(v *int) *PetUpdate {
 }
 
 // AddAge adds value to the "age" field.
-func (_u *PetUpdate) AddAge(v int) *PetUpdate {
-	_u.mutation.AddAge(v)
-	return _u
-}
+func (_u *PetUpdate) AddAge(v int) *PetUpdate { return entbuilder.BSet(_u, _u.mutation.AddAge, v) }
 
 // SetLicensedAt sets the "licensed_at" field.
 func (_u *PetUpdate) SetLicensedAt(v time.Time) *PetUpdate {
-	_u.mutation.SetLicensedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLicensedAt, v)
 }
 
 // SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
@@ -73,14 +67,12 @@ func (_u *PetUpdate) SetNillableLicensedAt(v *time.Time) *PetUpdate {
 
 // ClearLicensedAt clears the value of the "licensed_at" field.
 func (_u *PetUpdate) ClearLicensedAt() *PetUpdate {
-	_u.mutation.ClearLicensedAt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLicensedAt)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -92,15 +84,10 @@ func (_u *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_u *PetUpdate) Mutation() *PetMutation {
-	return _u.mutation
-}
+func (_u *PetUpdate) Mutation() *PetMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_u.mutation.ClearOwner()
-	return _u
-}
+func (_u *PetUpdate) ClearOwner() *PetUpdate { return entbuilder.BClear(_u, _u.mutation.ClearOwner) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
@@ -108,19 +95,10 @@ func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PetUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *PetUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *PetUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PetUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PetUpdate) ExecX(ctx context.Context) {
@@ -221,14 +199,12 @@ func (_u *PetUpdateOne) SetNillableAge(v *int) *PetUpdateOne {
 
 // AddAge adds value to the "age" field.
 func (_u *PetUpdateOne) AddAge(v int) *PetUpdateOne {
-	_u.mutation.AddAge(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddAge, v)
 }
 
 // SetLicensedAt sets the "licensed_at" field.
 func (_u *PetUpdateOne) SetLicensedAt(v time.Time) *PetUpdateOne {
-	_u.mutation.SetLicensedAt(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetLicensedAt, v)
 }
 
 // SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
@@ -241,14 +217,12 @@ func (_u *PetUpdateOne) SetNillableLicensedAt(v *time.Time) *PetUpdateOne {
 
 // ClearLicensedAt clears the value of the "licensed_at" field.
 func (_u *PetUpdateOne) ClearLicensedAt() *PetUpdateOne {
-	_u.mutation.ClearLicensedAt()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearLicensedAt)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	_u.mutation.SetOwnerID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -260,21 +234,15 @@ func (_u *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_u *PetUpdateOne) Mutation() *PetMutation {
-	return _u.mutation
-}
+func (_u *PetUpdateOne) Mutation() *PetMutation { return _u.mutation }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_u.mutation.ClearOwner()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearOwner)
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne { _u.mutation.Where(ps...); return _u }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
@@ -289,19 +257,10 @@ func (_u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *PetUpdateOne) SaveX(ctx context.Context) *Pet {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *PetUpdateOne) SaveX(ctx context.Context) *Pet { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *PetUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *PetUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *PetUpdateOne) ExecX(ctx context.Context) {

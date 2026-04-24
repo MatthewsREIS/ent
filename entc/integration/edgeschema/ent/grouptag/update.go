@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,8 +38,7 @@ func (_u *GroupTagUpdate) Where(ps ...predicate.GroupTag) *GroupTagUpdate {
 
 // SetTagID sets the "tag_id" field.
 func (_u *GroupTagUpdate) SetTagID(v int) *GroupTagUpdate {
-	_u.mutation.SetTagID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTagID, v)
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
@@ -51,8 +51,7 @@ func (_u *GroupTagUpdate) SetNillableTagID(v *int) *GroupTagUpdate {
 
 // SetGroupID sets the "group_id" field.
 func (_u *GroupTagUpdate) SetGroupID(v int) *GroupTagUpdate {
-	_u.mutation.SetGroupID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetGroupID, v)
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
@@ -64,20 +63,16 @@ func (_u *GroupTagUpdate) SetNillableGroupID(v *int) *GroupTagUpdate {
 }
 
 // Mutation returns the GroupTagMutation object of the builder.
-func (_u *GroupTagUpdate) Mutation() *GroupTagMutation {
-	return _u.mutation
-}
+func (_u *GroupTagUpdate) Mutation() *GroupTagMutation { return _u.mutation }
 
 // ClearTag clears the "tag" edge to the Tag entity.
 func (_u *GroupTagUpdate) ClearTag() *GroupTagUpdate {
-	_u.mutation.ClearTag()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTag)
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
 func (_u *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
-	_u.mutation.ClearGroup()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroup)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -86,19 +81,10 @@ func (_u *GroupTagUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupTagUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *GroupTagUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *GroupTagUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupTagUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupTagUpdate) ExecX(ctx context.Context) {
@@ -215,8 +201,7 @@ func NewGroupTagUpdateOne(c Config, hooks []Hook, mutation *GroupTagMutation) *G
 
 // SetTagID sets the "tag_id" field.
 func (_u *GroupTagUpdateOne) SetTagID(v int) *GroupTagUpdateOne {
-	_u.mutation.SetTagID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetTagID, v)
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
@@ -229,8 +214,7 @@ func (_u *GroupTagUpdateOne) SetNillableTagID(v *int) *GroupTagUpdateOne {
 
 // SetGroupID sets the "group_id" field.
 func (_u *GroupTagUpdateOne) SetGroupID(v int) *GroupTagUpdateOne {
-	_u.mutation.SetGroupID(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetGroupID, v)
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
@@ -242,20 +226,16 @@ func (_u *GroupTagUpdateOne) SetNillableGroupID(v *int) *GroupTagUpdateOne {
 }
 
 // Mutation returns the GroupTagMutation object of the builder.
-func (_u *GroupTagUpdateOne) Mutation() *GroupTagMutation {
-	return _u.mutation
-}
+func (_u *GroupTagUpdateOne) Mutation() *GroupTagMutation { return _u.mutation }
 
 // ClearTag clears the "tag" edge to the Tag entity.
 func (_u *GroupTagUpdateOne) ClearTag() *GroupTagUpdateOne {
-	_u.mutation.ClearTag()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearTag)
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
 func (_u *GroupTagUpdateOne) ClearGroup() *GroupTagUpdateOne {
-	_u.mutation.ClearGroup()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearGroup)
 }
 
 // Where appends a list predicates to the GroupTagUpdate builder.
@@ -278,18 +258,11 @@ func (_u *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *GroupTagUpdateOne) SaveX(ctx context.Context) *GroupTag {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *GroupTagUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupTagUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupTagUpdateOne) ExecX(ctx context.Context) {

@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -109,10 +110,7 @@ func (_c *PetCreate) SetNillableOptionalTime(v *time.Time) *PetCreate {
 }
 
 // SetTeamID sets the "team" edge to the User entity by ID.
-func (_c *PetCreate) SetTeamID(id string) *PetCreate {
-	_c.mutation.SetTeamID(id)
-	return _c
-}
+func (_c *PetCreate) SetTeamID(id string) *PetCreate { _c.mutation.SetTeamID(id); return _c }
 
 // SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
 func (_c *PetCreate) SetNillableTeamID(id *string) *PetCreate {
@@ -123,10 +121,7 @@ func (_c *PetCreate) SetNillableTeamID(id *string) *PetCreate {
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *PetCreate) SetOwnerID(id string) *PetCreate {
-	_c.mutation.SetOwnerID(id)
-	return _c
-}
+func (_c *PetCreate) SetOwnerID(id string) *PetCreate { _c.mutation.SetOwnerID(id); return _c }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
 func (_c *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
@@ -137,9 +132,7 @@ func (_c *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_c *PetCreate) Mutation() *PetMutation {
-	return _c.mutation
-}
+func (_c *PetCreate) Mutation() *PetMutation { return _c.mutation }
 
 // Save creates the Pet in the database.
 func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
@@ -148,19 +141,10 @@ func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *PetCreate) SaveX(ctx context.Context) *Pet {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *PetCreate) SaveX(ctx context.Context) *Pet { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *PetCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *PetCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *PetCreate) ExecX(ctx context.Context) {

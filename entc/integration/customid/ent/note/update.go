@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,15 +32,11 @@ func NewNoteUpdate(c Config, hooks []Hook, mutation *NoteMutation) *NoteUpdate {
 }
 
 // Where appends a list predicates to the NoteUpdate builder.
-func (_u *NoteUpdate) Where(ps ...predicate.Note) *NoteUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *NoteUpdate) Where(ps ...predicate.Note) *NoteUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetText sets the "text" field.
 func (_u *NoteUpdate) SetText(v string) *NoteUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -51,15 +48,11 @@ func (_u *NoteUpdate) SetNillableText(v *string) *NoteUpdate {
 }
 
 // ClearText clears the value of the "text" field.
-func (_u *NoteUpdate) ClearText() *NoteUpdate {
-	_u.mutation.ClearText()
-	return _u
-}
+func (_u *NoteUpdate) ClearText() *NoteUpdate { return entbuilder.BClear(_u, _u.mutation.ClearText) }
 
 // SetParentID sets the "parent" edge to the Note entity by ID.
 func (_u *NoteUpdate) SetParentID(id schema.NoteID) *NoteUpdate {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Note entity by ID if the given value is not nil.
@@ -77,20 +70,16 @@ func (_u *NoteUpdate) AddChildIDs(ids ...schema.NoteID) *NoteUpdate {
 }
 
 // Mutation returns the NoteMutation object of the builder.
-func (_u *NoteUpdate) Mutation() *NoteMutation {
-	return _u.mutation
-}
+func (_u *NoteUpdate) Mutation() *NoteMutation { return _u.mutation }
 
 // ClearParent clears the "parent" edge to the Note entity.
 func (_u *NoteUpdate) ClearParent() *NoteUpdate {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearChildren clears all "children" edges to the Note entity.
 func (_u *NoteUpdate) ClearChildren() *NoteUpdate {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to Note entities by IDs.
@@ -105,19 +94,10 @@ func (_u *NoteUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *NoteUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *NoteUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *NoteUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *NoteUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *NoteUpdate) ExecX(ctx context.Context) {
@@ -242,8 +222,7 @@ func NewNoteUpdateOne(c Config, hooks []Hook, mutation *NoteMutation) *NoteUpdat
 
 // SetText sets the "text" field.
 func (_u *NoteUpdateOne) SetText(v string) *NoteUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -256,14 +235,12 @@ func (_u *NoteUpdateOne) SetNillableText(v *string) *NoteUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *NoteUpdateOne) ClearText() *NoteUpdateOne {
-	_u.mutation.ClearText()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearText)
 }
 
 // SetParentID sets the "parent" edge to the Note entity by ID.
 func (_u *NoteUpdateOne) SetParentID(id schema.NoteID) *NoteUpdateOne {
-	_u.mutation.SetParentID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetParentID, id)
 }
 
 // SetNillableParentID sets the "parent" edge to the Note entity by ID if the given value is not nil.
@@ -281,20 +258,16 @@ func (_u *NoteUpdateOne) AddChildIDs(ids ...schema.NoteID) *NoteUpdateOne {
 }
 
 // Mutation returns the NoteMutation object of the builder.
-func (_u *NoteUpdateOne) Mutation() *NoteMutation {
-	return _u.mutation
-}
+func (_u *NoteUpdateOne) Mutation() *NoteMutation { return _u.mutation }
 
 // ClearParent clears the "parent" edge to the Note entity.
 func (_u *NoteUpdateOne) ClearParent() *NoteUpdateOne {
-	_u.mutation.ClearParent()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearParent)
 }
 
 // ClearChildren clears all "children" edges to the Note entity.
 func (_u *NoteUpdateOne) ClearChildren() *NoteUpdateOne {
-	_u.mutation.ClearChildren()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearChildren)
 }
 
 // RemoveChildIDs removes the "children" edge to Note entities by IDs.
@@ -322,19 +295,10 @@ func (_u *NoteUpdateOne) Save(ctx context.Context) (*Note, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *NoteUpdateOne) SaveX(ctx context.Context) *Note {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *NoteUpdateOne) SaveX(ctx context.Context) *Note { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *NoteUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *NoteUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *NoteUpdateOne) ExecX(ctx context.Context) {

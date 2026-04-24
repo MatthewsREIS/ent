@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,8 +30,7 @@ func NewPetCreate(c Config, hooks []Hook, mutation *PetMutation) *PetCreate {
 
 // SetDeleteTime sets the "delete_time" field.
 func (_c *PetCreate) SetDeleteTime(v time.Time) *PetCreate {
-	_c.mutation.SetDeleteTime(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetDeleteTime, v)
 }
 
 // SetNillableDeleteTime sets the "delete_time" field if the given value is not nil.
@@ -42,10 +42,7 @@ func (_c *PetCreate) SetNillableDeleteTime(v *time.Time) *PetCreate {
 }
 
 // SetName sets the "name" field.
-func (_c *PetCreate) SetName(v string) *PetCreate {
-	_c.mutation.SetName(v)
-	return _c
-}
+func (_c *PetCreate) SetName(v string) *PetCreate { return entbuilder.BSet(_c, _c.mutation.SetName, v) }
 
 // SetNillableName sets the "name" field if the given value is not nil.
 func (_c *PetCreate) SetNillableName(v *string) *PetCreate {
@@ -57,8 +54,7 @@ func (_c *PetCreate) SetNillableName(v *string) *PetCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *PetCreate) SetOwnerID(id int) *PetCreate {
-	_c.mutation.SetOwnerID(id)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetOwnerID, id)
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
@@ -70,9 +66,7 @@ func (_c *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (_c *PetCreate) Mutation() *PetMutation {
-	return _c.mutation
-}
+func (_c *PetCreate) Mutation() *PetMutation { return _c.mutation }
 
 // Save creates the Pet in the database.
 func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
@@ -80,19 +74,10 @@ func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *PetCreate) SaveX(ctx context.Context) *Pet {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *PetCreate) SaveX(ctx context.Context) *Pet { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *PetCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *PetCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *PetCreate) ExecX(ctx context.Context) {

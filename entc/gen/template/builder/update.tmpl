@@ -13,7 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "Imports" $.BuilderImports }}
+{{ with extend $ "Imports" $.BuilderImports "UpdateUsesEntbuilder" true }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -34,10 +34,7 @@ func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *
 }
 
 // Where appends a list predicates to the {{ $builder }} builder.
-func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $mutation }}.Where(ps...)
-	return {{ $receiver }}
-}
+func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} { {{ $mutation }}.Where(ps...); return {{ $receiver }} }
 
 {{ with extend $ "Receiver" $receiver "Builder" $builder }}
 	{{ template "setter" . }}
@@ -62,26 +59,13 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) int {
-	affected, err := {{ $receiver }}.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func ({{ $receiver }} *{{ $builder }}) SaveX(ctx context.Context) int { return entbuilder.Must({{ $receiver }}.Save(ctx)) }
 
 // Exec executes the query.
-func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) error {
-	_, err := {{ $receiver }}.Save(ctx)
-	return err
-}
+func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) error { _, err := {{ $receiver }}.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
-func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
-	if err := {{ $receiver }}.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
+func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) { if err := {{ $receiver }}.Exec(ctx); err != nil { panic(err) } }
 
 {{ with extend $ "Receiver" $receiver "Builder" $builder "Package" $pkg }}
 	{{ template "update/checks" . }}
@@ -118,17 +102,11 @@ func New{{ $onebuilder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}
 {{ end }}
 
 // Where appends a list predicates to the {{ $builder }} builder.
-func ({{ $receiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
-	{{ $mutation }}.Where(ps...)
-	return {{ $receiver }}
-}
+func ({{ $receiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} { {{ $mutation }}.Where(ps...); return {{ $receiver }} }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func ({{ $receiver }} *{{ $onebuilder }}) Select(field string, fields ...string) *{{ $onebuilder }} {
-	{{ $receiver }}.fields = append([]string{field}, fields...)
-	return {{ $receiver }}
-}
+func ({{ $receiver }} *{{ $onebuilder }}) Select(field string, fields ...string) *{{ $onebuilder }} { {{ $receiver }}.fields = append([]string{field}, fields...); return {{ $receiver }} }
 
 // Save executes the query and returns the updated {{ $.Name }} entity.
 func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name }}, error) {
@@ -145,26 +123,13 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func ({{ $receiver }} *{{ $onebuilder }}) SaveX(ctx context.Context) *{{ $.Name }} {
-	node, err := {{ $receiver }}.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func ({{ $receiver }} *{{ $onebuilder }}) SaveX(ctx context.Context) *{{ $.Name }} { return entbuilder.Must({{ $receiver }}.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func ({{ $receiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error {
-	_, err := {{ $receiver }}.Save(ctx)
-	return err
-}
+func ({{ $receiver }} *{{ $onebuilder }}) Exec(ctx context.Context) error { _, err := {{ $receiver }}.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
-func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
-	if err := {{ $receiver }}.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
+func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) { if err := {{ $receiver }}.Exec(ctx); err != nil { panic(err) } }
 
 {{ with extend $ "Receiver" $receiver "Builder" $onebuilder "Package" $pkg }}
 	{{ template "update/checks" . }}
@@ -200,6 +165,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 {{ $builder := pascal .Scope.Builder }}
 {{ $receiver := .Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation" }}
+{{ $isSQL := eq $.Storage.Name "sql" }}
 
 {{ range $e := $.EdgesWithID }}
 	{{ if $e.Immutable }}
@@ -208,17 +174,15 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{ end }}
 	{{ $func := $e.MutationClear }}
 	// {{ $func }} clears {{ if $e.Unique }}the "{{ $e.Name }}" edge{{ else }}all "{{ $e.Name }}" edges{{ end }} to the {{ $e.Type.Name }} entity.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-		{{ $mutation }}.{{ $func }}()
-		return {{ $receiver }}
-	}
+	{{- if $isSQL }}
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} { return entbuilder.BClear({{ $receiver }}, {{ $mutation }}.{{ $func }}) }
+	{{- else }}
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} { {{ $mutation }}.{{ $func }}(); return {{ $receiver }} }
+	{{- end }}
 	{{ if not $e.Unique }}
 		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
 		// {{ $idsFunc }} removes the "{{ $e.Name }}" edge to {{ $e.Type.Name }} entities by IDs.
-		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} {
-			{{ $mutation }}.{{ $idsFunc }}(ids...)
-			return {{ $receiver }}
-		}
+		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} { {{ $mutation }}.{{ $idsFunc }}(ids...); return {{ $receiver }} }
 	{{ end }}
 {{ end }}
 {{ end }}

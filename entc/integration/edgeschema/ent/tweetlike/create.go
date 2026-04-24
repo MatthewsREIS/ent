@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,8 +33,7 @@ func NewTweetLikeCreate(c Config, hooks []Hook, mutation *TweetLikeMutation) *Tw
 
 // SetLikedAt sets the "liked_at" field.
 func (_c *TweetLikeCreate) SetLikedAt(v time.Time) *TweetLikeCreate {
-	_c.mutation.SetLikedAt(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetLikedAt, v)
 }
 
 // SetNillableLikedAt sets the "liked_at" field if the given value is not nil.
@@ -46,20 +46,16 @@ func (_c *TweetLikeCreate) SetNillableLikedAt(v *time.Time) *TweetLikeCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *TweetLikeCreate) SetUserID(v int) *TweetLikeCreate {
-	_c.mutation.SetUserID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetUserID, v)
 }
 
 // SetTweetID sets the "tweet_id" field.
 func (_c *TweetLikeCreate) SetTweetID(v int) *TweetLikeCreate {
-	_c.mutation.SetTweetID(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetTweetID, v)
 }
 
 // Mutation returns the TweetLikeMutation object of the builder.
-func (_c *TweetLikeCreate) Mutation() *TweetLikeMutation {
-	return _c.mutation
-}
+func (_c *TweetLikeCreate) Mutation() *TweetLikeMutation { return _c.mutation }
 
 // Save creates the TweetLike in the database.
 func (_c *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
@@ -71,18 +67,11 @@ func (_c *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
 
 // SaveX calls Save and panics if Save returns an error.
 func (_c *TweetLikeCreate) SaveX(ctx context.Context) *TweetLike {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
+	return entbuilder.Must(_c.Save(ctx))
 }
 
 // Exec executes the query.
-func (_c *TweetLikeCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TweetLikeCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TweetLikeCreate) ExecX(ctx context.Context) {

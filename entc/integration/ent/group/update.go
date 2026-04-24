@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,15 +33,11 @@ func NewGroupUpdate(c Config, hooks []Hook, mutation *GroupMutation) *GroupUpdat
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
-func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetActive sets the "active" field.
 func (_u *GroupUpdate) SetActive(v bool) *GroupUpdate {
-	_u.mutation.SetActive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetActive, v)
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
@@ -53,8 +50,7 @@ func (_u *GroupUpdate) SetNillableActive(v *bool) *GroupUpdate {
 
 // SetExpire sets the "expire" field.
 func (_u *GroupUpdate) SetExpire(v time.Time) *GroupUpdate {
-	_u.mutation.SetExpire(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetExpire, v)
 }
 
 // SetNillableExpire sets the "expire" field if the given value is not nil.
@@ -67,8 +63,7 @@ func (_u *GroupUpdate) SetNillableExpire(v *time.Time) *GroupUpdate {
 
 // SetType sets the "type" field.
 func (_u *GroupUpdate) SetType(v string) *GroupUpdate {
-	_u.mutation.SetType(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetType, v)
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
@@ -80,10 +75,7 @@ func (_u *GroupUpdate) SetNillableType(v *string) *GroupUpdate {
 }
 
 // ClearType clears the value of the "type" field.
-func (_u *GroupUpdate) ClearType() *GroupUpdate {
-	_u.mutation.ClearType()
-	return _u
-}
+func (_u *GroupUpdate) ClearType() *GroupUpdate { return entbuilder.BClear(_u, _u.mutation.ClearType) }
 
 // SetMaxUsers sets the "max_users" field.
 func (_u *GroupUpdate) SetMaxUsers(v int) *GroupUpdate {
@@ -102,20 +94,17 @@ func (_u *GroupUpdate) SetNillableMaxUsers(v *int) *GroupUpdate {
 
 // AddMaxUsers adds value to the "max_users" field.
 func (_u *GroupUpdate) AddMaxUsers(v int) *GroupUpdate {
-	_u.mutation.AddMaxUsers(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddMaxUsers, v)
 }
 
 // ClearMaxUsers clears the value of the "max_users" field.
 func (_u *GroupUpdate) ClearMaxUsers() *GroupUpdate {
-	_u.mutation.ClearMaxUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearMaxUsers)
 }
 
 // SetName sets the "name" field.
 func (_u *GroupUpdate) SetName(v string) *GroupUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -127,10 +116,7 @@ func (_u *GroupUpdate) SetNillableName(v *string) *GroupUpdate {
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_u *GroupUpdate) AddFileIDs(ids ...int) *GroupUpdate {
-	_u.mutation.AddFileIDs(ids...)
-	return _u
-}
+func (_u *GroupUpdate) AddFileIDs(ids ...int) *GroupUpdate { _u.mutation.AddFileIDs(ids...); return _u }
 
 // AddBlockedIDs adds the "blocked" edge to the User entity by IDs.
 func (_u *GroupUpdate) AddBlockedIDs(ids ...int) *GroupUpdate {
@@ -139,26 +125,19 @@ func (_u *GroupUpdate) AddBlockedIDs(ids ...int) *GroupUpdate {
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
-	_u.mutation.AddUserIDs(ids...)
-	return _u
-}
+func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate { _u.mutation.AddUserIDs(ids...); return _u }
 
 // SetInfoID sets the "info" edge to the GroupInfo entity by ID.
 func (_u *GroupUpdate) SetInfoID(id int) *GroupUpdate {
-	_u.mutation.SetInfoID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInfoID, id)
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_u *GroupUpdate) Mutation() *GroupMutation {
-	return _u.mutation
-}
+func (_u *GroupUpdate) Mutation() *GroupMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *GroupUpdate) ClearFiles() *GroupUpdate {
-	_u.mutation.ClearFiles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFiles)
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
@@ -169,8 +148,7 @@ func (_u *GroupUpdate) RemoveFileIDs(ids ...int) *GroupUpdate {
 
 // ClearBlocked clears all "blocked" edges to the User entity.
 func (_u *GroupUpdate) ClearBlocked() *GroupUpdate {
-	_u.mutation.ClearBlocked()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBlocked)
 }
 
 // RemoveBlockedIDs removes the "blocked" edge to User entities by IDs.
@@ -181,8 +159,7 @@ func (_u *GroupUpdate) RemoveBlockedIDs(ids ...int) *GroupUpdate {
 
 // ClearUsers clears all "users" edges to the User entity.
 func (_u *GroupUpdate) ClearUsers() *GroupUpdate {
-	_u.mutation.ClearUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUsers)
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
@@ -192,10 +169,7 @@ func (_u *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 }
 
 // ClearInfo clears the "info" edge to the GroupInfo entity.
-func (_u *GroupUpdate) ClearInfo() *GroupUpdate {
-	_u.mutation.ClearInfo()
-	return _u
-}
+func (_u *GroupUpdate) ClearInfo() *GroupUpdate { return entbuilder.BClear(_u, _u.mutation.ClearInfo) }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
@@ -203,19 +177,10 @@ func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *GroupUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *GroupUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupUpdate) ExecX(ctx context.Context) {
@@ -482,8 +447,7 @@ func NewGroupUpdateOne(c Config, hooks []Hook, mutation *GroupMutation) *GroupUp
 
 // SetActive sets the "active" field.
 func (_u *GroupUpdateOne) SetActive(v bool) *GroupUpdateOne {
-	_u.mutation.SetActive(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetActive, v)
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
@@ -496,8 +460,7 @@ func (_u *GroupUpdateOne) SetNillableActive(v *bool) *GroupUpdateOne {
 
 // SetExpire sets the "expire" field.
 func (_u *GroupUpdateOne) SetExpire(v time.Time) *GroupUpdateOne {
-	_u.mutation.SetExpire(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetExpire, v)
 }
 
 // SetNillableExpire sets the "expire" field if the given value is not nil.
@@ -510,8 +473,7 @@ func (_u *GroupUpdateOne) SetNillableExpire(v *time.Time) *GroupUpdateOne {
 
 // SetType sets the "type" field.
 func (_u *GroupUpdateOne) SetType(v string) *GroupUpdateOne {
-	_u.mutation.SetType(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetType, v)
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
@@ -524,8 +486,7 @@ func (_u *GroupUpdateOne) SetNillableType(v *string) *GroupUpdateOne {
 
 // ClearType clears the value of the "type" field.
 func (_u *GroupUpdateOne) ClearType() *GroupUpdateOne {
-	_u.mutation.ClearType()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearType)
 }
 
 // SetMaxUsers sets the "max_users" field.
@@ -545,20 +506,17 @@ func (_u *GroupUpdateOne) SetNillableMaxUsers(v *int) *GroupUpdateOne {
 
 // AddMaxUsers adds value to the "max_users" field.
 func (_u *GroupUpdateOne) AddMaxUsers(v int) *GroupUpdateOne {
-	_u.mutation.AddMaxUsers(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.AddMaxUsers, v)
 }
 
 // ClearMaxUsers clears the value of the "max_users" field.
 func (_u *GroupUpdateOne) ClearMaxUsers() *GroupUpdateOne {
-	_u.mutation.ClearMaxUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearMaxUsers)
 }
 
 // SetName sets the "name" field.
 func (_u *GroupUpdateOne) SetName(v string) *GroupUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -589,19 +547,15 @@ func (_u *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
 
 // SetInfoID sets the "info" edge to the GroupInfo entity by ID.
 func (_u *GroupUpdateOne) SetInfoID(id int) *GroupUpdateOne {
-	_u.mutation.SetInfoID(id)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetInfoID, id)
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (_u *GroupUpdateOne) Mutation() *GroupMutation {
-	return _u.mutation
-}
+func (_u *GroupUpdateOne) Mutation() *GroupMutation { return _u.mutation }
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *GroupUpdateOne) ClearFiles() *GroupUpdateOne {
-	_u.mutation.ClearFiles()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearFiles)
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
@@ -612,8 +566,7 @@ func (_u *GroupUpdateOne) RemoveFileIDs(ids ...int) *GroupUpdateOne {
 
 // ClearBlocked clears all "blocked" edges to the User entity.
 func (_u *GroupUpdateOne) ClearBlocked() *GroupUpdateOne {
-	_u.mutation.ClearBlocked()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearBlocked)
 }
 
 // RemoveBlockedIDs removes the "blocked" edge to User entities by IDs.
@@ -624,8 +577,7 @@ func (_u *GroupUpdateOne) RemoveBlockedIDs(ids ...int) *GroupUpdateOne {
 
 // ClearUsers clears all "users" edges to the User entity.
 func (_u *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
-	_u.mutation.ClearUsers()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearUsers)
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
@@ -636,8 +588,7 @@ func (_u *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 
 // ClearInfo clears the "info" edge to the GroupInfo entity.
 func (_u *GroupUpdateOne) ClearInfo() *GroupUpdateOne {
-	_u.mutation.ClearInfo()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearInfo)
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
@@ -659,19 +610,10 @@ func (_u *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *GroupUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupUpdateOne) ExecX(ctx context.Context) {

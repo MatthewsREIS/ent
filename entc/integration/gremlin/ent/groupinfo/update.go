@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
@@ -67,10 +68,7 @@ func (_u *GroupInfoUpdate) SetNillableMaxUsers(v *int) *GroupInfoUpdate {
 }
 
 // AddMaxUsers adds value to the "max_users" field.
-func (_u *GroupInfoUpdate) AddMaxUsers(v int) *GroupInfoUpdate {
-	_u.mutation.AddMaxUsers(v)
-	return _u
-}
+func (_u *GroupInfoUpdate) AddMaxUsers(v int) *GroupInfoUpdate { _u.mutation.AddMaxUsers(v); return _u }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
@@ -79,15 +77,10 @@ func (_u *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
 }
 
 // Mutation returns the GroupInfoMutation object of the builder.
-func (_u *GroupInfoUpdate) Mutation() *GroupInfoMutation {
-	return _u.mutation
-}
+func (_u *GroupInfoUpdate) Mutation() *GroupInfoMutation { return _u.mutation }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (_u *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
-	_u.mutation.ClearGroups()
-	return _u
-}
+func (_u *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate { _u.mutation.ClearGroups(); return _u }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
@@ -101,19 +94,10 @@ func (_u *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *GroupInfoUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *GroupInfoUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *GroupInfoUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupInfoUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupInfoUpdate) ExecX(ctx context.Context) {
@@ -241,15 +225,10 @@ func (_u *GroupInfoUpdateOne) AddGroupIDs(ids ...string) *GroupInfoUpdateOne {
 }
 
 // Mutation returns the GroupInfoMutation object of the builder.
-func (_u *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
-	return _u.mutation
-}
+func (_u *GroupInfoUpdateOne) Mutation() *GroupInfoMutation { return _u.mutation }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (_u *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
-	_u.mutation.ClearGroups()
-	return _u
-}
+func (_u *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne { _u.mutation.ClearGroups(); return _u }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
@@ -277,18 +256,11 @@ func (_u *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *GroupInfoUpdateOne) SaveX(ctx context.Context) *GroupInfo {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *GroupInfoUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *GroupInfoUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *GroupInfoUpdateOne) ExecX(ctx context.Context) {

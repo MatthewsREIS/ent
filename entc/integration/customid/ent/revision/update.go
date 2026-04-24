@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -36,9 +37,7 @@ func (_u *RevisionUpdate) Where(ps ...predicate.Revision) *RevisionUpdate {
 }
 
 // Mutation returns the RevisionMutation object of the builder.
-func (_u *RevisionUpdate) Mutation() *RevisionMutation {
-	return _u.mutation
-}
+func (_u *RevisionUpdate) Mutation() *RevisionMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RevisionUpdate) Save(ctx context.Context) (int, error) {
@@ -46,19 +45,10 @@ func (_u *RevisionUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *RevisionUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *RevisionUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *RevisionUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RevisionUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RevisionUpdate) ExecX(ctx context.Context) {
@@ -102,9 +92,7 @@ func NewRevisionUpdateOne(c Config, hooks []Hook, mutation *RevisionMutation) *R
 }
 
 // Mutation returns the RevisionMutation object of the builder.
-func (_u *RevisionUpdateOne) Mutation() *RevisionMutation {
-	return _u.mutation
-}
+func (_u *RevisionUpdateOne) Mutation() *RevisionMutation { return _u.mutation }
 
 // Where appends a list predicates to the RevisionUpdate builder.
 func (_u *RevisionUpdateOne) Where(ps ...predicate.Revision) *RevisionUpdateOne {
@@ -126,18 +114,11 @@ func (_u *RevisionUpdateOne) Save(ctx context.Context) (*Revision, error) {
 
 // SaveX is like Save, but panics if an error occurs.
 func (_u *RevisionUpdateOne) SaveX(ctx context.Context) *Revision {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_u.Save(ctx))
 }
 
 // Exec executes the query on the entity.
-func (_u *RevisionUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *RevisionUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *RevisionUpdateOne) ExecX(ctx context.Context) {

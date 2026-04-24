@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,11 @@ func NewMediaUpdate(c Config, hooks []Hook, mutation *MediaMutation) *MediaUpdat
 }
 
 // Where appends a list predicates to the MediaUpdate builder.
-func (_u *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetSource sets the "source" field.
 func (_u *MediaUpdate) SetSource(v string) *MediaUpdate {
-	_u.mutation.SetSource(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSource, v)
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
@@ -51,14 +48,12 @@ func (_u *MediaUpdate) SetNillableSource(v *string) *MediaUpdate {
 
 // ClearSource clears the value of the "source" field.
 func (_u *MediaUpdate) ClearSource() *MediaUpdate {
-	_u.mutation.ClearSource()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSource)
 }
 
 // SetSourceURI sets the "source_uri" field.
 func (_u *MediaUpdate) SetSourceURI(v string) *MediaUpdate {
-	_u.mutation.SetSourceURI(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSourceURI, v)
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
@@ -71,14 +66,12 @@ func (_u *MediaUpdate) SetNillableSourceURI(v *string) *MediaUpdate {
 
 // ClearSourceURI clears the value of the "source_uri" field.
 func (_u *MediaUpdate) ClearSourceURI() *MediaUpdate {
-	_u.mutation.ClearSourceURI()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSourceURI)
 }
 
 // SetText sets the "text" field.
 func (_u *MediaUpdate) SetText(v string) *MediaUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -90,15 +83,10 @@ func (_u *MediaUpdate) SetNillableText(v *string) *MediaUpdate {
 }
 
 // ClearText clears the value of the "text" field.
-func (_u *MediaUpdate) ClearText() *MediaUpdate {
-	_u.mutation.ClearText()
-	return _u
-}
+func (_u *MediaUpdate) ClearText() *MediaUpdate { return entbuilder.BClear(_u, _u.mutation.ClearText) }
 
 // Mutation returns the MediaMutation object of the builder.
-func (_u *MediaUpdate) Mutation() *MediaMutation {
-	return _u.mutation
-}
+func (_u *MediaUpdate) Mutation() *MediaMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MediaUpdate) Save(ctx context.Context) (int, error) {
@@ -106,19 +94,10 @@ func (_u *MediaUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *MediaUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *MediaUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *MediaUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *MediaUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *MediaUpdate) ExecX(ctx context.Context) {
@@ -181,8 +160,7 @@ func NewMediaUpdateOne(c Config, hooks []Hook, mutation *MediaMutation) *MediaUp
 
 // SetSource sets the "source" field.
 func (_u *MediaUpdateOne) SetSource(v string) *MediaUpdateOne {
-	_u.mutation.SetSource(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSource, v)
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
@@ -195,14 +173,12 @@ func (_u *MediaUpdateOne) SetNillableSource(v *string) *MediaUpdateOne {
 
 // ClearSource clears the value of the "source" field.
 func (_u *MediaUpdateOne) ClearSource() *MediaUpdateOne {
-	_u.mutation.ClearSource()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSource)
 }
 
 // SetSourceURI sets the "source_uri" field.
 func (_u *MediaUpdateOne) SetSourceURI(v string) *MediaUpdateOne {
-	_u.mutation.SetSourceURI(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetSourceURI, v)
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
@@ -215,14 +191,12 @@ func (_u *MediaUpdateOne) SetNillableSourceURI(v *string) *MediaUpdateOne {
 
 // ClearSourceURI clears the value of the "source_uri" field.
 func (_u *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
-	_u.mutation.ClearSourceURI()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearSourceURI)
 }
 
 // SetText sets the "text" field.
 func (_u *MediaUpdateOne) SetText(v string) *MediaUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -235,14 +209,11 @@ func (_u *MediaUpdateOne) SetNillableText(v *string) *MediaUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *MediaUpdateOne) ClearText() *MediaUpdateOne {
-	_u.mutation.ClearText()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearText)
 }
 
 // Mutation returns the MediaMutation object of the builder.
-func (_u *MediaUpdateOne) Mutation() *MediaMutation {
-	return _u.mutation
-}
+func (_u *MediaUpdateOne) Mutation() *MediaMutation { return _u.mutation }
 
 // Where appends a list predicates to the MediaUpdate builder.
 func (_u *MediaUpdateOne) Where(ps ...predicate.Media) *MediaUpdateOne {
@@ -263,19 +234,10 @@ func (_u *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *MediaUpdateOne) SaveX(ctx context.Context) *Media {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *MediaUpdateOne) SaveX(ctx context.Context) *Media { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *MediaUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *MediaUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *MediaUpdateOne) ExecX(ctx context.Context) {

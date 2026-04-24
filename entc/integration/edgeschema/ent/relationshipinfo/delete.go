@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -40,11 +41,7 @@ func (_d *RelationshipInfoDelete) Exec(ctx context.Context) (int, error) {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_d *RelationshipInfoDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
+	return entbuilder.Must(_d.Exec(ctx))
 }
 
 func (_d *RelationshipInfoDelete) sqlExec(ctx context.Context) (int, error) {

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -33,21 +34,14 @@ func NewTagCreate(c Config, hooks []Hook, mutation *TagMutation) *TagCreate {
 
 // SetValue sets the "value" field.
 func (_c *TagCreate) SetValue(v string) *TagCreate {
-	_c.mutation.SetValue(v)
-	return _c
+	return entbuilder.BSet(_c, _c.mutation.SetValue, v)
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_c *TagCreate) AddTweetIDs(ids ...int) *TagCreate {
-	_c.mutation.AddTweetIDs(ids...)
-	return _c
-}
+func (_c *TagCreate) AddTweetIDs(ids ...int) *TagCreate { _c.mutation.AddTweetIDs(ids...); return _c }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_c *TagCreate) AddGroupIDs(ids ...int) *TagCreate {
-	_c.mutation.AddGroupIDs(ids...)
-	return _c
-}
+func (_c *TagCreate) AddGroupIDs(ids ...int) *TagCreate { _c.mutation.AddGroupIDs(ids...); return _c }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (_c *TagCreate) AddTweetTagIDs(ids ...uuid.UUID) *TagCreate {
@@ -62,9 +56,7 @@ func (_c *TagCreate) AddGroupTagIDs(ids ...int) *TagCreate {
 }
 
 // Mutation returns the TagMutation object of the builder.
-func (_c *TagCreate) Mutation() *TagMutation {
-	return _c.mutation
-}
+func (_c *TagCreate) Mutation() *TagMutation { return _c.mutation }
 
 // Save creates the Tag in the database.
 func (_c *TagCreate) Save(ctx context.Context) (*Tag, error) {
@@ -72,19 +64,10 @@ func (_c *TagCreate) Save(ctx context.Context) (*Tag, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TagCreate) SaveX(ctx context.Context) *Tag {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *TagCreate) SaveX(ctx context.Context) *Tag { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *TagCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *TagCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *TagCreate) ExecX(ctx context.Context) {

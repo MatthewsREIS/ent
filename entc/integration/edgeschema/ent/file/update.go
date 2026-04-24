@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,15 +31,11 @@ func NewFileUpdate(c Config, hooks []Hook, mutation *FileMutation) *FileUpdate {
 }
 
 // Where appends a list predicates to the FileUpdate builder.
-func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetName sets the "name" field.
 func (_u *FileUpdate) SetName(v string) *FileUpdate {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -56,14 +53,11 @@ func (_u *FileUpdate) AddProcessIDs(ids ...int) *FileUpdate {
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (_u *FileUpdate) Mutation() *FileMutation {
-	return _u.mutation
-}
+func (_u *FileUpdate) Mutation() *FileMutation { return _u.mutation }
 
 // ClearProcesses clears all "processes" edges to the Process entity.
 func (_u *FileUpdate) ClearProcesses() *FileUpdate {
-	_u.mutation.ClearProcesses()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearProcesses)
 }
 
 // RemoveProcessIDs removes the "processes" edge to Process entities by IDs.
@@ -78,19 +72,10 @@ func (_u *FileUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FileUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *FileUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *FileUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FileUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FileUpdate) ExecX(ctx context.Context) {
@@ -183,8 +168,7 @@ func NewFileUpdateOne(c Config, hooks []Hook, mutation *FileMutation) *FileUpdat
 
 // SetName sets the "name" field.
 func (_u *FileUpdateOne) SetName(v string) *FileUpdateOne {
-	_u.mutation.SetName(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetName, v)
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
@@ -202,14 +186,11 @@ func (_u *FileUpdateOne) AddProcessIDs(ids ...int) *FileUpdateOne {
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (_u *FileUpdateOne) Mutation() *FileMutation {
-	return _u.mutation
-}
+func (_u *FileUpdateOne) Mutation() *FileMutation { return _u.mutation }
 
 // ClearProcesses clears all "processes" edges to the Process entity.
 func (_u *FileUpdateOne) ClearProcesses() *FileUpdateOne {
-	_u.mutation.ClearProcesses()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearProcesses)
 }
 
 // RemoveProcessIDs removes the "processes" edge to Process entities by IDs.
@@ -237,19 +218,10 @@ func (_u *FileUpdateOne) Save(ctx context.Context) (*File, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *FileUpdateOne) SaveX(ctx context.Context) *File {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *FileUpdateOne) SaveX(ctx context.Context) *File { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *FileUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *FileUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *FileUpdateOne) ExecX(ctx context.Context) {

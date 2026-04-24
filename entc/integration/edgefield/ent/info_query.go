@@ -41,23 +41,14 @@ func (_q *InfoQuery) Where(ps ...predicate.Info) *InfoQuery {
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *InfoQuery) Limit(limit int) *InfoQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *InfoQuery) Limit(limit int) *InfoQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
-func (_q *InfoQuery) Offset(offset int) *InfoQuery {
-	_q.ctx.Offset = &offset
-	return _q
-}
+func (_q *InfoQuery) Offset(offset int) *InfoQuery { _q.ctx.Offset = &offset; return _q }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *InfoQuery) Unique(unique bool) *InfoQuery {
-	_q.ctx.Unique = &unique
-	return _q
-}
+func (_q *InfoQuery) Unique(unique bool) *InfoQuery { _q.ctx.Unique = &unique; return _q }
 
 // Order specifies how the records should be ordered.
 func (_q *InfoQuery) Order(o ...info.OrderOption) *InfoQuery {
@@ -151,13 +142,7 @@ func (_q *InfoQuery) Only(ctx context.Context) (*Info, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *InfoQuery) OnlyX(ctx context.Context) *Info {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_q *InfoQuery) OnlyX(ctx context.Context) *Info { return entbuilder.Must(_q.Only(ctx)) }
 
 // OnlyID is like Only, but returns the only Info ID in the query.
 // Returns a *NotSingularError when more than one Info ID is found.
@@ -179,13 +164,7 @@ func (_q *InfoQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *InfoQuery) OnlyIDX(ctx context.Context) int {
-	id, err := _q.OnlyID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
+func (_q *InfoQuery) OnlyIDX(ctx context.Context) int { return entbuilder.Must(_q.OnlyID(ctx)) }
 
 // All executes the query and returns a list of Infos.
 func (_q *InfoQuery) All(ctx context.Context) ([]*Info, error) {
@@ -198,13 +177,7 @@ func (_q *InfoQuery) All(ctx context.Context) ([]*Info, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *InfoQuery) AllX(ctx context.Context) []*Info {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
-}
+func (_q *InfoQuery) AllX(ctx context.Context) []*Info { return entbuilder.Must(_q.All(ctx)) }
 
 // IDs executes the query and returns a list of Info IDs.
 func (_q *InfoQuery) IDs(ctx context.Context) (ids []int, err error) {
@@ -219,13 +192,7 @@ func (_q *InfoQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *InfoQuery) IDsX(ctx context.Context) []int {
-	ids, err := _q.IDs(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return ids
-}
+func (_q *InfoQuery) IDsX(ctx context.Context) []int { return entbuilder.Must(_q.IDs(ctx)) }
 
 // Count returns the count of the given query.
 func (_q *InfoQuery) Count(ctx context.Context) (int, error) {
@@ -237,13 +204,7 @@ func (_q *InfoQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *InfoQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *InfoQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *InfoQuery) Exist(ctx context.Context) (bool, error) {
@@ -259,13 +220,7 @@ func (_q *InfoQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *InfoQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *InfoQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the InfoQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
@@ -406,32 +361,33 @@ func (_q *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, e
 	return nodes, nil
 }
 
-var infoUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Info, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        info.UserTable,
-			Columns:      info.UserColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Info) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Info) *int {
-		v := n.ID
-		return &v
-	},
-}
-
 func (_q *InfoQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Info, init func(*Info), assign func(*Info, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &infoUserEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Info)
+	for i := range nodes {
+		fk := nodes[i].ID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 

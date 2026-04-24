@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RelationshipQuery is the builder for querying Relationship entities.
@@ -43,10 +44,7 @@ func (_q *RelationshipQuery) Where(ps ...predicate.Relationship) *RelationshipQu
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *RelationshipQuery) Limit(limit int) *RelationshipQuery {
-	_q.ctx.Limit = &limit
-	return _q
-}
+func (_q *RelationshipQuery) Limit(limit int) *RelationshipQuery { _q.ctx.Limit = &limit; return _q }
 
 // Offset to start from.
 func (_q *RelationshipQuery) Offset(offset int) *RelationshipQuery {
@@ -175,11 +173,7 @@ func (_q *RelationshipQuery) Only(ctx context.Context) (*Relationship, error) {
 
 // OnlyX is like Only, but panics if an error occurs.
 func (_q *RelationshipQuery) OnlyX(ctx context.Context) *Relationship {
-	node, err := _q.Only(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
+	return entbuilder.Must(_q.Only(ctx))
 }
 
 // All executes the query and returns a list of Relationships.
@@ -194,11 +188,7 @@ func (_q *RelationshipQuery) All(ctx context.Context) ([]*Relationship, error) {
 
 // AllX is like All, but panics if an error occurs.
 func (_q *RelationshipQuery) AllX(ctx context.Context) []*Relationship {
-	nodes, err := _q.All(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return nodes
+	return entbuilder.Must(_q.All(ctx))
 }
 
 // Count returns the count of the given query.
@@ -211,13 +201,7 @@ func (_q *RelationshipQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *RelationshipQuery) CountX(ctx context.Context) int {
-	count, err := _q.Count(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return count
-}
+func (_q *RelationshipQuery) CountX(ctx context.Context) int { return entbuilder.Must(_q.Count(ctx)) }
 
 // Exist returns true if the query has elements in the graph.
 func (_q *RelationshipQuery) Exist(ctx context.Context) (bool, error) {
@@ -233,13 +217,7 @@ func (_q *RelationshipQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *RelationshipQuery) ExistX(ctx context.Context) bool {
-	exist, err := _q.Exist(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return exist
-}
+func (_q *RelationshipQuery) ExistX(ctx context.Context) bool { return entbuilder.Must(_q.Exist(ctx)) }
 
 // Clone returns a duplicate of the RelationshipQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.

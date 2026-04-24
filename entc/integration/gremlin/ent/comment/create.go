@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -99,9 +100,7 @@ func (_c *CommentCreate) SetNillableClient(v *string) *CommentCreate {
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (_c *CommentCreate) Mutation() *CommentMutation {
-	return _c.mutation
-}
+func (_c *CommentCreate) Mutation() *CommentMutation { return _c.mutation }
 
 // Save creates the Comment in the database.
 func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
@@ -109,19 +108,10 @@ func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *CommentCreate) SaveX(ctx context.Context) *Comment {
-	v, err := _c.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+func (_c *CommentCreate) SaveX(ctx context.Context) *Comment { return entbuilder.Must(_c.Save(ctx)) }
 
 // Exec executes the query.
-func (_c *CommentCreate) Exec(ctx context.Context) error {
-	_, err := _c.Save(ctx)
-	return err
-}
+func (_c *CommentCreate) Exec(ctx context.Context) error { _, err := _c.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_c *CommentCreate) ExecX(ctx context.Context) {

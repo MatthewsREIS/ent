@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,15 +32,11 @@ func NewItemUpdate(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdate {
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
-func (_u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	_u.mutation.Where(ps...)
-	return _u
-}
+func (_u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate { _u.mutation.Where(ps...); return _u }
 
 // SetText sets the "text" field.
 func (_u *ItemUpdate) SetText(v string) *ItemUpdate {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -51,15 +48,10 @@ func (_u *ItemUpdate) SetNillableText(v *string) *ItemUpdate {
 }
 
 // ClearText clears the value of the "text" field.
-func (_u *ItemUpdate) ClearText() *ItemUpdate {
-	_u.mutation.ClearText()
-	return _u
-}
+func (_u *ItemUpdate) ClearText() *ItemUpdate { return entbuilder.BClear(_u, _u.mutation.ClearText) }
 
 // Mutation returns the ItemMutation object of the builder.
-func (_u *ItemUpdate) Mutation() *ItemMutation {
-	return _u.mutation
-}
+func (_u *ItemUpdate) Mutation() *ItemMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ItemUpdate) Save(ctx context.Context) (int, error) {
@@ -67,19 +59,10 @@ func (_u *ItemUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ItemUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *ItemUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *ItemUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ItemUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ItemUpdate) ExecX(ctx context.Context) {
@@ -151,8 +134,7 @@ func NewItemUpdateOne(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdat
 
 // SetText sets the "text" field.
 func (_u *ItemUpdateOne) SetText(v string) *ItemUpdateOne {
-	_u.mutation.SetText(v)
-	return _u
+	return entbuilder.BSet(_u, _u.mutation.SetText, v)
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
@@ -165,14 +147,11 @@ func (_u *ItemUpdateOne) SetNillableText(v *string) *ItemUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *ItemUpdateOne) ClearText() *ItemUpdateOne {
-	_u.mutation.ClearText()
-	return _u
+	return entbuilder.BClear(_u, _u.mutation.ClearText)
 }
 
 // Mutation returns the ItemMutation object of the builder.
-func (_u *ItemUpdateOne) Mutation() *ItemMutation {
-	return _u.mutation
-}
+func (_u *ItemUpdateOne) Mutation() *ItemMutation { return _u.mutation }
 
 // Where appends a list predicates to the ItemUpdate builder.
 func (_u *ItemUpdateOne) Where(ps ...predicate.Item) *ItemUpdateOne {
@@ -193,19 +172,10 @@ func (_u *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *ItemUpdateOne) SaveX(ctx context.Context) *Item {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *ItemUpdateOne) SaveX(ctx context.Context) *Item { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *ItemUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *ItemUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *ItemUpdateOne) ExecX(ctx context.Context) {

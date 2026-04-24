@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // LicenseUpdate is the builder for updating License entities.
@@ -42,9 +43,7 @@ func (_u *LicenseUpdate) SetUpdateTime(v time.Time) *LicenseUpdate {
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (_u *LicenseUpdate) Mutation() *LicenseMutation {
-	return _u.mutation
-}
+func (_u *LicenseUpdate) Mutation() *LicenseMutation { return _u.mutation }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LicenseUpdate) Save(ctx context.Context) (int, error) {
@@ -53,19 +52,10 @@ func (_u *LicenseUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *LicenseUpdate) SaveX(ctx context.Context) int {
-	affected, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return affected
-}
+func (_u *LicenseUpdate) SaveX(ctx context.Context) int { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query.
-func (_u *LicenseUpdate) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *LicenseUpdate) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *LicenseUpdate) ExecX(ctx context.Context) {
@@ -131,9 +121,7 @@ func (_u *LicenseUpdateOne) SetUpdateTime(v time.Time) *LicenseUpdateOne {
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (_u *LicenseUpdateOne) Mutation() *LicenseMutation {
-	return _u.mutation
-}
+func (_u *LicenseUpdateOne) Mutation() *LicenseMutation { return _u.mutation }
 
 // Where appends a list predicates to the LicenseUpdate builder.
 func (_u *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
@@ -155,19 +143,10 @@ func (_u *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_u *LicenseUpdateOne) SaveX(ctx context.Context) *License {
-	node, err := _u.Save(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return node
-}
+func (_u *LicenseUpdateOne) SaveX(ctx context.Context) *License { return entbuilder.Must(_u.Save(ctx)) }
 
 // Exec executes the query on the entity.
-func (_u *LicenseUpdateOne) Exec(ctx context.Context) error {
-	_, err := _u.Save(ctx)
-	return err
-}
+func (_u *LicenseUpdateOne) Exec(ctx context.Context) error { _, err := _u.Save(ctx); return err }
 
 // ExecX is like Exec, but panics if an error occurs.
 func (_u *LicenseUpdateOne) ExecX(ctx context.Context) {
