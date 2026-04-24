@@ -160,18 +160,19 @@ func newCapturingClient(t *testing.T) (*ent.Client, *captureBuf, func()) {
 }
 
 // TestSnapshot_CreateUserWithTweet covers create.go setter + edge-add path.
-// Creates a user, then creates a tweet associated to that user via AddTweets.
+// Creates a user, then creates a tweet associated to that user via AddTweetIDs.
 //
 // Note: the edgeschema Tweet-User relationship is many-to-many through the
 // UserTweet junction entity. There is no SetOwner on Tweet; the canonical
-// pattern is AddTweets on User (or AddUser on Tweet).
+// pattern is AddTweetIDs on User (after the sub-package split, entity-taking
+// setters were removed — only *ID variants remain).
 func TestSnapshot_CreateUserWithTweet(t *testing.T) {
 	client, cap, done := newCapturingClient(t)
 	defer done()
 	ctx := context.Background()
 
 	t1 := client.Tweet.Create().SetText("hello world").SaveX(ctx)
-	client.User.Create().SetName("alice").AddTweets(t1).SaveX(ctx)
+	client.User.Create().SetName("alice").AddTweetIDs(t1.ID).SaveX(ctx)
 
 	got := cap.drain()
 	if len(got) == 0 {
@@ -188,7 +189,7 @@ func TestSnapshot_UserQuery_WithTweets(t *testing.T) {
 
 	t1 := client.Tweet.Create().SetText("one").SaveX(ctx)
 	t2 := client.Tweet.Create().SetText("two").SaveX(ctx)
-	client.User.Create().SetName("alice").AddTweets(t1, t2).SaveX(ctx)
+	client.User.Create().SetName("alice").AddTweetIDs(t1.ID, t2.ID).SaveX(ctx)
 	cap.drain() // discard setup SQL; only capture the query below
 
 	client.User.Query().WithTweets().AllX(ctx)

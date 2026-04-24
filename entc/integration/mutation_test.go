@@ -46,7 +46,7 @@ func TestMutationStateSurface(t *testing.T) {
 			})
 		}, ent.OpCreate))
 		u := client.User.Create().SetAge(1).SetName("a8m").SaveX(ctx)
-		client.Card.Create().SetNumber("1234").SetOwner(u).ExecX(ctx)
+		client.Card.Create().SetNumber("1234").SetOwnerID(u.ID).ExecX(ctx)
 		require.Contains(t, captured, card.FieldNumber, "Fields() should include 'number'")
 	})
 
@@ -64,7 +64,7 @@ func TestMutationStateSurface(t *testing.T) {
 			})
 		}, ent.OpCreate))
 		u := client.User.Create().SetAge(1).SetName("a8m").SaveX(ctx)
-		client.Card.Create().SetNumber("1234").SetName("before-reset").SetOwner(u).ExecX(ctx)
+		client.Card.Create().SetNumber("1234").SetName("before-reset").SetOwnerID(u.ID).ExecX(ctx)
 		require.True(t, nameSetBeforeReset, "Name() should be set before ResetName()")
 		require.Empty(t, nameAfterReset, "Name() should be empty after ResetName()")
 	})
@@ -73,7 +73,7 @@ func TestMutationStateSurface(t *testing.T) {
 		client := openClient(t)
 		defer client.Close()
 		u := client.User.Create().SetAge(1).SetName("a8m").SaveX(ctx)
-		crd := client.Card.Create().SetNumber("1234").SetName("mycard").SetOwner(u).SaveX(ctx)
+		crd := client.Card.Create().SetNumber("1234").SetName("mycard").SetOwnerID(u.ID).SaveX(ctx)
 		var nameCleared bool
 		client.Card.Use(hook.On(func(next ent.Mutator) ent.Mutator {
 			return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
@@ -99,7 +99,7 @@ func TestMutationStateSurface(t *testing.T) {
 			})
 		}, ent.OpUpdate))
 		u := client.User.Create().SetAge(1).SetName("a8m").SaveX(ctx)
-		client.Card.Create().SetNumber("1234").SetOwner(u).ExecX(ctx)
+		client.Card.Create().SetNumber("1234").SetOwnerID(u.ID).ExecX(ctx)
 		client.Card.Update().AddBalance(3.14).ExecX(ctx)
 		require.Contains(t, addedFields, card.FieldBalance, "AddedFields() should include 'balance'")
 		require.True(t, ok, "AddedField('balance') should return true")

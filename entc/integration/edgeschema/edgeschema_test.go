@@ -428,8 +428,8 @@ func TestEntQLNonEdgePredicates(t *testing.T) {
 	client.Role.Create().SetName("member").ExecX(ctx)
 	t1 := client.Tweet.Create().SetText("hello world").SaveX(ctx)
 	t2 := client.Tweet.Create().SetText("goodbye world").SaveX(ctx)
-	a8m := client.User.Create().SetName("a8m").AddLikedTweets(t1).SaveX(ctx)
-	client.User.Create().SetName("nati").AddLikedTweets(t1, t2).ExecX(ctx)
+	a8m := client.User.Create().SetName("a8m").AddLikedTweetIDs(t1.ID).SaveX(ctx)
+	client.User.Create().SetName("nati").AddLikedTweetIDs(t1.ID, t2.ID).ExecX(ctx)
 
 	t.Run("GroupFilter_WhereName", func(t *testing.T) {
 		q := client.Group.Query()
