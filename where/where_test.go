@@ -40,3 +40,55 @@ func TestNEQ_Int(t *testing.T) {
 	require.Contains(t, q, "`age` <> ?")
 	require.Equal(t, []any{30}, args)
 }
+
+func TestIn_Int(t *testing.T) {
+	q, args := predicateToSQL(t, where.In("age", 30, 40, 50))
+	require.Contains(t, q, "`age` IN (?, ?, ?)")
+	require.Equal(t, []any{30, 40, 50}, args)
+}
+
+func TestIn_String(t *testing.T) {
+	q, args := predicateToSQL(t, where.In("name", "a", "b"))
+	require.Contains(t, q, "`name` IN (?, ?)")
+	require.Equal(t, []any{"a", "b"}, args)
+}
+
+func TestNotIn(t *testing.T) {
+	q, args := predicateToSQL(t, where.NotIn("age", 1, 2))
+	require.Contains(t, q, "`age` NOT IN (?, ?)")
+	require.Equal(t, []any{1, 2}, args)
+}
+
+func TestGT(t *testing.T) {
+	q, args := predicateToSQL(t, where.GT("age", 18))
+	require.Contains(t, q, "`age` > ?")
+	require.Equal(t, []any{18}, args)
+}
+
+func TestGTE(t *testing.T) {
+	q, args := predicateToSQL(t, where.GTE("age", 18))
+	require.Contains(t, q, "`age` >= ?")
+	require.Equal(t, []any{18}, args)
+}
+
+func TestLT(t *testing.T) {
+	q, args := predicateToSQL(t, where.LT("age", 65))
+	require.Contains(t, q, "`age` < ?")
+	require.Equal(t, []any{65}, args)
+}
+
+func TestLTE(t *testing.T) {
+	q, args := predicateToSQL(t, where.LTE("age", 65))
+	require.Contains(t, q, "`age` <= ?")
+	require.Equal(t, []any{65}, args)
+}
+
+func TestIsNull(t *testing.T) {
+	q, _ := predicateToSQL(t, where.IsNull("deleted_at"))
+	require.Contains(t, q, "`deleted_at` IS NULL")
+}
+
+func TestNotNull(t *testing.T) {
+	q, _ := predicateToSQL(t, where.NotNull("deleted_at"))
+	require.Contains(t, q, "`deleted_at` IS NOT NULL")
+}
