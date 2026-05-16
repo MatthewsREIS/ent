@@ -83,7 +83,9 @@ var (
 		},
 		{
 			Name: "update",
-			Cond: notView,
+			Cond: func(t *Type) bool {
+				return notView(t) && !t.featureEnabled(FeatureNoUpdate)
+			},
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/update.go", t.PackageDir())
 			},
@@ -91,7 +93,9 @@ var (
 		},
 		{
 			Name: "delete",
-			Cond: notView,
+			Cond: func(t *Type) bool {
+				return notView(t) && !t.featureEnabled(FeatureNoDelete)
+			},
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/delete.go", t.PackageDir())
 			},

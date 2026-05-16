@@ -566,12 +566,20 @@ func TestGraph_Gen(t *testing.T) {
 		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
 		require.NoError(err)
 	}
-	// Ensure CUD builder files were generated in sub-packages.
-	for _, name := range []string{"create", "update", "delete"} {
+	// Ensure create builder files were generated in sub-packages.
+	// (update/delete are suppressed when AllFeatures includes FeatureNoUpdate/FeatureNoDelete.)
+	for _, name := range []string{"create"} {
 		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
 		require.NoError(err)
 		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
 		require.NoError(err)
+	}
+	// Ensure update/delete files are NOT generated when FeatureNoUpdate/FeatureNoDelete active.
+	for _, name := range []string{"update", "delete"} {
+		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
+		require.True(os.IsNotExist(err), "expected %s/t1/%s.go to not exist with no-update/no-delete features", target, name)
+		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
+		require.True(os.IsNotExist(err), "expected %s/t2/%s.go to not exist with no-update/no-delete features", target, name)
 	}
 	// Ensure client files were generated in the root target.
 	for _, name := range []string{"t1_client.go", "t2_client.go"} {
@@ -627,13 +635,12 @@ func TestGraph_Gen(t *testing.T) {
 		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
 		require.Error(err)
 	}
-	// Ensure CUD builder files were generated in sub-packages for t1 but not t2.
-	for _, name := range []string{"create", "update", "delete"} {
-		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
-		require.NoError(err)
-		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
-		require.Error(err)
-	}
+	// Ensure create builder was generated for t1 but not t2.
+	// (update/delete suppressed by FeatureNoUpdate/FeatureNoDelete in AllFeatures.)
+	_, err = os.Stat(filepath.Join(target, "t1", "create.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "t2", "create.go"))
+	require.Error(err)
 	// Ensure client files were generated in the root target for t1 but not t2.
 	_, err = os.Stat(filepath.Join(target, "t1_client.go"))
 	require.NoError(err)

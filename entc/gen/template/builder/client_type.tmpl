@@ -72,6 +72,8 @@ func (c *{{ $client }}) MapCreateBulk(slice any, setFunc func(*{{ $q }}{{ $n.Cre
 	return {{ $q }}New{{ $n.CreateBulkName }}(c.Config, builders)
 }
 
+{{ $noUpdate := $n.FeatureEnabled "no-update" }}
+{{- if not $noUpdate }}
 // Update returns an update builder for {{ $n.Name }}.
 func (c *{{ $client }}) Update() *{{ $q }}{{ $n.UpdateName }} {
 	{{- if $n.HasOneFieldID }}
@@ -104,7 +106,10 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.Upda
 		return {{ $q }}New{{ $n.UpdateOneName }}(c.Config, c.Hooks(), mutation)
 	}
 {{ end }}
+{{- end }}{{/* End of if not FeatureNoUpdate. */}}
 
+{{ $noDelete := $n.FeatureEnabled "no-delete" }}
+{{- if not $noDelete }}
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
 	{{- if $n.HasOneFieldID }}
@@ -130,6 +135,7 @@ func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
 		return {{ $q }}New{{ $n.DeleteOneName }}({{ $q }}New{{ $n.DeleteName }}(c.Config, c.Hooks(), mutation))
 	}
 {{ end }}
+{{- end }}{{/* End of if not FeatureNoDelete. */}}
 {{- end }} {{/* End of if not IsView. */}}
 
 // Query returns a query builder for {{ $n.Name }}.

@@ -1085,6 +1085,24 @@ func (Config) ModuleInfo() (m debug.Module) {
 	return
 }
 
+// IsUpdateDisabled reports whether Update/UpdateOne builders should NOT be
+// generated for the named entity. Currently driven by the global FeatureNoUpdate
+// flag; per-entity ReadOnly annotation support will be added in PR 2 Task 5.
+func (g *Graph) IsUpdateDisabled(typeName string) bool {
+	if ok, _ := g.Config.FeatureEnabled(FeatureNoUpdate.Name); ok {
+		return true
+	}
+	return false
+}
+
+// IsDeleteDisabled mirrors IsUpdateDisabled for Delete builders.
+func (g *Graph) IsDeleteDisabled(typeName string) bool {
+	if ok, _ := g.Config.FeatureEnabled(FeatureNoDelete.Name); ok {
+		return true
+	}
+	return false
+}
+
 // FeatureEnabled reports if the given feature name is enabled.
 // It's exported to be used by the template engine as follows:
 //
