@@ -159,6 +159,26 @@ var (
 		},
 	}
 
+	// FeatureNoUpdate suppresses generation of <Entity>Update and <Entity>UpdateOne
+	// builders for every entity (unless a per-entity ReadOnly annotation explicitly
+	// overrides this in the future). Use this on consumer projects with
+	// write-once-or-via-migrations data models to shrink generated code.
+	FeatureNoUpdate = Feature{
+		Name:        "no-update",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Suppress generation of *Update/*UpdateOne builders for every entity",
+	}
+
+	// FeatureNoDelete suppresses generation of <Entity>Delete and <Entity>DeleteOne
+	// builders for every entity. Same rationale as FeatureNoUpdate.
+	FeatureNoDelete = Feature{
+		Name:        "no-delete",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Suppress generation of *Delete/*DeleteOne builders for every entity",
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
@@ -174,6 +194,8 @@ var (
 		FeatureUpsert,
 		FeatureVersionedMigration,
 		FeatureGlobalID,
+		FeatureNoUpdate,
+		FeatureNoDelete,
 	}
 	// allFeatures includes all public and private features.
 	allFeatures = append(AllFeatures, featureMultiSchema)
