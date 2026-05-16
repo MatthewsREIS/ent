@@ -46,6 +46,9 @@ import (
 	{{- if and (hasField $ "Scope") (or ($.Scope.CreateUsesEntbuilder) ($.Scope.UpdateUsesEntbuilder) ($.Scope.DeleteUsesEntbuilder)) }}
 		"entgo.io/ent/runtime/entbuilder"
 	{{- end }}
+	{{- if and (hasField $ "Scope") ($.Scope.WhereUsesWherePkg) }}
+		"entgo.io/ent/where"
+	{{- end }}
 	{{- template "import/additional" $ }}
 )
 {{ end }}
