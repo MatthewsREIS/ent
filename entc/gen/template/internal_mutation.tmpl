@@ -47,7 +47,7 @@ type {{ $mutation }}Option = func(*{{ $mutation }})
 // {{ $n.Package }}Descriptor describes {{ $n.Name }}'s fields and edges
 // for the generic mutation runtime.
 var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
-	Name:   {{ $n.TypeName | printf "%q" }},
+	Name:   {{ $n.Name | printf "%q" }},
 	{{- with $n.HasOneFieldID }}
 	IDType: reflect.TypeFor[{{ $n.ID.Type }}](),
 	{{- end }}
