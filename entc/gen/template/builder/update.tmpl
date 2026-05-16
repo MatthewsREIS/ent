@@ -13,7 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "Imports" $.BuilderImports }}
+{{ with extend $ "Imports" $.BuilderImports "UpdateUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -58,7 +58,11 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
+	{{- if eq $.Config.Storage.Name "sql" }}
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*{{ $.MutationName }}]{Hooks: {{ $receiver }}.hooks, Mutation: {{ $mutation }}}, {{ $receiver }}.{{ $.Storage }}Save)
+	{{- else }}
 	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	{{- end }}
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -141,7 +145,11 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
+	{{- if eq $.Config.Storage.Name "sql" }}
+	return entbuilder.RunUpdateOne[{{ $.Name }}](ctx, &entbuilder.UpdateState[*{{ $.MutationName }}]{Hooks: {{ $receiver }}.hooks, Mutation: {{ $mutation }}}, {{ $receiver }}.{{ $.Storage }}Save)
+	{{- else }}
 	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	{{- end }}
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -13,7 +13,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ template "import" $ }}
+{{ with extend $ "DeleteUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
+	{{ template "import" . }}
+{{ end }}
 
 {{ $builder := $.DeleteName }}
 {{ $receiver := $.DeleteReceiver }}
@@ -44,7 +46,11 @@ func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*{{ $.MutationName }}]{Hooks: {{ $receiver }}.hooks, Mutation: {{ $mutation }}}, {{ $receiver }}.{{ $.Storage }}Exec)
+	{{- else }}
 	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
+	{{- end }}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
