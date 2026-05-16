@@ -2,6 +2,11 @@
 
 This document covers the breaking API changes introduced by the sub-package split. After regenerating your code with the updated `ent` code generator, follow these steps to update your application code.
 
+## Predicate Collapse (codegen-epic PR 3)
+
+New `entgo.io/ent/where` generic predicate package + deprecated per-entity
+wrappers. See [doc/md/migration-predicate-collapse.md](doc/md/migration-predicate-collapse.md).
+
 ## Overview
 
 Generated ent packages now use a 3-tier structure:
