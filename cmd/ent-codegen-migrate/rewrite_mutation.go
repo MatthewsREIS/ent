@@ -58,6 +58,9 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 			return true
 		}
 		// Look up field/edge across all descriptors; first match wins.
+		// For "cleared" action the name may refer to either a field or an edge
+		// (e.g. m.OwnerCleared() where "owner" is an edge). Try both; if we
+		// match an edge, upgrade isEdge so rewriteCall uses EdgeCleared.
 		var (
 			fd      FieldDesc
 			edgeD   EdgeDesc
@@ -75,6 +78,15 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 					fd = f
 					matched = true
 					break
+				}
+				// "cleared" is ambiguous: also look in edges.
+				if action == "cleared" {
+					if e, ok := ed.Edges[fieldOrEdge]; ok {
+						edgeD = e
+						isEdge = true
+						matched = true
+						break
+					}
 				}
 			}
 		}
@@ -224,8 +236,14 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 			Args: []ast.Expr{strLit(name)},
 		}, false
 	case "cleared":
+		// When the name resolved to an edge (isEdge was upgraded in the
+		// lookup loop), use EdgeCleared; otherwise use FieldCleared.
+		method := "FieldCleared"
+		if edgeD.TargetIDType != "" || edgeD.Cardinality != "" {
+			method = "EdgeCleared"
+		}
 		return &ast.CallExpr{
-			Fun:  &ast.SelectorExpr{X: recv, Sel: ast.NewIdent("FieldCleared")},
+			Fun:  &ast.SelectorExpr{X: recv, Sel: ast.NewIdent(method)},
 			Args: []ast.Expr{strLit(name)},
 		}, false
 	case "addIDs":

@@ -1,0 +1,33 @@
+package privacy
+
+import (
+	"context"
+
+	"entgo.io/ent"
+	"entgo.io/ent/entc/integration/privacy/ent/internal"
+	"entgo.io/ent/entc/integration/privacy/ent/task"
+)
+
+func titleHook(ctx context.Context, m *internal.TaskMutation) (ent.Value, error) {
+	title, _ := m.Title()
+	if title == "" {
+		m.SetTitle("untitled")
+	}
+	return nil, nil
+}
+
+func ownerHook(ctx context.Context, m *internal.TaskMutation) (ent.Value, error) {
+	if !m.OwnerCleared() {
+		m.SetOwnerID(1)
+	}
+	return nil, nil
+}
+
+func teamPicker(ids []int) []func(*ent.Mutation) {
+	return nil
+}
+
+func adminFilter() func() {
+	_ = task.TitleEQ("admin")
+	return nil
+}
