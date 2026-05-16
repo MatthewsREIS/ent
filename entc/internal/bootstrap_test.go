@@ -5,6 +5,8 @@
 package internal
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -168,5 +170,84 @@ func TestStripHookBodies_SyntaxErrorReturnsError(t *testing.T) {
 
 func ((((`
 	_, err := StripHookBodies([]byte(src))
+	require.Error(t, err)
+}
+
+func TestStageStrippedSchema_CopiesAndStrips(t *testing.T) {
+	src := t.TempDir()
+
+	// Write a schema file with a Hooks method that references a "generated" symbol.
+	userSrc := `package schema
+
+import (
+	"context"
+
+	"entgo.io/ent"
+	"badpackage" // intentionally bad path -- proves the stripped output doesn't need it
+)
+
+type User struct {
+	ent.Schema
+}
+
+func (User) Fields() []ent.Field { return nil }
+
+func (User) Hooks() []ent.Hook {
+	return []ent.Hook{
+		func(next ent.Mutator) ent.Mutator {
+			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+				_ = badpackage.GoSomething(m)
+				return next.Mutate(ctx, m)
+			})
+		},
+	}
+}
+`
+	require.NoError(t, os.WriteFile(filepath.Join(src, "user.go"), []byte(userSrc), 0o644))
+
+	// Also write a non-.go file that should be copied verbatim.
+	require.NoError(t, os.WriteFile(filepath.Join(src, "README"), []byte("hello"), 0o644))
+
+	// And a subdirectory with another .go file.
+	require.NoError(t, os.MkdirAll(filepath.Join(src, "sub"), 0o755))
+	subSrc := `package schema
+
+import "entgo.io/ent"
+
+type Comment struct{ ent.Schema }
+
+func (Comment) Fields() []ent.Field { return nil }
+`
+	require.NoError(t, os.WriteFile(filepath.Join(src, "sub", "comment.go"), []byte(subSrc), 0o644))
+
+	dst, err := StageStrippedSchema(src)
+	require.NoError(t, err)
+	defer os.RemoveAll(dst)
+
+	// user.go should exist with Hooks body stripped and bad imports removed.
+	userOut, err := os.ReadFile(filepath.Join(dst, "user.go"))
+	require.NoError(t, err)
+	require.NotContains(t, string(userOut), "badpackage", "bad import must be gone from stripped file")
+	require.NotContains(t, string(userOut), "GoSomething", "stripped body content must be gone")
+	require.Contains(t, string(userOut), "func (User) Hooks() []ent.Hook {")
+
+	// README should be copied verbatim.
+	readme, err := os.ReadFile(filepath.Join(dst, "README"))
+	require.NoError(t, err)
+	require.Equal(t, "hello", string(readme))
+
+	// sub/comment.go should exist (no hooks to strip; should be unchanged in semantics).
+	commentOut, err := os.ReadFile(filepath.Join(dst, "sub", "comment.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(commentOut), "type Comment struct")
+
+	// Source directory must be untouched.
+	srcUser, err := os.ReadFile(filepath.Join(src, "user.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(srcUser), "GoSomething", "original source must NOT be modified")
+}
+
+func TestStageStrippedSchema_NonExistentSrc(t *testing.T) {
+	_, err := StageStrippedSchema("/this/path/does/not/exist")
 	require.Error(t, err)
 }

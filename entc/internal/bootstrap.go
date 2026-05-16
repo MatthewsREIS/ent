@@ -11,7 +11,11 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
@@ -119,4 +123,57 @@ func StripHookBodies(src []byte) ([]byte, error) {
 		return nil, fmt.Errorf("bootstrap: format: %w", err)
 	}
 	return buf.Bytes(), nil
+}
+
+// StageStrippedSchema copies the schema directory at srcDir into a fresh
+// temporary directory, AST-stripping the bodies of Hooks() / Policy() /
+// Interceptors() methods on every .go file along the way. Non-.go files are
+// copied verbatim. The source directory is never modified.
+//
+// Caller is responsible for removing the returned directory.
+//
+// This is the entrypoint bootstrap mode uses before invoking the loader:
+// `dst, err := StageStrippedSchema(schemaPath); defer os.RemoveAll(dst);
+// loader.Load(dst, ...)`.
+func StageStrippedSchema(srcDir string) (string, error) {
+	if _, err := os.Stat(srcDir); err != nil {
+		return "", fmt.Errorf("bootstrap: stat src: %w", err)
+	}
+	dst, err := os.MkdirTemp("", "ent-bootstrap-*")
+	if err != nil {
+		return "", fmt.Errorf("bootstrap: tempdir: %w", err)
+	}
+	if err := stripAndCopyTree(srcDir, dst); err != nil {
+		_ = os.RemoveAll(dst)
+		return "", err
+	}
+	return dst, nil
+}
+
+func stripAndCopyTree(src, dst string) error {
+	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, _ := filepath.Rel(src, path)
+		target := filepath.Join(dst, rel)
+		if d.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+		data, rerr := os.ReadFile(path)
+		if rerr != nil {
+			return rerr
+		}
+		if strings.HasSuffix(d.Name(), ".go") {
+			stripped, serr := StripHookBodies(data)
+			if serr != nil {
+				// File doesn't parse cleanly -- copy verbatim and let the
+				// downstream loader surface the real error. Don't pretend
+				// to have stripped a file we couldn't parse.
+				stripped = data
+			}
+			data = stripped
+		}
+		return os.WriteFile(target, data, 0o644)
+	})
 }
