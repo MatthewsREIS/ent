@@ -59,23 +59,31 @@ func myHook(next ent.Mutator) ent.Mutator {
 
 ### Automated migration tool
 
-`ent-codegen-migrate` (at `cmd/ent-codegen-migrate`) rewrites call sites mechanically:
+`ent-codegen-migrate` (at `cmd/ent-codegen-migrate`) rewrites call sites mechanically. The `-descriptors` flag points at the consumer's regenerated `internal/` package so the tool can learn field types and edge cardinalities from the descriptor literals.
 
 ```bash
-# Dry-run: report all sites that need updating
-ent-codegen-migrate -dir ./your-module
+# Dry-run: print which files would change (no writes)
+go run entgo.io/ent/cmd/ent-codegen-migrate \
+    -descriptors ./path/to/your/ent/gen/internal \
+    -dry-run \
+    ./path/to/your/source/...
 
 # Apply rewrites in-place
-ent-codegen-migrate -dir ./your-module -write
+go run entgo.io/ent/cmd/ent-codegen-migrate \
+    -descriptors ./path/to/your/ent/gen/internal \
+    ./path/to/your/source/...
 ```
 
 The tool handles:
-- Typed getter calls → `entbuilder.GetField[T](m, entity.FieldX)`
-- Typed setter calls → `entbuilder.SetField(m, entity.FieldX, v)`
-- `AddedX()` → `entbuilder.AppendedField[T](m, entity.FieldX)`
-- Predicate wrapper calls → `entbuilder.ToAny(ps...)` (from PR 3)
+- Typed setters: `m.SetTitle(v)` → `m.SetField("title", v)`
+- Typed getters: `m.Title()` → `entbuilder.GetField[string](m, "title")`
+- Typed old-value reads: `m.OldTitle(ctx)` → `entbuilder.OldFieldAs[string](ctx, m, "title")`
+- Edge add/remove: `m.AddTeamIDs(ids...)` → `m.AddEdgeIDs("teams", entbuilder.ToAny(ids)...)`
+- Edge state checks: `m.TeamsCleared()` / `m.OwnerCleared()` → `m.EdgeCleared("teams"|"owner")`
+- Predicate wrappers (from PR 3): `user.NameEQ(x)` → `where.EQ(user.FieldName, x)` (ID helpers like `user.IDIn` are preserved)
+- `m.Where(ps...)` on a mutation receiver → `m.WhereP(ps...)`
 
-Sites the tool intentionally leaves for manual follow-up are reported as residuals.
+The dispatch is heuristic — the tool matches method-name shape and looks up the inferred field/edge name across all descriptors (first match wins). Patterns it can't auto-rewrite (e.g. passing a method value: `someFunc(m.SetTitle)`) are left unchanged; verify your build after running.
 
 ### Known regression: gremlin storage backend
 
