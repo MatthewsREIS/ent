@@ -95,7 +95,10 @@ replace (
 	}
 
 	entDir := filepath.Join(mod, "ent")
-	srcSchema := filepath.Join(repoRoot, f.SchemaDir)
+	srcSchema := f.SchemaDir
+	if !filepath.IsAbs(srcSchema) {
+		srcSchema = filepath.Join(repoRoot, srcSchema)
+	}
 	dstSchema := filepath.Join(entDir, "schema")
 	if err := copyTree(srcSchema, dstSchema); err != nil {
 		return err

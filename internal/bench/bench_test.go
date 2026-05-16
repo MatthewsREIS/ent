@@ -37,6 +37,29 @@ func TestRunFixture_SmokePrivacy(t *testing.T) {
 	require.Greater(t, run.FileCount, 0, "generated file count should be > 0")
 }
 
+// TestRunFixture_ExternalSchemaPath verifies that an absolute SchemaDir works.
+// We simulate "external" by passing an absolute path to one of the in-repo
+// fixture schema dirs — the bench should treat the absolute path as-is rather
+// than joining it onto repoRoot.
+func TestRunFixture_ExternalSchemaPath(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("bench requires POSIX rusage")
+	}
+	if _, err := exec.LookPath("go"); err != nil {
+		t.Skip("go toolchain not in PATH")
+	}
+	repoRoot := repoRootForTest(t)
+	abs := filepath.Join(repoRoot, "entc/integration/privacy/ent/schema")
+	require.True(t, filepath.IsAbs(abs))
+	run, err := RunFixture(repoRoot, Fixture{
+		Name:      "privacy-external",
+		SchemaDir: abs,
+	})
+	require.NoError(t, err)
+	require.Equal(t, "privacy-external", run.Fixture)
+	require.Greater(t, run.TotalLOC, 0)
+}
+
 func repoRootForTest(t *testing.T) string {
 	t.Helper()
 	wd, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
