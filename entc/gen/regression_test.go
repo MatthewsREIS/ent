@@ -175,14 +175,14 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 
 	userQuery, err := os.ReadFile(filepath.Join(target, "user_query.go"))
 	require.NoError(t, err)
-	require.Contains(t, string(userQuery), "joinT.Schema(_q.schemaConfig.UserGroups)")
-	require.NotContains(t, string(userQuery), "edge.Schema = _q.schemaConfig.UserGroups")
+	require.Contains(t, string(userQuery), "joinT.Schema(_q.Config.SchemaConfig().UserGroups)")
+	require.NotContains(t, string(userQuery), "edge.Schema = _q.Config.SchemaConfig().UserGroups")
 
-	groupUpdate, err := os.ReadFile(filepath.Join(target, "group_update.go"))
+	groupUpdate, err := os.ReadFile(filepath.Join(target, "group", "update.go"))
 	require.NoError(t, err)
 	require.Truef(
 		t,
-		strings.Count(string(groupUpdate), "edge.Schema = cfg.schemaConfig.UserGroups") >= 3,
+		strings.Count(string(groupUpdate), "edge.Schema = _u.Config.SchemaConfig().UserGroups") >= 3,
 		"expected schema hook to be applied for clear/remove/add edge mutations, got:\n%s",
 		groupUpdate,
 	)
@@ -191,11 +191,15 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 	testFile := filepath.Join(target, "schemaconfig_compile_test.go")
 	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
 
-import "testing"
+import (
+	"testing"
+
+	"schemaconfigregen/ent/group"
+)
 
 func TestGeneratedSchemaConfigDescriptorPathsCompile(t *testing.T) {
 	_ = (*UserQuery).WithGroups
-	_ = (*GroupUpdate).ClearUsers
+	_ = (*group.GroupUpdate).ClearUsers
 }
 `), 0644))
 
