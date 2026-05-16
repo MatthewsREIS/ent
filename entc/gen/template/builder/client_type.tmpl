@@ -73,6 +73,7 @@ func (c *{{ $client }}) MapCreateBulk(slice any, setFunc func(*{{ $q }}{{ $n.Cre
 }
 
 {{ $noUpdate := $n.FeatureEnabled "no-update" }}
+{{- if not $noUpdate }}{{- if hasKey $n.Annotations "ReadOnly" }}{{- $noUpdate = true }}{{- end }}{{- end }}
 {{- if not $noUpdate }}
 // Update returns an update builder for {{ $n.Name }}.
 func (c *{{ $client }}) Update() *{{ $q }}{{ $n.UpdateName }} {
@@ -109,6 +110,7 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.Upda
 {{- end }}{{/* End of if not FeatureNoUpdate. */}}
 
 {{ $noDelete := $n.FeatureEnabled "no-delete" }}
+{{- if not $noDelete }}{{- if hasKey $n.Annotations "ReadOnly" }}{{- $noDelete = true }}{{- end }}{{- end }}
 {{- if not $noDelete }}
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
