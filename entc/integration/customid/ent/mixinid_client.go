@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -108,8 +109,10 @@ func (c *MixinIDClient) DeleteOneID(id uuid.UUID) *mixinid.MixinIDDeleteOne {
 func (c *MixinIDClient) Query() *MixinIDQuery {
 	return &MixinIDQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeMixinID},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.MixinID]{
+			Ctx:    &QueryContext{Type: TypeMixinID},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

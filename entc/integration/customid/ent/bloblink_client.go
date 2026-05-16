@@ -12,6 +12,8 @@ import (
 	"reflect"
 
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
+	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // BlobLinkClient is a client for the BlobLink schema.
@@ -86,8 +88,10 @@ func (c *BlobLinkClient) Delete() *bloblink.BlobLinkDelete {
 func (c *BlobLinkClient) Query() *BlobLinkQuery {
 	return &BlobLinkQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeBlobLink},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.BlobLink]{
+			Ctx:    &QueryContext{Type: TypeBlobLink},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // IntSIDClient is a client for the IntSID schema.
@@ -110,8 +111,10 @@ func (c *IntSIDClient) DeleteOneID(id sid.ID) *intsid.IntSIDDeleteOne {
 func (c *IntSIDClient) Query() *IntSIDQuery {
 	return &IntSIDQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeIntSID},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.IntSID]{
+			Ctx:    &QueryContext{Type: TypeIntSID},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *IntSIDClient) GetX(ctx context.Context, id sid.ID) *IntSID {
 // QueryParent queries the parent edge of a IntSID.
 func (c *IntSIDClient) QueryParent(_m *IntSID) *IntSIDQuery {
 	query := (&IntSIDClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(intsid.Table, intsid.FieldID, id),
@@ -148,7 +151,7 @@ func (c *IntSIDClient) QueryParent(_m *IntSID) *IntSIDQuery {
 // QueryChildren queries the children edge of a IntSID.
 func (c *IntSIDClient) QueryChildren(_m *IntSID) *IntSIDQuery {
 	query := (&IntSIDClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(intsid.Table, intsid.FieldID, id),

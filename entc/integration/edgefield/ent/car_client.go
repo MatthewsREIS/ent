@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -111,8 +112,10 @@ func (c *CarClient) DeleteOneID(id uuid.UUID) *car.CarDeleteOne {
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeCar},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Car]{
+			Ctx:    &QueryContext{Type: TypeCar},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *CarClient) GetX(ctx context.Context, id uuid.UUID) *Car {
 // QueryRentals queries the rentals edge of a Car.
 func (c *CarClient) QueryRentals(_m *Car) *RentalQuery {
 	query := (&RentalClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(car.Table, car.FieldID, id),

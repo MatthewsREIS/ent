@@ -11,7 +11,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RelationshipClient is a client for the Relationship schema.
@@ -86,8 +88,10 @@ func (c *RelationshipClient) Delete() *relationship.RelationshipDelete {
 func (c *RelationshipClient) Query() *RelationshipQuery {
 	return &RelationshipQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeRelationship},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Relationship]{
+			Ctx:    &QueryContext{Type: TypeRelationship},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

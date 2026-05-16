@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // PCClient is a client for the PC schema.
@@ -107,8 +108,10 @@ func (c *PCClient) DeleteOneID(id int) *pc.PCDeleteOne {
 func (c *PCClient) Query() *PCQuery {
 	return &PCQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypePC},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.PC]{
+			Ctx:    &QueryContext{Type: TypePC},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

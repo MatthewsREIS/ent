@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/migrate/entv1/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ConversionClient is a client for the Conversion schema.
@@ -107,8 +108,10 @@ func (c *ConversionClient) DeleteOneID(id int) *conversion.ConversionDeleteOne {
 func (c *ConversionClient) Query() *ConversionQuery {
 	return &ConversionQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeConversion},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Conversion]{
+			Ctx:    &QueryContext{Type: TypeConversion},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

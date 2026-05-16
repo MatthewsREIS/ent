@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -76,7 +77,7 @@ func (_u *InfoUpdate) ClearUser() *InfoUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *InfoUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*InfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -224,7 +225,7 @@ func (_u *InfoUpdateOne) Select(field string, fields ...string) *InfoUpdateOne {
 
 // Save executes the query and returns the updated Info entity.
 func (_u *InfoUpdateOne) Save(ctx context.Context) (*Info, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Info](ctx, &entbuilder.UpdateState[*InfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

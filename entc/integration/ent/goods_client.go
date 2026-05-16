@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/goods"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GoodsClient is a client for the Goods schema.
@@ -107,8 +108,10 @@ func (c *GoodsClient) DeleteOneID(id int) *goods.GoodsDeleteOne {
 func (c *GoodsClient) Query() *GoodsQuery {
 	return &GoodsQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeGoods},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Goods]{
+			Ctx:    &QueryContext{Type: TypeGoods},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

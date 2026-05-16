@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // BlogClient is a client for the Blog schema.
@@ -110,8 +111,10 @@ func (c *BlogClient) DeleteOneID(id int) *blog.BlogDeleteOne {
 func (c *BlogClient) Query() *BlogQuery {
 	return &BlogQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeBlog},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Blog]{
+			Ctx:    &QueryContext{Type: TypeBlog},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *BlogClient) GetX(ctx context.Context, id int) *Blog {
 // QueryAdmins queries the admins edge of a Blog.
 func (c *BlogClient) QueryAdmins(_m *Blog) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(blog.Table, blog.FieldID, id),

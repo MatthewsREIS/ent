@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -63,7 +64,7 @@ func (_u *SessionUpdate) ClearDevice() *SessionUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *SessionUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*SessionMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -191,7 +192,7 @@ func (_u *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdat
 
 // Save executes the query and returns the updated Session entity.
 func (_u *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Session](ctx, &entbuilder.UpdateState[*SessionMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

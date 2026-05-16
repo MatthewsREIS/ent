@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ParentClient is a client for the Parent schema.
@@ -110,8 +111,10 @@ func (c *ParentClient) DeleteOneID(id int) *parent.ParentDeleteOne {
 func (c *ParentClient) Query() *ParentQuery {
 	return &ParentQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeParent},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Parent]{
+			Ctx:    &QueryContext{Type: TypeParent},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *ParentClient) GetX(ctx context.Context, id int) *Parent {
 // QueryChild queries the child edge of a Parent.
 func (c *ParentClient) QueryChild(_m *Parent) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(parent.Table, parent.FieldID, id),
@@ -151,7 +154,7 @@ func (c *ParentClient) QueryChild(_m *Parent) *UserQuery {
 // QueryParent queries the parent edge of a Parent.
 func (c *ParentClient) QueryParent(_m *Parent) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(parent.Table, parent.FieldID, id),

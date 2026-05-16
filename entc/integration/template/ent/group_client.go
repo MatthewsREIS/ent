@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/template/ent/group"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupClient is a client for the Group schema.
@@ -107,9 +108,11 @@ func (c *GroupClient) DeleteOneID(id int) *group.GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeGroup},
-		inters: c.Interceptors(),
-		extra:  "Group",
+		QueryState: entbuilder.QueryState[predicate.Group]{
+			Ctx:    &QueryContext{Type: TypeGroup},
+			Inters: c.Interceptors(),
+		},
+		extra: "Group",
 	}
 }
 

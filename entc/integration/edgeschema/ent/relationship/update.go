@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -129,7 +130,7 @@ func (_u *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RelationshipUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RelationshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -402,7 +403,7 @@ func (_u *RelationshipUpdateOne) Select(field string, fields ...string) *Relatio
 
 // Save executes the query and returns the updated Relationship entity.
 func (_u *RelationshipUpdateOne) Save(ctx context.Context) (*Relationship, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Relationship](ctx, &entbuilder.UpdateState[*RelationshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

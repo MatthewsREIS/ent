@@ -17,7 +17,7 @@ import (
 
 // AddPredicate implements the predicateAdder interface.
 func (_q *ProcessQuery) AddPredicate(pred func(s *sql.Selector)) {
-	_q.predicates = append(_q.predicates, pred)
+	_q.Predicates = append(_q.Predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the ProcessQuery builder.

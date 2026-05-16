@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserClient is a client for the User schema.
@@ -110,8 +111,10 @@ func (c *UserClient) DeleteOneID(id int) *user.UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeUser},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.User]{
+			Ctx:    &QueryContext{Type: TypeUser},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryPosts queries the posts edge of a User.
 func (c *UserClient) QueryPosts(_m *User) *PostQuery {
 	query := (&PostClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),

@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -112,8 +113,10 @@ func (c *TweetTagClient) DeleteOneID(id uuid.UUID) *tweettag.TweetTagDeleteOne {
 func (c *TweetTagClient) Query() *TweetTagQuery {
 	return &TweetTagQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeTweetTag},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.TweetTag]{
+			Ctx:    &QueryContext{Type: TypeTweetTag},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -134,7 +137,7 @@ func (c *TweetTagClient) GetX(ctx context.Context, id uuid.UUID) *TweetTag {
 // QueryTag queries the tag edge of a TweetTag.
 func (c *TweetTagClient) QueryTag(_m *TweetTag) *TagQuery {
 	query := (&TagClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweettag.Table, tweettag.FieldID, id),
@@ -150,7 +153,7 @@ func (c *TweetTagClient) QueryTag(_m *TweetTag) *TagQuery {
 // QueryTweet queries the tweet edge of a TweetTag.
 func (c *TweetTagClient) QueryTweet(_m *TweetTag) *TweetQuery {
 	query := (&TweetClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweettag.Table, tweettag.FieldID, id),

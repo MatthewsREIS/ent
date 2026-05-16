@@ -24,39 +24,34 @@ import (
 // NodeQuery is the builder for querying Node entities.
 type NodeQuery struct {
 	Config
-	ctx        *QueryContext
-	order      []node.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Node
-	withPrev   *NodeQuery
-	withNext   *NodeQuery
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	entbuilder.QueryState[predicate.Node]
+	order    []node.OrderOption
+	withPrev *NodeQuery
+	withNext *NodeQuery
 }
 
 // Where adds a new predicate for the NodeQuery builder.
 func (_q *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
-	_q.predicates = append(_q.predicates, ps...)
+	_q.AddPredicates(ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
 func (_q *NodeQuery) Limit(limit int) *NodeQuery {
-	_q.ctx.Limit = &limit
+	_q.SetLimit(limit)
 	return _q
 }
 
 // Offset to start from.
 func (_q *NodeQuery) Offset(offset int) *NodeQuery {
-	_q.ctx.Offset = &offset
+	_q.SetOffset(offset)
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (_q *NodeQuery) Unique(unique bool) *NodeQuery {
-	_q.ctx.Unique = &unique
+	_q.SetUnique(unique)
 	return _q
 }
 
@@ -69,7 +64,7 @@ func (_q *NodeQuery) Order(o ...node.OrderOption) *NodeQuery {
 // QueryPrev chains the current query on the "prev" edge.
 func (_q *NodeQuery) QueryPrev() *NodeQuery {
 	query := (&NodeClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -91,7 +86,7 @@ func (_q *NodeQuery) QueryPrev() *NodeQuery {
 // QueryNext chains the current query on the "next" edge.
 func (_q *NodeQuery) QueryNext() *NodeQuery {
 	query := (&NodeClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -113,14 +108,8 @@ func (_q *NodeQuery) QueryNext() *NodeQuery {
 // First returns the first Node entity from the query.
 // Returns a *NotFoundError when no Node was found.
 func (_q *NodeQuery) First(ctx context.Context) (*Node, error) {
-	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
-	if err != nil {
-		return nil, err
-	}
-	if len(nodes) == 0 {
-		return nil, &NotFoundError{Label: node.Label}
-	}
-	return nodes[0], nil
+	_q.Limit(1)
+	return entbuilder.RunFirst[*Node, []*Node](ctx, _q, _q.Ctx, ent.OpQueryFirst, node.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*Node, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
 }
 
 // FirstX is like First, but panics if an error occurs.
@@ -136,7 +125,7 @@ func (_q *NodeQuery) FirstX(ctx context.Context) *Node {
 // Returns a *NotFoundError when no Node ID was found.
 func (_q *NodeQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.Ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -159,18 +148,8 @@ func (_q *NodeQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one Node entity is found.
 // Returns a *NotFoundError when no Node entities are found.
 func (_q *NodeQuery) Only(ctx context.Context) (*Node, error) {
-	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
-	if err != nil {
-		return nil, err
-	}
-	switch len(nodes) {
-	case 1:
-		return nodes[0], nil
-	case 0:
-		return nil, &NotFoundError{Label: node.Label}
-	default:
-		return nil, &NotSingularError{Label: node.Label}
-	}
+	_q.Limit(2)
+	return entbuilder.RunOnly[*Node, []*Node](ctx, _q, _q.Ctx, ent.OpQueryOnly, node.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*Node, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
 }
 
 // OnlyX is like Only, but panics if an error occurs.
@@ -187,7 +166,7 @@ func (_q *NodeQuery) OnlyX(ctx context.Context) *Node {
 // Returns a *NotFoundError when no entities are found.
 func (_q *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.Ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -212,12 +191,7 @@ func (_q *NodeQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Nodes.
 func (_q *NodeQuery) All(ctx context.Context) ([]*Node, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return nil, err
-	}
-	qr := querierAll[[]*Node, *NodeQuery]()
-	return withInterceptors[[]*Node](ctx, _q, qr, _q.inters)
+	return entbuilder.RunAll[[]*Node](ctx, _q, _q.Ctx, ent.OpQueryAll, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*Node, error) { return _q.sqlAll(ctx) })
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -231,10 +205,10 @@ func (_q *NodeQuery) AllX(ctx context.Context) []*Node {
 
 // IDs executes the query and returns a list of Node IDs.
 func (_q *NodeQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if _q.ctx.Unique == nil && _q.path != nil {
+	if _q.Ctx.Unique == nil && _q.Path != nil {
 		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryIDs)
 	if err = _q.Select(node.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -252,11 +226,7 @@ func (_q *NodeQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (_q *NodeQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return 0, err
-	}
-	return withInterceptors[int](ctx, _q, querierCount[*NodeQuery](), _q.inters)
+	return entbuilder.RunCount(ctx, _q, _q.Ctx, ent.OpQueryCount, _q.QueryState.Inters, _q.prepareQuery, _q.sqlCount)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -270,7 +240,7 @@ func (_q *NodeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (_q *NodeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -298,15 +268,10 @@ func (_q *NodeQuery) Clone() *NodeQuery {
 	}
 	return &NodeQuery{
 		Config:     _q.Config,
-		ctx:        _q.ctx.Clone(),
+		QueryState: *_q.QueryState.Clone(),
 		order:      append([]node.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.Node{}, _q.predicates...),
 		withPrev:   _q.withPrev.Clone(),
 		withNext:   _q.withNext.Clone(),
-		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
 	}
 }
 
@@ -347,9 +312,9 @@ func (_q *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
-	_q.ctx.Fields = append([]string{field}, fields...)
+	_q.Ctx.Fields = append([]string{field}, fields...)
 	grbuild := &NodeGroupBy{build: _q}
-	grbuild.flds = &_q.ctx.Fields
+	grbuild.flds = &_q.Ctx.Fields
 	grbuild.label = node.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -368,10 +333,10 @@ func (_q *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //		Select(node.FieldValue).
 //		Scan(ctx, &v)
 func (_q *NodeQuery) Select(fields ...string) *NodeSelect {
-	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	_q.Ctx.Fields = append(_q.Ctx.Fields, fields...)
 	sbuild := &NodeSelect{NodeQuery: _q}
 	sbuild.label = node.Label
-	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.Ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -381,7 +346,7 @@ func (_q *NodeQuery) Aggregate(fns ...AggregateFunc) *NodeSelect {
 }
 
 func (_q *NodeQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range _q.inters {
+	for _, inter := range _q.QueryState.Inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
@@ -391,17 +356,17 @@ func (_q *NodeQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range _q.ctx.Fields {
+	for _, f := range _q.Ctx.Fields {
 		if !node.ValidColumn(f) {
 			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if _q.path != nil {
-		prev, err := _q.path(ctx)
+	if _q.Path != nil {
+		prev, err := _q.Path(ctx)
 		if err != nil {
 			return err
 		}
-		_q.sql = prev
+		_q.Sql = prev
 	}
 	return nil
 }
@@ -484,8 +449,8 @@ func (_q *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
-	if len(query.ctx.Fields) > 0 {
-		query.ctx.AppendFieldOnce(node.FieldPrevID)
+	if len(query.Ctx.Fields) > 0 {
+		query.Ctx.AppendFieldOnce(node.FieldPrevID)
 	}
 	query.Where(predicate.Node(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(node.NextColumn), fks...))
@@ -507,22 +472,22 @@ func (_q *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 
 func (_q *NodeQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
-	_spec.Node.Columns = _q.ctx.Fields
-	if len(_q.ctx.Fields) > 0 {
-		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
+	_spec.Node.Columns = _q.Ctx.Fields
+	if len(_q.Ctx.Fields) > 0 {
+		_spec.Unique = _q.Ctx.Unique != nil && *_q.Ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(node.Table, node.Columns, sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt))
-	_spec.From = _q.sql
-	if unique := _q.ctx.Unique; unique != nil {
+	_spec.From = _q.Sql
+	if unique := _q.Ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if _q.path != nil {
+	} else if _q.Path != nil {
 		_spec.Unique = true
 	}
-	if fields := _q.ctx.Fields; len(fields) > 0 {
+	if fields := _q.Ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, node.FieldID)
 		for i := range fields {
@@ -534,17 +499,17 @@ func (_q *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 			_spec.Node.AddColumnOnce(node.FieldPrevID)
 		}
 	}
-	if ps := _q.predicates; len(ps) > 0 {
+	if ps := _q.Predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := _q.order; len(ps) > 0 {
@@ -560,30 +525,30 @@ func (_q *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 func (_q *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(node.Table)
-	columns := _q.ctx.Fields
+	columns := _q.Ctx.Fields
 	if len(columns) == 0 {
 		columns = node.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if _q.sql != nil {
-		selector = _q.sql
+	if _q.Sql != nil {
+		selector = _q.Sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if _q.ctx.Unique != nil && *_q.ctx.Unique {
+	if _q.Ctx.Unique != nil && *_q.Ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range _q.predicates {
+	for _, p := range _q.Predicates {
 		p(selector)
 	}
 	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -603,11 +568,11 @@ func (_g *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_g *NodeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	ctx = setContextOp(ctx, _g.build.Ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*NodeQuery, *NodeGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*NodeQuery, *NodeGroupBy](ctx, _g.build, _g, _g.build.QueryState.Inters, v)
 }
 
 func (_g *NodeGroupBy) sqlScan(ctx context.Context, root *NodeQuery, v any) error {
@@ -651,11 +616,11 @@ func (_s *NodeSelect) Aggregate(fns ...AggregateFunc) *NodeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_s *NodeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	ctx = setContextOp(ctx, _s.Ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*NodeQuery, *NodeSelect](ctx, _s.NodeQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*NodeQuery, *NodeSelect](ctx, _s.NodeQuery, _s, _s.QueryState.Inters, v)
 }
 
 func (_s *NodeSelect) sqlScan(ctx context.Context, root *NodeQuery, v any) error {

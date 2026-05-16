@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupInfoClient is a client for the GroupInfo schema.
@@ -110,8 +111,10 @@ func (c *GroupInfoClient) DeleteOneID(id int) *groupinfo.GroupInfoDeleteOne {
 func (c *GroupInfoClient) Query() *GroupInfoQuery {
 	return &GroupInfoQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeGroupInfo},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.GroupInfo]{
+			Ctx:    &QueryContext{Type: TypeGroupInfo},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *GroupInfoClient) GetX(ctx context.Context, id int) *GroupInfo {
 // QueryGroups queries the groups edge of a GroupInfo.
 func (c *GroupInfoClient) QueryGroups(_m *GroupInfo) *GroupQuery {
 	query := (&GroupClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, id),

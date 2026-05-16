@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -97,7 +98,7 @@ func (_u *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserGroupUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserGroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -305,7 +306,7 @@ func (_u *UserGroupUpdateOne) Select(field string, fields ...string) *UserGroupU
 
 // Save executes the query and returns the updated UserGroup entity.
 func (_u *UserGroupUpdateOne) Save(ctx context.Context) (*UserGroup, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[UserGroup](ctx, &entbuilder.UpdateState[*UserGroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

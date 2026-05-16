@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // PetClient is a client for the Pet schema.
@@ -111,8 +112,10 @@ func (c *PetClient) DeleteOneID(id string) *pet.PetDeleteOne {
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypePet},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Pet]{
+			Ctx:    &QueryContext{Type: TypePet},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *PetClient) GetX(ctx context.Context, id string) *Pet {
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(_m *Pet) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),
@@ -149,7 +152,7 @@ func (c *PetClient) QueryOwner(_m *Pet) *UserQuery {
 // QueryCars queries the cars edge of a Pet.
 func (c *PetClient) QueryCars(_m *Pet) *CarQuery {
 	query := (&CarClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),
@@ -165,7 +168,7 @@ func (c *PetClient) QueryCars(_m *Pet) *CarQuery {
 // QueryFriends queries the friends edge of a Pet.
 func (c *PetClient) QueryFriends(_m *Pet) *PetQuery {
 	query := (&PetClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),
@@ -181,7 +184,7 @@ func (c *PetClient) QueryFriends(_m *Pet) *PetQuery {
 // QueryBestFriend queries the best_friend edge of a Pet.
 func (c *PetClient) QueryBestFriend(_m *Pet) *PetQuery {
 	query := (&PetClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),

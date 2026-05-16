@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupTagClient is a client for the GroupTag schema.
@@ -111,8 +112,10 @@ func (c *GroupTagClient) DeleteOneID(id int) *grouptag.GroupTagDeleteOne {
 func (c *GroupTagClient) Query() *GroupTagQuery {
 	return &GroupTagQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeGroupTag},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.GroupTag]{
+			Ctx:    &QueryContext{Type: TypeGroupTag},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *GroupTagClient) GetX(ctx context.Context, id int) *GroupTag {
 // QueryTag queries the tag edge of a GroupTag.
 func (c *GroupTagClient) QueryTag(_m *GroupTag) *TagQuery {
 	query := (&TagClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(grouptag.Table, grouptag.FieldID, id),
@@ -149,7 +152,7 @@ func (c *GroupTagClient) QueryTag(_m *GroupTag) *TagQuery {
 // QueryGroup queries the group edge of a GroupTag.
 func (c *GroupTagClient) QueryGroup(_m *GroupTag) *GroupQuery {
 	query := (&GroupClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(grouptag.Table, grouptag.FieldID, id),

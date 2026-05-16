@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RoleClient is a client for the Role schema.
@@ -111,8 +112,10 @@ func (c *RoleClient) DeleteOneID(id int) *role.RoleDeleteOne {
 func (c *RoleClient) Query() *RoleQuery {
 	return &RoleQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeRole},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Role]{
+			Ctx:    &QueryContext{Type: TypeRole},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *RoleClient) GetX(ctx context.Context, id int) *Role {
 // QueryUser queries the user edge of a Role.
 func (c *RoleClient) QueryUser(_m *Role) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(role.Table, role.FieldID, id),
@@ -149,7 +152,7 @@ func (c *RoleClient) QueryUser(_m *Role) *UserQuery {
 // QueryRolesUsers queries the roles_users edge of a Role.
 func (c *RoleClient) QueryRolesUsers(_m *Role) *RoleUserQuery {
 	query := (&RoleUserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(role.Table, role.FieldID, id),

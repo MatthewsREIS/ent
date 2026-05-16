@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // LicenseClient is a client for the License schema.
@@ -107,8 +108,10 @@ func (c *LicenseClient) DeleteOneID(id int) *license.LicenseDeleteOne {
 func (c *LicenseClient) Query() *LicenseQuery {
 	return &LicenseQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeLicense},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.License]{
+			Ctx:    &QueryContext{Type: TypeLicense},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

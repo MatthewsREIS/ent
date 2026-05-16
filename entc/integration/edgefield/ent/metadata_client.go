@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // MetadataClient is a client for the Metadata schema.
@@ -110,8 +111,10 @@ func (c *MetadataClient) DeleteOneID(id int) *metadata.MetadataDeleteOne {
 func (c *MetadataClient) Query() *MetadataQuery {
 	return &MetadataQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeMetadata},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Metadata]{
+			Ctx:    &QueryContext{Type: TypeMetadata},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *MetadataClient) GetX(ctx context.Context, id int) *Metadata {
 // QueryUser queries the user edge of a Metadata.
 func (c *MetadataClient) QueryUser(_m *Metadata) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metadata.Table, metadata.FieldID, id),
@@ -148,7 +151,7 @@ func (c *MetadataClient) QueryUser(_m *Metadata) *UserQuery {
 // QueryChildren queries the children edge of a Metadata.
 func (c *MetadataClient) QueryChildren(_m *Metadata) *MetadataQuery {
 	query := (&MetadataClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metadata.Table, metadata.FieldID, id),
@@ -164,7 +167,7 @@ func (c *MetadataClient) QueryChildren(_m *Metadata) *MetadataQuery {
 // QueryParent queries the parent edge of a Metadata.
 func (c *MetadataClient) QueryParent(_m *Metadata) *MetadataQuery {
 	query := (&MetadataClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metadata.Table, metadata.FieldID, id),

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/versioned/friendship"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
 	"entgo.io/ent/entc/integration/multischema/versioned/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FriendshipClient is a client for the Friendship schema.
@@ -110,8 +111,10 @@ func (c *FriendshipClient) DeleteOneID(id int) *friendship.FriendshipDeleteOne {
 func (c *FriendshipClient) Query() *FriendshipQuery {
 	return &FriendshipQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeFriendship},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Friendship]{
+			Ctx:    &QueryContext{Type: TypeFriendship},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *FriendshipClient) GetX(ctx context.Context, id int) *Friendship {
 // QueryUser queries the user edge of a Friendship.
 func (c *FriendshipClient) QueryUser(_m *Friendship) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(friendship.Table, friendship.FieldID, id),
@@ -151,7 +154,7 @@ func (c *FriendshipClient) QueryUser(_m *Friendship) *UserQuery {
 // QueryFriend queries the friend edge of a Friendship.
 func (c *FriendshipClient) QueryFriend(_m *Friendship) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(friendship.Table, friendship.FieldID, id),

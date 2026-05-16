@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserTweetClient is a client for the UserTweet schema.
@@ -111,8 +112,10 @@ func (c *UserTweetClient) DeleteOneID(id int) *usertweet.UserTweetDeleteOne {
 func (c *UserTweetClient) Query() *UserTweetQuery {
 	return &UserTweetQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeUserTweet},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.UserTweet]{
+			Ctx:    &QueryContext{Type: TypeUserTweet},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *UserTweetClient) GetX(ctx context.Context, id int) *UserTweet {
 // QueryUser queries the user edge of a UserTweet.
 func (c *UserTweetClient) QueryUser(_m *UserTweet) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(usertweet.Table, usertweet.FieldID, id),
@@ -149,7 +152,7 @@ func (c *UserTweetClient) QueryUser(_m *UserTweet) *UserQuery {
 // QueryTweet queries the tweet edge of a UserTweet.
 func (c *UserTweetClient) QueryTweet(_m *UserTweet) *TweetQuery {
 	query := (&TweetClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(usertweet.Table, usertweet.FieldID, id),

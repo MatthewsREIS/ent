@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // DeviceClient is a client for the Device schema.
@@ -111,8 +112,10 @@ func (c *DeviceClient) DeleteOneID(id schema.ID) *device.DeviceDeleteOne {
 func (c *DeviceClient) Query() *DeviceQuery {
 	return &DeviceQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeDevice},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Device]{
+			Ctx:    &QueryContext{Type: TypeDevice},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *DeviceClient) GetX(ctx context.Context, id schema.ID) *Device {
 // QueryActiveSession queries the active_session edge of a Device.
 func (c *DeviceClient) QueryActiveSession(_m *Device) *SessionQuery {
 	query := (&SessionClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(device.Table, device.FieldID, id),
@@ -149,7 +152,7 @@ func (c *DeviceClient) QueryActiveSession(_m *Device) *SessionQuery {
 // QuerySessions queries the sessions edge of a Device.
 func (c *DeviceClient) QuerySessions(_m *Device) *SessionQuery {
 	query := (&SessionClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(device.Table, device.FieldID, id),

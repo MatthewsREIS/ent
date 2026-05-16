@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // PetClient is a client for the Pet schema.
@@ -110,8 +111,10 @@ func (c *PetClient) DeleteOneID(id int) *pet.PetDeleteOne {
 func (c *PetClient) Query() *PetQuery {
 	return &PetQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypePet},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Pet]{
+			Ctx:    &QueryContext{Type: TypePet},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 // QueryTeam queries the team edge of a Pet.
 func (c *PetClient) QueryTeam(_m *Pet) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),
@@ -148,7 +151,7 @@ func (c *PetClient) QueryTeam(_m *Pet) *UserQuery {
 // QueryOwner queries the owner edge of a Pet.
 func (c *PetClient) QueryOwner(_m *Pet) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pet.Table, pet.FieldID, id),

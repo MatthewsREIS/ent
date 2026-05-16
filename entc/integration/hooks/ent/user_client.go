@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/hooks/ent/pet"
 	"entgo.io/ent/entc/integration/hooks/ent/predicate"
 	"entgo.io/ent/entc/integration/hooks/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserClient is a client for the User schema.
@@ -111,8 +112,10 @@ func (c *UserClient) DeleteOneID(id int) *user.UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeUser},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.User]{
+			Ctx:    &QueryContext{Type: TypeUser},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryCards queries the cards edge of a User.
 func (c *UserClient) QueryCards(_m *User) *CardQuery {
 	query := (&CardClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -149,7 +152,7 @@ func (c *UserClient) QueryCards(_m *User) *CardQuery {
 // QueryPets queries the pets edge of a User.
 func (c *UserClient) QueryPets(_m *User) *PetQuery {
 	query := (&PetClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -165,7 +168,7 @@ func (c *UserClient) QueryPets(_m *User) *PetQuery {
 // QueryFriends queries the friends edge of a User.
 func (c *UserClient) QueryFriends(_m *User) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -181,7 +184,7 @@ func (c *UserClient) QueryFriends(_m *User) *UserQuery {
 // QueryBestFriend queries the best_friend edge of a User.
 func (c *UserClient) QueryBestFriend(_m *User) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),

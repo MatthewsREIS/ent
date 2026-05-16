@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // NoteClient is a client for the Note schema.
@@ -110,8 +111,10 @@ func (c *NoteClient) DeleteOneID(id schema.NoteID) *note.NoteDeleteOne {
 func (c *NoteClient) Query() *NoteQuery {
 	return &NoteQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeNote},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Note]{
+			Ctx:    &QueryContext{Type: TypeNote},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *NoteClient) GetX(ctx context.Context, id schema.NoteID) *Note {
 // QueryParent queries the parent edge of a Note.
 func (c *NoteClient) QueryParent(_m *Note) *NoteQuery {
 	query := (&NoteClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(note.Table, note.FieldID, id),
@@ -148,7 +151,7 @@ func (c *NoteClient) QueryParent(_m *Note) *NoteQuery {
 // QueryChildren queries the children edge of a Note.
 func (c *NoteClient) QueryChildren(_m *Note) *NoteQuery {
 	query := (&NoteClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(note.Table, note.FieldID, id),

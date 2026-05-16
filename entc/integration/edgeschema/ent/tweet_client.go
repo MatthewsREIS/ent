@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TweetClient is a client for the Tweet schema.
@@ -114,8 +115,10 @@ func (c *TweetClient) DeleteOneID(id int) *tweet.TweetDeleteOne {
 func (c *TweetClient) Query() *TweetQuery {
 	return &TweetQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeTweet},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Tweet]{
+			Ctx:    &QueryContext{Type: TypeTweet},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -136,7 +139,7 @@ func (c *TweetClient) GetX(ctx context.Context, id int) *Tweet {
 // QueryLikedUsers queries the liked_users edge of a Tweet.
 func (c *TweetClient) QueryLikedUsers(_m *Tweet) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -152,7 +155,7 @@ func (c *TweetClient) QueryLikedUsers(_m *Tweet) *UserQuery {
 // QueryUser queries the user edge of a Tweet.
 func (c *TweetClient) QueryUser(_m *Tweet) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -168,7 +171,7 @@ func (c *TweetClient) QueryUser(_m *Tweet) *UserQuery {
 // QueryTags queries the tags edge of a Tweet.
 func (c *TweetClient) QueryTags(_m *Tweet) *TagQuery {
 	query := (&TagClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -184,7 +187,7 @@ func (c *TweetClient) QueryTags(_m *Tweet) *TagQuery {
 // QueryLikes queries the likes edge of a Tweet.
 func (c *TweetClient) QueryLikes(_m *Tweet) *TweetLikeQuery {
 	query := (&TweetLikeClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -200,7 +203,7 @@ func (c *TweetClient) QueryLikes(_m *Tweet) *TweetLikeQuery {
 // QueryTweetUser queries the tweet_user edge of a Tweet.
 func (c *TweetClient) QueryTweetUser(_m *Tweet) *UserTweetQuery {
 	query := (&UserTweetClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),
@@ -216,7 +219,7 @@ func (c *TweetClient) QueryTweetUser(_m *Tweet) *UserTweetQuery {
 // QueryTweetTags queries the tweet_tags edge of a Tweet.
 func (c *TweetClient) QueryTweetTags(_m *Tweet) *TweetTagQuery {
 	query := (&TweetTagClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tweet.Table, tweet.FieldID, id),

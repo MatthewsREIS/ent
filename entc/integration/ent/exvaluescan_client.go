@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ExValueScanClient is a client for the ExValueScan schema.
@@ -107,8 +108,10 @@ func (c *ExValueScanClient) DeleteOneID(id int) *exvaluescan.ExValueScanDeleteOn
 func (c *ExValueScanClient) Query() *ExValueScanQuery {
 	return &ExValueScanQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeExValueScan},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.ExValueScan]{
+			Ctx:    &QueryContext{Type: TypeExValueScan},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserGroupClient is a client for the UserGroup schema.
@@ -111,8 +112,10 @@ func (c *UserGroupClient) DeleteOneID(id int) *usergroup.UserGroupDeleteOne {
 func (c *UserGroupClient) Query() *UserGroupQuery {
 	return &UserGroupQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeUserGroup},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.UserGroup]{
+			Ctx:    &QueryContext{Type: TypeUserGroup},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *UserGroupClient) GetX(ctx context.Context, id int) *UserGroup {
 // QueryUser queries the user edge of a UserGroup.
 func (c *UserGroupClient) QueryUser(_m *UserGroup) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(usergroup.Table, usergroup.FieldID, id),
@@ -149,7 +152,7 @@ func (c *UserGroupClient) QueryUser(_m *UserGroup) *UserQuery {
 // QueryGroup queries the group edge of a UserGroup.
 func (c *UserGroupClient) QueryGroup(_m *UserGroup) *GroupQuery {
 	query := (&GroupClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(usergroup.Table, usergroup.FieldID, id),

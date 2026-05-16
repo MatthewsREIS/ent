@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CustomTypeClient is a client for the CustomType schema.
@@ -107,8 +108,10 @@ func (c *CustomTypeClient) DeleteOneID(id int) *customtype.CustomTypeDeleteOne {
 func (c *CustomTypeClient) Query() *CustomTypeQuery {
 	return &CustomTypeQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeCustomType},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.CustomType]{
+			Ctx:    &QueryContext{Type: TypeCustomType},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

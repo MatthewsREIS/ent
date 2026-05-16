@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -74,7 +75,7 @@ func (_u *CarUpdate) ClearOwner() *CarUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -231,7 +232,7 @@ func (_u *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
 
 // Save executes the query and returns the updated Car entity.
 func (_u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Car](ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

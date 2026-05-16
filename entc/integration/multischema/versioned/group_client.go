@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/versioned/group"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
 	"entgo.io/ent/entc/integration/multischema/versioned/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupClient is a client for the Group schema.
@@ -110,8 +111,10 @@ func (c *GroupClient) DeleteOneID(id int) *group.GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeGroup},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Group]{
+			Ctx:    &QueryContext{Type: TypeGroup},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(_m *Group) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),

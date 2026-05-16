@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // LinkClient is a client for the Link schema.
@@ -108,8 +109,10 @@ func (c *LinkClient) DeleteOneID(id uuidc.UUIDC) *link.LinkDeleteOne {
 func (c *LinkClient) Query() *LinkQuery {
 	return &LinkQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeLink},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Link]{
+			Ctx:    &QueryContext{Type: TypeLink},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

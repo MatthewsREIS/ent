@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FieldTypeClient is a client for the FieldType schema.
@@ -107,8 +108,10 @@ func (c *FieldTypeClient) DeleteOneID(id int) *fieldtype.FieldTypeDeleteOne {
 func (c *FieldTypeClient) Query() *FieldTypeQuery {
 	return &FieldTypeQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeFieldType},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.FieldType]{
+			Ctx:    &QueryContext{Type: TypeFieldType},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CommentClient is a client for the Comment schema.
@@ -107,8 +108,10 @@ func (c *CommentClient) DeleteOneID(id int) *comment.CommentDeleteOne {
 func (c *CommentClient) Query() *CommentQuery {
 	return &CommentQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeComment},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Comment]{
+			Ctx:    &QueryContext{Type: TypeComment},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

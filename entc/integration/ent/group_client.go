@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupClient is a client for the Group schema.
@@ -112,8 +113,10 @@ func (c *GroupClient) DeleteOneID(id int) *group.GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeGroup},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Group]{
+			Ctx:    &QueryContext{Type: TypeGroup},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -134,7 +137,7 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 // QueryFiles queries the files edge of a Group.
 func (c *GroupClient) QueryFiles(_m *Group) *FileQuery {
 	query := (&FileClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -150,7 +153,7 @@ func (c *GroupClient) QueryFiles(_m *Group) *FileQuery {
 // QueryBlocked queries the blocked edge of a Group.
 func (c *GroupClient) QueryBlocked(_m *Group) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -166,7 +169,7 @@ func (c *GroupClient) QueryBlocked(_m *Group) *UserQuery {
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(_m *Group) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -182,7 +185,7 @@ func (c *GroupClient) QueryUsers(_m *Group) *UserQuery {
 // QueryInfo queries the info edge of a Group.
 func (c *GroupClient) QueryInfo(_m *Group) *GroupInfoQuery {
 	query := (&GroupInfoClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),

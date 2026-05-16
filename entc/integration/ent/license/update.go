@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -51,7 +52,7 @@ func (_u *LicenseUpdate) Mutation() *LicenseMutation {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LicenseUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*LicenseMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -156,7 +157,7 @@ func (_u *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdat
 // Save executes the query and returns the updated License entity.
 func (_u *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
 	_u.defaults()
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[License](ctx, &entbuilder.UpdateState[*LicenseMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

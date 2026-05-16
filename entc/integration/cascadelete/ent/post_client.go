@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // PostClient is a client for the Post schema.
@@ -111,8 +112,10 @@ func (c *PostClient) DeleteOneID(id int) *post.PostDeleteOne {
 func (c *PostClient) Query() *PostQuery {
 	return &PostQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypePost},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Post]{
+			Ctx:    &QueryContext{Type: TypePost},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *PostClient) GetX(ctx context.Context, id int) *Post {
 // QueryAuthor queries the author edge of a Post.
 func (c *PostClient) QueryAuthor(_m *Post) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(post.Table, post.FieldID, id),
@@ -149,7 +152,7 @@ func (c *PostClient) QueryAuthor(_m *Post) *UserQuery {
 // QueryComments queries the comments edge of a Post.
 func (c *PostClient) QueryComments(_m *Post) *CommentQuery {
 	query := (&CommentClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(post.Table, post.FieldID, id),

@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TagClient is a client for the Tag schema.
@@ -113,8 +114,10 @@ func (c *TagClient) DeleteOneID(id int) *tag.TagDeleteOne {
 func (c *TagClient) Query() *TagQuery {
 	return &TagQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeTag},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Tag]{
+			Ctx:    &QueryContext{Type: TypeTag},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -135,7 +138,7 @@ func (c *TagClient) GetX(ctx context.Context, id int) *Tag {
 // QueryTweets queries the tweets edge of a Tag.
 func (c *TagClient) QueryTweets(_m *Tag) *TweetQuery {
 	query := (&TweetClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
@@ -151,7 +154,7 @@ func (c *TagClient) QueryTweets(_m *Tag) *TweetQuery {
 // QueryGroups queries the groups edge of a Tag.
 func (c *TagClient) QueryGroups(_m *Tag) *GroupQuery {
 	query := (&GroupClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
@@ -167,7 +170,7 @@ func (c *TagClient) QueryGroups(_m *Tag) *GroupQuery {
 // QueryTweetTags queries the tweet_tags edge of a Tag.
 func (c *TagClient) QueryTweetTags(_m *Tag) *TweetTagQuery {
 	query := (&TweetTagClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),
@@ -183,7 +186,7 @@ func (c *TagClient) QueryTweetTags(_m *Tag) *TweetTagQuery {
 // QueryGroupTags queries the group_tags edge of a Tag.
 func (c *TagClient) QueryGroupTags(_m *Tag) *GroupTagQuery {
 	query := (&GroupTagClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(tag.Table, tag.FieldID, id),

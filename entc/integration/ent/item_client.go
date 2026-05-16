@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ItemClient is a client for the Item schema.
@@ -107,8 +108,10 @@ func (c *ItemClient) DeleteOneID(id string) *item.ItemDeleteOne {
 func (c *ItemClient) Query() *ItemQuery {
 	return &ItemQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeItem},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Item]{
+			Ctx:    &QueryContext{Type: TypeItem},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -58,7 +59,7 @@ func (_u *ParentUpdate) Mutation() *ParentMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ParentUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ParentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -179,7 +180,7 @@ func (_u *ParentUpdateOne) Select(field string, fields ...string) *ParentUpdateO
 
 // Save executes the query and returns the updated Parent entity.
 func (_u *ParentUpdateOne) Save(ctx context.Context) (*Parent, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Parent](ctx, &entbuilder.UpdateState[*ParentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

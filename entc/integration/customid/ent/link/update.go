@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -49,7 +50,7 @@ func (_u *LinkUpdate) Mutation() *LinkMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LinkUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*LinkMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -137,7 +138,7 @@ func (_u *LinkUpdateOne) Select(field string, fields ...string) *LinkUpdateOne {
 
 // Save executes the query and returns the updated Link entity.
 func (_u *LinkUpdateOne) Save(ctx context.Context) (*Link, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Link](ctx, &entbuilder.UpdateState[*LinkMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

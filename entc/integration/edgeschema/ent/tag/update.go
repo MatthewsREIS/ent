@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -130,7 +131,7 @@ func (_u *TagUpdate) RemoveGroupTagIDs(ids ...int) *TagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TagUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -493,7 +494,7 @@ func (_u *TagUpdateOne) Select(field string, fields ...string) *TagUpdateOne {
 
 // Save executes the query and returns the updated Tag entity.
 func (_u *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Tag](ctx, &entbuilder.UpdateState[*TagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

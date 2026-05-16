@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -61,7 +62,7 @@ func (_u *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *SpecUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*SpecMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -211,7 +212,7 @@ func (_u *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
 
 // Save executes the query and returns the updated Spec entity.
 func (_u *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Spec](ctx, &entbuilder.UpdateState[*SpecMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

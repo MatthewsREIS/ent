@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // DocClient is a client for the Doc schema.
@@ -110,8 +111,10 @@ func (c *DocClient) DeleteOneID(id schema.DocID) *doc.DocDeleteOne {
 func (c *DocClient) Query() *DocQuery {
 	return &DocQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeDoc},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Doc]{
+			Ctx:    &QueryContext{Type: TypeDoc},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *DocClient) GetX(ctx context.Context, id schema.DocID) *Doc {
 // QueryParent queries the parent edge of a Doc.
 func (c *DocClient) QueryParent(_m *Doc) *DocQuery {
 	query := (&DocClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(doc.Table, doc.FieldID, id),
@@ -148,7 +151,7 @@ func (c *DocClient) QueryParent(_m *Doc) *DocQuery {
 // QueryChildren queries the children edge of a Doc.
 func (c *DocClient) QueryChildren(_m *Doc) *DocQuery {
 	query := (&DocClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(doc.Table, doc.FieldID, id),
@@ -164,7 +167,7 @@ func (c *DocClient) QueryChildren(_m *Doc) *DocQuery {
 // QueryRelated queries the related edge of a Doc.
 func (c *DocClient) QueryRelated(_m *Doc) *DocQuery {
 	query := (&DocClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(doc.Table, doc.FieldID, id),

@@ -26,42 +26,37 @@ import (
 // PetQuery is the builder for querying Pet entities.
 type PetQuery struct {
 	Config
-	ctx            *QueryContext
+	entbuilder.QueryState[predicate.Pet]
 	order          []pet.OrderOption
-	inters         []Interceptor
-	predicates     []predicate.Pet
 	withOwner      *UserQuery
 	withCars       *CarQuery
 	withFriends    *PetQuery
 	withBestFriend *PetQuery
 	withFKs        bool
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
 }
 
 // Where adds a new predicate for the PetQuery builder.
 func (_q *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
-	_q.predicates = append(_q.predicates, ps...)
+	_q.AddPredicates(ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
 func (_q *PetQuery) Limit(limit int) *PetQuery {
-	_q.ctx.Limit = &limit
+	_q.SetLimit(limit)
 	return _q
 }
 
 // Offset to start from.
 func (_q *PetQuery) Offset(offset int) *PetQuery {
-	_q.ctx.Offset = &offset
+	_q.SetOffset(offset)
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (_q *PetQuery) Unique(unique bool) *PetQuery {
-	_q.ctx.Unique = &unique
+	_q.SetUnique(unique)
 	return _q
 }
 
@@ -74,7 +69,7 @@ func (_q *PetQuery) Order(o ...pet.OrderOption) *PetQuery {
 // QueryOwner chains the current query on the "owner" edge.
 func (_q *PetQuery) QueryOwner() *UserQuery {
 	query := (&UserClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -96,7 +91,7 @@ func (_q *PetQuery) QueryOwner() *UserQuery {
 // QueryCars chains the current query on the "cars" edge.
 func (_q *PetQuery) QueryCars() *CarQuery {
 	query := (&CarClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -118,7 +113,7 @@ func (_q *PetQuery) QueryCars() *CarQuery {
 // QueryFriends chains the current query on the "friends" edge.
 func (_q *PetQuery) QueryFriends() *PetQuery {
 	query := (&PetClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -140,7 +135,7 @@ func (_q *PetQuery) QueryFriends() *PetQuery {
 // QueryBestFriend chains the current query on the "best_friend" edge.
 func (_q *PetQuery) QueryBestFriend() *PetQuery {
 	query := (&PetClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -162,14 +157,8 @@ func (_q *PetQuery) QueryBestFriend() *PetQuery {
 // First returns the first Pet entity from the query.
 // Returns a *NotFoundError when no Pet was found.
 func (_q *PetQuery) First(ctx context.Context) (*Pet, error) {
-	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
-	if err != nil {
-		return nil, err
-	}
-	if len(nodes) == 0 {
-		return nil, &NotFoundError{Label: pet.Label}
-	}
-	return nodes[0], nil
+	_q.Limit(1)
+	return entbuilder.RunFirst[*Pet, []*Pet](ctx, _q, _q.Ctx, ent.OpQueryFirst, pet.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*Pet, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
 }
 
 // FirstX is like First, but panics if an error occurs.
@@ -185,7 +174,7 @@ func (_q *PetQuery) FirstX(ctx context.Context) *Pet {
 // Returns a *NotFoundError when no Pet ID was found.
 func (_q *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.Ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -208,18 +197,8 @@ func (_q *PetQuery) FirstIDX(ctx context.Context) string {
 // Returns a *NotSingularError when more than one Pet entity is found.
 // Returns a *NotFoundError when no Pet entities are found.
 func (_q *PetQuery) Only(ctx context.Context) (*Pet, error) {
-	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
-	if err != nil {
-		return nil, err
-	}
-	switch len(nodes) {
-	case 1:
-		return nodes[0], nil
-	case 0:
-		return nil, &NotFoundError{Label: pet.Label}
-	default:
-		return nil, &NotSingularError{Label: pet.Label}
-	}
+	_q.Limit(2)
+	return entbuilder.RunOnly[*Pet, []*Pet](ctx, _q, _q.Ctx, ent.OpQueryOnly, pet.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*Pet, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
 }
 
 // OnlyX is like Only, but panics if an error occurs.
@@ -236,7 +215,7 @@ func (_q *PetQuery) OnlyX(ctx context.Context) *Pet {
 // Returns a *NotFoundError when no entities are found.
 func (_q *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.Ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -261,12 +240,7 @@ func (_q *PetQuery) OnlyIDX(ctx context.Context) string {
 
 // All executes the query and returns a list of Pets.
 func (_q *PetQuery) All(ctx context.Context) ([]*Pet, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return nil, err
-	}
-	qr := querierAll[[]*Pet, *PetQuery]()
-	return withInterceptors[[]*Pet](ctx, _q, qr, _q.inters)
+	return entbuilder.RunAll[[]*Pet](ctx, _q, _q.Ctx, ent.OpQueryAll, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*Pet, error) { return _q.sqlAll(ctx) })
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -280,10 +254,10 @@ func (_q *PetQuery) AllX(ctx context.Context) []*Pet {
 
 // IDs executes the query and returns a list of Pet IDs.
 func (_q *PetQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if _q.ctx.Unique == nil && _q.path != nil {
+	if _q.Ctx.Unique == nil && _q.Path != nil {
 		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryIDs)
 	if err = _q.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -301,11 +275,7 @@ func (_q *PetQuery) IDsX(ctx context.Context) []string {
 
 // Count returns the count of the given query.
 func (_q *PetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return 0, err
-	}
-	return withInterceptors[int](ctx, _q, querierCount[*PetQuery](), _q.inters)
+	return entbuilder.RunCount(ctx, _q, _q.Ctx, ent.OpQueryCount, _q.QueryState.Inters, _q.prepareQuery, _q.sqlCount)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -319,7 +289,7 @@ func (_q *PetQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (_q *PetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -347,17 +317,12 @@ func (_q *PetQuery) Clone() *PetQuery {
 	}
 	return &PetQuery{
 		Config:         _q.Config,
-		ctx:            _q.ctx.Clone(),
+		QueryState:     *_q.QueryState.Clone(),
 		order:          append([]pet.OrderOption{}, _q.order...),
-		inters:         append([]Interceptor{}, _q.inters...),
-		predicates:     append([]predicate.Pet{}, _q.predicates...),
 		withOwner:      _q.withOwner.Clone(),
 		withCars:       _q.withCars.Clone(),
 		withFriends:    _q.withFriends.Clone(),
 		withBestFriend: _q.withBestFriend.Clone(),
-		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
 	}
 }
 
@@ -408,9 +373,9 @@ func (_q *PetQuery) WithBestFriend(opts ...func(*PetQuery)) *PetQuery {
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 func (_q *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
-	_q.ctx.Fields = append([]string{field}, fields...)
+	_q.Ctx.Fields = append([]string{field}, fields...)
 	grbuild := &PetGroupBy{build: _q}
-	grbuild.flds = &_q.ctx.Fields
+	grbuild.flds = &_q.Ctx.Fields
 	grbuild.label = pet.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -419,10 +384,10 @@ func (_q *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
 func (_q *PetQuery) Select(fields ...string) *PetSelect {
-	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	_q.Ctx.Fields = append(_q.Ctx.Fields, fields...)
 	sbuild := &PetSelect{PetQuery: _q}
 	sbuild.label = pet.Label
-	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.Ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -432,7 +397,7 @@ func (_q *PetQuery) Aggregate(fns ...AggregateFunc) *PetSelect {
 }
 
 func (_q *PetQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range _q.inters {
+	for _, inter := range _q.QueryState.Inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
@@ -442,17 +407,17 @@ func (_q *PetQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range _q.ctx.Fields {
+	for _, f := range _q.Ctx.Fields {
 		if !pet.ValidColumn(f) {
 			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if _q.path != nil {
-		prev, err := _q.path(ctx)
+	if _q.Path != nil {
+		prev, err := _q.Path(ctx)
 		if err != nil {
 			return err
 		}
-		_q.sql = prev
+		_q.Sql = prev
 	}
 	return nil
 }
@@ -631,7 +596,7 @@ func (_q *PetQuery) loadFriends(ctx context.Context, query *PetQuery, nodes []*P
 			}
 		})
 	})
-	neighbors, err := withInterceptors[[]*Pet](ctx, query, qr, query.inters)
+	neighbors, err := withInterceptors[[]*Pet](ctx, query, qr, query.QueryState.Inters)
 	if err != nil {
 		return err
 	}
@@ -681,22 +646,22 @@ func (_q *PetQuery) loadBestFriend(ctx context.Context, query *PetQuery, nodes [
 
 func (_q *PetQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
-	_spec.Node.Columns = _q.ctx.Fields
-	if len(_q.ctx.Fields) > 0 {
-		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
+	_spec.Node.Columns = _q.Ctx.Fields
+	if len(_q.Ctx.Fields) > 0 {
+		_spec.Unique = _q.Ctx.Unique != nil && *_q.Ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *PetQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(pet.Table, pet.Columns, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeString))
-	_spec.From = _q.sql
-	if unique := _q.ctx.Unique; unique != nil {
+	_spec.From = _q.Sql
+	if unique := _q.Ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if _q.path != nil {
+	} else if _q.Path != nil {
 		_spec.Unique = true
 	}
-	if fields := _q.ctx.Fields; len(fields) > 0 {
+	if fields := _q.Ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.FieldID)
 		for i := range fields {
@@ -705,17 +670,17 @@ func (_q *PetQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := _q.predicates; len(ps) > 0 {
+	if ps := _q.Predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := _q.order; len(ps) > 0 {
@@ -731,30 +696,30 @@ func (_q *PetQuery) querySpec() *sqlgraph.QuerySpec {
 func (_q *PetQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(pet.Table)
-	columns := _q.ctx.Fields
+	columns := _q.Ctx.Fields
 	if len(columns) == 0 {
 		columns = pet.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if _q.sql != nil {
-		selector = _q.sql
+	if _q.Sql != nil {
+		selector = _q.Sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if _q.ctx.Unique != nil && *_q.ctx.Unique {
+	if _q.Ctx.Unique != nil && *_q.Ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range _q.predicates {
+	for _, p := range _q.Predicates {
 		p(selector)
 	}
 	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -774,11 +739,11 @@ func (_g *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_g *PetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	ctx = setContextOp(ctx, _g.build.Ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PetQuery, *PetGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*PetQuery, *PetGroupBy](ctx, _g.build, _g, _g.build.QueryState.Inters, v)
 }
 
 func (_g *PetGroupBy) sqlScan(ctx context.Context, root *PetQuery, v any) error {
@@ -822,11 +787,11 @@ func (_s *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_s *PetSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	ctx = setContextOp(ctx, _s.Ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PetQuery, *PetSelect](ctx, _s.PetQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*PetQuery, *PetSelect](ctx, _s.PetQuery, _s, _s.QueryState.Inters, v)
 }
 
 func (_s *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {

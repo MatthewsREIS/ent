@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FileTypeClient is a client for the FileType schema.
@@ -110,8 +111,10 @@ func (c *FileTypeClient) DeleteOneID(id int) *filetype.FileTypeDeleteOne {
 func (c *FileTypeClient) Query() *FileTypeQuery {
 	return &FileTypeQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeFileType},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.FileType]{
+			Ctx:    &QueryContext{Type: TypeFileType},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *FileTypeClient) GetX(ctx context.Context, id int) *FileType {
 // QueryFiles queries the files edge of a FileType.
 func (c *FileTypeClient) QueryFiles(_m *FileType) *FileQuery {
 	query := (&FileClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(filetype.Table, filetype.FieldID, id),

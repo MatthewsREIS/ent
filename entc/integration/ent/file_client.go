@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FileClient is a client for the File schema.
@@ -112,8 +113,10 @@ func (c *FileClient) DeleteOneID(id int) *file.FileDeleteOne {
 func (c *FileClient) Query() *FileQuery {
 	return &FileQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeFile},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.File]{
+			Ctx:    &QueryContext{Type: TypeFile},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -134,7 +137,7 @@ func (c *FileClient) GetX(ctx context.Context, id int) *File {
 // QueryOwner queries the owner edge of a File.
 func (c *FileClient) QueryOwner(_m *File) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
@@ -150,7 +153,7 @@ func (c *FileClient) QueryOwner(_m *File) *UserQuery {
 // QueryType queries the type edge of a File.
 func (c *FileClient) QueryType(_m *File) *FileTypeQuery {
 	query := (&FileTypeClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),
@@ -166,7 +169,7 @@ func (c *FileClient) QueryType(_m *File) *FileTypeQuery {
 // QueryField queries the field edge of a File.
 func (c *FileClient) QueryField(_m *File) *FieldTypeQuery {
 	query := (&FieldTypeClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(file.Table, file.FieldID, id),

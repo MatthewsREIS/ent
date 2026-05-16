@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/revision"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RevisionClient is a client for the Revision schema.
@@ -107,8 +108,10 @@ func (c *RevisionClient) DeleteOneID(id string) *revision.RevisionDeleteOne {
 func (c *RevisionClient) Query() *RevisionQuery {
 	return &RevisionQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeRevision},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Revision]{
+			Ctx:    &QueryContext{Type: TypeRevision},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

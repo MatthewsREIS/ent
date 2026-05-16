@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/migrate/versioned/predicate"
 	"entgo.io/ent/entc/integration/migrate/versioned/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserClient is a client for the User schema.
@@ -107,8 +108,10 @@ func (c *UserClient) DeleteOneID(id int) *user.UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeUser},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.User]{
+			Ctx:    &QueryContext{Type: TypeUser},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

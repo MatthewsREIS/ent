@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -90,7 +91,7 @@ func (_u *RoleUpdate) RemoveUserIDs(ids ...int) *RoleUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RoleUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RoleMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -272,7 +273,7 @@ func (_u *RoleUpdateOne) Select(field string, fields ...string) *RoleUpdateOne {
 
 // Save executes the query and returns the updated Role entity.
 func (_u *RoleUpdateOne) Save(ctx context.Context) (*Role, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Role](ctx, &entbuilder.UpdateState[*RoleMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

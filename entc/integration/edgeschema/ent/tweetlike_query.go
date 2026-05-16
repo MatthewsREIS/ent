@@ -19,44 +19,40 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TweetLikeQuery is the builder for querying TweetLike entities.
 type TweetLikeQuery struct {
 	Config
-	ctx        *QueryContext
-	order      []tweetlike.OrderOption
-	inters     []Interceptor
-	predicates []predicate.TweetLike
-	withTweet  *TweetQuery
-	withUser   *UserQuery
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	entbuilder.QueryState[predicate.TweetLike]
+	order     []tweetlike.OrderOption
+	withTweet *TweetQuery
+	withUser  *UserQuery
 }
 
 // Where adds a new predicate for the TweetLikeQuery builder.
 func (_q *TweetLikeQuery) Where(ps ...predicate.TweetLike) *TweetLikeQuery {
-	_q.predicates = append(_q.predicates, ps...)
+	_q.AddPredicates(ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
 func (_q *TweetLikeQuery) Limit(limit int) *TweetLikeQuery {
-	_q.ctx.Limit = &limit
+	_q.SetLimit(limit)
 	return _q
 }
 
 // Offset to start from.
 func (_q *TweetLikeQuery) Offset(offset int) *TweetLikeQuery {
-	_q.ctx.Offset = &offset
+	_q.SetOffset(offset)
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (_q *TweetLikeQuery) Unique(unique bool) *TweetLikeQuery {
-	_q.ctx.Unique = &unique
+	_q.SetUnique(unique)
 	return _q
 }
 
@@ -69,7 +65,7 @@ func (_q *TweetLikeQuery) Order(o ...tweetlike.OrderOption) *TweetLikeQuery {
 // QueryTweet chains the current query on the "tweet" edge.
 func (_q *TweetLikeQuery) QueryTweet() *TweetQuery {
 	query := (&TweetClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -91,7 +87,7 @@ func (_q *TweetLikeQuery) QueryTweet() *TweetQuery {
 // QueryUser chains the current query on the "user" edge.
 func (_q *TweetLikeQuery) QueryUser() *UserQuery {
 	query := (&UserClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -113,14 +109,8 @@ func (_q *TweetLikeQuery) QueryUser() *UserQuery {
 // First returns the first TweetLike entity from the query.
 // Returns a *NotFoundError when no TweetLike was found.
 func (_q *TweetLikeQuery) First(ctx context.Context) (*TweetLike, error) {
-	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
-	if err != nil {
-		return nil, err
-	}
-	if len(nodes) == 0 {
-		return nil, &NotFoundError{Label: tweetlike.Label}
-	}
-	return nodes[0], nil
+	_q.Limit(1)
+	return entbuilder.RunFirst[*TweetLike, []*TweetLike](ctx, _q, _q.Ctx, ent.OpQueryFirst, tweetlike.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*TweetLike, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
 }
 
 // FirstX is like First, but panics if an error occurs.
@@ -136,18 +126,8 @@ func (_q *TweetLikeQuery) FirstX(ctx context.Context) *TweetLike {
 // Returns a *NotSingularError when more than one TweetLike entity is found.
 // Returns a *NotFoundError when no TweetLike entities are found.
 func (_q *TweetLikeQuery) Only(ctx context.Context) (*TweetLike, error) {
-	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
-	if err != nil {
-		return nil, err
-	}
-	switch len(nodes) {
-	case 1:
-		return nodes[0], nil
-	case 0:
-		return nil, &NotFoundError{Label: tweetlike.Label}
-	default:
-		return nil, &NotSingularError{Label: tweetlike.Label}
-	}
+	_q.Limit(2)
+	return entbuilder.RunOnly[*TweetLike, []*TweetLike](ctx, _q, _q.Ctx, ent.OpQueryOnly, tweetlike.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*TweetLike, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
 }
 
 // OnlyX is like Only, but panics if an error occurs.
@@ -161,12 +141,7 @@ func (_q *TweetLikeQuery) OnlyX(ctx context.Context) *TweetLike {
 
 // All executes the query and returns a list of TweetLikes.
 func (_q *TweetLikeQuery) All(ctx context.Context) ([]*TweetLike, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return nil, err
-	}
-	qr := querierAll[[]*TweetLike, *TweetLikeQuery]()
-	return withInterceptors[[]*TweetLike](ctx, _q, qr, _q.inters)
+	return entbuilder.RunAll[[]*TweetLike](ctx, _q, _q.Ctx, ent.OpQueryAll, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*TweetLike, error) { return _q.sqlAll(ctx) })
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -180,11 +155,7 @@ func (_q *TweetLikeQuery) AllX(ctx context.Context) []*TweetLike {
 
 // Count returns the count of the given query.
 func (_q *TweetLikeQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return 0, err
-	}
-	return withInterceptors[int](ctx, _q, querierCount[*TweetLikeQuery](), _q.inters)
+	return entbuilder.RunCount(ctx, _q, _q.Ctx, ent.OpQueryCount, _q.QueryState.Inters, _q.prepareQuery, _q.sqlCount)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -198,7 +169,7 @@ func (_q *TweetLikeQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (_q *TweetLikeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryExist)
 	switch _, err := _q.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -226,15 +197,10 @@ func (_q *TweetLikeQuery) Clone() *TweetLikeQuery {
 	}
 	return &TweetLikeQuery{
 		Config:     _q.Config,
-		ctx:        _q.ctx.Clone(),
+		QueryState: *_q.QueryState.Clone(),
 		order:      append([]tweetlike.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.TweetLike{}, _q.predicates...),
 		withTweet:  _q.withTweet.Clone(),
 		withUser:   _q.withUser.Clone(),
-		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
 	}
 }
 
@@ -275,9 +241,9 @@ func (_q *TweetLikeQuery) WithUser(opts ...func(*UserQuery)) *TweetLikeQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *TweetLikeQuery) GroupBy(field string, fields ...string) *TweetLikeGroupBy {
-	_q.ctx.Fields = append([]string{field}, fields...)
+	_q.Ctx.Fields = append([]string{field}, fields...)
 	grbuild := &TweetLikeGroupBy{build: _q}
-	grbuild.flds = &_q.ctx.Fields
+	grbuild.flds = &_q.Ctx.Fields
 	grbuild.label = tweetlike.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -296,10 +262,10 @@ func (_q *TweetLikeQuery) GroupBy(field string, fields ...string) *TweetLikeGrou
 //		Select(tweetlike.FieldLikedAt).
 //		Scan(ctx, &v)
 func (_q *TweetLikeQuery) Select(fields ...string) *TweetLikeSelect {
-	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	_q.Ctx.Fields = append(_q.Ctx.Fields, fields...)
 	sbuild := &TweetLikeSelect{TweetLikeQuery: _q}
 	sbuild.label = tweetlike.Label
-	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.Ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -309,7 +275,7 @@ func (_q *TweetLikeQuery) Aggregate(fns ...AggregateFunc) *TweetLikeSelect {
 }
 
 func (_q *TweetLikeQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range _q.inters {
+	for _, inter := range _q.QueryState.Inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
@@ -319,17 +285,17 @@ func (_q *TweetLikeQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range _q.ctx.Fields {
+	for _, f := range _q.Ctx.Fields {
 		if !tweetlike.ValidColumn(f) {
 			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if _q.path != nil {
-		prev, err := _q.path(ctx)
+	if _q.Path != nil {
+		prev, err := _q.Path(ctx)
 		if err != nil {
 			return err
 		}
-		_q.sql = prev
+		_q.Sql = prev
 	}
 	if tweetlike.Policy == nil {
 		return errors.New("ent: uninitialized tweetlike.Policy (forgotten import ent/runtime?)")
@@ -450,13 +416,13 @@ func (_q *TweetLikeQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (_q *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(tweetlike.Table, tweetlike.Columns, nil)
-	_spec.From = _q.sql
-	if unique := _q.ctx.Unique; unique != nil {
+	_spec.From = _q.Sql
+	if unique := _q.Ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if _q.path != nil {
+	} else if _q.Path != nil {
 		_spec.Unique = true
 	}
-	if fields := _q.ctx.Fields; len(fields) > 0 {
+	if fields := _q.Ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
@@ -468,17 +434,17 @@ func (_q *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
 			_spec.Node.AddColumnOnce(tweetlike.FieldUserID)
 		}
 	}
-	if ps := _q.predicates; len(ps) > 0 {
+	if ps := _q.Predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := _q.order; len(ps) > 0 {
@@ -494,30 +460,30 @@ func (_q *TweetLikeQuery) querySpec() *sqlgraph.QuerySpec {
 func (_q *TweetLikeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(tweetlike.Table)
-	columns := _q.ctx.Fields
+	columns := _q.Ctx.Fields
 	if len(columns) == 0 {
 		columns = tweetlike.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if _q.sql != nil {
-		selector = _q.sql
+	if _q.Sql != nil {
+		selector = _q.Sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if _q.ctx.Unique != nil && *_q.ctx.Unique {
+	if _q.Ctx.Unique != nil && *_q.Ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range _q.predicates {
+	for _, p := range _q.Predicates {
 		p(selector)
 	}
 	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -537,11 +503,11 @@ func (_g *TweetLikeGroupBy) Aggregate(fns ...AggregateFunc) *TweetLikeGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_g *TweetLikeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	ctx = setContextOp(ctx, _g.build.Ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TweetLikeQuery, *TweetLikeGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*TweetLikeQuery, *TweetLikeGroupBy](ctx, _g.build, _g, _g.build.QueryState.Inters, v)
 }
 
 func (_g *TweetLikeGroupBy) sqlScan(ctx context.Context, root *TweetLikeQuery, v any) error {
@@ -585,11 +551,11 @@ func (_s *TweetLikeSelect) Aggregate(fns ...AggregateFunc) *TweetLikeSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_s *TweetLikeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	ctx = setContextOp(ctx, _s.Ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TweetLikeQuery, *TweetLikeSelect](ctx, _s.TweetLikeQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*TweetLikeQuery, *TweetLikeSelect](ctx, _s.TweetLikeQuery, _s, _s.QueryState.Inters, v)
 }
 
 func (_s *TweetLikeSelect) sqlScan(ctx context.Context, root *TweetLikeQuery, v any) error {

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -80,7 +81,7 @@ func (_u *FriendshipUpdate) Mutation() *FriendshipMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FriendshipUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*FriendshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -228,7 +229,7 @@ func (_u *FriendshipUpdateOne) Select(field string, fields ...string) *Friendshi
 
 // Save executes the query and returns the updated Friendship entity.
 func (_u *FriendshipUpdateOne) Save(ctx context.Context) (*Friendship, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Friendship](ctx, &entbuilder.UpdateState[*FriendshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

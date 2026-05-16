@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RentalClient is a client for the Rental schema.
@@ -111,8 +112,10 @@ func (c *RentalClient) DeleteOneID(id int) *rental.RentalDeleteOne {
 func (c *RentalClient) Query() *RentalQuery {
 	return &RentalQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeRental},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Rental]{
+			Ctx:    &QueryContext{Type: TypeRental},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *RentalClient) GetX(ctx context.Context, id int) *Rental {
 // QueryUser queries the user edge of a Rental.
 func (c *RentalClient) QueryUser(_m *Rental) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(rental.Table, rental.FieldID, id),
@@ -149,7 +152,7 @@ func (c *RentalClient) QueryUser(_m *Rental) *UserQuery {
 // QueryCar queries the car edge of a Rental.
 func (c *RentalClient) QueryCar(_m *Rental) *CarQuery {
 	query := (&CarClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(rental.Table, rental.FieldID, id),

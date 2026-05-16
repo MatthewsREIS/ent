@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -97,7 +98,7 @@ func (_u *UserTweetUpdate) ClearTweet() *UserTweetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserTweetUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserTweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -305,7 +306,7 @@ func (_u *UserTweetUpdateOne) Select(field string, fields ...string) *UserTweetU
 
 // Save executes the query and returns the updated UserTweet entity.
 func (_u *UserTweetUpdateOne) Save(ctx context.Context) (*UserTweet, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[UserTweet](ctx, &entbuilder.UpdateState[*UserTweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

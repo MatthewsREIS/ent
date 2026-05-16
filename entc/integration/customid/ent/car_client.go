@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/car"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CarClient is a client for the Car schema.
@@ -110,8 +111,10 @@ func (c *CarClient) DeleteOneID(id int) *car.CarDeleteOne {
 func (c *CarClient) Query() *CarQuery {
 	return &CarQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeCar},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Car]{
+			Ctx:    &QueryContext{Type: TypeCar},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *CarClient) GetX(ctx context.Context, id int) *Car {
 // QueryOwner queries the owner edge of a Car.
 func (c *CarClient) QueryOwner(_m *Car) *PetQuery {
 	query := (&PetClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(car.Table, car.FieldID, id),

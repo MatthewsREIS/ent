@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/versioned/internal"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -37,7 +38,7 @@ func (_d *FriendshipDelete) Where(ps ...predicate.Friendship) *FriendshipDelete 
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *FriendshipDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*FriendshipMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

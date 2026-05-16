@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -76,7 +77,7 @@ func (_u *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -249,7 +250,7 @@ func (_u *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOne
 
 // Save executes the query and returns the updated Group entity.
 func (_u *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Group](ctx, &entbuilder.UpdateState[*GroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -117,7 +118,7 @@ func (_u *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BlobUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*BlobMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -358,7 +359,7 @@ func (_u *BlobUpdateOne) Select(field string, fields ...string) *BlobUpdateOne {
 
 // Save executes the query and returns the updated Blob entity.
 func (_u *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Blob](ctx, &entbuilder.UpdateState[*BlobMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

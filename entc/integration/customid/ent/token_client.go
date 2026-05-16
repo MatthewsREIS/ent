@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TokenClient is a client for the Token schema.
@@ -111,8 +112,10 @@ func (c *TokenClient) DeleteOneID(id sid.ID) *token.TokenDeleteOne {
 func (c *TokenClient) Query() *TokenQuery {
 	return &TokenQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeToken},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Token]{
+			Ctx:    &QueryContext{Type: TypeToken},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *TokenClient) GetX(ctx context.Context, id sid.ID) *Token {
 // QueryAccount queries the account edge of a Token.
 func (c *TokenClient) QueryAccount(_m *Token) *AccountQuery {
 	query := (&AccountClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(token.Table, token.FieldID, id),

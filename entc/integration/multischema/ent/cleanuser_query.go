@@ -17,43 +17,39 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/cleanuser"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CleanUserQuery is the builder for querying CleanUser entities.
 type CleanUserQuery struct {
 	Config
-	ctx        *QueryContext
-	order      []cleanuser.OrderOption
-	inters     []Interceptor
-	predicates []predicate.CleanUser
-	modifiers  []func(*sql.Selector)
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	entbuilder.QueryState[predicate.CleanUser]
+	order     []cleanuser.OrderOption
+	modifiers []func(*sql.Selector)
 }
 
 // Where adds a new predicate for the CleanUserQuery builder.
 func (_q *CleanUserQuery) Where(ps ...predicate.CleanUser) *CleanUserQuery {
-	_q.predicates = append(_q.predicates, ps...)
+	_q.AddPredicates(ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
 func (_q *CleanUserQuery) Limit(limit int) *CleanUserQuery {
-	_q.ctx.Limit = &limit
+	_q.SetLimit(limit)
 	return _q
 }
 
 // Offset to start from.
 func (_q *CleanUserQuery) Offset(offset int) *CleanUserQuery {
-	_q.ctx.Offset = &offset
+	_q.SetOffset(offset)
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (_q *CleanUserQuery) Unique(unique bool) *CleanUserQuery {
-	_q.ctx.Unique = &unique
+	_q.SetUnique(unique)
 	return _q
 }
 
@@ -66,14 +62,8 @@ func (_q *CleanUserQuery) Order(o ...cleanuser.OrderOption) *CleanUserQuery {
 // First returns the first CleanUser entity from the query.
 // Returns a *NotFoundError when no CleanUser was found.
 func (_q *CleanUserQuery) First(ctx context.Context) (*CleanUser, error) {
-	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
-	if err != nil {
-		return nil, err
-	}
-	if len(nodes) == 0 {
-		return nil, &NotFoundError{Label: cleanuser.Label}
-	}
-	return nodes[0], nil
+	_q.Limit(1)
+	return entbuilder.RunFirst[*CleanUser, []*CleanUser](ctx, _q, _q.Ctx, ent.OpQueryFirst, cleanuser.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*CleanUser, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
 }
 
 // FirstX is like First, but panics if an error occurs.
@@ -89,18 +79,8 @@ func (_q *CleanUserQuery) FirstX(ctx context.Context) *CleanUser {
 // Returns a *NotSingularError when more than one CleanUser entity is found.
 // Returns a *NotFoundError when no CleanUser entities are found.
 func (_q *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
-	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
-	if err != nil {
-		return nil, err
-	}
-	switch len(nodes) {
-	case 1:
-		return nodes[0], nil
-	case 0:
-		return nil, &NotFoundError{Label: cleanuser.Label}
-	default:
-		return nil, &NotSingularError{Label: cleanuser.Label}
-	}
+	_q.Limit(2)
+	return entbuilder.RunOnly[*CleanUser, []*CleanUser](ctx, _q, _q.Ctx, ent.OpQueryOnly, cleanuser.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*CleanUser, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
 }
 
 // OnlyX is like Only, but panics if an error occurs.
@@ -114,12 +94,7 @@ func (_q *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser {
 
 // All executes the query and returns a list of CleanUsers.
 func (_q *CleanUserQuery) All(ctx context.Context) ([]*CleanUser, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return nil, err
-	}
-	qr := querierAll[[]*CleanUser, *CleanUserQuery]()
-	return withInterceptors[[]*CleanUser](ctx, _q, qr, _q.inters)
+	return entbuilder.RunAll[[]*CleanUser](ctx, _q, _q.Ctx, ent.OpQueryAll, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*CleanUser, error) { return _q.sqlAll(ctx) })
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -133,11 +108,7 @@ func (_q *CleanUserQuery) AllX(ctx context.Context) []*CleanUser {
 
 // Count returns the count of the given query.
 func (_q *CleanUserQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return 0, err
-	}
-	return withInterceptors[int](ctx, _q, querierCount[*CleanUserQuery](), _q.inters)
+	return entbuilder.RunCount(ctx, _q, _q.Ctx, ent.OpQueryCount, _q.QueryState.Inters, _q.prepareQuery, _q.sqlCount)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -151,7 +122,7 @@ func (_q *CleanUserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (_q *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryExist)
 	switch _, err := _q.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -179,14 +150,9 @@ func (_q *CleanUserQuery) Clone() *CleanUserQuery {
 	}
 	return &CleanUserQuery{
 		Config:     _q.Config,
-		ctx:        _q.ctx.Clone(),
+		QueryState: *_q.QueryState.Clone(),
 		order:      append([]cleanuser.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.CleanUser{}, _q.predicates...),
-		// clone intermediate query.
-		sql:       _q.sql.Clone(),
-		path:      _q.path,
-		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
+		modifiers:  append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -205,9 +171,9 @@ func (_q *CleanUserQuery) Clone() *CleanUserQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *CleanUserQuery) GroupBy(field string, fields ...string) *CleanUserGroupBy {
-	_q.ctx.Fields = append([]string{field}, fields...)
+	_q.Ctx.Fields = append([]string{field}, fields...)
 	grbuild := &CleanUserGroupBy{build: _q}
-	grbuild.flds = &_q.ctx.Fields
+	grbuild.flds = &_q.Ctx.Fields
 	grbuild.label = cleanuser.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -226,10 +192,10 @@ func (_q *CleanUserQuery) GroupBy(field string, fields ...string) *CleanUserGrou
 //		Select(cleanuser.FieldName).
 //		Scan(ctx, &v)
 func (_q *CleanUserQuery) Select(fields ...string) *CleanUserSelect {
-	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	_q.Ctx.Fields = append(_q.Ctx.Fields, fields...)
 	sbuild := &CleanUserSelect{CleanUserQuery: _q}
 	sbuild.label = cleanuser.Label
-	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.Ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -239,7 +205,7 @@ func (_q *CleanUserQuery) Aggregate(fns ...AggregateFunc) *CleanUserSelect {
 }
 
 func (_q *CleanUserQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range _q.inters {
+	for _, inter := range _q.QueryState.Inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
@@ -249,17 +215,17 @@ func (_q *CleanUserQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range _q.ctx.Fields {
+	for _, f := range _q.Ctx.Fields {
 		if !cleanuser.ValidColumn(f) {
 			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if _q.path != nil {
-		prev, err := _q.path(ctx)
+	if _q.Path != nil {
+		prev, err := _q.Path(ctx)
 		if err != nil {
 			return err
 		}
-		_q.sql = prev
+		_q.Sql = prev
 	}
 	return nil
 }
@@ -303,38 +269,38 @@ func (_q *CleanUserQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = _q.ctx.Fields
-	if len(_q.ctx.Fields) > 0 {
-		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
+	_spec.Node.Columns = _q.Ctx.Fields
+	if len(_q.Ctx.Fields) > 0 {
+		_spec.Unique = _q.Ctx.Unique != nil && *_q.Ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(cleanuser.Table, cleanuser.Columns, nil)
-	_spec.From = _q.sql
-	if unique := _q.ctx.Unique; unique != nil {
+	_spec.From = _q.Sql
+	if unique := _q.Ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if _q.path != nil {
+	} else if _q.Path != nil {
 		_spec.Unique = true
 	}
-	if fields := _q.ctx.Fields; len(fields) > 0 {
+	if fields := _q.Ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
 	}
-	if ps := _q.predicates; len(ps) > 0 {
+	if ps := _q.Predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := _q.order; len(ps) > 0 {
@@ -350,16 +316,16 @@ func (_q *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
 func (_q *CleanUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(cleanuser.Table)
-	columns := _q.ctx.Fields
+	columns := _q.Ctx.Fields
 	if len(columns) == 0 {
 		columns = cleanuser.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if _q.sql != nil {
-		selector = _q.sql
+	if _q.Sql != nil {
+		selector = _q.Sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if _q.ctx.Unique != nil && *_q.ctx.Unique {
+	if _q.Ctx.Unique != nil && *_q.Ctx.Unique {
 		selector.Distinct()
 	}
 	schemaConfig := _q.Config.SchemaConfig()
@@ -369,18 +335,18 @@ func (_q *CleanUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, m := range _q.modifiers {
 		m(selector)
 	}
-	for _, p := range _q.predicates {
+	for _, p := range _q.Predicates {
 		p(selector)
 	}
 	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -406,11 +372,11 @@ func (_g *CleanUserGroupBy) Aggregate(fns ...AggregateFunc) *CleanUserGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_g *CleanUserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	ctx = setContextOp(ctx, _g.build.Ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CleanUserQuery, *CleanUserGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*CleanUserQuery, *CleanUserGroupBy](ctx, _g.build, _g, _g.build.QueryState.Inters, v)
 }
 
 func (_g *CleanUserGroupBy) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
@@ -454,11 +420,11 @@ func (_s *CleanUserSelect) Aggregate(fns ...AggregateFunc) *CleanUserSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_s *CleanUserSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	ctx = setContextOp(ctx, _s.Ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CleanUserQuery, *CleanUserSelect](ctx, _s.CleanUserQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*CleanUserQuery, *CleanUserSelect](ctx, _s.CleanUserQuery, _s, _s.QueryState.Inters, v)
 }
 
 func (_s *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {

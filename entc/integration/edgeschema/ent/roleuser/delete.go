@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RoleUserDelete is the builder for deleting a RoleUser entity.
@@ -34,7 +35,7 @@ func (_d *RoleUserDelete) Where(ps ...predicate.RoleUser) *RoleUserDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *RoleUserDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*RoleUserMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

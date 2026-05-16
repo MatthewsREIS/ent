@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -69,7 +70,7 @@ func (_u *TokenUpdate) ClearAccount() *TokenUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TokenUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TokenMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -222,7 +223,7 @@ func (_u *TokenUpdateOne) Select(field string, fields ...string) *TokenUpdateOne
 
 // Save executes the query and returns the updated Token entity.
 func (_u *TokenUpdateOne) Save(ctx context.Context) (*Token, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Token](ctx, &entbuilder.UpdateState[*TokenMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

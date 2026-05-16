@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -135,7 +136,7 @@ func (_u *ExValueScanUpdate) Mutation() *ExValueScanMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ExValueScanUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ExValueScanMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -377,7 +378,7 @@ func (_u *ExValueScanUpdateOne) Select(field string, fields ...string) *ExValueS
 
 // Save executes the query and returns the updated ExValueScan entity.
 func (_u *ExValueScanUpdateOne) Save(ctx context.Context) (*ExValueScan, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[ExValueScan](ctx, &entbuilder.UpdateState[*ExValueScanMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

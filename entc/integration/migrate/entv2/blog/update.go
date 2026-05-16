@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -81,7 +82,7 @@ func (_u *BlogUpdate) RemoveAdminIDs(ids ...int) *BlogUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BlogUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*BlogMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -250,7 +251,7 @@ func (_u *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne {
 
 // Save executes the query and returns the updated Blog entity.
 func (_u *BlogUpdateOne) Save(ctx context.Context) (*Blog, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Blog](ctx, &entbuilder.UpdateState[*BlogMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

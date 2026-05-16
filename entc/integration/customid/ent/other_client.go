@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // OtherClient is a client for the Other schema.
@@ -108,8 +109,10 @@ func (c *OtherClient) DeleteOneID(id sid.ID) *other.OtherDeleteOne {
 func (c *OtherClient) Query() *OtherQuery {
 	return &OtherQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeOther},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Other]{
+			Ctx:    &QueryContext{Type: TypeOther},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

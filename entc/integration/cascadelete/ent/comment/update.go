@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -76,7 +77,7 @@ func (_u *CommentUpdate) ClearPost() *CommentUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CommentUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CommentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -232,7 +233,7 @@ func (_u *CommentUpdateOne) Select(field string, fields ...string) *CommentUpdat
 
 // Save executes the query and returns the updated Comment entity.
 func (_u *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Comment](ctx, &entbuilder.UpdateState[*CommentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/card"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CardClient is a client for the Card schema.
@@ -110,8 +111,10 @@ func (c *CardClient) DeleteOneID(id int) *card.CardDeleteOne {
 func (c *CardClient) Query() *CardQuery {
 	return &CardQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeCard},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Card]{
+			Ctx:    &QueryContext{Type: TypeCard},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *CardClient) GetX(ctx context.Context, id int) *Card {
 // QueryOwner queries the owner edge of a Card.
 func (c *CardClient) QueryOwner(_m *Card) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(card.Table, card.FieldID, id),

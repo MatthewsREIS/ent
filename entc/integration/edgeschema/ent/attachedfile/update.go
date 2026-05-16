@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -103,7 +104,7 @@ func (_u *AttachedFileUpdate) ClearProc() *AttachedFileUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *AttachedFileUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*AttachedFileMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -317,7 +318,7 @@ func (_u *AttachedFileUpdateOne) Select(field string, fields ...string) *Attache
 
 // Save executes the query and returns the updated AttachedFile entity.
 func (_u *AttachedFileUpdateOne) Save(ctx context.Context) (*AttachedFile, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[AttachedFile](ctx, &entbuilder.UpdateState[*AttachedFileMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

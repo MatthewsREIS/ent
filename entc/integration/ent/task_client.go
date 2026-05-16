@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 	enttask "entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TaskClient is a client for the Task schema.
@@ -107,8 +108,10 @@ func (c *TaskClient) DeleteOneID(id int) *enttask.TaskDeleteOne {
 func (c *TaskClient) Query() *TaskQuery {
 	return &TaskQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeTask},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Task]{
+			Ctx:    &QueryContext{Type: TypeTask},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

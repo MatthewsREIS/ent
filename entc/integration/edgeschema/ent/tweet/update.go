@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -150,7 +151,7 @@ func (_u *TweetUpdate) RemoveTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TweetUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -588,7 +589,7 @@ func (_u *TweetUpdateOne) Select(field string, fields ...string) *TweetUpdateOne
 
 // Save executes the query and returns the updated Tweet entity.
 func (_u *TweetUpdateOne) Save(ctx context.Context) (*Tweet, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Tweet](ctx, &entbuilder.UpdateState[*TweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

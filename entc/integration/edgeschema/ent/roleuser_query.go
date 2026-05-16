@@ -18,44 +18,40 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RoleUserQuery is the builder for querying RoleUser entities.
 type RoleUserQuery struct {
 	Config
-	ctx        *QueryContext
-	order      []roleuser.OrderOption
-	inters     []Interceptor
-	predicates []predicate.RoleUser
-	withRole   *RoleQuery
-	withUser   *UserQuery
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	entbuilder.QueryState[predicate.RoleUser]
+	order    []roleuser.OrderOption
+	withRole *RoleQuery
+	withUser *UserQuery
 }
 
 // Where adds a new predicate for the RoleUserQuery builder.
 func (_q *RoleUserQuery) Where(ps ...predicate.RoleUser) *RoleUserQuery {
-	_q.predicates = append(_q.predicates, ps...)
+	_q.AddPredicates(ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
 func (_q *RoleUserQuery) Limit(limit int) *RoleUserQuery {
-	_q.ctx.Limit = &limit
+	_q.SetLimit(limit)
 	return _q
 }
 
 // Offset to start from.
 func (_q *RoleUserQuery) Offset(offset int) *RoleUserQuery {
-	_q.ctx.Offset = &offset
+	_q.SetOffset(offset)
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (_q *RoleUserQuery) Unique(unique bool) *RoleUserQuery {
-	_q.ctx.Unique = &unique
+	_q.SetUnique(unique)
 	return _q
 }
 
@@ -68,7 +64,7 @@ func (_q *RoleUserQuery) Order(o ...roleuser.OrderOption) *RoleUserQuery {
 // QueryRole chains the current query on the "role" edge.
 func (_q *RoleUserQuery) QueryRole() *RoleQuery {
 	query := (&RoleClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -90,7 +86,7 @@ func (_q *RoleUserQuery) QueryRole() *RoleQuery {
 // QueryUser chains the current query on the "user" edge.
 func (_q *RoleUserQuery) QueryUser() *UserQuery {
 	query := (&UserClient{Config: _q.Config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+	query.Path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
@@ -112,14 +108,8 @@ func (_q *RoleUserQuery) QueryUser() *UserQuery {
 // First returns the first RoleUser entity from the query.
 // Returns a *NotFoundError when no RoleUser was found.
 func (_q *RoleUserQuery) First(ctx context.Context) (*RoleUser, error) {
-	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
-	if err != nil {
-		return nil, err
-	}
-	if len(nodes) == 0 {
-		return nil, &NotFoundError{Label: roleuser.Label}
-	}
-	return nodes[0], nil
+	_q.Limit(1)
+	return entbuilder.RunFirst[*RoleUser, []*RoleUser](ctx, _q, _q.Ctx, ent.OpQueryFirst, roleuser.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*RoleUser, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
 }
 
 // FirstX is like First, but panics if an error occurs.
@@ -135,18 +125,8 @@ func (_q *RoleUserQuery) FirstX(ctx context.Context) *RoleUser {
 // Returns a *NotSingularError when more than one RoleUser entity is found.
 // Returns a *NotFoundError when no RoleUser entities are found.
 func (_q *RoleUserQuery) Only(ctx context.Context) (*RoleUser, error) {
-	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
-	if err != nil {
-		return nil, err
-	}
-	switch len(nodes) {
-	case 1:
-		return nodes[0], nil
-	case 0:
-		return nil, &NotFoundError{Label: roleuser.Label}
-	default:
-		return nil, &NotSingularError{Label: roleuser.Label}
-	}
+	_q.Limit(2)
+	return entbuilder.RunOnly[*RoleUser, []*RoleUser](ctx, _q, _q.Ctx, ent.OpQueryOnly, roleuser.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*RoleUser, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
 }
 
 // OnlyX is like Only, but panics if an error occurs.
@@ -160,12 +140,7 @@ func (_q *RoleUserQuery) OnlyX(ctx context.Context) *RoleUser {
 
 // All executes the query and returns a list of RoleUsers.
 func (_q *RoleUserQuery) All(ctx context.Context) ([]*RoleUser, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return nil, err
-	}
-	qr := querierAll[[]*RoleUser, *RoleUserQuery]()
-	return withInterceptors[[]*RoleUser](ctx, _q, qr, _q.inters)
+	return entbuilder.RunAll[[]*RoleUser](ctx, _q, _q.Ctx, ent.OpQueryAll, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*RoleUser, error) { return _q.sqlAll(ctx) })
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -179,11 +154,7 @@ func (_q *RoleUserQuery) AllX(ctx context.Context) []*RoleUser {
 
 // Count returns the count of the given query.
 func (_q *RoleUserQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return 0, err
-	}
-	return withInterceptors[int](ctx, _q, querierCount[*RoleUserQuery](), _q.inters)
+	return entbuilder.RunCount(ctx, _q, _q.Ctx, ent.OpQueryCount, _q.QueryState.Inters, _q.prepareQuery, _q.sqlCount)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -197,7 +168,7 @@ func (_q *RoleUserQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (_q *RoleUserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryExist)
 	switch _, err := _q.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -225,15 +196,10 @@ func (_q *RoleUserQuery) Clone() *RoleUserQuery {
 	}
 	return &RoleUserQuery{
 		Config:     _q.Config,
-		ctx:        _q.ctx.Clone(),
+		QueryState: *_q.QueryState.Clone(),
 		order:      append([]roleuser.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.RoleUser{}, _q.predicates...),
 		withRole:   _q.withRole.Clone(),
 		withUser:   _q.withUser.Clone(),
-		// clone intermediate query.
-		sql:  _q.sql.Clone(),
-		path: _q.path,
 	}
 }
 
@@ -274,9 +240,9 @@ func (_q *RoleUserQuery) WithUser(opts ...func(*UserQuery)) *RoleUserQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroupBy {
-	_q.ctx.Fields = append([]string{field}, fields...)
+	_q.Ctx.Fields = append([]string{field}, fields...)
 	grbuild := &RoleUserGroupBy{build: _q}
-	grbuild.flds = &_q.ctx.Fields
+	grbuild.flds = &_q.Ctx.Fields
 	grbuild.label = roleuser.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -295,10 +261,10 @@ func (_q *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroupB
 //		Select(roleuser.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (_q *RoleUserQuery) Select(fields ...string) *RoleUserSelect {
-	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	_q.Ctx.Fields = append(_q.Ctx.Fields, fields...)
 	sbuild := &RoleUserSelect{RoleUserQuery: _q}
 	sbuild.label = roleuser.Label
-	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.Ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -308,7 +274,7 @@ func (_q *RoleUserQuery) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
 }
 
 func (_q *RoleUserQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range _q.inters {
+	for _, inter := range _q.QueryState.Inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
@@ -318,17 +284,17 @@ func (_q *RoleUserQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range _q.ctx.Fields {
+	for _, f := range _q.Ctx.Fields {
 		if !roleuser.ValidColumn(f) {
 			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if _q.path != nil {
-		prev, err := _q.path(ctx)
+	if _q.Path != nil {
+		prev, err := _q.Path(ctx)
 		if err != nil {
 			return err
 		}
-		_q.sql = prev
+		_q.Sql = prev
 	}
 	return nil
 }
@@ -443,13 +409,13 @@ func (_q *RoleUserQuery) sqlCount(ctx context.Context) (int, error) {
 
 func (_q *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(roleuser.Table, roleuser.Columns, nil)
-	_spec.From = _q.sql
-	if unique := _q.ctx.Unique; unique != nil {
+	_spec.From = _q.Sql
+	if unique := _q.Ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if _q.path != nil {
+	} else if _q.Path != nil {
 		_spec.Unique = true
 	}
-	if fields := _q.ctx.Fields; len(fields) > 0 {
+	if fields := _q.Ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
@@ -461,17 +427,17 @@ func (_q *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 			_spec.Node.AddColumnOnce(roleuser.FieldUserID)
 		}
 	}
-	if ps := _q.predicates; len(ps) > 0 {
+	if ps := _q.Predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := _q.order; len(ps) > 0 {
@@ -487,30 +453,30 @@ func (_q *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 func (_q *RoleUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(roleuser.Table)
-	columns := _q.ctx.Fields
+	columns := _q.Ctx.Fields
 	if len(columns) == 0 {
 		columns = roleuser.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if _q.sql != nil {
-		selector = _q.sql
+	if _q.Sql != nil {
+		selector = _q.Sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if _q.ctx.Unique != nil && *_q.ctx.Unique {
+	if _q.Ctx.Unique != nil && *_q.Ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range _q.predicates {
+	for _, p := range _q.Predicates {
 		p(selector)
 	}
 	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -530,11 +496,11 @@ func (_g *RoleUserGroupBy) Aggregate(fns ...AggregateFunc) *RoleUserGroupBy {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_g *RoleUserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	ctx = setContextOp(ctx, _g.build.Ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RoleUserQuery, *RoleUserGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*RoleUserQuery, *RoleUserGroupBy](ctx, _g.build, _g, _g.build.QueryState.Inters, v)
 }
 
 func (_g *RoleUserGroupBy) sqlScan(ctx context.Context, root *RoleUserQuery, v any) error {
@@ -578,11 +544,11 @@ func (_s *RoleUserSelect) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (_s *RoleUserSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	ctx = setContextOp(ctx, _s.Ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RoleUserQuery, *RoleUserSelect](ctx, _s.RoleUserQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*RoleUserQuery, *RoleUserSelect](ctx, _s.RoleUserQuery, _s, _s.QueryState.Inters, v)
 }
 
 func (_s *RoleUserSelect) sqlScan(ctx context.Context, root *RoleUserQuery, v any) error {

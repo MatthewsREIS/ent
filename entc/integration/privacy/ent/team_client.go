@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TeamClient is a client for the Team schema.
@@ -111,8 +112,10 @@ func (c *TeamClient) DeleteOneID(id int) *team.TeamDeleteOne {
 func (c *TeamClient) Query() *TeamQuery {
 	return &TeamQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeTeam},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Team]{
+			Ctx:    &QueryContext{Type: TypeTeam},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *TeamClient) GetX(ctx context.Context, id int) *Team {
 // QueryTasks queries the tasks edge of a Team.
 func (c *TeamClient) QueryTasks(_m *Team) *TaskQuery {
 	query := (&TaskClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(team.Table, team.FieldID, id),
@@ -149,7 +152,7 @@ func (c *TeamClient) QueryTasks(_m *Team) *TaskQuery {
 // QueryUsers queries the users edge of a Team.
 func (c *TeamClient) QueryUsers(_m *Team) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(team.Table, team.FieldID, id),

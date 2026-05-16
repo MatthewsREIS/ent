@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RelationshipInfoClient is a client for the RelationshipInfo schema.
@@ -107,8 +108,10 @@ func (c *RelationshipInfoClient) DeleteOneID(id int) *relationshipinfo.Relations
 func (c *RelationshipInfoClient) Query() *RelationshipInfoQuery {
 	return &RelationshipInfoQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeRelationshipInfo},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.RelationshipInfo]{
+			Ctx:    &QueryContext{Type: TypeRelationshipInfo},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

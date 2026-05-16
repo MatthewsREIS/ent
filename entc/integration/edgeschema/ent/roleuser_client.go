@@ -11,7 +11,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RoleUserClient is a client for the RoleUser schema.
@@ -86,8 +88,10 @@ func (c *RoleUserClient) Delete() *roleuser.RoleUserDelete {
 func (c *RoleUserClient) Query() *RoleUserQuery {
 	return &RoleUserQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeRoleUser},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.RoleUser]{
+			Ctx:    &QueryContext{Type: TypeRoleUser},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/node"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // NodeClient is a client for the Node schema.
@@ -109,8 +110,10 @@ func (c *NodeClient) DeleteOneID(id int) *node.NodeDeleteOne {
 func (c *NodeClient) Query() *NodeQuery {
 	return &NodeQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeNode},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Node]{
+			Ctx:    &QueryContext{Type: TypeNode},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -131,7 +134,7 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 // QueryPrev queries the prev edge of a Node.
 func (c *NodeClient) QueryPrev(_m *Node) *NodeQuery {
 	query := (&NodeClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(node.Table, node.FieldID, id),
@@ -147,7 +150,7 @@ func (c *NodeClient) QueryPrev(_m *Node) *NodeQuery {
 // QueryNext queries the next edge of a Node.
 func (c *NodeClient) QueryNext(_m *Node) *NodeQuery {
 	query := (&NodeClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(node.Table, node.FieldID, id),

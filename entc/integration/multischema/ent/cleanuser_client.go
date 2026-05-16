@@ -6,6 +6,11 @@
 
 package ent
 
+import (
+	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
+)
+
 // CleanUserClient is a client for the CleanUser schema.
 type CleanUserClient struct {
 	Config
@@ -26,8 +31,10 @@ func (c *CleanUserClient) Intercept(interceptors ...Interceptor) {
 func (c *CleanUserClient) Query() *CleanUserQuery {
 	return &CleanUserQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeCleanUser},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.CleanUser]{
+			Ctx:    &QueryContext{Type: TypeCleanUser},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

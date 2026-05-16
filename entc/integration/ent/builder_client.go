@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/builder"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // BuilderClient is a client for the Builder schema.
@@ -107,8 +108,10 @@ func (c *BuilderClient) DeleteOneID(id int) *builder.BuilderDeleteOne {
 func (c *BuilderClient) Query() *BuilderQuery {
 	return &BuilderQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeBuilder},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Builder]{
+			Ctx:    &QueryContext{Type: TypeBuilder},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

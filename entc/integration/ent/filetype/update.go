@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -103,7 +104,7 @@ func (_u *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*FileTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -322,7 +323,7 @@ func (_u *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpd
 
 // Save executes the query and returns the updated FileType entity.
 func (_u *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[FileType](ctx, &entbuilder.UpdateState[*FileTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

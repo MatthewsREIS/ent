@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/ent/api"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // APIClient is a client for the Api schema.
@@ -107,8 +108,10 @@ func (c *APIClient) DeleteOneID(id int) *api.APIDeleteOne {
 func (c *APIClient) Query() *APIQuery {
 	return &APIQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeAPI},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Api]{
+			Ctx:    &QueryContext{Type: TypeAPI},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

@@ -25,38 +25,33 @@ import (
 // ExValueScanQuery is the builder for querying ExValueScan entities.
 type ExValueScanQuery struct {
 	Config
-	ctx        *QueryContext
-	order      []exvaluescan.OrderOption
-	inters     []Interceptor
-	predicates []predicate.ExValueScan
-	modifiers  []func(*sql.Selector)
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	entbuilder.QueryState[predicate.ExValueScan]
+	order     []exvaluescan.OrderOption
+	modifiers []func(*sql.Selector)
 }
 
 // Where adds a new predicate for the ExValueScanQuery builder.
 func (_q *ExValueScanQuery) Where(ps ...predicate.ExValueScan) *ExValueScanQuery {
-	_q.predicates = append(_q.predicates, ps...)
+	_q.AddPredicates(ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
 func (_q *ExValueScanQuery) Limit(limit int) *ExValueScanQuery {
-	_q.ctx.Limit = &limit
+	_q.SetLimit(limit)
 	return _q
 }
 
 // Offset to start from.
 func (_q *ExValueScanQuery) Offset(offset int) *ExValueScanQuery {
-	_q.ctx.Offset = &offset
+	_q.SetOffset(offset)
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (_q *ExValueScanQuery) Unique(unique bool) *ExValueScanQuery {
-	_q.ctx.Unique = &unique
+	_q.SetUnique(unique)
 	return _q
 }
 
@@ -69,14 +64,8 @@ func (_q *ExValueScanQuery) Order(o ...exvaluescan.OrderOption) *ExValueScanQuer
 // First returns the first ExValueScan entity from the query.
 // Returns a *NotFoundError when no ExValueScan was found.
 func (_q *ExValueScanQuery) First(ctx context.Context) (*ExValueScan, error) {
-	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
-	if err != nil {
-		return nil, err
-	}
-	if len(nodes) == 0 {
-		return nil, &NotFoundError{Label: exvaluescan.Label}
-	}
-	return nodes[0], nil
+	_q.Limit(1)
+	return entbuilder.RunFirst[*ExValueScan, []*ExValueScan](ctx, _q, _q.Ctx, ent.OpQueryFirst, exvaluescan.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*ExValueScan, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
 }
 
 // FirstX is like First, but panics if an error occurs.
@@ -92,7 +81,7 @@ func (_q *ExValueScanQuery) FirstX(ctx context.Context) *ExValueScan {
 // Returns a *NotFoundError when no ExValueScan ID was found.
 func (_q *ExValueScanQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.Ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -115,18 +104,8 @@ func (_q *ExValueScanQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one ExValueScan entity is found.
 // Returns a *NotFoundError when no ExValueScan entities are found.
 func (_q *ExValueScanQuery) Only(ctx context.Context) (*ExValueScan, error) {
-	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
-	if err != nil {
-		return nil, err
-	}
-	switch len(nodes) {
-	case 1:
-		return nodes[0], nil
-	case 0:
-		return nil, &NotFoundError{Label: exvaluescan.Label}
-	default:
-		return nil, &NotSingularError{Label: exvaluescan.Label}
-	}
+	_q.Limit(2)
+	return entbuilder.RunOnly[*ExValueScan, []*ExValueScan](ctx, _q, _q.Ctx, ent.OpQueryOnly, exvaluescan.Label, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*ExValueScan, error) { return _q.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
 }
 
 // OnlyX is like Only, but panics if an error occurs.
@@ -143,7 +122,7 @@ func (_q *ExValueScanQuery) OnlyX(ctx context.Context) *ExValueScan {
 // Returns a *NotFoundError when no entities are found.
 func (_q *ExValueScanQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.Ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -168,12 +147,7 @@ func (_q *ExValueScanQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of ExValueScans.
 func (_q *ExValueScanQuery) All(ctx context.Context) ([]*ExValueScan, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return nil, err
-	}
-	qr := querierAll[[]*ExValueScan, *ExValueScanQuery]()
-	return withInterceptors[[]*ExValueScan](ctx, _q, qr, _q.inters)
+	return entbuilder.RunAll[[]*ExValueScan](ctx, _q, _q.Ctx, ent.OpQueryAll, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*ExValueScan, error) { return _q.sqlAll(ctx) })
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -187,10 +161,10 @@ func (_q *ExValueScanQuery) AllX(ctx context.Context) []*ExValueScan {
 
 // IDs executes the query and returns a list of ExValueScan IDs.
 func (_q *ExValueScanQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if _q.ctx.Unique == nil && _q.path != nil {
+	if _q.Ctx.Unique == nil && _q.Path != nil {
 		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryIDs)
 	if err = _q.Select(exvaluescan.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -208,11 +182,7 @@ func (_q *ExValueScanQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (_q *ExValueScanQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
-	if err := _q.prepareQuery(ctx); err != nil {
-		return 0, err
-	}
-	return withInterceptors[int](ctx, _q, querierCount[*ExValueScanQuery](), _q.inters)
+	return entbuilder.RunCount(ctx, _q, _q.Ctx, ent.OpQueryCount, _q.QueryState.Inters, _q.prepareQuery, _q.sqlCount)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -226,7 +196,7 @@ func (_q *ExValueScanQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (_q *ExValueScanQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	ctx = setContextOp(ctx, _q.Ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
@@ -254,14 +224,9 @@ func (_q *ExValueScanQuery) Clone() *ExValueScanQuery {
 	}
 	return &ExValueScanQuery{
 		Config:     _q.Config,
-		ctx:        _q.ctx.Clone(),
+		QueryState: *_q.QueryState.Clone(),
 		order:      append([]exvaluescan.OrderOption{}, _q.order...),
-		inters:     append([]Interceptor{}, _q.inters...),
-		predicates: append([]predicate.ExValueScan{}, _q.predicates...),
-		// clone intermediate query.
-		sql:       _q.sql.Clone(),
-		path:      _q.path,
-		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
+		modifiers:  append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -280,9 +245,9 @@ func (_q *ExValueScanQuery) Clone() *ExValueScanQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (_q *ExValueScanQuery) GroupBy(field string, fields ...string) *ExValueScanGroupBy {
-	_q.ctx.Fields = append([]string{field}, fields...)
+	_q.Ctx.Fields = append([]string{field}, fields...)
 	grbuild := &ExValueScanGroupBy{build: _q}
-	grbuild.flds = &_q.ctx.Fields
+	grbuild.flds = &_q.Ctx.Fields
 	grbuild.label = exvaluescan.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -301,10 +266,10 @@ func (_q *ExValueScanQuery) GroupBy(field string, fields ...string) *ExValueScan
 //		Select(exvaluescan.FieldBinary).
 //		Scan(ctx, &v)
 func (_q *ExValueScanQuery) Select(fields ...string) *ExValueScanSelect {
-	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	_q.Ctx.Fields = append(_q.Ctx.Fields, fields...)
 	sbuild := &ExValueScanSelect{ExValueScanQuery: _q}
 	sbuild.label = exvaluescan.Label
-	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.Ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
@@ -314,7 +279,7 @@ func (_q *ExValueScanQuery) Aggregate(fns ...AggregateFunc) *ExValueScanSelect {
 }
 
 func (_q *ExValueScanQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range _q.inters {
+	for _, inter := range _q.QueryState.Inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
@@ -324,17 +289,17 @@ func (_q *ExValueScanQuery) prepareQuery(ctx context.Context) error {
 			}
 		}
 	}
-	for _, f := range _q.ctx.Fields {
+	for _, f := range _q.Ctx.Fields {
 		if !exvaluescan.ValidColumn(f) {
 			return &ValidationError{Name: f, Err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if _q.path != nil {
-		prev, err := _q.path(ctx)
+	if _q.Path != nil {
+		prev, err := _q.Path(ctx)
 		if err != nil {
 			return err
 		}
-		_q.sql = prev
+		_q.Sql = prev
 	}
 	return nil
 }
@@ -372,22 +337,22 @@ func (_q *ExValueScanQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(_q.modifiers) > 0 {
 		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = _q.ctx.Fields
-	if len(_q.ctx.Fields) > 0 {
-		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
+	_spec.Node.Columns = _q.Ctx.Fields
+	if len(_q.Ctx.Fields) > 0 {
+		_spec.Unique = _q.Ctx.Unique != nil && *_q.Ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, _q.Drv, _spec)
 }
 
 func (_q *ExValueScanQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(exvaluescan.Table, exvaluescan.Columns, sqlgraph.NewFieldSpec(exvaluescan.FieldID, field.TypeInt))
-	_spec.From = _q.sql
-	if unique := _q.ctx.Unique; unique != nil {
+	_spec.From = _q.Sql
+	if unique := _q.Ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if _q.path != nil {
+	} else if _q.Path != nil {
 		_spec.Unique = true
 	}
-	if fields := _q.ctx.Fields; len(fields) > 0 {
+	if fields := _q.Ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, exvaluescan.FieldID)
 		for i := range fields {
@@ -396,17 +361,17 @@ func (_q *ExValueScanQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := _q.predicates; len(ps) > 0 {
+	if ps := _q.Predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := _q.order; len(ps) > 0 {
@@ -422,33 +387,33 @@ func (_q *ExValueScanQuery) querySpec() *sqlgraph.QuerySpec {
 func (_q *ExValueScanQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.Drv.Dialect())
 	t1 := builder.Table(exvaluescan.Table)
-	columns := _q.ctx.Fields
+	columns := _q.Ctx.Fields
 	if len(columns) == 0 {
 		columns = exvaluescan.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if _q.sql != nil {
-		selector = _q.sql
+	if _q.Sql != nil {
+		selector = _q.Sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if _q.ctx.Unique != nil && *_q.ctx.Unique {
+	if _q.Ctx.Unique != nil && *_q.Ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range _q.modifiers {
 		m(selector)
 	}
-	for _, p := range _q.predicates {
+	for _, p := range _q.Predicates {
 		p(selector)
 	}
 	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := _q.ctx.Offset; offset != nil {
+	if offset := _q.Ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := _q.ctx.Limit; limit != nil {
+	if limit := _q.Ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -500,11 +465,11 @@ func (_g *ExValueScanGroupBy) Aggregate(fns ...AggregateFunc) *ExValueScanGroupB
 
 // Scan applies the selector query and scans the result into the given value.
 func (_g *ExValueScanGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	ctx = setContextOp(ctx, _g.build.Ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ExValueScanQuery, *ExValueScanGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*ExValueScanQuery, *ExValueScanGroupBy](ctx, _g.build, _g, _g.build.QueryState.Inters, v)
 }
 
 func (_g *ExValueScanGroupBy) sqlScan(ctx context.Context, root *ExValueScanQuery, v any) error {
@@ -548,11 +513,11 @@ func (_s *ExValueScanSelect) Aggregate(fns ...AggregateFunc) *ExValueScanSelect 
 
 // Scan applies the selector query and scans the result into the given value.
 func (_s *ExValueScanSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	ctx = setContextOp(ctx, _s.Ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ExValueScanQuery, *ExValueScanSelect](ctx, _s.ExValueScanQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*ExValueScanQuery, *ExValueScanSelect](ctx, _s.ExValueScanQuery, _s, _s.QueryState.Inters, v)
 }
 
 func (_s *ExValueScanSelect) sqlScan(ctx context.Context, root *ExValueScanQuery, v any) error {

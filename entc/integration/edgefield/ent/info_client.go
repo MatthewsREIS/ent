@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // InfoClient is a client for the Info schema.
@@ -110,8 +111,10 @@ func (c *InfoClient) DeleteOneID(id int) *info.InfoDeleteOne {
 func (c *InfoClient) Query() *InfoQuery {
 	return &InfoQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeInfo},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Info]{
+			Ctx:    &QueryContext{Type: TypeInfo},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *InfoClient) GetX(ctx context.Context, id int) *Info {
 // QueryUser queries the user edge of a Info.
 func (c *InfoClient) QueryUser(_m *Info) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(info.Table, info.FieldID, id),

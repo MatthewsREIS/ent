@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/spec"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // SpecClient is a client for the Spec schema.
@@ -110,8 +111,10 @@ func (c *SpecClient) DeleteOneID(id int) *spec.SpecDeleteOne {
 func (c *SpecClient) Query() *SpecQuery {
 	return &SpecQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeSpec},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Spec]{
+			Ctx:    &QueryContext{Type: TypeSpec},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -132,7 +135,7 @@ func (c *SpecClient) GetX(ctx context.Context, id int) *Spec {
 // QueryCard queries the card edge of a Spec.
 func (c *SpecClient) QueryCard(_m *Spec) *CardQuery {
 	query := (&CardClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(spec.Table, spec.FieldID, id),

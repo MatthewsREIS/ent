@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -1354,7 +1355,7 @@ func (_u *FieldTypeUpdate) Mutation() *FieldTypeMutation {
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FieldTypeUpdate) Save(ctx context.Context) (int, error) {
 	_u.defaults()
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*FieldTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -3272,7 +3273,7 @@ func (_u *FieldTypeUpdateOne) Select(field string, fields ...string) *FieldTypeU
 // Save executes the query and returns the updated FieldType entity.
 func (_u *FieldTypeUpdateOne) Save(ctx context.Context) (*FieldType, error) {
 	_u.defaults()
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[FieldType](ctx, &entbuilder.UpdateState[*FieldTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

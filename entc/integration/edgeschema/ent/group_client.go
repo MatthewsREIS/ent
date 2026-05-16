@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupClient is a client for the Group schema.
@@ -113,8 +114,10 @@ func (c *GroupClient) DeleteOneID(id int) *group.GroupDeleteOne {
 func (c *GroupClient) Query() *GroupQuery {
 	return &GroupQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeGroup},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Group]{
+			Ctx:    &QueryContext{Type: TypeGroup},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -135,7 +138,7 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 // QueryUsers queries the users edge of a Group.
 func (c *GroupClient) QueryUsers(_m *Group) *UserQuery {
 	query := (&UserClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -151,7 +154,7 @@ func (c *GroupClient) QueryUsers(_m *Group) *UserQuery {
 // QueryTags queries the tags edge of a Group.
 func (c *GroupClient) QueryTags(_m *Group) *TagQuery {
 	query := (&TagClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -167,7 +170,7 @@ func (c *GroupClient) QueryTags(_m *Group) *TagQuery {
 // QueryJoinedUsers queries the joined_users edge of a Group.
 func (c *GroupClient) QueryJoinedUsers(_m *Group) *UserGroupQuery {
 	query := (&UserGroupClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),
@@ -183,7 +186,7 @@ func (c *GroupClient) QueryJoinedUsers(_m *Group) *UserGroupQuery {
 // QueryGroupTags queries the group_tags edge of a Group.
 func (c *GroupClient) QueryGroupTags(_m *Group) *GroupTagQuery {
 	query := (&GroupTagClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(group.Table, group.FieldID, id),

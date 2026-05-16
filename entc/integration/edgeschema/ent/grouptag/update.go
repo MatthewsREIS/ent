@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -82,7 +83,7 @@ func (_u *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupTagUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GroupTagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -273,7 +274,7 @@ func (_u *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagUpd
 
 // Save executes the query and returns the updated GroupTag entity.
 func (_u *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[GroupTag](ctx, &entbuilder.UpdateState[*GroupTagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // MediaClient is a client for the Media schema.
@@ -107,8 +108,10 @@ func (c *MediaClient) DeleteOneID(id int) *media.MediaDeleteOne {
 func (c *MediaClient) Query() *MediaQuery {
 	return &MediaQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeMedia},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Media]{
+			Ctx:    &QueryContext{Type: TypeMedia},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

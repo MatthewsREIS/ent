@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -92,7 +93,7 @@ func (_u *TeamUpdate) RemoveUserIDs(ids ...int) *TeamUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TeamUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TeamMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -327,7 +328,7 @@ func (_u *TeamUpdateOne) Select(field string, fields ...string) *TeamUpdateOne {
 
 // Save executes the query and returns the updated Team entity.
 func (_u *TeamUpdateOne) Save(ctx context.Context) (*Team, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Team](ctx, &entbuilder.UpdateState[*TeamMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

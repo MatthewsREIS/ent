@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ZooClient is a client for the Zoo schema.
@@ -107,8 +108,10 @@ func (c *ZooClient) DeleteOneID(id int) *zoo.ZooDeleteOne {
 func (c *ZooClient) Query() *ZooQuery {
 	return &ZooQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeZoo},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Zoo]{
+			Ctx:    &QueryContext{Type: TypeZoo},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

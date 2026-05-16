@@ -11,7 +11,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TweetLikeClient is a client for the TweetLike schema.
@@ -86,8 +88,10 @@ func (c *TweetLikeClient) Delete() *tweetlike.TweetLikeDelete {
 func (c *TweetLikeClient) Query() *TweetLikeQuery {
 	return &TweetLikeQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeTweetLike},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.TweetLike]{
+			Ctx:    &QueryContext{Type: TypeTweetLike},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 

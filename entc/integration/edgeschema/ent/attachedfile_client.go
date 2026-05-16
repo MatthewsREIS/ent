@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // AttachedFileClient is a client for the AttachedFile schema.
@@ -111,8 +112,10 @@ func (c *AttachedFileClient) DeleteOneID(id int) *attachedfile.AttachedFileDelet
 func (c *AttachedFileClient) Query() *AttachedFileQuery {
 	return &AttachedFileQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeAttachedFile},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.AttachedFile]{
+			Ctx:    &QueryContext{Type: TypeAttachedFile},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *AttachedFileClient) GetX(ctx context.Context, id int) *AttachedFile {
 // QueryFi queries the fi edge of a AttachedFile.
 func (c *AttachedFileClient) QueryFi(_m *AttachedFile) *FileQuery {
 	query := (&FileClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, id),
@@ -149,7 +152,7 @@ func (c *AttachedFileClient) QueryFi(_m *AttachedFile) *FileQuery {
 // QueryProc queries the proc edge of a AttachedFile.
 func (c *AttachedFileClient) QueryProc(_m *AttachedFile) *ProcessQuery {
 	query := (&ProcessClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, id),

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -111,8 +112,10 @@ func (c *BlobClient) DeleteOneID(id uuid.UUID) *blob.BlobDeleteOne {
 func (c *BlobClient) Query() *BlobQuery {
 	return &BlobQuery{
 		Config: c.Config,
-		ctx:    &QueryContext{Type: TypeBlob},
-		inters: c.Interceptors(),
+		QueryState: entbuilder.QueryState[predicate.Blob]{
+			Ctx:    &QueryContext{Type: TypeBlob},
+			Inters: c.Interceptors(),
+		},
 	}
 }
 
@@ -133,7 +136,7 @@ func (c *BlobClient) GetX(ctx context.Context, id uuid.UUID) *Blob {
 // QueryParent queries the parent edge of a Blob.
 func (c *BlobClient) QueryParent(_m *Blob) *BlobQuery {
 	query := (&BlobClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(blob.Table, blob.FieldID, id),
@@ -149,7 +152,7 @@ func (c *BlobClient) QueryParent(_m *Blob) *BlobQuery {
 // QueryLinks queries the links edge of a Blob.
 func (c *BlobClient) QueryLinks(_m *Blob) *BlobQuery {
 	query := (&BlobClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(blob.Table, blob.FieldID, id),
@@ -165,7 +168,7 @@ func (c *BlobClient) QueryLinks(_m *Blob) *BlobQuery {
 // QueryBlobLinks queries the blob_links edge of a Blob.
 func (c *BlobClient) QueryBlobLinks(_m *Blob) *BlobLinkQuery {
 	query := (&BlobLinkClient{Config: c.Config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+	query.Path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(blob.Table, blob.FieldID, id),

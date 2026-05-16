@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -57,7 +58,7 @@ func (_u *RentalUpdate) Mutation() *RentalMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RentalUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RentalMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -167,7 +168,7 @@ func (_u *RentalUpdateOne) Select(field string, fields ...string) *RentalUpdateO
 
 // Save executes the query and returns the updated Rental entity.
 func (_u *RentalUpdateOne) Save(ctx context.Context) (*Rental, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Rental](ctx, &entbuilder.UpdateState[*RentalMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
