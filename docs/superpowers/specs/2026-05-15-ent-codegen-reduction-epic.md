@@ -13,11 +13,11 @@ The matthewsreis fork of `entgo.io/ent` generates volumes of Go code that bring 
 
 - 1.69M LOC across 2,501 generated files, 65 MB on disk
 - ≈ 12,600 LOC per entity
-- Dominant per-entity contributors:
+- Dominant per-entity contributors **that the compiler sees**:
   - `where.go` ≈ 1K LOC of per-(field × op) predicate factories
   - `create.go` / `update.go` per-field setter explosions
   - `internal/<entity>_mutation.go` ≈ one struct field per column/edge per entity (355K LOC aggregate across all entities)
-- Single biggest hotspot: `internal/schema.go` is a 2.3 MB / 72K-LOC serialized Go constant
+- `internal/schema.go` is 2.3 MB / 72K-LOC, **but is excluded from `go build` via `//go:build tools`** — it does not contribute to compile-time cost. See the regression test at `entc/internal/snapshot_buildtag_test.go`. The snapshot still costs gen-time write I/O and inflates the regen diff, but isn't a compile-cost hotspot.
 - 1,286 GraphQL-binding files at the root of `ent/gen`
 
 **CI cost** (PR MatthewsREIS/gemini#3844 — an 11-line `go.mod` bump triggers a 28-min CI):
@@ -28,6 +28,8 @@ The matthewsreis fork of `entgo.io/ent` generates volumes of Go code that bring 
 - Workflow pins `GOMEMLIMIT: 28GiB` and has a built-in stale-cache fallback (`"Warm generation failed — clearing stale cache and retrying cold"`)
 
 **Architectural force.** ent's design motto is *"100% statically typed and explicit API."* Each entity gets a sealed per-entity predicate type (`predicate.User` vs `predicate.Post`) and a sealed `OrderField` constructor. That guarantee is what forces every method signature to be entity-concrete (`UserQuery.Where(predicate.User)`) instead of generic — and that's what blows up the LOC.
+
+**Developer-workflow pain (separate from compile cost, addressed by PR 1).** The loader (`entc/load/load.go:118`) runs `packages.Load` with `NeedTypes | NeedTypesInfo` — full Go type-checking of the schema package and everything it imports. If a hook in `ent/schema/user.go` references `m.SetNewField(v)` after a new field is added but before codegen has run, the schema package fails to type-check (`has no field or method SetNewField`) and codegen aborts. `IsBuildError` (entc/internal/snapshot.go:218-234) does not match this error class, so snapshot recovery doesn't trigger; even if it did, snapshot replay regenerates the *old* schema's code, which still has no `SetNewField`. The current workaround is "comment out the hook, regenerate, uncomment" — a known DX paper-cut for the team.
 
 **Already shipped in this fork.** `runtime/entbuilder/` provides `SimpleField[C,N,M,T]`, `NillableField[C,N,M,T]`, `FieldWithScanner[C,N,M,T]` — generic descriptor helpers used by the `create` template. Per `COMPACT_HELPERS_RESULTS.md`:
 
@@ -59,19 +61,20 @@ The matthewsreis fork of `entgo.io/ent` generates volumes of Go code that bring 
 
 ## 3. Approach
 
-Eight PRs in a **git-spice stack**, branch prefix `codegen-epic/`. Each attacks a different layer and ships with its own measurement gate. Three layers of attack, applied in order:
+Eight PRs in a **git-spice stack**, branch prefix `codegen-epic/`. Each attacks a different layer and ships with its own measurement gate. Four layers of attack, applied in order:
 
-1. **Eliminate work outright** (PR 1, 3): remove artifacts from the compile graph or let consumers opt out of categories.
-2. **Shrink what each entity emits** (PRs 2, 4, 5, 6): generics, helpers, embedded data, and reflection/unsafe push per-entity boilerplate into shared runtime.
-3. **Shard the compile model** (PR 7): split the giant root `ent` package into per-entity sub-packages so the Go compiler can parallelize and sees smaller per-package working sets.
+1. **Fix the developer-workflow deadlock** (PR 1): make codegen survive schema-side code referencing not-yet-generated types so the team stops paying the "comment out, regenerate, uncomment" tax.
+2. **Eliminate work outright or let consumers opt out** (PR 3): negative feature flags for categories the consumer doesn't need.
+3. **Shrink what each entity emits** (PRs 2, 4, 5, 6): generics, helpers, and reflection/unsafe push per-entity boilerplate into shared runtime.
+4. **Shard the compile model** (PR 7): split the giant root `ent` package into per-entity sub-packages so the Go compiler can parallelize and sees smaller per-package working sets.
 
-Order rationale: cheap structural changes first to validate the bench methodology, API-visible changes in the middle, the biggest structural refactor (per-package split) last so it doesn't confound earlier measurements.
+Order rationale: PR 1 first because it's the active DX pain. Then cheap structural changes to validate the bench methodology. API-visible changes in the middle. Biggest structural refactor (per-package split) last so it doesn't confound earlier measurements.
 
 ### Bloat layer → PR mapping
 
 | Layer | LOC contribution (134-entity baseline, est.) | Attacked by PR |
 |---|---|---|
-| `internal/schema.go` Go constant | 72K (one file) | 1 |
+| Schema-build deadlock when hooks reference not-yet-generated types | DX, not LOC | 1 |
 | Repeated bodies in `where` / `create` / `update` templates | ~100K | 2 |
 | Selective generation knobs | varies (consumer choice) | 3 |
 | `where.go` predicate factories | ~134K (~1K × 134 entities) | 4 |
@@ -109,24 +112,47 @@ Order rationale: cheap structural changes first to validate the bench methodolog
 
 ---
 
-### PR 1 — `codegen-epic/01-embed-schema`
+### PR 1 — `codegen-epic/01-loader-ux`
 
-**Scope.** Replace the 2.3 MB `internal/schema.go` Go constant with `//go:embed schema.json` + a tiny init decoder.
+**Scope.** End the "comment-out-hook, regenerate, uncomment" workflow paper-cut. Two complementary changes: make the snapshot recovery path trigger on the error class that's actually hitting users, and add a bootstrap mode that lets codegen complete even when hooks reference not-yet-generated types.
 
 **Changes:**
-- New template emits `schema.json` alongside generated Go
-- New template emits `internal/schema.go` as a ~20-line decoder using `//go:embed` + `encoding/json`
-- Runtime parses JSON once at init, populates the existing schema variable
-- Pre-check (grep) that no consumer of the schema constant requires it to be a compile-time-evaluable expression
+
+1. **Extend `IsBuildError`** (entc/internal/snapshot.go:218-234) to match the type-checker error class produced when schema-side Go references symbols that don't exist in the generated package yet:
+   - `undefined:`
+   - `has no field or method`
+   - `undeclared name`
+   - `cannot use`
+   - Any additional substrings surfaced by the team's recent incident history (grep CI logs)
+
+   Each match must be unit-tested. Today these errors fall through `mayRecover` (entc/entc.go:443) and abort codegen — extending the match opens the recovery door.
+
+2. **Bootstrap mode** — new `entc.SkipHookCompilation()` option and `--skip-hook-compilation` CLI flag (final naming TBD during implementation). When set:
+   - entc copies the schema package source to a tmpdir
+   - AST-strips the method bodies of `Hooks() []ent.Hook`, `Policy() ent.Policy`, and `Interceptors() []ent.Interceptor` on every Schema-implementing type, replacing the body with `return nil` (preserving signatures so the type still implements `ent.Schema`)
+   - Loader runs `packages.Load` against the stripped copy — succeeds because the references to generated types have been removed with the hook bodies
+   - Codegen runs against the schema definitions (Fields, Edges, Mixins, Annotations, Indexes, Config) extracted from the stripped package
+   - The user's real schema package is never modified; once codegen completes, it compiles normally because the new generated methods now exist
+
+3. **Auto-fallback path.** When loader fails AND `IsBuildError` matches AND `FeatureSnapshot` is on, try in order:
+   a. Snapshot restore (existing path — useful for merge conflicts and hand-edits to generated code)
+   b. If that fails or produces stale output, bootstrap-mode reload with the *current* schema
+   c. If both fail, surface a clear error message pointing at the bootstrap flag in case the user wants to opt in manually
+
+**Known limitations** (documented, not fixed in this PR):
+- Hooks defined in **subpackages** of the schema package that themselves import the generated `ent` package — stripping the schema package's `Hooks()` body doesn't help, because the subpackage's bad imports still fail to compile. Workaround: keep hooks that touch generated mutation types in a package that is *not* imported by the schema package (most teams already do this).
+- Schemas whose `Fields()` / `Edges()` methods compute results from runtime values — bootstrap mode still runs those methods; only `Hooks` / `Policy` / `Interceptors` get stripped. If `Fields()` itself references a generated type, you're still stuck.
 
 **Acceptance:**
-- All existing tests pass
-- Bench shows measurable reduction in build RSS attributable to removing one giant constant
-- LOC delta in generated output: −72K at consumer scale (confirm by re-running on consumer)
+- New regression test (`entc/internal/bootstrap_test.go` or similar): schema with a `Hooks()` method that references `m.SetNewField(v)` where `NewField` is not yet generated — codegen succeeds via the bootstrap path
+- New regression test: schema with a `Policy()` referencing not-yet-generated mutation methods — same outcome
+- New unit tests for each new `IsBuildError` substring
+- Documentation page (`doc/md/devx-bootstrap.md` or similar) explaining when to use the flag and what it doesn't cover
+- Existing `TestSnapshot_Restore` and `TestSnapshotIsBuildTagged` continue to pass
 
-**Risk:** Low. Hypothesis: nothing does compile-time reflection on the constant. Mitigation: grep first, fail the PR review if a use is found.
+**Risk:** Medium. AST surgery on user source code is fiddly but mechanical; the surface area is three Schema-interface methods. Failure mode is benign — bootstrap mode falls back to surfacing the original error.
 
-**Consumer impact:** Transparent. Regenerate, output is functionally identical.
+**Consumer impact:** Additive — opt-in flag. Existing behavior unchanged when the flag isn't set. The extended `IsBuildError` matching could cause snapshot recovery to trigger on errors it previously ignored; this is intended, but recovery's preexisting limitation (snapshot only knows the old schema) means it might regenerate stale code in some edge cases. Mitigated by the auto-fallback ordering above.
 
 ---
 
@@ -251,6 +277,8 @@ Order rationale: cheap structural changes first to validate the bench methodolog
 
 **Consumer impact:** Hook authors update from `m.SetName(v)` / `m.Name()` to `m.SetField(user.FieldName, v)` / `m.Field(user.FieldName)`, or opt into `FeatureTypedMutation` for one release while migrating.
 
+**Migration angle — generic API already exists today.** Every generated `<entity>_mutation.go` already ships the generic methods `Field(name) (ent.Value, bool)`, `SetField(name, v) error`, `AddedField`, `AddField`, `ClearField`, `ResetField`, `FieldCleared`, `OldField`, `Fields()` (see e.g. `entc/integration/privacy/ent/internal/task_mutation.go:452-578`). Hook authors can adopt this API **before this PR ships** as a one-time migration; doing so also resolves the chicken-and-egg pain that PR 1 addresses from a different angle (string-keyed access doesn't depend on per-field methods being generated). PR 6's contribution is to make this the *only* API and delete the typed methods (and the 355K LOC of struct fields backing them). Document this migration path explicitly in `MIGRATION.md` at the start of PR 6, ahead of any deprecation shim work.
+
 ---
 
 ### PR 7 — `codegen-epic/07-per-entity-packages`
@@ -285,7 +313,7 @@ Order rationale: cheap structural changes first to validate the bench methodolog
 Two-tier measurement. Every PR records numbers at two scales:
 
 1. **In-repo fixture scale** — ent's own integration test schemas. Fast, deterministic, runs in CI. Mandatory for every PR.
-2. **Consumer scale** — `service-api-go/api-graphql` (134 entities, the real workload). Run manually before merging high-impact PRs (1, 4, 5, 6, 7). Tracked in `BENCH_RESULTS.md` per PR.
+2. **Consumer scale** — `service-api-go/api-graphql` (134 entities, the real workload). Run manually before merging high-LOC-impact PRs (4, 5, 6, 7). Tracked in `BENCH_RESULTS.md` per PR. PR 1 is a DX-only change and doesn't move these numbers; its acceptance gates are the bootstrap-mode regression tests.
 
 **Metrics per fixture:**
 
@@ -301,7 +329,7 @@ Two-tier measurement. Every PR records numbers at two scales:
 
 ### 5.2 Regression fixture handling
 
-Many `entc/gen` regression tests compare against snapshot output of generated code. PRs that change template output (1, 2, 4, 5, 6, 7) regenerate fixtures as part of the PR. PR 0 adds a `make regen-fixtures` target so this is mechanical. Reviewers diff template changes alongside fixture changes; the bench tool includes a fixture-diff summarizer to keep review tractable.
+Many `entc/gen` regression tests compare against snapshot output of generated code. PRs that change template output (2, 4, 5, 6, 7) regenerate fixtures as part of the PR. PR 0 adds a `make regen-fixtures` target so this is mechanical. Reviewers diff template changes alongside fixture changes; the bench tool includes a fixture-diff summarizer to keep review tractable. PR 1 changes the loader, not templates — no fixture churn.
 
 ### 5.3 Deprecation policy
 
@@ -333,6 +361,8 @@ Before PR 0 lands, run codegen against `service-api-go/api-graphql` with the cur
 | Downstream consumers have hand-written code against deprecated APIs | 4, 6 | One-release deprecation shims, `MIGRATION.md` entries, ahead-of-release communication |
 | `entc/gen` regression fixtures churn enormously per PR, making review hard | All template PRs | Bench tool includes fixture-diff summarizer; reviewers focus on template + bench, fixtures verified mechanically |
 | Generic instantiation cost (post-Go-1.18 GC-shape stenciling) erodes the LOC win at scale | 5, 6 | Measure; cap generic depth in templates; some methods stay non-generic if benchmarks demand |
+| Bootstrap-mode AST stripping of `Hooks` / `Policy` / `Interceptors` fails to satisfy `ent.Schema` (e.g., the stripped stub returns wrong type) and breaks the loader | 1 | Comprehensive test suite of schema-interface signatures; explicit signature check after stripping; fallback to surfacing the original loader error rather than masking it |
+| Bootstrap mode doesn't cover hooks in **subpackages** that import the generated `ent` (documented limitation) | 1 | Documented in PR 1; the practical guidance is "keep generated-type-touching hooks in a package not imported by your schema package" — already standard ent practice for most teams |
 
 ## 8. Success metrics for the epic as a whole
 
