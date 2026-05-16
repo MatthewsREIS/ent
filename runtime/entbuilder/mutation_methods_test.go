@@ -1,0 +1,90 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
+package entbuilder_test
+
+import (
+	"reflect"
+	"testing"
+
+	"entgo.io/ent"
+	"entgo.io/ent/runtime/entbuilder"
+	"github.com/stretchr/testify/require"
+)
+
+func edgeTestDescriptor() *entbuilder.Descriptor {
+	return &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{},
+		Edges: map[string]entbuilder.EdgeSpec{
+			"teams": {Cardinality: entbuilder.M2M, Target: "Team", TargetIDType: reflect.TypeFor[int]()},
+			"owner": {Cardinality: entbuilder.O2OUnique, Target: "User", TargetIDType: reflect.TypeFor[int](), Inverse: true},
+		},
+	}
+}
+
+func TestMutation_AddEdgeIDs_M2M(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, edgeTestDescriptor())
+	require.NoError(t, m.AddEdgeIDs("teams", 1, 2, 3))
+	ids := m.EdgeIDs("teams")
+	require.ElementsMatch(t, []any{1, 2, 3}, ids)
+	require.ElementsMatch(t, []string{"teams"}, m.AddedEdges())
+	added := m.AddedIDs("teams")
+	require.ElementsMatch(t, []ent.Value{1, 2, 3}, added)
+}
+
+func TestMutation_RemoveEdgeIDs_M2M(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	require.NoError(t, m.AddEdgeIDs("teams", 1, 2, 3))
+	require.NoError(t, m.RemoveEdgeIDs("teams", 2))
+	require.ElementsMatch(t, []any{1, 3}, m.EdgeIDs("teams"))
+	require.ElementsMatch(t, []any{2}, m.RemovedEdgeIDs("teams"))
+	require.ElementsMatch(t, []string{"teams"}, m.RemovedEdges())
+	require.ElementsMatch(t, []ent.Value{2}, m.RemovedIDs("teams"))
+}
+
+func TestMutation_RemoveEdgeIDs_UniqueErrors(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	require.NoError(t, m.SetEdgeID("owner", 99))
+	require.Error(t, m.RemoveEdgeIDs("owner", 99)) // not allowed on unique edges
+}
+
+func TestMutation_SetEdgeID_Unique(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, edgeTestDescriptor())
+	require.NoError(t, m.SetEdgeID("owner", 7))
+	id, ok := m.EdgeID("owner")
+	require.True(t, ok)
+	require.Equal(t, 7, id)
+	require.ElementsMatch(t, []string{"owner"}, m.AddedEdges())
+	require.ElementsMatch(t, []ent.Value{7}, m.AddedIDs("owner"))
+}
+
+func TestMutation_ClearEdge(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	require.NoError(t, m.ClearEdge("owner"))
+	require.True(t, m.EdgeCleared("owner"))
+	require.ElementsMatch(t, []string{"owner"}, m.ClearedEdges())
+}
+
+func TestMutation_ClearEdge_UnknownErrors(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	require.Error(t, m.ClearEdge("nope"))
+}
+
+func TestMutation_ResetEdge_M2M(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	require.NoError(t, m.AddEdgeIDs("teams", 1, 2))
+	require.NoError(t, m.RemoveEdgeIDs("teams", 1))
+	require.NoError(t, m.ClearEdge("teams"))
+	require.NoError(t, m.ResetEdge("teams"))
+	require.Empty(t, m.EdgeIDs("teams"))
+	require.Empty(t, m.RemovedEdgeIDs("teams"))
+	require.False(t, m.EdgeCleared("teams"))
+}
+
+func TestMutation_AddEdgeIDs_TypeMismatch(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, edgeTestDescriptor())
+	require.Error(t, m.AddEdgeIDs("teams", "not-an-int")) // string into int-keyed edge
+}

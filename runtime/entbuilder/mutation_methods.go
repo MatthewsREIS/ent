@@ -207,3 +207,199 @@ func (m *Mutation[T]) AddField(name string, value ent.Value) error {
 	m.added[name] = value
 	return nil
 }
+
+// AddEdgeIDs adds neighbor IDs to the given edge.
+func (m *Mutation[T]) AddEdgeIDs(edge string, ids ...any) error {
+	spec, ok := m.desc.Edges[edge]
+	if !ok {
+		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	for _, id := range ids {
+		if id != nil && reflect.TypeOf(id) != spec.TargetIDType {
+			return fmt.Errorf("unexpected ID type %T for edge %s (want %s)", id, edge, spec.TargetIDType)
+		}
+	}
+	if m.edges == nil {
+		m.edges = make(map[string]map[any]struct{})
+	}
+	if m.edges[edge] == nil {
+		m.edges[edge] = make(map[any]struct{})
+	}
+	for _, id := range ids {
+		m.edges[edge][id] = struct{}{}
+	}
+	return nil
+}
+
+// RemoveEdgeIDs marks neighbor IDs as removed from the edge. M2M only.
+// Errors on unique edges; callers must use ClearEdge then SetEdgeID instead.
+func (m *Mutation[T]) RemoveEdgeIDs(edge string, ids ...any) error {
+	spec, ok := m.desc.Edges[edge]
+	if !ok {
+		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	if spec.Cardinality == O2OUnique {
+		return fmt.Errorf("entbuilder: RemoveEdgeIDs not supported on unique edge %s; use ClearEdge", edge)
+	}
+	for _, id := range ids {
+		if id != nil && reflect.TypeOf(id) != spec.TargetIDType {
+			return fmt.Errorf("unexpected ID type %T for edge %s (want %s)", id, edge, spec.TargetIDType)
+		}
+	}
+	if m.removedEdges == nil {
+		m.removedEdges = make(map[string]map[any]struct{})
+	}
+	if m.removedEdges[edge] == nil {
+		m.removedEdges[edge] = make(map[any]struct{})
+	}
+	for _, id := range ids {
+		if m.edges != nil {
+			delete(m.edges[edge], id)
+		}
+		m.removedEdges[edge][id] = struct{}{}
+	}
+	return nil
+}
+
+// SetEdgeID sets the neighbor ID on a unique edge. Errors on non-unique edges.
+func (m *Mutation[T]) SetEdgeID(edge string, id any) error {
+	spec, ok := m.desc.Edges[edge]
+	if !ok {
+		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	if spec.Cardinality != O2OUnique {
+		return fmt.Errorf("entbuilder: SetEdgeID requires a unique edge; %s is %v", edge, spec.Cardinality)
+	}
+	if id != nil && reflect.TypeOf(id) != spec.TargetIDType {
+		return fmt.Errorf("unexpected ID type %T for edge %s (want %s)", id, edge, spec.TargetIDType)
+	}
+	if m.edges == nil {
+		m.edges = make(map[string]map[any]struct{})
+	}
+	m.edges[edge] = map[any]struct{}{id: {}}
+	return nil
+}
+
+// EdgeID returns the neighbor ID on a unique edge.
+func (m *Mutation[T]) EdgeID(edge string) (any, bool) {
+	if m.edges == nil || m.edges[edge] == nil {
+		return nil, false
+	}
+	for id := range m.edges[edge] {
+		return id, true
+	}
+	return nil, false
+}
+
+// EdgeIDs returns all neighbor IDs on the edge.
+func (m *Mutation[T]) EdgeIDs(edge string) []any {
+	if m.edges == nil || m.edges[edge] == nil {
+		return nil
+	}
+	out := make([]any, 0, len(m.edges[edge]))
+	for id := range m.edges[edge] {
+		out = append(out, id)
+	}
+	return out
+}
+
+// RemovedEdgeIDs returns all neighbor IDs marked as removed from the edge.
+func (m *Mutation[T]) RemovedEdgeIDs(edge string) []any {
+	if m.removedEdges == nil || m.removedEdges[edge] == nil {
+		return nil
+	}
+	out := make([]any, 0, len(m.removedEdges[edge]))
+	for id := range m.removedEdges[edge] {
+		out = append(out, id)
+	}
+	return out
+}
+
+// ClearEdge marks the edge as cleared.
+func (m *Mutation[T]) ClearEdge(edge string) error {
+	if _, ok := m.desc.Edges[edge]; !ok {
+		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	if m.cleared == nil {
+		m.cleared = make(map[string]struct{})
+	}
+	m.cleared[edge] = struct{}{}
+	return nil
+}
+
+// EdgeCleared returns whether the edge was cleared in this mutation.
+func (m *Mutation[T]) EdgeCleared(edge string) bool {
+	if m.cleared == nil {
+		return false
+	}
+	_, ok := m.cleared[edge]
+	if !ok {
+		return false
+	}
+	_, isEdge := m.desc.Edges[edge]
+	return isEdge
+}
+
+// ResetEdge resets all changes to the edge.
+func (m *Mutation[T]) ResetEdge(edge string) error {
+	if _, ok := m.desc.Edges[edge]; !ok {
+		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	delete(m.edges, edge)
+	delete(m.removedEdges, edge)
+	delete(m.cleared, edge)
+	return nil
+}
+
+// AddedEdges returns the names of edges that had IDs added in this mutation.
+func (m *Mutation[T]) AddedEdges() []string {
+	out := make([]string, 0, len(m.edges))
+	for k := range m.edges {
+		out = append(out, k)
+	}
+	return out
+}
+
+// AddedIDs returns the IDs added to the given edge.
+func (m *Mutation[T]) AddedIDs(edge string) []ent.Value {
+	if m.edges == nil || m.edges[edge] == nil {
+		return nil
+	}
+	out := make([]ent.Value, 0, len(m.edges[edge]))
+	for id := range m.edges[edge] {
+		out = append(out, id)
+	}
+	return out
+}
+
+// RemovedEdges returns the names of edges that had IDs removed in this mutation.
+func (m *Mutation[T]) RemovedEdges() []string {
+	out := make([]string, 0, len(m.removedEdges))
+	for k := range m.removedEdges {
+		out = append(out, k)
+	}
+	return out
+}
+
+// RemovedIDs returns the IDs removed from the given edge.
+func (m *Mutation[T]) RemovedIDs(edge string) []ent.Value {
+	if m.removedEdges == nil || m.removedEdges[edge] == nil {
+		return nil
+	}
+	out := make([]ent.Value, 0, len(m.removedEdges[edge]))
+	for id := range m.removedEdges[edge] {
+		out = append(out, id)
+	}
+	return out
+}
+
+// ClearedEdges returns the names of edges that were cleared.
+func (m *Mutation[T]) ClearedEdges() []string {
+	out := make([]string, 0, len(m.cleared))
+	for k := range m.cleared {
+		if _, isEdge := m.desc.Edges[k]; isEdge {
+			out = append(out, k)
+		}
+	}
+	return out
+}
