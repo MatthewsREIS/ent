@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-{{ with extend $ "Imports" $.SiblingImports }}
+{{ with extend $ "Imports" $.SiblingImports "CreateUsesEntbuilder" (and $.HasOneFieldID (eq $.Config.Storage.Name "sql")) }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -485,5 +485,61 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v a
 	{{ $tmpl := printf "dialect/%s/select" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
+
+{{- if and $.HasOneFieldID (eq $.Config.Storage.Name "sql") }}
+
+// {{ lower $.Name }}CreateDescriptor holds the metadata and callbacks for constructing a {{ $.Name }} entity.
+var {{ lower $.Name }}CreateDescriptor = &entbuilder.CreateDescriptor[Config, {{ $.Name }}, *{{ $.MutationName }}]{
+	Table:   {{ $.Package }}.Table,
+	NewNode: func(c Config) *{{ $.Name }} { return &{{ $.Name }}{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, {{ $.Name }}, *{{ $.MutationName }}]{
+		Column:      {{ $.Package }}.{{ $.ID.Constant }},
+		Type:        field.{{ $.ID.Type.ConstName }},
+		UserDefined: {{ $.ID.UserDefined }},
+		{{- if $.ID.UserDefined }}
+		Value: func(m *{{ $.MutationName }}) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.{{ $.ID.MutationGet }}(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *{{ $.Name }}, fv entbuilder.FieldValue) error {
+			n.{{ $.ID.StructField }} = fv.Node.({{ $.ID.Type }})
+			return nil
+		},
+		AssignGenerated: func(n *{{ $.Name }}, v driver.Value) error {
+			switch x := v.(type) {
+			case {{ $.ID.Type }}:
+				n.{{ $.ID.StructField }} = x
+			{{- if $.ID.Type.Numeric }}
+			case int64:
+				n.{{ $.ID.StructField }} = {{ $.ID.Type }}(x)
+			{{- end }}
+			default:
+				return fmt.Errorf("unexpected {{ $.Name }}.{{ $.ID.StructField }} type: %T", v)
+			}
+			return nil
+		},
+		{{- else }}
+		AssignGenerated: func(n *{{ $.Name }}, v driver.Value) error {
+			{{- if $.ID.Type.Numeric }}
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected {{ $.Name }}.{{ $.ID.StructField }} type: %T", v)
+			}
+			n.{{ $.ID.StructField }} = {{ $.ID.Type }}(id)
+			{{- else }}
+			if id, ok := v.({{ $.ID.Type }}); ok {
+				n.{{ $.ID.StructField }} = id
+			} else if err := n.{{ $.ID.StructField }}.Scan(v); err != nil {
+				return fmt.Errorf("unexpected {{ $.Name }}.{{ $.ID.StructField }} type: %w", err)
+			}
+			{{- end }}
+			return nil
+		},
+		{{- end }}
+	},
+}
+{{- end }}
 
 {{ end }}
