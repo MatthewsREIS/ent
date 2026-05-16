@@ -83,9 +83,10 @@ type Mutation[T any] struct {
 	typ string
 
 	// Field state (lazy-allocated).
-	fields  map[string]any      // set values keyed by schema field name
-	cleared map[string]struct{} // cleared fields + cleared edges
-	added   map[string]any      // numeric increments
+	fields   map[string]any      // set values keyed by schema field name
+	cleared  map[string]struct{} // cleared fields + cleared edges
+	added    map[string]any      // numeric increments
+	appended map[string]any      // JSON slice appends
 
 	// Edge state (lazy-allocated).
 	edges        map[string]map[any]struct{} // edge name → neighbor ID set

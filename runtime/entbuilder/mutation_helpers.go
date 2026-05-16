@@ -50,3 +50,13 @@ func EdgeIDAs[ID any, T any](m *Mutation[T], edge string) (ID, bool) {
 	}
 	return id.(ID), true
 }
+
+// ToAny converts a typed slice to a slice of any. Used by generated code to
+// pass typed IDs through the string-keyed Mutation API.
+func ToAny[T any](xs []T) []any {
+	out := make([]any, len(xs))
+	for i, x := range xs {
+		out[i] = x
+	}
+	return out
+}

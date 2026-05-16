@@ -165,6 +165,7 @@ func (m *Mutation[T]) ResetField(name string) error {
 	delete(m.fields, name)
 	delete(m.cleared, name)
 	delete(m.added, name)
+	delete(m.appended, name)
 	return nil
 }
 
@@ -206,6 +207,30 @@ func (m *Mutation[T]) AddField(name string, value ent.Value) error {
 		m.added = make(map[string]any)
 	}
 	m.added[name] = value
+	return nil
+}
+
+// AppendedField returns the value that was appended to the field with the
+// given name. The second return value indicates whether anything was appended.
+func (m *Mutation[T]) AppendedField(name string) (ent.Value, bool) {
+	if m.appended == nil {
+		return nil, false
+	}
+	v, ok := m.appended[name]
+	return v, ok
+}
+
+// AppendField records a value to append to the field with the given name.
+// Used for JSON list fields. Returns an error if the field is not in the
+// descriptor.
+func (m *Mutation[T]) AppendField(name string, value ent.Value) error {
+	if _, ok := m.desc.Fields[name]; !ok {
+		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
+	}
+	if m.appended == nil {
+		m.appended = make(map[string]any)
+	}
+	m.appended[name] = value
 	return nil
 }
 
