@@ -38,8 +38,8 @@ metadata that can't be generic.
 
 The existing `user.NameEQ(v)`, `user.AgeGT(v)`, etc. still work but are marked
 `// Deprecated:` in the generated code. Each wrapper is a one-line delegate to
-the corresponding `where.XX` function. They'll be removed in the release
-*after* the next one.
+the corresponding `where.XX` function. They'll be removed in the next release —
+migrate before upgrading.
 
 ### `predicate.<Entity>` is now a type alias
 
