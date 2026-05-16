@@ -139,7 +139,11 @@ func StageStrippedSchema(srcDir string) (string, error) {
 	if _, err := os.Stat(srcDir); err != nil {
 		return "", fmt.Errorf("bootstrap: stat src: %w", err)
 	}
-	dst, err := os.MkdirTemp("", "ent-bootstrap-*")
+	// Create the temp dir adjacent to srcDir (i.e. in the parent directory)
+	// rather than in the OS-global temp dir. This ensures the stripped copy
+	// is within the same Go module as the original schema, which is required
+	// for packages.Load to resolve the module context correctly.
+	dst, err := os.MkdirTemp(filepath.Dir(srcDir), "ent-bootstrap-*")
 	if err != nil {
 		return "", fmt.Errorf("bootstrap: tempdir: %w", err)
 	}
