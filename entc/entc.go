@@ -497,31 +497,54 @@ func maybeStageBootstrap(schemaPath string, cfg *gen.Config, forceBootstrap bool
 }
 
 func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
-	if ok, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); !ok {
-		return err
-	}
 	if !errors.As(err, &packages.Error{}) && !internal.IsBuildError(err) {
 		return err
 	}
 	// If the build error comes from the schema package.
-	if err := internal.CheckDir(schemaPath); err != nil {
-		return fmt.Errorf("schema failure: %w", err)
+	if cErr := internal.CheckDir(schemaPath); cErr != nil {
+		return fmt.Errorf("schema failure: %w", cErr)
 	}
-	if ok, _ := cfg.FeatureEnabled(gen.FeatureGlobalID.Name); ok {
-		if internal.CheckDir(filepath.Dir(gen.IncrementStartsFilePath(cfg.Target))) != nil {
-			// Resolve the conflict by accepting the remote version of the file.
-			if err := gen.ResolveIncrementStartsConflict(cfg.Target); err != nil {
-				return err
+
+	snapshotOK, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name)
+	if snapshotOK {
+		if ok, _ := cfg.FeatureEnabled(gen.FeatureGlobalID.Name); ok {
+			if internal.CheckDir(filepath.Dir(gen.IncrementStartsFilePath(cfg.Target))) != nil {
+				if err := gen.ResolveIncrementStartsConflict(cfg.Target); err != nil {
+					return err
+				}
 			}
 		}
+		var target string
+		if cfg.SnapshotDir != "" {
+			target = filepath.Join(cfg.SnapshotDir, "schema.go")
+		} else {
+			target = filepath.Join(cfg.Target, "internal/schema.go")
+		}
+		if rErr := (&internal.Snapshot{Path: target, Config: cfg}).Restore(); rErr == nil {
+			return nil
+		}
+		// Snapshot restore failed (file missing, malformed, or schema stale).
+		// Fall through to bootstrap.
 	}
-	var target string
-	if cfg.SnapshotDir != "" {
-		target = filepath.Join(cfg.SnapshotDir, "schema.go")
-	} else {
-		target = filepath.Join(cfg.Target, "internal/schema.go")
+
+	// Bootstrap fallback: AST-strip the current schema and try generating
+	// against the stripped copy.
+	loadPath, cleanup, sErr := maybeStageBootstrap(schemaPath, cfg, true)
+	if sErr != nil {
+		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, sErr)
 	}
-	return (&internal.Snapshot{Path: target, Config: cfg}).Restore()
+	defer cleanup()
+	graph, lErr := LoadGraph(loadPath, cfg)
+	if lErr != nil {
+		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, lErr)
+	}
+	if nErr := normalizePkg(cfg); nErr != nil {
+		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, nErr)
+	}
+	if gErr := graph.Gen(); gErr != nil {
+		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, gErr)
+	}
+	return errRecovered
 }
 
 // indirect returns the type at the end of indirection.
