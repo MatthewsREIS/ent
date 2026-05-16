@@ -144,11 +144,12 @@ func DescribeCmd() *cobra.Command {
 // GenerateCmd returns the generate command for ent/c packages.
 func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	var (
-		cfg       gen.Config
-		storage   string
-		features  []string
-		templates []string
-		idtype    = IDType(field.TypeInt)
+		cfg                  gen.Config
+		storage              string
+		features             []string
+		templates            []string
+		skipHookCompilation  bool
+		idtype               = IDType(field.TypeInt)
 		cmd       = &cobra.Command{
 			Use:   "generate [flags] path",
 			Short: "generate go code for the schema directory",
@@ -161,6 +162,9 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 				opts := []entc.Option{
 					entc.Storage(storage),
 					entc.FeatureNames(features...),
+				}
+				if skipHookCompilation {
+					opts = append(opts, entc.SkipHookCompilation())
 				}
 				for _, tmpl := range templates {
 					typ := "dir"
@@ -203,6 +207,7 @@ func GenerateCmd(postRun ...func(*gen.Config)) *cobra.Command {
 	cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory for codegen")
 	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
 	cmd.Flags().StringSliceVarP(&templates, "template", "", nil, "external templates to execute")
+	cmd.Flags().BoolVar(&skipHookCompilation, "skip-hook-compilation", false, "AST-strip Hooks/Policy/Interceptors method bodies before loading the schema (use when a hook references a generated symbol that does not yet exist)")
 	// The --idtype flag predates the field.<Type>("id") option.
 	// See, https://entgo.io/docs/schema-fields#id-field.
 	cobra.CheckErr(cmd.Flags().MarkHidden("idtype"))
