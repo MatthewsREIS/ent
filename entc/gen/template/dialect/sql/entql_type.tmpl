@@ -43,7 +43,7 @@ func ({{ $receiver }} *{{ $builder }}) Filter() *{{ $filter }} {
 {{- if not $n.IsView }}
 		// New{{ $filter }}ForMutation creates a new {{ $filter }} for the given mutation.
 		func New{{ $filter }}ForMutation(m *{{ $mutation }}) *{{ $filter }} {
-			return &{{ $filter }}{Config: m.Config, predicateAdder: m}
+			return &{{ $filter }}{Config: m.Config.(Config), predicateAdder: m}
 		}
 {{- end }}
 

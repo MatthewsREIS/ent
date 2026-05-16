@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-{{ with extend $ "Imports" $.SiblingImports }}
+{{ with extend $ "Imports" $.SiblingImports "CreateUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -94,7 +94,7 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.Upda
 	{{- else }}
 		mutation := New{{ $n.MutationName }}(c.Config, OpUpdateOne)
 		{{- range $id := $n.EdgeSchema.ID }}
-			mutation.{{ $id.MutationSet }}({{ $rec }}.{{ $id.StructField }})
+			_ = mutation.SetField({{ printf "%q" $id.Name }}, {{ $rec }}.{{ $id.StructField }})
 		{{- end }}
 	{{- end }}
 	return {{ $q }}New{{ $n.UpdateOneName }}(c.Config, c.Hooks(), mutation)
@@ -133,7 +133,7 @@ func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
 	// DeleteOneID returns a builder for deleting the given entity by its id.
 	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $q }}{{ $n.DeleteOneName }} {
 		mutation := New{{ $n.MutationName }}(c.Config, OpDeleteOne, With{{ $n.Name }}ID(id, nil))
-		mutation.Where({{ $n.Package }}.ID(id))
+		mutation.WhereP({{ $n.Package }}.ID(id))
 		return {{ $q }}New{{ $n.DeleteOneName }}({{ $q }}New{{ $n.DeleteName }}(c.Config, c.Hooks(), mutation))
 	}
 {{ end }}

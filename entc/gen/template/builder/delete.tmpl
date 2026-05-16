@@ -40,7 +40,7 @@ func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $mutation }}.Where(ps...)
+	{{ $mutation }}.WhereP(ps...)
 	return {{ $receiver }}
 }
 
@@ -89,7 +89,7 @@ func New{{ $onebuilder }}(d *{{ $builder }}) *{{ $onebuilder }} {
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
-	{{ $oneReceiver }}.{{ $mutation }}.Where(ps...)
+	{{ $oneReceiver }}.{{ $mutation }}.WhereP(ps...)
 	return {{ $oneReceiver }}
 }
 

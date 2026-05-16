@@ -28,9 +28,9 @@ in the LICENSE file in the root directory of this source tree.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $ft }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $updater $f.SupportsMutationAdd }}
-			{{ $receiver }}.mutation.{{ $f.MutationReset }}()
+			_ = {{ $receiver }}.mutation.ResetField({{ printf "%q" $f.Name }})
 		{{- end }}
-		{{ $receiver }}.mutation.{{ $f.MutationSet }}(v)
+		_ = {{ $receiver }}.mutation.SetField({{ printf "%q" $f.Name }}, v)
 		return {{ $receiver }}
 	}
 
@@ -52,7 +52,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ if and $updater $f.SupportsMutationAdd }}
 		// {{ $f.MutationAdd }} adds value to the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}(v {{ $f.SignedType }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $f.MutationAdd }}(v)
+			_ = {{ $receiver }}.mutation.AddField({{ printf "%q" $f.Name }}, v)
 			return {{ $receiver }}
 		}
 	{{ end }}
@@ -60,7 +60,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ if and $updater $f.SupportsMutationAppend }}
 		// {{ $f.MutationAppend }} appends value to the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}(v {{ $f.Type }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $f.MutationAppend }}(v)
+			_ = {{ $receiver }}.mutation.AppendField({{ printf "%q" $f.Name }}, v)
 			return {{ $receiver }}
 		}
 	{{ end }}
@@ -69,7 +69,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $func }}()
+			_ = {{ $receiver }}.mutation.ClearField({{ printf "%q" $f.Name }})
 			return {{ $receiver }}
 		}
 	{{ end }}
@@ -86,7 +86,11 @@ in the LICENSE file in the root directory of this source tree.
 	{{ if $withSetter }}
 		// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID{{ if not $e.Unique }}s{{ end }}.
 		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }})
+			{{- if $e.Unique }}
+			_ = {{ $receiver }}.mutation.SetEdgeID({{ printf "%q" $e.Name }}, id)
+			{{- else }}
+			_ = {{ $receiver }}.mutation.AddEdgeIDs({{ printf "%q" $e.Name }}, entbuilder.ToAny(ids)...)
+			{{- end }}
 			return {{ $receiver }}
 		}
 	{{ end }}

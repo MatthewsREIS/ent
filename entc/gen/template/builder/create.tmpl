@@ -14,7 +14,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "Imports" $.BuilderImports }}
+{{ with extend $ "Imports" $.BuilderImports "CreateUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -85,14 +85,14 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 	func ({{ $receiver }} *{{ $builder }}) defaults() {{ if $runtimeRequired }}error{{ end }}{
 		{{- range $f := $fields }}
 			{{- if $f.Default }}
-				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
+				if _, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); !ok {
 					{{- if and $runtimeRequired $f.DefaultFunc }}
 						if {{ $.PackageQualifier }}{{ $f.DefaultName }} == nil {
 							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.PackageQualifier }}{{ $f.DefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
 					v := {{ $.PackageQualifier }}{{ $f.DefaultName }}{{ if $f.DefaultFunc }}(){{ end }}
-					{{ $mutation }}.{{ $f.MutationSet }}(v)
+					_ = {{ $mutation }}.SetField({{ printf "%q" $f.Name }}, v)
 				}
 			{{- end }}
 		{{- end }}
@@ -115,7 +115,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 					switch {{ $receiver }}.Drv.Dialect() {
 					case {{ join $dialects ", " }}:
 				{{- end }}
-					if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {
+					if _, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); !ok {
 						return &ValidationError{Name: "{{ $f.Name }}", Err: errors.New(`{{ $pkg }}: missing required field "{{ $.Name }}.{{ $f.Name }}"`)}
 					}
 				{{- if $partially }}
@@ -125,7 +125,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 		{{- end }}
 		{{- $isValidator := and ($f.HasGoType) ($f.Type.Validator) }}
 		{{- with or $f.Validators $f.IsEnum $isValidator }}
-			if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+			if v, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); ok {
 				if err := {{ if or $f.Validators $f.IsEnum }}{{ $.PackageQualifier }}{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
 					return &ValidationError{Name: "{{ $f.Name }}", Err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 				}
@@ -134,7 +134,7 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- end }}
 	{{- range $e := $.EdgesWithID }}
 		{{- if not $e.Optional }}
-			if len({{ $mutation }}.{{ $e.StructField }}IDs()) == 0 {
+			if len({{ $mutation }}.EdgeIDs({{ printf "%q" $e.Name }})) == 0 {
 				return &ValidationError{Name: "{{ $e.Name }}", Err: errors.New(`{{ $pkg }}: missing required edge "{{ $.Name }}.{{ $e.Name }}"`)}
 			}
 		{{- end }}
