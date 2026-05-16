@@ -106,6 +106,14 @@ type (
 		// Split holds optional file-splitting configuration for generated
 		// Go assets. If nil, generated outputs stay as single files.
 		Split *SplitConfig
+
+		// SkipHookCompilation, when true, instructs the loader to AST-strip the
+		// bodies of Hooks() / Policy() / Interceptors() methods on every
+		// Schema-implementing type before type-checking the schema package.
+		// This lets codegen complete when a hook references a generated symbol
+		// that does not yet exist. See entc.SkipHookCompilation() for the
+		// option setter, and doc/md/devx-bootstrap.md for usage.
+		SkipHookCompilation bool
 	}
 
 	// Graph holds the nodes/entities of the loaded graph schema. Note that, it doesn't
