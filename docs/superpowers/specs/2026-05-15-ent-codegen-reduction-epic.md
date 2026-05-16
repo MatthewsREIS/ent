@@ -1,6 +1,6 @@
 # ent codegen reduction — epic design
 
-**Status:** In progress (3 of 7 PRs complete as of 2026-05-16)
+**Status:** In progress (4 of 7 PRs complete as of 2026-05-16)
 **Date:** 2026-05-15 (created); progress tracker updated 2026-05-16
 **Worktree:** `.claude/worktrees/wiggly-singing-pancake` on branch `worktree-wiggly-singing-pancake`
 **Stack tool:** git-spice (deferred — all commits stay local until end-of-epic per [[feedback-no-prs-until-end-of-epic]])
@@ -12,8 +12,8 @@
 | 0 | baseline (bench harness + entc/gen fixes) | ✅ complete | `docs/superpowers/plans/2026-05-15-codegen-epic-pr0-baseline.md` | `f3471df35` … `21bb66022` |
 | 1 | loader UX / bootstrap mode (DX win) | ✅ complete | `docs/superpowers/plans/2026-05-15-codegen-epic-pr1-loader-ux.md` | `7fa162c05` … `6371e0b27` |
 | 2 | feature flags (NoUpdate / NoDelete / `entc.ReadOnly`) | ✅ complete | `docs/superpowers/plans/2026-05-15-codegen-epic-pr2-feature-flags.md` | `1982c3389` … `348be29dd` |
-| 3 | predicate collapse | ⏳ next | not yet written | — |
-| 4 | generic builders | ⏳ pending | not yet written | — |
+| 3 | predicate collapse | ✅ complete | `docs/superpowers/plans/2026-05-16-codegen-epic-pr3-predicate-collapse.md` | `077a968ac` … `e1ff5131a` |
+| 4 | generic builders | ⏳ next | not yet written | — |
 | 5 | mutation collapse (biggest LOC pull, ~355K) | ⏳ pending | not yet written | — |
 | 6 | per-entity packages (biggest compile-time win) | ⏳ pending | not yet written | — |
 
