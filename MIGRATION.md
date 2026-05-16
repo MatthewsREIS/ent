@@ -1,3 +1,94 @@
+# Migration Guide
+
+<!-- NEW SECTIONS GO AT THE TOP; older sections below -->
+
+## Mutation Collapse (codegen-epic PR 5)
+
+PR 5 rewrites `internal_mutation.tmpl` so that generated entities no longer emit per-field typed mutation methods (`SetName`, `AddAge`, `Name`, `OldName`, etc.) or the backing struct fields (`name`, `oldName`, `addAge`, …). The `runtime/entbuilder.Mutation[T]` generic type becomes the sole mutation carrier.
+
+### What changed
+
+| Before (generated per-entity) | After (generic, in `runtime/entbuilder`) |
+|---|---|
+| `func (m *UserMutation) SetName(v string)` | `entbuilder.SetField(m, user.FieldName, v)` |
+| `func (m *UserMutation) Name() (string, bool)` | `entbuilder.GetField[string](m, user.FieldName)` |
+| `func (m *UserMutation) OldName(ctx) (string, error)` | `entbuilder.OldFieldAs[string](m, ctx, user.FieldName)` |
+| `func (m *UserMutation) AddAge(v int)` | `entbuilder.AppendField(m, user.FieldAge, v)` |
+| `func (m *UserMutation) AddedAge() (int, bool)` | `entbuilder.AppendedField[int](m, user.FieldAge)` |
+| `func (m *UserMutation) ClearName()` | `m.ClearField(user.FieldName)` |
+| `func (m *UserMutation) NameCleared() bool` | `m.FieldCleared(user.FieldName)` |
+
+The CUD builders (`UserCreate`, `UserUpdate`, `UserUpdateOne`, `UserDelete`, `UserDeleteOne`) still exist as generated wrappers and their public API is unchanged.
+
+### Hook / middleware migration
+
+If you access mutation fields in `ent.Hook` or `ent.Policy` implementations, update to the generic API:
+
+```go
+import (
+    "entgo.io/ent/runtime/entbuilder"
+    "your-module/ent/user"
+)
+
+// Before
+func myHook(next ent.Mutator) ent.Mutator {
+    return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+        if um, ok := m.(*ent.UserMutation); ok {
+            if name, exists := um.Name(); exists {
+                // use name
+            }
+            um.SetName("overridden")
+        }
+        return next.Mutate(ctx, m)
+    })
+}
+
+// After
+func myHook(next ent.Mutator) ent.Mutator {
+    return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+        if um, ok := m.(*ent.UserMutation); ok {
+            if name, exists := entbuilder.GetField[string](um, user.FieldName); exists {
+                // use name
+            }
+            entbuilder.SetField(um, user.FieldName, "overridden")
+        }
+        return next.Mutate(ctx, m)
+    })
+}
+```
+
+### Automated migration tool
+
+`ent-codegen-migrate` (at `cmd/ent-codegen-migrate`) rewrites call sites mechanically:
+
+```bash
+# Dry-run: report all sites that need updating
+ent-codegen-migrate -dir ./your-module
+
+# Apply rewrites in-place
+ent-codegen-migrate -dir ./your-module -write
+```
+
+The tool handles:
+- Typed getter calls → `entbuilder.GetField[T](m, entity.FieldX)`
+- Typed setter calls → `entbuilder.SetField(m, entity.FieldX, v)`
+- `AddedX()` → `entbuilder.AppendedField[T](m, entity.FieldX)`
+- Predicate wrapper calls → `entbuilder.ToAny(ps...)` (from PR 3)
+
+Sites the tool intentionally leaves for manual follow-up are reported as residuals.
+
+### Known regression: gremlin storage backend
+
+PR 5's `internal_mutation.tmpl` rewrite did not include a `{{ if eq $.Storage.Name "sql" }}` guard. As a result, gremlin-storage entities now emit `func(*sql.Selector)` predicates that don't match gremlin's `func(*dsl.Traversal)` predicate type, causing `entc/integration/gremlin/...` to fail to build.
+
+The matthewsreis fork doesn't use gremlin; this is documented as a known issue rather than fixed in PR 5. Restoring gremlin support requires either:
+- An `{{ else }}` branch in `internal_mutation.tmpl` that emits the pre-PR-5 per-entity mutation template content for gremlin storage, or
+- Making `runtime/entbuilder.Mutation[T]` dialect-agnostic (parameterising the predicate type)
+
+Tracking: out-of-scope follow-up.
+
+---
+
 # Sub-Package Migration Guide
 
 This document covers the breaking API changes introduced by the sub-package split. After regenerating your code with the updated `ent` code generator, follow these steps to update your application code.
