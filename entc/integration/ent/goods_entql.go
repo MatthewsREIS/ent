@@ -25,7 +25,7 @@ func (_q *GoodsQuery) Filter() *GoodsFilter {
 
 // NewGoodsFilterForMutation creates a new GoodsFilter for the given mutation.
 func NewGoodsFilterForMutation(m *GoodsMutation) *GoodsFilter {
-	return &GoodsFilter{Config: m.Config, predicateAdder: m}
+	return &GoodsFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // GoodsFilter provides a generic filtering capability at runtime for GoodsQuery.

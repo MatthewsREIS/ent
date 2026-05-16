@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,19 +30,19 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetAge sets the "age" field.
 func (_c *UserCreate) SetAge(v int32) *UserCreate {
-	_c.mutation.SetAge(v)
+	_ = _c.mutation.SetField("age", v)
 	return _c
 }
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // SetDescription sets the "description" field.
 func (_c *UserCreate) SetDescription(v string) *UserCreate {
-	_c.mutation.SetDescription(v)
+	_ = _c.mutation.SetField("description", v)
 	return _c
 }
 
@@ -55,13 +56,13 @@ func (_c *UserCreate) SetNillableDescription(v *string) *UserCreate {
 
 // SetNickname sets the "nickname" field.
 func (_c *UserCreate) SetNickname(v string) *UserCreate {
-	_c.mutation.SetNickname(v)
+	_ = _c.mutation.SetField("nickname", v)
 	return _c
 }
 
 // SetAddress sets the "address" field.
 func (_c *UserCreate) SetAddress(v string) *UserCreate {
-	_c.mutation.SetAddress(v)
+	_ = _c.mutation.SetField("address", v)
 	return _c
 }
 
@@ -75,7 +76,7 @@ func (_c *UserCreate) SetNillableAddress(v *string) *UserCreate {
 
 // SetRenamed sets the "renamed" field.
 func (_c *UserCreate) SetRenamed(v string) *UserCreate {
-	_c.mutation.SetRenamed(v)
+	_ = _c.mutation.SetField("renamed", v)
 	return _c
 }
 
@@ -89,7 +90,7 @@ func (_c *UserCreate) SetNillableRenamed(v *string) *UserCreate {
 
 // SetOldToken sets the "old_token" field.
 func (_c *UserCreate) SetOldToken(v string) *UserCreate {
-	_c.mutation.SetOldToken(v)
+	_ = _c.mutation.SetField("old_token", v)
 	return _c
 }
 
@@ -103,13 +104,13 @@ func (_c *UserCreate) SetNillableOldToken(v *string) *UserCreate {
 
 // SetBlob sets the "blob" field.
 func (_c *UserCreate) SetBlob(v []byte) *UserCreate {
-	_c.mutation.SetBlob(v)
+	_ = _c.mutation.SetField("blob", v)
 	return _c
 }
 
 // SetState sets the "state" field.
 func (_c *UserCreate) SetState(v State) *UserCreate {
-	_c.mutation.SetState(v)
+	_ = _c.mutation.SetField("state", v)
 	return _c
 }
 
@@ -123,7 +124,7 @@ func (_c *UserCreate) SetNillableState(v *State) *UserCreate {
 
 // SetStatus sets the "status" field.
 func (_c *UserCreate) SetStatus(v string) *UserCreate {
-	_c.mutation.SetStatus(v)
+	_ = _c.mutation.SetField("status", v)
 	return _c
 }
 
@@ -137,7 +138,7 @@ func (_c *UserCreate) SetNillableStatus(v *string) *UserCreate {
 
 // SetWorkplace sets the "workplace" field.
 func (_c *UserCreate) SetWorkplace(v string) *UserCreate {
-	_c.mutation.SetWorkplace(v)
+	_ = _c.mutation.SetField("workplace", v)
 	return _c
 }
 
@@ -151,7 +152,7 @@ func (_c *UserCreate) SetNillableWorkplace(v *string) *UserCreate {
 
 // SetDropOptional sets the "drop_optional" field.
 func (_c *UserCreate) SetDropOptional(v string) *UserCreate {
-	_c.mutation.SetDropOptional(v)
+	_ = _c.mutation.SetField("drop_optional", v)
 	return _c
 }
 
@@ -171,7 +172,7 @@ func (_c *UserCreate) SetID(v int) *UserCreate {
 
 // SetParentID sets the "parent" edge to the User entity by ID.
 func (_c *UserCreate) SetParentID(id int) *UserCreate {
-	_c.mutation.SetParentID(id)
+	_ = _c.mutation.SetEdgeID("parent", id)
 	return _c
 }
 
@@ -185,13 +186,13 @@ func (_c *UserCreate) SetNillableParentID(id *int) *UserCreate {
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
 func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	_c.mutation.AddChildIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (_c *UserCreate) SetSpouseID(id int) *UserCreate {
-	_c.mutation.SetSpouseID(id)
+	_ = _c.mutation.SetEdgeID("spouse", id)
 	return _c
 }
 
@@ -205,7 +206,7 @@ func (_c *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
 
 // SetCarID sets the "car" edge to the Car entity by ID.
 func (_c *UserCreate) SetCarID(id int) *UserCreate {
-	_c.mutation.SetCarID(id)
+	_ = _c.mutation.SetEdgeID("car", id)
 	return _c
 }
 
@@ -252,46 +253,46 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.OldToken(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "old_token"); !ok {
 		v := DefaultOldToken()
-		_c.mutation.SetOldToken(v)
+		_ = _c.mutation.SetField("old_token", v)
 	}
-	if _, ok := _c.mutation.State(); !ok {
+	if _, ok := entbuilder.GetField[State](_c.mutation, "state"); !ok {
 		v := DefaultState
-		_c.mutation.SetState(v)
+		_ = _c.mutation.SetField("state", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.Age(); !ok {
+	if _, ok := entbuilder.GetField[int32](_c.mutation, "age"); !ok {
 		return &ValidationError{Name: "age", Err: errors.New(`entv1: missing required field "User.age"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`entv1: missing required field "User.name"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`entv1: validator failed for field "User.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Nickname(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "nickname"); !ok {
 		return &ValidationError{Name: "nickname", Err: errors.New(`entv1: missing required field "User.nickname"`)}
 	}
-	if _, ok := _c.mutation.OldToken(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "old_token"); !ok {
 		return &ValidationError{Name: "old_token", Err: errors.New(`entv1: missing required field "User.old_token"`)}
 	}
-	if v, ok := _c.mutation.Blob(); ok {
+	if v, ok := entbuilder.GetField[[]byte](_c.mutation, "blob"); ok {
 		if err := BlobValidator(v); err != nil {
 			return &ValidationError{Name: "blob", Err: fmt.Errorf(`entv1: validator failed for field "User.blob": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.State(); ok {
+	if v, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
 		if err := StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", Err: fmt.Errorf(`entv1: validator failed for field "User.state": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Workplace(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "workplace"); ok {
 		if err := WorkplaceValidator(v); err != nil {
 			return &ValidationError{Name: "workplace", Err: fmt.Errorf(`entv1: validator failed for field "User.workplace": %w`, err)}
 		}
@@ -314,7 +315,7 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -324,59 +325,60 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node = &User{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(int)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[int32](_c.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeInt32, value)
 		_node.Age = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Description(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "description"); ok {
 		_spec.SetField(FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := _c.mutation.Nickname(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "nickname"); ok {
 		_spec.SetField(FieldNickname, field.TypeString, value)
 		_node.Nickname = value
 	}
-	if value, ok := _c.mutation.Address(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "address"); ok {
 		_spec.SetField(FieldAddress, field.TypeString, value)
 		_node.Address = value
 	}
-	if value, ok := _c.mutation.Renamed(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "renamed"); ok {
 		_spec.SetField(FieldRenamed, field.TypeString, value)
 		_node.Renamed = value
 	}
-	if value, ok := _c.mutation.OldToken(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "old_token"); ok {
 		_spec.SetField(FieldOldToken, field.TypeString, value)
 		_node.OldToken = value
 	}
-	if value, ok := _c.mutation.Blob(); ok {
+	if value, ok := entbuilder.GetField[[]byte](_c.mutation, "blob"); ok {
 		_spec.SetField(FieldBlob, field.TypeBytes, value)
 		_node.Blob = value
 	}
-	if value, ok := _c.mutation.State(); ok {
+	if value, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
 		_spec.SetField(FieldState, field.TypeEnum, value)
 		_node.State = value
 	}
-	if value, ok := _c.mutation.Status(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "status"); ok {
 		_spec.SetField(FieldStatus, field.TypeString, value)
 		_node.Status = value
 	}
-	if value, ok := _c.mutation.Workplace(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "workplace"); ok {
 		_spec.SetField(FieldWorkplace, field.TypeString, value)
 		_node.Workplace = value
 	}
-	if value, ok := _c.mutation.DropOptional(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "drop_optional"); ok {
 		_spec.SetField(FieldDropOptional, field.TypeString, value)
 		_node.DropOptional = value
 	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -392,7 +394,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -408,7 +410,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.SpouseIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "spouse"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -424,7 +426,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.CarIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "car"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -497,11 +499,11 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

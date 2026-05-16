@@ -105,7 +105,7 @@ func (c *FileClient) DeleteOne(_m *File) *file.FileDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FileClient) DeleteOneID(id int) *file.FileDeleteOne {
 	mutation := NewFileMutation(c.Config, OpDeleteOne, WithFileID(id, nil))
-	mutation.Where(file.ID(id))
+	mutation.WhereP(file.ID(id))
 	return file.NewFileDeleteOne(file.NewFileDelete(c.Config, c.Hooks(), mutation))
 }
 

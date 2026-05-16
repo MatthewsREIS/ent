@@ -33,7 +33,7 @@ func NewGoodsUpdate(c Config, hooks []Hook, mutation *GoodsMutation) *GoodsUpdat
 
 // Where appends a list predicates to the GoodsUpdate builder.
 func (_u *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -118,7 +118,7 @@ func (_u *GoodsUpdateOne) Mutation() *GoodsMutation {
 
 // Where appends a list predicates to the GoodsUpdate builder.
 func (_u *GoodsUpdateOne) Where(ps ...predicate.Goods) *GoodsUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -164,10 +164,11 @@ func (_u *GoodsUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Goods
 
 func (_u *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Goods.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

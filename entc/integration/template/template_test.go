@@ -35,7 +35,7 @@ func TestCustomTemplate(t *testing.T) {
 	client.User.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
 			// Access the injected HTTP client here.
-			_ = m.HTTPClient
+			_ = m.Config.(*ent.Config).HTTPClient
 			return next.Mutate(ctx, m)
 		})
 	})

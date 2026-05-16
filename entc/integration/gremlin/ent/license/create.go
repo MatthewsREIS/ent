@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // LicenseCreate is the builder for creating a License entity.
@@ -30,7 +31,7 @@ func NewLicenseCreate(c Config, hooks []Hook, mutation *LicenseMutation) *Licens
 
 // SetCreateTime sets the "create_time" field.
 func (_c *LicenseCreate) SetCreateTime(v time.Time) *LicenseCreate {
-	_c.mutation.SetCreateTime(v)
+	_ = _c.mutation.SetField("create_time", v)
 	return _c
 }
 
@@ -44,7 +45,7 @@ func (_c *LicenseCreate) SetNillableCreateTime(v *time.Time) *LicenseCreate {
 
 // SetUpdateTime sets the "update_time" field.
 func (_c *LicenseCreate) SetUpdateTime(v time.Time) *LicenseCreate {
-	_c.mutation.SetUpdateTime(v)
+	_ = _c.mutation.SetField("update_time", v)
 	return _c
 }
 
@@ -97,22 +98,22 @@ func (_c *LicenseCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *LicenseCreate) defaults() {
-	if _, ok := _c.mutation.CreateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); !ok {
 		v := DefaultCreateTime()
-		_c.mutation.SetCreateTime(v)
+		_ = _c.mutation.SetField("create_time", v)
 	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); !ok {
 		v := DefaultUpdateTime()
-		_c.mutation.SetUpdateTime(v)
+		_ = _c.mutation.SetField("update_time", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *LicenseCreate) check() error {
-	if _, ok := _c.mutation.CreateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); !ok {
 		return &ValidationError{Name: "create_time", Err: errors.New(`ent: missing required field "License.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); !ok {
 		return &ValidationError{Name: "update_time", Err: errors.New(`ent: missing required field "License.update_time"`)}
 	}
 	return nil

@@ -33,13 +33,13 @@ func NewPetUpdate(c Config, hooks []Hook, mutation *PetMutation) *PetUpdate {
 
 // Where appends a list predicates to the PetUpdate builder.
 func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetDeleteTime sets the "delete_time" field.
 func (_u *PetUpdate) SetDeleteTime(v time.Time) *PetUpdate {
-	_u.mutation.SetDeleteTime(v)
+	_ = _u.mutation.SetField("delete_time", v)
 	return _u
 }
 
@@ -53,13 +53,13 @@ func (_u *PetUpdate) SetNillableDeleteTime(v *time.Time) *PetUpdate {
 
 // ClearDeleteTime clears the value of the "delete_time" field.
 func (_u *PetUpdate) ClearDeleteTime() *PetUpdate {
-	_u.mutation.ClearDeleteTime()
+	_ = _u.mutation.ClearField("delete_time")
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *PetUpdate) SetName(v string) *PetUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -73,13 +73,13 @@ func (_u *PetUpdate) SetNillableName(v *string) *PetUpdate {
 
 // ClearName clears the value of the "name" field.
 func (_u *PetUpdate) ClearName() *PetUpdate {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -98,7 +98,7 @@ func (_u *PetUpdate) Mutation() *PetMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -138,19 +138,19 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.DeleteTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "delete_time"); ok {
 		_spec.SetField(FieldDeleteTime, field.TypeTime, value)
 	}
-	if _u.mutation.DeleteTimeCleared() {
+	if _u.mutation.FieldCleared("delete_time") {
 		_spec.ClearField(FieldDeleteTime, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -163,7 +163,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -206,7 +206,7 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 
 // SetDeleteTime sets the "delete_time" field.
 func (_u *PetUpdateOne) SetDeleteTime(v time.Time) *PetUpdateOne {
-	_u.mutation.SetDeleteTime(v)
+	_ = _u.mutation.SetField("delete_time", v)
 	return _u
 }
 
@@ -220,13 +220,13 @@ func (_u *PetUpdateOne) SetNillableDeleteTime(v *time.Time) *PetUpdateOne {
 
 // ClearDeleteTime clears the value of the "delete_time" field.
 func (_u *PetUpdateOne) ClearDeleteTime() *PetUpdateOne {
-	_u.mutation.ClearDeleteTime()
+	_ = _u.mutation.ClearField("delete_time")
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *PetUpdateOne) SetName(v string) *PetUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -240,13 +240,13 @@ func (_u *PetUpdateOne) SetNillableName(v *string) *PetUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *PetUpdateOne) ClearName() *PetUpdateOne {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -265,13 +265,13 @@ func (_u *PetUpdateOne) Mutation() *PetMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Where appends a list predicates to the PetUpdate builder.
 func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -311,10 +311,11 @@ func (_u *PetUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Pet.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -335,19 +336,19 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.DeleteTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "delete_time"); ok {
 		_spec.SetField(FieldDeleteTime, field.TypeTime, value)
 	}
-	if _u.mutation.DeleteTimeCleared() {
+	if _u.mutation.FieldCleared("delete_time") {
 		_spec.ClearField(FieldDeleteTime, field.TypeTime)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -360,7 +361,7 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,

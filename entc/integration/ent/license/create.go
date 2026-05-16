@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewLicenseCreate(c Config, hooks []Hook, mutation *LicenseMutation) *Licens
 
 // SetCreateTime sets the "create_time" field.
 func (_c *LicenseCreate) SetCreateTime(v time.Time) *LicenseCreate {
-	_c.mutation.SetCreateTime(v)
+	_ = _c.mutation.SetField("create_time", v)
 	return _c
 }
 
@@ -46,7 +47,7 @@ func (_c *LicenseCreate) SetNillableCreateTime(v *time.Time) *LicenseCreate {
 
 // SetUpdateTime sets the "update_time" field.
 func (_c *LicenseCreate) SetUpdateTime(v time.Time) *LicenseCreate {
-	_c.mutation.SetUpdateTime(v)
+	_ = _c.mutation.SetField("update_time", v)
 	return _c
 }
 
@@ -99,22 +100,22 @@ func (_c *LicenseCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *LicenseCreate) defaults() {
-	if _, ok := _c.mutation.CreateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); !ok {
 		v := DefaultCreateTime()
-		_c.mutation.SetCreateTime(v)
+		_ = _c.mutation.SetField("create_time", v)
 	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); !ok {
 		v := DefaultUpdateTime()
-		_c.mutation.SetUpdateTime(v)
+		_ = _c.mutation.SetField("update_time", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *LicenseCreate) check() error {
-	if _, ok := _c.mutation.CreateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); !ok {
 		return &ValidationError{Name: "create_time", Err: errors.New(`ent: missing required field "License.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); !ok {
 		return &ValidationError{Name: "update_time", Err: errors.New(`ent: missing required field "License.update_time"`)}
 	}
 	return nil
@@ -135,7 +136,7 @@ func (_c *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -146,15 +147,16 @@ func (_c *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(int)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.CreateTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); ok {
 		_spec.SetField(FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
-	if value, ok := _c.mutation.UpdateTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); ok {
 		_spec.SetField(FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
@@ -239,7 +241,7 @@ func (u *LicenseUpsertOne) UpdateNewValues() *LicenseUpsertOne {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(FieldID)
 		}
-		if _, exists := u.create.mutation.CreateTime(); exists {
+		if _, exists := u.create.mutation.Field(FieldCreateTime); exists {
 			s.SetIgnore(FieldCreateTime)
 		}
 	}))
@@ -376,11 +378,11 @@ func (_c *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})
@@ -479,7 +481,7 @@ func (u *LicenseUpsertBulk) UpdateNewValues() *LicenseUpsertBulk {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(FieldID)
 			}
-			if _, exists := b.mutation.CreateTime(); exists {
+			if _, exists := b.mutation.Field(FieldCreateTime); exists {
 				s.SetIgnore(FieldCreateTime)
 			}
 		}

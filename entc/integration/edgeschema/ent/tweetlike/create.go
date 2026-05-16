@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewTweetLikeCreate(c Config, hooks []Hook, mutation *TweetLikeMutation) *Tw
 
 // SetLikedAt sets the "liked_at" field.
 func (_c *TweetLikeCreate) SetLikedAt(v time.Time) *TweetLikeCreate {
-	_c.mutation.SetLikedAt(v)
+	_ = _c.mutation.SetField("liked_at", v)
 	return _c
 }
 
@@ -46,13 +47,13 @@ func (_c *TweetLikeCreate) SetNillableLikedAt(v *time.Time) *TweetLikeCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *TweetLikeCreate) SetUserID(v int) *TweetLikeCreate {
-	_c.mutation.SetUserID(v)
+	_ = _c.mutation.SetEdgeID("user", v)
 	return _c
 }
 
 // SetTweetID sets the "tweet_id" field.
 func (_c *TweetLikeCreate) SetTweetID(v int) *TweetLikeCreate {
-	_c.mutation.SetTweetID(v)
+	_ = _c.mutation.SetEdgeID("tweet", v)
 	return _c
 }
 
@@ -93,31 +94,25 @@ func (_c *TweetLikeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *TweetLikeCreate) defaults() error {
-	if _, ok := _c.mutation.LikedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "liked_at"); !ok {
 		if DefaultLikedAt == nil {
 			return fmt.Errorf("ent: uninitialized DefaultLikedAt (forgotten import ent/runtime?)")
 		}
 		v := DefaultLikedAt()
-		_c.mutation.SetLikedAt(v)
+		_ = _c.mutation.SetField("liked_at", v)
 	}
 	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *TweetLikeCreate) check() error {
-	if _, ok := _c.mutation.LikedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "liked_at"); !ok {
 		return &ValidationError{Name: "liked_at", Err: errors.New(`ent: missing required field "TweetLike.liked_at"`)}
 	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", Err: errors.New(`ent: missing required field "TweetLike.user_id"`)}
-	}
-	if _, ok := _c.mutation.TweetID(); !ok {
-		return &ValidationError{Name: "tweet_id", Err: errors.New(`ent: missing required field "TweetLike.tweet_id"`)}
-	}
-	if len(_c.mutation.TweetIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("tweet")) == 0 {
 		return &ValidationError{Name: "tweet", Err: errors.New(`ent: missing required edge "TweetLike.tweet"`)}
 	}
-	if len(_c.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("user")) == 0 {
 		return &ValidationError{Name: "user", Err: errors.New(`ent: missing required edge "TweetLike.user"`)}
 	}
 	return nil
@@ -143,11 +138,11 @@ func (_c *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, nil)
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.LikedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "liked_at"); ok {
 		_spec.SetField(FieldLikedAt, field.TypeTime, value)
 		_node.LikedAt = value
 	}
-	if nodes := _c.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tweet"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -164,7 +159,7 @@ func (_c *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 		_node.TweetID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

@@ -32,7 +32,7 @@ func NewZooUpdate(c Config, hooks []Hook, mutation *ZooMutation) *ZooUpdate {
 
 // Where appends a list predicates to the ZooUpdate builder.
 func (_u *ZooUpdate) Where(ps ...predicate.Zoo) *ZooUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -109,7 +109,7 @@ func (_u *ZooUpdateOne) Mutation() *ZooMutation {
 
 // Where appends a list predicates to the ZooUpdate builder.
 func (_u *ZooUpdateOne) Where(ps ...predicate.Zoo) *ZooUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -149,10 +149,11 @@ func (_u *ZooUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *ZooUpdateOne) sqlSave(ctx context.Context) (_node *Zoo, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`entv2: missing "Zoo.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

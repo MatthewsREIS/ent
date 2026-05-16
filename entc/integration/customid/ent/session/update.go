@@ -33,13 +33,13 @@ func NewSessionUpdate(c Config, hooks []Hook, mutation *SessionMutation) *Sessio
 
 // Where appends a list predicates to the SessionUpdate builder.
 func (_u *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetDeviceID sets the "device" edge to the Device entity by ID.
 func (_u *SessionUpdate) SetDeviceID(id schema.ID) *SessionUpdate {
-	_u.mutation.SetDeviceID(id)
+	_ = _u.mutation.SetEdgeID("device", id)
 	return _u
 }
 
@@ -58,7 +58,7 @@ func (_u *SessionUpdate) Mutation() *SessionMutation {
 
 // ClearDevice clears the "device" edge to the Device entity.
 func (_u *SessionUpdate) ClearDevice() *SessionUpdate {
-	_u.mutation.ClearDevice()
+	_ = _u.mutation.ClearEdge("device")
 	return _u
 }
 
@@ -98,7 +98,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.DeviceCleared() {
+	if _u.mutation.EdgeCleared("device") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -111,7 +111,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.DeviceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("device"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -154,7 +154,7 @@ func NewSessionUpdateOne(c Config, hooks []Hook, mutation *SessionMutation) *Ses
 
 // SetDeviceID sets the "device" edge to the Device entity by ID.
 func (_u *SessionUpdateOne) SetDeviceID(id schema.ID) *SessionUpdateOne {
-	_u.mutation.SetDeviceID(id)
+	_ = _u.mutation.SetEdgeID("device", id)
 	return _u
 }
 
@@ -173,13 +173,13 @@ func (_u *SessionUpdateOne) Mutation() *SessionMutation {
 
 // ClearDevice clears the "device" edge to the Device entity.
 func (_u *SessionUpdateOne) ClearDevice() *SessionUpdateOne {
-	_u.mutation.ClearDevice()
+	_ = _u.mutation.ClearEdge("device")
 	return _u
 }
 
 // Where appends a list predicates to the SessionUpdate builder.
 func (_u *SessionUpdateOne) Where(ps ...predicate.Session) *SessionUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -219,10 +219,11 @@ func (_u *SessionUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeBytes))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Session.id" for update`)}
 	}
+	id := idAny.(schema.ID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -243,7 +244,7 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 			}
 		}
 	}
-	if _u.mutation.DeviceCleared() {
+	if _u.mutation.EdgeCleared("device") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -256,7 +257,7 @@ func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.DeviceIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("device"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,

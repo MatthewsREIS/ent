@@ -104,7 +104,7 @@ func (c *TeamClient) DeleteOne(_m *Team) *team.TeamDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TeamClient) DeleteOneID(id int) *team.TeamDeleteOne {
 	mutation := NewTeamMutation(c.Config, OpDeleteOne, WithTeamID(id, nil))
-	mutation.Where(team.ID(id))
+	mutation.WhereP(team.ID(id))
 	return team.NewTeamDeleteOne(team.NewTeamDelete(c.Config, c.Hooks(), mutation))
 }
 

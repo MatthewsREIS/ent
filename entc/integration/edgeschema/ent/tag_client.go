@@ -106,7 +106,7 @@ func (c *TagClient) DeleteOne(_m *Tag) *tag.TagDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TagClient) DeleteOneID(id int) *tag.TagDeleteOne {
 	mutation := NewTagMutation(c.Config, OpDeleteOne, WithTagID(id, nil))
-	mutation.Where(tag.ID(id))
+	mutation.WhereP(tag.ID(id))
 	return tag.NewTagDeleteOne(tag.NewTagDelete(c.Config, c.Hooks(), mutation))
 }
 

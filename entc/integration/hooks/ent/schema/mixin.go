@@ -60,7 +60,7 @@ func (d SoftDeleteMixin) Hooks() []ent.Hook {
 					}
 					mx, ok := m.(interface {
 						SetOp(ent.Op)
-						SetDeleteTime(time.Time)
+						SetField(string, ent.Value) error
 						WhereP(...func(*sql.Selector))
 					})
 					if !ok {
@@ -68,7 +68,7 @@ func (d SoftDeleteMixin) Hooks() []ent.Hook {
 					}
 					d.P(mx)
 					mx.SetOp(ent.OpUpdate)
-					mx.SetDeleteTime(time.Now())
+					_ = mx.SetField("delete_time", time.Now())
 					return gen.FromContext(ctx).Mutate(ctx, m)
 				})
 			},

@@ -25,7 +25,7 @@ func (_q *ExValueScanQuery) Filter() *ExValueScanFilter {
 
 // NewExValueScanFilterForMutation creates a new ExValueScanFilter for the given mutation.
 func NewExValueScanFilterForMutation(m *ExValueScanMutation) *ExValueScanFilter {
-	return &ExValueScanFilter{Config: m.Config, predicateAdder: m}
+	return &ExValueScanFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // ExValueScanFilter provides a generic filtering capability at runtime for ExValueScanQuery.

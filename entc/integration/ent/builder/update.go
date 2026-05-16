@@ -33,7 +33,7 @@ func NewBuilderUpdate(c Config, hooks []Hook, mutation *BuilderMutation) *Builde
 
 // Where appends a list predicates to the BuilderUpdate builder.
 func (_u *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -118,7 +118,7 @@ func (_u *BuilderUpdateOne) Mutation() *BuilderMutation {
 
 // Where appends a list predicates to the BuilderUpdate builder.
 func (_u *BuilderUpdateOne) Where(ps ...predicate.Builder) *BuilderUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -164,10 +164,11 @@ func (_u *BuilderUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Bui
 
 func (_u *BuilderUpdateOne) sqlSave(ctx context.Context) (_node *Builder, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Builder.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

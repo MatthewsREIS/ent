@@ -103,7 +103,7 @@ func (c *SpecClient) DeleteOne(_m *Spec) *spec.SpecDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *SpecClient) DeleteOneID(id int) *spec.SpecDeleteOne {
 	mutation := NewSpecMutation(c.Config, OpDeleteOne, WithSpecID(id, nil))
-	mutation.Where(spec.ID(id))
+	mutation.WhereP(spec.ID(id))
 	return spec.NewSpecDeleteOne(spec.NewSpecDelete(c.Config, c.Hooks(), mutation))
 }
 

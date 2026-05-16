@@ -35,14 +35,14 @@ func NewPetUpdate(c Config, hooks []Hook, mutation *PetMutation) *PetUpdate {
 
 // Where appends a list predicates to the PetUpdate builder.
 func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetAge sets the "age" field.
 func (_u *PetUpdate) SetAge(v float64) *PetUpdate {
-	_u.mutation.ResetAge()
-	_u.mutation.SetAge(v)
+	_ = _u.mutation.ResetField("age")
+	_ = _u.mutation.SetField("age", v)
 	return _u
 }
 
@@ -56,13 +56,13 @@ func (_u *PetUpdate) SetNillableAge(v *float64) *PetUpdate {
 
 // AddAge adds value to the "age" field.
 func (_u *PetUpdate) AddAge(v float64) *PetUpdate {
-	_u.mutation.AddAge(v)
+	_ = _u.mutation.AddField("age", v)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *PetUpdate) SetName(v string) *PetUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -76,7 +76,7 @@ func (_u *PetUpdate) SetNillableName(v *string) *PetUpdate {
 
 // SetUUID sets the "uuid" field.
 func (_u *PetUpdate) SetUUID(v uuid.UUID) *PetUpdate {
-	_u.mutation.SetUUID(v)
+	_ = _u.mutation.SetField("uuid", v)
 	return _u
 }
 
@@ -90,13 +90,13 @@ func (_u *PetUpdate) SetNillableUUID(v *uuid.UUID) *PetUpdate {
 
 // ClearUUID clears the value of the "uuid" field.
 func (_u *PetUpdate) ClearUUID() *PetUpdate {
-	_u.mutation.ClearUUID()
+	_ = _u.mutation.ClearField("uuid")
 	return _u
 }
 
 // SetNickname sets the "nickname" field.
 func (_u *PetUpdate) SetNickname(v string) *PetUpdate {
-	_u.mutation.SetNickname(v)
+	_ = _u.mutation.SetField("nickname", v)
 	return _u
 }
 
@@ -110,13 +110,13 @@ func (_u *PetUpdate) SetNillableNickname(v *string) *PetUpdate {
 
 // ClearNickname clears the value of the "nickname" field.
 func (_u *PetUpdate) ClearNickname() *PetUpdate {
-	_u.mutation.ClearNickname()
+	_ = _u.mutation.ClearField("nickname")
 	return _u
 }
 
 // SetTrained sets the "trained" field.
 func (_u *PetUpdate) SetTrained(v bool) *PetUpdate {
-	_u.mutation.SetTrained(v)
+	_ = _u.mutation.SetField("trained", v)
 	return _u
 }
 
@@ -130,7 +130,7 @@ func (_u *PetUpdate) SetNillableTrained(v *bool) *PetUpdate {
 
 // SetOptionalTime sets the "optional_time" field.
 func (_u *PetUpdate) SetOptionalTime(v time.Time) *PetUpdate {
-	_u.mutation.SetOptionalTime(v)
+	_ = _u.mutation.SetField("optional_time", v)
 	return _u
 }
 
@@ -144,13 +144,13 @@ func (_u *PetUpdate) SetNillableOptionalTime(v *time.Time) *PetUpdate {
 
 // ClearOptionalTime clears the value of the "optional_time" field.
 func (_u *PetUpdate) ClearOptionalTime() *PetUpdate {
-	_u.mutation.ClearOptionalTime()
+	_ = _u.mutation.ClearField("optional_time")
 	return _u
 }
 
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (_u *PetUpdate) SetTeamID(id int) *PetUpdate {
-	_u.mutation.SetTeamID(id)
+	_ = _u.mutation.SetEdgeID("team", id)
 	return _u
 }
 
@@ -164,7 +164,7 @@ func (_u *PetUpdate) SetNillableTeamID(id *int) *PetUpdate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -183,13 +183,13 @@ func (_u *PetUpdate) Mutation() *PetMutation {
 
 // ClearTeam clears the "team" edge to the User entity.
 func (_u *PetUpdate) ClearTeam() *PetUpdate {
-	_u.mutation.ClearTeam()
+	_ = _u.mutation.ClearEdge("team")
 	return _u
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -235,37 +235,38 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[float64](_u.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeFloat64, value)
 	}
-	if value, ok := _u.mutation.AddedAge(); ok {
+	if added, ok := _u.mutation.AddedField("age"); ok {
+		value := added.(float64)
 		_spec.AddField(FieldAge, field.TypeFloat64, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.UUID(); ok {
+	if value, ok := entbuilder.GetField[uuid.UUID](_u.mutation, "uuid"); ok {
 		_spec.SetField(FieldUUID, field.TypeUUID, value)
 	}
-	if _u.mutation.UUIDCleared() {
+	if _u.mutation.FieldCleared("uuid") {
 		_spec.ClearField(FieldUUID, field.TypeUUID)
 	}
-	if value, ok := _u.mutation.Nickname(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "nickname"); ok {
 		_spec.SetField(FieldNickname, field.TypeString, value)
 	}
-	if _u.mutation.NicknameCleared() {
+	if _u.mutation.FieldCleared("nickname") {
 		_spec.ClearField(FieldNickname, field.TypeString)
 	}
-	if value, ok := _u.mutation.Trained(); ok {
+	if value, ok := entbuilder.GetField[bool](_u.mutation, "trained"); ok {
 		_spec.SetField(FieldTrained, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.OptionalTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "optional_time"); ok {
 		_spec.SetField(FieldOptionalTime, field.TypeTime, value)
 	}
-	if _u.mutation.OptionalTimeCleared() {
+	if _u.mutation.FieldCleared("optional_time") {
 		_spec.ClearField(FieldOptionalTime, field.TypeTime)
 	}
-	if _u.mutation.TeamCleared() {
+	if _u.mutation.EdgeCleared("team") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -278,7 +279,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TeamIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("team"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -294,7 +295,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -307,7 +308,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -352,8 +353,8 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 
 // SetAge sets the "age" field.
 func (_u *PetUpdateOne) SetAge(v float64) *PetUpdateOne {
-	_u.mutation.ResetAge()
-	_u.mutation.SetAge(v)
+	_ = _u.mutation.ResetField("age")
+	_ = _u.mutation.SetField("age", v)
 	return _u
 }
 
@@ -367,13 +368,13 @@ func (_u *PetUpdateOne) SetNillableAge(v *float64) *PetUpdateOne {
 
 // AddAge adds value to the "age" field.
 func (_u *PetUpdateOne) AddAge(v float64) *PetUpdateOne {
-	_u.mutation.AddAge(v)
+	_ = _u.mutation.AddField("age", v)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *PetUpdateOne) SetName(v string) *PetUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -387,7 +388,7 @@ func (_u *PetUpdateOne) SetNillableName(v *string) *PetUpdateOne {
 
 // SetUUID sets the "uuid" field.
 func (_u *PetUpdateOne) SetUUID(v uuid.UUID) *PetUpdateOne {
-	_u.mutation.SetUUID(v)
+	_ = _u.mutation.SetField("uuid", v)
 	return _u
 }
 
@@ -401,13 +402,13 @@ func (_u *PetUpdateOne) SetNillableUUID(v *uuid.UUID) *PetUpdateOne {
 
 // ClearUUID clears the value of the "uuid" field.
 func (_u *PetUpdateOne) ClearUUID() *PetUpdateOne {
-	_u.mutation.ClearUUID()
+	_ = _u.mutation.ClearField("uuid")
 	return _u
 }
 
 // SetNickname sets the "nickname" field.
 func (_u *PetUpdateOne) SetNickname(v string) *PetUpdateOne {
-	_u.mutation.SetNickname(v)
+	_ = _u.mutation.SetField("nickname", v)
 	return _u
 }
 
@@ -421,13 +422,13 @@ func (_u *PetUpdateOne) SetNillableNickname(v *string) *PetUpdateOne {
 
 // ClearNickname clears the value of the "nickname" field.
 func (_u *PetUpdateOne) ClearNickname() *PetUpdateOne {
-	_u.mutation.ClearNickname()
+	_ = _u.mutation.ClearField("nickname")
 	return _u
 }
 
 // SetTrained sets the "trained" field.
 func (_u *PetUpdateOne) SetTrained(v bool) *PetUpdateOne {
-	_u.mutation.SetTrained(v)
+	_ = _u.mutation.SetField("trained", v)
 	return _u
 }
 
@@ -441,7 +442,7 @@ func (_u *PetUpdateOne) SetNillableTrained(v *bool) *PetUpdateOne {
 
 // SetOptionalTime sets the "optional_time" field.
 func (_u *PetUpdateOne) SetOptionalTime(v time.Time) *PetUpdateOne {
-	_u.mutation.SetOptionalTime(v)
+	_ = _u.mutation.SetField("optional_time", v)
 	return _u
 }
 
@@ -455,13 +456,13 @@ func (_u *PetUpdateOne) SetNillableOptionalTime(v *time.Time) *PetUpdateOne {
 
 // ClearOptionalTime clears the value of the "optional_time" field.
 func (_u *PetUpdateOne) ClearOptionalTime() *PetUpdateOne {
-	_u.mutation.ClearOptionalTime()
+	_ = _u.mutation.ClearField("optional_time")
 	return _u
 }
 
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (_u *PetUpdateOne) SetTeamID(id int) *PetUpdateOne {
-	_u.mutation.SetTeamID(id)
+	_ = _u.mutation.SetEdgeID("team", id)
 	return _u
 }
 
@@ -475,7 +476,7 @@ func (_u *PetUpdateOne) SetNillableTeamID(id *int) *PetUpdateOne {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -494,19 +495,19 @@ func (_u *PetUpdateOne) Mutation() *PetMutation {
 
 // ClearTeam clears the "team" edge to the User entity.
 func (_u *PetUpdateOne) ClearTeam() *PetUpdateOne {
-	_u.mutation.ClearTeam()
+	_ = _u.mutation.ClearEdge("team")
 	return _u
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Where appends a list predicates to the PetUpdate builder.
 func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -552,10 +553,11 @@ func (_u *PetUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PetUpda
 
 func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Pet.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -576,37 +578,38 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[float64](_u.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeFloat64, value)
 	}
-	if value, ok := _u.mutation.AddedAge(); ok {
+	if added, ok := _u.mutation.AddedField("age"); ok {
+		value := added.(float64)
 		_spec.AddField(FieldAge, field.TypeFloat64, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.UUID(); ok {
+	if value, ok := entbuilder.GetField[uuid.UUID](_u.mutation, "uuid"); ok {
 		_spec.SetField(FieldUUID, field.TypeUUID, value)
 	}
-	if _u.mutation.UUIDCleared() {
+	if _u.mutation.FieldCleared("uuid") {
 		_spec.ClearField(FieldUUID, field.TypeUUID)
 	}
-	if value, ok := _u.mutation.Nickname(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "nickname"); ok {
 		_spec.SetField(FieldNickname, field.TypeString, value)
 	}
-	if _u.mutation.NicknameCleared() {
+	if _u.mutation.FieldCleared("nickname") {
 		_spec.ClearField(FieldNickname, field.TypeString)
 	}
-	if value, ok := _u.mutation.Trained(); ok {
+	if value, ok := entbuilder.GetField[bool](_u.mutation, "trained"); ok {
 		_spec.SetField(FieldTrained, field.TypeBool, value)
 	}
-	if value, ok := _u.mutation.OptionalTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "optional_time"); ok {
 		_spec.SetField(FieldOptionalTime, field.TypeTime, value)
 	}
-	if _u.mutation.OptionalTimeCleared() {
+	if _u.mutation.FieldCleared("optional_time") {
 		_spec.ClearField(FieldOptionalTime, field.TypeTime)
 	}
-	if _u.mutation.TeamCleared() {
+	if _u.mutation.EdgeCleared("team") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -619,7 +622,7 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TeamIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("team"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -635,7 +638,7 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -648,7 +651,7 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,

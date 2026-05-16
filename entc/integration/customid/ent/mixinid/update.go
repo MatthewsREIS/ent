@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // MixinIDUpdate is the builder for updating MixinID entities.
@@ -32,13 +33,13 @@ func NewMixinIDUpdate(c Config, hooks []Hook, mutation *MixinIDMutation) *MixinI
 
 // Where appends a list predicates to the MixinIDUpdate builder.
 func (_u *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetSomeField sets the "some_field" field.
 func (_u *MixinIDUpdate) SetSomeField(v string) *MixinIDUpdate {
-	_u.mutation.SetSomeField(v)
+	_ = _u.mutation.SetField("some_field", v)
 	return _u
 }
 
@@ -52,7 +53,7 @@ func (_u *MixinIDUpdate) SetNillableSomeField(v *string) *MixinIDUpdate {
 
 // SetMixinField sets the "mixin_field" field.
 func (_u *MixinIDUpdate) SetMixinField(v string) *MixinIDUpdate {
-	_u.mutation.SetMixinField(v)
+	_ = _u.mutation.SetField("mixin_field", v)
 	return _u
 }
 
@@ -105,10 +106,10 @@ func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.SomeField(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "some_field"); ok {
 		_spec.SetField(FieldSomeField, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.MixinField(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "mixin_field"); ok {
 		_spec.SetField(FieldMixinField, field.TypeString, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -138,7 +139,7 @@ func NewMixinIDUpdateOne(c Config, hooks []Hook, mutation *MixinIDMutation) *Mix
 
 // SetSomeField sets the "some_field" field.
 func (_u *MixinIDUpdateOne) SetSomeField(v string) *MixinIDUpdateOne {
-	_u.mutation.SetSomeField(v)
+	_ = _u.mutation.SetField("some_field", v)
 	return _u
 }
 
@@ -152,7 +153,7 @@ func (_u *MixinIDUpdateOne) SetNillableSomeField(v *string) *MixinIDUpdateOne {
 
 // SetMixinField sets the "mixin_field" field.
 func (_u *MixinIDUpdateOne) SetMixinField(v string) *MixinIDUpdateOne {
-	_u.mutation.SetMixinField(v)
+	_ = _u.mutation.SetField("mixin_field", v)
 	return _u
 }
 
@@ -171,7 +172,7 @@ func (_u *MixinIDUpdateOne) Mutation() *MixinIDMutation {
 
 // Where appends a list predicates to the MixinIDUpdate builder.
 func (_u *MixinIDUpdateOne) Where(ps ...predicate.MixinID) *MixinIDUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -211,10 +212,11 @@ func (_u *MixinIDUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "MixinID.id" for update`)}
 	}
+	id := idAny.(uuid.UUID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -235,10 +237,10 @@ func (_u *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err er
 			}
 		}
 	}
-	if value, ok := _u.mutation.SomeField(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "some_field"); ok {
 		_spec.SetField(FieldSomeField, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.MixinField(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "mixin_field"); ok {
 		_spec.SetField(FieldMixinField, field.TypeString, value)
 	}
 	_node = &MixinID{Config: _u.Config}

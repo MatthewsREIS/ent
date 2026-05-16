@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -46,7 +47,7 @@ func (_c *PetCreate) SetNillableID(v *string) *PetCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *PetCreate) SetOwnerID(id int) *PetCreate {
-	_c.mutation.SetOwnerID(id)
+	_ = _c.mutation.SetEdgeID("owner", id)
 	return _c
 }
 
@@ -60,19 +61,19 @@ func (_c *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 
 // AddCarIDs adds the "cars" edge to the Car entity by IDs.
 func (_c *PetCreate) AddCarIDs(ids ...int) *PetCreate {
-	_c.mutation.AddCarIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("cars", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFriendIDs adds the "friends" edge to the Pet entity by IDs.
 func (_c *PetCreate) AddFriendIDs(ids ...string) *PetCreate {
-	_c.mutation.AddFriendIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // SetBestFriendID sets the "best_friend" edge to the Pet entity by ID.
 func (_c *PetCreate) SetBestFriendID(id string) *PetCreate {
-	_c.mutation.SetBestFriendID(id)
+	_ = _c.mutation.SetEdgeID("best_friend", id)
 	return _c
 }
 
@@ -127,7 +128,7 @@ func (_c *PetCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *PetCreate) check() error {
-	if v, ok := _c.mutation.ID(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "id"); ok {
 		if err := IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", Err: fmt.Errorf(`ent: validator failed for field "Pet.id": %w`, err)}
 		}
@@ -153,7 +154,7 @@ func (_c *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 			return nil, fmt.Errorf("unexpected Pet.ID type: %T", _spec.ID.Value)
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -164,11 +165,12 @@ func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(string)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -184,7 +186,7 @@ func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.CarsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "cars"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -200,7 +202,7 @@ func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[string](_c.mutation, "friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -216,7 +218,7 @@ func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.BestFriendIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[string](_c.mutation, "best_friend"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -420,7 +422,7 @@ func (_c *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

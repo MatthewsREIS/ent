@@ -34,14 +34,14 @@ func NewTaskUpdate(c Config, hooks []Hook, mutation *TaskMutation) *TaskUpdate {
 
 // Where appends a list predicates to the TaskUpdate builder.
 func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetPriority sets the "priority" field.
 func (_u *TaskUpdate) SetPriority(v task.Priority) *TaskUpdate {
-	_u.mutation.ResetPriority()
-	_u.mutation.SetPriority(v)
+	_ = _u.mutation.ResetField("priority")
+	_ = _u.mutation.SetField("priority", v)
 	return _u
 }
 
@@ -55,25 +55,25 @@ func (_u *TaskUpdate) SetNillablePriority(v *task.Priority) *TaskUpdate {
 
 // AddPriority adds value to the "priority" field.
 func (_u *TaskUpdate) AddPriority(v task.Priority) *TaskUpdate {
-	_u.mutation.AddPriority(v)
+	_ = _u.mutation.AddField("priority", v)
 	return _u
 }
 
 // SetPriorities sets the "priorities" field.
 func (_u *TaskUpdate) SetPriorities(v map[string]task.Priority) *TaskUpdate {
-	_u.mutation.SetPriorities(v)
+	_ = _u.mutation.SetField("priorities", v)
 	return _u
 }
 
 // ClearPriorities clears the value of the "priorities" field.
 func (_u *TaskUpdate) ClearPriorities() *TaskUpdate {
-	_u.mutation.ClearPriorities()
+	_ = _u.mutation.ClearField("priorities")
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *TaskUpdate) SetName(v string) *TaskUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -87,13 +87,13 @@ func (_u *TaskUpdate) SetNillableName(v *string) *TaskUpdate {
 
 // ClearName clears the value of the "name" field.
 func (_u *TaskUpdate) ClearName() *TaskUpdate {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwner sets the "owner" field.
 func (_u *TaskUpdate) SetOwner(v string) *TaskUpdate {
-	_u.mutation.SetOwner(v)
+	_ = _u.mutation.SetField("owner", v)
 	return _u
 }
 
@@ -107,14 +107,14 @@ func (_u *TaskUpdate) SetNillableOwner(v *string) *TaskUpdate {
 
 // ClearOwner clears the value of the "owner" field.
 func (_u *TaskUpdate) ClearOwner() *TaskUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearField("owner")
 	return _u
 }
 
 // SetOrder sets the "order" field.
 func (_u *TaskUpdate) SetOrder(v int) *TaskUpdate {
-	_u.mutation.ResetOrder()
-	_u.mutation.SetOrder(v)
+	_ = _u.mutation.ResetField("order")
+	_ = _u.mutation.SetField("order", v)
 	return _u
 }
 
@@ -128,20 +128,20 @@ func (_u *TaskUpdate) SetNillableOrder(v *int) *TaskUpdate {
 
 // AddOrder adds value to the "order" field.
 func (_u *TaskUpdate) AddOrder(v int) *TaskUpdate {
-	_u.mutation.AddOrder(v)
+	_ = _u.mutation.AddField("order", v)
 	return _u
 }
 
 // ClearOrder clears the value of the "order" field.
 func (_u *TaskUpdate) ClearOrder() *TaskUpdate {
-	_u.mutation.ClearOrder()
+	_ = _u.mutation.ClearField("order")
 	return _u
 }
 
 // SetOrderOption sets the "order_option" field.
 func (_u *TaskUpdate) SetOrderOption(v int) *TaskUpdate {
-	_u.mutation.ResetOrderOption()
-	_u.mutation.SetOrderOption(v)
+	_ = _u.mutation.ResetField("order_option")
+	_ = _u.mutation.SetField("order_option", v)
 	return _u
 }
 
@@ -155,19 +155,19 @@ func (_u *TaskUpdate) SetNillableOrderOption(v *int) *TaskUpdate {
 
 // AddOrderOption adds value to the "order_option" field.
 func (_u *TaskUpdate) AddOrderOption(v int) *TaskUpdate {
-	_u.mutation.AddOrderOption(v)
+	_ = _u.mutation.AddField("order_option", v)
 	return _u
 }
 
 // ClearOrderOption clears the value of the "order_option" field.
 func (_u *TaskUpdate) ClearOrderOption() *TaskUpdate {
-	_u.mutation.ClearOrderOption()
+	_ = _u.mutation.ClearField("order_option")
 	return _u
 }
 
 // SetOp sets the "op" field.
 func (_u *TaskUpdate) SetOp(v string) *TaskUpdate {
-	_u.mutation.SetOpField(v)
+	_ = _u.mutation.SetField("op", v)
 	return _u
 }
 
@@ -213,12 +213,12 @@ func (_u *TaskUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *TaskUpdate) check() error {
-	if v, ok := _u.mutation.Priority(); ok {
+	if v, ok := entbuilder.GetField[task.Priority](_u.mutation, "priority"); ok {
 		if err := v.Validate(); err != nil {
 			return &ValidationError{Name: "priority", Err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.GetOp(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "op"); ok {
 		if err := OpValidator(v); err != nil {
 			return &ValidationError{Name: "op", Err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
 		}
@@ -244,49 +244,52 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Priority(); ok {
+	if value, ok := entbuilder.GetField[task.Priority](_u.mutation, "priority"); ok {
 		_spec.SetField(FieldPriority, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedPriority(); ok {
+	if added, ok := _u.mutation.AddedField("priority"); ok {
+		value := added.(task.Priority)
 		_spec.AddField(FieldPriority, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Priorities(); ok {
+	if value, ok := entbuilder.GetField[map[string]task.Priority](_u.mutation, "priorities"); ok {
 		_spec.SetField(FieldPriorities, field.TypeJSON, value)
 	}
-	if _u.mutation.PrioritiesCleared() {
+	if _u.mutation.FieldCleared("priorities") {
 		_spec.ClearField(FieldPriorities, field.TypeJSON)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if value, ok := _u.mutation.Owner(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "owner"); ok {
 		_spec.SetField(FieldOwner, field.TypeString, value)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.FieldCleared("owner") {
 		_spec.ClearField(FieldOwner, field.TypeString)
 	}
-	if value, ok := _u.mutation.Order(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "order"); ok {
 		_spec.SetField(FieldOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrder(); ok {
+	if added, ok := _u.mutation.AddedField("order"); ok {
+		value := added.(int)
 		_spec.AddField(FieldOrder, field.TypeInt, value)
 	}
-	if _u.mutation.OrderCleared() {
+	if _u.mutation.FieldCleared("order") {
 		_spec.ClearField(FieldOrder, field.TypeInt)
 	}
-	if value, ok := _u.mutation.OrderOption(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "order_option"); ok {
 		_spec.SetField(FieldOrderOption, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderOption(); ok {
+	if added, ok := _u.mutation.AddedField("order_option"); ok {
+		value := added.(int)
 		_spec.AddField(FieldOrderOption, field.TypeInt, value)
 	}
-	if _u.mutation.OrderOptionCleared() {
+	if _u.mutation.FieldCleared("order_option") {
 		_spec.ClearField(FieldOrderOption, field.TypeInt)
 	}
-	if value, ok := _u.mutation.GetOp(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "op"); ok {
 		_spec.SetField(FieldOp, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
@@ -318,8 +321,8 @@ func NewTaskUpdateOne(c Config, hooks []Hook, mutation *TaskMutation) *TaskUpdat
 
 // SetPriority sets the "priority" field.
 func (_u *TaskUpdateOne) SetPriority(v task.Priority) *TaskUpdateOne {
-	_u.mutation.ResetPriority()
-	_u.mutation.SetPriority(v)
+	_ = _u.mutation.ResetField("priority")
+	_ = _u.mutation.SetField("priority", v)
 	return _u
 }
 
@@ -333,25 +336,25 @@ func (_u *TaskUpdateOne) SetNillablePriority(v *task.Priority) *TaskUpdateOne {
 
 // AddPriority adds value to the "priority" field.
 func (_u *TaskUpdateOne) AddPriority(v task.Priority) *TaskUpdateOne {
-	_u.mutation.AddPriority(v)
+	_ = _u.mutation.AddField("priority", v)
 	return _u
 }
 
 // SetPriorities sets the "priorities" field.
 func (_u *TaskUpdateOne) SetPriorities(v map[string]task.Priority) *TaskUpdateOne {
-	_u.mutation.SetPriorities(v)
+	_ = _u.mutation.SetField("priorities", v)
 	return _u
 }
 
 // ClearPriorities clears the value of the "priorities" field.
 func (_u *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
-	_u.mutation.ClearPriorities()
+	_ = _u.mutation.ClearField("priorities")
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *TaskUpdateOne) SetName(v string) *TaskUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -365,13 +368,13 @@ func (_u *TaskUpdateOne) SetNillableName(v *string) *TaskUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *TaskUpdateOne) ClearName() *TaskUpdateOne {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwner sets the "owner" field.
 func (_u *TaskUpdateOne) SetOwner(v string) *TaskUpdateOne {
-	_u.mutation.SetOwner(v)
+	_ = _u.mutation.SetField("owner", v)
 	return _u
 }
 
@@ -385,14 +388,14 @@ func (_u *TaskUpdateOne) SetNillableOwner(v *string) *TaskUpdateOne {
 
 // ClearOwner clears the value of the "owner" field.
 func (_u *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearField("owner")
 	return _u
 }
 
 // SetOrder sets the "order" field.
 func (_u *TaskUpdateOne) SetOrder(v int) *TaskUpdateOne {
-	_u.mutation.ResetOrder()
-	_u.mutation.SetOrder(v)
+	_ = _u.mutation.ResetField("order")
+	_ = _u.mutation.SetField("order", v)
 	return _u
 }
 
@@ -406,20 +409,20 @@ func (_u *TaskUpdateOne) SetNillableOrder(v *int) *TaskUpdateOne {
 
 // AddOrder adds value to the "order" field.
 func (_u *TaskUpdateOne) AddOrder(v int) *TaskUpdateOne {
-	_u.mutation.AddOrder(v)
+	_ = _u.mutation.AddField("order", v)
 	return _u
 }
 
 // ClearOrder clears the value of the "order" field.
 func (_u *TaskUpdateOne) ClearOrder() *TaskUpdateOne {
-	_u.mutation.ClearOrder()
+	_ = _u.mutation.ClearField("order")
 	return _u
 }
 
 // SetOrderOption sets the "order_option" field.
 func (_u *TaskUpdateOne) SetOrderOption(v int) *TaskUpdateOne {
-	_u.mutation.ResetOrderOption()
-	_u.mutation.SetOrderOption(v)
+	_ = _u.mutation.ResetField("order_option")
+	_ = _u.mutation.SetField("order_option", v)
 	return _u
 }
 
@@ -433,19 +436,19 @@ func (_u *TaskUpdateOne) SetNillableOrderOption(v *int) *TaskUpdateOne {
 
 // AddOrderOption adds value to the "order_option" field.
 func (_u *TaskUpdateOne) AddOrderOption(v int) *TaskUpdateOne {
-	_u.mutation.AddOrderOption(v)
+	_ = _u.mutation.AddField("order_option", v)
 	return _u
 }
 
 // ClearOrderOption clears the value of the "order_option" field.
 func (_u *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne {
-	_u.mutation.ClearOrderOption()
+	_ = _u.mutation.ClearField("order_option")
 	return _u
 }
 
 // SetOp sets the "op" field.
 func (_u *TaskUpdateOne) SetOp(v string) *TaskUpdateOne {
-	_u.mutation.SetOpField(v)
+	_ = _u.mutation.SetField("op", v)
 	return _u
 }
 
@@ -464,7 +467,7 @@ func (_u *TaskUpdateOne) Mutation() *TaskMutation {
 
 // Where appends a list predicates to the TaskUpdate builder.
 func (_u *TaskUpdateOne) Where(ps ...predicate.Task) *TaskUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -504,12 +507,12 @@ func (_u *TaskUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *TaskUpdateOne) check() error {
-	if v, ok := _u.mutation.Priority(); ok {
+	if v, ok := entbuilder.GetField[task.Priority](_u.mutation, "priority"); ok {
 		if err := v.Validate(); err != nil {
 			return &ValidationError{Name: "priority", Err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.GetOp(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "op"); ok {
 		if err := OpValidator(v); err != nil {
 			return &ValidationError{Name: "op", Err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
 		}
@@ -528,10 +531,11 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Task.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -552,49 +556,52 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Priority(); ok {
+	if value, ok := entbuilder.GetField[task.Priority](_u.mutation, "priority"); ok {
 		_spec.SetField(FieldPriority, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedPriority(); ok {
+	if added, ok := _u.mutation.AddedField("priority"); ok {
+		value := added.(task.Priority)
 		_spec.AddField(FieldPriority, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Priorities(); ok {
+	if value, ok := entbuilder.GetField[map[string]task.Priority](_u.mutation, "priorities"); ok {
 		_spec.SetField(FieldPriorities, field.TypeJSON, value)
 	}
-	if _u.mutation.PrioritiesCleared() {
+	if _u.mutation.FieldCleared("priorities") {
 		_spec.ClearField(FieldPriorities, field.TypeJSON)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if value, ok := _u.mutation.Owner(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "owner"); ok {
 		_spec.SetField(FieldOwner, field.TypeString, value)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.FieldCleared("owner") {
 		_spec.ClearField(FieldOwner, field.TypeString)
 	}
-	if value, ok := _u.mutation.Order(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "order"); ok {
 		_spec.SetField(FieldOrder, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrder(); ok {
+	if added, ok := _u.mutation.AddedField("order"); ok {
+		value := added.(int)
 		_spec.AddField(FieldOrder, field.TypeInt, value)
 	}
-	if _u.mutation.OrderCleared() {
+	if _u.mutation.FieldCleared("order") {
 		_spec.ClearField(FieldOrder, field.TypeInt)
 	}
-	if value, ok := _u.mutation.OrderOption(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "order_option"); ok {
 		_spec.SetField(FieldOrderOption, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOrderOption(); ok {
+	if added, ok := _u.mutation.AddedField("order_option"); ok {
+		value := added.(int)
 		_spec.AddField(FieldOrderOption, field.TypeInt, value)
 	}
-	if _u.mutation.OrderOptionCleared() {
+	if _u.mutation.FieldCleared("order_option") {
 		_spec.ClearField(FieldOrderOption, field.TypeInt)
 	}
-	if value, ok := _u.mutation.GetOp(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "op"); ok {
 		_spec.SetField(FieldOp, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)

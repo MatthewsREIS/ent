@@ -103,7 +103,7 @@ func (c *BlogClient) DeleteOne(_m *Blog) *blog.BlogDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *BlogClient) DeleteOneID(id int) *blog.BlogDeleteOne {
 	mutation := NewBlogMutation(c.Config, OpDeleteOne, WithBlogID(id, nil))
-	mutation.Where(blog.ID(id))
+	mutation.WhereP(blog.ID(id))
 	return blog.NewBlogDeleteOne(blog.NewBlogDelete(c.Config, c.Hooks(), mutation))
 }
 

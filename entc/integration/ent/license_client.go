@@ -100,7 +100,7 @@ func (c *LicenseClient) DeleteOne(_m *License) *license.LicenseDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *LicenseClient) DeleteOneID(id int) *license.LicenseDeleteOne {
 	mutation := NewLicenseMutation(c.Config, OpDeleteOne, WithLicenseID(id, nil))
-	mutation.Where(license.ID(id))
+	mutation.WhereP(license.ID(id))
 	return license.NewLicenseDeleteOne(license.NewLicenseDelete(c.Config, c.Hooks(), mutation))
 }
 

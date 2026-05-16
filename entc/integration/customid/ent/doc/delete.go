@@ -30,7 +30,7 @@ func NewDocDelete(c Config, hooks []Hook, mutation *DocMutation) *DocDelete {
 
 // Where appends a list predicates to the DocDelete builder.
 func (_d *DocDelete) Where(ps ...predicate.Doc) *DocDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewDocDeleteOne(d *DocDelete) *DocDeleteOne {
 
 // Where appends a list predicates to the DocDelete builder.
 func (_d *DocDeleteOne) Where(ps ...predicate.Doc) *DocDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

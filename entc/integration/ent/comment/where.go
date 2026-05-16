@@ -9,7 +9,6 @@ package comment
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,140 +56,230 @@ func IDLTE(id int) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: UniqueInt — use where.EQ(FieldUniqueInt, v).
-func UniqueInt(v int) predicate.Comment { return where.EQ(FieldUniqueInt, v) }
+// UniqueInt applies equality check predicate on the "unique_int" field. It's identical to UniqueIntEQ.
+func UniqueInt(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldUniqueInt, v))
+}
 
-// Deprecated: UniqueFloat — use where.EQ(FieldUniqueFloat, v).
-func UniqueFloat(v float64) predicate.Comment { return where.EQ(FieldUniqueFloat, v) }
+// UniqueFloat applies equality check predicate on the "unique_float" field. It's identical to UniqueFloatEQ.
+func UniqueFloat(v float64) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldUniqueFloat, v))
+}
 
-// Deprecated: NillableInt — use where.EQ(FieldNillableInt, v).
-func NillableInt(v int) predicate.Comment { return where.EQ(FieldNillableInt, v) }
+// NillableInt applies equality check predicate on the "nillable_int" field. It's identical to NillableIntEQ.
+func NillableInt(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldNillableInt, v))
+}
 
-// Deprecated: Client — use where.EQ(FieldClient, v).
-func Client(v string) predicate.Comment { return where.EQ(FieldClient, v) }
+// Client applies equality check predicate on the "client" field. It's identical to ClientEQ.
+func Client(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldClient, v))
+}
 
-// Deprecated: UniqueIntEQ — use where.EQ(FieldUniqueInt, v).
-func UniqueIntEQ(v int) predicate.Comment { return where.EQ(FieldUniqueInt, v) }
+// UniqueIntEQ applies the EQ predicate on the "unique_int" field.
+func UniqueIntEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldUniqueInt, v))
+}
 
-// Deprecated: UniqueIntNEQ — use where.NEQ(FieldUniqueInt, v).
-func UniqueIntNEQ(v int) predicate.Comment { return where.NEQ(FieldUniqueInt, v) }
+// UniqueIntNEQ applies the NEQ predicate on the "unique_int" field.
+func UniqueIntNEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldUniqueInt, v))
+}
 
-// Deprecated: UniqueIntIn — use where.In(FieldUniqueInt, vs...).
-func UniqueIntIn(vs ...int) predicate.Comment { return where.In(FieldUniqueInt, vs...) }
+// UniqueIntIn applies the In predicate on the "unique_int" field.
+func UniqueIntIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldUniqueInt, vs...))
+}
 
-// Deprecated: UniqueIntNotIn — use where.NotIn(FieldUniqueInt, vs...).
-func UniqueIntNotIn(vs ...int) predicate.Comment { return where.NotIn(FieldUniqueInt, vs...) }
+// UniqueIntNotIn applies the NotIn predicate on the "unique_int" field.
+func UniqueIntNotIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldUniqueInt, vs...))
+}
 
-// Deprecated: UniqueIntGT — use where.GT(FieldUniqueInt, v).
-func UniqueIntGT(v int) predicate.Comment { return where.GT(FieldUniqueInt, v) }
+// UniqueIntGT applies the GT predicate on the "unique_int" field.
+func UniqueIntGT(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldUniqueInt, v))
+}
 
-// Deprecated: UniqueIntGTE — use where.GTE(FieldUniqueInt, v).
-func UniqueIntGTE(v int) predicate.Comment { return where.GTE(FieldUniqueInt, v) }
+// UniqueIntGTE applies the GTE predicate on the "unique_int" field.
+func UniqueIntGTE(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldUniqueInt, v))
+}
 
-// Deprecated: UniqueIntLT — use where.LT(FieldUniqueInt, v).
-func UniqueIntLT(v int) predicate.Comment { return where.LT(FieldUniqueInt, v) }
+// UniqueIntLT applies the LT predicate on the "unique_int" field.
+func UniqueIntLT(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldUniqueInt, v))
+}
 
-// Deprecated: UniqueIntLTE — use where.LTE(FieldUniqueInt, v).
-func UniqueIntLTE(v int) predicate.Comment { return where.LTE(FieldUniqueInt, v) }
+// UniqueIntLTE applies the LTE predicate on the "unique_int" field.
+func UniqueIntLTE(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldUniqueInt, v))
+}
 
-// Deprecated: UniqueFloatEQ — use where.EQ(FieldUniqueFloat, v).
-func UniqueFloatEQ(v float64) predicate.Comment { return where.EQ(FieldUniqueFloat, v) }
+// UniqueFloatEQ applies the EQ predicate on the "unique_float" field.
+func UniqueFloatEQ(v float64) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldUniqueFloat, v))
+}
 
-// Deprecated: UniqueFloatNEQ — use where.NEQ(FieldUniqueFloat, v).
-func UniqueFloatNEQ(v float64) predicate.Comment { return where.NEQ(FieldUniqueFloat, v) }
+// UniqueFloatNEQ applies the NEQ predicate on the "unique_float" field.
+func UniqueFloatNEQ(v float64) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldUniqueFloat, v))
+}
 
-// Deprecated: UniqueFloatIn — use where.In(FieldUniqueFloat, vs...).
-func UniqueFloatIn(vs ...float64) predicate.Comment { return where.In(FieldUniqueFloat, vs...) }
+// UniqueFloatIn applies the In predicate on the "unique_float" field.
+func UniqueFloatIn(vs ...float64) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldUniqueFloat, vs...))
+}
 
-// Deprecated: UniqueFloatNotIn — use where.NotIn(FieldUniqueFloat, vs...).
-func UniqueFloatNotIn(vs ...float64) predicate.Comment { return where.NotIn(FieldUniqueFloat, vs...) }
+// UniqueFloatNotIn applies the NotIn predicate on the "unique_float" field.
+func UniqueFloatNotIn(vs ...float64) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldUniqueFloat, vs...))
+}
 
-// Deprecated: UniqueFloatGT — use where.GT(FieldUniqueFloat, v).
-func UniqueFloatGT(v float64) predicate.Comment { return where.GT(FieldUniqueFloat, v) }
+// UniqueFloatGT applies the GT predicate on the "unique_float" field.
+func UniqueFloatGT(v float64) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldUniqueFloat, v))
+}
 
-// Deprecated: UniqueFloatGTE — use where.GTE(FieldUniqueFloat, v).
-func UniqueFloatGTE(v float64) predicate.Comment { return where.GTE(FieldUniqueFloat, v) }
+// UniqueFloatGTE applies the GTE predicate on the "unique_float" field.
+func UniqueFloatGTE(v float64) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldUniqueFloat, v))
+}
 
-// Deprecated: UniqueFloatLT — use where.LT(FieldUniqueFloat, v).
-func UniqueFloatLT(v float64) predicate.Comment { return where.LT(FieldUniqueFloat, v) }
+// UniqueFloatLT applies the LT predicate on the "unique_float" field.
+func UniqueFloatLT(v float64) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldUniqueFloat, v))
+}
 
-// Deprecated: UniqueFloatLTE — use where.LTE(FieldUniqueFloat, v).
-func UniqueFloatLTE(v float64) predicate.Comment { return where.LTE(FieldUniqueFloat, v) }
+// UniqueFloatLTE applies the LTE predicate on the "unique_float" field.
+func UniqueFloatLTE(v float64) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldUniqueFloat, v))
+}
 
-// Deprecated: NillableIntEQ — use where.EQ(FieldNillableInt, v).
-func NillableIntEQ(v int) predicate.Comment { return where.EQ(FieldNillableInt, v) }
+// NillableIntEQ applies the EQ predicate on the "nillable_int" field.
+func NillableIntEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldNillableInt, v))
+}
 
-// Deprecated: NillableIntNEQ — use where.NEQ(FieldNillableInt, v).
-func NillableIntNEQ(v int) predicate.Comment { return where.NEQ(FieldNillableInt, v) }
+// NillableIntNEQ applies the NEQ predicate on the "nillable_int" field.
+func NillableIntNEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldNillableInt, v))
+}
 
-// Deprecated: NillableIntIn — use where.In(FieldNillableInt, vs...).
-func NillableIntIn(vs ...int) predicate.Comment { return where.In(FieldNillableInt, vs...) }
+// NillableIntIn applies the In predicate on the "nillable_int" field.
+func NillableIntIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldNillableInt, vs...))
+}
 
-// Deprecated: NillableIntNotIn — use where.NotIn(FieldNillableInt, vs...).
-func NillableIntNotIn(vs ...int) predicate.Comment { return where.NotIn(FieldNillableInt, vs...) }
+// NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
+func NillableIntNotIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldNillableInt, vs...))
+}
 
-// Deprecated: NillableIntGT — use where.GT(FieldNillableInt, v).
-func NillableIntGT(v int) predicate.Comment { return where.GT(FieldNillableInt, v) }
+// NillableIntGT applies the GT predicate on the "nillable_int" field.
+func NillableIntGT(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldNillableInt, v))
+}
 
-// Deprecated: NillableIntGTE — use where.GTE(FieldNillableInt, v).
-func NillableIntGTE(v int) predicate.Comment { return where.GTE(FieldNillableInt, v) }
+// NillableIntGTE applies the GTE predicate on the "nillable_int" field.
+func NillableIntGTE(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldNillableInt, v))
+}
 
-// Deprecated: NillableIntLT — use where.LT(FieldNillableInt, v).
-func NillableIntLT(v int) predicate.Comment { return where.LT(FieldNillableInt, v) }
+// NillableIntLT applies the LT predicate on the "nillable_int" field.
+func NillableIntLT(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldNillableInt, v))
+}
 
-// Deprecated: NillableIntLTE — use where.LTE(FieldNillableInt, v).
-func NillableIntLTE(v int) predicate.Comment { return where.LTE(FieldNillableInt, v) }
+// NillableIntLTE applies the LTE predicate on the "nillable_int" field.
+func NillableIntLTE(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldNillableInt, v))
+}
 
-// Deprecated: NillableIntIsNil — use where.IsNull(FieldNillableInt).
-func NillableIntIsNil() predicate.Comment { return where.IsNull(FieldNillableInt) }
+// NillableIntIsNil applies the IsNil predicate on the "nillable_int" field.
+func NillableIntIsNil() predicate.Comment {
+	return predicate.Comment(sql.FieldIsNull(FieldNillableInt))
+}
 
-// Deprecated: NillableIntNotNil — use where.NotNull(FieldNillableInt).
-func NillableIntNotNil() predicate.Comment { return where.NotNull(FieldNillableInt) }
+// NillableIntNotNil applies the NotNil predicate on the "nillable_int" field.
+func NillableIntNotNil() predicate.Comment {
+	return predicate.Comment(sql.FieldNotNull(FieldNillableInt))
+}
 
-// Deprecated: TableEQ — use where.EQ(FieldTable, v).
-func TableEQ(v string) predicate.Comment { return where.EQ(FieldTable, v) }
+// TableEQ applies the EQ predicate on the "table" field.
+func TableEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldTable, v))
+}
 
-// Deprecated: TableNEQ — use where.NEQ(FieldTable, v).
-func TableNEQ(v string) predicate.Comment { return where.NEQ(FieldTable, v) }
+// TableNEQ applies the NEQ predicate on the "table" field.
+func TableNEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldTable, v))
+}
 
-// Deprecated: TableIn — use where.In(FieldTable, vs...).
-func TableIn(vs ...string) predicate.Comment { return where.In(FieldTable, vs...) }
+// TableIn applies the In predicate on the "table" field.
+func TableIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldTable, vs...))
+}
 
-// Deprecated: TableNotIn — use where.NotIn(FieldTable, vs...).
-func TableNotIn(vs ...string) predicate.Comment { return where.NotIn(FieldTable, vs...) }
+// TableNotIn applies the NotIn predicate on the "table" field.
+func TableNotIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldTable, vs...))
+}
 
-// Deprecated: TableGT — use where.GT(FieldTable, v).
-func TableGT(v string) predicate.Comment { return where.GT(FieldTable, v) }
+// TableGT applies the GT predicate on the "table" field.
+func TableGT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldTable, v))
+}
 
-// Deprecated: TableGTE — use where.GTE(FieldTable, v).
-func TableGTE(v string) predicate.Comment { return where.GTE(FieldTable, v) }
+// TableGTE applies the GTE predicate on the "table" field.
+func TableGTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldTable, v))
+}
 
-// Deprecated: TableLT — use where.LT(FieldTable, v).
-func TableLT(v string) predicate.Comment { return where.LT(FieldTable, v) }
+// TableLT applies the LT predicate on the "table" field.
+func TableLT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldTable, v))
+}
 
-// Deprecated: TableLTE — use where.LTE(FieldTable, v).
-func TableLTE(v string) predicate.Comment { return where.LTE(FieldTable, v) }
+// TableLTE applies the LTE predicate on the "table" field.
+func TableLTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldTable, v))
+}
 
-// Deprecated: TableContains — use where.Contains(FieldTable, v).
-func TableContains(v string) predicate.Comment { return where.Contains(FieldTable, v) }
+// TableContains applies the Contains predicate on the "table" field.
+func TableContains(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContains(FieldTable, v))
+}
 
-// Deprecated: TableHasPrefix — use where.HasPrefix(FieldTable, v).
-func TableHasPrefix(v string) predicate.Comment { return where.HasPrefix(FieldTable, v) }
+// TableHasPrefix applies the HasPrefix predicate on the "table" field.
+func TableHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasPrefix(FieldTable, v))
+}
 
-// Deprecated: TableHasSuffix — use where.HasSuffix(FieldTable, v).
-func TableHasSuffix(v string) predicate.Comment { return where.HasSuffix(FieldTable, v) }
+// TableHasSuffix applies the HasSuffix predicate on the "table" field.
+func TableHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasSuffix(FieldTable, v))
+}
 
-// Deprecated: TableIsNil — use where.IsNull(FieldTable).
-func TableIsNil() predicate.Comment { return where.IsNull(FieldTable) }
+// TableIsNil applies the IsNil predicate on the "table" field.
+func TableIsNil() predicate.Comment {
+	return predicate.Comment(sql.FieldIsNull(FieldTable))
+}
 
-// Deprecated: TableNotNil — use where.NotNull(FieldTable).
-func TableNotNil() predicate.Comment { return where.NotNull(FieldTable) }
+// TableNotNil applies the NotNil predicate on the "table" field.
+func TableNotNil() predicate.Comment {
+	return predicate.Comment(sql.FieldNotNull(FieldTable))
+}
 
-// Deprecated: TableEqualFold — use where.EqualFold(FieldTable, v).
-func TableEqualFold(v string) predicate.Comment { return where.EqualFold(FieldTable, v) }
+// TableEqualFold applies the EqualFold predicate on the "table" field.
+func TableEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldTable, v))
+}
 
-// Deprecated: TableContainsFold — use where.ContainsFold(FieldTable, v).
-func TableContainsFold(v string) predicate.Comment { return where.ContainsFold(FieldTable, v) }
+// TableContainsFold applies the ContainsFold predicate on the "table" field.
+func TableContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldTable, v))
+}
 
 // DirIsNil applies the IsNil predicate on the "dir" field.
 func DirIsNil() predicate.Comment {
@@ -202,50 +291,80 @@ func DirNotNil() predicate.Comment {
 	return predicate.Comment(sql.FieldNotNull(FieldDir))
 }
 
-// Deprecated: ClientEQ — use where.EQ(FieldClient, v).
-func ClientEQ(v string) predicate.Comment { return where.EQ(FieldClient, v) }
+// ClientEQ applies the EQ predicate on the "client" field.
+func ClientEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldClient, v))
+}
 
-// Deprecated: ClientNEQ — use where.NEQ(FieldClient, v).
-func ClientNEQ(v string) predicate.Comment { return where.NEQ(FieldClient, v) }
+// ClientNEQ applies the NEQ predicate on the "client" field.
+func ClientNEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldClient, v))
+}
 
-// Deprecated: ClientIn — use where.In(FieldClient, vs...).
-func ClientIn(vs ...string) predicate.Comment { return where.In(FieldClient, vs...) }
+// ClientIn applies the In predicate on the "client" field.
+func ClientIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldClient, vs...))
+}
 
-// Deprecated: ClientNotIn — use where.NotIn(FieldClient, vs...).
-func ClientNotIn(vs ...string) predicate.Comment { return where.NotIn(FieldClient, vs...) }
+// ClientNotIn applies the NotIn predicate on the "client" field.
+func ClientNotIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldClient, vs...))
+}
 
-// Deprecated: ClientGT — use where.GT(FieldClient, v).
-func ClientGT(v string) predicate.Comment { return where.GT(FieldClient, v) }
+// ClientGT applies the GT predicate on the "client" field.
+func ClientGT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldClient, v))
+}
 
-// Deprecated: ClientGTE — use where.GTE(FieldClient, v).
-func ClientGTE(v string) predicate.Comment { return where.GTE(FieldClient, v) }
+// ClientGTE applies the GTE predicate on the "client" field.
+func ClientGTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldClient, v))
+}
 
-// Deprecated: ClientLT — use where.LT(FieldClient, v).
-func ClientLT(v string) predicate.Comment { return where.LT(FieldClient, v) }
+// ClientLT applies the LT predicate on the "client" field.
+func ClientLT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldClient, v))
+}
 
-// Deprecated: ClientLTE — use where.LTE(FieldClient, v).
-func ClientLTE(v string) predicate.Comment { return where.LTE(FieldClient, v) }
+// ClientLTE applies the LTE predicate on the "client" field.
+func ClientLTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldClient, v))
+}
 
-// Deprecated: ClientContains — use where.Contains(FieldClient, v).
-func ClientContains(v string) predicate.Comment { return where.Contains(FieldClient, v) }
+// ClientContains applies the Contains predicate on the "client" field.
+func ClientContains(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContains(FieldClient, v))
+}
 
-// Deprecated: ClientHasPrefix — use where.HasPrefix(FieldClient, v).
-func ClientHasPrefix(v string) predicate.Comment { return where.HasPrefix(FieldClient, v) }
+// ClientHasPrefix applies the HasPrefix predicate on the "client" field.
+func ClientHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasPrefix(FieldClient, v))
+}
 
-// Deprecated: ClientHasSuffix — use where.HasSuffix(FieldClient, v).
-func ClientHasSuffix(v string) predicate.Comment { return where.HasSuffix(FieldClient, v) }
+// ClientHasSuffix applies the HasSuffix predicate on the "client" field.
+func ClientHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasSuffix(FieldClient, v))
+}
 
-// Deprecated: ClientIsNil — use where.IsNull(FieldClient).
-func ClientIsNil() predicate.Comment { return where.IsNull(FieldClient) }
+// ClientIsNil applies the IsNil predicate on the "client" field.
+func ClientIsNil() predicate.Comment {
+	return predicate.Comment(sql.FieldIsNull(FieldClient))
+}
 
-// Deprecated: ClientNotNil — use where.NotNull(FieldClient).
-func ClientNotNil() predicate.Comment { return where.NotNull(FieldClient) }
+// ClientNotNil applies the NotNil predicate on the "client" field.
+func ClientNotNil() predicate.Comment {
+	return predicate.Comment(sql.FieldNotNull(FieldClient))
+}
 
-// Deprecated: ClientEqualFold — use where.EqualFold(FieldClient, v).
-func ClientEqualFold(v string) predicate.Comment { return where.EqualFold(FieldClient, v) }
+// ClientEqualFold applies the EqualFold predicate on the "client" field.
+func ClientEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldClient, v))
+}
 
-// Deprecated: ClientContainsFold — use where.ContainsFold(FieldClient, v).
-func ClientContainsFold(v string) predicate.Comment { return where.ContainsFold(FieldClient, v) }
+// ClientContainsFold applies the ContainsFold predicate on the "client" field.
+func ClientContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldClient, v))
+}
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Comment) predicate.Comment {

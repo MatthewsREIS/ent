@@ -103,7 +103,7 @@ func (c *ParentClient) DeleteOne(_m *Parent) *parent.ParentDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ParentClient) DeleteOneID(id int) *parent.ParentDeleteOne {
 	mutation := NewParentMutation(c.Config, OpDeleteOne, WithParentID(id, nil))
-	mutation.Where(parent.ID(id))
+	mutation.WhereP(parent.ID(id))
 	return parent.NewParentDeleteOne(parent.NewParentDelete(c.Config, c.Hooks(), mutation))
 }
 

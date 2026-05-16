@@ -32,7 +32,7 @@ func NewParentDelete(c Config, hooks []Hook, mutation *ParentMutation) *ParentDe
 
 // Where appends a list predicates to the ParentDelete builder.
 func (_d *ParentDelete) Where(ps ...predicate.Parent) *ParentDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -89,7 +89,7 @@ func NewParentDeleteOne(d *ParentDelete) *ParentDeleteOne {
 
 // Where appends a list predicates to the ParentDelete builder.
 func (_d *ParentDeleteOne) Where(ps ...predicate.Parent) *ParentDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

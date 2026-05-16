@@ -30,7 +30,7 @@ func NewRevisionDelete(c Config, hooks []Hook, mutation *RevisionMutation) *Revi
 
 // Where appends a list predicates to the RevisionDelete builder.
 func (_d *RevisionDelete) Where(ps ...predicate.Revision) *RevisionDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewRevisionDeleteOne(d *RevisionDelete) *RevisionDeleteOne {
 
 // Where appends a list predicates to the RevisionDelete builder.
 func (_d *RevisionDeleteOne) Where(ps ...predicate.Revision) *RevisionDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

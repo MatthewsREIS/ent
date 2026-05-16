@@ -30,7 +30,7 @@ func NewMixinIDDelete(c Config, hooks []Hook, mutation *MixinIDMutation) *MixinI
 
 // Where appends a list predicates to the MixinIDDelete builder.
 func (_d *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewMixinIDDeleteOne(d *MixinIDDelete) *MixinIDDeleteOne {
 
 // Where appends a list predicates to the MixinIDDelete builder.
 func (_d *MixinIDDeleteOne) Where(ps ...predicate.MixinID) *MixinIDDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

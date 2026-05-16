@@ -30,7 +30,7 @@ func NewGroupTagDelete(c Config, hooks []Hook, mutation *GroupTagMutation) *Grou
 
 // Where appends a list predicates to the GroupTagDelete builder.
 func (_d *GroupTagDelete) Where(ps ...predicate.GroupTag) *GroupTagDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewGroupTagDeleteOne(d *GroupTagDelete) *GroupTagDeleteOne {
 
 // Where appends a list predicates to the GroupTagDelete builder.
 func (_d *GroupTagDeleteOne) Where(ps ...predicate.GroupTag) *GroupTagDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

@@ -32,13 +32,13 @@ func NewTeamUpdate(c Config, hooks []Hook, mutation *TeamMutation) *TeamUpdate {
 
 // Where appends a list predicates to the TeamUpdate builder.
 func (_u *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *TeamUpdate) SetName(v string) *TeamUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -52,13 +52,13 @@ func (_u *TeamUpdate) SetNillableName(v *string) *TeamUpdate {
 
 // AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
 func (_u *TeamUpdate) AddTaskIDs(ids ...int) *TeamUpdate {
-	_u.mutation.AddTaskIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tasks", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (_u *TeamUpdate) AddUserIDs(ids ...int) *TeamUpdate {
-	_u.mutation.AddUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -69,25 +69,25 @@ func (_u *TeamUpdate) Mutation() *TeamMutation {
 
 // ClearTasks clears all "tasks" edges to the Task entity.
 func (_u *TeamUpdate) ClearTasks() *TeamUpdate {
-	_u.mutation.ClearTasks()
+	_ = _u.mutation.ClearEdge("tasks")
 	return _u
 }
 
 // RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
 func (_u *TeamUpdate) RemoveTaskIDs(ids ...int) *TeamUpdate {
-	_u.mutation.RemoveTaskIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tasks", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearUsers clears all "users" edges to the User entity.
 func (_u *TeamUpdate) ClearUsers() *TeamUpdate {
-	_u.mutation.ClearUsers()
+	_ = _u.mutation.ClearEdge("users")
 	return _u
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (_u *TeamUpdate) RemoveUserIDs(ids ...int) *TeamUpdate {
-	_u.mutation.RemoveUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -120,7 +120,7 @@ func (_u *TeamUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *TeamUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`ent: validator failed for field "Team.name": %w`, err)}
 		}
@@ -140,10 +140,10 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.TasksCleared() {
+	if _u.mutation.EdgeCleared("tasks") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -156,7 +156,7 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !_u.mutation.TasksCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tasks"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tasks") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -172,7 +172,7 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TasksIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tasks"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -188,7 +188,7 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UsersCleared() {
+	if _u.mutation.EdgeCleared("users") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -201,7 +201,7 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUsersIDs(); len(nodes) > 0 && !_u.mutation.UsersCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("users"); len(nodes) > 0 && !_u.mutation.EdgeCleared("users") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -217,7 +217,7 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("users"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -260,7 +260,7 @@ func NewTeamUpdateOne(c Config, hooks []Hook, mutation *TeamMutation) *TeamUpdat
 
 // SetName sets the "name" field.
 func (_u *TeamUpdateOne) SetName(v string) *TeamUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -274,13 +274,13 @@ func (_u *TeamUpdateOne) SetNillableName(v *string) *TeamUpdateOne {
 
 // AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
 func (_u *TeamUpdateOne) AddTaskIDs(ids ...int) *TeamUpdateOne {
-	_u.mutation.AddTaskIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tasks", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (_u *TeamUpdateOne) AddUserIDs(ids ...int) *TeamUpdateOne {
-	_u.mutation.AddUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -291,31 +291,31 @@ func (_u *TeamUpdateOne) Mutation() *TeamMutation {
 
 // ClearTasks clears all "tasks" edges to the Task entity.
 func (_u *TeamUpdateOne) ClearTasks() *TeamUpdateOne {
-	_u.mutation.ClearTasks()
+	_ = _u.mutation.ClearEdge("tasks")
 	return _u
 }
 
 // RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
 func (_u *TeamUpdateOne) RemoveTaskIDs(ids ...int) *TeamUpdateOne {
-	_u.mutation.RemoveTaskIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tasks", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearUsers clears all "users" edges to the User entity.
 func (_u *TeamUpdateOne) ClearUsers() *TeamUpdateOne {
-	_u.mutation.ClearUsers()
+	_ = _u.mutation.ClearEdge("users")
 	return _u
 }
 
 // RemoveUserIDs removes the "users" edge to User entities by IDs.
 func (_u *TeamUpdateOne) RemoveUserIDs(ids ...int) *TeamUpdateOne {
-	_u.mutation.RemoveUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the TeamUpdate builder.
 func (_u *TeamUpdateOne) Where(ps ...predicate.Team) *TeamUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -355,7 +355,7 @@ func (_u *TeamUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *TeamUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`ent: validator failed for field "Team.name": %w`, err)}
 		}
@@ -368,10 +368,11 @@ func (_u *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Team.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -392,10 +393,10 @@ func (_u *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.TasksCleared() {
+	if _u.mutation.EdgeCleared("tasks") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -408,7 +409,7 @@ func (_u *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !_u.mutation.TasksCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tasks"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tasks") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -424,7 +425,7 @@ func (_u *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TasksIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tasks"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -440,7 +441,7 @@ func (_u *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UsersCleared() {
+	if _u.mutation.EdgeCleared("users") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -453,7 +454,7 @@ func (_u *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUsersIDs(); len(nodes) > 0 && !_u.mutation.UsersCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("users"); len(nodes) > 0 && !_u.mutation.EdgeCleared("users") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -469,7 +470,7 @@ func (_u *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("users"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,

@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ItemUpdate is the builder for updating Item entities.
@@ -33,13 +34,13 @@ func NewItemUpdate(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdate {
 
 // Where appends a list predicates to the ItemUpdate builder.
 func (_u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *ItemUpdate) SetText(v string) *ItemUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -53,7 +54,7 @@ func (_u *ItemUpdate) SetNillableText(v *string) *ItemUpdate {
 
 // ClearText clears the value of the "text" field.
 func (_u *ItemUpdate) ClearText() *ItemUpdate {
-	_u.mutation.ClearText()
+	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -91,7 +92,7 @@ func (_u *ItemUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ItemUpdate) check() error {
-	if v, ok := _u.mutation.Text(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		if err := TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", Err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
@@ -175,7 +176,7 @@ func NewItemUpdateOne(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdat
 
 // SetText sets the "text" field.
 func (_u *ItemUpdateOne) SetText(v string) *ItemUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -189,7 +190,7 @@ func (_u *ItemUpdateOne) SetNillableText(v *string) *ItemUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *ItemUpdateOne) ClearText() *ItemUpdateOne {
-	_u.mutation.ClearText()
+	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -200,7 +201,7 @@ func (_u *ItemUpdateOne) Mutation() *ItemMutation {
 
 // Where appends a list predicates to the ItemUpdate builder.
 func (_u *ItemUpdateOne) Where(ps ...predicate.Item) *ItemUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -240,7 +241,7 @@ func (_u *ItemUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ItemUpdateOne) check() error {
-	if v, ok := _u.mutation.Text(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		if err := TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", Err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}

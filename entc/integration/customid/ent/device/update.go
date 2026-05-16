@@ -33,13 +33,13 @@ func NewDeviceUpdate(c Config, hooks []Hook, mutation *DeviceMutation) *DeviceUp
 
 // Where appends a list predicates to the DeviceUpdate builder.
 func (_u *DeviceUpdate) Where(ps ...predicate.Device) *DeviceUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
 func (_u *DeviceUpdate) SetActiveSessionID(id schema.ID) *DeviceUpdate {
-	_u.mutation.SetActiveSessionID(id)
+	_ = _u.mutation.SetEdgeID("active_session", id)
 	return _u
 }
 
@@ -53,7 +53,7 @@ func (_u *DeviceUpdate) SetNillableActiveSessionID(id *schema.ID) *DeviceUpdate 
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
 func (_u *DeviceUpdate) AddSessionIDs(ids ...schema.ID) *DeviceUpdate {
-	_u.mutation.AddSessionIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("sessions", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -64,19 +64,19 @@ func (_u *DeviceUpdate) Mutation() *DeviceMutation {
 
 // ClearActiveSession clears the "active_session" edge to the Session entity.
 func (_u *DeviceUpdate) ClearActiveSession() *DeviceUpdate {
-	_u.mutation.ClearActiveSession()
+	_ = _u.mutation.ClearEdge("active_session")
 	return _u
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
 func (_u *DeviceUpdate) ClearSessions() *DeviceUpdate {
-	_u.mutation.ClearSessions()
+	_ = _u.mutation.ClearEdge("sessions")
 	return _u
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
 func (_u *DeviceUpdate) RemoveSessionIDs(ids ...schema.ID) *DeviceUpdate {
-	_u.mutation.RemoveSessionIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("sessions", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -116,7 +116,7 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.ActiveSessionCleared() {
+	if _u.mutation.EdgeCleared("active_session") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -129,7 +129,7 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ActiveSessionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("active_session"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -145,7 +145,7 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SessionsCleared() {
+	if _u.mutation.EdgeCleared("sessions") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -158,7 +158,7 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("sessions"); len(nodes) > 0 && !_u.mutation.EdgeCleared("sessions") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -174,7 +174,7 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("sessions"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -217,7 +217,7 @@ func NewDeviceUpdateOne(c Config, hooks []Hook, mutation *DeviceMutation) *Devic
 
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
 func (_u *DeviceUpdateOne) SetActiveSessionID(id schema.ID) *DeviceUpdateOne {
-	_u.mutation.SetActiveSessionID(id)
+	_ = _u.mutation.SetEdgeID("active_session", id)
 	return _u
 }
 
@@ -231,7 +231,7 @@ func (_u *DeviceUpdateOne) SetNillableActiveSessionID(id *schema.ID) *DeviceUpda
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
 func (_u *DeviceUpdateOne) AddSessionIDs(ids ...schema.ID) *DeviceUpdateOne {
-	_u.mutation.AddSessionIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("sessions", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -242,25 +242,25 @@ func (_u *DeviceUpdateOne) Mutation() *DeviceMutation {
 
 // ClearActiveSession clears the "active_session" edge to the Session entity.
 func (_u *DeviceUpdateOne) ClearActiveSession() *DeviceUpdateOne {
-	_u.mutation.ClearActiveSession()
+	_ = _u.mutation.ClearEdge("active_session")
 	return _u
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
 func (_u *DeviceUpdateOne) ClearSessions() *DeviceUpdateOne {
-	_u.mutation.ClearSessions()
+	_ = _u.mutation.ClearEdge("sessions")
 	return _u
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
 func (_u *DeviceUpdateOne) RemoveSessionIDs(ids ...schema.ID) *DeviceUpdateOne {
-	_u.mutation.RemoveSessionIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("sessions", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the DeviceUpdate builder.
 func (_u *DeviceUpdateOne) Where(ps ...predicate.Device) *DeviceUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -300,10 +300,11 @@ func (_u *DeviceUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeBytes))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Device.id" for update`)}
 	}
+	id := idAny.(schema.ID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -324,7 +325,7 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 			}
 		}
 	}
-	if _u.mutation.ActiveSessionCleared() {
+	if _u.mutation.EdgeCleared("active_session") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -337,7 +338,7 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ActiveSessionIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("active_session"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -353,7 +354,7 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SessionsCleared() {
+	if _u.mutation.EdgeCleared("sessions") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -366,7 +367,7 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("sessions"); len(nodes) > 0 && !_u.mutation.EdgeCleared("sessions") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -382,7 +383,7 @@ func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("sessions"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

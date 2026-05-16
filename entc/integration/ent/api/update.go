@@ -33,7 +33,7 @@ func NewAPIUpdate(c Config, hooks []Hook, mutation *APIMutation) *APIUpdate {
 
 // Where appends a list predicates to the APIUpdate builder.
 func (_u *APIUpdate) Where(ps ...predicate.Api) *APIUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -118,7 +118,7 @@ func (_u *APIUpdateOne) Mutation() *APIMutation {
 
 // Where appends a list predicates to the APIUpdate builder.
 func (_u *APIUpdateOne) Where(ps ...predicate.Api) *APIUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -164,10 +164,11 @@ func (_u *APIUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *APIUpda
 
 func (_u *APIUpdateOne) sqlSave(ctx context.Context) (_node *Api, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Api.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -30,7 +30,7 @@ func NewAPIUpdate(c Config, hooks []Hook, mutation *APIMutation) *APIUpdate {
 
 // Where appends a list predicates to the APIUpdate builder.
 func (_u *APIUpdate) Where(ps ...predicate.Api) *APIUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -112,7 +112,7 @@ func (_u *APIUpdateOne) Mutation() *APIMutation {
 
 // Where appends a list predicates to the APIUpdate builder.
 func (_u *APIUpdateOne) Where(ps ...predicate.Api) *APIUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 

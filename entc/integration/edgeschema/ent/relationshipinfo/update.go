@@ -32,13 +32,13 @@ func NewRelationshipInfoUpdate(c Config, hooks []Hook, mutation *RelationshipInf
 
 // Where appends a list predicates to the RelationshipInfoUpdate builder.
 func (_u *RelationshipInfoUpdate) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *RelationshipInfoUpdate) SetText(v string) *RelationshipInfoUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -91,7 +91,7 @@ func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (_node int, err e
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -121,7 +121,7 @@ func NewRelationshipInfoUpdateOne(c Config, hooks []Hook, mutation *Relationship
 
 // SetText sets the "text" field.
 func (_u *RelationshipInfoUpdateOne) SetText(v string) *RelationshipInfoUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -140,7 +140,7 @@ func (_u *RelationshipInfoUpdateOne) Mutation() *RelationshipInfoMutation {
 
 // Where appends a list predicates to the RelationshipInfoUpdate builder.
 func (_u *RelationshipInfoUpdateOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -180,10 +180,11 @@ func (_u *RelationshipInfoUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *RelationshipInfo, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "RelationshipInfo.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -204,7 +205,7 @@ func (_u *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *Relati
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
 	_node = &RelationshipInfo{Config: _u.Config}

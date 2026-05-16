@@ -30,7 +30,7 @@ func NewNoteDelete(c Config, hooks []Hook, mutation *NoteMutation) *NoteDelete {
 
 // Where appends a list predicates to the NoteDelete builder.
 func (_d *NoteDelete) Where(ps ...predicate.Note) *NoteDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewNoteDeleteOne(d *NoteDelete) *NoteDeleteOne {
 
 // Where appends a list predicates to the NoteDelete builder.
 func (_d *NoteDeleteOne) Where(ps ...predicate.Note) *NoteDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

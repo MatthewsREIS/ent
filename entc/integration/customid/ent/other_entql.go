@@ -25,7 +25,7 @@ func (_q *OtherQuery) Filter() *OtherFilter {
 
 // NewOtherFilterForMutation creates a new OtherFilter for the given mutation.
 func NewOtherFilterForMutation(m *OtherMutation) *OtherFilter {
-	return &OtherFilter{Config: m.Config, predicateAdder: m}
+	return &OtherFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // OtherFilter provides a generic filtering capability at runtime for OtherQuery.

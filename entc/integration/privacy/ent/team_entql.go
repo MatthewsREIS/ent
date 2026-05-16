@@ -27,7 +27,7 @@ func (_q *TeamQuery) Filter() *TeamFilter {
 
 // NewTeamFilterForMutation creates a new TeamFilter for the given mutation.
 func NewTeamFilterForMutation(m *TeamMutation) *TeamFilter {
-	return &TeamFilter{Config: m.Config, predicateAdder: m}
+	return &TeamFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // TeamFilter provides a generic filtering capability at runtime for TeamQuery.

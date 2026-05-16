@@ -104,7 +104,7 @@ func (c *DeviceClient) DeleteOne(_m *Device) *device.DeviceDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *DeviceClient) DeleteOneID(id schema.ID) *device.DeviceDeleteOne {
 	mutation := NewDeviceMutation(c.Config, OpDeleteOne, WithDeviceID(id, nil))
-	mutation.Where(device.ID(id))
+	mutation.WhereP(device.ID(id))
 	return device.NewDeviceDeleteOne(device.NewDeviceDelete(c.Config, c.Hooks(), mutation))
 }
 

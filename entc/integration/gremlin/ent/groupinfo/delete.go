@@ -30,7 +30,7 @@ func NewGroupInfoDelete(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 
 // Where appends a list predicates to the GroupInfoDelete builder.
 func (_d *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -78,7 +78,7 @@ func NewGroupInfoDeleteOne(d *GroupInfoDelete) *GroupInfoDeleteOne {
 
 // Where appends a list predicates to the GroupInfoDelete builder.
 func (_d *GroupInfoDeleteOne) Where(ps ...predicate.GroupInfo) *GroupInfoDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

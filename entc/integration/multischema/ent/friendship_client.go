@@ -103,7 +103,7 @@ func (c *FriendshipClient) DeleteOne(_m *Friendship) *friendship.FriendshipDelet
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FriendshipClient) DeleteOneID(id int) *friendship.FriendshipDeleteOne {
 	mutation := NewFriendshipMutation(c.Config, OpDeleteOne, WithFriendshipID(id, nil))
-	mutation.Where(friendship.ID(id))
+	mutation.WhereP(friendship.ID(id))
 	return friendship.NewFriendshipDeleteOne(friendship.NewFriendshipDelete(c.Config, c.Hooks(), mutation))
 }
 

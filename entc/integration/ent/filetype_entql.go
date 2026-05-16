@@ -27,7 +27,7 @@ func (_q *FileTypeQuery) Filter() *FileTypeFilter {
 
 // NewFileTypeFilterForMutation creates a new FileTypeFilter for the given mutation.
 func NewFileTypeFilterForMutation(m *FileTypeMutation) *FileTypeFilter {
-	return &FileTypeFilter{Config: m.Config, predicateAdder: m}
+	return &FileTypeFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // FileTypeFilter provides a generic filtering capability at runtime for FileTypeQuery.

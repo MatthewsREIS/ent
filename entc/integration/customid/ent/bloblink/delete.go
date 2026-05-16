@@ -29,7 +29,7 @@ func NewBlobLinkDelete(c Config, hooks []Hook, mutation *BlobLinkMutation) *Blob
 
 // Where appends a list predicates to the BlobLinkDelete builder.
 func (_d *BlobLinkDelete) Where(ps ...predicate.BlobLink) *BlobLinkDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -76,7 +76,7 @@ func NewBlobLinkDeleteOne(d *BlobLinkDelete) *BlobLinkDeleteOne {
 
 // Where appends a list predicates to the BlobLinkDelete builder.
 func (_d *BlobLinkDeleteOne) Where(ps ...predicate.BlobLink) *BlobLinkDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

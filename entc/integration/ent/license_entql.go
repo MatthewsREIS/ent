@@ -25,7 +25,7 @@ func (_q *LicenseQuery) Filter() *LicenseFilter {
 
 // NewLicenseFilterForMutation creates a new LicenseFilter for the given mutation.
 func NewLicenseFilterForMutation(m *LicenseMutation) *LicenseFilter {
-	return &LicenseFilter{Config: m.Config, predicateAdder: m}
+	return &LicenseFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // LicenseFilter provides a generic filtering capability at runtime for LicenseQuery.

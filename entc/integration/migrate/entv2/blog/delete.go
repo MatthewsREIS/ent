@@ -30,7 +30,7 @@ func NewBlogDelete(c Config, hooks []Hook, mutation *BlogMutation) *BlogDelete {
 
 // Where appends a list predicates to the BlogDelete builder.
 func (_d *BlogDelete) Where(ps ...predicate.Blog) *BlogDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewBlogDeleteOne(d *BlogDelete) *BlogDeleteOne {
 
 // Where appends a list predicates to the BlogDelete builder.
 func (_d *BlogDeleteOne) Where(ps ...predicate.Blog) *BlogDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

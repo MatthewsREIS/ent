@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -34,7 +35,7 @@ func NewPetCreate(c Config, hooks []Hook, mutation *PetMutation) *PetCreate {
 
 // SetAge sets the "age" field.
 func (_c *PetCreate) SetAge(v float64) *PetCreate {
-	_c.mutation.SetAge(v)
+	_ = _c.mutation.SetField("age", v)
 	return _c
 }
 
@@ -48,13 +49,13 @@ func (_c *PetCreate) SetNillableAge(v *float64) *PetCreate {
 
 // SetName sets the "name" field.
 func (_c *PetCreate) SetName(v string) *PetCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // SetUUID sets the "uuid" field.
 func (_c *PetCreate) SetUUID(v uuid.UUID) *PetCreate {
-	_c.mutation.SetUUID(v)
+	_ = _c.mutation.SetField("uuid", v)
 	return _c
 }
 
@@ -68,7 +69,7 @@ func (_c *PetCreate) SetNillableUUID(v *uuid.UUID) *PetCreate {
 
 // SetNickname sets the "nickname" field.
 func (_c *PetCreate) SetNickname(v string) *PetCreate {
-	_c.mutation.SetNickname(v)
+	_ = _c.mutation.SetField("nickname", v)
 	return _c
 }
 
@@ -82,7 +83,7 @@ func (_c *PetCreate) SetNillableNickname(v *string) *PetCreate {
 
 // SetTrained sets the "trained" field.
 func (_c *PetCreate) SetTrained(v bool) *PetCreate {
-	_c.mutation.SetTrained(v)
+	_ = _c.mutation.SetField("trained", v)
 	return _c
 }
 
@@ -96,7 +97,7 @@ func (_c *PetCreate) SetNillableTrained(v *bool) *PetCreate {
 
 // SetOptionalTime sets the "optional_time" field.
 func (_c *PetCreate) SetOptionalTime(v time.Time) *PetCreate {
-	_c.mutation.SetOptionalTime(v)
+	_ = _c.mutation.SetField("optional_time", v)
 	return _c
 }
 
@@ -110,7 +111,7 @@ func (_c *PetCreate) SetNillableOptionalTime(v *time.Time) *PetCreate {
 
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (_c *PetCreate) SetTeamID(id string) *PetCreate {
-	_c.mutation.SetTeamID(id)
+	_ = _c.mutation.SetEdgeID("team", id)
 	return _c
 }
 
@@ -124,7 +125,7 @@ func (_c *PetCreate) SetNillableTeamID(id *string) *PetCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *PetCreate) SetOwnerID(id string) *PetCreate {
-	_c.mutation.SetOwnerID(id)
+	_ = _c.mutation.SetEdgeID("owner", id)
 	return _c
 }
 
@@ -171,25 +172,25 @@ func (_c *PetCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *PetCreate) defaults() {
-	if _, ok := _c.mutation.Age(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "age"); !ok {
 		v := DefaultAge
-		_c.mutation.SetAge(v)
+		_ = _c.mutation.SetField("age", v)
 	}
-	if _, ok := _c.mutation.Trained(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "trained"); !ok {
 		v := DefaultTrained
-		_c.mutation.SetTrained(v)
+		_ = _c.mutation.SetField("trained", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *PetCreate) check() error {
-	if _, ok := _c.mutation.Age(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "age"); !ok {
 		return &ValidationError{Name: "age", Err: errors.New(`ent: missing required field "Pet.age"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
-	if _, ok := _c.mutation.Trained(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "trained"); !ok {
 		return &ValidationError{Name: "trained", Err: errors.New(`ent: missing required field "Pet.trained"`)}
 	}
 	return nil

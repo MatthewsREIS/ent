@@ -25,7 +25,7 @@ func (_q *APIQuery) Filter() *APIFilter {
 
 // NewAPIFilterForMutation creates a new APIFilter for the given mutation.
 func NewAPIFilterForMutation(m *APIMutation) *APIFilter {
-	return &APIFilter{Config: m.Config, predicateAdder: m}
+	return &APIFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // APIFilter provides a generic filtering capability at runtime for APIQuery.

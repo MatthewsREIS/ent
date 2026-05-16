@@ -27,7 +27,7 @@ func (_q *UserTweetQuery) Filter() *UserTweetFilter {
 
 // NewUserTweetFilterForMutation creates a new UserTweetFilter for the given mutation.
 func NewUserTweetFilterForMutation(m *UserTweetMutation) *UserTweetFilter {
-	return &UserTweetFilter{Config: m.Config, predicateAdder: m}
+	return &UserTweetFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // UserTweetFilter provides a generic filtering capability at runtime for UserTweetQuery.

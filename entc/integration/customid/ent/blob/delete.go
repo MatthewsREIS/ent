@@ -30,7 +30,7 @@ func NewBlobDelete(c Config, hooks []Hook, mutation *BlobMutation) *BlobDelete {
 
 // Where appends a list predicates to the BlobDelete builder.
 func (_d *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewBlobDeleteOne(d *BlobDelete) *BlobDeleteOne {
 
 // Where appends a list predicates to the BlobDelete builder.
 func (_d *BlobDeleteOne) Where(ps ...predicate.Blob) *BlobDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

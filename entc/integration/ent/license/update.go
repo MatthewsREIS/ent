@@ -34,13 +34,13 @@ func NewLicenseUpdate(c Config, hooks []Hook, mutation *LicenseMutation) *Licens
 
 // Where appends a list predicates to the LicenseUpdate builder.
 func (_u *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetUpdateTime sets the "update_time" field.
 func (_u *LicenseUpdate) SetUpdateTime(v time.Time) *LicenseUpdate {
-	_u.mutation.SetUpdateTime(v)
+	_ = _u.mutation.SetField("update_time", v)
 	return _u
 }
 
@@ -79,9 +79,9 @@ func (_u *LicenseUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *LicenseUpdate) defaults() {
-	if _, ok := _u.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); !ok {
 		v := UpdateDefaultUpdateTime()
-		_u.mutation.SetUpdateTime(v)
+		_ = _u.mutation.SetField("update_time", v)
 	}
 }
 
@@ -100,7 +100,7 @@ func (_u *LicenseUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UpdateTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); ok {
 		_spec.SetField(FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
@@ -132,7 +132,7 @@ func NewLicenseUpdateOne(c Config, hooks []Hook, mutation *LicenseMutation) *Lic
 
 // SetUpdateTime sets the "update_time" field.
 func (_u *LicenseUpdateOne) SetUpdateTime(v time.Time) *LicenseUpdateOne {
-	_u.mutation.SetUpdateTime(v)
+	_ = _u.mutation.SetField("update_time", v)
 	return _u
 }
 
@@ -143,7 +143,7 @@ func (_u *LicenseUpdateOne) Mutation() *LicenseMutation {
 
 // Where appends a list predicates to the LicenseUpdate builder.
 func (_u *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -184,9 +184,9 @@ func (_u *LicenseUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *LicenseUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); !ok {
 		v := UpdateDefaultUpdateTime()
-		_u.mutation.SetUpdateTime(v)
+		_ = _u.mutation.SetField("update_time", v)
 	}
 }
 
@@ -198,10 +198,11 @@ func (_u *LicenseUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Lic
 
 func (_u *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "License.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -222,7 +223,7 @@ func (_u *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err er
 			}
 		}
 	}
-	if value, ok := _u.mutation.UpdateTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); ok {
 		_spec.SetField(FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)

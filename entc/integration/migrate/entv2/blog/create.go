@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,7 +31,7 @@ func NewBlogCreate(c Config, hooks []Hook, mutation *BlogMutation) *BlogCreate {
 
 // SetOid sets the "oid" field.
 func (_c *BlogCreate) SetOid(v int) *BlogCreate {
-	_c.mutation.SetOid(v)
+	_ = _c.mutation.SetField("oid", v)
 	return _c
 }
 
@@ -42,7 +43,7 @@ func (_c *BlogCreate) SetID(v int) *BlogCreate {
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
 func (_c *BlogCreate) AddAdminIDs(ids ...int) *BlogCreate {
-	_c.mutation.AddAdminIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("admins", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -82,7 +83,7 @@ func (_c *BlogCreate) ExecX(ctx context.Context) {
 func (_c *BlogCreate) check() error {
 	switch _c.Drv.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
-		if _, ok := _c.mutation.Oid(); !ok {
+		if _, ok := entbuilder.GetField[int](_c.mutation, "oid"); !ok {
 			return &ValidationError{Name: "oid", Err: errors.New(`entv2: missing required field "Blog.oid"`)}
 		}
 	}
@@ -104,7 +105,7 @@ func (_c *BlogCreate) sqlSave(ctx context.Context) (*Blog, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -114,15 +115,16 @@ func (_c *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
 		_node = &Blog{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(int)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Oid(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "oid"); ok {
 		_spec.SetField(FieldOid, field.TypeInt, value)
 		_node.Oid = value
 	}
-	if nodes := _c.mutation.AdminsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "admins"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -194,11 +196,11 @@ func (_c *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

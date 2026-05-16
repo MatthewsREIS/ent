@@ -33,13 +33,13 @@ func NewAttachedFileUpdate(c Config, hooks []Hook, mutation *AttachedFileMutatio
 
 // Where appends a list predicates to the AttachedFileUpdate builder.
 func (_u *AttachedFileUpdate) Where(ps ...predicate.AttachedFile) *AttachedFileUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetAttachTime sets the "attach_time" field.
 func (_u *AttachedFileUpdate) SetAttachTime(v time.Time) *AttachedFileUpdate {
-	_u.mutation.SetAttachTime(v)
+	_ = _u.mutation.SetField("attach_time", v)
 	return _u
 }
 
@@ -53,7 +53,7 @@ func (_u *AttachedFileUpdate) SetNillableAttachTime(v *time.Time) *AttachedFileU
 
 // SetFID sets the "f_id" field.
 func (_u *AttachedFileUpdate) SetFID(v int) *AttachedFileUpdate {
-	_u.mutation.SetFID(v)
+	_ = _u.mutation.SetEdgeID("fi", v)
 	return _u
 }
 
@@ -67,7 +67,7 @@ func (_u *AttachedFileUpdate) SetNillableFID(v *int) *AttachedFileUpdate {
 
 // SetProcID sets the "proc_id" field.
 func (_u *AttachedFileUpdate) SetProcID(v int) *AttachedFileUpdate {
-	_u.mutation.SetProcID(v)
+	_ = _u.mutation.SetEdgeID("proc", v)
 	return _u
 }
 
@@ -81,7 +81,7 @@ func (_u *AttachedFileUpdate) SetNillableProcID(v *int) *AttachedFileUpdate {
 
 // SetFiID sets the "fi" edge to the File entity by ID.
 func (_u *AttachedFileUpdate) SetFiID(id int) *AttachedFileUpdate {
-	_u.mutation.SetFiID(id)
+	_ = _u.mutation.SetEdgeID("fi", id)
 	return _u
 }
 
@@ -92,13 +92,13 @@ func (_u *AttachedFileUpdate) Mutation() *AttachedFileMutation {
 
 // ClearFi clears the "fi" edge to the File entity.
 func (_u *AttachedFileUpdate) ClearFi() *AttachedFileUpdate {
-	_u.mutation.ClearFi()
+	_ = _u.mutation.ClearEdge("fi")
 	return _u
 }
 
 // ClearProc clears the "proc" edge to the Process entity.
 func (_u *AttachedFileUpdate) ClearProc() *AttachedFileUpdate {
-	_u.mutation.ClearProc()
+	_ = _u.mutation.ClearEdge("proc")
 	return _u
 }
 
@@ -131,10 +131,10 @@ func (_u *AttachedFileUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *AttachedFileUpdate) check() error {
-	if _u.mutation.FiCleared() && len(_u.mutation.FiIDs()) > 0 {
+	if _u.mutation.EdgeCleared("fi") && len(_u.mutation.EdgeIDs("fi")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.fi"`)
 	}
-	if _u.mutation.ProcCleared() && len(_u.mutation.ProcIDs()) > 0 {
+	if _u.mutation.EdgeCleared("proc") && len(_u.mutation.EdgeIDs("proc")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.proc"`)
 	}
 	return nil
@@ -152,10 +152,10 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (_node int, err error
 			}
 		}
 	}
-	if value, ok := _u.mutation.AttachTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "attach_time"); ok {
 		_spec.SetField(FieldAttachTime, field.TypeTime, value)
 	}
-	if _u.mutation.FiCleared() {
+	if _u.mutation.EdgeCleared("fi") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -168,7 +168,7 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (_node int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FiIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("fi"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -184,7 +184,7 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (_node int, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ProcCleared() {
+	if _u.mutation.EdgeCleared("proc") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -197,7 +197,7 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (_node int, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProcIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("proc"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -240,7 +240,7 @@ func NewAttachedFileUpdateOne(c Config, hooks []Hook, mutation *AttachedFileMuta
 
 // SetAttachTime sets the "attach_time" field.
 func (_u *AttachedFileUpdateOne) SetAttachTime(v time.Time) *AttachedFileUpdateOne {
-	_u.mutation.SetAttachTime(v)
+	_ = _u.mutation.SetField("attach_time", v)
 	return _u
 }
 
@@ -254,7 +254,7 @@ func (_u *AttachedFileUpdateOne) SetNillableAttachTime(v *time.Time) *AttachedFi
 
 // SetFID sets the "f_id" field.
 func (_u *AttachedFileUpdateOne) SetFID(v int) *AttachedFileUpdateOne {
-	_u.mutation.SetFID(v)
+	_ = _u.mutation.SetEdgeID("fi", v)
 	return _u
 }
 
@@ -268,7 +268,7 @@ func (_u *AttachedFileUpdateOne) SetNillableFID(v *int) *AttachedFileUpdateOne {
 
 // SetProcID sets the "proc_id" field.
 func (_u *AttachedFileUpdateOne) SetProcID(v int) *AttachedFileUpdateOne {
-	_u.mutation.SetProcID(v)
+	_ = _u.mutation.SetEdgeID("proc", v)
 	return _u
 }
 
@@ -282,7 +282,7 @@ func (_u *AttachedFileUpdateOne) SetNillableProcID(v *int) *AttachedFileUpdateOn
 
 // SetFiID sets the "fi" edge to the File entity by ID.
 func (_u *AttachedFileUpdateOne) SetFiID(id int) *AttachedFileUpdateOne {
-	_u.mutation.SetFiID(id)
+	_ = _u.mutation.SetEdgeID("fi", id)
 	return _u
 }
 
@@ -293,19 +293,19 @@ func (_u *AttachedFileUpdateOne) Mutation() *AttachedFileMutation {
 
 // ClearFi clears the "fi" edge to the File entity.
 func (_u *AttachedFileUpdateOne) ClearFi() *AttachedFileUpdateOne {
-	_u.mutation.ClearFi()
+	_ = _u.mutation.ClearEdge("fi")
 	return _u
 }
 
 // ClearProc clears the "proc" edge to the Process entity.
 func (_u *AttachedFileUpdateOne) ClearProc() *AttachedFileUpdateOne {
-	_u.mutation.ClearProc()
+	_ = _u.mutation.ClearEdge("proc")
 	return _u
 }
 
 // Where appends a list predicates to the AttachedFileUpdate builder.
 func (_u *AttachedFileUpdateOne) Where(ps ...predicate.AttachedFile) *AttachedFileUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -345,10 +345,10 @@ func (_u *AttachedFileUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *AttachedFileUpdateOne) check() error {
-	if _u.mutation.FiCleared() && len(_u.mutation.FiIDs()) > 0 {
+	if _u.mutation.EdgeCleared("fi") && len(_u.mutation.EdgeIDs("fi")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.fi"`)
 	}
-	if _u.mutation.ProcCleared() && len(_u.mutation.ProcIDs()) > 0 {
+	if _u.mutation.EdgeCleared("proc") && len(_u.mutation.EdgeIDs("proc")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.proc"`)
 	}
 	return nil
@@ -359,10 +359,11 @@ func (_u *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFi
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "AttachedFile.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -383,10 +384,10 @@ func (_u *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFi
 			}
 		}
 	}
-	if value, ok := _u.mutation.AttachTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "attach_time"); ok {
 		_spec.SetField(FieldAttachTime, field.TypeTime, value)
 	}
-	if _u.mutation.FiCleared() {
+	if _u.mutation.EdgeCleared("fi") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -399,7 +400,7 @@ func (_u *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFi
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FiIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("fi"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -415,7 +416,7 @@ func (_u *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFi
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ProcCleared() {
+	if _u.mutation.EdgeCleared("proc") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -428,7 +429,7 @@ func (_u *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFi
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ProcIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("proc"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

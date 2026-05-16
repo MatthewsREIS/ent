@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,68 +59,110 @@ func IDLTE(id int) predicate.Node {
 	return predicate.Node(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: UpdatedAt — use where.EQ(FieldUpdatedAt, v).
-func UpdatedAt(v time.Time) predicate.Node { return where.EQ(FieldUpdatedAt, v) }
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldUpdatedAt, v))
+}
 
-// Deprecated: ValueEQ — use where.EQ(FieldValue, v).
-func ValueEQ(v int) predicate.Node { return where.EQ(FieldValue, v) }
+// ValueEQ applies the EQ predicate on the "value" field.
+func ValueEQ(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldValue, v))
+}
 
-// Deprecated: ValueNEQ — use where.NEQ(FieldValue, v).
-func ValueNEQ(v int) predicate.Node { return where.NEQ(FieldValue, v) }
+// ValueNEQ applies the NEQ predicate on the "value" field.
+func ValueNEQ(v int) predicate.Node {
+	return predicate.Node(sql.FieldNEQ(FieldValue, v))
+}
 
-// Deprecated: ValueIn — use where.In(FieldValue, vs...).
-func ValueIn(vs ...int) predicate.Node { return where.In(FieldValue, vs...) }
+// ValueIn applies the In predicate on the "value" field.
+func ValueIn(vs ...int) predicate.Node {
+	return predicate.Node(sql.FieldIn(FieldValue, vs...))
+}
 
-// Deprecated: ValueNotIn — use where.NotIn(FieldValue, vs...).
-func ValueNotIn(vs ...int) predicate.Node { return where.NotIn(FieldValue, vs...) }
+// ValueNotIn applies the NotIn predicate on the "value" field.
+func ValueNotIn(vs ...int) predicate.Node {
+	return predicate.Node(sql.FieldNotIn(FieldValue, vs...))
+}
 
-// Deprecated: ValueGT — use where.GT(FieldValue, v).
-func ValueGT(v int) predicate.Node { return where.GT(FieldValue, v) }
+// ValueGT applies the GT predicate on the "value" field.
+func ValueGT(v int) predicate.Node {
+	return predicate.Node(sql.FieldGT(FieldValue, v))
+}
 
-// Deprecated: ValueGTE — use where.GTE(FieldValue, v).
-func ValueGTE(v int) predicate.Node { return where.GTE(FieldValue, v) }
+// ValueGTE applies the GTE predicate on the "value" field.
+func ValueGTE(v int) predicate.Node {
+	return predicate.Node(sql.FieldGTE(FieldValue, v))
+}
 
-// Deprecated: ValueLT — use where.LT(FieldValue, v).
-func ValueLT(v int) predicate.Node { return where.LT(FieldValue, v) }
+// ValueLT applies the LT predicate on the "value" field.
+func ValueLT(v int) predicate.Node {
+	return predicate.Node(sql.FieldLT(FieldValue, v))
+}
 
-// Deprecated: ValueLTE — use where.LTE(FieldValue, v).
-func ValueLTE(v int) predicate.Node { return where.LTE(FieldValue, v) }
+// ValueLTE applies the LTE predicate on the "value" field.
+func ValueLTE(v int) predicate.Node {
+	return predicate.Node(sql.FieldLTE(FieldValue, v))
+}
 
-// Deprecated: ValueIsNil — use where.IsNull(FieldValue).
-func ValueIsNil() predicate.Node { return where.IsNull(FieldValue) }
+// ValueIsNil applies the IsNil predicate on the "value" field.
+func ValueIsNil() predicate.Node {
+	return predicate.Node(sql.FieldIsNull(FieldValue))
+}
 
-// Deprecated: ValueNotNil — use where.NotNull(FieldValue).
-func ValueNotNil() predicate.Node { return where.NotNull(FieldValue) }
+// ValueNotNil applies the NotNil predicate on the "value" field.
+func ValueNotNil() predicate.Node {
+	return predicate.Node(sql.FieldNotNull(FieldValue))
+}
 
-// Deprecated: UpdatedAtEQ — use where.EQ(FieldUpdatedAt, v).
-func UpdatedAtEQ(v time.Time) predicate.Node { return where.EQ(FieldUpdatedAt, v) }
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldUpdatedAt, v))
+}
 
-// Deprecated: UpdatedAtNEQ — use where.NEQ(FieldUpdatedAt, v).
-func UpdatedAtNEQ(v time.Time) predicate.Node { return where.NEQ(FieldUpdatedAt, v) }
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldNEQ(FieldUpdatedAt, v))
+}
 
-// Deprecated: UpdatedAtIn — use where.In(FieldUpdatedAt, vs...).
-func UpdatedAtIn(vs ...time.Time) predicate.Node { return where.In(FieldUpdatedAt, vs...) }
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Node {
+	return predicate.Node(sql.FieldIn(FieldUpdatedAt, vs...))
+}
 
-// Deprecated: UpdatedAtNotIn — use where.NotIn(FieldUpdatedAt, vs...).
-func UpdatedAtNotIn(vs ...time.Time) predicate.Node { return where.NotIn(FieldUpdatedAt, vs...) }
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Node {
+	return predicate.Node(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
 
-// Deprecated: UpdatedAtGT — use where.GT(FieldUpdatedAt, v).
-func UpdatedAtGT(v time.Time) predicate.Node { return where.GT(FieldUpdatedAt, v) }
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldGT(FieldUpdatedAt, v))
+}
 
-// Deprecated: UpdatedAtGTE — use where.GTE(FieldUpdatedAt, v).
-func UpdatedAtGTE(v time.Time) predicate.Node { return where.GTE(FieldUpdatedAt, v) }
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldGTE(FieldUpdatedAt, v))
+}
 
-// Deprecated: UpdatedAtLT — use where.LT(FieldUpdatedAt, v).
-func UpdatedAtLT(v time.Time) predicate.Node { return where.LT(FieldUpdatedAt, v) }
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldLT(FieldUpdatedAt, v))
+}
 
-// Deprecated: UpdatedAtLTE — use where.LTE(FieldUpdatedAt, v).
-func UpdatedAtLTE(v time.Time) predicate.Node { return where.LTE(FieldUpdatedAt, v) }
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Node {
+	return predicate.Node(sql.FieldLTE(FieldUpdatedAt, v))
+}
 
-// Deprecated: UpdatedAtIsNil — use where.IsNull(FieldUpdatedAt).
-func UpdatedAtIsNil() predicate.Node { return where.IsNull(FieldUpdatedAt) }
+// UpdatedAtIsNil applies the IsNil predicate on the "updated_at" field.
+func UpdatedAtIsNil() predicate.Node {
+	return predicate.Node(sql.FieldIsNull(FieldUpdatedAt))
+}
 
-// Deprecated: UpdatedAtNotNil — use where.NotNull(FieldUpdatedAt).
-func UpdatedAtNotNil() predicate.Node { return where.NotNull(FieldUpdatedAt) }
+// UpdatedAtNotNil applies the NotNil predicate on the "updated_at" field.
+func UpdatedAtNotNil() predicate.Node {
+	return predicate.Node(sql.FieldNotNull(FieldUpdatedAt))
+}
 
 // HasPrev applies the HasEdge predicate on the "prev" edge.
 func HasPrev() predicate.Node {

@@ -66,11 +66,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			}
 		{{- else }}{{/* Composite ID. */}}
 			{{- range $i, $id := $.EdgeSchema.ID }}
+				{{- $edgeName := $id.EdgeName }}
+				{{- if $edgeName }}
+				if rawID, ok := {{ $mutation }}.EdgeID({{ printf "%q" $edgeName }}); !ok {
+					return {{ $zero }}, &ValidationError{Name: "{{ $id.Name }}", Err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $id.Name }}" for update`)}
+				} else {
+					_spec.Node.CompositeID[{{ $i }}].Value = rawID.({{ trimPackage $id.Type.String $.Package }})
+				}
+				{{- else }}
 				if id, ok := entbuilder.GetField[{{ trimPackage $id.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $id.Name }}); !ok {
 					return {{ $zero }}, &ValidationError{Name: "{{ $id.Name }}", Err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $id.Name }}" for update`)}
 				} else {
 					_spec.Node.CompositeID[{{ $i }}].Value = id
 				}
+				{{- end }}
 			{{- end }}
 			if fields := {{ $receiver }}.fields; len(fields) > 0 {
 				_spec.Node.Columns = make([]string, len(fields))

@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -29,7 +30,7 @@ func NewCarCreate(c Config, hooks []Hook, mutation *CarMutation) *CarCreate {
 
 // SetNumber sets the "number" field.
 func (_c *CarCreate) SetNumber(v string) *CarCreate {
-	_c.mutation.SetNumber(v)
+	_ = _c.mutation.SetField("number", v)
 	return _c
 }
 
@@ -57,7 +58,7 @@ func (_c *CarCreate) SetNillableID(v *uuid.UUID) *CarCreate {
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
 func (_c *CarCreate) AddRentalIDs(ids ...int) *CarCreate {
-	_c.mutation.AddRentalIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -125,7 +126,7 @@ func (_c *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -135,15 +136,16 @@ func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_node = &Car{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
 	)
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(uuid.UUID)
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.Number(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "number"); ok {
 		_spec.SetField(FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
-	if nodes := _c.mutation.RentalsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "rentals"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -216,7 +218,7 @@ func (_c *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

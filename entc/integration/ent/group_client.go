@@ -105,7 +105,7 @@ func (c *GroupClient) DeleteOne(_m *Group) *group.GroupDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupClient) DeleteOneID(id int) *group.GroupDeleteOne {
 	mutation := NewGroupMutation(c.Config, OpDeleteOne, WithGroupID(id, nil))
-	mutation.Where(group.ID(id))
+	mutation.WhereP(group.ID(id))
 	return group.NewGroupDeleteOne(group.NewGroupDelete(c.Config, c.Hooks(), mutation))
 }
 

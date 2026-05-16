@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // SpecCreate is the builder for creating a Spec entity.
@@ -28,7 +29,7 @@ func NewSpecCreate(c Config, hooks []Hook, mutation *SpecMutation) *SpecCreate {
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (_c *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
-	_c.mutation.AddCardIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _c
 }
 

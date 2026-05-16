@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -38,7 +39,7 @@ func (_c *IntSIDCreate) SetID(v sid.ID) *IntSIDCreate {
 
 // SetParentID sets the "parent" edge to the IntSID entity by ID.
 func (_c *IntSIDCreate) SetParentID(id sid.ID) *IntSIDCreate {
-	_c.mutation.SetParentID(id)
+	_ = _c.mutation.SetEdgeID("parent", id)
 	return _c
 }
 
@@ -52,7 +53,7 @@ func (_c *IntSIDCreate) SetNillableParentID(id *sid.ID) *IntSIDCreate {
 
 // AddChildIDs adds the "children" edge to the IntSID entity by IDs.
 func (_c *IntSIDCreate) AddChildIDs(ids ...sid.ID) *IntSIDCreate {
-	_c.mutation.AddChildIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -111,7 +112,7 @@ func (_c *IntSIDCreate) sqlSave(ctx context.Context) (*IntSID, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -122,11 +123,12 @@ func (_c *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt64))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(sid.ID)
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[sid.ID](_c.mutation, "parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -142,7 +144,7 @@ func (_c *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[sid.ID](_c.mutation, "children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -340,12 +342,12 @@ func (_c *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					if err := nodes[i].ID.Scan(specs[i].ID.Value); err != nil {
 						return nil, err
 					}
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

@@ -33,13 +33,13 @@ func NewUserGroupUpdate(c Config, hooks []Hook, mutation *UserGroupMutation) *Us
 
 // Where appends a list predicates to the UserGroupUpdate builder.
 func (_u *UserGroupUpdate) Where(ps ...predicate.UserGroup) *UserGroupUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetJoinedAt sets the "joined_at" field.
 func (_u *UserGroupUpdate) SetJoinedAt(v time.Time) *UserGroupUpdate {
-	_u.mutation.SetJoinedAt(v)
+	_ = _u.mutation.SetField("joined_at", v)
 	return _u
 }
 
@@ -53,7 +53,7 @@ func (_u *UserGroupUpdate) SetNillableJoinedAt(v *time.Time) *UserGroupUpdate {
 
 // SetUserID sets the "user_id" field.
 func (_u *UserGroupUpdate) SetUserID(v int) *UserGroupUpdate {
-	_u.mutation.SetUserID(v)
+	_ = _u.mutation.SetEdgeID("user", v)
 	return _u
 }
 
@@ -67,7 +67,7 @@ func (_u *UserGroupUpdate) SetNillableUserID(v *int) *UserGroupUpdate {
 
 // SetGroupID sets the "group_id" field.
 func (_u *UserGroupUpdate) SetGroupID(v int) *UserGroupUpdate {
-	_u.mutation.SetGroupID(v)
+	_ = _u.mutation.SetEdgeID("group", v)
 	return _u
 }
 
@@ -86,13 +86,13 @@ func (_u *UserGroupUpdate) Mutation() *UserGroupMutation {
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *UserGroupUpdate) ClearUser() *UserGroupUpdate {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
 func (_u *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
-	_u.mutation.ClearGroup()
+	_ = _u.mutation.ClearEdge("group")
 	return _u
 }
 
@@ -125,10 +125,10 @@ func (_u *UserGroupUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserGroupUpdate) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.user"`)
 	}
-	if _u.mutation.GroupCleared() && len(_u.mutation.GroupIDs()) > 0 {
+	if _u.mutation.EdgeCleared("group") && len(_u.mutation.EdgeIDs("group")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.group"`)
 	}
 	return nil
@@ -146,10 +146,10 @@ func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.JoinedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "joined_at"); ok {
 		_spec.SetField(FieldJoinedAt, field.TypeTime, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -162,7 +162,7 @@ func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -178,7 +178,7 @@ func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.GroupCleared() {
+	if _u.mutation.EdgeCleared("group") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -191,7 +191,7 @@ func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("group"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -234,7 +234,7 @@ func NewUserGroupUpdateOne(c Config, hooks []Hook, mutation *UserGroupMutation) 
 
 // SetJoinedAt sets the "joined_at" field.
 func (_u *UserGroupUpdateOne) SetJoinedAt(v time.Time) *UserGroupUpdateOne {
-	_u.mutation.SetJoinedAt(v)
+	_ = _u.mutation.SetField("joined_at", v)
 	return _u
 }
 
@@ -248,7 +248,7 @@ func (_u *UserGroupUpdateOne) SetNillableJoinedAt(v *time.Time) *UserGroupUpdate
 
 // SetUserID sets the "user_id" field.
 func (_u *UserGroupUpdateOne) SetUserID(v int) *UserGroupUpdateOne {
-	_u.mutation.SetUserID(v)
+	_ = _u.mutation.SetEdgeID("user", v)
 	return _u
 }
 
@@ -262,7 +262,7 @@ func (_u *UserGroupUpdateOne) SetNillableUserID(v *int) *UserGroupUpdateOne {
 
 // SetGroupID sets the "group_id" field.
 func (_u *UserGroupUpdateOne) SetGroupID(v int) *UserGroupUpdateOne {
-	_u.mutation.SetGroupID(v)
+	_ = _u.mutation.SetEdgeID("group", v)
 	return _u
 }
 
@@ -281,19 +281,19 @@ func (_u *UserGroupUpdateOne) Mutation() *UserGroupMutation {
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *UserGroupUpdateOne) ClearUser() *UserGroupUpdateOne {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
 func (_u *UserGroupUpdateOne) ClearGroup() *UserGroupUpdateOne {
-	_u.mutation.ClearGroup()
+	_ = _u.mutation.ClearEdge("group")
 	return _u
 }
 
 // Where appends a list predicates to the UserGroupUpdate builder.
 func (_u *UserGroupUpdateOne) Where(ps ...predicate.UserGroup) *UserGroupUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -333,10 +333,10 @@ func (_u *UserGroupUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserGroupUpdateOne) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.user"`)
 	}
-	if _u.mutation.GroupCleared() && len(_u.mutation.GroupIDs()) > 0 {
+	if _u.mutation.EdgeCleared("group") && len(_u.mutation.EdgeIDs("group")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.group"`)
 	}
 	return nil
@@ -347,10 +347,11 @@ func (_u *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, er
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "UserGroup.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -371,10 +372,10 @@ func (_u *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, er
 			}
 		}
 	}
-	if value, ok := _u.mutation.JoinedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "joined_at"); ok {
 		_spec.SetField(FieldJoinedAt, field.TypeTime, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -387,7 +388,7 @@ func (_u *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -403,7 +404,7 @@ func (_u *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.GroupCleared() {
+	if _u.mutation.EdgeCleared("group") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -416,7 +417,7 @@ func (_u *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("group"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

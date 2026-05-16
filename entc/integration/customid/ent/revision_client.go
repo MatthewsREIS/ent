@@ -100,7 +100,7 @@ func (c *RevisionClient) DeleteOne(_m *Revision) *revision.RevisionDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RevisionClient) DeleteOneID(id string) *revision.RevisionDeleteOne {
 	mutation := NewRevisionMutation(c.Config, OpDeleteOne, WithRevisionID(id, nil))
-	mutation.Where(revision.ID(id))
+	mutation.WhereP(revision.ID(id))
 	return revision.NewRevisionDeleteOne(revision.NewRevisionDelete(c.Config, c.Hooks(), mutation))
 }
 

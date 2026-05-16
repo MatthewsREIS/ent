@@ -30,7 +30,7 @@ func NewMediaDelete(c Config, hooks []Hook, mutation *MediaMutation) *MediaDelet
 
 // Where appends a list predicates to the MediaDelete builder.
 func (_d *MediaDelete) Where(ps ...predicate.Media) *MediaDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewMediaDeleteOne(d *MediaDelete) *MediaDeleteOne {
 
 // Where appends a list predicates to the MediaDelete builder.
 func (_d *MediaDeleteOne) Where(ps ...predicate.Media) *MediaDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

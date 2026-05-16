@@ -104,7 +104,7 @@ func (c *TokenClient) DeleteOne(_m *Token) *token.TokenDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TokenClient) DeleteOneID(id sid.ID) *token.TokenDeleteOne {
 	mutation := NewTokenMutation(c.Config, OpDeleteOne, WithTokenID(id, nil))
-	mutation.Where(token.ID(id))
+	mutation.WhereP(token.ID(id))
 	return token.NewTokenDeleteOne(token.NewTokenDelete(c.Config, c.Hooks(), mutation))
 }
 

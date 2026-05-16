@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
@@ -32,7 +33,7 @@ func NewOtherUpdate(c Config, hooks []Hook, mutation *OtherMutation) *OtherUpdat
 
 // Where appends a list predicates to the OtherUpdate builder.
 func (_u *OtherUpdate) Where(ps ...predicate.Other) *OtherUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -109,7 +110,7 @@ func (_u *OtherUpdateOne) Mutation() *OtherMutation {
 
 // Where appends a list predicates to the OtherUpdate builder.
 func (_u *OtherUpdateOne) Where(ps ...predicate.Other) *OtherUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -149,10 +150,11 @@ func (_u *OtherUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *OtherUpdateOne) sqlSave(ctx context.Context) (_node *Other, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeOther))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Other.id" for update`)}
 	}
+	id := idAny.(sid.ID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

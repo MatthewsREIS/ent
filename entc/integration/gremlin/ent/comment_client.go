@@ -99,7 +99,7 @@ func (c *CommentClient) DeleteOne(_m *Comment) *comment.CommentDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CommentClient) DeleteOneID(id string) *comment.CommentDeleteOne {
 	mutation := NewCommentMutation(c.Config, OpDeleteOne, WithCommentID(id, nil))
-	mutation.Where(comment.ID(id))
+	mutation.WhereP(comment.ID(id))
 	return comment.NewCommentDeleteOne(comment.NewCommentDelete(c.Config, c.Hooks(), mutation))
 }
 

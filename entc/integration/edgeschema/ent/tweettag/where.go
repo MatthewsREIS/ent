@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -61,62 +60,100 @@ func IDLTE(id uuid.UUID) predicate.TweetTag {
 	return predicate.TweetTag(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: AddedAt — use where.EQ(FieldAddedAt, v).
-func AddedAt(v time.Time) predicate.TweetTag { return where.EQ(FieldAddedAt, v) }
+// AddedAt applies equality check predicate on the "added_at" field. It's identical to AddedAtEQ.
+func AddedAt(v time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldEQ(FieldAddedAt, v))
+}
 
-// Deprecated: TagID — use where.EQ(FieldTagID, v).
-func TagID(v int) predicate.TweetTag { return where.EQ(FieldTagID, v) }
+// TagID applies equality check predicate on the "tag_id" field. It's identical to TagIDEQ.
+func TagID(v int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldEQ(FieldTagID, v))
+}
 
-// Deprecated: TweetID — use where.EQ(FieldTweetID, v).
-func TweetID(v int) predicate.TweetTag { return where.EQ(FieldTweetID, v) }
+// TweetID applies equality check predicate on the "tweet_id" field. It's identical to TweetIDEQ.
+func TweetID(v int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldEQ(FieldTweetID, v))
+}
 
-// Deprecated: AddedAtEQ — use where.EQ(FieldAddedAt, v).
-func AddedAtEQ(v time.Time) predicate.TweetTag { return where.EQ(FieldAddedAt, v) }
+// AddedAtEQ applies the EQ predicate on the "added_at" field.
+func AddedAtEQ(v time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldEQ(FieldAddedAt, v))
+}
 
-// Deprecated: AddedAtNEQ — use where.NEQ(FieldAddedAt, v).
-func AddedAtNEQ(v time.Time) predicate.TweetTag { return where.NEQ(FieldAddedAt, v) }
+// AddedAtNEQ applies the NEQ predicate on the "added_at" field.
+func AddedAtNEQ(v time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldNEQ(FieldAddedAt, v))
+}
 
-// Deprecated: AddedAtIn — use where.In(FieldAddedAt, vs...).
-func AddedAtIn(vs ...time.Time) predicate.TweetTag { return where.In(FieldAddedAt, vs...) }
+// AddedAtIn applies the In predicate on the "added_at" field.
+func AddedAtIn(vs ...time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldIn(FieldAddedAt, vs...))
+}
 
-// Deprecated: AddedAtNotIn — use where.NotIn(FieldAddedAt, vs...).
-func AddedAtNotIn(vs ...time.Time) predicate.TweetTag { return where.NotIn(FieldAddedAt, vs...) }
+// AddedAtNotIn applies the NotIn predicate on the "added_at" field.
+func AddedAtNotIn(vs ...time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldNotIn(FieldAddedAt, vs...))
+}
 
-// Deprecated: AddedAtGT — use where.GT(FieldAddedAt, v).
-func AddedAtGT(v time.Time) predicate.TweetTag { return where.GT(FieldAddedAt, v) }
+// AddedAtGT applies the GT predicate on the "added_at" field.
+func AddedAtGT(v time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldGT(FieldAddedAt, v))
+}
 
-// Deprecated: AddedAtGTE — use where.GTE(FieldAddedAt, v).
-func AddedAtGTE(v time.Time) predicate.TweetTag { return where.GTE(FieldAddedAt, v) }
+// AddedAtGTE applies the GTE predicate on the "added_at" field.
+func AddedAtGTE(v time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldGTE(FieldAddedAt, v))
+}
 
-// Deprecated: AddedAtLT — use where.LT(FieldAddedAt, v).
-func AddedAtLT(v time.Time) predicate.TweetTag { return where.LT(FieldAddedAt, v) }
+// AddedAtLT applies the LT predicate on the "added_at" field.
+func AddedAtLT(v time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldLT(FieldAddedAt, v))
+}
 
-// Deprecated: AddedAtLTE — use where.LTE(FieldAddedAt, v).
-func AddedAtLTE(v time.Time) predicate.TweetTag { return where.LTE(FieldAddedAt, v) }
+// AddedAtLTE applies the LTE predicate on the "added_at" field.
+func AddedAtLTE(v time.Time) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldLTE(FieldAddedAt, v))
+}
 
-// Deprecated: TagIDEQ — use where.EQ(FieldTagID, v).
-func TagIDEQ(v int) predicate.TweetTag { return where.EQ(FieldTagID, v) }
+// TagIDEQ applies the EQ predicate on the "tag_id" field.
+func TagIDEQ(v int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldEQ(FieldTagID, v))
+}
 
-// Deprecated: TagIDNEQ — use where.NEQ(FieldTagID, v).
-func TagIDNEQ(v int) predicate.TweetTag { return where.NEQ(FieldTagID, v) }
+// TagIDNEQ applies the NEQ predicate on the "tag_id" field.
+func TagIDNEQ(v int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldNEQ(FieldTagID, v))
+}
 
-// Deprecated: TagIDIn — use where.In(FieldTagID, vs...).
-func TagIDIn(vs ...int) predicate.TweetTag { return where.In(FieldTagID, vs...) }
+// TagIDIn applies the In predicate on the "tag_id" field.
+func TagIDIn(vs ...int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldIn(FieldTagID, vs...))
+}
 
-// Deprecated: TagIDNotIn — use where.NotIn(FieldTagID, vs...).
-func TagIDNotIn(vs ...int) predicate.TweetTag { return where.NotIn(FieldTagID, vs...) }
+// TagIDNotIn applies the NotIn predicate on the "tag_id" field.
+func TagIDNotIn(vs ...int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldNotIn(FieldTagID, vs...))
+}
 
-// Deprecated: TweetIDEQ — use where.EQ(FieldTweetID, v).
-func TweetIDEQ(v int) predicate.TweetTag { return where.EQ(FieldTweetID, v) }
+// TweetIDEQ applies the EQ predicate on the "tweet_id" field.
+func TweetIDEQ(v int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldEQ(FieldTweetID, v))
+}
 
-// Deprecated: TweetIDNEQ — use where.NEQ(FieldTweetID, v).
-func TweetIDNEQ(v int) predicate.TweetTag { return where.NEQ(FieldTweetID, v) }
+// TweetIDNEQ applies the NEQ predicate on the "tweet_id" field.
+func TweetIDNEQ(v int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldNEQ(FieldTweetID, v))
+}
 
-// Deprecated: TweetIDIn — use where.In(FieldTweetID, vs...).
-func TweetIDIn(vs ...int) predicate.TweetTag { return where.In(FieldTweetID, vs...) }
+// TweetIDIn applies the In predicate on the "tweet_id" field.
+func TweetIDIn(vs ...int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldIn(FieldTweetID, vs...))
+}
 
-// Deprecated: TweetIDNotIn — use where.NotIn(FieldTweetID, vs...).
-func TweetIDNotIn(vs ...int) predicate.TweetTag { return where.NotIn(FieldTweetID, vs...) }
+// TweetIDNotIn applies the NotIn predicate on the "tweet_id" field.
+func TweetIDNotIn(vs ...int) predicate.TweetTag {
+	return predicate.TweetTag(sql.FieldNotIn(FieldTweetID, vs...))
+}
 
 // HasTag applies the HasEdge predicate on the "tag" edge.
 func HasTag() predicate.TweetTag {

@@ -30,7 +30,7 @@ func NewIntSIDDelete(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSIDDe
 
 // Where appends a list predicates to the IntSIDDelete builder.
 func (_d *IntSIDDelete) Where(ps ...predicate.IntSID) *IntSIDDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewIntSIDDeleteOne(d *IntSIDDelete) *IntSIDDeleteOne {
 
 // Where appends a list predicates to the IntSIDDelete builder.
 func (_d *IntSIDDeleteOne) Where(ps ...predicate.IntSID) *IntSIDDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

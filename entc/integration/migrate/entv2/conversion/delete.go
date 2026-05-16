@@ -30,7 +30,7 @@ func NewConversionDelete(c Config, hooks []Hook, mutation *ConversionMutation) *
 
 // Where appends a list predicates to the ConversionDelete builder.
 func (_d *ConversionDelete) Where(ps ...predicate.Conversion) *ConversionDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewConversionDeleteOne(d *ConversionDelete) *ConversionDeleteOne {
 
 // Where appends a list predicates to the ConversionDelete builder.
 func (_d *ConversionDeleteOne) Where(ps ...predicate.Conversion) *ConversionDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

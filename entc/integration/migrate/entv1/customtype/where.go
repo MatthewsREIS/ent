@@ -9,7 +9,6 @@ package customtype
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,53 +56,85 @@ func IDLTE(id int) predicate.CustomType {
 	return predicate.CustomType(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Custom — use where.EQ(FieldCustom, v).
-func Custom(v string) predicate.CustomType { return where.EQ(FieldCustom, v) }
+// Custom applies equality check predicate on the "custom" field. It's identical to CustomEQ.
+func Custom(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldEQ(FieldCustom, v))
+}
 
-// Deprecated: CustomEQ — use where.EQ(FieldCustom, v).
-func CustomEQ(v string) predicate.CustomType { return where.EQ(FieldCustom, v) }
+// CustomEQ applies the EQ predicate on the "custom" field.
+func CustomEQ(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldEQ(FieldCustom, v))
+}
 
-// Deprecated: CustomNEQ — use where.NEQ(FieldCustom, v).
-func CustomNEQ(v string) predicate.CustomType { return where.NEQ(FieldCustom, v) }
+// CustomNEQ applies the NEQ predicate on the "custom" field.
+func CustomNEQ(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldNEQ(FieldCustom, v))
+}
 
-// Deprecated: CustomIn — use where.In(FieldCustom, vs...).
-func CustomIn(vs ...string) predicate.CustomType { return where.In(FieldCustom, vs...) }
+// CustomIn applies the In predicate on the "custom" field.
+func CustomIn(vs ...string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldIn(FieldCustom, vs...))
+}
 
-// Deprecated: CustomNotIn — use where.NotIn(FieldCustom, vs...).
-func CustomNotIn(vs ...string) predicate.CustomType { return where.NotIn(FieldCustom, vs...) }
+// CustomNotIn applies the NotIn predicate on the "custom" field.
+func CustomNotIn(vs ...string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldNotIn(FieldCustom, vs...))
+}
 
-// Deprecated: CustomGT — use where.GT(FieldCustom, v).
-func CustomGT(v string) predicate.CustomType { return where.GT(FieldCustom, v) }
+// CustomGT applies the GT predicate on the "custom" field.
+func CustomGT(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldGT(FieldCustom, v))
+}
 
-// Deprecated: CustomGTE — use where.GTE(FieldCustom, v).
-func CustomGTE(v string) predicate.CustomType { return where.GTE(FieldCustom, v) }
+// CustomGTE applies the GTE predicate on the "custom" field.
+func CustomGTE(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldGTE(FieldCustom, v))
+}
 
-// Deprecated: CustomLT — use where.LT(FieldCustom, v).
-func CustomLT(v string) predicate.CustomType { return where.LT(FieldCustom, v) }
+// CustomLT applies the LT predicate on the "custom" field.
+func CustomLT(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldLT(FieldCustom, v))
+}
 
-// Deprecated: CustomLTE — use where.LTE(FieldCustom, v).
-func CustomLTE(v string) predicate.CustomType { return where.LTE(FieldCustom, v) }
+// CustomLTE applies the LTE predicate on the "custom" field.
+func CustomLTE(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldLTE(FieldCustom, v))
+}
 
-// Deprecated: CustomContains — use where.Contains(FieldCustom, v).
-func CustomContains(v string) predicate.CustomType { return where.Contains(FieldCustom, v) }
+// CustomContains applies the Contains predicate on the "custom" field.
+func CustomContains(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldContains(FieldCustom, v))
+}
 
-// Deprecated: CustomHasPrefix — use where.HasPrefix(FieldCustom, v).
-func CustomHasPrefix(v string) predicate.CustomType { return where.HasPrefix(FieldCustom, v) }
+// CustomHasPrefix applies the HasPrefix predicate on the "custom" field.
+func CustomHasPrefix(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldHasPrefix(FieldCustom, v))
+}
 
-// Deprecated: CustomHasSuffix — use where.HasSuffix(FieldCustom, v).
-func CustomHasSuffix(v string) predicate.CustomType { return where.HasSuffix(FieldCustom, v) }
+// CustomHasSuffix applies the HasSuffix predicate on the "custom" field.
+func CustomHasSuffix(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldHasSuffix(FieldCustom, v))
+}
 
-// Deprecated: CustomIsNil — use where.IsNull(FieldCustom).
-func CustomIsNil() predicate.CustomType { return where.IsNull(FieldCustom) }
+// CustomIsNil applies the IsNil predicate on the "custom" field.
+func CustomIsNil() predicate.CustomType {
+	return predicate.CustomType(sql.FieldIsNull(FieldCustom))
+}
 
-// Deprecated: CustomNotNil — use where.NotNull(FieldCustom).
-func CustomNotNil() predicate.CustomType { return where.NotNull(FieldCustom) }
+// CustomNotNil applies the NotNil predicate on the "custom" field.
+func CustomNotNil() predicate.CustomType {
+	return predicate.CustomType(sql.FieldNotNull(FieldCustom))
+}
 
-// Deprecated: CustomEqualFold — use where.EqualFold(FieldCustom, v).
-func CustomEqualFold(v string) predicate.CustomType { return where.EqualFold(FieldCustom, v) }
+// CustomEqualFold applies the EqualFold predicate on the "custom" field.
+func CustomEqualFold(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldEqualFold(FieldCustom, v))
+}
 
-// Deprecated: CustomContainsFold — use where.ContainsFold(FieldCustom, v).
-func CustomContainsFold(v string) predicate.CustomType { return where.ContainsFold(FieldCustom, v) }
+// CustomContainsFold applies the ContainsFold predicate on the "custom" field.
+func CustomContainsFold(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldContainsFold(FieldCustom, v))
+}
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.CustomType) predicate.CustomType {

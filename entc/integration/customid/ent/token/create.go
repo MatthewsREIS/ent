@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,7 +34,7 @@ func NewTokenCreate(c Config, hooks []Hook, mutation *TokenMutation) *TokenCreat
 
 // SetBody sets the "body" field.
 func (_c *TokenCreate) SetBody(v string) *TokenCreate {
-	_c.mutation.SetBody(v)
+	_ = _c.mutation.SetField("body", v)
 	return _c
 }
 
@@ -53,7 +54,7 @@ func (_c *TokenCreate) SetNillableID(v *sid.ID) *TokenCreate {
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (_c *TokenCreate) SetAccountID(id sid.ID) *TokenCreate {
-	_c.mutation.SetAccountID(id)
+	_ = _c.mutation.SetEdgeID("account", id)
 	return _c
 }
 
@@ -100,15 +101,15 @@ func (_c *TokenCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *TokenCreate) check() error {
-	if _, ok := _c.mutation.Body(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "body"); !ok {
 		return &ValidationError{Name: "body", Err: errors.New(`ent: missing required field "Token.body"`)}
 	}
-	if v, ok := _c.mutation.Body(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "body"); ok {
 		if err := BodyValidator(v); err != nil {
 			return &ValidationError{Name: "body", Err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
-	if len(_c.mutation.AccountIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("account")) == 0 {
 		return &ValidationError{Name: "account", Err: errors.New(`ent: missing required edge "Token.account"`)}
 	}
 	return nil
@@ -132,7 +133,7 @@ func (_c *TokenCreate) sqlSave(ctx context.Context) (*Token, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -143,15 +144,16 @@ func (_c *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeOther))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(sid.ID)
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.Body(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "body"); ok {
 		_spec.SetField(FieldBody, field.TypeString, value)
 		_node.Body = value
 	}
-	if nodes := _c.mutation.AccountIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[sid.ID](_c.mutation, "account"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -387,7 +389,7 @@ func (_c *TokenCreateBulk) Save(ctx context.Context) ([]*Token, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

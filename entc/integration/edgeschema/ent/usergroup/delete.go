@@ -30,7 +30,7 @@ func NewUserGroupDelete(c Config, hooks []Hook, mutation *UserGroupMutation) *Us
 
 // Where appends a list predicates to the UserGroupDelete builder.
 func (_d *UserGroupDelete) Where(ps ...predicate.UserGroup) *UserGroupDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewUserGroupDeleteOne(d *UserGroupDelete) *UserGroupDeleteOne {
 
 // Where appends a list predicates to the UserGroupDelete builder.
 func (_d *UserGroupDeleteOne) Where(ps ...predicate.UserGroup) *UserGroupDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

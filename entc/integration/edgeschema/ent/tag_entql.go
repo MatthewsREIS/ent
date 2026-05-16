@@ -27,7 +27,7 @@ func (_q *TagQuery) Filter() *TagFilter {
 
 // NewTagFilterForMutation creates a new TagFilter for the given mutation.
 func NewTagFilterForMutation(m *TagMutation) *TagFilter {
-	return &TagFilter{Config: m.Config, predicateAdder: m}
+	return &TagFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // TagFilter provides a generic filtering capability at runtime for TagQuery.

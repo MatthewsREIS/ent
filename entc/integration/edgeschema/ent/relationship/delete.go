@@ -29,7 +29,7 @@ func NewRelationshipDelete(c Config, hooks []Hook, mutation *RelationshipMutatio
 
 // Where appends a list predicates to the RelationshipDelete builder.
 func (_d *RelationshipDelete) Where(ps ...predicate.Relationship) *RelationshipDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -76,7 +76,7 @@ func NewRelationshipDeleteOne(d *RelationshipDelete) *RelationshipDeleteOne {
 
 // Where appends a list predicates to the RelationshipDelete builder.
 func (_d *RelationshipDeleteOne) Where(ps ...predicate.Relationship) *RelationshipDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

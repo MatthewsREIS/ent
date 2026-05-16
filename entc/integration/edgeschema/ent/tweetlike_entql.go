@@ -27,7 +27,7 @@ func (_q *TweetLikeQuery) Filter() *TweetLikeFilter {
 
 // NewTweetLikeFilterForMutation creates a new TweetLikeFilter for the given mutation.
 func NewTweetLikeFilterForMutation(m *TweetLikeMutation) *TweetLikeFilter {
-	return &TweetLikeFilter{Config: m.Config, predicateAdder: m}
+	return &TweetLikeFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // TweetLikeFilter provides a generic filtering capability at runtime for TweetLikeQuery.

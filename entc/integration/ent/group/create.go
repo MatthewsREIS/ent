@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 
 // SetActive sets the "active" field.
 func (_c *GroupCreate) SetActive(v bool) *GroupCreate {
-	_c.mutation.SetActive(v)
+	_ = _c.mutation.SetField("active", v)
 	return _c
 }
 
@@ -46,13 +47,13 @@ func (_c *GroupCreate) SetNillableActive(v *bool) *GroupCreate {
 
 // SetExpire sets the "expire" field.
 func (_c *GroupCreate) SetExpire(v time.Time) *GroupCreate {
-	_c.mutation.SetExpire(v)
+	_ = _c.mutation.SetField("expire", v)
 	return _c
 }
 
 // SetType sets the "type" field.
 func (_c *GroupCreate) SetType(v string) *GroupCreate {
-	_c.mutation.SetType(v)
+	_ = _c.mutation.SetField("type", v)
 	return _c
 }
 
@@ -66,7 +67,7 @@ func (_c *GroupCreate) SetNillableType(v *string) *GroupCreate {
 
 // SetMaxUsers sets the "max_users" field.
 func (_c *GroupCreate) SetMaxUsers(v int) *GroupCreate {
-	_c.mutation.SetMaxUsers(v)
+	_ = _c.mutation.SetField("max_users", v)
 	return _c
 }
 
@@ -80,31 +81,31 @@ func (_c *GroupCreate) SetNillableMaxUsers(v *int) *GroupCreate {
 
 // SetName sets the "name" field.
 func (_c *GroupCreate) SetName(v string) *GroupCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_c *GroupCreate) AddFileIDs(ids ...int) *GroupCreate {
-	_c.mutation.AddFileIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddBlockedIDs adds the "blocked" edge to the User entity by IDs.
 func (_c *GroupCreate) AddBlockedIDs(ids ...int) *GroupCreate {
-	_c.mutation.AddBlockedIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("blocked", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
-	_c.mutation.AddUserIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // SetInfoID sets the "info" edge to the GroupInfo entity by ID.
 func (_c *GroupCreate) SetInfoID(id int) *GroupCreate {
-	_c.mutation.SetInfoID(id)
+	_ = _c.mutation.SetEdgeID("info", id)
 	return _c
 }
 
@@ -143,43 +144,43 @@ func (_c *GroupCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *GroupCreate) defaults() {
-	if _, ok := _c.mutation.Active(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "active"); !ok {
 		v := DefaultActive
-		_c.mutation.SetActive(v)
+		_ = _c.mutation.SetField("active", v)
 	}
-	if _, ok := _c.mutation.MaxUsers(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "max_users"); !ok {
 		v := DefaultMaxUsers
-		_c.mutation.SetMaxUsers(v)
+		_ = _c.mutation.SetField("max_users", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *GroupCreate) check() error {
-	if _, ok := _c.mutation.Active(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "active"); !ok {
 		return &ValidationError{Name: "active", Err: errors.New(`ent: missing required field "Group.active"`)}
 	}
-	if _, ok := _c.mutation.Expire(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "expire"); !ok {
 		return &ValidationError{Name: "expire", Err: errors.New(`ent: missing required field "Group.expire"`)}
 	}
-	if v, ok := _c.mutation.GetType(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "type"); ok {
 		if err := TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", Err: fmt.Errorf(`ent: validator failed for field "Group.type": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.MaxUsers(); ok {
+	if v, ok := entbuilder.GetField[int](_c.mutation, "max_users"); ok {
 		if err := MaxUsersValidator(v); err != nil {
 			return &ValidationError{Name: "max_users", Err: fmt.Errorf(`ent: validator failed for field "Group.max_users": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "Group.name"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
 		}
 	}
-	if len(_c.mutation.InfoIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("info")) == 0 {
 		return &ValidationError{Name: "info", Err: errors.New(`ent: missing required edge "Group.info"`)}
 	}
 	return nil
@@ -198,7 +199,7 @@ func (_c *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -209,27 +210,27 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Active(); ok {
+	if value, ok := entbuilder.GetField[bool](_c.mutation, "active"); ok {
 		_spec.SetField(FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
-	if value, ok := _c.mutation.Expire(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "expire"); ok {
 		_spec.SetField(FieldExpire, field.TypeTime, value)
 		_node.Expire = value
 	}
-	if value, ok := _c.mutation.GetType(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "type"); ok {
 		_spec.SetField(FieldType, field.TypeString, value)
 		_node.Type = &value
 	}
-	if value, ok := _c.mutation.MaxUsers(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "max_users"); ok {
 		_spec.SetField(FieldMaxUsers, field.TypeInt, value)
 		_node.MaxUsers = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := _c.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -245,7 +246,7 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.BlockedIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "blocked"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -261,7 +262,7 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "users"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -277,7 +278,7 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.InfoIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "info"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -643,11 +644,11 @@ func (_c *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

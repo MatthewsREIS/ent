@@ -25,7 +25,7 @@ func (_q *ItemQuery) Filter() *ItemFilter {
 
 // NewItemFilterForMutation creates a new ItemFilter for the given mutation.
 func NewItemFilterForMutation(m *ItemMutation) *ItemFilter {
-	return &ItemFilter{Config: m.Config, predicateAdder: m}
+	return &ItemFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // ItemFilter provides a generic filtering capability at runtime for ItemQuery.

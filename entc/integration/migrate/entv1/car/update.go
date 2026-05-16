@@ -32,13 +32,13 @@ func NewCarUpdate(c Config, hooks []Hook, mutation *CarMutation) *CarUpdate {
 
 // Where appends a list predicates to the CarUpdate builder.
 func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CarUpdate) SetOwnerID(id int) *CarUpdate {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -57,7 +57,7 @@ func (_u *CarUpdate) Mutation() *CarMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CarUpdate) ClearOwner() *CarUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -97,7 +97,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -110,7 +110,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -153,7 +153,7 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -172,13 +172,13 @@ func (_u *CarUpdateOne) Mutation() *CarMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CarUpdateOne) ClearOwner() *CarUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Where appends a list predicates to the CarUpdate builder.
 func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -218,10 +218,11 @@ func (_u *CarUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`entv1: missing "Car.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -242,7 +243,7 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			}
 		}
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -255,7 +256,7 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,

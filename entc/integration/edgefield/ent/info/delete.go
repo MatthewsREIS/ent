@@ -30,7 +30,7 @@ func NewInfoDelete(c Config, hooks []Hook, mutation *InfoMutation) *InfoDelete {
 
 // Where appends a list predicates to the InfoDelete builder.
 func (_d *InfoDelete) Where(ps ...predicate.Info) *InfoDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewInfoDeleteOne(d *InfoDelete) *InfoDeleteOne {
 
 // Where appends a list predicates to the InfoDelete builder.
 func (_d *InfoDeleteOne) Where(ps ...predicate.Info) *InfoDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

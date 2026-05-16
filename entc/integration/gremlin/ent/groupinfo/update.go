@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupInfoUpdate is the builder for updating GroupInfo entities.
@@ -33,13 +34,13 @@ func NewGroupInfoUpdate(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 
 // Where appends a list predicates to the GroupInfoUpdate builder.
 func (_u *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetDesc sets the "desc" field.
 func (_u *GroupInfoUpdate) SetDesc(v string) *GroupInfoUpdate {
-	_u.mutation.SetDesc(v)
+	_ = _u.mutation.SetField("desc", v)
 	return _u
 }
 
@@ -53,8 +54,8 @@ func (_u *GroupInfoUpdate) SetNillableDesc(v *string) *GroupInfoUpdate {
 
 // SetMaxUsers sets the "max_users" field.
 func (_u *GroupInfoUpdate) SetMaxUsers(v int) *GroupInfoUpdate {
-	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(v)
+	_ = _u.mutation.ResetField("max_users")
+	_ = _u.mutation.SetField("max_users", v)
 	return _u
 }
 
@@ -68,13 +69,13 @@ func (_u *GroupInfoUpdate) SetNillableMaxUsers(v *int) *GroupInfoUpdate {
 
 // AddMaxUsers adds value to the "max_users" field.
 func (_u *GroupInfoUpdate) AddMaxUsers(v int) *GroupInfoUpdate {
-	_u.mutation.AddMaxUsers(v)
+	_ = _u.mutation.AddField("max_users", v)
 	return _u
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
-	_u.mutation.AddGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -85,13 +86,13 @@ func (_u *GroupInfoUpdate) Mutation() *GroupInfoMutation {
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
-	_u.mutation.ClearGroups()
+	_ = _u.mutation.ClearEdge("groups")
 	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
-	_u.mutation.RemoveGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -201,7 +202,7 @@ func NewGroupInfoUpdateOne(c Config, hooks []Hook, mutation *GroupInfoMutation) 
 
 // SetDesc sets the "desc" field.
 func (_u *GroupInfoUpdateOne) SetDesc(v string) *GroupInfoUpdateOne {
-	_u.mutation.SetDesc(v)
+	_ = _u.mutation.SetField("desc", v)
 	return _u
 }
 
@@ -215,8 +216,8 @@ func (_u *GroupInfoUpdateOne) SetNillableDesc(v *string) *GroupInfoUpdateOne {
 
 // SetMaxUsers sets the "max_users" field.
 func (_u *GroupInfoUpdateOne) SetMaxUsers(v int) *GroupInfoUpdateOne {
-	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(v)
+	_ = _u.mutation.ResetField("max_users")
+	_ = _u.mutation.SetField("max_users", v)
 	return _u
 }
 
@@ -230,13 +231,13 @@ func (_u *GroupInfoUpdateOne) SetNillableMaxUsers(v *int) *GroupInfoUpdateOne {
 
 // AddMaxUsers adds value to the "max_users" field.
 func (_u *GroupInfoUpdateOne) AddMaxUsers(v int) *GroupInfoUpdateOne {
-	_u.mutation.AddMaxUsers(v)
+	_ = _u.mutation.AddField("max_users", v)
 	return _u
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *GroupInfoUpdateOne) AddGroupIDs(ids ...string) *GroupInfoUpdateOne {
-	_u.mutation.AddGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -247,19 +248,19 @@ func (_u *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
-	_u.mutation.ClearGroups()
+	_ = _u.mutation.ClearEdge("groups")
 	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
-	_u.mutation.RemoveGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the GroupInfoUpdate builder.
 func (_u *GroupInfoUpdateOne) Where(ps ...predicate.GroupInfo) *GroupInfoUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 

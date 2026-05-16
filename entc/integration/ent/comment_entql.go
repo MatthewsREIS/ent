@@ -25,7 +25,7 @@ func (_q *CommentQuery) Filter() *CommentFilter {
 
 // NewCommentFilterForMutation creates a new CommentFilter for the given mutation.
 func NewCommentFilterForMutation(m *CommentMutation) *CommentFilter {
-	return &CommentFilter{Config: m.Config, predicateAdder: m}
+	return &CommentFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // CommentFilter provides a generic filtering capability at runtime for CommentQuery.

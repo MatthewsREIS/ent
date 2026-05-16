@@ -27,7 +27,7 @@ func (_q *TokenQuery) Filter() *TokenFilter {
 
 // NewTokenFilterForMutation creates a new TokenFilter for the given mutation.
 func NewTokenFilterForMutation(m *TokenMutation) *TokenFilter {
-	return &TokenFilter{Config: m.Config, predicateAdder: m}
+	return &TokenFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // TokenFilter provides a generic filtering capability at runtime for TokenQuery.

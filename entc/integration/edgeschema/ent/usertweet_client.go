@@ -104,7 +104,7 @@ func (c *UserTweetClient) DeleteOne(_m *UserTweet) *usertweet.UserTweetDeleteOne
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserTweetClient) DeleteOneID(id int) *usertweet.UserTweetDeleteOne {
 	mutation := NewUserTweetMutation(c.Config, OpDeleteOne, WithUserTweetID(id, nil))
-	mutation.Where(usertweet.ID(id))
+	mutation.WhereP(usertweet.ID(id))
 	return usertweet.NewUserTweetDeleteOne(usertweet.NewUserTweetDelete(c.Config, c.Hooks(), mutation))
 }
 

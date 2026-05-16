@@ -100,7 +100,7 @@ func (c *FieldTypeClient) DeleteOne(_m *FieldType) *fieldtype.FieldTypeDeleteOne
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FieldTypeClient) DeleteOneID(id int) *fieldtype.FieldTypeDeleteOne {
 	mutation := NewFieldTypeMutation(c.Config, OpDeleteOne, WithFieldTypeID(id, nil))
-	mutation.Where(fieldtype.ID(id))
+	mutation.WhereP(fieldtype.ID(id))
 	return fieldtype.NewFieldTypeDeleteOne(fieldtype.NewFieldTypeDelete(c.Config, c.Hooks(), mutation))
 }
 

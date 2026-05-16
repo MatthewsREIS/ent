@@ -31,7 +31,7 @@ func NewFieldTypeDelete(c Config, hooks []Hook, mutation *FieldTypeMutation) *Fi
 
 // Where appends a list predicates to the FieldTypeDelete builder.
 func (_d *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewFieldTypeDeleteOne(d *FieldTypeDelete) *FieldTypeDeleteOne {
 
 // Where appends a list predicates to the FieldTypeDelete builder.
 func (_d *FieldTypeDeleteOne) Where(ps ...predicate.FieldType) *FieldTypeDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

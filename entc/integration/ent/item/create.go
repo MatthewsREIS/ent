@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewItemCreate(c Config, hooks []Hook, mutation *ItemMutation) *ItemCreate {
 
 // SetText sets the "text" field.
 func (_c *ItemCreate) SetText(v string) *ItemCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
@@ -101,12 +102,12 @@ func (_c *ItemCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *ItemCreate) check() error {
-	if v, ok := _c.mutation.Text(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		if err := TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", Err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.ID(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "id"); ok {
 		if err := IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", Err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
 		}
@@ -132,7 +133,7 @@ func (_c *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 			return nil, fmt.Errorf("unexpected Item.ID type: %T", _spec.ID.Value)
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -143,11 +144,12 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(string)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 		_node.Text = value
 	}
@@ -384,7 +386,7 @@ func (_c *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

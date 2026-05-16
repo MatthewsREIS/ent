@@ -33,13 +33,13 @@ func NewIntSIDUpdate(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSIDUp
 
 // Where appends a list predicates to the IntSIDUpdate builder.
 func (_u *IntSIDUpdate) Where(ps ...predicate.IntSID) *IntSIDUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetParentID sets the "parent" edge to the IntSID entity by ID.
 func (_u *IntSIDUpdate) SetParentID(id sid.ID) *IntSIDUpdate {
-	_u.mutation.SetParentID(id)
+	_ = _u.mutation.SetEdgeID("parent", id)
 	return _u
 }
 
@@ -53,7 +53,7 @@ func (_u *IntSIDUpdate) SetNillableParentID(id *sid.ID) *IntSIDUpdate {
 
 // AddChildIDs adds the "children" edge to the IntSID entity by IDs.
 func (_u *IntSIDUpdate) AddChildIDs(ids ...sid.ID) *IntSIDUpdate {
-	_u.mutation.AddChildIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -64,19 +64,19 @@ func (_u *IntSIDUpdate) Mutation() *IntSIDMutation {
 
 // ClearParent clears the "parent" edge to the IntSID entity.
 func (_u *IntSIDUpdate) ClearParent() *IntSIDUpdate {
-	_u.mutation.ClearParent()
+	_ = _u.mutation.ClearEdge("parent")
 	return _u
 }
 
 // ClearChildren clears all "children" edges to the IntSID entity.
 func (_u *IntSIDUpdate) ClearChildren() *IntSIDUpdate {
-	_u.mutation.ClearChildren()
+	_ = _u.mutation.ClearEdge("children")
 	return _u
 }
 
 // RemoveChildIDs removes the "children" edge to IntSID entities by IDs.
 func (_u *IntSIDUpdate) RemoveChildIDs(ids ...sid.ID) *IntSIDUpdate {
-	_u.mutation.RemoveChildIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -116,7 +116,7 @@ func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.ParentCleared() {
+	if _u.mutation.EdgeCleared("parent") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -129,7 +129,7 @@ func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -145,7 +145,7 @@ func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ChildrenCleared() {
+	if _u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -158,7 +158,7 @@ func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("children"); len(nodes) > 0 && !_u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -174,7 +174,7 @@ func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -217,7 +217,7 @@ func NewIntSIDUpdateOne(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSI
 
 // SetParentID sets the "parent" edge to the IntSID entity by ID.
 func (_u *IntSIDUpdateOne) SetParentID(id sid.ID) *IntSIDUpdateOne {
-	_u.mutation.SetParentID(id)
+	_ = _u.mutation.SetEdgeID("parent", id)
 	return _u
 }
 
@@ -231,7 +231,7 @@ func (_u *IntSIDUpdateOne) SetNillableParentID(id *sid.ID) *IntSIDUpdateOne {
 
 // AddChildIDs adds the "children" edge to the IntSID entity by IDs.
 func (_u *IntSIDUpdateOne) AddChildIDs(ids ...sid.ID) *IntSIDUpdateOne {
-	_u.mutation.AddChildIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -242,25 +242,25 @@ func (_u *IntSIDUpdateOne) Mutation() *IntSIDMutation {
 
 // ClearParent clears the "parent" edge to the IntSID entity.
 func (_u *IntSIDUpdateOne) ClearParent() *IntSIDUpdateOne {
-	_u.mutation.ClearParent()
+	_ = _u.mutation.ClearEdge("parent")
 	return _u
 }
 
 // ClearChildren clears all "children" edges to the IntSID entity.
 func (_u *IntSIDUpdateOne) ClearChildren() *IntSIDUpdateOne {
-	_u.mutation.ClearChildren()
+	_ = _u.mutation.ClearEdge("children")
 	return _u
 }
 
 // RemoveChildIDs removes the "children" edge to IntSID entities by IDs.
 func (_u *IntSIDUpdateOne) RemoveChildIDs(ids ...sid.ID) *IntSIDUpdateOne {
-	_u.mutation.RemoveChildIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the IntSIDUpdate builder.
 func (_u *IntSIDUpdateOne) Where(ps ...predicate.IntSID) *IntSIDUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -300,10 +300,11 @@ func (_u *IntSIDUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt64))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "IntSID.id" for update`)}
 	}
+	id := idAny.(sid.ID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -324,7 +325,7 @@ func (_u *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err erro
 			}
 		}
 	}
-	if _u.mutation.ParentCleared() {
+	if _u.mutation.EdgeCleared("parent") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -337,7 +338,7 @@ func (_u *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -353,7 +354,7 @@ func (_u *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err erro
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ChildrenCleared() {
+	if _u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -366,7 +367,7 @@ func (_u *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("children"); len(nodes) > 0 && !_u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -382,7 +383,7 @@ func (_u *IntSIDUpdateOne) sqlSave(ctx context.Context) (_node *IntSID, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,

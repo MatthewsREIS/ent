@@ -30,7 +30,7 @@ func NewCommentDelete(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 
 // Where appends a list predicates to the CommentDelete builder.
 func (_d *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -78,7 +78,7 @@ func NewCommentDeleteOne(d *CommentDelete) *CommentDeleteOne {
 
 // Where appends a list predicates to the CommentDelete builder.
 func (_d *CommentDeleteOne) Where(ps ...predicate.Comment) *CommentDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

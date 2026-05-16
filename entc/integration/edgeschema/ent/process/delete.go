@@ -30,7 +30,7 @@ func NewProcessDelete(c Config, hooks []Hook, mutation *ProcessMutation) *Proces
 
 // Where appends a list predicates to the ProcessDelete builder.
 func (_d *ProcessDelete) Where(ps ...predicate.Process) *ProcessDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewProcessDeleteOne(d *ProcessDelete) *ProcessDeleteOne {
 
 // Where appends a list predicates to the ProcessDelete builder.
 func (_d *ProcessDeleteOne) Where(ps ...predicate.Process) *ProcessDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

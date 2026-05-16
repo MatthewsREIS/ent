@@ -27,7 +27,7 @@ func (_q *UserGroupQuery) Filter() *UserGroupFilter {
 
 // NewUserGroupFilterForMutation creates a new UserGroupFilter for the given mutation.
 func NewUserGroupFilterForMutation(m *UserGroupMutation) *UserGroupFilter {
-	return &UserGroupFilter{Config: m.Config, predicateAdder: m}
+	return &UserGroupFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // UserGroupFilter provides a generic filtering capability at runtime for UserGroupQuery.

@@ -31,7 +31,7 @@ func NewLicenseDelete(c Config, hooks []Hook, mutation *LicenseMutation) *Licens
 
 // Where appends a list predicates to the LicenseDelete builder.
 func (_d *LicenseDelete) Where(ps ...predicate.License) *LicenseDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewLicenseDeleteOne(d *LicenseDelete) *LicenseDeleteOne {
 
 // Where appends a list predicates to the LicenseDelete builder.
 func (_d *LicenseDeleteOne) Where(ps ...predicate.License) *LicenseDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

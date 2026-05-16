@@ -27,7 +27,7 @@ func (_q *CarQuery) Filter() *CarFilter {
 
 // NewCarFilterForMutation creates a new CarFilter for the given mutation.
 func NewCarFilterForMutation(m *CarMutation) *CarFilter {
-	return &CarFilter{Config: m.Config, predicateAdder: m}
+	return &CarFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // CarFilter provides a generic filtering capability at runtime for CarQuery.

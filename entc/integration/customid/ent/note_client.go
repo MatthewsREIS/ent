@@ -103,7 +103,7 @@ func (c *NoteClient) DeleteOne(_m *Note) *note.NoteDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *NoteClient) DeleteOneID(id schema.NoteID) *note.NoteDeleteOne {
 	mutation := NewNoteMutation(c.Config, OpDeleteOne, WithNoteID(id, nil))
-	mutation.Where(note.ID(id))
+	mutation.WhereP(note.ID(id))
 	return note.NewNoteDeleteOne(note.NewNoteDelete(c.Config, c.Hooks(), mutation))
 }
 

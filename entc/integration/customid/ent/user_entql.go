@@ -27,7 +27,7 @@ func (_q *UserQuery) Filter() *UserFilter {
 
 // NewUserFilterForMutation creates a new UserFilter for the given mutation.
 func NewUserFilterForMutation(m *UserMutation) *UserFilter {
-	return &UserFilter{Config: m.Config, predicateAdder: m}
+	return &UserFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // UserFilter provides a generic filtering capability at runtime for UserQuery.

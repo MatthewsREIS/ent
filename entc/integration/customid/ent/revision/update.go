@@ -32,7 +32,7 @@ func NewRevisionUpdate(c Config, hooks []Hook, mutation *RevisionMutation) *Revi
 
 // Where appends a list predicates to the RevisionUpdate builder.
 func (_u *RevisionUpdate) Where(ps ...predicate.Revision) *RevisionUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -109,7 +109,7 @@ func (_u *RevisionUpdateOne) Mutation() *RevisionMutation {
 
 // Where appends a list predicates to the RevisionUpdate builder.
 func (_u *RevisionUpdateOne) Where(ps ...predicate.Revision) *RevisionUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -149,10 +149,11 @@ func (_u *RevisionUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *RevisionUpdateOne) sqlSave(ctx context.Context) (_node *Revision, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Revision.id" for update`)}
 	}
+	id := idAny.(string)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

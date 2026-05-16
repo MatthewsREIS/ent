@@ -30,7 +30,7 @@ func NewTagDelete(c Config, hooks []Hook, mutation *TagMutation) *TagDelete {
 
 // Where appends a list predicates to the TagDelete builder.
 func (_d *TagDelete) Where(ps ...predicate.Tag) *TagDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewTagDeleteOne(d *TagDelete) *TagDeleteOne {
 
 // Where appends a list predicates to the TagDelete builder.
 func (_d *TagDeleteOne) Where(ps ...predicate.Tag) *TagDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

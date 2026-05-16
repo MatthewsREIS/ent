@@ -30,7 +30,7 @@ func NewMetadataDelete(c Config, hooks []Hook, mutation *MetadataMutation) *Meta
 
 // Where appends a list predicates to the MetadataDelete builder.
 func (_d *MetadataDelete) Where(ps ...predicate.Metadata) *MetadataDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewMetadataDeleteOne(d *MetadataDelete) *MetadataDeleteOne {
 
 // Where appends a list predicates to the MetadataDelete builder.
 func (_d *MetadataDeleteOne) Where(ps ...predicate.Metadata) *MetadataDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

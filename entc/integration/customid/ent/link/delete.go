@@ -30,7 +30,7 @@ func NewLinkDelete(c Config, hooks []Hook, mutation *LinkMutation) *LinkDelete {
 
 // Where appends a list predicates to the LinkDelete builder.
 func (_d *LinkDelete) Where(ps ...predicate.Link) *LinkDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewLinkDeleteOne(d *LinkDelete) *LinkDeleteOne {
 
 // Where appends a list predicates to the LinkDelete builder.
 func (_d *LinkDeleteOne) Where(ps ...predicate.Link) *LinkDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

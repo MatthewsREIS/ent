@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -59,47 +58,75 @@ func IDLTE(id sid.ID) predicate.Account {
 	return predicate.Account(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Email — use where.EQ(FieldEmail, v).
-func Email(v string) predicate.Account { return where.EQ(FieldEmail, v) }
+// Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
+func Email(v string) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldEmail, v))
+}
 
-// Deprecated: EmailEQ — use where.EQ(FieldEmail, v).
-func EmailEQ(v string) predicate.Account { return where.EQ(FieldEmail, v) }
+// EmailEQ applies the EQ predicate on the "email" field.
+func EmailEQ(v string) predicate.Account {
+	return predicate.Account(sql.FieldEQ(FieldEmail, v))
+}
 
-// Deprecated: EmailNEQ — use where.NEQ(FieldEmail, v).
-func EmailNEQ(v string) predicate.Account { return where.NEQ(FieldEmail, v) }
+// EmailNEQ applies the NEQ predicate on the "email" field.
+func EmailNEQ(v string) predicate.Account {
+	return predicate.Account(sql.FieldNEQ(FieldEmail, v))
+}
 
-// Deprecated: EmailIn — use where.In(FieldEmail, vs...).
-func EmailIn(vs ...string) predicate.Account { return where.In(FieldEmail, vs...) }
+// EmailIn applies the In predicate on the "email" field.
+func EmailIn(vs ...string) predicate.Account {
+	return predicate.Account(sql.FieldIn(FieldEmail, vs...))
+}
 
-// Deprecated: EmailNotIn — use where.NotIn(FieldEmail, vs...).
-func EmailNotIn(vs ...string) predicate.Account { return where.NotIn(FieldEmail, vs...) }
+// EmailNotIn applies the NotIn predicate on the "email" field.
+func EmailNotIn(vs ...string) predicate.Account {
+	return predicate.Account(sql.FieldNotIn(FieldEmail, vs...))
+}
 
-// Deprecated: EmailGT — use where.GT(FieldEmail, v).
-func EmailGT(v string) predicate.Account { return where.GT(FieldEmail, v) }
+// EmailGT applies the GT predicate on the "email" field.
+func EmailGT(v string) predicate.Account {
+	return predicate.Account(sql.FieldGT(FieldEmail, v))
+}
 
-// Deprecated: EmailGTE — use where.GTE(FieldEmail, v).
-func EmailGTE(v string) predicate.Account { return where.GTE(FieldEmail, v) }
+// EmailGTE applies the GTE predicate on the "email" field.
+func EmailGTE(v string) predicate.Account {
+	return predicate.Account(sql.FieldGTE(FieldEmail, v))
+}
 
-// Deprecated: EmailLT — use where.LT(FieldEmail, v).
-func EmailLT(v string) predicate.Account { return where.LT(FieldEmail, v) }
+// EmailLT applies the LT predicate on the "email" field.
+func EmailLT(v string) predicate.Account {
+	return predicate.Account(sql.FieldLT(FieldEmail, v))
+}
 
-// Deprecated: EmailLTE — use where.LTE(FieldEmail, v).
-func EmailLTE(v string) predicate.Account { return where.LTE(FieldEmail, v) }
+// EmailLTE applies the LTE predicate on the "email" field.
+func EmailLTE(v string) predicate.Account {
+	return predicate.Account(sql.FieldLTE(FieldEmail, v))
+}
 
-// Deprecated: EmailContains — use where.Contains(FieldEmail, v).
-func EmailContains(v string) predicate.Account { return where.Contains(FieldEmail, v) }
+// EmailContains applies the Contains predicate on the "email" field.
+func EmailContains(v string) predicate.Account {
+	return predicate.Account(sql.FieldContains(FieldEmail, v))
+}
 
-// Deprecated: EmailHasPrefix — use where.HasPrefix(FieldEmail, v).
-func EmailHasPrefix(v string) predicate.Account { return where.HasPrefix(FieldEmail, v) }
+// EmailHasPrefix applies the HasPrefix predicate on the "email" field.
+func EmailHasPrefix(v string) predicate.Account {
+	return predicate.Account(sql.FieldHasPrefix(FieldEmail, v))
+}
 
-// Deprecated: EmailHasSuffix — use where.HasSuffix(FieldEmail, v).
-func EmailHasSuffix(v string) predicate.Account { return where.HasSuffix(FieldEmail, v) }
+// EmailHasSuffix applies the HasSuffix predicate on the "email" field.
+func EmailHasSuffix(v string) predicate.Account {
+	return predicate.Account(sql.FieldHasSuffix(FieldEmail, v))
+}
 
-// Deprecated: EmailEqualFold — use where.EqualFold(FieldEmail, v).
-func EmailEqualFold(v string) predicate.Account { return where.EqualFold(FieldEmail, v) }
+// EmailEqualFold applies the EqualFold predicate on the "email" field.
+func EmailEqualFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldEqualFold(FieldEmail, v))
+}
 
-// Deprecated: EmailContainsFold — use where.ContainsFold(FieldEmail, v).
-func EmailContainsFold(v string) predicate.Account { return where.ContainsFold(FieldEmail, v) }
+// EmailContainsFold applies the ContainsFold predicate on the "email" field.
+func EmailContainsFold(v string) predicate.Account {
+	return predicate.Account(sql.FieldContainsFold(FieldEmail, v))
+}
 
 // HasToken applies the HasEdge predicate on the "token" edge.
 func HasToken() predicate.Account {

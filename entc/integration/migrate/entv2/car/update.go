@@ -32,13 +32,13 @@ func NewCarUpdate(c Config, hooks []Hook, mutation *CarMutation) *CarUpdate {
 
 // Where appends a list predicates to the CarUpdate builder.
 func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *CarUpdate) SetName(v string) *CarUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -52,13 +52,13 @@ func (_u *CarUpdate) SetNillableName(v *string) *CarUpdate {
 
 // ClearName clears the value of the "name" field.
 func (_u *CarUpdate) ClearName() *CarUpdate {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CarUpdate) SetOwnerID(id int) *CarUpdate {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -69,7 +69,7 @@ func (_u *CarUpdate) Mutation() *CarMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CarUpdate) ClearOwner() *CarUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -102,7 +102,7 @@ func (_u *CarUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *CarUpdate) check() error {
-	if _u.mutation.OwnerCleared() && len(_u.mutation.OwnerIDs()) > 0 {
+	if _u.mutation.EdgeCleared("owner") && len(_u.mutation.EdgeIDs("owner")) > 0 {
 		return errors.New(`entv2: clearing a required unique edge "Car.owner"`)
 	}
 	return nil
@@ -120,13 +120,13 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -139,7 +139,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -182,7 +182,7 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 
 // SetName sets the "name" field.
 func (_u *CarUpdateOne) SetName(v string) *CarUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -196,13 +196,13 @@ func (_u *CarUpdateOne) SetNillableName(v *string) *CarUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *CarUpdateOne) ClearName() *CarUpdateOne {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -213,13 +213,13 @@ func (_u *CarUpdateOne) Mutation() *CarMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CarUpdateOne) ClearOwner() *CarUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Where appends a list predicates to the CarUpdate builder.
 func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -259,7 +259,7 @@ func (_u *CarUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *CarUpdateOne) check() error {
-	if _u.mutation.OwnerCleared() && len(_u.mutation.OwnerIDs()) > 0 {
+	if _u.mutation.EdgeCleared("owner") && len(_u.mutation.EdgeIDs("owner")) > 0 {
 		return errors.New(`entv2: clearing a required unique edge "Car.owner"`)
 	}
 	return nil
@@ -270,10 +270,11 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`entv2: missing "Car.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -294,13 +295,13 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -313,7 +314,7 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,

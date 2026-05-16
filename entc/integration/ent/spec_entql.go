@@ -27,7 +27,7 @@ func (_q *SpecQuery) Filter() *SpecFilter {
 
 // NewSpecFilterForMutation creates a new SpecFilter for the given mutation.
 func NewSpecFilterForMutation(m *SpecMutation) *SpecFilter {
-	return &SpecFilter{Config: m.Config, predicateAdder: m}
+	return &SpecFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // SpecFilter provides a generic filtering capability at runtime for SpecQuery.

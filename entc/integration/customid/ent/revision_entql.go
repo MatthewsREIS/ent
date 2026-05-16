@@ -25,7 +25,7 @@ func (_q *RevisionQuery) Filter() *RevisionFilter {
 
 // NewRevisionFilterForMutation creates a new RevisionFilter for the given mutation.
 func NewRevisionFilterForMutation(m *RevisionMutation) *RevisionFilter {
-	return &RevisionFilter{Config: m.Config, predicateAdder: m}
+	return &RevisionFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // RevisionFilter provides a generic filtering capability at runtime for RevisionQuery.

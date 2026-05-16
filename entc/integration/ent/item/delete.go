@@ -31,7 +31,7 @@ func NewItemDelete(c Config, hooks []Hook, mutation *ItemMutation) *ItemDelete {
 
 // Where appends a list predicates to the ItemDelete builder.
 func (_d *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewItemDeleteOne(d *ItemDelete) *ItemDeleteOne {
 
 // Where appends a list predicates to the ItemDelete builder.
 func (_d *ItemDeleteOne) Where(ps ...predicate.Item) *ItemDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

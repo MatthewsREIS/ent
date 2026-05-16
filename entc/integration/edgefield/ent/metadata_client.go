@@ -103,7 +103,7 @@ func (c *MetadataClient) DeleteOne(_m *Metadata) *metadata.MetadataDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MetadataClient) DeleteOneID(id int) *metadata.MetadataDeleteOne {
 	mutation := NewMetadataMutation(c.Config, OpDeleteOne, WithMetadataID(id, nil))
-	mutation.Where(metadata.ID(id))
+	mutation.WhereP(metadata.ID(id))
 	return metadata.NewMetadataDeleteOne(metadata.NewMetadataDelete(c.Config, c.Hooks(), mutation))
 }
 

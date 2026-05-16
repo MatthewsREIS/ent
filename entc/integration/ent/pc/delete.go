@@ -31,7 +31,7 @@ func NewPCDelete(c Config, hooks []Hook, mutation *PCMutation) *PCDelete {
 
 // Where appends a list predicates to the PCDelete builder.
 func (_d *PCDelete) Where(ps ...predicate.PC) *PCDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewPCDeleteOne(d *PCDelete) *PCDeleteOne {
 
 // Where appends a list predicates to the PCDelete builder.
 func (_d *PCDeleteOne) Where(ps ...predicate.PC) *PCDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

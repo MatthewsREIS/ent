@@ -33,7 +33,7 @@ func NewPCUpdate(c Config, hooks []Hook, mutation *PCMutation) *PCUpdate {
 
 // Where appends a list predicates to the PCUpdate builder.
 func (_u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -118,7 +118,7 @@ func (_u *PCUpdateOne) Mutation() *PCMutation {
 
 // Where appends a list predicates to the PCUpdate builder.
 func (_u *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -164,10 +164,11 @@ func (_u *PCUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PCUpdate
 
 func (_u *PCUpdateOne) sqlSave(ctx context.Context) (_node *PC, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "PC.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

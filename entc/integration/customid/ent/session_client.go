@@ -104,7 +104,7 @@ func (c *SessionClient) DeleteOne(_m *Session) *session.SessionDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *SessionClient) DeleteOneID(id schema.ID) *session.SessionDeleteOne {
 	mutation := NewSessionMutation(c.Config, OpDeleteOne, WithSessionID(id, nil))
-	mutation.Where(session.ID(id))
+	mutation.WhereP(session.ID(id))
 	return session.NewSessionDeleteOne(session.NewSessionDelete(c.Config, c.Hooks(), mutation))
 }
 

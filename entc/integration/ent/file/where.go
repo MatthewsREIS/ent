@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,281 +59,465 @@ func IDLTE(id int) predicate.File {
 	return predicate.File(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: SetID — use where.EQ(FieldSetID, v).
-func SetID(v int) predicate.File { return where.EQ(FieldSetID, v) }
-
-// Deprecated: Size — use where.EQ(FieldSize, v).
-func Size(v int) predicate.File { return where.EQ(FieldSize, v) }
-
-// Deprecated: Name — use where.EQ(FieldName, v).
-func Name(v string) predicate.File { return where.EQ(FieldName, v) }
-
-// Deprecated: User — use where.EQ(FieldUser, v).
-func User(v string) predicate.File { return where.EQ(FieldUser, v) }
-
-// Deprecated: Group — use where.EQ(FieldGroup, v).
-func Group(v string) predicate.File { return where.EQ(FieldGroup, v) }
-
-// Deprecated: Op — use where.EQ(FieldOp, v).
-func Op(v bool) predicate.File { return where.EQ(FieldOp, v) }
-
-// Deprecated: CreateTime — use where.EQ(FieldCreateTime, v).
-func CreateTime(v time.Time) predicate.File { return where.EQ(FieldCreateTime, v) }
-
-// Deprecated: SetIDEQ — use where.EQ(FieldSetID, v).
-func SetIDEQ(v int) predicate.File { return where.EQ(FieldSetID, v) }
-
-// Deprecated: SetIDNEQ — use where.NEQ(FieldSetID, v).
-func SetIDNEQ(v int) predicate.File { return where.NEQ(FieldSetID, v) }
-
-// Deprecated: SetIDIn — use where.In(FieldSetID, vs...).
-func SetIDIn(vs ...int) predicate.File { return where.In(FieldSetID, vs...) }
-
-// Deprecated: SetIDNotIn — use where.NotIn(FieldSetID, vs...).
-func SetIDNotIn(vs ...int) predicate.File { return where.NotIn(FieldSetID, vs...) }
-
-// Deprecated: SetIDGT — use where.GT(FieldSetID, v).
-func SetIDGT(v int) predicate.File { return where.GT(FieldSetID, v) }
-
-// Deprecated: SetIDGTE — use where.GTE(FieldSetID, v).
-func SetIDGTE(v int) predicate.File { return where.GTE(FieldSetID, v) }
-
-// Deprecated: SetIDLT — use where.LT(FieldSetID, v).
-func SetIDLT(v int) predicate.File { return where.LT(FieldSetID, v) }
-
-// Deprecated: SetIDLTE — use where.LTE(FieldSetID, v).
-func SetIDLTE(v int) predicate.File { return where.LTE(FieldSetID, v) }
-
-// Deprecated: SetIDIsNil — use where.IsNull(FieldSetID).
-func SetIDIsNil() predicate.File { return where.IsNull(FieldSetID) }
-
-// Deprecated: SetIDNotNil — use where.NotNull(FieldSetID).
-func SetIDNotNil() predicate.File { return where.NotNull(FieldSetID) }
-
-// Deprecated: SizeEQ — use where.EQ(FieldSize, v).
-func SizeEQ(v int) predicate.File { return where.EQ(FieldSize, v) }
-
-// Deprecated: SizeNEQ — use where.NEQ(FieldSize, v).
-func SizeNEQ(v int) predicate.File { return where.NEQ(FieldSize, v) }
-
-// Deprecated: SizeIn — use where.In(FieldSize, vs...).
-func SizeIn(vs ...int) predicate.File { return where.In(FieldSize, vs...) }
-
-// Deprecated: SizeNotIn — use where.NotIn(FieldSize, vs...).
-func SizeNotIn(vs ...int) predicate.File { return where.NotIn(FieldSize, vs...) }
-
-// Deprecated: SizeGT — use where.GT(FieldSize, v).
-func SizeGT(v int) predicate.File { return where.GT(FieldSize, v) }
-
-// Deprecated: SizeGTE — use where.GTE(FieldSize, v).
-func SizeGTE(v int) predicate.File { return where.GTE(FieldSize, v) }
-
-// Deprecated: SizeLT — use where.LT(FieldSize, v).
-func SizeLT(v int) predicate.File { return where.LT(FieldSize, v) }
-
-// Deprecated: SizeLTE — use where.LTE(FieldSize, v).
-func SizeLTE(v int) predicate.File { return where.LTE(FieldSize, v) }
-
-// Deprecated: NameEQ — use where.EQ(FieldName, v).
-func NameEQ(v string) predicate.File { return where.EQ(FieldName, v) }
-
-// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
-func NameNEQ(v string) predicate.File { return where.NEQ(FieldName, v) }
-
-// Deprecated: NameIn — use where.In(FieldName, vs...).
-func NameIn(vs ...string) predicate.File { return where.In(FieldName, vs...) }
-
-// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
-func NameNotIn(vs ...string) predicate.File { return where.NotIn(FieldName, vs...) }
-
-// Deprecated: NameGT — use where.GT(FieldName, v).
-func NameGT(v string) predicate.File { return where.GT(FieldName, v) }
-
-// Deprecated: NameGTE — use where.GTE(FieldName, v).
-func NameGTE(v string) predicate.File { return where.GTE(FieldName, v) }
-
-// Deprecated: NameLT — use where.LT(FieldName, v).
-func NameLT(v string) predicate.File { return where.LT(FieldName, v) }
-
-// Deprecated: NameLTE — use where.LTE(FieldName, v).
-func NameLTE(v string) predicate.File { return where.LTE(FieldName, v) }
-
-// Deprecated: NameContains — use where.Contains(FieldName, v).
-func NameContains(v string) predicate.File { return where.Contains(FieldName, v) }
-
-// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
-func NameHasPrefix(v string) predicate.File { return where.HasPrefix(FieldName, v) }
-
-// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
-func NameHasSuffix(v string) predicate.File { return where.HasSuffix(FieldName, v) }
-
-// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
-func NameEqualFold(v string) predicate.File { return where.EqualFold(FieldName, v) }
-
-// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
-func NameContainsFold(v string) predicate.File { return where.ContainsFold(FieldName, v) }
-
-// Deprecated: UserEQ — use where.EQ(FieldUser, v).
-func UserEQ(v string) predicate.File { return where.EQ(FieldUser, v) }
-
-// Deprecated: UserNEQ — use where.NEQ(FieldUser, v).
-func UserNEQ(v string) predicate.File { return where.NEQ(FieldUser, v) }
-
-// Deprecated: UserIn — use where.In(FieldUser, vs...).
-func UserIn(vs ...string) predicate.File { return where.In(FieldUser, vs...) }
-
-// Deprecated: UserNotIn — use where.NotIn(FieldUser, vs...).
-func UserNotIn(vs ...string) predicate.File { return where.NotIn(FieldUser, vs...) }
-
-// Deprecated: UserGT — use where.GT(FieldUser, v).
-func UserGT(v string) predicate.File { return where.GT(FieldUser, v) }
-
-// Deprecated: UserGTE — use where.GTE(FieldUser, v).
-func UserGTE(v string) predicate.File { return where.GTE(FieldUser, v) }
-
-// Deprecated: UserLT — use where.LT(FieldUser, v).
-func UserLT(v string) predicate.File { return where.LT(FieldUser, v) }
-
-// Deprecated: UserLTE — use where.LTE(FieldUser, v).
-func UserLTE(v string) predicate.File { return where.LTE(FieldUser, v) }
-
-// Deprecated: UserContains — use where.Contains(FieldUser, v).
-func UserContains(v string) predicate.File { return where.Contains(FieldUser, v) }
-
-// Deprecated: UserHasPrefix — use where.HasPrefix(FieldUser, v).
-func UserHasPrefix(v string) predicate.File { return where.HasPrefix(FieldUser, v) }
-
-// Deprecated: UserHasSuffix — use where.HasSuffix(FieldUser, v).
-func UserHasSuffix(v string) predicate.File { return where.HasSuffix(FieldUser, v) }
-
-// Deprecated: UserIsNil — use where.IsNull(FieldUser).
-func UserIsNil() predicate.File { return where.IsNull(FieldUser) }
-
-// Deprecated: UserNotNil — use where.NotNull(FieldUser).
-func UserNotNil() predicate.File { return where.NotNull(FieldUser) }
-
-// Deprecated: UserEqualFold — use where.EqualFold(FieldUser, v).
-func UserEqualFold(v string) predicate.File { return where.EqualFold(FieldUser, v) }
-
-// Deprecated: UserContainsFold — use where.ContainsFold(FieldUser, v).
-func UserContainsFold(v string) predicate.File { return where.ContainsFold(FieldUser, v) }
-
-// Deprecated: GroupEQ — use where.EQ(FieldGroup, v).
-func GroupEQ(v string) predicate.File { return where.EQ(FieldGroup, v) }
-
-// Deprecated: GroupNEQ — use where.NEQ(FieldGroup, v).
-func GroupNEQ(v string) predicate.File { return where.NEQ(FieldGroup, v) }
-
-// Deprecated: GroupIn — use where.In(FieldGroup, vs...).
-func GroupIn(vs ...string) predicate.File { return where.In(FieldGroup, vs...) }
-
-// Deprecated: GroupNotIn — use where.NotIn(FieldGroup, vs...).
-func GroupNotIn(vs ...string) predicate.File { return where.NotIn(FieldGroup, vs...) }
-
-// Deprecated: GroupGT — use where.GT(FieldGroup, v).
-func GroupGT(v string) predicate.File { return where.GT(FieldGroup, v) }
-
-// Deprecated: GroupGTE — use where.GTE(FieldGroup, v).
-func GroupGTE(v string) predicate.File { return where.GTE(FieldGroup, v) }
-
-// Deprecated: GroupLT — use where.LT(FieldGroup, v).
-func GroupLT(v string) predicate.File { return where.LT(FieldGroup, v) }
-
-// Deprecated: GroupLTE — use where.LTE(FieldGroup, v).
-func GroupLTE(v string) predicate.File { return where.LTE(FieldGroup, v) }
-
-// Deprecated: GroupContains — use where.Contains(FieldGroup, v).
-func GroupContains(v string) predicate.File { return where.Contains(FieldGroup, v) }
-
-// Deprecated: GroupHasPrefix — use where.HasPrefix(FieldGroup, v).
-func GroupHasPrefix(v string) predicate.File { return where.HasPrefix(FieldGroup, v) }
-
-// Deprecated: GroupHasSuffix — use where.HasSuffix(FieldGroup, v).
-func GroupHasSuffix(v string) predicate.File { return where.HasSuffix(FieldGroup, v) }
-
-// Deprecated: GroupIsNil — use where.IsNull(FieldGroup).
-func GroupIsNil() predicate.File { return where.IsNull(FieldGroup) }
-
-// Deprecated: GroupNotNil — use where.NotNull(FieldGroup).
-func GroupNotNil() predicate.File { return where.NotNull(FieldGroup) }
-
-// Deprecated: GroupEqualFold — use where.EqualFold(FieldGroup, v).
-func GroupEqualFold(v string) predicate.File { return where.EqualFold(FieldGroup, v) }
-
-// Deprecated: GroupContainsFold — use where.ContainsFold(FieldGroup, v).
-func GroupContainsFold(v string) predicate.File { return where.ContainsFold(FieldGroup, v) }
-
-// Deprecated: OpEQ — use where.EQ(FieldOp, v).
-func OpEQ(v bool) predicate.File { return where.EQ(FieldOp, v) }
-
-// Deprecated: OpNEQ — use where.NEQ(FieldOp, v).
-func OpNEQ(v bool) predicate.File { return where.NEQ(FieldOp, v) }
-
-// Deprecated: OpIsNil — use where.IsNull(FieldOp).
-func OpIsNil() predicate.File { return where.IsNull(FieldOp) }
-
-// Deprecated: OpNotNil — use where.NotNull(FieldOp).
-func OpNotNil() predicate.File { return where.NotNull(FieldOp) }
-
-// Deprecated: FieldIDEQ — use where.EQ(FieldFieldID, v).
-func FieldIDEQ(v int) predicate.File { return where.EQ(FieldFieldID, v) }
-
-// Deprecated: FieldIDNEQ — use where.NEQ(FieldFieldID, v).
-func FieldIDNEQ(v int) predicate.File { return where.NEQ(FieldFieldID, v) }
-
-// Deprecated: FieldIDIn — use where.In(FieldFieldID, vs...).
-func FieldIDIn(vs ...int) predicate.File { return where.In(FieldFieldID, vs...) }
-
-// Deprecated: FieldIDNotIn — use where.NotIn(FieldFieldID, vs...).
-func FieldIDNotIn(vs ...int) predicate.File { return where.NotIn(FieldFieldID, vs...) }
-
-// Deprecated: FieldIDGT — use where.GT(FieldFieldID, v).
-func FieldIDGT(v int) predicate.File { return where.GT(FieldFieldID, v) }
-
-// Deprecated: FieldIDGTE — use where.GTE(FieldFieldID, v).
-func FieldIDGTE(v int) predicate.File { return where.GTE(FieldFieldID, v) }
-
-// Deprecated: FieldIDLT — use where.LT(FieldFieldID, v).
-func FieldIDLT(v int) predicate.File { return where.LT(FieldFieldID, v) }
-
-// Deprecated: FieldIDLTE — use where.LTE(FieldFieldID, v).
-func FieldIDLTE(v int) predicate.File { return where.LTE(FieldFieldID, v) }
-
-// Deprecated: FieldIDIsNil — use where.IsNull(FieldFieldID).
-func FieldIDIsNil() predicate.File { return where.IsNull(FieldFieldID) }
-
-// Deprecated: FieldIDNotNil — use where.NotNull(FieldFieldID).
-func FieldIDNotNil() predicate.File { return where.NotNull(FieldFieldID) }
-
-// Deprecated: CreateTimeEQ — use where.EQ(FieldCreateTime, v).
-func CreateTimeEQ(v time.Time) predicate.File { return where.EQ(FieldCreateTime, v) }
-
-// Deprecated: CreateTimeNEQ — use where.NEQ(FieldCreateTime, v).
-func CreateTimeNEQ(v time.Time) predicate.File { return where.NEQ(FieldCreateTime, v) }
-
-// Deprecated: CreateTimeIn — use where.In(FieldCreateTime, vs...).
-func CreateTimeIn(vs ...time.Time) predicate.File { return where.In(FieldCreateTime, vs...) }
-
-// Deprecated: CreateTimeNotIn — use where.NotIn(FieldCreateTime, vs...).
-func CreateTimeNotIn(vs ...time.Time) predicate.File { return where.NotIn(FieldCreateTime, vs...) }
-
-// Deprecated: CreateTimeGT — use where.GT(FieldCreateTime, v).
-func CreateTimeGT(v time.Time) predicate.File { return where.GT(FieldCreateTime, v) }
-
-// Deprecated: CreateTimeGTE — use where.GTE(FieldCreateTime, v).
-func CreateTimeGTE(v time.Time) predicate.File { return where.GTE(FieldCreateTime, v) }
-
-// Deprecated: CreateTimeLT — use where.LT(FieldCreateTime, v).
-func CreateTimeLT(v time.Time) predicate.File { return where.LT(FieldCreateTime, v) }
-
-// Deprecated: CreateTimeLTE — use where.LTE(FieldCreateTime, v).
-func CreateTimeLTE(v time.Time) predicate.File { return where.LTE(FieldCreateTime, v) }
-
-// Deprecated: CreateTimeIsNil — use where.IsNull(FieldCreateTime).
-func CreateTimeIsNil() predicate.File { return where.IsNull(FieldCreateTime) }
-
-// Deprecated: CreateTimeNotNil — use where.NotNull(FieldCreateTime).
-func CreateTimeNotNil() predicate.File { return where.NotNull(FieldCreateTime) }
+// SetID applies equality check predicate on the "set_id" field. It's identical to SetIDEQ.
+func SetID(v int) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldSetID, v))
+}
+
+// Size applies equality check predicate on the "size" field. It's identical to SizeEQ.
+func Size(v int) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldSize, v))
+}
+
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldName, v))
+}
+
+// User applies equality check predicate on the "user" field. It's identical to UserEQ.
+func User(v string) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldUser, v))
+}
+
+// Group applies equality check predicate on the "group" field. It's identical to GroupEQ.
+func Group(v string) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldGroup, v))
+}
+
+// Op applies equality check predicate on the "op" field. It's identical to OpEQ.
+func Op(v bool) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldOp, v))
+}
+
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// SetIDEQ applies the EQ predicate on the "set_id" field.
+func SetIDEQ(v int) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldSetID, v))
+}
+
+// SetIDNEQ applies the NEQ predicate on the "set_id" field.
+func SetIDNEQ(v int) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldSetID, v))
+}
+
+// SetIDIn applies the In predicate on the "set_id" field.
+func SetIDIn(vs ...int) predicate.File {
+	return predicate.File(sql.FieldIn(FieldSetID, vs...))
+}
+
+// SetIDNotIn applies the NotIn predicate on the "set_id" field.
+func SetIDNotIn(vs ...int) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldSetID, vs...))
+}
+
+// SetIDGT applies the GT predicate on the "set_id" field.
+func SetIDGT(v int) predicate.File {
+	return predicate.File(sql.FieldGT(FieldSetID, v))
+}
+
+// SetIDGTE applies the GTE predicate on the "set_id" field.
+func SetIDGTE(v int) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldSetID, v))
+}
+
+// SetIDLT applies the LT predicate on the "set_id" field.
+func SetIDLT(v int) predicate.File {
+	return predicate.File(sql.FieldLT(FieldSetID, v))
+}
+
+// SetIDLTE applies the LTE predicate on the "set_id" field.
+func SetIDLTE(v int) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldSetID, v))
+}
+
+// SetIDIsNil applies the IsNil predicate on the "set_id" field.
+func SetIDIsNil() predicate.File {
+	return predicate.File(sql.FieldIsNull(FieldSetID))
+}
+
+// SetIDNotNil applies the NotNil predicate on the "set_id" field.
+func SetIDNotNil() predicate.File {
+	return predicate.File(sql.FieldNotNull(FieldSetID))
+}
+
+// SizeEQ applies the EQ predicate on the "size" field.
+func SizeEQ(v int) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldSize, v))
+}
+
+// SizeNEQ applies the NEQ predicate on the "size" field.
+func SizeNEQ(v int) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldSize, v))
+}
+
+// SizeIn applies the In predicate on the "size" field.
+func SizeIn(vs ...int) predicate.File {
+	return predicate.File(sql.FieldIn(FieldSize, vs...))
+}
+
+// SizeNotIn applies the NotIn predicate on the "size" field.
+func SizeNotIn(vs ...int) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldSize, vs...))
+}
+
+// SizeGT applies the GT predicate on the "size" field.
+func SizeGT(v int) predicate.File {
+	return predicate.File(sql.FieldGT(FieldSize, v))
+}
+
+// SizeGTE applies the GTE predicate on the "size" field.
+func SizeGTE(v int) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldSize, v))
+}
+
+// SizeLT applies the LT predicate on the "size" field.
+func SizeLT(v int) predicate.File {
+	return predicate.File(sql.FieldLT(FieldSize, v))
+}
+
+// SizeLTE applies the LTE predicate on the "size" field.
+func SizeLTE(v int) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldSize, v))
+}
+
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldName, v))
+}
+
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldName, v))
+}
+
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.File {
+	return predicate.File(sql.FieldIn(FieldName, vs...))
+}
+
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldName, vs...))
+}
+
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.File {
+	return predicate.File(sql.FieldGT(FieldName, v))
+}
+
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldName, v))
+}
+
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.File {
+	return predicate.File(sql.FieldLT(FieldName, v))
+}
+
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldName, v))
+}
+
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.File {
+	return predicate.File(sql.FieldContains(FieldName, v))
+}
+
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.File {
+	return predicate.File(sql.FieldHasPrefix(FieldName, v))
+}
+
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.File {
+	return predicate.File(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.File {
+	return predicate.File(sql.FieldEqualFold(FieldName, v))
+}
+
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.File {
+	return predicate.File(sql.FieldContainsFold(FieldName, v))
+}
+
+// UserEQ applies the EQ predicate on the "user" field.
+func UserEQ(v string) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldUser, v))
+}
+
+// UserNEQ applies the NEQ predicate on the "user" field.
+func UserNEQ(v string) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldUser, v))
+}
+
+// UserIn applies the In predicate on the "user" field.
+func UserIn(vs ...string) predicate.File {
+	return predicate.File(sql.FieldIn(FieldUser, vs...))
+}
+
+// UserNotIn applies the NotIn predicate on the "user" field.
+func UserNotIn(vs ...string) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldUser, vs...))
+}
+
+// UserGT applies the GT predicate on the "user" field.
+func UserGT(v string) predicate.File {
+	return predicate.File(sql.FieldGT(FieldUser, v))
+}
+
+// UserGTE applies the GTE predicate on the "user" field.
+func UserGTE(v string) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldUser, v))
+}
+
+// UserLT applies the LT predicate on the "user" field.
+func UserLT(v string) predicate.File {
+	return predicate.File(sql.FieldLT(FieldUser, v))
+}
+
+// UserLTE applies the LTE predicate on the "user" field.
+func UserLTE(v string) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldUser, v))
+}
+
+// UserContains applies the Contains predicate on the "user" field.
+func UserContains(v string) predicate.File {
+	return predicate.File(sql.FieldContains(FieldUser, v))
+}
+
+// UserHasPrefix applies the HasPrefix predicate on the "user" field.
+func UserHasPrefix(v string) predicate.File {
+	return predicate.File(sql.FieldHasPrefix(FieldUser, v))
+}
+
+// UserHasSuffix applies the HasSuffix predicate on the "user" field.
+func UserHasSuffix(v string) predicate.File {
+	return predicate.File(sql.FieldHasSuffix(FieldUser, v))
+}
+
+// UserIsNil applies the IsNil predicate on the "user" field.
+func UserIsNil() predicate.File {
+	return predicate.File(sql.FieldIsNull(FieldUser))
+}
+
+// UserNotNil applies the NotNil predicate on the "user" field.
+func UserNotNil() predicate.File {
+	return predicate.File(sql.FieldNotNull(FieldUser))
+}
+
+// UserEqualFold applies the EqualFold predicate on the "user" field.
+func UserEqualFold(v string) predicate.File {
+	return predicate.File(sql.FieldEqualFold(FieldUser, v))
+}
+
+// UserContainsFold applies the ContainsFold predicate on the "user" field.
+func UserContainsFold(v string) predicate.File {
+	return predicate.File(sql.FieldContainsFold(FieldUser, v))
+}
+
+// GroupEQ applies the EQ predicate on the "group" field.
+func GroupEQ(v string) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldGroup, v))
+}
+
+// GroupNEQ applies the NEQ predicate on the "group" field.
+func GroupNEQ(v string) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldGroup, v))
+}
+
+// GroupIn applies the In predicate on the "group" field.
+func GroupIn(vs ...string) predicate.File {
+	return predicate.File(sql.FieldIn(FieldGroup, vs...))
+}
+
+// GroupNotIn applies the NotIn predicate on the "group" field.
+func GroupNotIn(vs ...string) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldGroup, vs...))
+}
+
+// GroupGT applies the GT predicate on the "group" field.
+func GroupGT(v string) predicate.File {
+	return predicate.File(sql.FieldGT(FieldGroup, v))
+}
+
+// GroupGTE applies the GTE predicate on the "group" field.
+func GroupGTE(v string) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldGroup, v))
+}
+
+// GroupLT applies the LT predicate on the "group" field.
+func GroupLT(v string) predicate.File {
+	return predicate.File(sql.FieldLT(FieldGroup, v))
+}
+
+// GroupLTE applies the LTE predicate on the "group" field.
+func GroupLTE(v string) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldGroup, v))
+}
+
+// GroupContains applies the Contains predicate on the "group" field.
+func GroupContains(v string) predicate.File {
+	return predicate.File(sql.FieldContains(FieldGroup, v))
+}
+
+// GroupHasPrefix applies the HasPrefix predicate on the "group" field.
+func GroupHasPrefix(v string) predicate.File {
+	return predicate.File(sql.FieldHasPrefix(FieldGroup, v))
+}
+
+// GroupHasSuffix applies the HasSuffix predicate on the "group" field.
+func GroupHasSuffix(v string) predicate.File {
+	return predicate.File(sql.FieldHasSuffix(FieldGroup, v))
+}
+
+// GroupIsNil applies the IsNil predicate on the "group" field.
+func GroupIsNil() predicate.File {
+	return predicate.File(sql.FieldIsNull(FieldGroup))
+}
+
+// GroupNotNil applies the NotNil predicate on the "group" field.
+func GroupNotNil() predicate.File {
+	return predicate.File(sql.FieldNotNull(FieldGroup))
+}
+
+// GroupEqualFold applies the EqualFold predicate on the "group" field.
+func GroupEqualFold(v string) predicate.File {
+	return predicate.File(sql.FieldEqualFold(FieldGroup, v))
+}
+
+// GroupContainsFold applies the ContainsFold predicate on the "group" field.
+func GroupContainsFold(v string) predicate.File {
+	return predicate.File(sql.FieldContainsFold(FieldGroup, v))
+}
+
+// OpEQ applies the EQ predicate on the "op" field.
+func OpEQ(v bool) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldOp, v))
+}
+
+// OpNEQ applies the NEQ predicate on the "op" field.
+func OpNEQ(v bool) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldOp, v))
+}
+
+// OpIsNil applies the IsNil predicate on the "op" field.
+func OpIsNil() predicate.File {
+	return predicate.File(sql.FieldIsNull(FieldOp))
+}
+
+// OpNotNil applies the NotNil predicate on the "op" field.
+func OpNotNil() predicate.File {
+	return predicate.File(sql.FieldNotNull(FieldOp))
+}
+
+// FieldIDEQ applies the EQ predicate on the "field_id" field.
+func FieldIDEQ(v int) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldFieldID, v))
+}
+
+// FieldIDNEQ applies the NEQ predicate on the "field_id" field.
+func FieldIDNEQ(v int) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldFieldID, v))
+}
+
+// FieldIDIn applies the In predicate on the "field_id" field.
+func FieldIDIn(vs ...int) predicate.File {
+	return predicate.File(sql.FieldIn(FieldFieldID, vs...))
+}
+
+// FieldIDNotIn applies the NotIn predicate on the "field_id" field.
+func FieldIDNotIn(vs ...int) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldFieldID, vs...))
+}
+
+// FieldIDGT applies the GT predicate on the "field_id" field.
+func FieldIDGT(v int) predicate.File {
+	return predicate.File(sql.FieldGT(FieldFieldID, v))
+}
+
+// FieldIDGTE applies the GTE predicate on the "field_id" field.
+func FieldIDGTE(v int) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldFieldID, v))
+}
+
+// FieldIDLT applies the LT predicate on the "field_id" field.
+func FieldIDLT(v int) predicate.File {
+	return predicate.File(sql.FieldLT(FieldFieldID, v))
+}
+
+// FieldIDLTE applies the LTE predicate on the "field_id" field.
+func FieldIDLTE(v int) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldFieldID, v))
+}
+
+// FieldIDIsNil applies the IsNil predicate on the "field_id" field.
+func FieldIDIsNil() predicate.File {
+	return predicate.File(sql.FieldIsNull(FieldFieldID))
+}
+
+// FieldIDNotNil applies the NotNil predicate on the "field_id" field.
+func FieldIDNotNil() predicate.File {
+	return predicate.File(sql.FieldNotNull(FieldFieldID))
+}
+
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.File {
+	return predicate.File(sql.FieldEQ(FieldCreateTime, v))
+}
+
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.File {
+	return predicate.File(sql.FieldNEQ(FieldCreateTime, v))
+}
+
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.File {
+	return predicate.File(sql.FieldIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.File {
+	return predicate.File(sql.FieldNotIn(FieldCreateTime, vs...))
+}
+
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.File {
+	return predicate.File(sql.FieldGT(FieldCreateTime, v))
+}
+
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.File {
+	return predicate.File(sql.FieldGTE(FieldCreateTime, v))
+}
+
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.File {
+	return predicate.File(sql.FieldLT(FieldCreateTime, v))
+}
+
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.File {
+	return predicate.File(sql.FieldLTE(FieldCreateTime, v))
+}
+
+// CreateTimeIsNil applies the IsNil predicate on the "create_time" field.
+func CreateTimeIsNil() predicate.File {
+	return predicate.File(sql.FieldIsNull(FieldCreateTime))
+}
+
+// CreateTimeNotNil applies the NotNil predicate on the "create_time" field.
+func CreateTimeNotNil() predicate.File {
+	return predicate.File(sql.FieldNotNull(FieldCreateTime))
+}
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.File {

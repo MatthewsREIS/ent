@@ -38,13 +38,13 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -58,55 +58,55 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddFriendIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddRelativeIDs adds the "relatives" edge to the User entity by IDs.
 func (_u *UserUpdate) AddRelativeIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddRelativeIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("relatives", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddLikedTweetIDs adds the "liked_tweets" edge to the Tweet entity by IDs.
 func (_u *UserUpdate) AddLikedTweetIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddLikedTweetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("liked_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
 func (_u *UserUpdate) AddTweetIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddTweetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddRoleIDs adds the "roles" edge to the Role entity by IDs.
 func (_u *UserUpdate) AddRoleIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddRoleIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("roles", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
 func (_u *UserUpdate) AddJoinedGroupIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddJoinedGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("joined_groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
 func (_u *UserUpdate) AddFriendshipIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddFriendshipIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("friendships", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddUserTweetIDs adds the "user_tweets" edge to the UserTweet entity by IDs.
 func (_u *UserUpdate) AddUserTweetIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddUserTweetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("user_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -117,109 +117,109 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *UserUpdate) ClearGroups() *UserUpdate {
-	_u.mutation.ClearGroups()
+	_ = _u.mutation.ClearEdge("groups")
 	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
 func (_u *UserUpdate) ClearFriends() *UserUpdate {
-	_u.mutation.ClearFriends()
+	_ = _u.mutation.ClearEdge("friends")
 	return _u
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveFriendIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearRelatives clears all "relatives" edges to the User entity.
 func (_u *UserUpdate) ClearRelatives() *UserUpdate {
-	_u.mutation.ClearRelatives()
+	_ = _u.mutation.ClearEdge("relatives")
 	return _u
 }
 
 // RemoveRelativeIDs removes the "relatives" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveRelativeIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveRelativeIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("relatives", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearLikedTweets clears all "liked_tweets" edges to the Tweet entity.
 func (_u *UserUpdate) ClearLikedTweets() *UserUpdate {
-	_u.mutation.ClearLikedTweets()
+	_ = _u.mutation.ClearEdge("liked_tweets")
 	return _u
 }
 
 // RemoveLikedTweetIDs removes the "liked_tweets" edge to Tweet entities by IDs.
 func (_u *UserUpdate) RemoveLikedTweetIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveLikedTweetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("liked_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
 func (_u *UserUpdate) ClearTweets() *UserUpdate {
-	_u.mutation.ClearTweets()
+	_ = _u.mutation.ClearEdge("tweets")
 	return _u
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
 func (_u *UserUpdate) RemoveTweetIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveTweetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearRoles clears all "roles" edges to the Role entity.
 func (_u *UserUpdate) ClearRoles() *UserUpdate {
-	_u.mutation.ClearRoles()
+	_ = _u.mutation.ClearEdge("roles")
 	return _u
 }
 
 // RemoveRoleIDs removes the "roles" edge to Role entities by IDs.
 func (_u *UserUpdate) RemoveRoleIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveRoleIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("roles", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearJoinedGroups clears all "joined_groups" edges to the UserGroup entity.
 func (_u *UserUpdate) ClearJoinedGroups() *UserUpdate {
-	_u.mutation.ClearJoinedGroups()
+	_ = _u.mutation.ClearEdge("joined_groups")
 	return _u
 }
 
 // RemoveJoinedGroupIDs removes the "joined_groups" edge to UserGroup entities by IDs.
 func (_u *UserUpdate) RemoveJoinedGroupIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveJoinedGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("joined_groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
 func (_u *UserUpdate) ClearFriendships() *UserUpdate {
-	_u.mutation.ClearFriendships()
+	_ = _u.mutation.ClearEdge("friendships")
 	return _u
 }
 
 // RemoveFriendshipIDs removes the "friendships" edge to Friendship entities by IDs.
 func (_u *UserUpdate) RemoveFriendshipIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveFriendshipIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("friendships", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearUserTweets clears all "user_tweets" edges to the UserTweet entity.
 func (_u *UserUpdate) ClearUserTweets() *UserUpdate {
-	_u.mutation.ClearUserTweets()
+	_ = _u.mutation.ClearEdge("user_tweets")
 	return _u
 }
 
 // RemoveUserTweetIDs removes the "user_tweets" edge to UserTweet entities by IDs.
 func (_u *UserUpdate) RemoveUserTweetIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveUserTweetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("user_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -259,10 +259,10 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.GroupsCleared() {
+	if _u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -277,25 +277,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   GroupsTable,
-			Columns: GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		specE := usergroup.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedEdgeIDs("groups"); len(nodes) > 0 && !_u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -311,9 +293,27 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		specE := usergroup.ThroughDefaults(_u.Config)
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EdgeIDs("groups"); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   GroupsTable,
+			Columns: GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		specE := usergroup.ThroughDefaults(_u.Config)
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FriendsCleared() {
+	if _u.mutation.EdgeCleared("friends") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -328,7 +328,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !_u.mutation.FriendsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("friends"); len(nodes) > 0 && !_u.mutation.EdgeCleared("friends") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -346,7 +346,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -364,7 +364,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RelativesCleared() {
+	if _u.mutation.EdgeCleared("relatives") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -379,25 +379,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRelativesIDs(); len(nodes) > 0 && !_u.mutation.RelativesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   RelativesTable,
-			Columns: RelativesPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		specE := relationship.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RelativesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedEdgeIDs("relatives"); len(nodes) > 0 && !_u.mutation.EdgeCleared("relatives") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -413,9 +395,27 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		specE := relationship.ThroughDefaults(_u.Config)
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EdgeIDs("relatives"); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   RelativesTable,
+			Columns: RelativesPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		specE := relationship.ThroughDefaults(_u.Config)
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LikedTweetsCleared() {
+	if _u.mutation.EdgeCleared("liked_tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -430,7 +430,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLikedTweetsIDs(); len(nodes) > 0 && !_u.mutation.LikedTweetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("liked_tweets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("liked_tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -448,7 +448,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LikedTweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("liked_tweets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -466,7 +466,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetsCleared() {
+	if _u.mutation.EdgeCleared("tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -481,25 +481,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetsIDs(); len(nodes) > 0 && !_u.mutation.TweetsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   TweetsTable,
-			Columns: TweetsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		specE := usertweet.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -515,9 +497,27 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		specE := usertweet.ThroughDefaults(_u.Config)
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EdgeIDs("tweets"); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   TweetsTable,
+			Columns: TweetsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		specE := usertweet.ThroughDefaults(_u.Config)
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RolesCleared() {
+	if _u.mutation.EdgeCleared("roles") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -532,7 +532,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRolesIDs(); len(nodes) > 0 && !_u.mutation.RolesCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("roles"); len(nodes) > 0 && !_u.mutation.EdgeCleared("roles") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -550,7 +550,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RolesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("roles"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -568,7 +568,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.JoinedGroupsCleared() {
+	if _u.mutation.EdgeCleared("joined_groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -581,7 +581,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedJoinedGroupsIDs(); len(nodes) > 0 && !_u.mutation.JoinedGroupsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("joined_groups"); len(nodes) > 0 && !_u.mutation.EdgeCleared("joined_groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -597,7 +597,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.JoinedGroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("joined_groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -613,7 +613,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FriendshipsCleared() {
+	if _u.mutation.EdgeCleared("friendships") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -626,7 +626,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFriendshipsIDs(); len(nodes) > 0 && !_u.mutation.FriendshipsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("friendships"); len(nodes) > 0 && !_u.mutation.EdgeCleared("friendships") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -642,7 +642,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FriendshipsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("friendships"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -658,7 +658,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UserTweetsCleared() {
+	if _u.mutation.EdgeCleared("user_tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -671,7 +671,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUserTweetsIDs(); len(nodes) > 0 && !_u.mutation.UserTweetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("user_tweets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user_tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -687,7 +687,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserTweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user_tweets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -730,7 +730,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -744,55 +744,55 @@ func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_u *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddFriendIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddRelativeIDs adds the "relatives" edge to the User entity by IDs.
 func (_u *UserUpdateOne) AddRelativeIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddRelativeIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("relatives", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddLikedTweetIDs adds the "liked_tweets" edge to the Tweet entity by IDs.
 func (_u *UserUpdateOne) AddLikedTweetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddLikedTweetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("liked_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
 func (_u *UserUpdateOne) AddTweetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddTweetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddRoleIDs adds the "roles" edge to the Role entity by IDs.
 func (_u *UserUpdateOne) AddRoleIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddRoleIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("roles", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
 func (_u *UserUpdateOne) AddJoinedGroupIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddJoinedGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("joined_groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
 func (_u *UserUpdateOne) AddFriendshipIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddFriendshipIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("friendships", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddUserTweetIDs adds the "user_tweets" edge to the UserTweet entity by IDs.
 func (_u *UserUpdateOne) AddUserTweetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddUserTweetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("user_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -803,115 +803,115 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *UserUpdateOne) ClearGroups() *UserUpdateOne {
-	_u.mutation.ClearGroups()
+	_ = _u.mutation.ClearEdge("groups")
 	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
 func (_u *UserUpdateOne) ClearFriends() *UserUpdateOne {
-	_u.mutation.ClearFriends()
+	_ = _u.mutation.ClearEdge("friends")
 	return _u
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveFriendIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearRelatives clears all "relatives" edges to the User entity.
 func (_u *UserUpdateOne) ClearRelatives() *UserUpdateOne {
-	_u.mutation.ClearRelatives()
+	_ = _u.mutation.ClearEdge("relatives")
 	return _u
 }
 
 // RemoveRelativeIDs removes the "relatives" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveRelativeIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveRelativeIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("relatives", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearLikedTweets clears all "liked_tweets" edges to the Tweet entity.
 func (_u *UserUpdateOne) ClearLikedTweets() *UserUpdateOne {
-	_u.mutation.ClearLikedTweets()
+	_ = _u.mutation.ClearEdge("liked_tweets")
 	return _u
 }
 
 // RemoveLikedTweetIDs removes the "liked_tweets" edge to Tweet entities by IDs.
 func (_u *UserUpdateOne) RemoveLikedTweetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveLikedTweetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("liked_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
 func (_u *UserUpdateOne) ClearTweets() *UserUpdateOne {
-	_u.mutation.ClearTweets()
+	_ = _u.mutation.ClearEdge("tweets")
 	return _u
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
 func (_u *UserUpdateOne) RemoveTweetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveTweetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearRoles clears all "roles" edges to the Role entity.
 func (_u *UserUpdateOne) ClearRoles() *UserUpdateOne {
-	_u.mutation.ClearRoles()
+	_ = _u.mutation.ClearEdge("roles")
 	return _u
 }
 
 // RemoveRoleIDs removes the "roles" edge to Role entities by IDs.
 func (_u *UserUpdateOne) RemoveRoleIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveRoleIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("roles", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearJoinedGroups clears all "joined_groups" edges to the UserGroup entity.
 func (_u *UserUpdateOne) ClearJoinedGroups() *UserUpdateOne {
-	_u.mutation.ClearJoinedGroups()
+	_ = _u.mutation.ClearEdge("joined_groups")
 	return _u
 }
 
 // RemoveJoinedGroupIDs removes the "joined_groups" edge to UserGroup entities by IDs.
 func (_u *UserUpdateOne) RemoveJoinedGroupIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveJoinedGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("joined_groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
 func (_u *UserUpdateOne) ClearFriendships() *UserUpdateOne {
-	_u.mutation.ClearFriendships()
+	_ = _u.mutation.ClearEdge("friendships")
 	return _u
 }
 
 // RemoveFriendshipIDs removes the "friendships" edge to Friendship entities by IDs.
 func (_u *UserUpdateOne) RemoveFriendshipIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveFriendshipIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("friendships", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearUserTweets clears all "user_tweets" edges to the UserTweet entity.
 func (_u *UserUpdateOne) ClearUserTweets() *UserUpdateOne {
-	_u.mutation.ClearUserTweets()
+	_ = _u.mutation.ClearEdge("user_tweets")
 	return _u
 }
 
 // RemoveUserTweetIDs removes the "user_tweets" edge to UserTweet entities by IDs.
 func (_u *UserUpdateOne) RemoveUserTweetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveUserTweetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("user_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -951,10 +951,11 @@ func (_u *UserUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "User.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -975,10 +976,10 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.GroupsCleared() {
+	if _u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -993,25 +994,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   GroupsTable,
-			Columns: GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		specE := usergroup.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedEdgeIDs("groups"); len(nodes) > 0 && !_u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1027,9 +1010,27 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		specE := usergroup.ThroughDefaults(_u.Config)
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EdgeIDs("groups"); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   GroupsTable,
+			Columns: GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		specE := usergroup.ThroughDefaults(_u.Config)
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FriendsCleared() {
+	if _u.mutation.EdgeCleared("friends") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1044,7 +1045,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !_u.mutation.FriendsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("friends"); len(nodes) > 0 && !_u.mutation.EdgeCleared("friends") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1062,7 +1063,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1080,7 +1081,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RelativesCleared() {
+	if _u.mutation.EdgeCleared("relatives") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1095,25 +1096,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRelativesIDs(); len(nodes) > 0 && !_u.mutation.RelativesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   RelativesTable,
-			Columns: RelativesPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		specE := relationship.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RelativesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedEdgeIDs("relatives"); len(nodes) > 0 && !_u.mutation.EdgeCleared("relatives") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1129,9 +1112,27 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		specE := relationship.ThroughDefaults(_u.Config)
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EdgeIDs("relatives"); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   RelativesTable,
+			Columns: RelativesPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		specE := relationship.ThroughDefaults(_u.Config)
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LikedTweetsCleared() {
+	if _u.mutation.EdgeCleared("liked_tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1146,7 +1147,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLikedTweetsIDs(); len(nodes) > 0 && !_u.mutation.LikedTweetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("liked_tweets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("liked_tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1164,7 +1165,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LikedTweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("liked_tweets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1182,7 +1183,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetsCleared() {
+	if _u.mutation.EdgeCleared("tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1197,25 +1198,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetsIDs(); len(nodes) > 0 && !_u.mutation.TweetsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   TweetsTable,
-			Columns: TweetsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		specE := usertweet.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1231,9 +1214,27 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		specE := usertweet.ThroughDefaults(_u.Config)
 		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EdgeIDs("tweets"); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   TweetsTable,
+			Columns: TweetsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		specE := usertweet.ThroughDefaults(_u.Config)
+		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RolesCleared() {
+	if _u.mutation.EdgeCleared("roles") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1248,7 +1249,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRolesIDs(); len(nodes) > 0 && !_u.mutation.RolesCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("roles"); len(nodes) > 0 && !_u.mutation.EdgeCleared("roles") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1266,7 +1267,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RolesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("roles"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1284,7 +1285,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.JoinedGroupsCleared() {
+	if _u.mutation.EdgeCleared("joined_groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1297,7 +1298,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedJoinedGroupsIDs(); len(nodes) > 0 && !_u.mutation.JoinedGroupsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("joined_groups"); len(nodes) > 0 && !_u.mutation.EdgeCleared("joined_groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1313,7 +1314,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.JoinedGroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("joined_groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1329,7 +1330,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FriendshipsCleared() {
+	if _u.mutation.EdgeCleared("friendships") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1342,7 +1343,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFriendshipsIDs(); len(nodes) > 0 && !_u.mutation.FriendshipsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("friendships"); len(nodes) > 0 && !_u.mutation.EdgeCleared("friendships") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1358,7 +1359,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FriendshipsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("friendships"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1374,7 +1375,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UserTweetsCleared() {
+	if _u.mutation.EdgeCleared("user_tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1387,7 +1388,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUserTweetsIDs(); len(nodes) > 0 && !_u.mutation.UserTweetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("user_tweets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user_tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1403,7 +1404,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserTweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user_tweets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,

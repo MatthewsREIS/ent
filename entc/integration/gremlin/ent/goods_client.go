@@ -99,7 +99,7 @@ func (c *GoodsClient) DeleteOne(_m *Goods) *goods.GoodsDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GoodsClient) DeleteOneID(id string) *goods.GoodsDeleteOne {
 	mutation := NewGoodsMutation(c.Config, OpDeleteOne, WithGoodsID(id, nil))
-	mutation.Where(goods.ID(id))
+	mutation.WhereP(goods.ID(id))
 	return goods.NewGoodsDeleteOne(goods.NewGoodsDelete(c.Config, c.Hooks(), mutation))
 }
 

@@ -48,6 +48,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
@@ -256,10 +257,10 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.True(ent.IsNotFound(err))
 	// Update a vertex with filter.
 	u := client.User.UpdateOneID(usr.ID).SetName("foo")
-	u.Mutation().Where(user.Name(usr.Name))
+	u.Mutation().WhereP(user.Name(usr.Name))
 	require.NoError(u.Exec(ctx))
 	u = client.User.UpdateOneID(usr.ID).SetName("bar")
-	u.Mutation().Where(user.Name("baz"))
+	u.Mutation().WhereP(user.Name("baz"))
 	require.Error(u.Exec(ctx))
 	require.True(ent.IsNotFound(err))
 
@@ -2204,8 +2205,10 @@ func NoSchemaChanges(t *testing.T, client *ent.Client) {
 
 func Mutation(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	setName := func(ns interface{ SetName(string) }, name string) {
-		ns.SetName(name)
+	setName := func(ns interface {
+		SetField(string, ent.Value) error
+	}, name string) {
+		_ = ns.SetField("name", name)
 	}
 	ub := client.User.Create().SetAge(30)
 	setName(ub.Mutation(), "a8m")
@@ -2219,8 +2222,8 @@ func Mutation(t *testing.T, client *ent.Client) {
 
 	setUsers := func(ms ...*ent.UserMutation) {
 		for _, m := range ms {
-			m.SetName("boring")
-			m.SetAge(30)
+			_ = m.SetField(user.FieldName, "boring")
+			_ = m.SetField(user.FieldAge, 30)
 		}
 	}
 	uu := client.User.UpdateOne(a8m).AddPetIDs(pedro.ID)
@@ -2231,16 +2234,20 @@ func Mutation(t *testing.T, client *ent.Client) {
 	require.Equal(t, "boring", a8m.Name)
 	require.Equal(t, "boring", usr.Name)
 
-	require.Equal(t, []int{usr.ID}, client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).Mutation().FriendsIDs())
-	require.Empty(t, client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).RemoveFriendIDs(usr.ID).Mutation().FriendsIDs())
-	require.Equal(t, []int{usr.ID}, client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).RemoveFriendIDs(a8m.ID).Mutation().FriendsIDs())
+	require.Equal(t, []int{usr.ID}, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).Mutation(), user.EdgeFriends))
+	require.Empty(t, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).RemoveFriendIDs(usr.ID).Mutation(), user.EdgeFriends))
+	require.Equal(t, []int{usr.ID}, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).RemoveFriendIDs(a8m.ID).Mutation(), user.EdgeFriends))
 	client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).ExecX(ctx)
 
 	t.Run("IDs", func(t *testing.T) {
 		ids := client.User.Query().IDsX(ctx)
 		u := client.User.Update().Where(user.IDIn(ids...)).AddAge(1)
-		mids, err := u.Mutation().IDs(ctx)
+		midsAny, err := u.Mutation().IDs(ctx)
 		require.NoError(t, err)
+		mids := make([]int, len(midsAny))
+		for i, v := range midsAny {
+			mids[i] = v.(int)
+		}
 		// Order can change between the 2 queries.
 		sort.Ints(ids)
 		sort.Ints(mids)
@@ -2257,23 +2264,23 @@ func Mutation(t *testing.T, client *ent.Client) {
 					pet.Name(pedro.Name),
 				),
 			)
-		mids, err = u.Mutation().IDs(ctx)
+		midsAny, err = u.Mutation().IDs(ctx)
 		require.NoError(t, err)
-		require.Len(t, mids, 1)
-		require.Equal(t, a8m.ID, mids[0])
+		require.Len(t, midsAny, 1)
+		require.Equal(t, a8m.ID, midsAny[0])
 		u.ExecX(ctx)
 	})
 
 	t.Run("Predicate", func(t *testing.T) {
 		updater := client.User.UpdateOne(a8m)
-		updater.Mutation().Where(user.Name(a8m.Name))
+		updater.Mutation().WhereP(user.Name(a8m.Name))
 		updater.SetName("mashraki")
 		a8m, err := updater.Save(ctx)
 		require.NoError(t, err, "predicate should not affect the returned object")
 		require.Equal(t, "mashraki", a8m.Name)
 
 		updater = client.User.UpdateOne(a8m)
-		updater.Mutation().Where(user.Name(a8m.Name + a8m.Name))
+		updater.Mutation().WhereP(user.Name(a8m.Name + a8m.Name))
 		updater.SetName("a8m")
 		a8m, err = updater.Save(ctx)
 		require.True(t, ent.IsNotFound(err))
@@ -2314,14 +2321,14 @@ func CreateBulk(t *testing.T, client *ent.Client) {
 	client.User.Use(
 		func(next ent.Mutator) ent.Mutator {
 			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
-				m.SetPassword("password")
+				_ = m.SetField(user.FieldPassword, "password")
 				return next.Mutate(ctx, m)
 			})
 		},
 		func(next ent.Mutator) ent.Mutator {
 			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
-				name, _ := m.Name()
-				m.SetNickname("@" + name)
+				name, _ := entbuilder.GetField[string](m, user.FieldName)
+				_ = m.SetField(user.FieldNickname, "@"+name)
 				return next.Mutate(ctx, m)
 			})
 		},

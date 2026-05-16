@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,7 +31,7 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetMixedString sets the "mixed_string" field.
 func (_c *UserCreate) SetMixedString(v string) *UserCreate {
-	_c.mutation.SetMixedString(v)
+	_ = _c.mutation.SetField("mixed_string", v)
 	return _c
 }
 
@@ -44,7 +45,7 @@ func (_c *UserCreate) SetNillableMixedString(v *string) *UserCreate {
 
 // SetMixedEnum sets the "mixed_enum" field.
 func (_c *UserCreate) SetMixedEnum(v MixedEnum) *UserCreate {
-	_c.mutation.SetMixedEnum(v)
+	_ = _c.mutation.SetField("mixed_enum", v)
 	return _c
 }
 
@@ -58,7 +59,7 @@ func (_c *UserCreate) SetNillableMixedEnum(v *MixedEnum) *UserCreate {
 
 // SetActive sets the "active" field.
 func (_c *UserCreate) SetActive(v bool) *UserCreate {
-	_c.mutation.SetActive(v)
+	_ = _c.mutation.SetField("active", v)
 	return _c
 }
 
@@ -72,19 +73,19 @@ func (_c *UserCreate) SetNillableActive(v *bool) *UserCreate {
 
 // SetAge sets the "age" field.
 func (_c *UserCreate) SetAge(v int) *UserCreate {
-	_c.mutation.SetAge(v)
+	_ = _c.mutation.SetField("age", v)
 	return _c
 }
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // SetDescription sets the "description" field.
 func (_c *UserCreate) SetDescription(v string) *UserCreate {
-	_c.mutation.SetDescription(v)
+	_ = _c.mutation.SetField("description", v)
 	return _c
 }
 
@@ -98,13 +99,13 @@ func (_c *UserCreate) SetNillableDescription(v *string) *UserCreate {
 
 // SetNickname sets the "nickname" field.
 func (_c *UserCreate) SetNickname(v string) *UserCreate {
-	_c.mutation.SetNickname(v)
+	_ = _c.mutation.SetField("nickname", v)
 	return _c
 }
 
 // SetPhone sets the "phone" field.
 func (_c *UserCreate) SetPhone(v string) *UserCreate {
-	_c.mutation.SetPhone(v)
+	_ = _c.mutation.SetField("phone", v)
 	return _c
 }
 
@@ -118,13 +119,13 @@ func (_c *UserCreate) SetNillablePhone(v *string) *UserCreate {
 
 // SetBuffer sets the "buffer" field.
 func (_c *UserCreate) SetBuffer(v []byte) *UserCreate {
-	_c.mutation.SetBuffer(v)
+	_ = _c.mutation.SetField("buffer", v)
 	return _c
 }
 
 // SetTitle sets the "title" field.
 func (_c *UserCreate) SetTitle(v string) *UserCreate {
-	_c.mutation.SetTitle(v)
+	_ = _c.mutation.SetField("title", v)
 	return _c
 }
 
@@ -138,7 +139,7 @@ func (_c *UserCreate) SetNillableTitle(v *string) *UserCreate {
 
 // SetNewName sets the "new_name" field.
 func (_c *UserCreate) SetNewName(v string) *UserCreate {
-	_c.mutation.SetNewName(v)
+	_ = _c.mutation.SetField("new_name", v)
 	return _c
 }
 
@@ -152,7 +153,7 @@ func (_c *UserCreate) SetNillableNewName(v *string) *UserCreate {
 
 // SetNewToken sets the "new_token" field.
 func (_c *UserCreate) SetNewToken(v string) *UserCreate {
-	_c.mutation.SetNewToken(v)
+	_ = _c.mutation.SetField("new_token", v)
 	return _c
 }
 
@@ -166,13 +167,13 @@ func (_c *UserCreate) SetNillableNewToken(v *string) *UserCreate {
 
 // SetBlob sets the "blob" field.
 func (_c *UserCreate) SetBlob(v []byte) *UserCreate {
-	_c.mutation.SetBlob(v)
+	_ = _c.mutation.SetField("blob", v)
 	return _c
 }
 
 // SetState sets the "state" field.
 func (_c *UserCreate) SetState(v State) *UserCreate {
-	_c.mutation.SetState(v)
+	_ = _c.mutation.SetField("state", v)
 	return _c
 }
 
@@ -186,7 +187,7 @@ func (_c *UserCreate) SetNillableState(v *State) *UserCreate {
 
 // SetStatus sets the "status" field.
 func (_c *UserCreate) SetStatus(v Status) *UserCreate {
-	_c.mutation.SetStatus(v)
+	_ = _c.mutation.SetField("status", v)
 	return _c
 }
 
@@ -200,7 +201,7 @@ func (_c *UserCreate) SetNillableStatus(v *Status) *UserCreate {
 
 // SetWorkplace sets the "workplace" field.
 func (_c *UserCreate) SetWorkplace(v string) *UserCreate {
-	_c.mutation.SetWorkplace(v)
+	_ = _c.mutation.SetField("workplace", v)
 	return _c
 }
 
@@ -214,13 +215,13 @@ func (_c *UserCreate) SetNillableWorkplace(v *string) *UserCreate {
 
 // SetRoles sets the "roles" field.
 func (_c *UserCreate) SetRoles(v []string) *UserCreate {
-	_c.mutation.SetRoles(v)
+	_ = _c.mutation.SetField("roles", v)
 	return _c
 }
 
 // SetDefaultExpr sets the "default_expr" field.
 func (_c *UserCreate) SetDefaultExpr(v string) *UserCreate {
-	_c.mutation.SetDefaultExpr(v)
+	_ = _c.mutation.SetField("default_expr", v)
 	return _c
 }
 
@@ -234,7 +235,7 @@ func (_c *UserCreate) SetNillableDefaultExpr(v *string) *UserCreate {
 
 // SetDefaultExprs sets the "default_exprs" field.
 func (_c *UserCreate) SetDefaultExprs(v string) *UserCreate {
-	_c.mutation.SetDefaultExprs(v)
+	_ = _c.mutation.SetField("default_exprs", v)
 	return _c
 }
 
@@ -248,7 +249,7 @@ func (_c *UserCreate) SetNillableDefaultExprs(v *string) *UserCreate {
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *UserCreate) SetCreatedAt(v time.Time) *UserCreate {
-	_c.mutation.SetCreatedAt(v)
+	_ = _c.mutation.SetField("created_at", v)
 	return _c
 }
 
@@ -262,7 +263,7 @@ func (_c *UserCreate) SetNillableCreatedAt(v *time.Time) *UserCreate {
 
 // SetDropOptional sets the "drop_optional" field.
 func (_c *UserCreate) SetDropOptional(v string) *UserCreate {
-	_c.mutation.SetDropOptional(v)
+	_ = _c.mutation.SetField("drop_optional", v)
 	return _c
 }
 
@@ -282,13 +283,13 @@ func (_c *UserCreate) SetID(v int) *UserCreate {
 
 // AddCarIDs adds the "car" edge to the Car entity by IDs.
 func (_c *UserCreate) AddCarIDs(ids ...int) *UserCreate {
-	_c.mutation.AddCarIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("car", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // SetPetsID sets the "pets" edge to the Pet entity by ID.
 func (_c *UserCreate) SetPetsID(id int) *UserCreate {
-	_c.mutation.SetPetsID(id)
+	_ = _c.mutation.SetEdgeID("pets", id)
 	return _c
 }
 
@@ -302,7 +303,7 @@ func (_c *UserCreate) SetNillablePetsID(id *int) *UserCreate {
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
-	_c.mutation.AddFriendIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -341,106 +342,106 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.MixedString(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "mixed_string"); !ok {
 		v := DefaultMixedString
-		_c.mutation.SetMixedString(v)
+		_ = _c.mutation.SetField("mixed_string", v)
 	}
-	if _, ok := _c.mutation.MixedEnum(); !ok {
+	if _, ok := entbuilder.GetField[MixedEnum](_c.mutation, "mixed_enum"); !ok {
 		v := DefaultMixedEnum
-		_c.mutation.SetMixedEnum(v)
+		_ = _c.mutation.SetField("mixed_enum", v)
 	}
-	if _, ok := _c.mutation.Active(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "active"); !ok {
 		v := DefaultActive
-		_c.mutation.SetActive(v)
+		_ = _c.mutation.SetField("active", v)
 	}
-	if _, ok := _c.mutation.Phone(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "phone"); !ok {
 		v := DefaultPhone
-		_c.mutation.SetPhone(v)
+		_ = _c.mutation.SetField("phone", v)
 	}
-	if _, ok := _c.mutation.Buffer(); !ok {
+	if _, ok := entbuilder.GetField[[]byte](_c.mutation, "buffer"); !ok {
 		v := DefaultBuffer()
-		_c.mutation.SetBuffer(v)
+		_ = _c.mutation.SetField("buffer", v)
 	}
-	if _, ok := _c.mutation.Title(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "title"); !ok {
 		v := DefaultTitle
-		_c.mutation.SetTitle(v)
+		_ = _c.mutation.SetField("title", v)
 	}
-	if _, ok := _c.mutation.NewToken(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "new_token"); !ok {
 		v := DefaultNewToken()
-		_c.mutation.SetNewToken(v)
+		_ = _c.mutation.SetField("new_token", v)
 	}
-	if _, ok := _c.mutation.State(); !ok {
+	if _, ok := entbuilder.GetField[State](_c.mutation, "state"); !ok {
 		v := DefaultState
-		_c.mutation.SetState(v)
+		_ = _c.mutation.SetField("state", v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		v := DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+		_ = _c.mutation.SetField("created_at", v)
 	}
-	if _, ok := _c.mutation.DropOptional(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "drop_optional"); !ok {
 		v := DefaultDropOptional()
-		_c.mutation.SetDropOptional(v)
+		_ = _c.mutation.SetField("drop_optional", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.MixedString(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "mixed_string"); !ok {
 		return &ValidationError{Name: "mixed_string", Err: errors.New(`entv2: missing required field "User.mixed_string"`)}
 	}
-	if _, ok := _c.mutation.MixedEnum(); !ok {
+	if _, ok := entbuilder.GetField[MixedEnum](_c.mutation, "mixed_enum"); !ok {
 		return &ValidationError{Name: "mixed_enum", Err: errors.New(`entv2: missing required field "User.mixed_enum"`)}
 	}
-	if v, ok := _c.mutation.MixedEnum(); ok {
+	if v, ok := entbuilder.GetField[MixedEnum](_c.mutation, "mixed_enum"); ok {
 		if err := MixedEnumValidator(v); err != nil {
 			return &ValidationError{Name: "mixed_enum", Err: fmt.Errorf(`entv2: validator failed for field "User.mixed_enum": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Active(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "active"); !ok {
 		return &ValidationError{Name: "active", Err: errors.New(`entv2: missing required field "User.active"`)}
 	}
-	if _, ok := _c.mutation.Age(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "age"); !ok {
 		return &ValidationError{Name: "age", Err: errors.New(`entv2: missing required field "User.age"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`entv2: missing required field "User.name"`)}
 	}
-	if _, ok := _c.mutation.Nickname(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "nickname"); !ok {
 		return &ValidationError{Name: "nickname", Err: errors.New(`entv2: missing required field "User.nickname"`)}
 	}
-	if v, ok := _c.mutation.Nickname(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "nickname"); ok {
 		if err := NicknameValidator(v); err != nil {
 			return &ValidationError{Name: "nickname", Err: fmt.Errorf(`entv2: validator failed for field "User.nickname": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Phone(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "phone"); !ok {
 		return &ValidationError{Name: "phone", Err: errors.New(`entv2: missing required field "User.phone"`)}
 	}
-	if _, ok := _c.mutation.Title(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "title"); !ok {
 		return &ValidationError{Name: "title", Err: errors.New(`entv2: missing required field "User.title"`)}
 	}
-	if _, ok := _c.mutation.NewToken(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "new_token"); !ok {
 		return &ValidationError{Name: "new_token", Err: errors.New(`entv2: missing required field "User.new_token"`)}
 	}
-	if v, ok := _c.mutation.Blob(); ok {
+	if v, ok := entbuilder.GetField[[]byte](_c.mutation, "blob"); ok {
 		if err := BlobValidator(v); err != nil {
 			return &ValidationError{Name: "blob", Err: fmt.Errorf(`entv2: validator failed for field "User.blob": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.State(); ok {
+	if v, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
 		if err := StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", Err: fmt.Errorf(`entv2: validator failed for field "User.state": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Status(); ok {
+	if v, ok := entbuilder.GetField[Status](_c.mutation, "status"); ok {
 		if err := StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", Err: fmt.Errorf(`entv2: validator failed for field "User.status": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		return &ValidationError{Name: "created_at", Err: errors.New(`entv2: missing required field "User.created_at"`)}
 	}
-	if _, ok := _c.mutation.DropOptional(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "drop_optional"); !ok {
 		return &ValidationError{Name: "drop_optional", Err: errors.New(`entv2: missing required field "User.drop_optional"`)}
 	}
 	return nil
@@ -461,7 +462,7 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -471,95 +472,96 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node = &User{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(int)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.MixedString(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "mixed_string"); ok {
 		_spec.SetField(FieldMixedString, field.TypeString, value)
 		_node.MixedString = value
 	}
-	if value, ok := _c.mutation.MixedEnum(); ok {
+	if value, ok := entbuilder.GetField[MixedEnum](_c.mutation, "mixed_enum"); ok {
 		_spec.SetField(FieldMixedEnum, field.TypeEnum, value)
 		_node.MixedEnum = value
 	}
-	if value, ok := _c.mutation.Active(); ok {
+	if value, ok := entbuilder.GetField[bool](_c.mutation, "active"); ok {
 		_spec.SetField(FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
-	if value, ok := _c.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeInt, value)
 		_node.Age = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Description(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "description"); ok {
 		_spec.SetField(FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := _c.mutation.Nickname(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "nickname"); ok {
 		_spec.SetField(FieldNickname, field.TypeString, value)
 		_node.Nickname = value
 	}
-	if value, ok := _c.mutation.Phone(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "phone"); ok {
 		_spec.SetField(FieldPhone, field.TypeString, value)
 		_node.Phone = value
 	}
-	if value, ok := _c.mutation.Buffer(); ok {
+	if value, ok := entbuilder.GetField[[]byte](_c.mutation, "buffer"); ok {
 		_spec.SetField(FieldBuffer, field.TypeBytes, value)
 		_node.Buffer = value
 	}
-	if value, ok := _c.mutation.Title(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "title"); ok {
 		_spec.SetField(FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
-	if value, ok := _c.mutation.NewName(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "new_name"); ok {
 		_spec.SetField(FieldNewName, field.TypeString, value)
 		_node.NewName = value
 	}
-	if value, ok := _c.mutation.NewToken(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "new_token"); ok {
 		_spec.SetField(FieldNewToken, field.TypeString, value)
 		_node.NewToken = value
 	}
-	if value, ok := _c.mutation.Blob(); ok {
+	if value, ok := entbuilder.GetField[[]byte](_c.mutation, "blob"); ok {
 		_spec.SetField(FieldBlob, field.TypeBytes, value)
 		_node.Blob = value
 	}
-	if value, ok := _c.mutation.State(); ok {
+	if value, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
 		_spec.SetField(FieldState, field.TypeEnum, value)
 		_node.State = value
 	}
-	if value, ok := _c.mutation.Status(); ok {
+	if value, ok := entbuilder.GetField[Status](_c.mutation, "status"); ok {
 		_spec.SetField(FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if value, ok := _c.mutation.Workplace(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "workplace"); ok {
 		_spec.SetField(FieldWorkplace, field.TypeString, value)
 		_node.Workplace = value
 	}
-	if value, ok := _c.mutation.Roles(); ok {
+	if value, ok := entbuilder.GetField[[]string](_c.mutation, "roles"); ok {
 		_spec.SetField(FieldRoles, field.TypeJSON, value)
 		_node.Roles = value
 	}
-	if value, ok := _c.mutation.DefaultExpr(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "default_expr"); ok {
 		_spec.SetField(FieldDefaultExpr, field.TypeString, value)
 		_node.DefaultExpr = value
 	}
-	if value, ok := _c.mutation.DefaultExprs(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "default_exprs"); ok {
 		_spec.SetField(FieldDefaultExprs, field.TypeString, value)
 		_node.DefaultExprs = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := _c.mutation.DropOptional(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "drop_optional"); ok {
 		_spec.SetField(FieldDropOptional, field.TypeString, value)
 		_node.DropOptional = value
 	}
-	if nodes := _c.mutation.CarIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "car"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -575,7 +577,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "pets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -591,7 +593,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -664,11 +666,11 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

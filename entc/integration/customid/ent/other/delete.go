@@ -30,7 +30,7 @@ func NewOtherDelete(c Config, hooks []Hook, mutation *OtherMutation) *OtherDelet
 
 // Where appends a list predicates to the OtherDelete builder.
 func (_d *OtherDelete) Where(ps ...predicate.Other) *OtherDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewOtherDeleteOne(d *OtherDelete) *OtherDeleteOne {
 
 // Where appends a list predicates to the OtherDelete builder.
 func (_d *OtherDeleteOne) Where(ps ...predicate.Other) *OtherDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

@@ -32,13 +32,13 @@ func NewPostUpdate(c Config, hooks []Hook, mutation *PostMutation) *PostUpdate {
 
 // Where appends a list predicates to the PostUpdate builder.
 func (_u *PostUpdate) Where(ps ...predicate.Post) *PostUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *PostUpdate) SetText(v string) *PostUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -52,7 +52,7 @@ func (_u *PostUpdate) SetNillableText(v *string) *PostUpdate {
 
 // SetAuthorID sets the "author_id" field.
 func (_u *PostUpdate) SetAuthorID(v int) *PostUpdate {
-	_u.mutation.SetAuthorID(v)
+	_ = _u.mutation.SetEdgeID("author", v)
 	return _u
 }
 
@@ -66,13 +66,13 @@ func (_u *PostUpdate) SetNillableAuthorID(v *int) *PostUpdate {
 
 // ClearAuthorID clears the value of the "author_id" field.
 func (_u *PostUpdate) ClearAuthorID() *PostUpdate {
-	_u.mutation.ClearAuthorID()
+	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
 func (_u *PostUpdate) AddCommentIDs(ids ...int) *PostUpdate {
-	_u.mutation.AddCommentIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("comments", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -83,19 +83,19 @@ func (_u *PostUpdate) Mutation() *PostMutation {
 
 // ClearAuthor clears the "author" edge to the User entity.
 func (_u *PostUpdate) ClearAuthor() *PostUpdate {
-	_u.mutation.ClearAuthor()
+	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
 // ClearComments clears all "comments" edges to the Comment entity.
 func (_u *PostUpdate) ClearComments() *PostUpdate {
-	_u.mutation.ClearComments()
+	_ = _u.mutation.ClearEdge("comments")
 	return _u
 }
 
 // RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
 func (_u *PostUpdate) RemoveCommentIDs(ids ...int) *PostUpdate {
-	_u.mutation.RemoveCommentIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("comments", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -135,10 +135,10 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.AuthorCleared() {
+	if _u.mutation.EdgeCleared("author") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -151,7 +151,7 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AuthorIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("author"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -167,7 +167,7 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.CommentsCleared() {
+	if _u.mutation.EdgeCleared("comments") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -180,7 +180,7 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedCommentsIDs(); len(nodes) > 0 && !_u.mutation.CommentsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("comments"); len(nodes) > 0 && !_u.mutation.EdgeCleared("comments") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -196,7 +196,7 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CommentsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("comments"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -239,7 +239,7 @@ func NewPostUpdateOne(c Config, hooks []Hook, mutation *PostMutation) *PostUpdat
 
 // SetText sets the "text" field.
 func (_u *PostUpdateOne) SetText(v string) *PostUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -253,7 +253,7 @@ func (_u *PostUpdateOne) SetNillableText(v *string) *PostUpdateOne {
 
 // SetAuthorID sets the "author_id" field.
 func (_u *PostUpdateOne) SetAuthorID(v int) *PostUpdateOne {
-	_u.mutation.SetAuthorID(v)
+	_ = _u.mutation.SetEdgeID("author", v)
 	return _u
 }
 
@@ -267,13 +267,13 @@ func (_u *PostUpdateOne) SetNillableAuthorID(v *int) *PostUpdateOne {
 
 // ClearAuthorID clears the value of the "author_id" field.
 func (_u *PostUpdateOne) ClearAuthorID() *PostUpdateOne {
-	_u.mutation.ClearAuthorID()
+	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
 func (_u *PostUpdateOne) AddCommentIDs(ids ...int) *PostUpdateOne {
-	_u.mutation.AddCommentIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("comments", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -284,25 +284,25 @@ func (_u *PostUpdateOne) Mutation() *PostMutation {
 
 // ClearAuthor clears the "author" edge to the User entity.
 func (_u *PostUpdateOne) ClearAuthor() *PostUpdateOne {
-	_u.mutation.ClearAuthor()
+	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
 // ClearComments clears all "comments" edges to the Comment entity.
 func (_u *PostUpdateOne) ClearComments() *PostUpdateOne {
-	_u.mutation.ClearComments()
+	_ = _u.mutation.ClearEdge("comments")
 	return _u
 }
 
 // RemoveCommentIDs removes the "comments" edge to Comment entities by IDs.
 func (_u *PostUpdateOne) RemoveCommentIDs(ids ...int) *PostUpdateOne {
-	_u.mutation.RemoveCommentIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("comments", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the PostUpdate builder.
 func (_u *PostUpdateOne) Where(ps ...predicate.Post) *PostUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -342,10 +342,11 @@ func (_u *PostUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Post.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -366,10 +367,10 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.AuthorCleared() {
+	if _u.mutation.EdgeCleared("author") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -382,7 +383,7 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AuthorIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("author"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -398,7 +399,7 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.CommentsCleared() {
+	if _u.mutation.EdgeCleared("comments") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -411,7 +412,7 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedCommentsIDs(); len(nodes) > 0 && !_u.mutation.CommentsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("comments"); len(nodes) > 0 && !_u.mutation.EdgeCleared("comments") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -427,7 +428,7 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CommentsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("comments"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

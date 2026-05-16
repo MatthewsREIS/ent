@@ -27,7 +27,7 @@ func (_q *ProcessQuery) Filter() *ProcessFilter {
 
 // NewProcessFilterForMutation creates a new ProcessFilter for the given mutation.
 func NewProcessFilterForMutation(m *ProcessMutation) *ProcessFilter {
-	return &ProcessFilter{Config: m.Config, predicateAdder: m}
+	return &ProcessFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // ProcessFilter provides a generic filtering capability at runtime for ProcessQuery.

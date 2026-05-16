@@ -31,7 +31,7 @@ func NewTaskDelete(c Config, hooks []Hook, mutation *TaskMutation) *TaskDelete {
 
 // Where appends a list predicates to the TaskDelete builder.
 func (_d *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewTaskDeleteOne(d *TaskDelete) *TaskDeleteOne {
 
 // Where appends a list predicates to the TaskDelete builder.
 func (_d *TaskDeleteOne) Where(ps ...predicate.Task) *TaskDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

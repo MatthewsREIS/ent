@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,74 +57,120 @@ func IDLTE(id int) predicate.GroupInfo {
 	return predicate.GroupInfo(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Desc — use where.EQ(FieldDesc, v).
-func Desc(v string) predicate.GroupInfo { return where.EQ(FieldDesc, v) }
+// Desc applies equality check predicate on the "desc" field. It's identical to DescEQ.
+func Desc(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldEQ(FieldDesc, v))
+}
 
-// Deprecated: MaxUsers — use where.EQ(FieldMaxUsers, v).
-func MaxUsers(v int) predicate.GroupInfo { return where.EQ(FieldMaxUsers, v) }
+// MaxUsers applies equality check predicate on the "max_users" field. It's identical to MaxUsersEQ.
+func MaxUsers(v int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldEQ(FieldMaxUsers, v))
+}
 
-// Deprecated: DescEQ — use where.EQ(FieldDesc, v).
-func DescEQ(v string) predicate.GroupInfo { return where.EQ(FieldDesc, v) }
+// DescEQ applies the EQ predicate on the "desc" field.
+func DescEQ(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldEQ(FieldDesc, v))
+}
 
-// Deprecated: DescNEQ — use where.NEQ(FieldDesc, v).
-func DescNEQ(v string) predicate.GroupInfo { return where.NEQ(FieldDesc, v) }
+// DescNEQ applies the NEQ predicate on the "desc" field.
+func DescNEQ(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldNEQ(FieldDesc, v))
+}
 
-// Deprecated: DescIn — use where.In(FieldDesc, vs...).
-func DescIn(vs ...string) predicate.GroupInfo { return where.In(FieldDesc, vs...) }
+// DescIn applies the In predicate on the "desc" field.
+func DescIn(vs ...string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldIn(FieldDesc, vs...))
+}
 
-// Deprecated: DescNotIn — use where.NotIn(FieldDesc, vs...).
-func DescNotIn(vs ...string) predicate.GroupInfo { return where.NotIn(FieldDesc, vs...) }
+// DescNotIn applies the NotIn predicate on the "desc" field.
+func DescNotIn(vs ...string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldNotIn(FieldDesc, vs...))
+}
 
-// Deprecated: DescGT — use where.GT(FieldDesc, v).
-func DescGT(v string) predicate.GroupInfo { return where.GT(FieldDesc, v) }
+// DescGT applies the GT predicate on the "desc" field.
+func DescGT(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldGT(FieldDesc, v))
+}
 
-// Deprecated: DescGTE — use where.GTE(FieldDesc, v).
-func DescGTE(v string) predicate.GroupInfo { return where.GTE(FieldDesc, v) }
+// DescGTE applies the GTE predicate on the "desc" field.
+func DescGTE(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldGTE(FieldDesc, v))
+}
 
-// Deprecated: DescLT — use where.LT(FieldDesc, v).
-func DescLT(v string) predicate.GroupInfo { return where.LT(FieldDesc, v) }
+// DescLT applies the LT predicate on the "desc" field.
+func DescLT(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldLT(FieldDesc, v))
+}
 
-// Deprecated: DescLTE — use where.LTE(FieldDesc, v).
-func DescLTE(v string) predicate.GroupInfo { return where.LTE(FieldDesc, v) }
+// DescLTE applies the LTE predicate on the "desc" field.
+func DescLTE(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldLTE(FieldDesc, v))
+}
 
-// Deprecated: DescContains — use where.Contains(FieldDesc, v).
-func DescContains(v string) predicate.GroupInfo { return where.Contains(FieldDesc, v) }
+// DescContains applies the Contains predicate on the "desc" field.
+func DescContains(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldContains(FieldDesc, v))
+}
 
-// Deprecated: DescHasPrefix — use where.HasPrefix(FieldDesc, v).
-func DescHasPrefix(v string) predicate.GroupInfo { return where.HasPrefix(FieldDesc, v) }
+// DescHasPrefix applies the HasPrefix predicate on the "desc" field.
+func DescHasPrefix(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldHasPrefix(FieldDesc, v))
+}
 
-// Deprecated: DescHasSuffix — use where.HasSuffix(FieldDesc, v).
-func DescHasSuffix(v string) predicate.GroupInfo { return where.HasSuffix(FieldDesc, v) }
+// DescHasSuffix applies the HasSuffix predicate on the "desc" field.
+func DescHasSuffix(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldHasSuffix(FieldDesc, v))
+}
 
-// Deprecated: DescEqualFold — use where.EqualFold(FieldDesc, v).
-func DescEqualFold(v string) predicate.GroupInfo { return where.EqualFold(FieldDesc, v) }
+// DescEqualFold applies the EqualFold predicate on the "desc" field.
+func DescEqualFold(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldEqualFold(FieldDesc, v))
+}
 
-// Deprecated: DescContainsFold — use where.ContainsFold(FieldDesc, v).
-func DescContainsFold(v string) predicate.GroupInfo { return where.ContainsFold(FieldDesc, v) }
+// DescContainsFold applies the ContainsFold predicate on the "desc" field.
+func DescContainsFold(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldContainsFold(FieldDesc, v))
+}
 
-// Deprecated: MaxUsersEQ — use where.EQ(FieldMaxUsers, v).
-func MaxUsersEQ(v int) predicate.GroupInfo { return where.EQ(FieldMaxUsers, v) }
+// MaxUsersEQ applies the EQ predicate on the "max_users" field.
+func MaxUsersEQ(v int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldEQ(FieldMaxUsers, v))
+}
 
-// Deprecated: MaxUsersNEQ — use where.NEQ(FieldMaxUsers, v).
-func MaxUsersNEQ(v int) predicate.GroupInfo { return where.NEQ(FieldMaxUsers, v) }
+// MaxUsersNEQ applies the NEQ predicate on the "max_users" field.
+func MaxUsersNEQ(v int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldNEQ(FieldMaxUsers, v))
+}
 
-// Deprecated: MaxUsersIn — use where.In(FieldMaxUsers, vs...).
-func MaxUsersIn(vs ...int) predicate.GroupInfo { return where.In(FieldMaxUsers, vs...) }
+// MaxUsersIn applies the In predicate on the "max_users" field.
+func MaxUsersIn(vs ...int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldIn(FieldMaxUsers, vs...))
+}
 
-// Deprecated: MaxUsersNotIn — use where.NotIn(FieldMaxUsers, vs...).
-func MaxUsersNotIn(vs ...int) predicate.GroupInfo { return where.NotIn(FieldMaxUsers, vs...) }
+// MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
+func MaxUsersNotIn(vs ...int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldNotIn(FieldMaxUsers, vs...))
+}
 
-// Deprecated: MaxUsersGT — use where.GT(FieldMaxUsers, v).
-func MaxUsersGT(v int) predicate.GroupInfo { return where.GT(FieldMaxUsers, v) }
+// MaxUsersGT applies the GT predicate on the "max_users" field.
+func MaxUsersGT(v int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldGT(FieldMaxUsers, v))
+}
 
-// Deprecated: MaxUsersGTE — use where.GTE(FieldMaxUsers, v).
-func MaxUsersGTE(v int) predicate.GroupInfo { return where.GTE(FieldMaxUsers, v) }
+// MaxUsersGTE applies the GTE predicate on the "max_users" field.
+func MaxUsersGTE(v int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldGTE(FieldMaxUsers, v))
+}
 
-// Deprecated: MaxUsersLT — use where.LT(FieldMaxUsers, v).
-func MaxUsersLT(v int) predicate.GroupInfo { return where.LT(FieldMaxUsers, v) }
+// MaxUsersLT applies the LT predicate on the "max_users" field.
+func MaxUsersLT(v int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldLT(FieldMaxUsers, v))
+}
 
-// Deprecated: MaxUsersLTE — use where.LTE(FieldMaxUsers, v).
-func MaxUsersLTE(v int) predicate.GroupInfo { return where.LTE(FieldMaxUsers, v) }
+// MaxUsersLTE applies the LTE predicate on the "max_users" field.
+func MaxUsersLTE(v int) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldLTE(FieldMaxUsers, v))
+}
 
 // HasGroups applies the HasEdge predicate on the "groups" edge.
 func HasGroups() predicate.GroupInfo {

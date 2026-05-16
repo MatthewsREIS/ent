@@ -33,13 +33,13 @@ func NewUserTweetUpdate(c Config, hooks []Hook, mutation *UserTweetMutation) *Us
 
 // Where appends a list predicates to the UserTweetUpdate builder.
 func (_u *UserTweetUpdate) Where(ps ...predicate.UserTweet) *UserTweetUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *UserTweetUpdate) SetCreatedAt(v time.Time) *UserTweetUpdate {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -53,7 +53,7 @@ func (_u *UserTweetUpdate) SetNillableCreatedAt(v *time.Time) *UserTweetUpdate {
 
 // SetUserID sets the "user_id" field.
 func (_u *UserTweetUpdate) SetUserID(v int) *UserTweetUpdate {
-	_u.mutation.SetUserID(v)
+	_ = _u.mutation.SetEdgeID("user", v)
 	return _u
 }
 
@@ -67,7 +67,7 @@ func (_u *UserTweetUpdate) SetNillableUserID(v *int) *UserTweetUpdate {
 
 // SetTweetID sets the "tweet_id" field.
 func (_u *UserTweetUpdate) SetTweetID(v int) *UserTweetUpdate {
-	_u.mutation.SetTweetID(v)
+	_ = _u.mutation.SetEdgeID("tweet", v)
 	return _u
 }
 
@@ -86,13 +86,13 @@ func (_u *UserTweetUpdate) Mutation() *UserTweetMutation {
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *UserTweetUpdate) ClearUser() *UserTweetUpdate {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (_u *UserTweetUpdate) ClearTweet() *UserTweetUpdate {
-	_u.mutation.ClearTweet()
+	_ = _u.mutation.ClearEdge("tweet")
 	return _u
 }
 
@@ -125,10 +125,10 @@ func (_u *UserTweetUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserTweetUpdate) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.user"`)
 	}
-	if _u.mutation.TweetCleared() && len(_u.mutation.TweetIDs()) > 0 {
+	if _u.mutation.EdgeCleared("tweet") && len(_u.mutation.EdgeIDs("tweet")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.tweet"`)
 	}
 	return nil
@@ -146,10 +146,10 @@ func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -162,7 +162,7 @@ func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -178,7 +178,7 @@ func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetCleared() {
+	if _u.mutation.EdgeCleared("tweet") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -191,7 +191,7 @@ func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -234,7 +234,7 @@ func NewUserTweetUpdateOne(c Config, hooks []Hook, mutation *UserTweetMutation) 
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *UserTweetUpdateOne) SetCreatedAt(v time.Time) *UserTweetUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -248,7 +248,7 @@ func (_u *UserTweetUpdateOne) SetNillableCreatedAt(v *time.Time) *UserTweetUpdat
 
 // SetUserID sets the "user_id" field.
 func (_u *UserTweetUpdateOne) SetUserID(v int) *UserTweetUpdateOne {
-	_u.mutation.SetUserID(v)
+	_ = _u.mutation.SetEdgeID("user", v)
 	return _u
 }
 
@@ -262,7 +262,7 @@ func (_u *UserTweetUpdateOne) SetNillableUserID(v *int) *UserTweetUpdateOne {
 
 // SetTweetID sets the "tweet_id" field.
 func (_u *UserTweetUpdateOne) SetTweetID(v int) *UserTweetUpdateOne {
-	_u.mutation.SetTweetID(v)
+	_ = _u.mutation.SetEdgeID("tweet", v)
 	return _u
 }
 
@@ -281,19 +281,19 @@ func (_u *UserTweetUpdateOne) Mutation() *UserTweetMutation {
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *UserTweetUpdateOne) ClearUser() *UserTweetUpdateOne {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (_u *UserTweetUpdateOne) ClearTweet() *UserTweetUpdateOne {
-	_u.mutation.ClearTweet()
+	_ = _u.mutation.ClearEdge("tweet")
 	return _u
 }
 
 // Where appends a list predicates to the UserTweetUpdate builder.
 func (_u *UserTweetUpdateOne) Where(ps ...predicate.UserTweet) *UserTweetUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -333,10 +333,10 @@ func (_u *UserTweetUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserTweetUpdateOne) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.user"`)
 	}
-	if _u.mutation.TweetCleared() && len(_u.mutation.TweetIDs()) > 0 {
+	if _u.mutation.EdgeCleared("tweet") && len(_u.mutation.EdgeIDs("tweet")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.tweet"`)
 	}
 	return nil
@@ -347,10 +347,11 @@ func (_u *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, er
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "UserTweet.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -371,10 +372,10 @@ func (_u *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, er
 			}
 		}
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -387,7 +388,7 @@ func (_u *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -403,7 +404,7 @@ func (_u *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetCleared() {
+	if _u.mutation.EdgeCleared("tweet") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -416,7 +417,7 @@ func (_u *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

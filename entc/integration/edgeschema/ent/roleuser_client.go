@@ -73,8 +73,8 @@ func (c *RoleUserClient) Update() *roleuser.RoleUserUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *RoleUserClient) UpdateOne(_m *RoleUser) *roleuser.RoleUserUpdateOne {
 	mutation := NewRoleUserMutation(c.Config, OpUpdateOne)
-	mutation.SetUserID(_m.UserID)
-	mutation.SetRoleID(_m.RoleID)
+	_ = mutation.SetEdgeID("user", _m.UserID)
+	_ = mutation.SetEdgeID("role", _m.RoleID)
 	return roleuser.NewRoleUserUpdateOne(c.Config, c.Hooks(), mutation)
 }
 

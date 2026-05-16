@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,80 +57,130 @@ func IDLTE(id int) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Name — use where.EQ(FieldName, v).
-func Name(v string) predicate.User { return where.EQ(FieldName, v) }
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: Age — use where.EQ(FieldAge, v).
-func Age(v uint) predicate.User { return where.EQ(FieldAge, v) }
+// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
+func Age(v uint) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAge, v))
+}
 
-// Deprecated: NameEQ — use where.EQ(FieldName, v).
-func NameEQ(v string) predicate.User { return where.EQ(FieldName, v) }
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
-func NameNEQ(v string) predicate.User { return where.NEQ(FieldName, v) }
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldName, v))
+}
 
-// Deprecated: NameIn — use where.In(FieldName, vs...).
-func NameIn(vs ...string) predicate.User { return where.In(FieldName, vs...) }
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldName, vs...))
+}
 
-// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
-func NameNotIn(vs ...string) predicate.User { return where.NotIn(FieldName, vs...) }
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldName, vs...))
+}
 
-// Deprecated: NameGT — use where.GT(FieldName, v).
-func NameGT(v string) predicate.User { return where.GT(FieldName, v) }
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldName, v))
+}
 
-// Deprecated: NameGTE — use where.GTE(FieldName, v).
-func NameGTE(v string) predicate.User { return where.GTE(FieldName, v) }
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldName, v))
+}
 
-// Deprecated: NameLT — use where.LT(FieldName, v).
-func NameLT(v string) predicate.User { return where.LT(FieldName, v) }
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldName, v))
+}
 
-// Deprecated: NameLTE — use where.LTE(FieldName, v).
-func NameLTE(v string) predicate.User { return where.LTE(FieldName, v) }
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldName, v))
+}
 
-// Deprecated: NameContains — use where.Contains(FieldName, v).
-func NameContains(v string) predicate.User { return where.Contains(FieldName, v) }
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldName, v))
+}
 
-// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
-func NameHasPrefix(v string) predicate.User { return where.HasPrefix(FieldName, v) }
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldName, v))
+}
 
-// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
-func NameHasSuffix(v string) predicate.User { return where.HasSuffix(FieldName, v) }
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldName, v))
+}
 
-// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
-func NameEqualFold(v string) predicate.User { return where.EqualFold(FieldName, v) }
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldName, v))
+}
 
-// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
-func NameContainsFold(v string) predicate.User { return where.ContainsFold(FieldName, v) }
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldName, v))
+}
 
-// Deprecated: AgeEQ — use where.EQ(FieldAge, v).
-func AgeEQ(v uint) predicate.User { return where.EQ(FieldAge, v) }
+// AgeEQ applies the EQ predicate on the "age" field.
+func AgeEQ(v uint) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldAge, v))
+}
 
-// Deprecated: AgeNEQ — use where.NEQ(FieldAge, v).
-func AgeNEQ(v uint) predicate.User { return where.NEQ(FieldAge, v) }
+// AgeNEQ applies the NEQ predicate on the "age" field.
+func AgeNEQ(v uint) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldAge, v))
+}
 
-// Deprecated: AgeIn — use where.In(FieldAge, vs...).
-func AgeIn(vs ...uint) predicate.User { return where.In(FieldAge, vs...) }
+// AgeIn applies the In predicate on the "age" field.
+func AgeIn(vs ...uint) predicate.User {
+	return predicate.User(sql.FieldIn(FieldAge, vs...))
+}
 
-// Deprecated: AgeNotIn — use where.NotIn(FieldAge, vs...).
-func AgeNotIn(vs ...uint) predicate.User { return where.NotIn(FieldAge, vs...) }
+// AgeNotIn applies the NotIn predicate on the "age" field.
+func AgeNotIn(vs ...uint) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldAge, vs...))
+}
 
-// Deprecated: AgeGT — use where.GT(FieldAge, v).
-func AgeGT(v uint) predicate.User { return where.GT(FieldAge, v) }
+// AgeGT applies the GT predicate on the "age" field.
+func AgeGT(v uint) predicate.User {
+	return predicate.User(sql.FieldGT(FieldAge, v))
+}
 
-// Deprecated: AgeGTE — use where.GTE(FieldAge, v).
-func AgeGTE(v uint) predicate.User { return where.GTE(FieldAge, v) }
+// AgeGTE applies the GTE predicate on the "age" field.
+func AgeGTE(v uint) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldAge, v))
+}
 
-// Deprecated: AgeLT — use where.LT(FieldAge, v).
-func AgeLT(v uint) predicate.User { return where.LT(FieldAge, v) }
+// AgeLT applies the LT predicate on the "age" field.
+func AgeLT(v uint) predicate.User {
+	return predicate.User(sql.FieldLT(FieldAge, v))
+}
 
-// Deprecated: AgeLTE — use where.LTE(FieldAge, v).
-func AgeLTE(v uint) predicate.User { return where.LTE(FieldAge, v) }
+// AgeLTE applies the LTE predicate on the "age" field.
+func AgeLTE(v uint) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldAge, v))
+}
 
-// Deprecated: AgeIsNil — use where.IsNull(FieldAge).
-func AgeIsNil() predicate.User { return where.IsNull(FieldAge) }
+// AgeIsNil applies the IsNil predicate on the "age" field.
+func AgeIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldAge))
+}
 
-// Deprecated: AgeNotNil — use where.NotNull(FieldAge).
-func AgeNotNil() predicate.User { return where.NotNull(FieldAge) }
+// AgeNotNil applies the NotNil predicate on the "age" field.
+func AgeNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldAge))
+}
 
 // HasTeams applies the HasEdge predicate on the "teams" edge.
 func HasTeams() predicate.User {

@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -59,44 +58,70 @@ func IDLTE(id int) predicate.Parent {
 	return predicate.Parent(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: ByAdoption — use where.EQ(FieldByAdoption, v).
-func ByAdoption(v bool) predicate.Parent { return where.EQ(FieldByAdoption, v) }
+// ByAdoption applies equality check predicate on the "by_adoption" field. It's identical to ByAdoptionEQ.
+func ByAdoption(v bool) predicate.Parent {
+	return predicate.Parent(sql.FieldEQ(FieldByAdoption, v))
+}
 
-// Deprecated: UserID — use where.EQ(FieldUserID, v).
-func UserID(v int) predicate.Parent { return where.EQ(FieldUserID, v) }
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v int) predicate.Parent {
+	return predicate.Parent(sql.FieldEQ(FieldUserID, v))
+}
 
-// Deprecated: ParentID — use where.EQ(FieldParentID, v).
-func ParentID(v int) predicate.Parent { return where.EQ(FieldParentID, v) }
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.Parent {
+	return predicate.Parent(sql.FieldEQ(FieldParentID, v))
+}
 
-// Deprecated: ByAdoptionEQ — use where.EQ(FieldByAdoption, v).
-func ByAdoptionEQ(v bool) predicate.Parent { return where.EQ(FieldByAdoption, v) }
+// ByAdoptionEQ applies the EQ predicate on the "by_adoption" field.
+func ByAdoptionEQ(v bool) predicate.Parent {
+	return predicate.Parent(sql.FieldEQ(FieldByAdoption, v))
+}
 
-// Deprecated: ByAdoptionNEQ — use where.NEQ(FieldByAdoption, v).
-func ByAdoptionNEQ(v bool) predicate.Parent { return where.NEQ(FieldByAdoption, v) }
+// ByAdoptionNEQ applies the NEQ predicate on the "by_adoption" field.
+func ByAdoptionNEQ(v bool) predicate.Parent {
+	return predicate.Parent(sql.FieldNEQ(FieldByAdoption, v))
+}
 
-// Deprecated: UserIDEQ — use where.EQ(FieldUserID, v).
-func UserIDEQ(v int) predicate.Parent { return where.EQ(FieldUserID, v) }
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v int) predicate.Parent {
+	return predicate.Parent(sql.FieldEQ(FieldUserID, v))
+}
 
-// Deprecated: UserIDNEQ — use where.NEQ(FieldUserID, v).
-func UserIDNEQ(v int) predicate.Parent { return where.NEQ(FieldUserID, v) }
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v int) predicate.Parent {
+	return predicate.Parent(sql.FieldNEQ(FieldUserID, v))
+}
 
-// Deprecated: UserIDIn — use where.In(FieldUserID, vs...).
-func UserIDIn(vs ...int) predicate.Parent { return where.In(FieldUserID, vs...) }
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...int) predicate.Parent {
+	return predicate.Parent(sql.FieldIn(FieldUserID, vs...))
+}
 
-// Deprecated: UserIDNotIn — use where.NotIn(FieldUserID, vs...).
-func UserIDNotIn(vs ...int) predicate.Parent { return where.NotIn(FieldUserID, vs...) }
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...int) predicate.Parent {
+	return predicate.Parent(sql.FieldNotIn(FieldUserID, vs...))
+}
 
-// Deprecated: ParentIDEQ — use where.EQ(FieldParentID, v).
-func ParentIDEQ(v int) predicate.Parent { return where.EQ(FieldParentID, v) }
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.Parent {
+	return predicate.Parent(sql.FieldEQ(FieldParentID, v))
+}
 
-// Deprecated: ParentIDNEQ — use where.NEQ(FieldParentID, v).
-func ParentIDNEQ(v int) predicate.Parent { return where.NEQ(FieldParentID, v) }
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.Parent {
+	return predicate.Parent(sql.FieldNEQ(FieldParentID, v))
+}
 
-// Deprecated: ParentIDIn — use where.In(FieldParentID, vs...).
-func ParentIDIn(vs ...int) predicate.Parent { return where.In(FieldParentID, vs...) }
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.Parent {
+	return predicate.Parent(sql.FieldIn(FieldParentID, vs...))
+}
 
-// Deprecated: ParentIDNotIn — use where.NotIn(FieldParentID, vs...).
-func ParentIDNotIn(vs ...int) predicate.Parent { return where.NotIn(FieldParentID, vs...) }
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.Parent {
+	return predicate.Parent(sql.FieldNotIn(FieldParentID, vs...))
+}
 
 // HasChild applies the HasEdge predicate on the "child" edge.
 func HasChild() predicate.Parent {

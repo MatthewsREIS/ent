@@ -25,7 +25,7 @@ func (_q *LinkQuery) Filter() *LinkFilter {
 
 // NewLinkFilterForMutation creates a new LinkFilter for the given mutation.
 func NewLinkFilterForMutation(m *LinkMutation) *LinkFilter {
-	return &LinkFilter{Config: m.Config, predicateAdder: m}
+	return &LinkFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // LinkFilter provides a generic filtering capability at runtime for LinkQuery.

@@ -27,7 +27,7 @@ func (_q *SessionQuery) Filter() *SessionFilter {
 
 // NewSessionFilterForMutation creates a new SessionFilter for the given mutation.
 func NewSessionFilterForMutation(m *SessionMutation) *SessionFilter {
-	return &SessionFilter{Config: m.Config, predicateAdder: m}
+	return &SessionFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // SessionFilter provides a generic filtering capability at runtime for SessionQuery.

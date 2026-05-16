@@ -27,7 +27,7 @@ func (_q *GroupTagQuery) Filter() *GroupTagFilter {
 
 // NewGroupTagFilterForMutation creates a new GroupTagFilter for the given mutation.
 func NewGroupTagFilterForMutation(m *GroupTagMutation) *GroupTagFilter {
-	return &GroupTagFilter{Config: m.Config, predicateAdder: m}
+	return &GroupTagFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // GroupTagFilter provides a generic filtering capability at runtime for GroupTagQuery.

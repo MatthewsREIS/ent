@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,176 +59,290 @@ func IDLTE(id int) predicate.Card {
 	return predicate.Card(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: CreateTime — use where.EQ(FieldCreateTime, v).
-func CreateTime(v time.Time) predicate.Card { return where.EQ(FieldCreateTime, v) }
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldCreateTime, v))
+}
 
-// Deprecated: UpdateTime — use where.EQ(FieldUpdateTime, v).
-func UpdateTime(v time.Time) predicate.Card { return where.EQ(FieldUpdateTime, v) }
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldUpdateTime, v))
+}
 
-// Deprecated: Balance — use where.EQ(FieldBalance, v).
-func Balance(v float64) predicate.Card { return where.EQ(FieldBalance, v) }
+// Balance applies equality check predicate on the "balance" field. It's identical to BalanceEQ.
+func Balance(v float64) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldBalance, v))
+}
 
-// Deprecated: Number — use where.EQ(FieldNumber, v).
-func Number(v string) predicate.Card { return where.EQ(FieldNumber, v) }
+// Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
+func Number(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldNumber, v))
+}
 
-// Deprecated: Name — use where.EQ(FieldName, v).
-func Name(v string) predicate.Card { return where.EQ(FieldName, v) }
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: CreateTimeEQ — use where.EQ(FieldCreateTime, v).
-func CreateTimeEQ(v time.Time) predicate.Card { return where.EQ(FieldCreateTime, v) }
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeNEQ — use where.NEQ(FieldCreateTime, v).
-func CreateTimeNEQ(v time.Time) predicate.Card { return where.NEQ(FieldCreateTime, v) }
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeIn — use where.In(FieldCreateTime, vs...).
-func CreateTimeIn(vs ...time.Time) predicate.Card { return where.In(FieldCreateTime, vs...) }
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldCreateTime, vs...))
+}
 
-// Deprecated: CreateTimeNotIn — use where.NotIn(FieldCreateTime, vs...).
-func CreateTimeNotIn(vs ...time.Time) predicate.Card { return where.NotIn(FieldCreateTime, vs...) }
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldCreateTime, vs...))
+}
 
-// Deprecated: CreateTimeGT — use where.GT(FieldCreateTime, v).
-func CreateTimeGT(v time.Time) predicate.Card { return where.GT(FieldCreateTime, v) }
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeGTE — use where.GTE(FieldCreateTime, v).
-func CreateTimeGTE(v time.Time) predicate.Card { return where.GTE(FieldCreateTime, v) }
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeLT — use where.LT(FieldCreateTime, v).
-func CreateTimeLT(v time.Time) predicate.Card { return where.LT(FieldCreateTime, v) }
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeLTE — use where.LTE(FieldCreateTime, v).
-func CreateTimeLTE(v time.Time) predicate.Card { return where.LTE(FieldCreateTime, v) }
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldCreateTime, v))
+}
 
-// Deprecated: UpdateTimeEQ — use where.EQ(FieldUpdateTime, v).
-func UpdateTimeEQ(v time.Time) predicate.Card { return where.EQ(FieldUpdateTime, v) }
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeNEQ — use where.NEQ(FieldUpdateTime, v).
-func UpdateTimeNEQ(v time.Time) predicate.Card { return where.NEQ(FieldUpdateTime, v) }
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeIn — use where.In(FieldUpdateTime, vs...).
-func UpdateTimeIn(vs ...time.Time) predicate.Card { return where.In(FieldUpdateTime, vs...) }
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldUpdateTime, vs...))
+}
 
-// Deprecated: UpdateTimeNotIn — use where.NotIn(FieldUpdateTime, vs...).
-func UpdateTimeNotIn(vs ...time.Time) predicate.Card { return where.NotIn(FieldUpdateTime, vs...) }
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldUpdateTime, vs...))
+}
 
-// Deprecated: UpdateTimeGT — use where.GT(FieldUpdateTime, v).
-func UpdateTimeGT(v time.Time) predicate.Card { return where.GT(FieldUpdateTime, v) }
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeGTE — use where.GTE(FieldUpdateTime, v).
-func UpdateTimeGTE(v time.Time) predicate.Card { return where.GTE(FieldUpdateTime, v) }
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeLT — use where.LT(FieldUpdateTime, v).
-func UpdateTimeLT(v time.Time) predicate.Card { return where.LT(FieldUpdateTime, v) }
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeLTE — use where.LTE(FieldUpdateTime, v).
-func UpdateTimeLTE(v time.Time) predicate.Card { return where.LTE(FieldUpdateTime, v) }
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldUpdateTime, v))
+}
 
-// Deprecated: BalanceEQ — use where.EQ(FieldBalance, v).
-func BalanceEQ(v float64) predicate.Card { return where.EQ(FieldBalance, v) }
+// BalanceEQ applies the EQ predicate on the "balance" field.
+func BalanceEQ(v float64) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldBalance, v))
+}
 
-// Deprecated: BalanceNEQ — use where.NEQ(FieldBalance, v).
-func BalanceNEQ(v float64) predicate.Card { return where.NEQ(FieldBalance, v) }
+// BalanceNEQ applies the NEQ predicate on the "balance" field.
+func BalanceNEQ(v float64) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldBalance, v))
+}
 
-// Deprecated: BalanceIn — use where.In(FieldBalance, vs...).
-func BalanceIn(vs ...float64) predicate.Card { return where.In(FieldBalance, vs...) }
+// BalanceIn applies the In predicate on the "balance" field.
+func BalanceIn(vs ...float64) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldBalance, vs...))
+}
 
-// Deprecated: BalanceNotIn — use where.NotIn(FieldBalance, vs...).
-func BalanceNotIn(vs ...float64) predicate.Card { return where.NotIn(FieldBalance, vs...) }
+// BalanceNotIn applies the NotIn predicate on the "balance" field.
+func BalanceNotIn(vs ...float64) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldBalance, vs...))
+}
 
-// Deprecated: BalanceGT — use where.GT(FieldBalance, v).
-func BalanceGT(v float64) predicate.Card { return where.GT(FieldBalance, v) }
+// BalanceGT applies the GT predicate on the "balance" field.
+func BalanceGT(v float64) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldBalance, v))
+}
 
-// Deprecated: BalanceGTE — use where.GTE(FieldBalance, v).
-func BalanceGTE(v float64) predicate.Card { return where.GTE(FieldBalance, v) }
+// BalanceGTE applies the GTE predicate on the "balance" field.
+func BalanceGTE(v float64) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldBalance, v))
+}
 
-// Deprecated: BalanceLT — use where.LT(FieldBalance, v).
-func BalanceLT(v float64) predicate.Card { return where.LT(FieldBalance, v) }
+// BalanceLT applies the LT predicate on the "balance" field.
+func BalanceLT(v float64) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldBalance, v))
+}
 
-// Deprecated: BalanceLTE — use where.LTE(FieldBalance, v).
-func BalanceLTE(v float64) predicate.Card { return where.LTE(FieldBalance, v) }
+// BalanceLTE applies the LTE predicate on the "balance" field.
+func BalanceLTE(v float64) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldBalance, v))
+}
 
-// Deprecated: NumberEQ — use where.EQ(FieldNumber, v).
-func NumberEQ(v string) predicate.Card { return where.EQ(FieldNumber, v) }
+// NumberEQ applies the EQ predicate on the "number" field.
+func NumberEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldNumber, v))
+}
 
-// Deprecated: NumberNEQ — use where.NEQ(FieldNumber, v).
-func NumberNEQ(v string) predicate.Card { return where.NEQ(FieldNumber, v) }
+// NumberNEQ applies the NEQ predicate on the "number" field.
+func NumberNEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldNumber, v))
+}
 
-// Deprecated: NumberIn — use where.In(FieldNumber, vs...).
-func NumberIn(vs ...string) predicate.Card { return where.In(FieldNumber, vs...) }
+// NumberIn applies the In predicate on the "number" field.
+func NumberIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldNumber, vs...))
+}
 
-// Deprecated: NumberNotIn — use where.NotIn(FieldNumber, vs...).
-func NumberNotIn(vs ...string) predicate.Card { return where.NotIn(FieldNumber, vs...) }
+// NumberNotIn applies the NotIn predicate on the "number" field.
+func NumberNotIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldNumber, vs...))
+}
 
-// Deprecated: NumberGT — use where.GT(FieldNumber, v).
-func NumberGT(v string) predicate.Card { return where.GT(FieldNumber, v) }
+// NumberGT applies the GT predicate on the "number" field.
+func NumberGT(v string) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldNumber, v))
+}
 
-// Deprecated: NumberGTE — use where.GTE(FieldNumber, v).
-func NumberGTE(v string) predicate.Card { return where.GTE(FieldNumber, v) }
+// NumberGTE applies the GTE predicate on the "number" field.
+func NumberGTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldNumber, v))
+}
 
-// Deprecated: NumberLT — use where.LT(FieldNumber, v).
-func NumberLT(v string) predicate.Card { return where.LT(FieldNumber, v) }
+// NumberLT applies the LT predicate on the "number" field.
+func NumberLT(v string) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldNumber, v))
+}
 
-// Deprecated: NumberLTE — use where.LTE(FieldNumber, v).
-func NumberLTE(v string) predicate.Card { return where.LTE(FieldNumber, v) }
+// NumberLTE applies the LTE predicate on the "number" field.
+func NumberLTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldNumber, v))
+}
 
-// Deprecated: NumberContains — use where.Contains(FieldNumber, v).
-func NumberContains(v string) predicate.Card { return where.Contains(FieldNumber, v) }
+// NumberContains applies the Contains predicate on the "number" field.
+func NumberContains(v string) predicate.Card {
+	return predicate.Card(sql.FieldContains(FieldNumber, v))
+}
 
-// Deprecated: NumberHasPrefix — use where.HasPrefix(FieldNumber, v).
-func NumberHasPrefix(v string) predicate.Card { return where.HasPrefix(FieldNumber, v) }
+// NumberHasPrefix applies the HasPrefix predicate on the "number" field.
+func NumberHasPrefix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasPrefix(FieldNumber, v))
+}
 
-// Deprecated: NumberHasSuffix — use where.HasSuffix(FieldNumber, v).
-func NumberHasSuffix(v string) predicate.Card { return where.HasSuffix(FieldNumber, v) }
+// NumberHasSuffix applies the HasSuffix predicate on the "number" field.
+func NumberHasSuffix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasSuffix(FieldNumber, v))
+}
 
-// Deprecated: NumberEqualFold — use where.EqualFold(FieldNumber, v).
-func NumberEqualFold(v string) predicate.Card { return where.EqualFold(FieldNumber, v) }
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldNumber, v))
+}
 
-// Deprecated: NumberContainsFold — use where.ContainsFold(FieldNumber, v).
-func NumberContainsFold(v string) predicate.Card { return where.ContainsFold(FieldNumber, v) }
+// NumberContainsFold applies the ContainsFold predicate on the "number" field.
+func NumberContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldNumber, v))
+}
 
-// Deprecated: NameEQ — use where.EQ(FieldName, v).
-func NameEQ(v string) predicate.Card { return where.EQ(FieldName, v) }
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
-func NameNEQ(v string) predicate.Card { return where.NEQ(FieldName, v) }
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldName, v))
+}
 
-// Deprecated: NameIn — use where.In(FieldName, vs...).
-func NameIn(vs ...string) predicate.Card { return where.In(FieldName, vs...) }
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldName, vs...))
+}
 
-// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
-func NameNotIn(vs ...string) predicate.Card { return where.NotIn(FieldName, vs...) }
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldName, vs...))
+}
 
-// Deprecated: NameGT — use where.GT(FieldName, v).
-func NameGT(v string) predicate.Card { return where.GT(FieldName, v) }
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldName, v))
+}
 
-// Deprecated: NameGTE — use where.GTE(FieldName, v).
-func NameGTE(v string) predicate.Card { return where.GTE(FieldName, v) }
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldName, v))
+}
 
-// Deprecated: NameLT — use where.LT(FieldName, v).
-func NameLT(v string) predicate.Card { return where.LT(FieldName, v) }
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldName, v))
+}
 
-// Deprecated: NameLTE — use where.LTE(FieldName, v).
-func NameLTE(v string) predicate.Card { return where.LTE(FieldName, v) }
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldName, v))
+}
 
-// Deprecated: NameContains — use where.Contains(FieldName, v).
-func NameContains(v string) predicate.Card { return where.Contains(FieldName, v) }
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.Card {
+	return predicate.Card(sql.FieldContains(FieldName, v))
+}
 
-// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
-func NameHasPrefix(v string) predicate.Card { return where.HasPrefix(FieldName, v) }
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasPrefix(FieldName, v))
+}
 
-// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
-func NameHasSuffix(v string) predicate.Card { return where.HasSuffix(FieldName, v) }
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasSuffix(FieldName, v))
+}
 
-// Deprecated: NameIsNil — use where.IsNull(FieldName).
-func NameIsNil() predicate.Card { return where.IsNull(FieldName) }
+// NameIsNil applies the IsNil predicate on the "name" field.
+func NameIsNil() predicate.Card {
+	return predicate.Card(sql.FieldIsNull(FieldName))
+}
 
-// Deprecated: NameNotNil — use where.NotNull(FieldName).
-func NameNotNil() predicate.Card { return where.NotNull(FieldName) }
+// NameNotNil applies the NotNil predicate on the "name" field.
+func NameNotNil() predicate.Card {
+	return predicate.Card(sql.FieldNotNull(FieldName))
+}
 
-// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
-func NameEqualFold(v string) predicate.Card { return where.EqualFold(FieldName, v) }
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldName, v))
+}
 
-// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
-func NameContainsFold(v string) predicate.Card { return where.ContainsFold(FieldName, v) }
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldName, v))
+}
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Card {

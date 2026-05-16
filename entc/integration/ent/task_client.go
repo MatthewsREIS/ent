@@ -100,7 +100,7 @@ func (c *TaskClient) DeleteOne(_m *Task) *enttask.TaskDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TaskClient) DeleteOneID(id int) *enttask.TaskDeleteOne {
 	mutation := NewTaskMutation(c.Config, OpDeleteOne, WithTaskID(id, nil))
-	mutation.Where(enttask.ID(id))
+	mutation.WhereP(enttask.ID(id))
 	return enttask.NewTaskDeleteOne(enttask.NewTaskDelete(c.Config, c.Hooks(), mutation))
 }
 

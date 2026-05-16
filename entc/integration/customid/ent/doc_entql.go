@@ -27,7 +27,7 @@ func (_q *DocQuery) Filter() *DocFilter {
 
 // NewDocFilterForMutation creates a new DocFilter for the given mutation.
 func NewDocFilterForMutation(m *DocMutation) *DocFilter {
-	return &DocFilter{Config: m.Config, predicateAdder: m}
+	return &DocFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // DocFilter provides a generic filtering capability at runtime for DocQuery.

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,7 +30,7 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetVersion sets the "version" field.
 func (_c *UserCreate) SetVersion(v int) *UserCreate {
-	_c.mutation.SetVersion(v)
+	_ = _c.mutation.SetField("version", v)
 	return _c
 }
 
@@ -43,13 +44,13 @@ func (_c *UserCreate) SetNillableVersion(v *int) *UserCreate {
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // SetWorth sets the "worth" field.
 func (_c *UserCreate) SetWorth(v uint) *UserCreate {
-	_c.mutation.SetWorth(v)
+	_ = _c.mutation.SetField("worth", v)
 	return _c
 }
 
@@ -63,7 +64,7 @@ func (_c *UserCreate) SetNillableWorth(v *uint) *UserCreate {
 
 // SetPassword sets the "password" field.
 func (_c *UserCreate) SetPassword(v string) *UserCreate {
-	_c.mutation.SetPassword(v)
+	_ = _c.mutation.SetField("password", v)
 	return _c
 }
 
@@ -77,7 +78,7 @@ func (_c *UserCreate) SetNillablePassword(v *string) *UserCreate {
 
 // SetActive sets the "active" field.
 func (_c *UserCreate) SetActive(v bool) *UserCreate {
-	_c.mutation.SetActive(v)
+	_ = _c.mutation.SetField("active", v)
 	return _c
 }
 
@@ -91,25 +92,25 @@ func (_c *UserCreate) SetNillableActive(v *bool) *UserCreate {
 
 // AddCardIDs adds the "cards" edge to the Card entity by IDs.
 func (_c *UserCreate) AddCardIDs(ids ...int) *UserCreate {
-	_c.mutation.AddCardIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("cards", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
-	_c.mutation.AddPetIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
-	_c.mutation.AddFriendIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (_c *UserCreate) SetBestFriendID(id int) *UserCreate {
-	_c.mutation.SetBestFriendID(id)
+	_ = _c.mutation.SetEdgeID("best_friend", id)
 	return _c
 }
 
@@ -158,26 +159,26 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() error {
-	if _, ok := _c.mutation.Version(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "version"); !ok {
 		v := DefaultVersion
-		_c.mutation.SetVersion(v)
+		_ = _c.mutation.SetField("version", v)
 	}
-	if _, ok := _c.mutation.Active(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "active"); !ok {
 		v := DefaultActive
-		_c.mutation.SetActive(v)
+		_ = _c.mutation.SetField("active", v)
 	}
 	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.Version(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "version"); !ok {
 		return &ValidationError{Name: "version", Err: errors.New(`ent: missing required field "User.version"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "User.name"`)}
 	}
-	if _, ok := _c.mutation.Active(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "active"); !ok {
 		return &ValidationError{Name: "active", Err: errors.New(`ent: missing required field "User.active"`)}
 	}
 	return nil
@@ -196,7 +197,7 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -206,27 +207,27 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node = &User{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.Version(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "version"); ok {
 		_spec.SetField(FieldVersion, field.TypeInt, value)
 		_node.Version = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Worth(); ok {
+	if value, ok := entbuilder.GetField[uint](_c.mutation, "worth"); ok {
 		_spec.SetField(FieldWorth, field.TypeUint, value)
 		_node.Worth = value
 	}
-	if value, ok := _c.mutation.Password(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "password"); ok {
 		_spec.SetField(FieldPassword, field.TypeString, value)
 		_node.Password = value
 	}
-	if value, ok := _c.mutation.Active(); ok {
+	if value, ok := entbuilder.GetField[bool](_c.mutation, "active"); ok {
 		_spec.SetField(FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
-	if nodes := _c.mutation.CardsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "cards"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -242,7 +243,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "pets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -258,7 +259,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -274,7 +275,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.BestFriendIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "best_friend"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -347,11 +348,11 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

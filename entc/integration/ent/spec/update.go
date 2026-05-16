@@ -33,13 +33,13 @@ func NewSpecUpdate(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdate {
 
 // Where appends a list predicates to the SpecUpdate builder.
 func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (_u *SpecUpdate) AddCardIDs(ids ...int) *SpecUpdate {
-	_u.mutation.AddCardIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -50,13 +50,13 @@ func (_u *SpecUpdate) Mutation() *SpecMutation {
 
 // ClearCard clears all "card" edges to the Card entity.
 func (_u *SpecUpdate) ClearCard() *SpecUpdate {
-	_u.mutation.ClearCard()
+	_ = _u.mutation.ClearEdge("card")
 	return _u
 }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (_u *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
-	_u.mutation.RemoveCardIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -102,7 +102,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.CardCleared() {
+	if _u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -115,7 +115,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedCardIDs(); len(nodes) > 0 && !_u.mutation.CardCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("card"); len(nodes) > 0 && !_u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -131,7 +131,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("card"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -176,7 +176,7 @@ func NewSpecUpdateOne(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdat
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (_u *SpecUpdateOne) AddCardIDs(ids ...int) *SpecUpdateOne {
-	_u.mutation.AddCardIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -187,19 +187,19 @@ func (_u *SpecUpdateOne) Mutation() *SpecMutation {
 
 // ClearCard clears all "card" edges to the Card entity.
 func (_u *SpecUpdateOne) ClearCard() *SpecUpdateOne {
-	_u.mutation.ClearCard()
+	_ = _u.mutation.ClearEdge("card")
 	return _u
 }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (_u *SpecUpdateOne) RemoveCardIDs(ids ...int) *SpecUpdateOne {
-	_u.mutation.RemoveCardIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the SpecUpdate builder.
 func (_u *SpecUpdateOne) Where(ps ...predicate.Spec) *SpecUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -245,10 +245,11 @@ func (_u *SpecUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SpecUp
 
 func (_u *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Spec.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -269,7 +270,7 @@ func (_u *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 			}
 		}
 	}
-	if _u.mutation.CardCleared() {
+	if _u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -282,7 +283,7 @@ func (_u *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedCardIDs(); len(nodes) > 0 && !_u.mutation.CardCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("card"); len(nodes) > 0 && !_u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -298,7 +299,7 @@ func (_u *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("card"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

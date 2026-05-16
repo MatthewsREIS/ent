@@ -30,7 +30,7 @@ func NewAccountDelete(c Config, hooks []Hook, mutation *AccountMutation) *Accoun
 
 // Where appends a list predicates to the AccountDelete builder.
 func (_d *AccountDelete) Where(ps ...predicate.Account) *AccountDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewAccountDeleteOne(d *AccountDelete) *AccountDeleteOne {
 
 // Where appends a list predicates to the AccountDelete builder.
 func (_d *AccountDeleteOne) Where(ps ...predicate.Account) *AccountDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

@@ -31,7 +31,7 @@ func NewBuilderDelete(c Config, hooks []Hook, mutation *BuilderMutation) *Builde
 
 // Where appends a list predicates to the BuilderDelete builder.
 func (_d *BuilderDelete) Where(ps ...predicate.Builder) *BuilderDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewBuilderDeleteOne(d *BuilderDelete) *BuilderDeleteOne {
 
 // Where appends a list predicates to the BuilderDelete builder.
 func (_d *BuilderDeleteOne) Where(ps ...predicate.Builder) *BuilderDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

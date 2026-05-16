@@ -30,7 +30,7 @@ func NewGoodsDelete(c Config, hooks []Hook, mutation *GoodsMutation) *GoodsDelet
 
 // Where appends a list predicates to the GoodsDelete builder.
 func (_d *GoodsDelete) Where(ps ...predicate.Goods) *GoodsDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -78,7 +78,7 @@ func NewGoodsDeleteOne(d *GoodsDelete) *GoodsDeleteOne {
 
 // Where appends a list predicates to the GoodsDelete builder.
 func (_d *GoodsDeleteOne) Where(ps ...predicate.Goods) *GoodsDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

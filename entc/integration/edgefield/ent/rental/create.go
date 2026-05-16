@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -31,7 +32,7 @@ func NewRentalCreate(c Config, hooks []Hook, mutation *RentalMutation) *RentalCr
 
 // SetDate sets the "date" field.
 func (_c *RentalCreate) SetDate(v time.Time) *RentalCreate {
-	_c.mutation.SetDate(v)
+	_ = _c.mutation.SetField("date", v)
 	return _c
 }
 
@@ -45,13 +46,13 @@ func (_c *RentalCreate) SetNillableDate(v *time.Time) *RentalCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *RentalCreate) SetUserID(v int) *RentalCreate {
-	_c.mutation.SetUserID(v)
+	_ = _c.mutation.SetEdgeID("user", v)
 	return _c
 }
 
 // SetCarID sets the "car_id" field.
 func (_c *RentalCreate) SetCarID(v uuid.UUID) *RentalCreate {
-	_c.mutation.SetCarID(v)
+	_ = _c.mutation.SetEdgeID("car", v)
 	return _c
 }
 
@@ -90,27 +91,21 @@ func (_c *RentalCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *RentalCreate) defaults() {
-	if _, ok := _c.mutation.Date(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "date"); !ok {
 		v := DefaultDate()
-		_c.mutation.SetDate(v)
+		_ = _c.mutation.SetField("date", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *RentalCreate) check() error {
-	if _, ok := _c.mutation.Date(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "date"); !ok {
 		return &ValidationError{Name: "date", Err: errors.New(`ent: missing required field "Rental.date"`)}
 	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", Err: errors.New(`ent: missing required field "Rental.user_id"`)}
-	}
-	if _, ok := _c.mutation.CarID(); !ok {
-		return &ValidationError{Name: "car_id", Err: errors.New(`ent: missing required field "Rental.car_id"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("user")) == 0 {
 		return &ValidationError{Name: "user", Err: errors.New(`ent: missing required edge "Rental.user"`)}
 	}
-	if len(_c.mutation.CarIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("car")) == 0 {
 		return &ValidationError{Name: "car", Err: errors.New(`ent: missing required edge "Rental.car"`)}
 	}
 	return nil
@@ -129,7 +124,7 @@ func (_c *RentalCreate) sqlSave(ctx context.Context) (*Rental, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -139,11 +134,11 @@ func (_c *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 		_node = &Rental{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.Date(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "date"); ok {
 		_spec.SetField(FieldDate, field.TypeTime, value)
 		_node.Date = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -160,7 +155,7 @@ func (_c *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.CarIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "car"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -234,11 +229,11 @@ func (_c *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

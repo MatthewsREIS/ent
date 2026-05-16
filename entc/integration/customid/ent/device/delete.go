@@ -30,7 +30,7 @@ func NewDeviceDelete(c Config, hooks []Hook, mutation *DeviceMutation) *DeviceDe
 
 // Where appends a list predicates to the DeviceDelete builder.
 func (_d *DeviceDelete) Where(ps ...predicate.Device) *DeviceDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewDeviceDeleteOne(d *DeviceDelete) *DeviceDeleteOne {
 
 // Where appends a list predicates to the DeviceDelete builder.
 func (_d *DeviceDeleteOne) Where(ps ...predicate.Device) *DeviceDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

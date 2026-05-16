@@ -30,7 +30,7 @@ func NewNodeDelete(c Config, hooks []Hook, mutation *NodeMutation) *NodeDelete {
 
 // Where appends a list predicates to the NodeDelete builder.
 func (_d *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewNodeDeleteOne(d *NodeDelete) *NodeDeleteOne {
 
 // Where appends a list predicates to the NodeDelete builder.
 func (_d *NodeDeleteOne) Where(ps ...predicate.Node) *NodeDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

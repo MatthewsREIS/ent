@@ -31,7 +31,7 @@ func NewSpecDelete(c Config, hooks []Hook, mutation *SpecMutation) *SpecDelete {
 
 // Where appends a list predicates to the SpecDelete builder.
 func (_d *SpecDelete) Where(ps ...predicate.Spec) *SpecDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewSpecDeleteOne(d *SpecDelete) *SpecDeleteOne {
 
 // Where appends a list predicates to the SpecDelete builder.
 func (_d *SpecDeleteOne) Where(ps ...predicate.Spec) *SpecDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

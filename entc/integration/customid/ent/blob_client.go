@@ -104,7 +104,7 @@ func (c *BlobClient) DeleteOne(_m *Blob) *blob.BlobDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *BlobClient) DeleteOneID(id uuid.UUID) *blob.BlobDeleteOne {
 	mutation := NewBlobMutation(c.Config, OpDeleteOne, WithBlobID(id, nil))
-	mutation.Where(blob.ID(id))
+	mutation.WhereP(blob.ID(id))
 	return blob.NewBlobDeleteOne(blob.NewBlobDelete(c.Config, c.Hooks(), mutation))
 }
 

@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -61,199 +60,325 @@ func IDLTE(id int) predicate.Pet {
 	return predicate.Pet(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Age — use where.EQ(FieldAge, v).
-func Age(v float64) predicate.Pet { return where.EQ(FieldAge, v) }
+// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
+func Age(v float64) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldAge, v))
+}
 
-// Deprecated: Name — use where.EQ(FieldName, v).
-func Name(v string) predicate.Pet { return where.EQ(FieldName, v) }
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldName, v))
+}
 
 // UUID applies equality check predicate on the "uuid" field. It's identical to UUIDEQ.
 func UUID(v uuid.UUID) predicate.Pet {
 	return predicate.Pet(sql.FieldEQ(FieldUUID, v))
 }
 
-// Deprecated: Nickname — use where.EQ(FieldNickname, v).
-func Nickname(v string) predicate.Pet { return where.EQ(FieldNickname, v) }
+// Nickname applies equality check predicate on the "nickname" field. It's identical to NicknameEQ.
+func Nickname(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldNickname, v))
+}
 
-// Deprecated: Trained — use where.EQ(FieldTrained, v).
-func Trained(v bool) predicate.Pet { return where.EQ(FieldTrained, v) }
+// Trained applies equality check predicate on the "trained" field. It's identical to TrainedEQ.
+func Trained(v bool) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldTrained, v))
+}
 
-// Deprecated: OptionalTime — use where.EQ(FieldOptionalTime, v).
-func OptionalTime(v time.Time) predicate.Pet { return where.EQ(FieldOptionalTime, v) }
+// OptionalTime applies equality check predicate on the "optional_time" field. It's identical to OptionalTimeEQ.
+func OptionalTime(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldOptionalTime, v))
+}
 
-// Deprecated: AgeEQ — use where.EQ(FieldAge, v).
-func AgeEQ(v float64) predicate.Pet { return where.EQ(FieldAge, v) }
+// AgeEQ applies the EQ predicate on the "age" field.
+func AgeEQ(v float64) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldAge, v))
+}
 
-// Deprecated: AgeNEQ — use where.NEQ(FieldAge, v).
-func AgeNEQ(v float64) predicate.Pet { return where.NEQ(FieldAge, v) }
+// AgeNEQ applies the NEQ predicate on the "age" field.
+func AgeNEQ(v float64) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldAge, v))
+}
 
-// Deprecated: AgeIn — use where.In(FieldAge, vs...).
-func AgeIn(vs ...float64) predicate.Pet { return where.In(FieldAge, vs...) }
+// AgeIn applies the In predicate on the "age" field.
+func AgeIn(vs ...float64) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldAge, vs...))
+}
 
-// Deprecated: AgeNotIn — use where.NotIn(FieldAge, vs...).
-func AgeNotIn(vs ...float64) predicate.Pet { return where.NotIn(FieldAge, vs...) }
+// AgeNotIn applies the NotIn predicate on the "age" field.
+func AgeNotIn(vs ...float64) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldAge, vs...))
+}
 
-// Deprecated: AgeGT — use where.GT(FieldAge, v).
-func AgeGT(v float64) predicate.Pet { return where.GT(FieldAge, v) }
+// AgeGT applies the GT predicate on the "age" field.
+func AgeGT(v float64) predicate.Pet {
+	return predicate.Pet(sql.FieldGT(FieldAge, v))
+}
 
-// Deprecated: AgeGTE — use where.GTE(FieldAge, v).
-func AgeGTE(v float64) predicate.Pet { return where.GTE(FieldAge, v) }
+// AgeGTE applies the GTE predicate on the "age" field.
+func AgeGTE(v float64) predicate.Pet {
+	return predicate.Pet(sql.FieldGTE(FieldAge, v))
+}
 
-// Deprecated: AgeLT — use where.LT(FieldAge, v).
-func AgeLT(v float64) predicate.Pet { return where.LT(FieldAge, v) }
+// AgeLT applies the LT predicate on the "age" field.
+func AgeLT(v float64) predicate.Pet {
+	return predicate.Pet(sql.FieldLT(FieldAge, v))
+}
 
-// Deprecated: AgeLTE — use where.LTE(FieldAge, v).
-func AgeLTE(v float64) predicate.Pet { return where.LTE(FieldAge, v) }
+// AgeLTE applies the LTE predicate on the "age" field.
+func AgeLTE(v float64) predicate.Pet {
+	return predicate.Pet(sql.FieldLTE(FieldAge, v))
+}
 
-// Deprecated: NameEQ — use where.EQ(FieldName, v).
-func NameEQ(v string) predicate.Pet { return where.EQ(FieldName, v) }
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
-func NameNEQ(v string) predicate.Pet { return where.NEQ(FieldName, v) }
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldName, v))
+}
 
-// Deprecated: NameIn — use where.In(FieldName, vs...).
-func NameIn(vs ...string) predicate.Pet { return where.In(FieldName, vs...) }
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldName, vs...))
+}
 
-// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
-func NameNotIn(vs ...string) predicate.Pet { return where.NotIn(FieldName, vs...) }
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldName, vs...))
+}
 
-// Deprecated: NameGT — use where.GT(FieldName, v).
-func NameGT(v string) predicate.Pet { return where.GT(FieldName, v) }
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldGT(FieldName, v))
+}
 
-// Deprecated: NameGTE — use where.GTE(FieldName, v).
-func NameGTE(v string) predicate.Pet { return where.GTE(FieldName, v) }
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldGTE(FieldName, v))
+}
 
-// Deprecated: NameLT — use where.LT(FieldName, v).
-func NameLT(v string) predicate.Pet { return where.LT(FieldName, v) }
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldLT(FieldName, v))
+}
 
-// Deprecated: NameLTE — use where.LTE(FieldName, v).
-func NameLTE(v string) predicate.Pet { return where.LTE(FieldName, v) }
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldLTE(FieldName, v))
+}
 
-// Deprecated: NameContains — use where.Contains(FieldName, v).
-func NameContains(v string) predicate.Pet { return where.Contains(FieldName, v) }
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldContains(FieldName, v))
+}
 
-// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
-func NameHasPrefix(v string) predicate.Pet { return where.HasPrefix(FieldName, v) }
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldHasPrefix(FieldName, v))
+}
 
-// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
-func NameHasSuffix(v string) predicate.Pet { return where.HasSuffix(FieldName, v) }
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldHasSuffix(FieldName, v))
+}
 
-// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
-func NameEqualFold(v string) predicate.Pet { return where.EqualFold(FieldName, v) }
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEqualFold(FieldName, v))
+}
 
-// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
-func NameContainsFold(v string) predicate.Pet { return where.ContainsFold(FieldName, v) }
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldContainsFold(FieldName, v))
+}
 
-// Deprecated: UUIDEQ — use where.EQ(FieldUUID, v).
-func UUIDEQ(v uuid.UUID) predicate.Pet { return where.EQ(FieldUUID, v) }
+// UUIDEQ applies the EQ predicate on the "uuid" field.
+func UUIDEQ(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldUUID, v))
+}
 
-// Deprecated: UUIDNEQ — use where.NEQ(FieldUUID, v).
-func UUIDNEQ(v uuid.UUID) predicate.Pet { return where.NEQ(FieldUUID, v) }
+// UUIDNEQ applies the NEQ predicate on the "uuid" field.
+func UUIDNEQ(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldUUID, v))
+}
 
-// Deprecated: UUIDIn — use where.In(FieldUUID, vs...).
-func UUIDIn(vs ...uuid.UUID) predicate.Pet { return where.In(FieldUUID, vs...) }
+// UUIDIn applies the In predicate on the "uuid" field.
+func UUIDIn(vs ...uuid.UUID) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldUUID, vs...))
+}
 
-// Deprecated: UUIDNotIn — use where.NotIn(FieldUUID, vs...).
-func UUIDNotIn(vs ...uuid.UUID) predicate.Pet { return where.NotIn(FieldUUID, vs...) }
+// UUIDNotIn applies the NotIn predicate on the "uuid" field.
+func UUIDNotIn(vs ...uuid.UUID) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldUUID, vs...))
+}
 
-// Deprecated: UUIDGT — use where.GT(FieldUUID, v).
-func UUIDGT(v uuid.UUID) predicate.Pet { return where.GT(FieldUUID, v) }
+// UUIDGT applies the GT predicate on the "uuid" field.
+func UUIDGT(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(sql.FieldGT(FieldUUID, v))
+}
 
-// Deprecated: UUIDGTE — use where.GTE(FieldUUID, v).
-func UUIDGTE(v uuid.UUID) predicate.Pet { return where.GTE(FieldUUID, v) }
+// UUIDGTE applies the GTE predicate on the "uuid" field.
+func UUIDGTE(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(sql.FieldGTE(FieldUUID, v))
+}
 
-// Deprecated: UUIDLT — use where.LT(FieldUUID, v).
-func UUIDLT(v uuid.UUID) predicate.Pet { return where.LT(FieldUUID, v) }
+// UUIDLT applies the LT predicate on the "uuid" field.
+func UUIDLT(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(sql.FieldLT(FieldUUID, v))
+}
 
-// Deprecated: UUIDLTE — use where.LTE(FieldUUID, v).
-func UUIDLTE(v uuid.UUID) predicate.Pet { return where.LTE(FieldUUID, v) }
+// UUIDLTE applies the LTE predicate on the "uuid" field.
+func UUIDLTE(v uuid.UUID) predicate.Pet {
+	return predicate.Pet(sql.FieldLTE(FieldUUID, v))
+}
 
-// Deprecated: UUIDIsNil — use where.IsNull(FieldUUID).
-func UUIDIsNil() predicate.Pet { return where.IsNull(FieldUUID) }
+// UUIDIsNil applies the IsNil predicate on the "uuid" field.
+func UUIDIsNil() predicate.Pet {
+	return predicate.Pet(sql.FieldIsNull(FieldUUID))
+}
 
-// Deprecated: UUIDNotNil — use where.NotNull(FieldUUID).
-func UUIDNotNil() predicate.Pet { return where.NotNull(FieldUUID) }
+// UUIDNotNil applies the NotNil predicate on the "uuid" field.
+func UUIDNotNil() predicate.Pet {
+	return predicate.Pet(sql.FieldNotNull(FieldUUID))
+}
 
-// Deprecated: NicknameEQ — use where.EQ(FieldNickname, v).
-func NicknameEQ(v string) predicate.Pet { return where.EQ(FieldNickname, v) }
+// NicknameEQ applies the EQ predicate on the "nickname" field.
+func NicknameEQ(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldNickname, v))
+}
 
-// Deprecated: NicknameNEQ — use where.NEQ(FieldNickname, v).
-func NicknameNEQ(v string) predicate.Pet { return where.NEQ(FieldNickname, v) }
+// NicknameNEQ applies the NEQ predicate on the "nickname" field.
+func NicknameNEQ(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldNickname, v))
+}
 
-// Deprecated: NicknameIn — use where.In(FieldNickname, vs...).
-func NicknameIn(vs ...string) predicate.Pet { return where.In(FieldNickname, vs...) }
+// NicknameIn applies the In predicate on the "nickname" field.
+func NicknameIn(vs ...string) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldNickname, vs...))
+}
 
-// Deprecated: NicknameNotIn — use where.NotIn(FieldNickname, vs...).
-func NicknameNotIn(vs ...string) predicate.Pet { return where.NotIn(FieldNickname, vs...) }
+// NicknameNotIn applies the NotIn predicate on the "nickname" field.
+func NicknameNotIn(vs ...string) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldNickname, vs...))
+}
 
-// Deprecated: NicknameGT — use where.GT(FieldNickname, v).
-func NicknameGT(v string) predicate.Pet { return where.GT(FieldNickname, v) }
+// NicknameGT applies the GT predicate on the "nickname" field.
+func NicknameGT(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldGT(FieldNickname, v))
+}
 
-// Deprecated: NicknameGTE — use where.GTE(FieldNickname, v).
-func NicknameGTE(v string) predicate.Pet { return where.GTE(FieldNickname, v) }
+// NicknameGTE applies the GTE predicate on the "nickname" field.
+func NicknameGTE(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldGTE(FieldNickname, v))
+}
 
-// Deprecated: NicknameLT — use where.LT(FieldNickname, v).
-func NicknameLT(v string) predicate.Pet { return where.LT(FieldNickname, v) }
+// NicknameLT applies the LT predicate on the "nickname" field.
+func NicknameLT(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldLT(FieldNickname, v))
+}
 
-// Deprecated: NicknameLTE — use where.LTE(FieldNickname, v).
-func NicknameLTE(v string) predicate.Pet { return where.LTE(FieldNickname, v) }
+// NicknameLTE applies the LTE predicate on the "nickname" field.
+func NicknameLTE(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldLTE(FieldNickname, v))
+}
 
-// Deprecated: NicknameContains — use where.Contains(FieldNickname, v).
-func NicknameContains(v string) predicate.Pet { return where.Contains(FieldNickname, v) }
+// NicknameContains applies the Contains predicate on the "nickname" field.
+func NicknameContains(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldContains(FieldNickname, v))
+}
 
-// Deprecated: NicknameHasPrefix — use where.HasPrefix(FieldNickname, v).
-func NicknameHasPrefix(v string) predicate.Pet { return where.HasPrefix(FieldNickname, v) }
+// NicknameHasPrefix applies the HasPrefix predicate on the "nickname" field.
+func NicknameHasPrefix(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldHasPrefix(FieldNickname, v))
+}
 
-// Deprecated: NicknameHasSuffix — use where.HasSuffix(FieldNickname, v).
-func NicknameHasSuffix(v string) predicate.Pet { return where.HasSuffix(FieldNickname, v) }
+// NicknameHasSuffix applies the HasSuffix predicate on the "nickname" field.
+func NicknameHasSuffix(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldHasSuffix(FieldNickname, v))
+}
 
-// Deprecated: NicknameIsNil — use where.IsNull(FieldNickname).
-func NicknameIsNil() predicate.Pet { return where.IsNull(FieldNickname) }
+// NicknameIsNil applies the IsNil predicate on the "nickname" field.
+func NicknameIsNil() predicate.Pet {
+	return predicate.Pet(sql.FieldIsNull(FieldNickname))
+}
 
-// Deprecated: NicknameNotNil — use where.NotNull(FieldNickname).
-func NicknameNotNil() predicate.Pet { return where.NotNull(FieldNickname) }
+// NicknameNotNil applies the NotNil predicate on the "nickname" field.
+func NicknameNotNil() predicate.Pet {
+	return predicate.Pet(sql.FieldNotNull(FieldNickname))
+}
 
-// Deprecated: NicknameEqualFold — use where.EqualFold(FieldNickname, v).
-func NicknameEqualFold(v string) predicate.Pet { return where.EqualFold(FieldNickname, v) }
+// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
+func NicknameEqualFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldEqualFold(FieldNickname, v))
+}
 
-// Deprecated: NicknameContainsFold — use where.ContainsFold(FieldNickname, v).
-func NicknameContainsFold(v string) predicate.Pet { return where.ContainsFold(FieldNickname, v) }
+// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
+func NicknameContainsFold(v string) predicate.Pet {
+	return predicate.Pet(sql.FieldContainsFold(FieldNickname, v))
+}
 
-// Deprecated: TrainedEQ — use where.EQ(FieldTrained, v).
-func TrainedEQ(v bool) predicate.Pet { return where.EQ(FieldTrained, v) }
+// TrainedEQ applies the EQ predicate on the "trained" field.
+func TrainedEQ(v bool) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldTrained, v))
+}
 
-// Deprecated: TrainedNEQ — use where.NEQ(FieldTrained, v).
-func TrainedNEQ(v bool) predicate.Pet { return where.NEQ(FieldTrained, v) }
+// TrainedNEQ applies the NEQ predicate on the "trained" field.
+func TrainedNEQ(v bool) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldTrained, v))
+}
 
-// Deprecated: OptionalTimeEQ — use where.EQ(FieldOptionalTime, v).
-func OptionalTimeEQ(v time.Time) predicate.Pet { return where.EQ(FieldOptionalTime, v) }
+// OptionalTimeEQ applies the EQ predicate on the "optional_time" field.
+func OptionalTimeEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldOptionalTime, v))
+}
 
-// Deprecated: OptionalTimeNEQ — use where.NEQ(FieldOptionalTime, v).
-func OptionalTimeNEQ(v time.Time) predicate.Pet { return where.NEQ(FieldOptionalTime, v) }
+// OptionalTimeNEQ applies the NEQ predicate on the "optional_time" field.
+func OptionalTimeNEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldOptionalTime, v))
+}
 
-// Deprecated: OptionalTimeIn — use where.In(FieldOptionalTime, vs...).
-func OptionalTimeIn(vs ...time.Time) predicate.Pet { return where.In(FieldOptionalTime, vs...) }
+// OptionalTimeIn applies the In predicate on the "optional_time" field.
+func OptionalTimeIn(vs ...time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldOptionalTime, vs...))
+}
 
-// Deprecated: OptionalTimeNotIn — use where.NotIn(FieldOptionalTime, vs...).
-func OptionalTimeNotIn(vs ...time.Time) predicate.Pet { return where.NotIn(FieldOptionalTime, vs...) }
+// OptionalTimeNotIn applies the NotIn predicate on the "optional_time" field.
+func OptionalTimeNotIn(vs ...time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldOptionalTime, vs...))
+}
 
-// Deprecated: OptionalTimeGT — use where.GT(FieldOptionalTime, v).
-func OptionalTimeGT(v time.Time) predicate.Pet { return where.GT(FieldOptionalTime, v) }
+// OptionalTimeGT applies the GT predicate on the "optional_time" field.
+func OptionalTimeGT(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldGT(FieldOptionalTime, v))
+}
 
-// Deprecated: OptionalTimeGTE — use where.GTE(FieldOptionalTime, v).
-func OptionalTimeGTE(v time.Time) predicate.Pet { return where.GTE(FieldOptionalTime, v) }
+// OptionalTimeGTE applies the GTE predicate on the "optional_time" field.
+func OptionalTimeGTE(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldGTE(FieldOptionalTime, v))
+}
 
-// Deprecated: OptionalTimeLT — use where.LT(FieldOptionalTime, v).
-func OptionalTimeLT(v time.Time) predicate.Pet { return where.LT(FieldOptionalTime, v) }
+// OptionalTimeLT applies the LT predicate on the "optional_time" field.
+func OptionalTimeLT(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldLT(FieldOptionalTime, v))
+}
 
-// Deprecated: OptionalTimeLTE — use where.LTE(FieldOptionalTime, v).
-func OptionalTimeLTE(v time.Time) predicate.Pet { return where.LTE(FieldOptionalTime, v) }
+// OptionalTimeLTE applies the LTE predicate on the "optional_time" field.
+func OptionalTimeLTE(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldLTE(FieldOptionalTime, v))
+}
 
-// Deprecated: OptionalTimeIsNil — use where.IsNull(FieldOptionalTime).
-func OptionalTimeIsNil() predicate.Pet { return where.IsNull(FieldOptionalTime) }
+// OptionalTimeIsNil applies the IsNil predicate on the "optional_time" field.
+func OptionalTimeIsNil() predicate.Pet {
+	return predicate.Pet(sql.FieldIsNull(FieldOptionalTime))
+}
 
-// Deprecated: OptionalTimeNotNil — use where.NotNull(FieldOptionalTime).
-func OptionalTimeNotNil() predicate.Pet { return where.NotNull(FieldOptionalTime) }
+// OptionalTimeNotNil applies the NotNil predicate on the "optional_time" field.
+func OptionalTimeNotNil() predicate.Pet {
+	return predicate.Pet(sql.FieldNotNull(FieldOptionalTime))
+}
 
 // HasTeam applies the HasEdge predicate on the "team" edge.
 func HasTeam() predicate.Pet {

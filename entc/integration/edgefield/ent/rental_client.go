@@ -104,7 +104,7 @@ func (c *RentalClient) DeleteOne(_m *Rental) *rental.RentalDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RentalClient) DeleteOneID(id int) *rental.RentalDeleteOne {
 	mutation := NewRentalMutation(c.Config, OpDeleteOne, WithRentalID(id, nil))
-	mutation.Where(rental.ID(id))
+	mutation.WhereP(rental.ID(id))
 	return rental.NewRentalDeleteOne(rental.NewRentalDelete(c.Config, c.Hooks(), mutation))
 }
 

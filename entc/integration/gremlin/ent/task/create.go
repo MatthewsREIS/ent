@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -32,7 +33,7 @@ func NewTaskCreate(c Config, hooks []Hook, mutation *TaskMutation) *TaskCreate {
 
 // SetPriority sets the "priority" field.
 func (_c *TaskCreate) SetPriority(v task.Priority) *TaskCreate {
-	_c.mutation.SetPriority(v)
+	_ = _c.mutation.SetField("priority", v)
 	return _c
 }
 
@@ -46,13 +47,13 @@ func (_c *TaskCreate) SetNillablePriority(v *task.Priority) *TaskCreate {
 
 // SetPriorities sets the "priorities" field.
 func (_c *TaskCreate) SetPriorities(v map[string]task.Priority) *TaskCreate {
-	_c.mutation.SetPriorities(v)
+	_ = _c.mutation.SetField("priorities", v)
 	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *TaskCreate) SetCreatedAt(v time.Time) *TaskCreate {
-	_c.mutation.SetCreatedAt(v)
+	_ = _c.mutation.SetField("created_at", v)
 	return _c
 }
 
@@ -66,7 +67,7 @@ func (_c *TaskCreate) SetNillableCreatedAt(v *time.Time) *TaskCreate {
 
 // SetName sets the "name" field.
 func (_c *TaskCreate) SetName(v string) *TaskCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
@@ -80,7 +81,7 @@ func (_c *TaskCreate) SetNillableName(v *string) *TaskCreate {
 
 // SetOwner sets the "owner" field.
 func (_c *TaskCreate) SetOwner(v string) *TaskCreate {
-	_c.mutation.SetOwner(v)
+	_ = _c.mutation.SetField("owner", v)
 	return _c
 }
 
@@ -94,7 +95,7 @@ func (_c *TaskCreate) SetNillableOwner(v *string) *TaskCreate {
 
 // SetOrder sets the "order" field.
 func (_c *TaskCreate) SetOrder(v int) *TaskCreate {
-	_c.mutation.SetOrder(v)
+	_ = _c.mutation.SetField("order", v)
 	return _c
 }
 
@@ -108,7 +109,7 @@ func (_c *TaskCreate) SetNillableOrder(v *int) *TaskCreate {
 
 // SetOrderOption sets the "order_option" field.
 func (_c *TaskCreate) SetOrderOption(v int) *TaskCreate {
-	_c.mutation.SetOrderOption(v)
+	_ = _c.mutation.SetField("order_option", v)
 	return _c
 }
 
@@ -122,7 +123,7 @@ func (_c *TaskCreate) SetNillableOrderOption(v *int) *TaskCreate {
 
 // SetOp sets the "op" field.
 func (_c *TaskCreate) SetOp(v string) *TaskCreate {
-	_c.mutation.SetOpField(v)
+	_ = _c.mutation.SetField("op", v)
 	return _c
 }
 
@@ -169,37 +170,37 @@ func (_c *TaskCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *TaskCreate) defaults() {
-	if _, ok := _c.mutation.Priority(); !ok {
+	if _, ok := entbuilder.GetField[task.Priority](_c.mutation, "priority"); !ok {
 		v := DefaultPriority
-		_c.mutation.SetPriority(v)
+		_ = _c.mutation.SetField("priority", v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		v := DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+		_ = _c.mutation.SetField("created_at", v)
 	}
-	if _, ok := _c.mutation.GetOp(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "op"); !ok {
 		v := DefaultOp
-		_c.mutation.SetOpField(v)
+		_ = _c.mutation.SetField("op", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *TaskCreate) check() error {
-	if _, ok := _c.mutation.Priority(); !ok {
+	if _, ok := entbuilder.GetField[task.Priority](_c.mutation, "priority"); !ok {
 		return &ValidationError{Name: "priority", Err: errors.New(`ent: missing required field "Task.priority"`)}
 	}
-	if v, ok := _c.mutation.Priority(); ok {
+	if v, ok := entbuilder.GetField[task.Priority](_c.mutation, "priority"); ok {
 		if err := v.Validate(); err != nil {
 			return &ValidationError{Name: "priority", Err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		return &ValidationError{Name: "created_at", Err: errors.New(`ent: missing required field "Task.created_at"`)}
 	}
-	if _, ok := _c.mutation.GetOp(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "op"); !ok {
 		return &ValidationError{Name: "op", Err: errors.New(`ent: missing required field "Task.op"`)}
 	}
-	if v, ok := _c.mutation.GetOp(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "op"); ok {
 		if err := OpValidator(v); err != nil {
 			return &ValidationError{Name: "op", Err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
 		}

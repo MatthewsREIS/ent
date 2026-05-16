@@ -13,6 +13,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,7 +31,7 @@ func NewInfoCreate(c Config, hooks []Hook, mutation *InfoMutation) *InfoCreate {
 
 // SetContent sets the "content" field.
 func (_c *InfoCreate) SetContent(v json.RawMessage) *InfoCreate {
-	_c.mutation.SetContent(v)
+	_ = _c.mutation.SetField("content", v)
 	return _c
 }
 
@@ -42,7 +43,7 @@ func (_c *InfoCreate) SetID(v int) *InfoCreate {
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_c *InfoCreate) SetUserID(id int) *InfoCreate {
-	_c.mutation.SetUserID(id)
+	_ = _c.mutation.SetEdgeID("user", id)
 	return _c
 }
 
@@ -88,7 +89,7 @@ func (_c *InfoCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *InfoCreate) check() error {
-	if _, ok := _c.mutation.Content(); !ok {
+	if _, ok := entbuilder.GetField[json.RawMessage](_c.mutation, "content"); !ok {
 		return &ValidationError{Name: "content", Err: errors.New(`ent: missing required field "Info.content"`)}
 	}
 	return nil
@@ -109,7 +110,7 @@ func (_c *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -119,15 +120,16 @@ func (_c *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 		_node = &Info{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(int)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Content(); ok {
+	if value, ok := entbuilder.GetField[json.RawMessage](_c.mutation, "content"); ok {
 		_spec.SetField(FieldContent, field.TypeJSON, value)
 		_node.Content = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -200,11 +202,11 @@ func (_c *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

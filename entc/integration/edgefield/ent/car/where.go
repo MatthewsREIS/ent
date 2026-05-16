@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -59,53 +58,85 @@ func IDLTE(id uuid.UUID) predicate.Car {
 	return predicate.Car(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Number — use where.EQ(FieldNumber, v).
-func Number(v string) predicate.Car { return where.EQ(FieldNumber, v) }
+// Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
+func Number(v string) predicate.Car {
+	return predicate.Car(sql.FieldEQ(FieldNumber, v))
+}
 
-// Deprecated: NumberEQ — use where.EQ(FieldNumber, v).
-func NumberEQ(v string) predicate.Car { return where.EQ(FieldNumber, v) }
+// NumberEQ applies the EQ predicate on the "number" field.
+func NumberEQ(v string) predicate.Car {
+	return predicate.Car(sql.FieldEQ(FieldNumber, v))
+}
 
-// Deprecated: NumberNEQ — use where.NEQ(FieldNumber, v).
-func NumberNEQ(v string) predicate.Car { return where.NEQ(FieldNumber, v) }
+// NumberNEQ applies the NEQ predicate on the "number" field.
+func NumberNEQ(v string) predicate.Car {
+	return predicate.Car(sql.FieldNEQ(FieldNumber, v))
+}
 
-// Deprecated: NumberIn — use where.In(FieldNumber, vs...).
-func NumberIn(vs ...string) predicate.Car { return where.In(FieldNumber, vs...) }
+// NumberIn applies the In predicate on the "number" field.
+func NumberIn(vs ...string) predicate.Car {
+	return predicate.Car(sql.FieldIn(FieldNumber, vs...))
+}
 
-// Deprecated: NumberNotIn — use where.NotIn(FieldNumber, vs...).
-func NumberNotIn(vs ...string) predicate.Car { return where.NotIn(FieldNumber, vs...) }
+// NumberNotIn applies the NotIn predicate on the "number" field.
+func NumberNotIn(vs ...string) predicate.Car {
+	return predicate.Car(sql.FieldNotIn(FieldNumber, vs...))
+}
 
-// Deprecated: NumberGT — use where.GT(FieldNumber, v).
-func NumberGT(v string) predicate.Car { return where.GT(FieldNumber, v) }
+// NumberGT applies the GT predicate on the "number" field.
+func NumberGT(v string) predicate.Car {
+	return predicate.Car(sql.FieldGT(FieldNumber, v))
+}
 
-// Deprecated: NumberGTE — use where.GTE(FieldNumber, v).
-func NumberGTE(v string) predicate.Car { return where.GTE(FieldNumber, v) }
+// NumberGTE applies the GTE predicate on the "number" field.
+func NumberGTE(v string) predicate.Car {
+	return predicate.Car(sql.FieldGTE(FieldNumber, v))
+}
 
-// Deprecated: NumberLT — use where.LT(FieldNumber, v).
-func NumberLT(v string) predicate.Car { return where.LT(FieldNumber, v) }
+// NumberLT applies the LT predicate on the "number" field.
+func NumberLT(v string) predicate.Car {
+	return predicate.Car(sql.FieldLT(FieldNumber, v))
+}
 
-// Deprecated: NumberLTE — use where.LTE(FieldNumber, v).
-func NumberLTE(v string) predicate.Car { return where.LTE(FieldNumber, v) }
+// NumberLTE applies the LTE predicate on the "number" field.
+func NumberLTE(v string) predicate.Car {
+	return predicate.Car(sql.FieldLTE(FieldNumber, v))
+}
 
-// Deprecated: NumberContains — use where.Contains(FieldNumber, v).
-func NumberContains(v string) predicate.Car { return where.Contains(FieldNumber, v) }
+// NumberContains applies the Contains predicate on the "number" field.
+func NumberContains(v string) predicate.Car {
+	return predicate.Car(sql.FieldContains(FieldNumber, v))
+}
 
-// Deprecated: NumberHasPrefix — use where.HasPrefix(FieldNumber, v).
-func NumberHasPrefix(v string) predicate.Car { return where.HasPrefix(FieldNumber, v) }
+// NumberHasPrefix applies the HasPrefix predicate on the "number" field.
+func NumberHasPrefix(v string) predicate.Car {
+	return predicate.Car(sql.FieldHasPrefix(FieldNumber, v))
+}
 
-// Deprecated: NumberHasSuffix — use where.HasSuffix(FieldNumber, v).
-func NumberHasSuffix(v string) predicate.Car { return where.HasSuffix(FieldNumber, v) }
+// NumberHasSuffix applies the HasSuffix predicate on the "number" field.
+func NumberHasSuffix(v string) predicate.Car {
+	return predicate.Car(sql.FieldHasSuffix(FieldNumber, v))
+}
 
-// Deprecated: NumberIsNil — use where.IsNull(FieldNumber).
-func NumberIsNil() predicate.Car { return where.IsNull(FieldNumber) }
+// NumberIsNil applies the IsNil predicate on the "number" field.
+func NumberIsNil() predicate.Car {
+	return predicate.Car(sql.FieldIsNull(FieldNumber))
+}
 
-// Deprecated: NumberNotNil — use where.NotNull(FieldNumber).
-func NumberNotNil() predicate.Car { return where.NotNull(FieldNumber) }
+// NumberNotNil applies the NotNil predicate on the "number" field.
+func NumberNotNil() predicate.Car {
+	return predicate.Car(sql.FieldNotNull(FieldNumber))
+}
 
-// Deprecated: NumberEqualFold — use where.EqualFold(FieldNumber, v).
-func NumberEqualFold(v string) predicate.Car { return where.EqualFold(FieldNumber, v) }
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Car {
+	return predicate.Car(sql.FieldEqualFold(FieldNumber, v))
+}
 
-// Deprecated: NumberContainsFold — use where.ContainsFold(FieldNumber, v).
-func NumberContainsFold(v string) predicate.Car { return where.ContainsFold(FieldNumber, v) }
+// NumberContainsFold applies the ContainsFold predicate on the "number" field.
+func NumberContainsFold(v string) predicate.Car {
+	return predicate.Car(sql.FieldContainsFold(FieldNumber, v))
+}
 
 // HasRentals applies the HasEdge predicate on the "rentals" edge.
 func HasRentals() predicate.Car {

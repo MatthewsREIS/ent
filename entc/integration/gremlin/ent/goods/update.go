@@ -30,7 +30,7 @@ func NewGoodsUpdate(c Config, hooks []Hook, mutation *GoodsMutation) *GoodsUpdat
 
 // Where appends a list predicates to the GoodsUpdate builder.
 func (_u *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -112,7 +112,7 @@ func (_u *GoodsUpdateOne) Mutation() *GoodsMutation {
 
 // Where appends a list predicates to the GoodsUpdate builder.
 func (_u *GoodsUpdateOne) Where(ps ...predicate.Goods) *GoodsUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 

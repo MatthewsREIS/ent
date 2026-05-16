@@ -104,7 +104,7 @@ func (c *AccountClient) DeleteOne(_m *Account) *account.AccountDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *AccountClient) DeleteOneID(id sid.ID) *account.AccountDeleteOne {
 	mutation := NewAccountMutation(c.Config, OpDeleteOne, WithAccountID(id, nil))
-	mutation.Where(account.ID(id))
+	mutation.WhereP(account.ID(id))
 	return account.NewAccountDeleteOne(account.NewAccountDelete(c.Config, c.Hooks(), mutation))
 }
 

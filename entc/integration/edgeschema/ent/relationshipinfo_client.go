@@ -100,7 +100,7 @@ func (c *RelationshipInfoClient) DeleteOne(_m *RelationshipInfo) *relationshipin
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RelationshipInfoClient) DeleteOneID(id int) *relationshipinfo.RelationshipInfoDeleteOne {
 	mutation := NewRelationshipInfoMutation(c.Config, OpDeleteOne, WithRelationshipInfoID(id, nil))
-	mutation.Where(relationshipinfo.ID(id))
+	mutation.WhereP(relationshipinfo.ID(id))
 	return relationshipinfo.NewRelationshipInfoDeleteOne(relationshipinfo.NewRelationshipInfoDelete(c.Config, c.Hooks(), mutation))
 }
 

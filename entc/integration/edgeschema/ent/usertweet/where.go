@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,62 +59,100 @@ func IDLTE(id int) predicate.UserTweet {
 	return predicate.UserTweet(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: CreatedAt — use where.EQ(FieldCreatedAt, v).
-func CreatedAt(v time.Time) predicate.UserTweet { return where.EQ(FieldCreatedAt, v) }
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldEQ(FieldCreatedAt, v))
+}
 
-// Deprecated: UserID — use where.EQ(FieldUserID, v).
-func UserID(v int) predicate.UserTweet { return where.EQ(FieldUserID, v) }
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldEQ(FieldUserID, v))
+}
 
-// Deprecated: TweetID — use where.EQ(FieldTweetID, v).
-func TweetID(v int) predicate.UserTweet { return where.EQ(FieldTweetID, v) }
+// TweetID applies equality check predicate on the "tweet_id" field. It's identical to TweetIDEQ.
+func TweetID(v int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldEQ(FieldTweetID, v))
+}
 
-// Deprecated: CreatedAtEQ — use where.EQ(FieldCreatedAt, v).
-func CreatedAtEQ(v time.Time) predicate.UserTweet { return where.EQ(FieldCreatedAt, v) }
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldEQ(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtNEQ — use where.NEQ(FieldCreatedAt, v).
-func CreatedAtNEQ(v time.Time) predicate.UserTweet { return where.NEQ(FieldCreatedAt, v) }
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldNEQ(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtIn — use where.In(FieldCreatedAt, vs...).
-func CreatedAtIn(vs ...time.Time) predicate.UserTweet { return where.In(FieldCreatedAt, vs...) }
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldIn(FieldCreatedAt, vs...))
+}
 
-// Deprecated: CreatedAtNotIn — use where.NotIn(FieldCreatedAt, vs...).
-func CreatedAtNotIn(vs ...time.Time) predicate.UserTweet { return where.NotIn(FieldCreatedAt, vs...) }
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldNotIn(FieldCreatedAt, vs...))
+}
 
-// Deprecated: CreatedAtGT — use where.GT(FieldCreatedAt, v).
-func CreatedAtGT(v time.Time) predicate.UserTweet { return where.GT(FieldCreatedAt, v) }
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldGT(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtGTE — use where.GTE(FieldCreatedAt, v).
-func CreatedAtGTE(v time.Time) predicate.UserTweet { return where.GTE(FieldCreatedAt, v) }
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldGTE(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtLT — use where.LT(FieldCreatedAt, v).
-func CreatedAtLT(v time.Time) predicate.UserTweet { return where.LT(FieldCreatedAt, v) }
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldLT(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtLTE — use where.LTE(FieldCreatedAt, v).
-func CreatedAtLTE(v time.Time) predicate.UserTweet { return where.LTE(FieldCreatedAt, v) }
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldLTE(FieldCreatedAt, v))
+}
 
-// Deprecated: UserIDEQ — use where.EQ(FieldUserID, v).
-func UserIDEQ(v int) predicate.UserTweet { return where.EQ(FieldUserID, v) }
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldEQ(FieldUserID, v))
+}
 
-// Deprecated: UserIDNEQ — use where.NEQ(FieldUserID, v).
-func UserIDNEQ(v int) predicate.UserTweet { return where.NEQ(FieldUserID, v) }
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldNEQ(FieldUserID, v))
+}
 
-// Deprecated: UserIDIn — use where.In(FieldUserID, vs...).
-func UserIDIn(vs ...int) predicate.UserTweet { return where.In(FieldUserID, vs...) }
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldIn(FieldUserID, vs...))
+}
 
-// Deprecated: UserIDNotIn — use where.NotIn(FieldUserID, vs...).
-func UserIDNotIn(vs ...int) predicate.UserTweet { return where.NotIn(FieldUserID, vs...) }
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldNotIn(FieldUserID, vs...))
+}
 
-// Deprecated: TweetIDEQ — use where.EQ(FieldTweetID, v).
-func TweetIDEQ(v int) predicate.UserTweet { return where.EQ(FieldTweetID, v) }
+// TweetIDEQ applies the EQ predicate on the "tweet_id" field.
+func TweetIDEQ(v int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldEQ(FieldTweetID, v))
+}
 
-// Deprecated: TweetIDNEQ — use where.NEQ(FieldTweetID, v).
-func TweetIDNEQ(v int) predicate.UserTweet { return where.NEQ(FieldTweetID, v) }
+// TweetIDNEQ applies the NEQ predicate on the "tweet_id" field.
+func TweetIDNEQ(v int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldNEQ(FieldTweetID, v))
+}
 
-// Deprecated: TweetIDIn — use where.In(FieldTweetID, vs...).
-func TweetIDIn(vs ...int) predicate.UserTweet { return where.In(FieldTweetID, vs...) }
+// TweetIDIn applies the In predicate on the "tweet_id" field.
+func TweetIDIn(vs ...int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldIn(FieldTweetID, vs...))
+}
 
-// Deprecated: TweetIDNotIn — use where.NotIn(FieldTweetID, vs...).
-func TweetIDNotIn(vs ...int) predicate.UserTweet { return where.NotIn(FieldTweetID, vs...) }
+// TweetIDNotIn applies the NotIn predicate on the "tweet_id" field.
+func TweetIDNotIn(vs ...int) predicate.UserTweet {
+	return predicate.UserTweet(sql.FieldNotIn(FieldTweetID, vs...))
+}
 
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.UserTweet {

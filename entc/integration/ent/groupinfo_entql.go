@@ -27,7 +27,7 @@ func (_q *GroupInfoQuery) Filter() *GroupInfoFilter {
 
 // NewGroupInfoFilterForMutation creates a new GroupInfoFilter for the given mutation.
 func NewGroupInfoFilterForMutation(m *GroupInfoMutation) *GroupInfoFilter {
-	return &GroupInfoFilter{Config: m.Config, predicateAdder: m}
+	return &GroupInfoFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // GroupInfoFilter provides a generic filtering capability at runtime for GroupInfoQuery.

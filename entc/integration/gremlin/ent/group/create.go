@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupCreate is the builder for creating a Group entity.
@@ -34,7 +35,7 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 
 // SetActive sets the "active" field.
 func (_c *GroupCreate) SetActive(v bool) *GroupCreate {
-	_c.mutation.SetActive(v)
+	_ = _c.mutation.SetField("active", v)
 	return _c
 }
 
@@ -48,13 +49,13 @@ func (_c *GroupCreate) SetNillableActive(v *bool) *GroupCreate {
 
 // SetExpire sets the "expire" field.
 func (_c *GroupCreate) SetExpire(v time.Time) *GroupCreate {
-	_c.mutation.SetExpire(v)
+	_ = _c.mutation.SetField("expire", v)
 	return _c
 }
 
 // SetType sets the "type" field.
 func (_c *GroupCreate) SetType(v string) *GroupCreate {
-	_c.mutation.SetType(v)
+	_ = _c.mutation.SetField("type", v)
 	return _c
 }
 
@@ -68,7 +69,7 @@ func (_c *GroupCreate) SetNillableType(v *string) *GroupCreate {
 
 // SetMaxUsers sets the "max_users" field.
 func (_c *GroupCreate) SetMaxUsers(v int) *GroupCreate {
-	_c.mutation.SetMaxUsers(v)
+	_ = _c.mutation.SetField("max_users", v)
 	return _c
 }
 
@@ -82,31 +83,31 @@ func (_c *GroupCreate) SetNillableMaxUsers(v *int) *GroupCreate {
 
 // SetName sets the "name" field.
 func (_c *GroupCreate) SetName(v string) *GroupCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_c *GroupCreate) AddFileIDs(ids ...string) *GroupCreate {
-	_c.mutation.AddFileIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddBlockedIDs adds the "blocked" edge to the User entity by IDs.
 func (_c *GroupCreate) AddBlockedIDs(ids ...string) *GroupCreate {
-	_c.mutation.AddBlockedIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("blocked", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (_c *GroupCreate) AddUserIDs(ids ...string) *GroupCreate {
-	_c.mutation.AddUserIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // SetInfoID sets the "info" edge to the GroupInfo entity by ID.
 func (_c *GroupCreate) SetInfoID(id string) *GroupCreate {
-	_c.mutation.SetInfoID(id)
+	_ = _c.mutation.SetEdgeID("info", id)
 	return _c
 }
 
@@ -145,43 +146,43 @@ func (_c *GroupCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *GroupCreate) defaults() {
-	if _, ok := _c.mutation.Active(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "active"); !ok {
 		v := DefaultActive
-		_c.mutation.SetActive(v)
+		_ = _c.mutation.SetField("active", v)
 	}
-	if _, ok := _c.mutation.MaxUsers(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "max_users"); !ok {
 		v := DefaultMaxUsers
-		_c.mutation.SetMaxUsers(v)
+		_ = _c.mutation.SetField("max_users", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *GroupCreate) check() error {
-	if _, ok := _c.mutation.Active(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "active"); !ok {
 		return &ValidationError{Name: "active", Err: errors.New(`ent: missing required field "Group.active"`)}
 	}
-	if _, ok := _c.mutation.Expire(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "expire"); !ok {
 		return &ValidationError{Name: "expire", Err: errors.New(`ent: missing required field "Group.expire"`)}
 	}
-	if v, ok := _c.mutation.GetType(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "type"); ok {
 		if err := TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", Err: fmt.Errorf(`ent: validator failed for field "Group.type": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.MaxUsers(); ok {
+	if v, ok := entbuilder.GetField[int](_c.mutation, "max_users"); ok {
 		if err := MaxUsersValidator(v); err != nil {
 			return &ValidationError{Name: "max_users", Err: fmt.Errorf(`ent: validator failed for field "Group.max_users": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "Group.name"`)}
 	}
-	if v, ok := _c.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`ent: validator failed for field "Group.name": %w`, err)}
 		}
 	}
-	if len(_c.mutation.InfoIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("info")) == 0 {
 		return &ValidationError{Name: "info", Err: errors.New(`ent: missing required edge "Group.info"`)}
 	}
 	return nil

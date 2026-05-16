@@ -73,8 +73,8 @@ func (c *RelationshipClient) Update() *relationship.RelationshipUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *RelationshipClient) UpdateOne(_m *Relationship) *relationship.RelationshipUpdateOne {
 	mutation := NewRelationshipMutation(c.Config, OpUpdateOne)
-	mutation.SetUserID(_m.UserID)
-	mutation.SetRelativeID(_m.RelativeID)
+	_ = mutation.SetEdgeID("user", _m.UserID)
+	_ = mutation.SetEdgeID("relative", _m.RelativeID)
 	return relationship.NewRelationshipUpdateOne(c.Config, c.Hooks(), mutation)
 }
 

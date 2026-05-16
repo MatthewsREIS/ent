@@ -103,7 +103,7 @@ func (c *GroupInfoClient) DeleteOne(_m *GroupInfo) *groupinfo.GroupInfoDeleteOne
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupInfoClient) DeleteOneID(id int) *groupinfo.GroupInfoDeleteOne {
 	mutation := NewGroupInfoMutation(c.Config, OpDeleteOne, WithGroupInfoID(id, nil))
-	mutation.Where(groupinfo.ID(id))
+	mutation.WhereP(groupinfo.ID(id))
 	return groupinfo.NewGroupInfoDeleteOne(groupinfo.NewGroupInfoDelete(c.Config, c.Hooks(), mutation))
 }
 

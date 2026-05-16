@@ -30,7 +30,7 @@ func NewAttachedFileDelete(c Config, hooks []Hook, mutation *AttachedFileMutatio
 
 // Where appends a list predicates to the AttachedFileDelete builder.
 func (_d *AttachedFileDelete) Where(ps ...predicate.AttachedFile) *AttachedFileDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewAttachedFileDeleteOne(d *AttachedFileDelete) *AttachedFileDeleteOne {
 
 // Where appends a list predicates to the AttachedFileDelete builder.
 func (_d *AttachedFileDeleteOne) Where(ps ...predicate.AttachedFile) *AttachedFileDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

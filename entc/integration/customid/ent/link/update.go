@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
@@ -33,13 +34,13 @@ func NewLinkUpdate(c Config, hooks []Hook, mutation *LinkMutation) *LinkUpdate {
 
 // Where appends a list predicates to the LinkUpdate builder.
 func (_u *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetLinkInformation sets the "link_information" field.
 func (_u *LinkUpdate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdate {
-	_u.mutation.SetLinkInformation(v)
+	_ = _u.mutation.SetField("link_information", v)
 	return _u
 }
 
@@ -84,7 +85,7 @@ func (_u *LinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.LinkInformation(); ok {
+	if value, ok := entbuilder.GetField[map[string]schema.LinkInformation](_u.mutation, "link_information"); ok {
 		_spec.SetField(FieldLinkInformation, field.TypeJSON, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -114,7 +115,7 @@ func NewLinkUpdateOne(c Config, hooks []Hook, mutation *LinkMutation) *LinkUpdat
 
 // SetLinkInformation sets the "link_information" field.
 func (_u *LinkUpdateOne) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdateOne {
-	_u.mutation.SetLinkInformation(v)
+	_ = _u.mutation.SetField("link_information", v)
 	return _u
 }
 
@@ -125,7 +126,7 @@ func (_u *LinkUpdateOne) Mutation() *LinkMutation {
 
 // Where appends a list predicates to the LinkUpdate builder.
 func (_u *LinkUpdateOne) Where(ps ...predicate.Link) *LinkUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -165,10 +166,11 @@ func (_u *LinkUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Link.id" for update`)}
 	}
+	id := idAny.(uuidc.UUIDC)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -189,7 +191,7 @@ func (_u *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.LinkInformation(); ok {
+	if value, ok := entbuilder.GetField[map[string]schema.LinkInformation](_u.mutation, "link_information"); ok {
 		_spec.SetField(FieldLinkInformation, field.TypeJSON, value)
 	}
 	_node = &Link{Config: _u.Config}

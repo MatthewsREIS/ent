@@ -30,7 +30,7 @@ func NewRoleDelete(c Config, hooks []Hook, mutation *RoleMutation) *RoleDelete {
 
 // Where appends a list predicates to the RoleDelete builder.
 func (_d *RoleDelete) Where(ps ...predicate.Role) *RoleDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewRoleDeleteOne(d *RoleDelete) *RoleDeleteOne {
 
 // Where appends a list predicates to the RoleDelete builder.
 func (_d *RoleDeleteOne) Where(ps ...predicate.Role) *RoleDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

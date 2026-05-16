@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,7 +32,7 @@ func NewCarCreate(c Config, hooks []Hook, mutation *CarMutation) *CarCreate {
 
 // SetBeforeID sets the "before_id" field.
 func (_c *CarCreate) SetBeforeID(v float64) *CarCreate {
-	_c.mutation.SetBeforeID(v)
+	_ = _c.mutation.SetField("before_id", v)
 	return _c
 }
 
@@ -45,7 +46,7 @@ func (_c *CarCreate) SetNillableBeforeID(v *float64) *CarCreate {
 
 // SetAfterID sets the "after_id" field.
 func (_c *CarCreate) SetAfterID(v float64) *CarCreate {
-	_c.mutation.SetAfterID(v)
+	_ = _c.mutation.SetField("after_id", v)
 	return _c
 }
 
@@ -59,7 +60,7 @@ func (_c *CarCreate) SetNillableAfterID(v *float64) *CarCreate {
 
 // SetModel sets the "model" field.
 func (_c *CarCreate) SetModel(v string) *CarCreate {
-	_c.mutation.SetModel(v)
+	_ = _c.mutation.SetField("model", v)
 	return _c
 }
 
@@ -71,7 +72,7 @@ func (_c *CarCreate) SetID(v int) *CarCreate {
 
 // SetOwnerID sets the "owner" edge to the Pet entity by ID.
 func (_c *CarCreate) SetOwnerID(id string) *CarCreate {
-	_c.mutation.SetOwnerID(id)
+	_ = _c.mutation.SetEdgeID("owner", id)
 	return _c
 }
 
@@ -117,20 +118,20 @@ func (_c *CarCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *CarCreate) check() error {
-	if v, ok := _c.mutation.BeforeID(); ok {
+	if v, ok := entbuilder.GetField[float64](_c.mutation, "before_id"); ok {
 		if err := BeforeIDValidator(v); err != nil {
 			return &ValidationError{Name: "before_id", Err: fmt.Errorf(`ent: validator failed for field "Car.before_id": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.AfterID(); ok {
+	if v, ok := entbuilder.GetField[float64](_c.mutation, "after_id"); ok {
 		if err := AfterIDValidator(v); err != nil {
 			return &ValidationError{Name: "after_id", Err: fmt.Errorf(`ent: validator failed for field "Car.after_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Model(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "model"); !ok {
 		return &ValidationError{Name: "model", Err: errors.New(`ent: missing required field "Car.model"`)}
 	}
-	if v, ok := _c.mutation.ID(); ok {
+	if v, ok := entbuilder.GetField[int](_c.mutation, "id"); ok {
 		if err := IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", Err: fmt.Errorf(`ent: validator failed for field "Car.id": %w`, err)}
 		}
@@ -153,7 +154,7 @@ func (_c *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -164,23 +165,24 @@ func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(int)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.BeforeID(); ok {
+	if value, ok := entbuilder.GetField[float64](_c.mutation, "before_id"); ok {
 		_spec.SetField(FieldBeforeID, field.TypeFloat64, value)
 		_node.BeforeID = value
 	}
-	if value, ok := _c.mutation.AfterID(); ok {
+	if value, ok := entbuilder.GetField[float64](_c.mutation, "after_id"); ok {
 		_spec.SetField(FieldAfterID, field.TypeFloat64, value)
 		_node.AfterID = value
 	}
-	if value, ok := _c.mutation.Model(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "model"); ok {
 		_spec.SetField(FieldModel, field.TypeString, value)
 		_node.Model = value
 	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[string](_c.mutation, "owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -514,11 +516,11 @@ func (_c *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

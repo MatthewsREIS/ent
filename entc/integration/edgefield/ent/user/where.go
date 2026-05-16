@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,47 +57,75 @@ func IDLTE(id int) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: ParentID — use where.EQ(FieldParentID, v).
-func ParentID(v int) predicate.User { return where.EQ(FieldParentID, v) }
+// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
+func ParentID(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldParentID, v))
+}
 
-// Deprecated: SpouseID — use where.EQ(FieldSpouseID, v).
-func SpouseID(v int) predicate.User { return where.EQ(FieldSpouseID, v) }
+// SpouseID applies equality check predicate on the "spouse_id" field. It's identical to SpouseIDEQ.
+func SpouseID(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldSpouseID, v))
+}
 
-// Deprecated: ParentIDEQ — use where.EQ(FieldParentID, v).
-func ParentIDEQ(v int) predicate.User { return where.EQ(FieldParentID, v) }
+// ParentIDEQ applies the EQ predicate on the "parent_id" field.
+func ParentIDEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldParentID, v))
+}
 
-// Deprecated: ParentIDNEQ — use where.NEQ(FieldParentID, v).
-func ParentIDNEQ(v int) predicate.User { return where.NEQ(FieldParentID, v) }
+// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
+func ParentIDNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldParentID, v))
+}
 
-// Deprecated: ParentIDIn — use where.In(FieldParentID, vs...).
-func ParentIDIn(vs ...int) predicate.User { return where.In(FieldParentID, vs...) }
+// ParentIDIn applies the In predicate on the "parent_id" field.
+func ParentIDIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldParentID, vs...))
+}
 
-// Deprecated: ParentIDNotIn — use where.NotIn(FieldParentID, vs...).
-func ParentIDNotIn(vs ...int) predicate.User { return where.NotIn(FieldParentID, vs...) }
+// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
+func ParentIDNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldParentID, vs...))
+}
 
-// Deprecated: ParentIDIsNil — use where.IsNull(FieldParentID).
-func ParentIDIsNil() predicate.User { return where.IsNull(FieldParentID) }
+// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
+func ParentIDIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldParentID))
+}
 
-// Deprecated: ParentIDNotNil — use where.NotNull(FieldParentID).
-func ParentIDNotNil() predicate.User { return where.NotNull(FieldParentID) }
+// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
+func ParentIDNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldParentID))
+}
 
-// Deprecated: SpouseIDEQ — use where.EQ(FieldSpouseID, v).
-func SpouseIDEQ(v int) predicate.User { return where.EQ(FieldSpouseID, v) }
+// SpouseIDEQ applies the EQ predicate on the "spouse_id" field.
+func SpouseIDEQ(v int) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldSpouseID, v))
+}
 
-// Deprecated: SpouseIDNEQ — use where.NEQ(FieldSpouseID, v).
-func SpouseIDNEQ(v int) predicate.User { return where.NEQ(FieldSpouseID, v) }
+// SpouseIDNEQ applies the NEQ predicate on the "spouse_id" field.
+func SpouseIDNEQ(v int) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldSpouseID, v))
+}
 
-// Deprecated: SpouseIDIn — use where.In(FieldSpouseID, vs...).
-func SpouseIDIn(vs ...int) predicate.User { return where.In(FieldSpouseID, vs...) }
+// SpouseIDIn applies the In predicate on the "spouse_id" field.
+func SpouseIDIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldIn(FieldSpouseID, vs...))
+}
 
-// Deprecated: SpouseIDNotIn — use where.NotIn(FieldSpouseID, vs...).
-func SpouseIDNotIn(vs ...int) predicate.User { return where.NotIn(FieldSpouseID, vs...) }
+// SpouseIDNotIn applies the NotIn predicate on the "spouse_id" field.
+func SpouseIDNotIn(vs ...int) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldSpouseID, vs...))
+}
 
-// Deprecated: SpouseIDIsNil — use where.IsNull(FieldSpouseID).
-func SpouseIDIsNil() predicate.User { return where.IsNull(FieldSpouseID) }
+// SpouseIDIsNil applies the IsNil predicate on the "spouse_id" field.
+func SpouseIDIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldSpouseID))
+}
 
-// Deprecated: SpouseIDNotNil — use where.NotNull(FieldSpouseID).
-func SpouseIDNotNil() predicate.User { return where.NotNull(FieldSpouseID) }
+// SpouseIDNotNil applies the NotNil predicate on the "spouse_id" field.
+func SpouseIDNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldSpouseID))
+}
 
 // HasPets applies the HasEdge predicate on the "pets" edge.
 func HasPets() predicate.User {

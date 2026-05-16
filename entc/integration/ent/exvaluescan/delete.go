@@ -31,7 +31,7 @@ func NewExValueScanDelete(c Config, hooks []Hook, mutation *ExValueScanMutation)
 
 // Where appends a list predicates to the ExValueScanDelete builder.
 func (_d *ExValueScanDelete) Where(ps ...predicate.ExValueScan) *ExValueScanDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewExValueScanDeleteOne(d *ExValueScanDelete) *ExValueScanDeleteOne {
 
 // Where appends a list predicates to the ExValueScanDelete builder.
 func (_d *ExValueScanDeleteOne) Where(ps ...predicate.ExValueScan) *ExValueScanDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

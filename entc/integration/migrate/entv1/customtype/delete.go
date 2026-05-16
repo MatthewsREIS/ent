@@ -30,7 +30,7 @@ func NewCustomTypeDelete(c Config, hooks []Hook, mutation *CustomTypeMutation) *
 
 // Where appends a list predicates to the CustomTypeDelete builder.
 func (_d *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewCustomTypeDeleteOne(d *CustomTypeDelete) *CustomTypeDeleteOne {
 
 // Where appends a list predicates to the CustomTypeDelete builder.
 func (_d *CustomTypeDeleteOne) Where(ps ...predicate.CustomType) *CustomTypeDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

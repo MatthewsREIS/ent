@@ -103,7 +103,7 @@ func (c *CardClient) DeleteOne(_m *Card) *card.CardDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CardClient) DeleteOneID(id string) *card.CardDeleteOne {
 	mutation := NewCardMutation(c.Config, OpDeleteOne, WithCardID(id, nil))
-	mutation.Where(card.ID(id))
+	mutation.WhereP(card.ID(id))
 	return card.NewCardDeleteOne(card.NewCardDelete(c.Config, c.Hooks(), mutation))
 }
 

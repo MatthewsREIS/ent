@@ -27,7 +27,7 @@ func (_q *AttachedFileQuery) Filter() *AttachedFileFilter {
 
 // NewAttachedFileFilterForMutation creates a new AttachedFileFilter for the given mutation.
 func NewAttachedFileFilterForMutation(m *AttachedFileMutation) *AttachedFileFilter {
-	return &AttachedFileFilter{Config: m.Config, predicateAdder: m}
+	return &AttachedFileFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // AttachedFileFilter provides a generic filtering capability at runtime for AttachedFileQuery.

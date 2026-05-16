@@ -99,7 +99,7 @@ func (c *PCClient) DeleteOne(_m *PC) *pc.PCDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PCClient) DeleteOneID(id string) *pc.PCDeleteOne {
 	mutation := NewPCMutation(c.Config, OpDeleteOne, WithPCID(id, nil))
-	mutation.Where(pc.ID(id))
+	mutation.WhereP(pc.ID(id))
 	return pc.NewPCDeleteOne(pc.NewPCDelete(c.Config, c.Hooks(), mutation))
 }
 

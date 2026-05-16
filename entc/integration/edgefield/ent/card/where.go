@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,74 +57,120 @@ func IDLTE(id int) predicate.Card {
 	return predicate.Card(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Number — use where.EQ(FieldNumber, v).
-func Number(v string) predicate.Card { return where.EQ(FieldNumber, v) }
+// Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
+func Number(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldNumber, v))
+}
 
-// Deprecated: OwnerID — use where.EQ(FieldOwnerID, v).
-func OwnerID(v int) predicate.Card { return where.EQ(FieldOwnerID, v) }
+// OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
+func OwnerID(v int) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldOwnerID, v))
+}
 
-// Deprecated: NumberEQ — use where.EQ(FieldNumber, v).
-func NumberEQ(v string) predicate.Card { return where.EQ(FieldNumber, v) }
+// NumberEQ applies the EQ predicate on the "number" field.
+func NumberEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldNumber, v))
+}
 
-// Deprecated: NumberNEQ — use where.NEQ(FieldNumber, v).
-func NumberNEQ(v string) predicate.Card { return where.NEQ(FieldNumber, v) }
+// NumberNEQ applies the NEQ predicate on the "number" field.
+func NumberNEQ(v string) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldNumber, v))
+}
 
-// Deprecated: NumberIn — use where.In(FieldNumber, vs...).
-func NumberIn(vs ...string) predicate.Card { return where.In(FieldNumber, vs...) }
+// NumberIn applies the In predicate on the "number" field.
+func NumberIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldNumber, vs...))
+}
 
-// Deprecated: NumberNotIn — use where.NotIn(FieldNumber, vs...).
-func NumberNotIn(vs ...string) predicate.Card { return where.NotIn(FieldNumber, vs...) }
+// NumberNotIn applies the NotIn predicate on the "number" field.
+func NumberNotIn(vs ...string) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldNumber, vs...))
+}
 
-// Deprecated: NumberGT — use where.GT(FieldNumber, v).
-func NumberGT(v string) predicate.Card { return where.GT(FieldNumber, v) }
+// NumberGT applies the GT predicate on the "number" field.
+func NumberGT(v string) predicate.Card {
+	return predicate.Card(sql.FieldGT(FieldNumber, v))
+}
 
-// Deprecated: NumberGTE — use where.GTE(FieldNumber, v).
-func NumberGTE(v string) predicate.Card { return where.GTE(FieldNumber, v) }
+// NumberGTE applies the GTE predicate on the "number" field.
+func NumberGTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldGTE(FieldNumber, v))
+}
 
-// Deprecated: NumberLT — use where.LT(FieldNumber, v).
-func NumberLT(v string) predicate.Card { return where.LT(FieldNumber, v) }
+// NumberLT applies the LT predicate on the "number" field.
+func NumberLT(v string) predicate.Card {
+	return predicate.Card(sql.FieldLT(FieldNumber, v))
+}
 
-// Deprecated: NumberLTE — use where.LTE(FieldNumber, v).
-func NumberLTE(v string) predicate.Card { return where.LTE(FieldNumber, v) }
+// NumberLTE applies the LTE predicate on the "number" field.
+func NumberLTE(v string) predicate.Card {
+	return predicate.Card(sql.FieldLTE(FieldNumber, v))
+}
 
-// Deprecated: NumberContains — use where.Contains(FieldNumber, v).
-func NumberContains(v string) predicate.Card { return where.Contains(FieldNumber, v) }
+// NumberContains applies the Contains predicate on the "number" field.
+func NumberContains(v string) predicate.Card {
+	return predicate.Card(sql.FieldContains(FieldNumber, v))
+}
 
-// Deprecated: NumberHasPrefix — use where.HasPrefix(FieldNumber, v).
-func NumberHasPrefix(v string) predicate.Card { return where.HasPrefix(FieldNumber, v) }
+// NumberHasPrefix applies the HasPrefix predicate on the "number" field.
+func NumberHasPrefix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasPrefix(FieldNumber, v))
+}
 
-// Deprecated: NumberHasSuffix — use where.HasSuffix(FieldNumber, v).
-func NumberHasSuffix(v string) predicate.Card { return where.HasSuffix(FieldNumber, v) }
+// NumberHasSuffix applies the HasSuffix predicate on the "number" field.
+func NumberHasSuffix(v string) predicate.Card {
+	return predicate.Card(sql.FieldHasSuffix(FieldNumber, v))
+}
 
-// Deprecated: NumberIsNil — use where.IsNull(FieldNumber).
-func NumberIsNil() predicate.Card { return where.IsNull(FieldNumber) }
+// NumberIsNil applies the IsNil predicate on the "number" field.
+func NumberIsNil() predicate.Card {
+	return predicate.Card(sql.FieldIsNull(FieldNumber))
+}
 
-// Deprecated: NumberNotNil — use where.NotNull(FieldNumber).
-func NumberNotNil() predicate.Card { return where.NotNull(FieldNumber) }
+// NumberNotNil applies the NotNil predicate on the "number" field.
+func NumberNotNil() predicate.Card {
+	return predicate.Card(sql.FieldNotNull(FieldNumber))
+}
 
-// Deprecated: NumberEqualFold — use where.EqualFold(FieldNumber, v).
-func NumberEqualFold(v string) predicate.Card { return where.EqualFold(FieldNumber, v) }
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldEqualFold(FieldNumber, v))
+}
 
-// Deprecated: NumberContainsFold — use where.ContainsFold(FieldNumber, v).
-func NumberContainsFold(v string) predicate.Card { return where.ContainsFold(FieldNumber, v) }
+// NumberContainsFold applies the ContainsFold predicate on the "number" field.
+func NumberContainsFold(v string) predicate.Card {
+	return predicate.Card(sql.FieldContainsFold(FieldNumber, v))
+}
 
-// Deprecated: OwnerIDEQ — use where.EQ(FieldOwnerID, v).
-func OwnerIDEQ(v int) predicate.Card { return where.EQ(FieldOwnerID, v) }
+// OwnerIDEQ applies the EQ predicate on the "owner_id" field.
+func OwnerIDEQ(v int) predicate.Card {
+	return predicate.Card(sql.FieldEQ(FieldOwnerID, v))
+}
 
-// Deprecated: OwnerIDNEQ — use where.NEQ(FieldOwnerID, v).
-func OwnerIDNEQ(v int) predicate.Card { return where.NEQ(FieldOwnerID, v) }
+// OwnerIDNEQ applies the NEQ predicate on the "owner_id" field.
+func OwnerIDNEQ(v int) predicate.Card {
+	return predicate.Card(sql.FieldNEQ(FieldOwnerID, v))
+}
 
-// Deprecated: OwnerIDIn — use where.In(FieldOwnerID, vs...).
-func OwnerIDIn(vs ...int) predicate.Card { return where.In(FieldOwnerID, vs...) }
+// OwnerIDIn applies the In predicate on the "owner_id" field.
+func OwnerIDIn(vs ...int) predicate.Card {
+	return predicate.Card(sql.FieldIn(FieldOwnerID, vs...))
+}
 
-// Deprecated: OwnerIDNotIn — use where.NotIn(FieldOwnerID, vs...).
-func OwnerIDNotIn(vs ...int) predicate.Card { return where.NotIn(FieldOwnerID, vs...) }
+// OwnerIDNotIn applies the NotIn predicate on the "owner_id" field.
+func OwnerIDNotIn(vs ...int) predicate.Card {
+	return predicate.Card(sql.FieldNotIn(FieldOwnerID, vs...))
+}
 
-// Deprecated: OwnerIDIsNil — use where.IsNull(FieldOwnerID).
-func OwnerIDIsNil() predicate.Card { return where.IsNull(FieldOwnerID) }
+// OwnerIDIsNil applies the IsNil predicate on the "owner_id" field.
+func OwnerIDIsNil() predicate.Card {
+	return predicate.Card(sql.FieldIsNull(FieldOwnerID))
+}
 
-// Deprecated: OwnerIDNotNil — use where.NotNull(FieldOwnerID).
-func OwnerIDNotNil() predicate.Card { return where.NotNull(FieldOwnerID) }
+// OwnerIDNotNil applies the NotNil predicate on the "owner_id" field.
+func OwnerIDNotNil() predicate.Card {
+	return predicate.Card(sql.FieldNotNull(FieldOwnerID))
+}
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Card {

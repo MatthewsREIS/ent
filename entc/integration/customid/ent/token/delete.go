@@ -30,7 +30,7 @@ func NewTokenDelete(c Config, hooks []Hook, mutation *TokenMutation) *TokenDelet
 
 // Where appends a list predicates to the TokenDelete builder.
 func (_d *TokenDelete) Where(ps ...predicate.Token) *TokenDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewTokenDeleteOne(d *TokenDelete) *TokenDeleteOne {
 
 // Where appends a list predicates to the TokenDelete builder.
 func (_d *TokenDeleteOne) Where(ps ...predicate.Token) *TokenDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

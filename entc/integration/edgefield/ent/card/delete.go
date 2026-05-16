@@ -30,7 +30,7 @@ func NewCardDelete(c Config, hooks []Hook, mutation *CardMutation) *CardDelete {
 
 // Where appends a list predicates to the CardDelete builder.
 func (_d *CardDelete) Where(ps ...predicate.Card) *CardDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewCardDeleteOne(d *CardDelete) *CardDeleteOne {
 
 // Where appends a list predicates to the CardDelete builder.
 func (_d *CardDeleteOne) Where(ps ...predicate.Card) *CardDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

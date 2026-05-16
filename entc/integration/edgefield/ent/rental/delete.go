@@ -30,7 +30,7 @@ func NewRentalDelete(c Config, hooks []Hook, mutation *RentalMutation) *RentalDe
 
 // Where appends a list predicates to the RentalDelete builder.
 func (_d *RentalDelete) Where(ps ...predicate.Rental) *RentalDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewRentalDeleteOne(d *RentalDelete) *RentalDeleteOne {
 
 // Where appends a list predicates to the RentalDelete builder.
 func (_d *RentalDeleteOne) Where(ps ...predicate.Rental) *RentalDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

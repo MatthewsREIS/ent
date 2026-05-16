@@ -100,7 +100,7 @@ func (c *ConversionClient) DeleteOne(_m *Conversion) *conversion.ConversionDelet
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ConversionClient) DeleteOneID(id int) *conversion.ConversionDeleteOne {
 	mutation := NewConversionMutation(c.Config, OpDeleteOne, WithConversionID(id, nil))
-	mutation.Where(conversion.ID(id))
+	mutation.WhereP(conversion.ID(id))
 	return conversion.NewConversionDeleteOne(conversion.NewConversionDelete(c.Config, c.Hooks(), mutation))
 }
 

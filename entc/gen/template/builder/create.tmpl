@@ -85,14 +85,23 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 	func ({{ $receiver }} *{{ $builder }}) defaults() {{ if $runtimeRequired }}error{{ end }}{
 		{{- range $f := $fields }}
 			{{- if $f.Default }}
+				{{- $isIDField := and $.HasOneFieldID (eq $f.Name $.ID.Name) }}
+				{{- if $isIDField }}
+				if _, ok := {{ $mutation }}.ID(); !ok {
+				{{- else }}
 				if _, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); !ok {
+				{{- end }}
 					{{- if and $runtimeRequired $f.DefaultFunc }}
 						if {{ $.PackageQualifier }}{{ $f.DefaultName }} == nil {
 							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.PackageQualifier }}{{ $f.DefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
 					v := {{ $.PackageQualifier }}{{ $f.DefaultName }}{{ if $f.DefaultFunc }}(){{ end }}
+					{{- if $isIDField }}
+					{{ $mutation }}.SetID(v)
+					{{- else }}
 					_ = {{ $mutation }}.SetField({{ printf "%q" $f.Name }}, v)
+					{{- end }}
 				}
 			{{- end }}
 		{{- end }}
@@ -106,6 +115,8 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- range $f := $fields }}
 		{{- $skip := false }}{{ if $.HasOneFieldID }}{{ if eq $f.Name $.ID.Name }}{{ $skip = true }}{{ end }}{{ end }}
+		{{- /* Edge-fields are validated through the edge presence check below. */}}
+		{{- if $f.IsEdgeField }}{{ $skip = true }}{{ end }}
 		{{- if and (not $f.Optional) (not $skip) }}
 			{{- $dialects := $f.RequiredFor }}
 			{{- $n := len $dialects }}

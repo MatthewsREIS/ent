@@ -104,7 +104,7 @@ func (c *UserGroupClient) DeleteOne(_m *UserGroup) *usergroup.UserGroupDeleteOne
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserGroupClient) DeleteOneID(id int) *usergroup.UserGroupDeleteOne {
 	mutation := NewUserGroupMutation(c.Config, OpDeleteOne, WithUserGroupID(id, nil))
-	mutation.Where(usergroup.ID(id))
+	mutation.WhereP(usergroup.ID(id))
 	return usergroup.NewUserGroupDeleteOne(usergroup.NewUserGroupDelete(c.Config, c.Hooks(), mutation))
 }
 

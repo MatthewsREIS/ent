@@ -100,7 +100,7 @@ func (c *ZooClient) DeleteOne(_m *Zoo) *zoo.ZooDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ZooClient) DeleteOneID(id int) *zoo.ZooDeleteOne {
 	mutation := NewZooMutation(c.Config, OpDeleteOne, WithZooID(id, nil))
-	mutation.Where(zoo.ID(id))
+	mutation.WhereP(zoo.ID(id))
 	return zoo.NewZooDeleteOne(zoo.NewZooDelete(c.Config, c.Hooks(), mutation))
 }
 

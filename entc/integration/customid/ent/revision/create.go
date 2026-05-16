@@ -91,7 +91,7 @@ func (_c *RevisionCreate) sqlSave(ctx context.Context) (*Revision, error) {
 			return nil, fmt.Errorf("unexpected Revision.ID type: %T", _spec.ID.Value)
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -102,7 +102,8 @@ func (_c *RevisionCreate) createSpec() (*Revision, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(string)
 		_node.ID = id
 		_spec.ID.Value = id
 	}
@@ -293,7 +294,7 @@ func (_c *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

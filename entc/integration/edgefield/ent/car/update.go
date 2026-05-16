@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // CarUpdate is the builder for updating Car entities.
@@ -32,13 +33,13 @@ func NewCarUpdate(c Config, hooks []Hook, mutation *CarMutation) *CarUpdate {
 
 // Where appends a list predicates to the CarUpdate builder.
 func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetNumber sets the "number" field.
 func (_u *CarUpdate) SetNumber(v string) *CarUpdate {
-	_u.mutation.SetNumber(v)
+	_ = _u.mutation.SetField("number", v)
 	return _u
 }
 
@@ -52,13 +53,13 @@ func (_u *CarUpdate) SetNillableNumber(v *string) *CarUpdate {
 
 // ClearNumber clears the value of the "number" field.
 func (_u *CarUpdate) ClearNumber() *CarUpdate {
-	_u.mutation.ClearNumber()
+	_ = _u.mutation.ClearField("number")
 	return _u
 }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
 func (_u *CarUpdate) AddRentalIDs(ids ...int) *CarUpdate {
-	_u.mutation.AddRentalIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -69,13 +70,13 @@ func (_u *CarUpdate) Mutation() *CarMutation {
 
 // ClearRentals clears all "rentals" edges to the Rental entity.
 func (_u *CarUpdate) ClearRentals() *CarUpdate {
-	_u.mutation.ClearRentals()
+	_ = _u.mutation.ClearEdge("rentals")
 	return _u
 }
 
 // RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
 func (_u *CarUpdate) RemoveRentalIDs(ids ...int) *CarUpdate {
-	_u.mutation.RemoveRentalIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -115,13 +116,13 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Number(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "number"); ok {
 		_spec.SetField(FieldNumber, field.TypeString, value)
 	}
-	if _u.mutation.NumberCleared() {
+	if _u.mutation.FieldCleared("number") {
 		_spec.ClearField(FieldNumber, field.TypeString)
 	}
-	if _u.mutation.RentalsCleared() {
+	if _u.mutation.EdgeCleared("rentals") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -134,7 +135,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !_u.mutation.RentalsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("rentals"); len(nodes) > 0 && !_u.mutation.EdgeCleared("rentals") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -150,7 +151,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RentalsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("rentals"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -193,7 +194,7 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 
 // SetNumber sets the "number" field.
 func (_u *CarUpdateOne) SetNumber(v string) *CarUpdateOne {
-	_u.mutation.SetNumber(v)
+	_ = _u.mutation.SetField("number", v)
 	return _u
 }
 
@@ -207,13 +208,13 @@ func (_u *CarUpdateOne) SetNillableNumber(v *string) *CarUpdateOne {
 
 // ClearNumber clears the value of the "number" field.
 func (_u *CarUpdateOne) ClearNumber() *CarUpdateOne {
-	_u.mutation.ClearNumber()
+	_ = _u.mutation.ClearField("number")
 	return _u
 }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
 func (_u *CarUpdateOne) AddRentalIDs(ids ...int) *CarUpdateOne {
-	_u.mutation.AddRentalIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -224,19 +225,19 @@ func (_u *CarUpdateOne) Mutation() *CarMutation {
 
 // ClearRentals clears all "rentals" edges to the Rental entity.
 func (_u *CarUpdateOne) ClearRentals() *CarUpdateOne {
-	_u.mutation.ClearRentals()
+	_ = _u.mutation.ClearEdge("rentals")
 	return _u
 }
 
 // RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
 func (_u *CarUpdateOne) RemoveRentalIDs(ids ...int) *CarUpdateOne {
-	_u.mutation.RemoveRentalIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the CarUpdate builder.
 func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -276,10 +277,11 @@ func (_u *CarUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Car.id" for update`)}
 	}
+	id := idAny.(uuid.UUID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -300,13 +302,13 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Number(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "number"); ok {
 		_spec.SetField(FieldNumber, field.TypeString, value)
 	}
-	if _u.mutation.NumberCleared() {
+	if _u.mutation.FieldCleared("number") {
 		_spec.ClearField(FieldNumber, field.TypeString)
 	}
-	if _u.mutation.RentalsCleared() {
+	if _u.mutation.EdgeCleared("rentals") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -319,7 +321,7 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !_u.mutation.RentalsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("rentals"); len(nodes) > 0 && !_u.mutation.EdgeCleared("rentals") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -335,7 +337,7 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RentalsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("rentals"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

@@ -27,7 +27,7 @@ func (_q *GroupQuery) Filter() *GroupFilter {
 
 // NewGroupFilterForMutation creates a new GroupFilter for the given mutation.
 func NewGroupFilterForMutation(m *GroupMutation) *GroupFilter {
-	return &GroupFilter{Config: m.Config, predicateAdder: m}
+	return &GroupFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // GroupFilter provides a generic filtering capability at runtime for GroupQuery.

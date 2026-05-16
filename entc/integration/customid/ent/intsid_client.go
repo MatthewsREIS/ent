@@ -103,7 +103,7 @@ func (c *IntSIDClient) DeleteOne(_m *IntSID) *intsid.IntSIDDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *IntSIDClient) DeleteOneID(id sid.ID) *intsid.IntSIDDeleteOne {
 	mutation := NewIntSIDMutation(c.Config, OpDeleteOne, WithIntSIDID(id, nil))
-	mutation.Where(intsid.ID(id))
+	mutation.WhereP(intsid.ID(id))
 	return intsid.NewIntSIDDeleteOne(intsid.NewIntSIDDelete(c.Config, c.Hooks(), mutation))
 }
 

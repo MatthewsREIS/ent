@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,64 +59,100 @@ func IDLTE(id int) predicate.AttachedFile {
 	return predicate.AttachedFile(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: AttachTime — use where.EQ(FieldAttachTime, v).
-func AttachTime(v time.Time) predicate.AttachedFile { return where.EQ(FieldAttachTime, v) }
-
-// Deprecated: FID — use where.EQ(FieldFID, v).
-func FID(v int) predicate.AttachedFile { return where.EQ(FieldFID, v) }
-
-// Deprecated: ProcID — use where.EQ(FieldProcID, v).
-func ProcID(v int) predicate.AttachedFile { return where.EQ(FieldProcID, v) }
-
-// Deprecated: AttachTimeEQ — use where.EQ(FieldAttachTime, v).
-func AttachTimeEQ(v time.Time) predicate.AttachedFile { return where.EQ(FieldAttachTime, v) }
-
-// Deprecated: AttachTimeNEQ — use where.NEQ(FieldAttachTime, v).
-func AttachTimeNEQ(v time.Time) predicate.AttachedFile { return where.NEQ(FieldAttachTime, v) }
-
-// Deprecated: AttachTimeIn — use where.In(FieldAttachTime, vs...).
-func AttachTimeIn(vs ...time.Time) predicate.AttachedFile { return where.In(FieldAttachTime, vs...) }
-
-// Deprecated: AttachTimeNotIn — use where.NotIn(FieldAttachTime, vs...).
-func AttachTimeNotIn(vs ...time.Time) predicate.AttachedFile {
-	return where.NotIn(FieldAttachTime, vs...)
+// AttachTime applies equality check predicate on the "attach_time" field. It's identical to AttachTimeEQ.
+func AttachTime(v time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldEQ(FieldAttachTime, v))
 }
 
-// Deprecated: AttachTimeGT — use where.GT(FieldAttachTime, v).
-func AttachTimeGT(v time.Time) predicate.AttachedFile { return where.GT(FieldAttachTime, v) }
+// FID applies equality check predicate on the "f_id" field. It's identical to FIDEQ.
+func FID(v int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldEQ(FieldFID, v))
+}
 
-// Deprecated: AttachTimeGTE — use where.GTE(FieldAttachTime, v).
-func AttachTimeGTE(v time.Time) predicate.AttachedFile { return where.GTE(FieldAttachTime, v) }
+// ProcID applies equality check predicate on the "proc_id" field. It's identical to ProcIDEQ.
+func ProcID(v int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldEQ(FieldProcID, v))
+}
 
-// Deprecated: AttachTimeLT — use where.LT(FieldAttachTime, v).
-func AttachTimeLT(v time.Time) predicate.AttachedFile { return where.LT(FieldAttachTime, v) }
+// AttachTimeEQ applies the EQ predicate on the "attach_time" field.
+func AttachTimeEQ(v time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldEQ(FieldAttachTime, v))
+}
 
-// Deprecated: AttachTimeLTE — use where.LTE(FieldAttachTime, v).
-func AttachTimeLTE(v time.Time) predicate.AttachedFile { return where.LTE(FieldAttachTime, v) }
+// AttachTimeNEQ applies the NEQ predicate on the "attach_time" field.
+func AttachTimeNEQ(v time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldNEQ(FieldAttachTime, v))
+}
 
-// Deprecated: FIDEQ — use where.EQ(FieldFID, v).
-func FIDEQ(v int) predicate.AttachedFile { return where.EQ(FieldFID, v) }
+// AttachTimeIn applies the In predicate on the "attach_time" field.
+func AttachTimeIn(vs ...time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldIn(FieldAttachTime, vs...))
+}
 
-// Deprecated: FIDNEQ — use where.NEQ(FieldFID, v).
-func FIDNEQ(v int) predicate.AttachedFile { return where.NEQ(FieldFID, v) }
+// AttachTimeNotIn applies the NotIn predicate on the "attach_time" field.
+func AttachTimeNotIn(vs ...time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldNotIn(FieldAttachTime, vs...))
+}
 
-// Deprecated: FIDIn — use where.In(FieldFID, vs...).
-func FIDIn(vs ...int) predicate.AttachedFile { return where.In(FieldFID, vs...) }
+// AttachTimeGT applies the GT predicate on the "attach_time" field.
+func AttachTimeGT(v time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldGT(FieldAttachTime, v))
+}
 
-// Deprecated: FIDNotIn — use where.NotIn(FieldFID, vs...).
-func FIDNotIn(vs ...int) predicate.AttachedFile { return where.NotIn(FieldFID, vs...) }
+// AttachTimeGTE applies the GTE predicate on the "attach_time" field.
+func AttachTimeGTE(v time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldGTE(FieldAttachTime, v))
+}
 
-// Deprecated: ProcIDEQ — use where.EQ(FieldProcID, v).
-func ProcIDEQ(v int) predicate.AttachedFile { return where.EQ(FieldProcID, v) }
+// AttachTimeLT applies the LT predicate on the "attach_time" field.
+func AttachTimeLT(v time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldLT(FieldAttachTime, v))
+}
 
-// Deprecated: ProcIDNEQ — use where.NEQ(FieldProcID, v).
-func ProcIDNEQ(v int) predicate.AttachedFile { return where.NEQ(FieldProcID, v) }
+// AttachTimeLTE applies the LTE predicate on the "attach_time" field.
+func AttachTimeLTE(v time.Time) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldLTE(FieldAttachTime, v))
+}
 
-// Deprecated: ProcIDIn — use where.In(FieldProcID, vs...).
-func ProcIDIn(vs ...int) predicate.AttachedFile { return where.In(FieldProcID, vs...) }
+// FIDEQ applies the EQ predicate on the "f_id" field.
+func FIDEQ(v int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldEQ(FieldFID, v))
+}
 
-// Deprecated: ProcIDNotIn — use where.NotIn(FieldProcID, vs...).
-func ProcIDNotIn(vs ...int) predicate.AttachedFile { return where.NotIn(FieldProcID, vs...) }
+// FIDNEQ applies the NEQ predicate on the "f_id" field.
+func FIDNEQ(v int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldNEQ(FieldFID, v))
+}
+
+// FIDIn applies the In predicate on the "f_id" field.
+func FIDIn(vs ...int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldIn(FieldFID, vs...))
+}
+
+// FIDNotIn applies the NotIn predicate on the "f_id" field.
+func FIDNotIn(vs ...int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldNotIn(FieldFID, vs...))
+}
+
+// ProcIDEQ applies the EQ predicate on the "proc_id" field.
+func ProcIDEQ(v int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldEQ(FieldProcID, v))
+}
+
+// ProcIDNEQ applies the NEQ predicate on the "proc_id" field.
+func ProcIDNEQ(v int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldNEQ(FieldProcID, v))
+}
+
+// ProcIDIn applies the In predicate on the "proc_id" field.
+func ProcIDIn(vs ...int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldIn(FieldProcID, vs...))
+}
+
+// ProcIDNotIn applies the NotIn predicate on the "proc_id" field.
+func ProcIDNotIn(vs ...int) predicate.AttachedFile {
+	return predicate.AttachedFile(sql.FieldNotIn(FieldProcID, vs...))
+}
 
 // HasFi applies the HasEdge predicate on the "fi" edge.
 func HasFi() predicate.AttachedFile {

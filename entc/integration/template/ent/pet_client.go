@@ -103,7 +103,7 @@ func (c *PetClient) DeleteOne(_m *Pet) *pet.PetDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PetClient) DeleteOneID(id int) *pet.PetDeleteOne {
 	mutation := NewPetMutation(c.Config, OpDeleteOne, WithPetID(id, nil))
-	mutation.Where(pet.ID(id))
+	mutation.WhereP(pet.ID(id))
 	return pet.NewPetDeleteOne(pet.NewPetDelete(c.Config, c.Hooks(), mutation))
 }
 

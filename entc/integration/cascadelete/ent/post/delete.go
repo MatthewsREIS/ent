@@ -30,7 +30,7 @@ func NewPostDelete(c Config, hooks []Hook, mutation *PostMutation) *PostDelete {
 
 // Where appends a list predicates to the PostDelete builder.
 func (_d *PostDelete) Where(ps ...predicate.Post) *PostDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewPostDeleteOne(d *PostDelete) *PostDeleteOne {
 
 // Where appends a list predicates to the PostDelete builder.
 func (_d *PostDeleteOne) Where(ps ...predicate.Post) *PostDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

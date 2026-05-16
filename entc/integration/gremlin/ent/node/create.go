@@ -31,7 +31,7 @@ func NewNodeCreate(c Config, hooks []Hook, mutation *NodeMutation) *NodeCreate {
 
 // SetValue sets the "value" field.
 func (_c *NodeCreate) SetValue(v int) *NodeCreate {
-	_c.mutation.SetValue(v)
+	_ = _c.mutation.SetField("value", v)
 	return _c
 }
 
@@ -45,7 +45,7 @@ func (_c *NodeCreate) SetNillableValue(v *int) *NodeCreate {
 
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *NodeCreate) SetUpdatedAt(v time.Time) *NodeCreate {
-	_c.mutation.SetUpdatedAt(v)
+	_ = _c.mutation.SetField("updated_at", v)
 	return _c
 }
 
@@ -59,7 +59,7 @@ func (_c *NodeCreate) SetNillableUpdatedAt(v *time.Time) *NodeCreate {
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
 func (_c *NodeCreate) SetPrevID(id string) *NodeCreate {
-	_c.mutation.SetPrevID(id)
+	_ = _c.mutation.SetEdgeID("prev", id)
 	return _c
 }
 
@@ -73,7 +73,7 @@ func (_c *NodeCreate) SetNillablePrevID(id *string) *NodeCreate {
 
 // SetNextID sets the "next" edge to the Node entity by ID.
 func (_c *NodeCreate) SetNextID(id string) *NodeCreate {
-	_c.mutation.SetNextID(id)
+	_ = _c.mutation.SetEdgeID("next", id)
 	return _c
 }
 

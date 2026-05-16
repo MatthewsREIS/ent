@@ -27,7 +27,7 @@ func (_q *BlobLinkQuery) Filter() *BlobLinkFilter {
 
 // NewBlobLinkFilterForMutation creates a new BlobLinkFilter for the given mutation.
 func NewBlobLinkFilterForMutation(m *BlobLinkMutation) *BlobLinkFilter {
-	return &BlobLinkFilter{Config: m.Config, predicateAdder: m}
+	return &BlobLinkFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // BlobLinkFilter provides a generic filtering capability at runtime for BlobLinkQuery.

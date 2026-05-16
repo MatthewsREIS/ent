@@ -100,7 +100,7 @@ func (c *UserClient) DeleteOne(_m *User) *user.UserDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *user.UserDeleteOne {
 	mutation := NewUserMutation(c.Config, OpDeleteOne, WithUserID(id, nil))
-	mutation.Where(user.ID(id))
+	mutation.WhereP(user.ID(id))
 	return user.NewUserDeleteOne(user.NewUserDelete(c.Config, c.Hooks(), mutation))
 }
 

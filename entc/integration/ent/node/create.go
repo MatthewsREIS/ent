@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewNodeCreate(c Config, hooks []Hook, mutation *NodeMutation) *NodeCreate {
 
 // SetValue sets the "value" field.
 func (_c *NodeCreate) SetValue(v int) *NodeCreate {
-	_c.mutation.SetValue(v)
+	_ = _c.mutation.SetField("value", v)
 	return _c
 }
 
@@ -46,7 +47,7 @@ func (_c *NodeCreate) SetNillableValue(v *int) *NodeCreate {
 
 // SetUpdatedAt sets the "updated_at" field.
 func (_c *NodeCreate) SetUpdatedAt(v time.Time) *NodeCreate {
-	_c.mutation.SetUpdatedAt(v)
+	_ = _c.mutation.SetField("updated_at", v)
 	return _c
 }
 
@@ -60,7 +61,7 @@ func (_c *NodeCreate) SetNillableUpdatedAt(v *time.Time) *NodeCreate {
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
 func (_c *NodeCreate) SetPrevID(id int) *NodeCreate {
-	_c.mutation.SetPrevID(id)
+	_ = _c.mutation.SetEdgeID("prev", id)
 	return _c
 }
 
@@ -74,7 +75,7 @@ func (_c *NodeCreate) SetNillablePrevID(id *int) *NodeCreate {
 
 // SetNextID sets the "next" edge to the Node entity by ID.
 func (_c *NodeCreate) SetNextID(id int) *NodeCreate {
-	_c.mutation.SetNextID(id)
+	_ = _c.mutation.SetEdgeID("next", id)
 	return _c
 }
 
@@ -136,7 +137,7 @@ func (_c *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -147,15 +148,15 @@ func (_c *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Value(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "value"); ok {
 		_spec.SetField(FieldValue, field.TypeInt, value)
 		_node.Value = value
 	}
-	if value, ok := _c.mutation.UpdatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "updated_at"); ok {
 		_spec.SetField(FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = &value
 	}
-	if nodes := _c.mutation.PrevIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "prev"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -171,7 +172,7 @@ func (_c *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.NextIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "next"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -458,11 +459,11 @@ func (_c *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewProcessCreate(c Config, hooks []Hook, mutation *ProcessMutation) *Proces
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_c *ProcessCreate) AddFileIDs(ids ...int) *ProcessCreate {
-	_c.mutation.AddFileIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddAttachedFileIDs adds the "attached_files" edge to the AttachedFile entity by IDs.
 func (_c *ProcessCreate) AddAttachedFileIDs(ids ...int) *ProcessCreate {
-	_c.mutation.AddAttachedFileIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -92,7 +93,7 @@ func (_c *ProcessCreate) sqlSave(ctx context.Context) (*Process, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -103,7 +104,7 @@ func (_c *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if nodes := _c.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -121,7 +122,7 @@ func (_c *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.AttachedFilesIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "attached_files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -311,11 +312,11 @@ func (_c *ProcessCreateBulk) Save(ctx context.Context) ([]*Process, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

@@ -30,7 +30,7 @@ func NewSessionDelete(c Config, hooks []Hook, mutation *SessionMutation) *Sessio
 
 // Where appends a list predicates to the SessionDelete builder.
 func (_d *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewSessionDeleteOne(d *SessionDelete) *SessionDeleteOne {
 
 // Where appends a list predicates to the SessionDelete builder.
 func (_d *SessionDeleteOne) Where(ps ...predicate.Session) *SessionDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

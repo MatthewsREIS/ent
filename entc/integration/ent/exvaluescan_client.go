@@ -100,7 +100,7 @@ func (c *ExValueScanClient) DeleteOne(_m *ExValueScan) *exvaluescan.ExValueScanD
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ExValueScanClient) DeleteOneID(id int) *exvaluescan.ExValueScanDeleteOne {
 	mutation := NewExValueScanMutation(c.Config, OpDeleteOne, WithExValueScanID(id, nil))
-	mutation.Where(exvaluescan.ID(id))
+	mutation.WhereP(exvaluescan.ID(id))
 	return exvaluescan.NewExValueScanDeleteOne(exvaluescan.NewExValueScanDelete(c.Config, c.Hooks(), mutation))
 }
 

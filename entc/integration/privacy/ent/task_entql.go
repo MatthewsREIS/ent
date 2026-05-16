@@ -27,7 +27,7 @@ func (_q *TaskQuery) Filter() *TaskFilter {
 
 // NewTaskFilterForMutation creates a new TaskFilter for the given mutation.
 func NewTaskFilterForMutation(m *TaskMutation) *TaskFilter {
-	return &TaskFilter{Config: m.Config, predicateAdder: m}
+	return &TaskFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // TaskFilter provides a generic filtering capability at runtime for TaskQuery.

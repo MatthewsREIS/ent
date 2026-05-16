@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewFileTypeCreate(c Config, hooks []Hook, mutation *FileTypeMutation) *File
 
 // SetName sets the "name" field.
 func (_c *FileTypeCreate) SetName(v string) *FileTypeCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // SetType sets the "type" field.
 func (_c *FileTypeCreate) SetType(v Type) *FileTypeCreate {
-	_c.mutation.SetType(v)
+	_ = _c.mutation.SetField("type", v)
 	return _c
 }
 
@@ -51,7 +52,7 @@ func (_c *FileTypeCreate) SetNillableType(v *Type) *FileTypeCreate {
 
 // SetState sets the "state" field.
 func (_c *FileTypeCreate) SetState(v State) *FileTypeCreate {
-	_c.mutation.SetState(v)
+	_ = _c.mutation.SetField("state", v)
 	return _c
 }
 
@@ -65,7 +66,7 @@ func (_c *FileTypeCreate) SetNillableState(v *State) *FileTypeCreate {
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_c *FileTypeCreate) AddFileIDs(ids ...int) *FileTypeCreate {
-	_c.mutation.AddFileIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -104,33 +105,33 @@ func (_c *FileTypeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *FileTypeCreate) defaults() {
-	if _, ok := _c.mutation.GetType(); !ok {
+	if _, ok := entbuilder.GetField[Type](_c.mutation, "type"); !ok {
 		v := DefaultType
-		_c.mutation.SetType(v)
+		_ = _c.mutation.SetField("type", v)
 	}
-	if _, ok := _c.mutation.State(); !ok {
+	if _, ok := entbuilder.GetField[State](_c.mutation, "state"); !ok {
 		v := DefaultState
-		_c.mutation.SetState(v)
+		_ = _c.mutation.SetField("state", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *FileTypeCreate) check() error {
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "FileType.name"`)}
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
+	if _, ok := entbuilder.GetField[Type](_c.mutation, "type"); !ok {
 		return &ValidationError{Name: "type", Err: errors.New(`ent: missing required field "FileType.type"`)}
 	}
-	if v, ok := _c.mutation.GetType(); ok {
+	if v, ok := entbuilder.GetField[Type](_c.mutation, "type"); ok {
 		if err := TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", Err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.State(); !ok {
+	if _, ok := entbuilder.GetField[State](_c.mutation, "state"); !ok {
 		return &ValidationError{Name: "state", Err: errors.New(`ent: missing required field "FileType.state"`)}
 	}
-	if v, ok := _c.mutation.State(); ok {
+	if v, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
 		if err := StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", Err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -151,7 +152,7 @@ func (_c *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -162,19 +163,19 @@ func (_c *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.GetType(); ok {
+	if value, ok := entbuilder.GetField[Type](_c.mutation, "type"); ok {
 		_spec.SetField(FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
-	if value, ok := _c.mutation.State(); ok {
+	if value, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
 		_spec.SetField(FieldState, field.TypeEnum, value)
 		_node.State = value
 	}
-	if nodes := _c.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -449,11 +450,11 @@ func (_c *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -33,13 +34,13 @@ func NewMixinIDCreate(c Config, hooks []Hook, mutation *MixinIDMutation) *MixinI
 
 // SetSomeField sets the "some_field" field.
 func (_c *MixinIDCreate) SetSomeField(v string) *MixinIDCreate {
-	_c.mutation.SetSomeField(v)
+	_ = _c.mutation.SetField("some_field", v)
 	return _c
 }
 
 // SetMixinField sets the "mixin_field" field.
 func (_c *MixinIDCreate) SetMixinField(v string) *MixinIDCreate {
-	_c.mutation.SetMixinField(v)
+	_ = _c.mutation.SetField("mixin_field", v)
 	return _c
 }
 
@@ -100,10 +101,10 @@ func (_c *MixinIDCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *MixinIDCreate) check() error {
-	if _, ok := _c.mutation.SomeField(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "some_field"); !ok {
 		return &ValidationError{Name: "some_field", Err: errors.New(`ent: missing required field "MixinID.some_field"`)}
 	}
-	if _, ok := _c.mutation.MixinField(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "mixin_field"); !ok {
 		return &ValidationError{Name: "mixin_field", Err: errors.New(`ent: missing required field "MixinID.mixin_field"`)}
 	}
 	return nil
@@ -127,7 +128,7 @@ func (_c *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -138,15 +139,16 @@ func (_c *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(uuid.UUID)
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.SomeField(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "some_field"); ok {
 		_spec.SetField(FieldSomeField, field.TypeString, value)
 		_node.SomeField = value
 	}
-	if value, ok := _c.mutation.MixinField(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "mixin_field"); ok {
 		_spec.SetField(FieldMixinField, field.TypeString, value)
 		_node.MixinField = value
 	}
@@ -396,7 +398,7 @@ func (_c *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

@@ -10,86 +10,137 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/where"
 )
 
-// Deprecated: Weight — use where.EQ(FieldWeight, v).
-func Weight(v int) predicate.Relationship { return where.EQ(FieldWeight, v) }
+// Weight applies equality check predicate on the "weight" field. It's identical to WeightEQ.
+func Weight(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldEQ(FieldWeight, v))
+}
 
-// Deprecated: UserID — use where.EQ(FieldUserID, v).
-func UserID(v int) predicate.Relationship { return where.EQ(FieldUserID, v) }
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldEQ(FieldUserID, v))
+}
 
-// Deprecated: RelativeID — use where.EQ(FieldRelativeID, v).
-func RelativeID(v int) predicate.Relationship { return where.EQ(FieldRelativeID, v) }
+// RelativeID applies equality check predicate on the "relative_id" field. It's identical to RelativeIDEQ.
+func RelativeID(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldEQ(FieldRelativeID, v))
+}
 
-// Deprecated: InfoID — use where.EQ(FieldInfoID, v).
-func InfoID(v int) predicate.Relationship { return where.EQ(FieldInfoID, v) }
+// InfoID applies equality check predicate on the "info_id" field. It's identical to InfoIDEQ.
+func InfoID(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldEQ(FieldInfoID, v))
+}
 
-// Deprecated: WeightEQ — use where.EQ(FieldWeight, v).
-func WeightEQ(v int) predicate.Relationship { return where.EQ(FieldWeight, v) }
+// WeightEQ applies the EQ predicate on the "weight" field.
+func WeightEQ(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldEQ(FieldWeight, v))
+}
 
-// Deprecated: WeightNEQ — use where.NEQ(FieldWeight, v).
-func WeightNEQ(v int) predicate.Relationship { return where.NEQ(FieldWeight, v) }
+// WeightNEQ applies the NEQ predicate on the "weight" field.
+func WeightNEQ(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldNEQ(FieldWeight, v))
+}
 
-// Deprecated: WeightIn — use where.In(FieldWeight, vs...).
-func WeightIn(vs ...int) predicate.Relationship { return where.In(FieldWeight, vs...) }
+// WeightIn applies the In predicate on the "weight" field.
+func WeightIn(vs ...int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldIn(FieldWeight, vs...))
+}
 
-// Deprecated: WeightNotIn — use where.NotIn(FieldWeight, vs...).
-func WeightNotIn(vs ...int) predicate.Relationship { return where.NotIn(FieldWeight, vs...) }
+// WeightNotIn applies the NotIn predicate on the "weight" field.
+func WeightNotIn(vs ...int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldNotIn(FieldWeight, vs...))
+}
 
-// Deprecated: WeightGT — use where.GT(FieldWeight, v).
-func WeightGT(v int) predicate.Relationship { return where.GT(FieldWeight, v) }
+// WeightGT applies the GT predicate on the "weight" field.
+func WeightGT(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldGT(FieldWeight, v))
+}
 
-// Deprecated: WeightGTE — use where.GTE(FieldWeight, v).
-func WeightGTE(v int) predicate.Relationship { return where.GTE(FieldWeight, v) }
+// WeightGTE applies the GTE predicate on the "weight" field.
+func WeightGTE(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldGTE(FieldWeight, v))
+}
 
-// Deprecated: WeightLT — use where.LT(FieldWeight, v).
-func WeightLT(v int) predicate.Relationship { return where.LT(FieldWeight, v) }
+// WeightLT applies the LT predicate on the "weight" field.
+func WeightLT(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldLT(FieldWeight, v))
+}
 
-// Deprecated: WeightLTE — use where.LTE(FieldWeight, v).
-func WeightLTE(v int) predicate.Relationship { return where.LTE(FieldWeight, v) }
+// WeightLTE applies the LTE predicate on the "weight" field.
+func WeightLTE(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldLTE(FieldWeight, v))
+}
 
-// Deprecated: UserIDEQ — use where.EQ(FieldUserID, v).
-func UserIDEQ(v int) predicate.Relationship { return where.EQ(FieldUserID, v) }
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldEQ(FieldUserID, v))
+}
 
-// Deprecated: UserIDNEQ — use where.NEQ(FieldUserID, v).
-func UserIDNEQ(v int) predicate.Relationship { return where.NEQ(FieldUserID, v) }
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldNEQ(FieldUserID, v))
+}
 
-// Deprecated: UserIDIn — use where.In(FieldUserID, vs...).
-func UserIDIn(vs ...int) predicate.Relationship { return where.In(FieldUserID, vs...) }
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldIn(FieldUserID, vs...))
+}
 
-// Deprecated: UserIDNotIn — use where.NotIn(FieldUserID, vs...).
-func UserIDNotIn(vs ...int) predicate.Relationship { return where.NotIn(FieldUserID, vs...) }
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldNotIn(FieldUserID, vs...))
+}
 
-// Deprecated: RelativeIDEQ — use where.EQ(FieldRelativeID, v).
-func RelativeIDEQ(v int) predicate.Relationship { return where.EQ(FieldRelativeID, v) }
+// RelativeIDEQ applies the EQ predicate on the "relative_id" field.
+func RelativeIDEQ(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldEQ(FieldRelativeID, v))
+}
 
-// Deprecated: RelativeIDNEQ — use where.NEQ(FieldRelativeID, v).
-func RelativeIDNEQ(v int) predicate.Relationship { return where.NEQ(FieldRelativeID, v) }
+// RelativeIDNEQ applies the NEQ predicate on the "relative_id" field.
+func RelativeIDNEQ(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldNEQ(FieldRelativeID, v))
+}
 
-// Deprecated: RelativeIDIn — use where.In(FieldRelativeID, vs...).
-func RelativeIDIn(vs ...int) predicate.Relationship { return where.In(FieldRelativeID, vs...) }
+// RelativeIDIn applies the In predicate on the "relative_id" field.
+func RelativeIDIn(vs ...int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldIn(FieldRelativeID, vs...))
+}
 
-// Deprecated: RelativeIDNotIn — use where.NotIn(FieldRelativeID, vs...).
-func RelativeIDNotIn(vs ...int) predicate.Relationship { return where.NotIn(FieldRelativeID, vs...) }
+// RelativeIDNotIn applies the NotIn predicate on the "relative_id" field.
+func RelativeIDNotIn(vs ...int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldNotIn(FieldRelativeID, vs...))
+}
 
-// Deprecated: InfoIDEQ — use where.EQ(FieldInfoID, v).
-func InfoIDEQ(v int) predicate.Relationship { return where.EQ(FieldInfoID, v) }
+// InfoIDEQ applies the EQ predicate on the "info_id" field.
+func InfoIDEQ(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldEQ(FieldInfoID, v))
+}
 
-// Deprecated: InfoIDNEQ — use where.NEQ(FieldInfoID, v).
-func InfoIDNEQ(v int) predicate.Relationship { return where.NEQ(FieldInfoID, v) }
+// InfoIDNEQ applies the NEQ predicate on the "info_id" field.
+func InfoIDNEQ(v int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldNEQ(FieldInfoID, v))
+}
 
-// Deprecated: InfoIDIn — use where.In(FieldInfoID, vs...).
-func InfoIDIn(vs ...int) predicate.Relationship { return where.In(FieldInfoID, vs...) }
+// InfoIDIn applies the In predicate on the "info_id" field.
+func InfoIDIn(vs ...int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldIn(FieldInfoID, vs...))
+}
 
-// Deprecated: InfoIDNotIn — use where.NotIn(FieldInfoID, vs...).
-func InfoIDNotIn(vs ...int) predicate.Relationship { return where.NotIn(FieldInfoID, vs...) }
+// InfoIDNotIn applies the NotIn predicate on the "info_id" field.
+func InfoIDNotIn(vs ...int) predicate.Relationship {
+	return predicate.Relationship(sql.FieldNotIn(FieldInfoID, vs...))
+}
 
-// Deprecated: InfoIDIsNil — use where.IsNull(FieldInfoID).
-func InfoIDIsNil() predicate.Relationship { return where.IsNull(FieldInfoID) }
+// InfoIDIsNil applies the IsNil predicate on the "info_id" field.
+func InfoIDIsNil() predicate.Relationship {
+	return predicate.Relationship(sql.FieldIsNull(FieldInfoID))
+}
 
-// Deprecated: InfoIDNotNil — use where.NotNull(FieldInfoID).
-func InfoIDNotNil() predicate.Relationship { return where.NotNull(FieldInfoID) }
+// InfoIDNotNil applies the NotNil predicate on the "info_id" field.
+func InfoIDNotNil() predicate.Relationship {
+	return predicate.Relationship(sql.FieldNotNull(FieldInfoID))
+}
 
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Relationship {

@@ -104,7 +104,7 @@ func (c *GroupTagClient) DeleteOne(_m *GroupTag) *grouptag.GroupTagDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupTagClient) DeleteOneID(id int) *grouptag.GroupTagDeleteOne {
 	mutation := NewGroupTagMutation(c.Config, OpDeleteOne, WithGroupTagID(id, nil))
-	mutation.Where(grouptag.ID(id))
+	mutation.WhereP(grouptag.ID(id))
 	return grouptag.NewGroupTagDeleteOne(grouptag.NewGroupTagDelete(c.Config, c.Hooks(), mutation))
 }
 

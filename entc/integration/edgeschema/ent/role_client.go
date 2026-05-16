@@ -104,7 +104,7 @@ func (c *RoleClient) DeleteOne(_m *Role) *role.RoleDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RoleClient) DeleteOneID(id int) *role.RoleDeleteOne {
 	mutation := NewRoleMutation(c.Config, OpDeleteOne, WithRoleID(id, nil))
-	mutation.Where(role.ID(id))
+	mutation.WhereP(role.ID(id))
 	return role.NewRoleDeleteOne(role.NewRoleDelete(c.Config, c.Hooks(), mutation))
 }
 

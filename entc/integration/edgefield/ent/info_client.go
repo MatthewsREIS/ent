@@ -103,7 +103,7 @@ func (c *InfoClient) DeleteOne(_m *Info) *info.InfoDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *InfoClient) DeleteOneID(id int) *info.InfoDeleteOne {
 	mutation := NewInfoMutation(c.Config, OpDeleteOne, WithInfoID(id, nil))
-	mutation.Where(info.ID(id))
+	mutation.WhereP(info.ID(id))
 	return info.NewInfoDeleteOne(info.NewInfoDelete(c.Config, c.Hooks(), mutation))
 }
 

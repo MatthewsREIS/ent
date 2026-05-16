@@ -73,8 +73,8 @@ func (c *BlobLinkClient) Update() *bloblink.BlobLinkUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *BlobLinkClient) UpdateOne(_m *BlobLink) *bloblink.BlobLinkUpdateOne {
 	mutation := NewBlobLinkMutation(c.Config, OpUpdateOne)
-	mutation.SetBlobID(_m.BlobID)
-	mutation.SetLinkID(_m.LinkID)
+	_ = mutation.SetEdgeID("blob", _m.BlobID)
+	_ = mutation.SetEdgeID("link", _m.LinkID)
 	return bloblink.NewBlobLinkUpdateOne(c.Config, c.Hooks(), mutation)
 }
 

@@ -65,9 +65,9 @@ func (Card) Hooks() []ent.Hook {
 		),
 		func(next ent.Mutator) ent.Mutator {
 			return hook.CardFunc(func(ctx context.Context, m *gen.CardMutation) (ent.Value, error) {
-				m.SetInHook("value was set in hook")
-				if _, ok := m.Name(); !ok {
-					m.SetName("unknown")
+				_ = m.SetField(card.FieldInHook, "value was set in hook")
+				if _, ok := m.Field(card.FieldName); !ok {
+					_ = m.SetField(card.FieldName, "unknown")
 				}
 				return next.Mutate(ctx, m)
 			})

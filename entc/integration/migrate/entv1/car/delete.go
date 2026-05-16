@@ -30,7 +30,7 @@ func NewCarDelete(c Config, hooks []Hook, mutation *CarMutation) *CarDelete {
 
 // Where appends a list predicates to the CarDelete builder.
 func (_d *CarDelete) Where(ps ...predicate.Car) *CarDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewCarDeleteOne(d *CarDelete) *CarDeleteOne {
 
 // Where appends a list predicates to the CarDelete builder.
 func (_d *CarDeleteOne) Where(ps ...predicate.Car) *CarDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

@@ -101,7 +101,7 @@ func (c *OtherClient) DeleteOne(_m *Other) *other.OtherDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *OtherClient) DeleteOneID(id sid.ID) *other.OtherDeleteOne {
 	mutation := NewOtherMutation(c.Config, OpDeleteOne, WithOtherID(id, nil))
-	mutation.Where(other.ID(id))
+	mutation.WhereP(other.ID(id))
 	return other.NewOtherDeleteOne(other.NewOtherDelete(c.Config, c.Hooks(), mutation))
 }
 

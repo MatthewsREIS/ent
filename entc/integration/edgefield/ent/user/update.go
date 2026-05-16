@@ -32,13 +32,13 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetSpouseID sets the "spouse_id" field.
 func (_u *UserUpdate) SetSpouseID(v int) *UserUpdate {
-	_u.mutation.SetSpouseID(v)
+	_ = _u.mutation.SetEdgeID("spouse", v)
 	return _u
 }
 
@@ -52,25 +52,25 @@ func (_u *UserUpdate) SetNillableSpouseID(v *int) *UserUpdate {
 
 // ClearSpouseID clears the value of the "spouse_id" field.
 func (_u *UserUpdate) ClearSpouseID() *UserUpdate {
-	_u.mutation.ClearSpouseID()
+	_ = _u.mutation.ClearEdge("spouse")
 	return _u
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddPetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
 func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddChildIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (_u *UserUpdate) SetCardID(id int) *UserUpdate {
-	_u.mutation.SetCardID(id)
+	_ = _u.mutation.SetEdgeID("card", id)
 	return _u
 }
 
@@ -84,7 +84,7 @@ func (_u *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 
 // SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
 func (_u *UserUpdate) SetMetadataID(id int) *UserUpdate {
-	_u.mutation.SetMetadataID(id)
+	_ = _u.mutation.SetEdgeID("metadata", id)
 	return _u
 }
 
@@ -98,13 +98,13 @@ func (_u *UserUpdate) SetNillableMetadataID(id *int) *UserUpdate {
 
 // AddInfoIDs adds the "info" edge to the Info entity by IDs.
 func (_u *UserUpdate) AddInfoIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddInfoIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("info", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
 func (_u *UserUpdate) AddRentalIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddRentalIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -115,67 +115,67 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 
 // ClearPets clears all "pets" edges to the Pet entity.
 func (_u *UserUpdate) ClearPets() *UserUpdate {
-	_u.mutation.ClearPets()
+	_ = _u.mutation.ClearEdge("pets")
 	return _u
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemovePetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearChildren clears all "children" edges to the User entity.
 func (_u *UserUpdate) ClearChildren() *UserUpdate {
-	_u.mutation.ClearChildren()
+	_ = _u.mutation.ClearEdge("children")
 	return _u
 }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveChildIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearSpouse clears the "spouse" edge to the User entity.
 func (_u *UserUpdate) ClearSpouse() *UserUpdate {
-	_u.mutation.ClearSpouse()
+	_ = _u.mutation.ClearEdge("spouse")
 	return _u
 }
 
 // ClearCard clears the "card" edge to the Card entity.
 func (_u *UserUpdate) ClearCard() *UserUpdate {
-	_u.mutation.ClearCard()
+	_ = _u.mutation.ClearEdge("card")
 	return _u
 }
 
 // ClearMetadata clears the "metadata" edge to the Metadata entity.
 func (_u *UserUpdate) ClearMetadata() *UserUpdate {
-	_u.mutation.ClearMetadata()
+	_ = _u.mutation.ClearEdge("metadata")
 	return _u
 }
 
 // ClearInfo clears all "info" edges to the Info entity.
 func (_u *UserUpdate) ClearInfo() *UserUpdate {
-	_u.mutation.ClearInfo()
+	_ = _u.mutation.ClearEdge("info")
 	return _u
 }
 
 // RemoveInfoIDs removes the "info" edge to Info entities by IDs.
 func (_u *UserUpdate) RemoveInfoIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveInfoIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("info", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearRentals clears all "rentals" edges to the Rental entity.
 func (_u *UserUpdate) ClearRentals() *UserUpdate {
-	_u.mutation.ClearRentals()
+	_ = _u.mutation.ClearEdge("rentals")
 	return _u
 }
 
 // RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
 func (_u *UserUpdate) RemoveRentalIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveRentalIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -215,7 +215,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.PetsCleared() {
+	if _u.mutation.EdgeCleared("pets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -228,7 +228,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedPetsIDs(); len(nodes) > 0 && !_u.mutation.PetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("pets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("pets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -244,7 +244,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("pets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -260,7 +260,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ChildrenCleared() {
+	if _u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -273,7 +273,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("children"); len(nodes) > 0 && !_u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -289,7 +289,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -305,7 +305,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SpouseCleared() {
+	if _u.mutation.EdgeCleared("spouse") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -318,7 +318,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SpouseIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("spouse"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -334,7 +334,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.CardCleared() {
+	if _u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -347,7 +347,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("card"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -363,7 +363,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.MetadataCleared() {
+	if _u.mutation.EdgeCleared("metadata") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -376,7 +376,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("metadata"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -392,7 +392,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.InfoCleared() {
+	if _u.mutation.EdgeCleared("info") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -405,7 +405,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedInfoIDs(); len(nodes) > 0 && !_u.mutation.InfoCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("info"); len(nodes) > 0 && !_u.mutation.EdgeCleared("info") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -421,7 +421,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.InfoIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("info"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -437,7 +437,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RentalsCleared() {
+	if _u.mutation.EdgeCleared("rentals") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -450,7 +450,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !_u.mutation.RentalsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("rentals"); len(nodes) > 0 && !_u.mutation.EdgeCleared("rentals") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -466,7 +466,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RentalsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("rentals"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -509,7 +509,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetSpouseID sets the "spouse_id" field.
 func (_u *UserUpdateOne) SetSpouseID(v int) *UserUpdateOne {
-	_u.mutation.SetSpouseID(v)
+	_ = _u.mutation.SetEdgeID("spouse", v)
 	return _u
 }
 
@@ -523,25 +523,25 @@ func (_u *UserUpdateOne) SetNillableSpouseID(v *int) *UserUpdateOne {
 
 // ClearSpouseID clears the value of the "spouse_id" field.
 func (_u *UserUpdateOne) ClearSpouseID() *UserUpdateOne {
-	_u.mutation.ClearSpouseID()
+	_ = _u.mutation.ClearEdge("spouse")
 	return _u
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (_u *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddPetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
 func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddChildIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (_u *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
-	_u.mutation.SetCardID(id)
+	_ = _u.mutation.SetEdgeID("card", id)
 	return _u
 }
 
@@ -555,7 +555,7 @@ func (_u *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 
 // SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
 func (_u *UserUpdateOne) SetMetadataID(id int) *UserUpdateOne {
-	_u.mutation.SetMetadataID(id)
+	_ = _u.mutation.SetEdgeID("metadata", id)
 	return _u
 }
 
@@ -569,13 +569,13 @@ func (_u *UserUpdateOne) SetNillableMetadataID(id *int) *UserUpdateOne {
 
 // AddInfoIDs adds the "info" edge to the Info entity by IDs.
 func (_u *UserUpdateOne) AddInfoIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddInfoIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("info", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
 func (_u *UserUpdateOne) AddRentalIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddRentalIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -586,73 +586,73 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 
 // ClearPets clears all "pets" edges to the Pet entity.
 func (_u *UserUpdateOne) ClearPets() *UserUpdateOne {
-	_u.mutation.ClearPets()
+	_ = _u.mutation.ClearEdge("pets")
 	return _u
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemovePetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearChildren clears all "children" edges to the User entity.
 func (_u *UserUpdateOne) ClearChildren() *UserUpdateOne {
-	_u.mutation.ClearChildren()
+	_ = _u.mutation.ClearEdge("children")
 	return _u
 }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveChildIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearSpouse clears the "spouse" edge to the User entity.
 func (_u *UserUpdateOne) ClearSpouse() *UserUpdateOne {
-	_u.mutation.ClearSpouse()
+	_ = _u.mutation.ClearEdge("spouse")
 	return _u
 }
 
 // ClearCard clears the "card" edge to the Card entity.
 func (_u *UserUpdateOne) ClearCard() *UserUpdateOne {
-	_u.mutation.ClearCard()
+	_ = _u.mutation.ClearEdge("card")
 	return _u
 }
 
 // ClearMetadata clears the "metadata" edge to the Metadata entity.
 func (_u *UserUpdateOne) ClearMetadata() *UserUpdateOne {
-	_u.mutation.ClearMetadata()
+	_ = _u.mutation.ClearEdge("metadata")
 	return _u
 }
 
 // ClearInfo clears all "info" edges to the Info entity.
 func (_u *UserUpdateOne) ClearInfo() *UserUpdateOne {
-	_u.mutation.ClearInfo()
+	_ = _u.mutation.ClearEdge("info")
 	return _u
 }
 
 // RemoveInfoIDs removes the "info" edge to Info entities by IDs.
 func (_u *UserUpdateOne) RemoveInfoIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveInfoIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("info", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearRentals clears all "rentals" edges to the Rental entity.
 func (_u *UserUpdateOne) ClearRentals() *UserUpdateOne {
-	_u.mutation.ClearRentals()
+	_ = _u.mutation.ClearEdge("rentals")
 	return _u
 }
 
 // RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
 func (_u *UserUpdateOne) RemoveRentalIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveRentalIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -692,10 +692,11 @@ func (_u *UserUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "User.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -716,7 +717,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if _u.mutation.PetsCleared() {
+	if _u.mutation.EdgeCleared("pets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -729,7 +730,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedPetsIDs(); len(nodes) > 0 && !_u.mutation.PetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("pets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("pets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -745,7 +746,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("pets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -761,7 +762,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ChildrenCleared() {
+	if _u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -774,7 +775,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("children"); len(nodes) > 0 && !_u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -790,7 +791,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -806,7 +807,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.SpouseCleared() {
+	if _u.mutation.EdgeCleared("spouse") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -819,7 +820,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SpouseIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("spouse"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -835,7 +836,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.CardCleared() {
+	if _u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -848,7 +849,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("card"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -864,7 +865,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.MetadataCleared() {
+	if _u.mutation.EdgeCleared("metadata") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -877,7 +878,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.MetadataIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("metadata"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -893,7 +894,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.InfoCleared() {
+	if _u.mutation.EdgeCleared("info") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -906,7 +907,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedInfoIDs(); len(nodes) > 0 && !_u.mutation.InfoCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("info"); len(nodes) > 0 && !_u.mutation.EdgeCleared("info") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -922,7 +923,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.InfoIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("info"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -938,7 +939,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.RentalsCleared() {
+	if _u.mutation.EdgeCleared("rentals") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -951,7 +952,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !_u.mutation.RentalsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("rentals"); len(nodes) > 0 && !_u.mutation.EdgeCleared("rentals") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -967,7 +968,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RentalsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("rentals"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

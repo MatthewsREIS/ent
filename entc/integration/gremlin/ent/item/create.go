@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ItemCreate is the builder for creating a Item entity.
@@ -31,7 +32,7 @@ func NewItemCreate(c Config, hooks []Hook, mutation *ItemMutation) *ItemCreate {
 
 // SetText sets the "text" field.
 func (_c *ItemCreate) SetText(v string) *ItemCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
@@ -100,12 +101,12 @@ func (_c *ItemCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *ItemCreate) check() error {
-	if v, ok := _c.mutation.Text(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		if err := TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", Err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.ID(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "id"); ok {
 		if err := IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", Err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
 		}

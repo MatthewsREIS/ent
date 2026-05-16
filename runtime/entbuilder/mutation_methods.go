@@ -57,13 +57,14 @@ func (m *Mutation[T]) Field(name string) (ent.Value, bool) {
 
 // SetField sets the value for the given field. Returns an error if the
 // field is not in the descriptor or the value type does not match the
-// field's expected Go type.
+// field's expected Go type. Fields typed as the empty interface (e.g.
+// schema.Any) accept any value.
 func (m *Mutation[T]) SetField(name string, value ent.Value) error {
 	spec, ok := m.desc.Fields[name]
 	if !ok {
 		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
 	}
-	if value != nil && reflect.TypeOf(value) != spec.Type {
+	if value != nil && spec.Type.Kind() != reflect.Interface && reflect.TypeOf(value) != spec.Type {
 		return fmt.Errorf("unexpected type %T for field %s (want %s)", value, name, spec.Type)
 	}
 	if m.fields == nil {
@@ -72,6 +73,8 @@ func (m *Mutation[T]) SetField(name string, value ent.Value) error {
 	m.fields[name] = value
 	// Clearing a previously-cleared field re-set should drop the cleared marker.
 	delete(m.cleared, name)
+	// Setting a field should override any prior append for the same field.
+	delete(m.appended, name)
 	return nil
 }
 
@@ -148,6 +151,8 @@ func (m *Mutation[T]) ClearField(name string) error {
 		return fmt.Errorf("entbuilder: %s field %s is not nillable", m.desc.Name, name)
 	}
 	delete(m.fields, name)
+	delete(m.added, name)
+	delete(m.appended, name)
 	if m.cleared == nil {
 		m.cleared = make(map[string]struct{})
 	}
@@ -191,7 +196,12 @@ func (m *Mutation[T]) AddedField(name string) (ent.Value, bool) {
 }
 
 // AddField adds the value to the field with the given name. Returns an
-// error if the field is not in the descriptor or is not Numeric.
+// error if the field is not in the descriptor or is not Numeric. The
+// value's Go type is intentionally not asserted against the field's main
+// type: generated builders pass the field's *signed* delta type (e.g.
+// int64 for a uint64 field) so subtraction works, and the downstream
+// dialect layer re-asserts the expected delta type. Multiple calls
+// accumulate: AddField(10) followed by AddField(-1) records a delta of 9.
 func (m *Mutation[T]) AddField(name string, value ent.Value) error {
 	spec, ok := m.desc.Fields[name]
 	if !ok {
@@ -200,14 +210,40 @@ func (m *Mutation[T]) AddField(name string, value ent.Value) error {
 	if !spec.Numeric {
 		return fmt.Errorf("entbuilder: %s field %s is not numeric", m.desc.Name, name)
 	}
-	if value != nil && reflect.TypeOf(value) != spec.Type {
-		return fmt.Errorf("unexpected type %T for field %s (want %s)", value, name, spec.Type)
-	}
 	if m.added == nil {
 		m.added = make(map[string]any)
 	}
+	if prev, exists := m.added[name]; exists {
+		if sum, ok := addValues(prev, value); ok {
+			m.added[name] = sum
+			return nil
+		}
+	}
 	m.added[name] = value
 	return nil
+}
+
+// addValues attempts to add two numeric values of compatible types via
+// reflect. Returns the sum and true on success, or the zero value and
+// false if the kinds differ or the kind is non-numeric.
+func addValues(a, b any) (any, bool) {
+	if a == nil || b == nil {
+		return nil, false
+	}
+	av := reflect.ValueOf(a)
+	bv := reflect.ValueOf(b)
+	if av.Kind() != bv.Kind() {
+		return nil, false
+	}
+	switch av.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return reflect.ValueOf(av.Int() + bv.Int()).Convert(av.Type()).Interface(), true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return reflect.ValueOf(av.Uint() + bv.Uint()).Convert(av.Type()).Interface(), true
+	case reflect.Float32, reflect.Float64:
+		return reflect.ValueOf(av.Float() + bv.Float()).Convert(av.Type()).Interface(), true
+	}
+	return nil, false
 }
 
 // AppendedField returns the value that was appended to the field with the

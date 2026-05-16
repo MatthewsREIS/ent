@@ -30,7 +30,7 @@ func NewZooDelete(c Config, hooks []Hook, mutation *ZooMutation) *ZooDelete {
 
 // Where appends a list predicates to the ZooDelete builder.
 func (_d *ZooDelete) Where(ps ...predicate.Zoo) *ZooDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewZooDeleteOne(d *ZooDelete) *ZooDeleteOne {
 
 // Where appends a list predicates to the ZooDelete builder.
 func (_d *ZooDeleteOne) Where(ps ...predicate.Zoo) *ZooDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

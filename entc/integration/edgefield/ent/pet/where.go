@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,26 +57,40 @@ func IDLTE(id int) predicate.Pet {
 	return predicate.Pet(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: OwnerID — use where.EQ(FieldOwnerID, v).
-func OwnerID(v int) predicate.Pet { return where.EQ(FieldOwnerID, v) }
+// OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
+func OwnerID(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldOwnerID, v))
+}
 
-// Deprecated: OwnerIDEQ — use where.EQ(FieldOwnerID, v).
-func OwnerIDEQ(v int) predicate.Pet { return where.EQ(FieldOwnerID, v) }
+// OwnerIDEQ applies the EQ predicate on the "owner_id" field.
+func OwnerIDEQ(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldOwnerID, v))
+}
 
-// Deprecated: OwnerIDNEQ — use where.NEQ(FieldOwnerID, v).
-func OwnerIDNEQ(v int) predicate.Pet { return where.NEQ(FieldOwnerID, v) }
+// OwnerIDNEQ applies the NEQ predicate on the "owner_id" field.
+func OwnerIDNEQ(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldOwnerID, v))
+}
 
-// Deprecated: OwnerIDIn — use where.In(FieldOwnerID, vs...).
-func OwnerIDIn(vs ...int) predicate.Pet { return where.In(FieldOwnerID, vs...) }
+// OwnerIDIn applies the In predicate on the "owner_id" field.
+func OwnerIDIn(vs ...int) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldOwnerID, vs...))
+}
 
-// Deprecated: OwnerIDNotIn — use where.NotIn(FieldOwnerID, vs...).
-func OwnerIDNotIn(vs ...int) predicate.Pet { return where.NotIn(FieldOwnerID, vs...) }
+// OwnerIDNotIn applies the NotIn predicate on the "owner_id" field.
+func OwnerIDNotIn(vs ...int) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldOwnerID, vs...))
+}
 
-// Deprecated: OwnerIDIsNil — use where.IsNull(FieldOwnerID).
-func OwnerIDIsNil() predicate.Pet { return where.IsNull(FieldOwnerID) }
+// OwnerIDIsNil applies the IsNil predicate on the "owner_id" field.
+func OwnerIDIsNil() predicate.Pet {
+	return predicate.Pet(sql.FieldIsNull(FieldOwnerID))
+}
 
-// Deprecated: OwnerIDNotNil — use where.NotNull(FieldOwnerID).
-func OwnerIDNotNil() predicate.Pet { return where.NotNull(FieldOwnerID) }
+// OwnerIDNotNil applies the NotNil predicate on the "owner_id" field.
+func OwnerIDNotNil() predicate.Pet {
+	return predicate.Pet(sql.FieldNotNull(FieldOwnerID))
+}
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Pet {

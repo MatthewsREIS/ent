@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,7 +29,7 @@ func NewCardCreate(c Config, hooks []Hook, mutation *CardMutation) *CardCreate {
 
 // SetNumber sets the "number" field.
 func (_c *CardCreate) SetNumber(v string) *CardCreate {
-	_c.mutation.SetNumber(v)
+	_ = _c.mutation.SetField("number", v)
 	return _c
 }
 
@@ -42,7 +43,7 @@ func (_c *CardCreate) SetNillableNumber(v *string) *CardCreate {
 
 // SetOwnerID sets the "owner_id" field.
 func (_c *CardCreate) SetOwnerID(v int) *CardCreate {
-	_c.mutation.SetOwnerID(v)
+	_ = _c.mutation.SetEdgeID("owner", v)
 	return _c
 }
 
@@ -104,7 +105,7 @@ func (_c *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -114,11 +115,11 @@ func (_c *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		_node = &Card{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.Number(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "number"); ok {
 		_spec.SetField(FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -191,11 +192,11 @@ func (_c *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

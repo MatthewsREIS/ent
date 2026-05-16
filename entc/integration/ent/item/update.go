@@ -33,13 +33,13 @@ func NewItemUpdate(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdate {
 
 // Where appends a list predicates to the ItemUpdate builder.
 func (_u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *ItemUpdate) SetText(v string) *ItemUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -53,7 +53,7 @@ func (_u *ItemUpdate) SetNillableText(v *string) *ItemUpdate {
 
 // ClearText clears the value of the "text" field.
 func (_u *ItemUpdate) ClearText() *ItemUpdate {
-	_u.mutation.ClearText()
+	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -91,7 +91,7 @@ func (_u *ItemUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ItemUpdate) check() error {
-	if v, ok := _u.mutation.Text(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		if err := TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", Err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
@@ -117,10 +117,10 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.TextCleared() {
+	if _u.mutation.FieldCleared("text") {
 		_spec.ClearField(FieldText, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
@@ -152,7 +152,7 @@ func NewItemUpdateOne(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdat
 
 // SetText sets the "text" field.
 func (_u *ItemUpdateOne) SetText(v string) *ItemUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -166,7 +166,7 @@ func (_u *ItemUpdateOne) SetNillableText(v *string) *ItemUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *ItemUpdateOne) ClearText() *ItemUpdateOne {
-	_u.mutation.ClearText()
+	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -177,7 +177,7 @@ func (_u *ItemUpdateOne) Mutation() *ItemMutation {
 
 // Where appends a list predicates to the ItemUpdate builder.
 func (_u *ItemUpdateOne) Where(ps ...predicate.Item) *ItemUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -217,7 +217,7 @@ func (_u *ItemUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ItemUpdateOne) check() error {
-	if v, ok := _u.mutation.Text(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		if err := TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", Err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
@@ -236,10 +236,11 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Item.id" for update`)}
 	}
+	id := idAny.(string)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -260,10 +261,10 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.TextCleared() {
+	if _u.mutation.FieldCleared("text") {
 		_spec.ClearField(FieldText, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)

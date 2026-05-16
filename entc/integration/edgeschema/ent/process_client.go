@@ -104,7 +104,7 @@ func (c *ProcessClient) DeleteOne(_m *Process) *process.ProcessDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ProcessClient) DeleteOneID(id int) *process.ProcessDeleteOne {
 	mutation := NewProcessMutation(c.Config, OpDeleteOne, WithProcessID(id, nil))
-	mutation.Where(process.ID(id))
+	mutation.WhereP(process.ID(id))
 	return process.NewProcessDeleteOne(process.NewProcessDelete(c.Config, c.Hooks(), mutation))
 }
 

@@ -33,13 +33,13 @@ func NewRentalUpdate(c Config, hooks []Hook, mutation *RentalMutation) *RentalUp
 
 // Where appends a list predicates to the RentalUpdate builder.
 func (_u *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetDate sets the "date" field.
 func (_u *RentalUpdate) SetDate(v time.Time) *RentalUpdate {
-	_u.mutation.SetDate(v)
+	_ = _u.mutation.SetField("date", v)
 	return _u
 }
 
@@ -85,10 +85,10 @@ func (_u *RentalUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *RentalUpdate) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.user"`)
 	}
-	if _u.mutation.CarCleared() && len(_u.mutation.CarIDs()) > 0 {
+	if _u.mutation.EdgeCleared("car") && len(_u.mutation.EdgeIDs("car")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.car"`)
 	}
 	return nil
@@ -106,7 +106,7 @@ func (_u *RentalUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Date(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "date"); ok {
 		_spec.SetField(FieldDate, field.TypeTime, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -136,7 +136,7 @@ func NewRentalUpdateOne(c Config, hooks []Hook, mutation *RentalMutation) *Renta
 
 // SetDate sets the "date" field.
 func (_u *RentalUpdateOne) SetDate(v time.Time) *RentalUpdateOne {
-	_u.mutation.SetDate(v)
+	_ = _u.mutation.SetField("date", v)
 	return _u
 }
 
@@ -155,7 +155,7 @@ func (_u *RentalUpdateOne) Mutation() *RentalMutation {
 
 // Where appends a list predicates to the RentalUpdate builder.
 func (_u *RentalUpdateOne) Where(ps ...predicate.Rental) *RentalUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -195,10 +195,10 @@ func (_u *RentalUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *RentalUpdateOne) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.user"`)
 	}
-	if _u.mutation.CarCleared() && len(_u.mutation.CarIDs()) > 0 {
+	if _u.mutation.EdgeCleared("car") && len(_u.mutation.EdgeIDs("car")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.car"`)
 	}
 	return nil
@@ -209,10 +209,11 @@ func (_u *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err erro
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Rental.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -233,7 +234,7 @@ func (_u *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err erro
 			}
 		}
 	}
-	if value, ok := _u.mutation.Date(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "date"); ok {
 		_spec.SetField(FieldDate, field.TypeTime, value)
 	}
 	_node = &Rental{Config: _u.Config}

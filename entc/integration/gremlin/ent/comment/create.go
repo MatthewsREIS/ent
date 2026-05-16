@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
@@ -32,19 +33,19 @@ func NewCommentCreate(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 
 // SetUniqueInt sets the "unique_int" field.
 func (_c *CommentCreate) SetUniqueInt(v int) *CommentCreate {
-	_c.mutation.SetUniqueInt(v)
+	_ = _c.mutation.SetField("unique_int", v)
 	return _c
 }
 
 // SetUniqueFloat sets the "unique_float" field.
 func (_c *CommentCreate) SetUniqueFloat(v float64) *CommentCreate {
-	_c.mutation.SetUniqueFloat(v)
+	_ = _c.mutation.SetField("unique_float", v)
 	return _c
 }
 
 // SetNillableInt sets the "nillable_int" field.
 func (_c *CommentCreate) SetNillableInt(v int) *CommentCreate {
-	_c.mutation.SetNillableInt(v)
+	_ = _c.mutation.SetField("nillable_int", v)
 	return _c
 }
 
@@ -58,7 +59,7 @@ func (_c *CommentCreate) SetNillableNillableInt(v *int) *CommentCreate {
 
 // SetTable sets the "table" field.
 func (_c *CommentCreate) SetTable(v string) *CommentCreate {
-	_c.mutation.SetTable(v)
+	_ = _c.mutation.SetField("table", v)
 	return _c
 }
 
@@ -72,7 +73,7 @@ func (_c *CommentCreate) SetNillableTable(v *string) *CommentCreate {
 
 // SetDir sets the "dir" field.
 func (_c *CommentCreate) SetDir(v schemadir.Dir) *CommentCreate {
-	_c.mutation.SetDir(v)
+	_ = _c.mutation.SetField("dir", v)
 	return _c
 }
 
@@ -86,7 +87,7 @@ func (_c *CommentCreate) SetNillableDir(v *schemadir.Dir) *CommentCreate {
 
 // SetClient sets the "client" field.
 func (_c *CommentCreate) SetClient(v string) *CommentCreate {
-	_c.mutation.SetClient(v)
+	_ = _c.mutation.SetField("client", v)
 	return _c
 }
 
@@ -132,10 +133,10 @@ func (_c *CommentCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *CommentCreate) check() error {
-	if _, ok := _c.mutation.UniqueInt(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "unique_int"); !ok {
 		return &ValidationError{Name: "unique_int", Err: errors.New(`ent: missing required field "Comment.unique_int"`)}
 	}
-	if _, ok := _c.mutation.UniqueFloat(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "unique_float"); !ok {
 		return &ValidationError{Name: "unique_float", Err: errors.New(`ent: missing required field "Comment.unique_float"`)}
 	}
 	return nil

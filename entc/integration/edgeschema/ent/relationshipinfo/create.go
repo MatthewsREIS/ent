@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,7 +32,7 @@ func NewRelationshipInfoCreate(c Config, hooks []Hook, mutation *RelationshipInf
 
 // SetText sets the "text" field.
 func (_c *RelationshipInfoCreate) SetText(v string) *RelationshipInfoCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
@@ -69,7 +70,7 @@ func (_c *RelationshipInfoCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *RelationshipInfoCreate) check() error {
-	if _, ok := _c.mutation.Text(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "text"); !ok {
 		return &ValidationError{Name: "text", Err: errors.New(`ent: missing required field "RelationshipInfo.text"`)}
 	}
 	return nil
@@ -88,7 +89,7 @@ func (_c *RelationshipInfoCreate) sqlSave(ctx context.Context) (*RelationshipInf
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -99,7 +100,7 @@ func (_c *RelationshipInfoCreate) createSpec() (*RelationshipInfo, *sqlgraph.Cre
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 		_node.Text = value
 	}
@@ -309,11 +310,11 @@ func (_c *RelationshipInfoCreateBulk) Save(ctx context.Context) ([]*Relationship
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

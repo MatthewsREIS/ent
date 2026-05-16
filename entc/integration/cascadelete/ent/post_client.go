@@ -104,7 +104,7 @@ func (c *PostClient) DeleteOne(_m *Post) *post.PostDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PostClient) DeleteOneID(id int) *post.PostDeleteOne {
 	mutation := NewPostMutation(c.Config, OpDeleteOne, WithPostID(id, nil))
-	mutation.Where(post.ID(id))
+	mutation.WhereP(post.ID(id))
 	return post.NewPostDeleteOne(post.NewPostDelete(c.Config, c.Hooks(), mutation))
 }
 

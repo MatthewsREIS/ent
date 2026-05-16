@@ -27,7 +27,7 @@ func (_q *NoteQuery) Filter() *NoteFilter {
 
 // NewNoteFilterForMutation creates a new NoteFilter for the given mutation.
 func NewNoteFilterForMutation(m *NoteMutation) *NoteFilter {
-	return &NoteFilter{Config: m.Config, predicateAdder: m}
+	return &NoteFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // NoteFilter provides a generic filtering capability at runtime for NoteQuery.

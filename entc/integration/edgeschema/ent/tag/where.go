@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,44 +57,70 @@ func IDLTE(id int) predicate.Tag {
 	return predicate.Tag(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: ValueEQ — use where.EQ(FieldValue, v).
-func ValueEQ(v string) predicate.Tag { return where.EQ(FieldValue, v) }
+// ValueEQ applies the EQ predicate on the "value" field.
+func ValueEQ(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldEQ(FieldValue, v))
+}
 
-// Deprecated: ValueNEQ — use where.NEQ(FieldValue, v).
-func ValueNEQ(v string) predicate.Tag { return where.NEQ(FieldValue, v) }
+// ValueNEQ applies the NEQ predicate on the "value" field.
+func ValueNEQ(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldNEQ(FieldValue, v))
+}
 
-// Deprecated: ValueIn — use where.In(FieldValue, vs...).
-func ValueIn(vs ...string) predicate.Tag { return where.In(FieldValue, vs...) }
+// ValueIn applies the In predicate on the "value" field.
+func ValueIn(vs ...string) predicate.Tag {
+	return predicate.Tag(sql.FieldIn(FieldValue, vs...))
+}
 
-// Deprecated: ValueNotIn — use where.NotIn(FieldValue, vs...).
-func ValueNotIn(vs ...string) predicate.Tag { return where.NotIn(FieldValue, vs...) }
+// ValueNotIn applies the NotIn predicate on the "value" field.
+func ValueNotIn(vs ...string) predicate.Tag {
+	return predicate.Tag(sql.FieldNotIn(FieldValue, vs...))
+}
 
-// Deprecated: ValueGT — use where.GT(FieldValue, v).
-func ValueGT(v string) predicate.Tag { return where.GT(FieldValue, v) }
+// ValueGT applies the GT predicate on the "value" field.
+func ValueGT(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldGT(FieldValue, v))
+}
 
-// Deprecated: ValueGTE — use where.GTE(FieldValue, v).
-func ValueGTE(v string) predicate.Tag { return where.GTE(FieldValue, v) }
+// ValueGTE applies the GTE predicate on the "value" field.
+func ValueGTE(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldGTE(FieldValue, v))
+}
 
-// Deprecated: ValueLT — use where.LT(FieldValue, v).
-func ValueLT(v string) predicate.Tag { return where.LT(FieldValue, v) }
+// ValueLT applies the LT predicate on the "value" field.
+func ValueLT(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldLT(FieldValue, v))
+}
 
-// Deprecated: ValueLTE — use where.LTE(FieldValue, v).
-func ValueLTE(v string) predicate.Tag { return where.LTE(FieldValue, v) }
+// ValueLTE applies the LTE predicate on the "value" field.
+func ValueLTE(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldLTE(FieldValue, v))
+}
 
-// Deprecated: ValueContains — use where.Contains(FieldValue, v).
-func ValueContains(v string) predicate.Tag { return where.Contains(FieldValue, v) }
+// ValueContains applies the Contains predicate on the "value" field.
+func ValueContains(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldContains(FieldValue, v))
+}
 
-// Deprecated: ValueHasPrefix — use where.HasPrefix(FieldValue, v).
-func ValueHasPrefix(v string) predicate.Tag { return where.HasPrefix(FieldValue, v) }
+// ValueHasPrefix applies the HasPrefix predicate on the "value" field.
+func ValueHasPrefix(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldHasPrefix(FieldValue, v))
+}
 
-// Deprecated: ValueHasSuffix — use where.HasSuffix(FieldValue, v).
-func ValueHasSuffix(v string) predicate.Tag { return where.HasSuffix(FieldValue, v) }
+// ValueHasSuffix applies the HasSuffix predicate on the "value" field.
+func ValueHasSuffix(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldHasSuffix(FieldValue, v))
+}
 
-// Deprecated: ValueEqualFold — use where.EqualFold(FieldValue, v).
-func ValueEqualFold(v string) predicate.Tag { return where.EqualFold(FieldValue, v) }
+// ValueEqualFold applies the EqualFold predicate on the "value" field.
+func ValueEqualFold(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldEqualFold(FieldValue, v))
+}
 
-// Deprecated: ValueContainsFold — use where.ContainsFold(FieldValue, v).
-func ValueContainsFold(v string) predicate.Tag { return where.ContainsFold(FieldValue, v) }
+// ValueContainsFold applies the ContainsFold predicate on the "value" field.
+func ValueContainsFold(v string) predicate.Tag {
+	return predicate.Tag(sql.FieldContainsFold(FieldValue, v))
+}
 
 // HasTweets applies the HasEdge predicate on the "tweets" edge.
 func HasTweets() predicate.Tag {

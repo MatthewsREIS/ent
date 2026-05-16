@@ -104,7 +104,7 @@ func (c *AttachedFileClient) DeleteOne(_m *AttachedFile) *attachedfile.AttachedF
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *AttachedFileClient) DeleteOneID(id int) *attachedfile.AttachedFileDeleteOne {
 	mutation := NewAttachedFileMutation(c.Config, OpDeleteOne, WithAttachedFileID(id, nil))
-	mutation.Where(attachedfile.ID(id))
+	mutation.WhereP(attachedfile.ID(id))
 	return attachedfile.NewAttachedFileDeleteOne(attachedfile.NewAttachedFileDelete(c.Config, c.Hooks(), mutation))
 }
 

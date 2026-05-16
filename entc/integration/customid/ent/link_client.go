@@ -101,7 +101,7 @@ func (c *LinkClient) DeleteOne(_m *Link) *link.LinkDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *LinkClient) DeleteOneID(id uuidc.UUIDC) *link.LinkDeleteOne {
 	mutation := NewLinkMutation(c.Config, OpDeleteOne, WithLinkID(id, nil))
-	mutation.Where(link.ID(id))
+	mutation.WhereP(link.ID(id))
 	return link.NewLinkDeleteOne(link.NewLinkDelete(c.Config, c.Hooks(), mutation))
 }
 

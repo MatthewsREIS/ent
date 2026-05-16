@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,32 +57,50 @@ func IDLTE(id int) predicate.Blog {
 	return predicate.Blog(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Oid — use where.EQ(FieldOid, v).
-func Oid(v int) predicate.Blog { return where.EQ(FieldOid, v) }
+// Oid applies equality check predicate on the "oid" field. It's identical to OidEQ.
+func Oid(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldEQ(FieldOid, v))
+}
 
-// Deprecated: OidEQ — use where.EQ(FieldOid, v).
-func OidEQ(v int) predicate.Blog { return where.EQ(FieldOid, v) }
+// OidEQ applies the EQ predicate on the "oid" field.
+func OidEQ(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldEQ(FieldOid, v))
+}
 
-// Deprecated: OidNEQ — use where.NEQ(FieldOid, v).
-func OidNEQ(v int) predicate.Blog { return where.NEQ(FieldOid, v) }
+// OidNEQ applies the NEQ predicate on the "oid" field.
+func OidNEQ(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldNEQ(FieldOid, v))
+}
 
-// Deprecated: OidIn — use where.In(FieldOid, vs...).
-func OidIn(vs ...int) predicate.Blog { return where.In(FieldOid, vs...) }
+// OidIn applies the In predicate on the "oid" field.
+func OidIn(vs ...int) predicate.Blog {
+	return predicate.Blog(sql.FieldIn(FieldOid, vs...))
+}
 
-// Deprecated: OidNotIn — use where.NotIn(FieldOid, vs...).
-func OidNotIn(vs ...int) predicate.Blog { return where.NotIn(FieldOid, vs...) }
+// OidNotIn applies the NotIn predicate on the "oid" field.
+func OidNotIn(vs ...int) predicate.Blog {
+	return predicate.Blog(sql.FieldNotIn(FieldOid, vs...))
+}
 
-// Deprecated: OidGT — use where.GT(FieldOid, v).
-func OidGT(v int) predicate.Blog { return where.GT(FieldOid, v) }
+// OidGT applies the GT predicate on the "oid" field.
+func OidGT(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldGT(FieldOid, v))
+}
 
-// Deprecated: OidGTE — use where.GTE(FieldOid, v).
-func OidGTE(v int) predicate.Blog { return where.GTE(FieldOid, v) }
+// OidGTE applies the GTE predicate on the "oid" field.
+func OidGTE(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldGTE(FieldOid, v))
+}
 
-// Deprecated: OidLT — use where.LT(FieldOid, v).
-func OidLT(v int) predicate.Blog { return where.LT(FieldOid, v) }
+// OidLT applies the LT predicate on the "oid" field.
+func OidLT(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldLT(FieldOid, v))
+}
 
-// Deprecated: OidLTE — use where.LTE(FieldOid, v).
-func OidLTE(v int) predicate.Blog { return where.LTE(FieldOid, v) }
+// OidLTE applies the LTE predicate on the "oid" field.
+func OidLTE(v int) predicate.Blog {
+	return predicate.Blog(sql.FieldLTE(FieldOid, v))
+}
 
 // HasAdmins applies the HasEdge predicate on the "admins" edge.
 func HasAdmins() predicate.Blog {

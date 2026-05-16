@@ -31,7 +31,7 @@ func NewFileDelete(c Config, hooks []Hook, mutation *FileMutation) *FileDelete {
 
 // Where appends a list predicates to the FileDelete builder.
 func (_d *FileDelete) Where(ps ...predicate.File) *FileDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -85,7 +85,7 @@ func NewFileDeleteOne(d *FileDelete) *FileDeleteOne {
 
 // Where appends a list predicates to the FileDelete builder.
 func (_d *FileDeleteOne) Where(ps ...predicate.File) *FileDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

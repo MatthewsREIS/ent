@@ -73,8 +73,8 @@ func (c *TweetLikeClient) Update() *tweetlike.TweetLikeUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *TweetLikeClient) UpdateOne(_m *TweetLike) *tweetlike.TweetLikeUpdateOne {
 	mutation := NewTweetLikeMutation(c.Config, OpUpdateOne)
-	mutation.SetUserID(_m.UserID)
-	mutation.SetTweetID(_m.TweetID)
+	_ = mutation.SetEdgeID("user", _m.UserID)
+	_ = mutation.SetEdgeID("tweet", _m.TweetID)
 	return tweetlike.NewTweetLikeUpdateOne(c.Config, c.Hooks(), mutation)
 }
 

@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,65 +59,105 @@ func IDLTE(id int) predicate.Pet {
 	return predicate.Pet(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Age — use where.EQ(FieldAge, v).
-func Age(v int) predicate.Pet { return where.EQ(FieldAge, v) }
+// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
+func Age(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldAge, v))
+}
 
-// Deprecated: LicensedAt — use where.EQ(FieldLicensedAt, v).
-func LicensedAt(v time.Time) predicate.Pet { return where.EQ(FieldLicensedAt, v) }
+// LicensedAt applies equality check predicate on the "licensed_at" field. It's identical to LicensedAtEQ.
+func LicensedAt(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldLicensedAt, v))
+}
 
-// Deprecated: AgeEQ — use where.EQ(FieldAge, v).
-func AgeEQ(v int) predicate.Pet { return where.EQ(FieldAge, v) }
+// AgeEQ applies the EQ predicate on the "age" field.
+func AgeEQ(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldAge, v))
+}
 
-// Deprecated: AgeNEQ — use where.NEQ(FieldAge, v).
-func AgeNEQ(v int) predicate.Pet { return where.NEQ(FieldAge, v) }
+// AgeNEQ applies the NEQ predicate on the "age" field.
+func AgeNEQ(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldAge, v))
+}
 
-// Deprecated: AgeIn — use where.In(FieldAge, vs...).
-func AgeIn(vs ...int) predicate.Pet { return where.In(FieldAge, vs...) }
+// AgeIn applies the In predicate on the "age" field.
+func AgeIn(vs ...int) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldAge, vs...))
+}
 
-// Deprecated: AgeNotIn — use where.NotIn(FieldAge, vs...).
-func AgeNotIn(vs ...int) predicate.Pet { return where.NotIn(FieldAge, vs...) }
+// AgeNotIn applies the NotIn predicate on the "age" field.
+func AgeNotIn(vs ...int) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldAge, vs...))
+}
 
-// Deprecated: AgeGT — use where.GT(FieldAge, v).
-func AgeGT(v int) predicate.Pet { return where.GT(FieldAge, v) }
+// AgeGT applies the GT predicate on the "age" field.
+func AgeGT(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldGT(FieldAge, v))
+}
 
-// Deprecated: AgeGTE — use where.GTE(FieldAge, v).
-func AgeGTE(v int) predicate.Pet { return where.GTE(FieldAge, v) }
+// AgeGTE applies the GTE predicate on the "age" field.
+func AgeGTE(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldGTE(FieldAge, v))
+}
 
-// Deprecated: AgeLT — use where.LT(FieldAge, v).
-func AgeLT(v int) predicate.Pet { return where.LT(FieldAge, v) }
+// AgeLT applies the LT predicate on the "age" field.
+func AgeLT(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldLT(FieldAge, v))
+}
 
-// Deprecated: AgeLTE — use where.LTE(FieldAge, v).
-func AgeLTE(v int) predicate.Pet { return where.LTE(FieldAge, v) }
+// AgeLTE applies the LTE predicate on the "age" field.
+func AgeLTE(v int) predicate.Pet {
+	return predicate.Pet(sql.FieldLTE(FieldAge, v))
+}
 
-// Deprecated: LicensedAtEQ — use where.EQ(FieldLicensedAt, v).
-func LicensedAtEQ(v time.Time) predicate.Pet { return where.EQ(FieldLicensedAt, v) }
+// LicensedAtEQ applies the EQ predicate on the "licensed_at" field.
+func LicensedAtEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldEQ(FieldLicensedAt, v))
+}
 
-// Deprecated: LicensedAtNEQ — use where.NEQ(FieldLicensedAt, v).
-func LicensedAtNEQ(v time.Time) predicate.Pet { return where.NEQ(FieldLicensedAt, v) }
+// LicensedAtNEQ applies the NEQ predicate on the "licensed_at" field.
+func LicensedAtNEQ(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldNEQ(FieldLicensedAt, v))
+}
 
-// Deprecated: LicensedAtIn — use where.In(FieldLicensedAt, vs...).
-func LicensedAtIn(vs ...time.Time) predicate.Pet { return where.In(FieldLicensedAt, vs...) }
+// LicensedAtIn applies the In predicate on the "licensed_at" field.
+func LicensedAtIn(vs ...time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldIn(FieldLicensedAt, vs...))
+}
 
-// Deprecated: LicensedAtNotIn — use where.NotIn(FieldLicensedAt, vs...).
-func LicensedAtNotIn(vs ...time.Time) predicate.Pet { return where.NotIn(FieldLicensedAt, vs...) }
+// LicensedAtNotIn applies the NotIn predicate on the "licensed_at" field.
+func LicensedAtNotIn(vs ...time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldNotIn(FieldLicensedAt, vs...))
+}
 
-// Deprecated: LicensedAtGT — use where.GT(FieldLicensedAt, v).
-func LicensedAtGT(v time.Time) predicate.Pet { return where.GT(FieldLicensedAt, v) }
+// LicensedAtGT applies the GT predicate on the "licensed_at" field.
+func LicensedAtGT(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldGT(FieldLicensedAt, v))
+}
 
-// Deprecated: LicensedAtGTE — use where.GTE(FieldLicensedAt, v).
-func LicensedAtGTE(v time.Time) predicate.Pet { return where.GTE(FieldLicensedAt, v) }
+// LicensedAtGTE applies the GTE predicate on the "licensed_at" field.
+func LicensedAtGTE(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldGTE(FieldLicensedAt, v))
+}
 
-// Deprecated: LicensedAtLT — use where.LT(FieldLicensedAt, v).
-func LicensedAtLT(v time.Time) predicate.Pet { return where.LT(FieldLicensedAt, v) }
+// LicensedAtLT applies the LT predicate on the "licensed_at" field.
+func LicensedAtLT(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldLT(FieldLicensedAt, v))
+}
 
-// Deprecated: LicensedAtLTE — use where.LTE(FieldLicensedAt, v).
-func LicensedAtLTE(v time.Time) predicate.Pet { return where.LTE(FieldLicensedAt, v) }
+// LicensedAtLTE applies the LTE predicate on the "licensed_at" field.
+func LicensedAtLTE(v time.Time) predicate.Pet {
+	return predicate.Pet(sql.FieldLTE(FieldLicensedAt, v))
+}
 
-// Deprecated: LicensedAtIsNil — use where.IsNull(FieldLicensedAt).
-func LicensedAtIsNil() predicate.Pet { return where.IsNull(FieldLicensedAt) }
+// LicensedAtIsNil applies the IsNil predicate on the "licensed_at" field.
+func LicensedAtIsNil() predicate.Pet {
+	return predicate.Pet(sql.FieldIsNull(FieldLicensedAt))
+}
 
-// Deprecated: LicensedAtNotNil — use where.NotNull(FieldLicensedAt).
-func LicensedAtNotNil() predicate.Pet { return where.NotNull(FieldLicensedAt) }
+// LicensedAtNotNil applies the NotNil predicate on the "licensed_at" field.
+func LicensedAtNotNil() predicate.Pet {
+	return predicate.Pet(sql.FieldNotNull(FieldLicensedAt))
+}
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Pet {

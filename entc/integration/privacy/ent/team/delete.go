@@ -30,7 +30,7 @@ func NewTeamDelete(c Config, hooks []Hook, mutation *TeamMutation) *TeamDelete {
 
 // Where appends a list predicates to the TeamDelete builder.
 func (_d *TeamDelete) Where(ps ...predicate.Team) *TeamDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewTeamDeleteOne(d *TeamDelete) *TeamDeleteOne {
 
 // Where appends a list predicates to the TeamDelete builder.
 func (_d *TeamDeleteOne) Where(ps ...predicate.Team) *TeamDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

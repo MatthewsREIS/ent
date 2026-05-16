@@ -103,7 +103,7 @@ func (c *DocClient) DeleteOne(_m *Doc) *doc.DocDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *DocClient) DeleteOneID(id schema.DocID) *doc.DocDeleteOne {
 	mutation := NewDocMutation(c.Config, OpDeleteOne, WithDocID(id, nil))
-	mutation.Where(doc.ID(id))
+	mutation.WhereP(doc.ID(id))
 	return doc.NewDocDeleteOne(doc.NewDocDelete(c.Config, c.Hooks(), mutation))
 }
 

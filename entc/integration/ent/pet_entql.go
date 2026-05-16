@@ -27,7 +27,7 @@ func (_q *PetQuery) Filter() *PetFilter {
 
 // NewPetFilterForMutation creates a new PetFilter for the given mutation.
 func NewPetFilterForMutation(m *PetMutation) *PetFilter {
-	return &PetFilter{Config: m.Config, predicateAdder: m}
+	return &PetFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // PetFilter provides a generic filtering capability at runtime for PetQuery.

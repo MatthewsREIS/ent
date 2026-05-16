@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -64,56 +63,90 @@ func UUID(v uuid.UUID) predicate.Blob {
 	return predicate.Blob(sql.FieldEQ(FieldUUID, v))
 }
 
-// Deprecated: Count — use where.EQ(FieldCount, v).
-func Count(v int) predicate.Blob { return where.EQ(FieldCount, v) }
+// Count applies equality check predicate on the "count" field. It's identical to CountEQ.
+func Count(v int) predicate.Blob {
+	return predicate.Blob(sql.FieldEQ(FieldCount, v))
+}
 
-// Deprecated: UUIDEQ — use where.EQ(FieldUUID, v).
-func UUIDEQ(v uuid.UUID) predicate.Blob { return where.EQ(FieldUUID, v) }
+// UUIDEQ applies the EQ predicate on the "uuid" field.
+func UUIDEQ(v uuid.UUID) predicate.Blob {
+	return predicate.Blob(sql.FieldEQ(FieldUUID, v))
+}
 
-// Deprecated: UUIDNEQ — use where.NEQ(FieldUUID, v).
-func UUIDNEQ(v uuid.UUID) predicate.Blob { return where.NEQ(FieldUUID, v) }
+// UUIDNEQ applies the NEQ predicate on the "uuid" field.
+func UUIDNEQ(v uuid.UUID) predicate.Blob {
+	return predicate.Blob(sql.FieldNEQ(FieldUUID, v))
+}
 
-// Deprecated: UUIDIn — use where.In(FieldUUID, vs...).
-func UUIDIn(vs ...uuid.UUID) predicate.Blob { return where.In(FieldUUID, vs...) }
+// UUIDIn applies the In predicate on the "uuid" field.
+func UUIDIn(vs ...uuid.UUID) predicate.Blob {
+	return predicate.Blob(sql.FieldIn(FieldUUID, vs...))
+}
 
-// Deprecated: UUIDNotIn — use where.NotIn(FieldUUID, vs...).
-func UUIDNotIn(vs ...uuid.UUID) predicate.Blob { return where.NotIn(FieldUUID, vs...) }
+// UUIDNotIn applies the NotIn predicate on the "uuid" field.
+func UUIDNotIn(vs ...uuid.UUID) predicate.Blob {
+	return predicate.Blob(sql.FieldNotIn(FieldUUID, vs...))
+}
 
-// Deprecated: UUIDGT — use where.GT(FieldUUID, v).
-func UUIDGT(v uuid.UUID) predicate.Blob { return where.GT(FieldUUID, v) }
+// UUIDGT applies the GT predicate on the "uuid" field.
+func UUIDGT(v uuid.UUID) predicate.Blob {
+	return predicate.Blob(sql.FieldGT(FieldUUID, v))
+}
 
-// Deprecated: UUIDGTE — use where.GTE(FieldUUID, v).
-func UUIDGTE(v uuid.UUID) predicate.Blob { return where.GTE(FieldUUID, v) }
+// UUIDGTE applies the GTE predicate on the "uuid" field.
+func UUIDGTE(v uuid.UUID) predicate.Blob {
+	return predicate.Blob(sql.FieldGTE(FieldUUID, v))
+}
 
-// Deprecated: UUIDLT — use where.LT(FieldUUID, v).
-func UUIDLT(v uuid.UUID) predicate.Blob { return where.LT(FieldUUID, v) }
+// UUIDLT applies the LT predicate on the "uuid" field.
+func UUIDLT(v uuid.UUID) predicate.Blob {
+	return predicate.Blob(sql.FieldLT(FieldUUID, v))
+}
 
-// Deprecated: UUIDLTE — use where.LTE(FieldUUID, v).
-func UUIDLTE(v uuid.UUID) predicate.Blob { return where.LTE(FieldUUID, v) }
+// UUIDLTE applies the LTE predicate on the "uuid" field.
+func UUIDLTE(v uuid.UUID) predicate.Blob {
+	return predicate.Blob(sql.FieldLTE(FieldUUID, v))
+}
 
-// Deprecated: CountEQ — use where.EQ(FieldCount, v).
-func CountEQ(v int) predicate.Blob { return where.EQ(FieldCount, v) }
+// CountEQ applies the EQ predicate on the "count" field.
+func CountEQ(v int) predicate.Blob {
+	return predicate.Blob(sql.FieldEQ(FieldCount, v))
+}
 
-// Deprecated: CountNEQ — use where.NEQ(FieldCount, v).
-func CountNEQ(v int) predicate.Blob { return where.NEQ(FieldCount, v) }
+// CountNEQ applies the NEQ predicate on the "count" field.
+func CountNEQ(v int) predicate.Blob {
+	return predicate.Blob(sql.FieldNEQ(FieldCount, v))
+}
 
-// Deprecated: CountIn — use where.In(FieldCount, vs...).
-func CountIn(vs ...int) predicate.Blob { return where.In(FieldCount, vs...) }
+// CountIn applies the In predicate on the "count" field.
+func CountIn(vs ...int) predicate.Blob {
+	return predicate.Blob(sql.FieldIn(FieldCount, vs...))
+}
 
-// Deprecated: CountNotIn — use where.NotIn(FieldCount, vs...).
-func CountNotIn(vs ...int) predicate.Blob { return where.NotIn(FieldCount, vs...) }
+// CountNotIn applies the NotIn predicate on the "count" field.
+func CountNotIn(vs ...int) predicate.Blob {
+	return predicate.Blob(sql.FieldNotIn(FieldCount, vs...))
+}
 
-// Deprecated: CountGT — use where.GT(FieldCount, v).
-func CountGT(v int) predicate.Blob { return where.GT(FieldCount, v) }
+// CountGT applies the GT predicate on the "count" field.
+func CountGT(v int) predicate.Blob {
+	return predicate.Blob(sql.FieldGT(FieldCount, v))
+}
 
-// Deprecated: CountGTE — use where.GTE(FieldCount, v).
-func CountGTE(v int) predicate.Blob { return where.GTE(FieldCount, v) }
+// CountGTE applies the GTE predicate on the "count" field.
+func CountGTE(v int) predicate.Blob {
+	return predicate.Blob(sql.FieldGTE(FieldCount, v))
+}
 
-// Deprecated: CountLT — use where.LT(FieldCount, v).
-func CountLT(v int) predicate.Blob { return where.LT(FieldCount, v) }
+// CountLT applies the LT predicate on the "count" field.
+func CountLT(v int) predicate.Blob {
+	return predicate.Blob(sql.FieldLT(FieldCount, v))
+}
 
-// Deprecated: CountLTE — use where.LTE(FieldCount, v).
-func CountLTE(v int) predicate.Blob { return where.LTE(FieldCount, v) }
+// CountLTE applies the LTE predicate on the "count" field.
+func CountLTE(v int) predicate.Blob {
+	return predicate.Blob(sql.FieldLTE(FieldCount, v))
+}
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Blob {

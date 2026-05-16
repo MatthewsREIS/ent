@@ -168,7 +168,7 @@ func (u *{{ $upsertOne }}) UpdateNewValues() *{{ $upsertOne }} {
 				}
 			{{- end }}
 			{{- range $f := $.ImmutableFields }}
-				if _, exists := u.create.mutation.{{ $f.MutationGet }}(); exists {
+				if _, exists := u.create.mutation.Field({{ $f.Constant }}); exists {
 					s.SetIgnore({{ $f.Constant }})
 				}
 			{{- end }}
@@ -341,7 +341,7 @@ func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
 					}
 				{{- end }}
 				{{- range $f := $.ImmutableFields }}
-					if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
+					if _, exists := b.mutation.Field({{ $f.Constant }}); exists {
 						s.SetIgnore({{ $f.Constant }})
 					}
 				{{- end }}

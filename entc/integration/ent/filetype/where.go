@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,71 +57,115 @@ func IDLTE(id int) predicate.FileType {
 	return predicate.FileType(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Name — use where.EQ(FieldName, v).
-func Name(v string) predicate.FileType { return where.EQ(FieldName, v) }
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: NameEQ — use where.EQ(FieldName, v).
-func NameEQ(v string) predicate.FileType { return where.EQ(FieldName, v) }
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
-func NameNEQ(v string) predicate.FileType { return where.NEQ(FieldName, v) }
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldNEQ(FieldName, v))
+}
 
-// Deprecated: NameIn — use where.In(FieldName, vs...).
-func NameIn(vs ...string) predicate.FileType { return where.In(FieldName, vs...) }
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.FileType {
+	return predicate.FileType(sql.FieldIn(FieldName, vs...))
+}
 
-// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
-func NameNotIn(vs ...string) predicate.FileType { return where.NotIn(FieldName, vs...) }
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.FileType {
+	return predicate.FileType(sql.FieldNotIn(FieldName, vs...))
+}
 
-// Deprecated: NameGT — use where.GT(FieldName, v).
-func NameGT(v string) predicate.FileType { return where.GT(FieldName, v) }
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldGT(FieldName, v))
+}
 
-// Deprecated: NameGTE — use where.GTE(FieldName, v).
-func NameGTE(v string) predicate.FileType { return where.GTE(FieldName, v) }
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldGTE(FieldName, v))
+}
 
-// Deprecated: NameLT — use where.LT(FieldName, v).
-func NameLT(v string) predicate.FileType { return where.LT(FieldName, v) }
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldLT(FieldName, v))
+}
 
-// Deprecated: NameLTE — use where.LTE(FieldName, v).
-func NameLTE(v string) predicate.FileType { return where.LTE(FieldName, v) }
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldLTE(FieldName, v))
+}
 
-// Deprecated: NameContains — use where.Contains(FieldName, v).
-func NameContains(v string) predicate.FileType { return where.Contains(FieldName, v) }
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldContains(FieldName, v))
+}
 
-// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
-func NameHasPrefix(v string) predicate.FileType { return where.HasPrefix(FieldName, v) }
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldHasPrefix(FieldName, v))
+}
 
-// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
-func NameHasSuffix(v string) predicate.FileType { return where.HasSuffix(FieldName, v) }
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldHasSuffix(FieldName, v))
+}
 
-// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
-func NameEqualFold(v string) predicate.FileType { return where.EqualFold(FieldName, v) }
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldEqualFold(FieldName, v))
+}
 
-// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
-func NameContainsFold(v string) predicate.FileType { return where.ContainsFold(FieldName, v) }
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldContainsFold(FieldName, v))
+}
 
-// Deprecated: TypeEQ — use where.EQ(FieldType, v).
-func TypeEQ(v Type) predicate.FileType { return where.EQ(FieldType, v) }
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v Type) predicate.FileType {
+	return predicate.FileType(sql.FieldEQ(FieldType, v))
+}
 
-// Deprecated: TypeNEQ — use where.NEQ(FieldType, v).
-func TypeNEQ(v Type) predicate.FileType { return where.NEQ(FieldType, v) }
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v Type) predicate.FileType {
+	return predicate.FileType(sql.FieldNEQ(FieldType, v))
+}
 
-// Deprecated: TypeIn — use where.In(FieldType, vs...).
-func TypeIn(vs ...Type) predicate.FileType { return where.In(FieldType, vs...) }
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...Type) predicate.FileType {
+	return predicate.FileType(sql.FieldIn(FieldType, vs...))
+}
 
-// Deprecated: TypeNotIn — use where.NotIn(FieldType, vs...).
-func TypeNotIn(vs ...Type) predicate.FileType { return where.NotIn(FieldType, vs...) }
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...Type) predicate.FileType {
+	return predicate.FileType(sql.FieldNotIn(FieldType, vs...))
+}
 
-// Deprecated: StateEQ — use where.EQ(FieldState, v).
-func StateEQ(v State) predicate.FileType { return where.EQ(FieldState, v) }
+// StateEQ applies the EQ predicate on the "state" field.
+func StateEQ(v State) predicate.FileType {
+	return predicate.FileType(sql.FieldEQ(FieldState, v))
+}
 
-// Deprecated: StateNEQ — use where.NEQ(FieldState, v).
-func StateNEQ(v State) predicate.FileType { return where.NEQ(FieldState, v) }
+// StateNEQ applies the NEQ predicate on the "state" field.
+func StateNEQ(v State) predicate.FileType {
+	return predicate.FileType(sql.FieldNEQ(FieldState, v))
+}
 
-// Deprecated: StateIn — use where.In(FieldState, vs...).
-func StateIn(vs ...State) predicate.FileType { return where.In(FieldState, vs...) }
+// StateIn applies the In predicate on the "state" field.
+func StateIn(vs ...State) predicate.FileType {
+	return predicate.FileType(sql.FieldIn(FieldState, vs...))
+}
 
-// Deprecated: StateNotIn — use where.NotIn(FieldState, vs...).
-func StateNotIn(vs ...State) predicate.FileType { return where.NotIn(FieldState, vs...) }
+// StateNotIn applies the NotIn predicate on the "state" field.
+func StateNotIn(vs ...State) predicate.FileType {
+	return predicate.FileType(sql.FieldNotIn(FieldState, vs...))
+}
 
 // HasFiles applies the HasEdge predicate on the "files" edge.
 func HasFiles() predicate.FileType {

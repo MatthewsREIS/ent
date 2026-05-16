@@ -30,7 +30,7 @@ func NewFriendshipDelete(c Config, hooks []Hook, mutation *FriendshipMutation) *
 
 // Where appends a list predicates to the FriendshipDelete builder.
 func (_d *FriendshipDelete) Where(ps ...predicate.Friendship) *FriendshipDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewFriendshipDeleteOne(d *FriendshipDelete) *FriendshipDeleteOne {
 
 // Where appends a list predicates to the FriendshipDelete builder.
 func (_d *FriendshipDeleteOne) Where(ps ...predicate.Friendship) *FriendshipDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

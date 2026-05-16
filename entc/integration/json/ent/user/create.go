@@ -16,6 +16,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/json/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,73 +34,73 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetT sets the "t" field.
 func (_c *UserCreate) SetT(v *schema.T) *UserCreate {
-	_c.mutation.SetT(v)
+	_ = _c.mutation.SetField("t", v)
 	return _c
 }
 
 // SetURL sets the "url" field.
 func (_c *UserCreate) SetURL(v *url.URL) *UserCreate {
-	_c.mutation.SetURL(v)
+	_ = _c.mutation.SetField("url", v)
 	return _c
 }
 
 // SetURLs sets the "URLs" field.
 func (_c *UserCreate) SetURLs(v []*url.URL) *UserCreate {
-	_c.mutation.SetURLs(v)
+	_ = _c.mutation.SetField("URLs", v)
 	return _c
 }
 
 // SetRaw sets the "raw" field.
 func (_c *UserCreate) SetRaw(v json.RawMessage) *UserCreate {
-	_c.mutation.SetRaw(v)
+	_ = _c.mutation.SetField("raw", v)
 	return _c
 }
 
 // SetDirs sets the "dirs" field.
 func (_c *UserCreate) SetDirs(v []http.Dir) *UserCreate {
-	_c.mutation.SetDirs(v)
+	_ = _c.mutation.SetField("dirs", v)
 	return _c
 }
 
 // SetInts sets the "ints" field.
 func (_c *UserCreate) SetInts(v []int) *UserCreate {
-	_c.mutation.SetInts(v)
+	_ = _c.mutation.SetField("ints", v)
 	return _c
 }
 
 // SetFloats sets the "floats" field.
 func (_c *UserCreate) SetFloats(v []float64) *UserCreate {
-	_c.mutation.SetFloats(v)
+	_ = _c.mutation.SetField("floats", v)
 	return _c
 }
 
 // SetStrings sets the "strings" field.
 func (_c *UserCreate) SetStrings(v []string) *UserCreate {
-	_c.mutation.SetStrings(v)
+	_ = _c.mutation.SetField("strings", v)
 	return _c
 }
 
 // SetIntsValidate sets the "ints_validate" field.
 func (_c *UserCreate) SetIntsValidate(v []int) *UserCreate {
-	_c.mutation.SetIntsValidate(v)
+	_ = _c.mutation.SetField("ints_validate", v)
 	return _c
 }
 
 // SetFloatsValidate sets the "floats_validate" field.
 func (_c *UserCreate) SetFloatsValidate(v []float64) *UserCreate {
-	_c.mutation.SetFloatsValidate(v)
+	_ = _c.mutation.SetField("floats_validate", v)
 	return _c
 }
 
 // SetStringsValidate sets the "strings_validate" field.
 func (_c *UserCreate) SetStringsValidate(v []string) *UserCreate {
-	_c.mutation.SetStringsValidate(v)
+	_ = _c.mutation.SetField("strings_validate", v)
 	return _c
 }
 
 // SetAddr sets the "addr" field.
 func (_c *UserCreate) SetAddr(v schema.Addr) *UserCreate {
-	_c.mutation.SetAddr(v)
+	_ = _c.mutation.SetField("addr", v)
 	return _c
 }
 
@@ -113,7 +114,7 @@ func (_c *UserCreate) SetNillableAddr(v *schema.Addr) *UserCreate {
 
 // SetUnknown sets the "unknown" field.
 func (_c *UserCreate) SetUnknown(v any) *UserCreate {
-	_c.mutation.SetUnknown(v)
+	_ = _c.mutation.SetField("unknown", v)
 	return _c
 }
 
@@ -152,32 +153,32 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.Dirs(); !ok {
+	if _, ok := entbuilder.GetField[[]http.Dir](_c.mutation, "dirs"); !ok {
 		v := DefaultDirs()
-		_c.mutation.SetDirs(v)
+		_ = _c.mutation.SetField("dirs", v)
 	}
-	if _, ok := _c.mutation.Ints(); !ok {
+	if _, ok := entbuilder.GetField[[]int](_c.mutation, "ints"); !ok {
 		v := DefaultInts
-		_c.mutation.SetInts(v)
+		_ = _c.mutation.SetField("ints", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.Dirs(); !ok {
+	if _, ok := entbuilder.GetField[[]http.Dir](_c.mutation, "dirs"); !ok {
 		return &ValidationError{Name: "dirs", Err: errors.New(`ent: missing required field "User.dirs"`)}
 	}
-	if v, ok := _c.mutation.IntsValidate(); ok {
+	if v, ok := entbuilder.GetField[[]int](_c.mutation, "ints_validate"); ok {
 		if err := IntsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "ints_validate", Err: fmt.Errorf(`ent: validator failed for field "User.ints_validate": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.FloatsValidate(); ok {
+	if v, ok := entbuilder.GetField[[]float64](_c.mutation, "floats_validate"); ok {
 		if err := FloatsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "floats_validate", Err: fmt.Errorf(`ent: validator failed for field "User.floats_validate": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.StringsValidate(); ok {
+	if v, ok := entbuilder.GetField[[]string](_c.mutation, "strings_validate"); ok {
 		if err := StringsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "strings_validate", Err: fmt.Errorf(`ent: validator failed for field "User.strings_validate": %w`, err)}
 		}
@@ -198,7 +199,7 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -208,55 +209,55 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node = &User{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.T(); ok {
+	if value, ok := entbuilder.GetField[*schema.T](_c.mutation, "t"); ok {
 		_spec.SetField(FieldT, field.TypeJSON, value)
 		_node.T = value
 	}
-	if value, ok := _c.mutation.URL(); ok {
+	if value, ok := entbuilder.GetField[*url.URL](_c.mutation, "url"); ok {
 		_spec.SetField(FieldURL, field.TypeJSON, value)
 		_node.URL = value
 	}
-	if value, ok := _c.mutation.URLs(); ok {
+	if value, ok := entbuilder.GetField[[]*url.URL](_c.mutation, "URLs"); ok {
 		_spec.SetField(FieldURLs, field.TypeJSON, value)
 		_node.URLs = value
 	}
-	if value, ok := _c.mutation.Raw(); ok {
+	if value, ok := entbuilder.GetField[json.RawMessage](_c.mutation, "raw"); ok {
 		_spec.SetField(FieldRaw, field.TypeJSON, value)
 		_node.Raw = value
 	}
-	if value, ok := _c.mutation.Dirs(); ok {
+	if value, ok := entbuilder.GetField[[]http.Dir](_c.mutation, "dirs"); ok {
 		_spec.SetField(FieldDirs, field.TypeJSON, value)
 		_node.Dirs = value
 	}
-	if value, ok := _c.mutation.Ints(); ok {
+	if value, ok := entbuilder.GetField[[]int](_c.mutation, "ints"); ok {
 		_spec.SetField(FieldInts, field.TypeJSON, value)
 		_node.Ints = value
 	}
-	if value, ok := _c.mutation.Floats(); ok {
+	if value, ok := entbuilder.GetField[[]float64](_c.mutation, "floats"); ok {
 		_spec.SetField(FieldFloats, field.TypeJSON, value)
 		_node.Floats = value
 	}
-	if value, ok := _c.mutation.Strings(); ok {
+	if value, ok := entbuilder.GetField[[]string](_c.mutation, "strings"); ok {
 		_spec.SetField(FieldStrings, field.TypeJSON, value)
 		_node.Strings = value
 	}
-	if value, ok := _c.mutation.IntsValidate(); ok {
+	if value, ok := entbuilder.GetField[[]int](_c.mutation, "ints_validate"); ok {
 		_spec.SetField(FieldIntsValidate, field.TypeJSON, value)
 		_node.IntsValidate = value
 	}
-	if value, ok := _c.mutation.FloatsValidate(); ok {
+	if value, ok := entbuilder.GetField[[]float64](_c.mutation, "floats_validate"); ok {
 		_spec.SetField(FieldFloatsValidate, field.TypeJSON, value)
 		_node.FloatsValidate = value
 	}
-	if value, ok := _c.mutation.StringsValidate(); ok {
+	if value, ok := entbuilder.GetField[[]string](_c.mutation, "strings_validate"); ok {
 		_spec.SetField(FieldStringsValidate, field.TypeJSON, value)
 		_node.StringsValidate = value
 	}
-	if value, ok := _c.mutation.Addr(); ok {
+	if value, ok := entbuilder.GetField[schema.Addr](_c.mutation, "addr"); ok {
 		_spec.SetField(FieldAddr, field.TypeJSON, value)
 		_node.Addr = value
 	}
-	if value, ok := _c.mutation.Unknown(); ok {
+	if value, ok := entbuilder.GetField[any](_c.mutation, "unknown"); ok {
 		_spec.SetField(FieldUnknown, field.TypeJSON, value)
 		_node.Unknown = value
 	}
@@ -317,11 +318,11 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

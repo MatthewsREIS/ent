@@ -27,7 +27,7 @@ func (_q *TweetTagQuery) Filter() *TweetTagFilter {
 
 // NewTweetTagFilterForMutation creates a new TweetTagFilter for the given mutation.
 func NewTweetTagFilterForMutation(m *TweetTagMutation) *TweetTagFilter {
-	return &TweetTagFilter{Config: m.Config, predicateAdder: m}
+	return &TweetTagFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // TweetTagFilter provides a generic filtering capability at runtime for TweetTagQuery.

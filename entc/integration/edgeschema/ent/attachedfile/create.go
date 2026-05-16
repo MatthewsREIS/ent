@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewAttachedFileCreate(c Config, hooks []Hook, mutation *AttachedFileMutatio
 
 // SetAttachTime sets the "attach_time" field.
 func (_c *AttachedFileCreate) SetAttachTime(v time.Time) *AttachedFileCreate {
-	_c.mutation.SetAttachTime(v)
+	_ = _c.mutation.SetField("attach_time", v)
 	return _c
 }
 
@@ -46,19 +47,19 @@ func (_c *AttachedFileCreate) SetNillableAttachTime(v *time.Time) *AttachedFileC
 
 // SetFID sets the "f_id" field.
 func (_c *AttachedFileCreate) SetFID(v int) *AttachedFileCreate {
-	_c.mutation.SetFID(v)
+	_ = _c.mutation.SetEdgeID("fi", v)
 	return _c
 }
 
 // SetProcID sets the "proc_id" field.
 func (_c *AttachedFileCreate) SetProcID(v int) *AttachedFileCreate {
-	_c.mutation.SetProcID(v)
+	_ = _c.mutation.SetEdgeID("proc", v)
 	return _c
 }
 
 // SetFiID sets the "fi" edge to the File entity by ID.
 func (_c *AttachedFileCreate) SetFiID(id int) *AttachedFileCreate {
-	_c.mutation.SetFiID(id)
+	_ = _c.mutation.SetEdgeID("fi", id)
 	return _c
 }
 
@@ -97,27 +98,21 @@ func (_c *AttachedFileCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *AttachedFileCreate) defaults() {
-	if _, ok := _c.mutation.AttachTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "attach_time"); !ok {
 		v := DefaultAttachTime()
-		_c.mutation.SetAttachTime(v)
+		_ = _c.mutation.SetField("attach_time", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *AttachedFileCreate) check() error {
-	if _, ok := _c.mutation.AttachTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "attach_time"); !ok {
 		return &ValidationError{Name: "attach_time", Err: errors.New(`ent: missing required field "AttachedFile.attach_time"`)}
 	}
-	if _, ok := _c.mutation.FID(); !ok {
-		return &ValidationError{Name: "f_id", Err: errors.New(`ent: missing required field "AttachedFile.f_id"`)}
-	}
-	if _, ok := _c.mutation.ProcID(); !ok {
-		return &ValidationError{Name: "proc_id", Err: errors.New(`ent: missing required field "AttachedFile.proc_id"`)}
-	}
-	if len(_c.mutation.FiIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("fi")) == 0 {
 		return &ValidationError{Name: "fi", Err: errors.New(`ent: missing required edge "AttachedFile.fi"`)}
 	}
-	if len(_c.mutation.ProcIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("proc")) == 0 {
 		return &ValidationError{Name: "proc", Err: errors.New(`ent: missing required edge "AttachedFile.proc"`)}
 	}
 	return nil
@@ -136,7 +131,7 @@ func (_c *AttachedFileCreate) sqlSave(ctx context.Context) (*AttachedFile, error
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -147,11 +142,11 @@ func (_c *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec)
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.AttachTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "attach_time"); ok {
 		_spec.SetField(FieldAttachTime, field.TypeTime, value)
 		_node.AttachTime = value
 	}
-	if nodes := _c.mutation.FiIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "fi"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -168,7 +163,7 @@ func (_c *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec)
 		_node.FID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ProcIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "proc"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -454,11 +449,11 @@ func (_c *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, er
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

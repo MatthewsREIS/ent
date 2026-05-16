@@ -32,14 +32,14 @@ func NewMetadataUpdate(c Config, hooks []Hook, mutation *MetadataMutation) *Meta
 
 // Where appends a list predicates to the MetadataUpdate builder.
 func (_u *MetadataUpdate) Where(ps ...predicate.Metadata) *MetadataUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetAge sets the "age" field.
 func (_u *MetadataUpdate) SetAge(v int) *MetadataUpdate {
-	_u.mutation.ResetAge()
-	_u.mutation.SetAge(v)
+	_ = _u.mutation.ResetField("age")
+	_ = _u.mutation.SetField("age", v)
 	return _u
 }
 
@@ -53,13 +53,13 @@ func (_u *MetadataUpdate) SetNillableAge(v *int) *MetadataUpdate {
 
 // AddAge adds value to the "age" field.
 func (_u *MetadataUpdate) AddAge(v int) *MetadataUpdate {
-	_u.mutation.AddAge(v)
+	_ = _u.mutation.AddField("age", v)
 	return _u
 }
 
 // SetParentID sets the "parent_id" field.
 func (_u *MetadataUpdate) SetParentID(v int) *MetadataUpdate {
-	_u.mutation.SetParentID(v)
+	_ = _u.mutation.SetEdgeID("parent", v)
 	return _u
 }
 
@@ -73,13 +73,13 @@ func (_u *MetadataUpdate) SetNillableParentID(v *int) *MetadataUpdate {
 
 // ClearParentID clears the value of the "parent_id" field.
 func (_u *MetadataUpdate) ClearParentID() *MetadataUpdate {
-	_u.mutation.ClearParentID()
+	_ = _u.mutation.ClearEdge("parent")
 	return _u
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *MetadataUpdate) SetUserID(id int) *MetadataUpdate {
-	_u.mutation.SetUserID(id)
+	_ = _u.mutation.SetEdgeID("user", id)
 	return _u
 }
 
@@ -93,7 +93,7 @@ func (_u *MetadataUpdate) SetNillableUserID(id *int) *MetadataUpdate {
 
 // AddChildIDs adds the "children" edge to the Metadata entity by IDs.
 func (_u *MetadataUpdate) AddChildIDs(ids ...int) *MetadataUpdate {
-	_u.mutation.AddChildIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -104,25 +104,25 @@ func (_u *MetadataUpdate) Mutation() *MetadataMutation {
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *MetadataUpdate) ClearUser() *MetadataUpdate {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // ClearChildren clears all "children" edges to the Metadata entity.
 func (_u *MetadataUpdate) ClearChildren() *MetadataUpdate {
-	_u.mutation.ClearChildren()
+	_ = _u.mutation.ClearEdge("children")
 	return _u
 }
 
 // RemoveChildIDs removes the "children" edge to Metadata entities by IDs.
 func (_u *MetadataUpdate) RemoveChildIDs(ids ...int) *MetadataUpdate {
-	_u.mutation.RemoveChildIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearParent clears the "parent" edge to the Metadata entity.
 func (_u *MetadataUpdate) ClearParent() *MetadataUpdate {
-	_u.mutation.ClearParent()
+	_ = _u.mutation.ClearEdge("parent")
 	return _u
 }
 
@@ -162,13 +162,14 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedAge(); ok {
+	if added, ok := _u.mutation.AddedField("age"); ok {
+		value := added.(int)
 		_spec.AddField(FieldAge, field.TypeInt, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -181,7 +182,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -197,7 +198,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ChildrenCleared() {
+	if _u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -210,7 +211,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("children"); len(nodes) > 0 && !_u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -226,7 +227,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -242,7 +243,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ParentCleared() {
+	if _u.mutation.EdgeCleared("parent") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -255,7 +256,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -298,8 +299,8 @@ func NewMetadataUpdateOne(c Config, hooks []Hook, mutation *MetadataMutation) *M
 
 // SetAge sets the "age" field.
 func (_u *MetadataUpdateOne) SetAge(v int) *MetadataUpdateOne {
-	_u.mutation.ResetAge()
-	_u.mutation.SetAge(v)
+	_ = _u.mutation.ResetField("age")
+	_ = _u.mutation.SetField("age", v)
 	return _u
 }
 
@@ -313,13 +314,13 @@ func (_u *MetadataUpdateOne) SetNillableAge(v *int) *MetadataUpdateOne {
 
 // AddAge adds value to the "age" field.
 func (_u *MetadataUpdateOne) AddAge(v int) *MetadataUpdateOne {
-	_u.mutation.AddAge(v)
+	_ = _u.mutation.AddField("age", v)
 	return _u
 }
 
 // SetParentID sets the "parent_id" field.
 func (_u *MetadataUpdateOne) SetParentID(v int) *MetadataUpdateOne {
-	_u.mutation.SetParentID(v)
+	_ = _u.mutation.SetEdgeID("parent", v)
 	return _u
 }
 
@@ -333,13 +334,13 @@ func (_u *MetadataUpdateOne) SetNillableParentID(v *int) *MetadataUpdateOne {
 
 // ClearParentID clears the value of the "parent_id" field.
 func (_u *MetadataUpdateOne) ClearParentID() *MetadataUpdateOne {
-	_u.mutation.ClearParentID()
+	_ = _u.mutation.ClearEdge("parent")
 	return _u
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *MetadataUpdateOne) SetUserID(id int) *MetadataUpdateOne {
-	_u.mutation.SetUserID(id)
+	_ = _u.mutation.SetEdgeID("user", id)
 	return _u
 }
 
@@ -353,7 +354,7 @@ func (_u *MetadataUpdateOne) SetNillableUserID(id *int) *MetadataUpdateOne {
 
 // AddChildIDs adds the "children" edge to the Metadata entity by IDs.
 func (_u *MetadataUpdateOne) AddChildIDs(ids ...int) *MetadataUpdateOne {
-	_u.mutation.AddChildIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -364,31 +365,31 @@ func (_u *MetadataUpdateOne) Mutation() *MetadataMutation {
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *MetadataUpdateOne) ClearUser() *MetadataUpdateOne {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // ClearChildren clears all "children" edges to the Metadata entity.
 func (_u *MetadataUpdateOne) ClearChildren() *MetadataUpdateOne {
-	_u.mutation.ClearChildren()
+	_ = _u.mutation.ClearEdge("children")
 	return _u
 }
 
 // RemoveChildIDs removes the "children" edge to Metadata entities by IDs.
 func (_u *MetadataUpdateOne) RemoveChildIDs(ids ...int) *MetadataUpdateOne {
-	_u.mutation.RemoveChildIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearParent clears the "parent" edge to the Metadata entity.
 func (_u *MetadataUpdateOne) ClearParent() *MetadataUpdateOne {
-	_u.mutation.ClearParent()
+	_ = _u.mutation.ClearEdge("parent")
 	return _u
 }
 
 // Where appends a list predicates to the MetadataUpdate builder.
 func (_u *MetadataUpdateOne) Where(ps ...predicate.Metadata) *MetadataUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -428,10 +429,11 @@ func (_u *MetadataUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Metadata.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -452,13 +454,14 @@ func (_u *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedAge(); ok {
+	if added, ok := _u.mutation.AddedField("age"); ok {
+		value := added.(int)
 		_spec.AddField(FieldAge, field.TypeInt, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -471,7 +474,7 @@ func (_u *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -487,7 +490,7 @@ func (_u *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ChildrenCleared() {
+	if _u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -500,7 +503,7 @@ func (_u *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("children"); len(nodes) > 0 && !_u.mutation.EdgeCleared("children") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -516,7 +519,7 @@ func (_u *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -532,7 +535,7 @@ func (_u *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.ParentCleared() {
+	if _u.mutation.EdgeCleared("parent") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -545,7 +548,7 @@ func (_u *MetadataUpdateOne) sqlSave(ctx context.Context) (_node *Metadata, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

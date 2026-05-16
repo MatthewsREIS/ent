@@ -104,7 +104,7 @@ func (c *CarClient) DeleteOne(_m *Car) *car.CarDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CarClient) DeleteOneID(id uuid.UUID) *car.CarDeleteOne {
 	mutation := NewCarMutation(c.Config, OpDeleteOne, WithCarID(id, nil))
-	mutation.Where(car.ID(id))
+	mutation.WhereP(car.ID(id))
 	return car.NewCarDeleteOne(car.NewCarDelete(c.Config, c.Hooks(), mutation))
 }
 

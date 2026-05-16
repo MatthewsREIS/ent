@@ -103,7 +103,7 @@ func (c *FileTypeClient) DeleteOne(_m *FileType) *filetype.FileTypeDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FileTypeClient) DeleteOneID(id int) *filetype.FileTypeDeleteOne {
 	mutation := NewFileTypeMutation(c.Config, OpDeleteOne, WithFileTypeID(id, nil))
-	mutation.Where(filetype.ID(id))
+	mutation.WhereP(filetype.ID(id))
 	return filetype.NewFileTypeDeleteOne(filetype.NewFileTypeDelete(c.Config, c.Hooks(), mutation))
 }
 

@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,74 +59,120 @@ func IDLTE(id int) predicate.Role {
 	return predicate.Role(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Name — use where.EQ(FieldName, v).
-func Name(v string) predicate.Role { return where.EQ(FieldName, v) }
+// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
+func Name(v string) predicate.Role {
+	return predicate.Role(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: CreatedAt — use where.EQ(FieldCreatedAt, v).
-func CreatedAt(v time.Time) predicate.Role { return where.EQ(FieldCreatedAt, v) }
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Role {
+	return predicate.Role(sql.FieldEQ(FieldCreatedAt, v))
+}
 
-// Deprecated: NameEQ — use where.EQ(FieldName, v).
-func NameEQ(v string) predicate.Role { return where.EQ(FieldName, v) }
+// NameEQ applies the EQ predicate on the "name" field.
+func NameEQ(v string) predicate.Role {
+	return predicate.Role(sql.FieldEQ(FieldName, v))
+}
 
-// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
-func NameNEQ(v string) predicate.Role { return where.NEQ(FieldName, v) }
+// NameNEQ applies the NEQ predicate on the "name" field.
+func NameNEQ(v string) predicate.Role {
+	return predicate.Role(sql.FieldNEQ(FieldName, v))
+}
 
-// Deprecated: NameIn — use where.In(FieldName, vs...).
-func NameIn(vs ...string) predicate.Role { return where.In(FieldName, vs...) }
+// NameIn applies the In predicate on the "name" field.
+func NameIn(vs ...string) predicate.Role {
+	return predicate.Role(sql.FieldIn(FieldName, vs...))
+}
 
-// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
-func NameNotIn(vs ...string) predicate.Role { return where.NotIn(FieldName, vs...) }
+// NameNotIn applies the NotIn predicate on the "name" field.
+func NameNotIn(vs ...string) predicate.Role {
+	return predicate.Role(sql.FieldNotIn(FieldName, vs...))
+}
 
-// Deprecated: NameGT — use where.GT(FieldName, v).
-func NameGT(v string) predicate.Role { return where.GT(FieldName, v) }
+// NameGT applies the GT predicate on the "name" field.
+func NameGT(v string) predicate.Role {
+	return predicate.Role(sql.FieldGT(FieldName, v))
+}
 
-// Deprecated: NameGTE — use where.GTE(FieldName, v).
-func NameGTE(v string) predicate.Role { return where.GTE(FieldName, v) }
+// NameGTE applies the GTE predicate on the "name" field.
+func NameGTE(v string) predicate.Role {
+	return predicate.Role(sql.FieldGTE(FieldName, v))
+}
 
-// Deprecated: NameLT — use where.LT(FieldName, v).
-func NameLT(v string) predicate.Role { return where.LT(FieldName, v) }
+// NameLT applies the LT predicate on the "name" field.
+func NameLT(v string) predicate.Role {
+	return predicate.Role(sql.FieldLT(FieldName, v))
+}
 
-// Deprecated: NameLTE — use where.LTE(FieldName, v).
-func NameLTE(v string) predicate.Role { return where.LTE(FieldName, v) }
+// NameLTE applies the LTE predicate on the "name" field.
+func NameLTE(v string) predicate.Role {
+	return predicate.Role(sql.FieldLTE(FieldName, v))
+}
 
-// Deprecated: NameContains — use where.Contains(FieldName, v).
-func NameContains(v string) predicate.Role { return where.Contains(FieldName, v) }
+// NameContains applies the Contains predicate on the "name" field.
+func NameContains(v string) predicate.Role {
+	return predicate.Role(sql.FieldContains(FieldName, v))
+}
 
-// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
-func NameHasPrefix(v string) predicate.Role { return where.HasPrefix(FieldName, v) }
+// NameHasPrefix applies the HasPrefix predicate on the "name" field.
+func NameHasPrefix(v string) predicate.Role {
+	return predicate.Role(sql.FieldHasPrefix(FieldName, v))
+}
 
-// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
-func NameHasSuffix(v string) predicate.Role { return where.HasSuffix(FieldName, v) }
+// NameHasSuffix applies the HasSuffix predicate on the "name" field.
+func NameHasSuffix(v string) predicate.Role {
+	return predicate.Role(sql.FieldHasSuffix(FieldName, v))
+}
 
-// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
-func NameEqualFold(v string) predicate.Role { return where.EqualFold(FieldName, v) }
+// NameEqualFold applies the EqualFold predicate on the "name" field.
+func NameEqualFold(v string) predicate.Role {
+	return predicate.Role(sql.FieldEqualFold(FieldName, v))
+}
 
-// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
-func NameContainsFold(v string) predicate.Role { return where.ContainsFold(FieldName, v) }
+// NameContainsFold applies the ContainsFold predicate on the "name" field.
+func NameContainsFold(v string) predicate.Role {
+	return predicate.Role(sql.FieldContainsFold(FieldName, v))
+}
 
-// Deprecated: CreatedAtEQ — use where.EQ(FieldCreatedAt, v).
-func CreatedAtEQ(v time.Time) predicate.Role { return where.EQ(FieldCreatedAt, v) }
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Role {
+	return predicate.Role(sql.FieldEQ(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtNEQ — use where.NEQ(FieldCreatedAt, v).
-func CreatedAtNEQ(v time.Time) predicate.Role { return where.NEQ(FieldCreatedAt, v) }
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Role {
+	return predicate.Role(sql.FieldNEQ(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtIn — use where.In(FieldCreatedAt, vs...).
-func CreatedAtIn(vs ...time.Time) predicate.Role { return where.In(FieldCreatedAt, vs...) }
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Role {
+	return predicate.Role(sql.FieldIn(FieldCreatedAt, vs...))
+}
 
-// Deprecated: CreatedAtNotIn — use where.NotIn(FieldCreatedAt, vs...).
-func CreatedAtNotIn(vs ...time.Time) predicate.Role { return where.NotIn(FieldCreatedAt, vs...) }
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Role {
+	return predicate.Role(sql.FieldNotIn(FieldCreatedAt, vs...))
+}
 
-// Deprecated: CreatedAtGT — use where.GT(FieldCreatedAt, v).
-func CreatedAtGT(v time.Time) predicate.Role { return where.GT(FieldCreatedAt, v) }
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Role {
+	return predicate.Role(sql.FieldGT(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtGTE — use where.GTE(FieldCreatedAt, v).
-func CreatedAtGTE(v time.Time) predicate.Role { return where.GTE(FieldCreatedAt, v) }
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Role {
+	return predicate.Role(sql.FieldGTE(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtLT — use where.LT(FieldCreatedAt, v).
-func CreatedAtLT(v time.Time) predicate.Role { return where.LT(FieldCreatedAt, v) }
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Role {
+	return predicate.Role(sql.FieldLT(FieldCreatedAt, v))
+}
 
-// Deprecated: CreatedAtLTE — use where.LTE(FieldCreatedAt, v).
-func CreatedAtLTE(v time.Time) predicate.Role { return where.LTE(FieldCreatedAt, v) }
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Role {
+	return predicate.Role(sql.FieldLTE(FieldCreatedAt, v))
+}
 
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Role {

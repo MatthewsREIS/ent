@@ -27,7 +27,7 @@ func (_q *IntSIDQuery) Filter() *IntSIDFilter {
 
 // NewIntSIDFilterForMutation creates a new IntSIDFilter for the given mutation.
 func NewIntSIDFilterForMutation(m *IntSIDMutation) *IntSIDFilter {
-	return &IntSIDFilter{Config: m.Config, predicateAdder: m}
+	return &IntSIDFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // IntSIDFilter provides a generic filtering capability at runtime for IntSIDQuery.

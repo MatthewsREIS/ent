@@ -99,7 +99,7 @@ func (c *APIClient) DeleteOne(_m *Api) *api.APIDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *APIClient) DeleteOneID(id string) *api.APIDeleteOne {
 	mutation := NewAPIMutation(c.Config, OpDeleteOne, WithApiID(id, nil))
-	mutation.Where(api.ID(id))
+	mutation.WhereP(api.ID(id))
 	return api.NewAPIDeleteOne(api.NewAPIDelete(c.Config, c.Hooks(), mutation))
 }
 

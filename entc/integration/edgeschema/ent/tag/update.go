@@ -34,13 +34,13 @@ func NewTagUpdate(c Config, hooks []Hook, mutation *TagMutation) *TagUpdate {
 
 // Where appends a list predicates to the TagUpdate builder.
 func (_u *TagUpdate) Where(ps ...predicate.Tag) *TagUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetValue sets the "value" field.
 func (_u *TagUpdate) SetValue(v string) *TagUpdate {
-	_u.mutation.SetValue(v)
+	_ = _u.mutation.SetField("value", v)
 	return _u
 }
 
@@ -54,25 +54,25 @@ func (_u *TagUpdate) SetNillableValue(v *string) *TagUpdate {
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
 func (_u *TagUpdate) AddTweetIDs(ids ...int) *TagUpdate {
-	_u.mutation.AddTweetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *TagUpdate) AddGroupIDs(ids ...int) *TagUpdate {
-	_u.mutation.AddGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (_u *TagUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TagUpdate {
-	_u.mutation.AddTweetTagIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
 func (_u *TagUpdate) AddGroupTagIDs(ids ...int) *TagUpdate {
-	_u.mutation.AddGroupTagIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -83,49 +83,49 @@ func (_u *TagUpdate) Mutation() *TagMutation {
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
 func (_u *TagUpdate) ClearTweets() *TagUpdate {
-	_u.mutation.ClearTweets()
+	_ = _u.mutation.ClearEdge("tweets")
 	return _u
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
 func (_u *TagUpdate) RemoveTweetIDs(ids ...int) *TagUpdate {
-	_u.mutation.RemoveTweetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *TagUpdate) ClearGroups() *TagUpdate {
-	_u.mutation.ClearGroups()
+	_ = _u.mutation.ClearEdge("groups")
 	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *TagUpdate) RemoveGroupIDs(ids ...int) *TagUpdate {
-	_u.mutation.RemoveGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
 func (_u *TagUpdate) ClearTweetTags() *TagUpdate {
-	_u.mutation.ClearTweetTags()
+	_ = _u.mutation.ClearEdge("tweet_tags")
 	return _u
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
 func (_u *TagUpdate) RemoveTweetTagIDs(ids ...uuid.UUID) *TagUpdate {
-	_u.mutation.RemoveTweetTagIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearGroupTags clears all "group_tags" edges to the GroupTag entity.
 func (_u *TagUpdate) ClearGroupTags() *TagUpdate {
-	_u.mutation.ClearGroupTags()
+	_ = _u.mutation.ClearEdge("group_tags")
 	return _u
 }
 
 // RemoveGroupTagIDs removes the "group_tags" edge to GroupTag entities by IDs.
 func (_u *TagUpdate) RemoveGroupTagIDs(ids ...int) *TagUpdate {
-	_u.mutation.RemoveGroupTagIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -165,10 +165,10 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Value(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "value"); ok {
 		_spec.SetField(FieldValue, field.TypeString, value)
 	}
-	if _u.mutation.TweetsCleared() {
+	if _u.mutation.EdgeCleared("tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -186,7 +186,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetsIDs(); len(nodes) > 0 && !_u.mutation.TweetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -207,7 +207,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -228,7 +228,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.GroupsCleared() {
+	if _u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -241,7 +241,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("groups"); len(nodes) > 0 && !_u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -257,7 +257,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -273,7 +273,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetTagsCleared() {
+	if _u.mutation.EdgeCleared("tweet_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -286,7 +286,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetTagsIDs(); len(nodes) > 0 && !_u.mutation.TweetTagsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweet_tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweet_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -302,7 +302,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetTagsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -318,7 +318,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.GroupTagsCleared() {
+	if _u.mutation.EdgeCleared("group_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -331,7 +331,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGroupTagsIDs(); len(nodes) > 0 && !_u.mutation.GroupTagsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("group_tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("group_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -347,7 +347,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupTagsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("group_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -390,7 +390,7 @@ func NewTagUpdateOne(c Config, hooks []Hook, mutation *TagMutation) *TagUpdateOn
 
 // SetValue sets the "value" field.
 func (_u *TagUpdateOne) SetValue(v string) *TagUpdateOne {
-	_u.mutation.SetValue(v)
+	_ = _u.mutation.SetField("value", v)
 	return _u
 }
 
@@ -404,25 +404,25 @@ func (_u *TagUpdateOne) SetNillableValue(v *string) *TagUpdateOne {
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
 func (_u *TagUpdateOne) AddTweetIDs(ids ...int) *TagUpdateOne {
-	_u.mutation.AddTweetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *TagUpdateOne) AddGroupIDs(ids ...int) *TagUpdateOne {
-	_u.mutation.AddGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (_u *TagUpdateOne) AddTweetTagIDs(ids ...uuid.UUID) *TagUpdateOne {
-	_u.mutation.AddTweetTagIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
 func (_u *TagUpdateOne) AddGroupTagIDs(ids ...int) *TagUpdateOne {
-	_u.mutation.AddGroupTagIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -433,55 +433,55 @@ func (_u *TagUpdateOne) Mutation() *TagMutation {
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
 func (_u *TagUpdateOne) ClearTweets() *TagUpdateOne {
-	_u.mutation.ClearTweets()
+	_ = _u.mutation.ClearEdge("tweets")
 	return _u
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
 func (_u *TagUpdateOne) RemoveTweetIDs(ids ...int) *TagUpdateOne {
-	_u.mutation.RemoveTweetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *TagUpdateOne) ClearGroups() *TagUpdateOne {
-	_u.mutation.ClearGroups()
+	_ = _u.mutation.ClearEdge("groups")
 	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *TagUpdateOne) RemoveGroupIDs(ids ...int) *TagUpdateOne {
-	_u.mutation.RemoveGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
 func (_u *TagUpdateOne) ClearTweetTags() *TagUpdateOne {
-	_u.mutation.ClearTweetTags()
+	_ = _u.mutation.ClearEdge("tweet_tags")
 	return _u
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
 func (_u *TagUpdateOne) RemoveTweetTagIDs(ids ...uuid.UUID) *TagUpdateOne {
-	_u.mutation.RemoveTweetTagIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearGroupTags clears all "group_tags" edges to the GroupTag entity.
 func (_u *TagUpdateOne) ClearGroupTags() *TagUpdateOne {
-	_u.mutation.ClearGroupTags()
+	_ = _u.mutation.ClearEdge("group_tags")
 	return _u
 }
 
 // RemoveGroupTagIDs removes the "group_tags" edge to GroupTag entities by IDs.
 func (_u *TagUpdateOne) RemoveGroupTagIDs(ids ...int) *TagUpdateOne {
-	_u.mutation.RemoveGroupTagIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the TagUpdate builder.
 func (_u *TagUpdateOne) Where(ps ...predicate.Tag) *TagUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -521,10 +521,11 @@ func (_u *TagUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Tag.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -545,10 +546,10 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Value(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "value"); ok {
 		_spec.SetField(FieldValue, field.TypeString, value)
 	}
-	if _u.mutation.TweetsCleared() {
+	if _u.mutation.EdgeCleared("tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -566,7 +567,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetsIDs(); len(nodes) > 0 && !_u.mutation.TweetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -587,7 +588,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -608,7 +609,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.GroupsCleared() {
+	if _u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -621,7 +622,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("groups"); len(nodes) > 0 && !_u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -637,7 +638,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -653,7 +654,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetTagsCleared() {
+	if _u.mutation.EdgeCleared("tweet_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -666,7 +667,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetTagsIDs(); len(nodes) > 0 && !_u.mutation.TweetTagsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweet_tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweet_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -682,7 +683,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetTagsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -698,7 +699,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.GroupTagsCleared() {
+	if _u.mutation.EdgeCleared("group_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -711,7 +712,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGroupTagsIDs(); len(nodes) > 0 && !_u.mutation.GroupTagsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("group_tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("group_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -727,7 +728,7 @@ func (_u *TagUpdateOne) sqlSave(ctx context.Context) (_node *Tag, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupTagsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("group_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,

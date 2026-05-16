@@ -101,7 +101,7 @@ func (c *MixinIDClient) DeleteOne(_m *MixinID) *mixinid.MixinIDDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MixinIDClient) DeleteOneID(id uuid.UUID) *mixinid.MixinIDDeleteOne {
 	mutation := NewMixinIDMutation(c.Config, OpDeleteOne, WithMixinIDID(id, nil))
-	mutation.Where(mixinid.ID(id))
+	mutation.WhereP(mixinid.ID(id))
 	return mixinid.NewMixinIDDeleteOne(mixinid.NewMixinIDDelete(c.Config, c.Hooks(), mutation))
 }
 

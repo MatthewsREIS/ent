@@ -94,7 +94,12 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.Upda
 	{{- else }}
 		mutation := New{{ $n.MutationName }}(c.Config, OpUpdateOne)
 		{{- range $id := $n.EdgeSchema.ID }}
+			{{- $edgeName := $id.EdgeName }}
+			{{- if $edgeName }}
+			_ = mutation.SetEdgeID({{ printf "%q" $edgeName }}, {{ $rec }}.{{ $id.StructField }})
+			{{- else }}
 			_ = mutation.SetField({{ printf "%q" $id.Name }}, {{ $rec }}.{{ $id.StructField }})
+			{{- end }}
 		{{- end }}
 	{{- end }}
 	return {{ $q }}New{{ $n.UpdateOneName }}(c.Config, c.Hooks(), mutation)

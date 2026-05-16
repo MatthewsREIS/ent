@@ -25,7 +25,7 @@ func (_q *RelationshipInfoQuery) Filter() *RelationshipInfoFilter {
 
 // NewRelationshipInfoFilterForMutation creates a new RelationshipInfoFilter for the given mutation.
 func NewRelationshipInfoFilterForMutation(m *RelationshipInfoMutation) *RelationshipInfoFilter {
-	return &RelationshipInfoFilter{Config: m.Config, predicateAdder: m}
+	return &RelationshipInfoFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // RelationshipInfoFilter provides a generic filtering capability at runtime for RelationshipInfoQuery.

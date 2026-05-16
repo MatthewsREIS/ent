@@ -27,7 +27,7 @@ func (_q *NodeQuery) Filter() *NodeFilter {
 
 // NewNodeFilterForMutation creates a new NodeFilter for the given mutation.
 func NewNodeFilterForMutation(m *NodeMutation) *NodeFilter {
-	return &NodeFilter{Config: m.Config, predicateAdder: m}
+	return &NodeFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // NodeFilter provides a generic filtering capability at runtime for NodeQuery.

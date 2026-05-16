@@ -27,7 +27,7 @@ func (_q *CardQuery) Filter() *CardFilter {
 
 // NewCardFilterForMutation creates a new CardFilter for the given mutation.
 func NewCardFilterForMutation(m *CardMutation) *CardFilter {
-	return &CardFilter{Config: m.Config, predicateAdder: m}
+	return &CardFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // CardFilter provides a generic filtering capability at runtime for CardQuery.

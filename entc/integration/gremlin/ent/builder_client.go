@@ -99,7 +99,7 @@ func (c *BuilderClient) DeleteOne(_m *Builder) *builder.BuilderDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *BuilderClient) DeleteOneID(id string) *builder.BuilderDeleteOne {
 	mutation := NewBuilderMutation(c.Config, OpDeleteOne, WithBuilderID(id, nil))
-	mutation.Where(builder.ID(id))
+	mutation.WhereP(builder.ID(id))
 	return builder.NewBuilderDeleteOne(builder.NewBuilderDelete(c.Config, c.Hooks(), mutation))
 }
 

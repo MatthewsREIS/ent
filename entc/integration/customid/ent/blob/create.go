@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -34,7 +35,7 @@ func NewBlobCreate(c Config, hooks []Hook, mutation *BlobMutation) *BlobCreate {
 
 // SetUUID sets the "uuid" field.
 func (_c *BlobCreate) SetUUID(v uuid.UUID) *BlobCreate {
-	_c.mutation.SetUUID(v)
+	_ = _c.mutation.SetField("uuid", v)
 	return _c
 }
 
@@ -48,7 +49,7 @@ func (_c *BlobCreate) SetNillableUUID(v *uuid.UUID) *BlobCreate {
 
 // SetCount sets the "count" field.
 func (_c *BlobCreate) SetCount(v int) *BlobCreate {
-	_c.mutation.SetCount(v)
+	_ = _c.mutation.SetField("count", v)
 	return _c
 }
 
@@ -76,7 +77,7 @@ func (_c *BlobCreate) SetNillableID(v *uuid.UUID) *BlobCreate {
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
 func (_c *BlobCreate) SetParentID(id uuid.UUID) *BlobCreate {
-	_c.mutation.SetParentID(id)
+	_ = _c.mutation.SetEdgeID("parent", id)
 	return _c
 }
 
@@ -90,7 +91,7 @@ func (_c *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
 func (_c *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
-	_c.mutation.AddLinkIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("links", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -129,13 +130,13 @@ func (_c *BlobCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *BlobCreate) defaults() {
-	if _, ok := _c.mutation.UUID(); !ok {
+	if _, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "uuid"); !ok {
 		v := DefaultUUID()
-		_c.mutation.SetUUID(v)
+		_ = _c.mutation.SetField("uuid", v)
 	}
-	if _, ok := _c.mutation.Count(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "count"); !ok {
 		v := DefaultCount
-		_c.mutation.SetCount(v)
+		_ = _c.mutation.SetField("count", v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := DefaultID()
@@ -145,10 +146,10 @@ func (_c *BlobCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *BlobCreate) check() error {
-	if _, ok := _c.mutation.UUID(); !ok {
+	if _, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "uuid"); !ok {
 		return &ValidationError{Name: "uuid", Err: errors.New(`ent: missing required field "Blob.uuid"`)}
 	}
-	if _, ok := _c.mutation.Count(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "count"); !ok {
 		return &ValidationError{Name: "count", Err: errors.New(`ent: missing required field "Blob.count"`)}
 	}
 	return nil
@@ -172,7 +173,7 @@ func (_c *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -183,19 +184,20 @@ func (_c *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(uuid.UUID)
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.UUID(); ok {
+	if value, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "uuid"); ok {
 		_spec.SetField(FieldUUID, field.TypeUUID, value)
 		_node.UUID = value
 	}
-	if value, ok := _c.mutation.Count(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "count"); ok {
 		_spec.SetField(FieldCount, field.TypeInt, value)
 		_node.Count = value
 	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -211,7 +213,7 @@ func (_c *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LinksIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "links"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -488,7 +490,7 @@ func (_c *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

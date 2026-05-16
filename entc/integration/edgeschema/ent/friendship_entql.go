@@ -27,7 +27,7 @@ func (_q *FriendshipQuery) Filter() *FriendshipFilter {
 
 // NewFriendshipFilterForMutation creates a new FriendshipFilter for the given mutation.
 func NewFriendshipFilterForMutation(m *FriendshipMutation) *FriendshipFilter {
-	return &FriendshipFilter{Config: m.Config, predicateAdder: m}
+	return &FriendshipFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // FriendshipFilter provides a generic filtering capability at runtime for FriendshipQuery.

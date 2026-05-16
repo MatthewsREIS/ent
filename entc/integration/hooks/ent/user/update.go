@@ -32,14 +32,14 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetVersion sets the "version" field.
 func (_u *UserUpdate) SetVersion(v int) *UserUpdate {
-	_u.mutation.ResetVersion()
-	_u.mutation.SetVersion(v)
+	_ = _u.mutation.ResetField("version")
+	_ = _u.mutation.SetField("version", v)
 	return _u
 }
 
@@ -53,13 +53,13 @@ func (_u *UserUpdate) SetNillableVersion(v *int) *UserUpdate {
 
 // AddVersion adds value to the "version" field.
 func (_u *UserUpdate) AddVersion(v int) *UserUpdate {
-	_u.mutation.AddVersion(v)
+	_ = _u.mutation.AddField("version", v)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -73,8 +73,8 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 
 // SetWorth sets the "worth" field.
 func (_u *UserUpdate) SetWorth(v uint) *UserUpdate {
-	_u.mutation.ResetWorth()
-	_u.mutation.SetWorth(v)
+	_ = _u.mutation.ResetField("worth")
+	_ = _u.mutation.SetField("worth", v)
 	return _u
 }
 
@@ -88,19 +88,19 @@ func (_u *UserUpdate) SetNillableWorth(v *uint) *UserUpdate {
 
 // AddWorth adds value to the "worth" field.
 func (_u *UserUpdate) AddWorth(v int) *UserUpdate {
-	_u.mutation.AddWorth(v)
+	_ = _u.mutation.AddField("worth", v)
 	return _u
 }
 
 // ClearWorth clears the value of the "worth" field.
 func (_u *UserUpdate) ClearWorth() *UserUpdate {
-	_u.mutation.ClearWorth()
+	_ = _u.mutation.ClearField("worth")
 	return _u
 }
 
 // SetPassword sets the "password" field.
 func (_u *UserUpdate) SetPassword(v string) *UserUpdate {
-	_u.mutation.SetPassword(v)
+	_ = _u.mutation.SetField("password", v)
 	return _u
 }
 
@@ -114,13 +114,13 @@ func (_u *UserUpdate) SetNillablePassword(v *string) *UserUpdate {
 
 // ClearPassword clears the value of the "password" field.
 func (_u *UserUpdate) ClearPassword() *UserUpdate {
-	_u.mutation.ClearPassword()
+	_ = _u.mutation.ClearField("password")
 	return _u
 }
 
 // SetActive sets the "active" field.
 func (_u *UserUpdate) SetActive(v bool) *UserUpdate {
-	_u.mutation.SetActive(v)
+	_ = _u.mutation.SetField("active", v)
 	return _u
 }
 
@@ -134,25 +134,25 @@ func (_u *UserUpdate) SetNillableActive(v *bool) *UserUpdate {
 
 // AddCardIDs adds the "cards" edge to the Card entity by IDs.
 func (_u *UserUpdate) AddCardIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddCardIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("cards", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddPetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddFriendIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (_u *UserUpdate) SetBestFriendID(id int) *UserUpdate {
-	_u.mutation.SetBestFriendID(id)
+	_ = _u.mutation.SetEdgeID("best_friend", id)
 	return _u
 }
 
@@ -171,43 +171,43 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 
 // ClearCards clears all "cards" edges to the Card entity.
 func (_u *UserUpdate) ClearCards() *UserUpdate {
-	_u.mutation.ClearCards()
+	_ = _u.mutation.ClearEdge("cards")
 	return _u
 }
 
 // RemoveCardIDs removes the "cards" edge to Card entities by IDs.
 func (_u *UserUpdate) RemoveCardIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveCardIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("cards", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearPets clears all "pets" edges to the Pet entity.
 func (_u *UserUpdate) ClearPets() *UserUpdate {
-	_u.mutation.ClearPets()
+	_ = _u.mutation.ClearEdge("pets")
 	return _u
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemovePetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
 func (_u *UserUpdate) ClearFriends() *UserUpdate {
-	_u.mutation.ClearFriends()
+	_ = _u.mutation.ClearEdge("friends")
 	return _u
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemoveFriendIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearBestFriend clears the "best_friend" edge to the User entity.
 func (_u *UserUpdate) ClearBestFriend() *UserUpdate {
-	_u.mutation.ClearBestFriend()
+	_ = _u.mutation.ClearEdge("best_friend")
 	return _u
 }
 
@@ -247,34 +247,36 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Version(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "version"); ok {
 		_spec.SetField(FieldVersion, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedVersion(); ok {
+	if added, ok := _u.mutation.AddedField("version"); ok {
+		value := added.(int)
 		_spec.AddField(FieldVersion, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Worth(); ok {
+	if value, ok := entbuilder.GetField[uint](_u.mutation, "worth"); ok {
 		_spec.SetField(FieldWorth, field.TypeUint, value)
 	}
-	if value, ok := _u.mutation.AddedWorth(); ok {
+	if added, ok := _u.mutation.AddedField("worth"); ok {
+		value := added.(int)
 		_spec.AddField(FieldWorth, field.TypeUint, value)
 	}
-	if _u.mutation.WorthCleared() {
+	if _u.mutation.FieldCleared("worth") {
 		_spec.ClearField(FieldWorth, field.TypeUint)
 	}
-	if value, ok := _u.mutation.Password(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "password"); ok {
 		_spec.SetField(FieldPassword, field.TypeString, value)
 	}
-	if _u.mutation.PasswordCleared() {
+	if _u.mutation.FieldCleared("password") {
 		_spec.ClearField(FieldPassword, field.TypeString)
 	}
-	if value, ok := _u.mutation.Active(); ok {
+	if value, ok := entbuilder.GetField[bool](_u.mutation, "active"); ok {
 		_spec.SetField(FieldActive, field.TypeBool, value)
 	}
-	if _u.mutation.CardsCleared() {
+	if _u.mutation.EdgeCleared("cards") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -287,7 +289,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedCardsIDs(); len(nodes) > 0 && !_u.mutation.CardsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("cards"); len(nodes) > 0 && !_u.mutation.EdgeCleared("cards") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -303,7 +305,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CardsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("cards"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -319,7 +321,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.PetsCleared() {
+	if _u.mutation.EdgeCleared("pets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -332,7 +334,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedPetsIDs(); len(nodes) > 0 && !_u.mutation.PetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("pets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("pets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -348,7 +350,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("pets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -364,7 +366,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FriendsCleared() {
+	if _u.mutation.EdgeCleared("friends") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -377,7 +379,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !_u.mutation.FriendsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("friends"); len(nodes) > 0 && !_u.mutation.EdgeCleared("friends") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -393,7 +395,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -409,7 +411,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.BestFriendCleared() {
+	if _u.mutation.EdgeCleared("best_friend") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -422,7 +424,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.BestFriendIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("best_friend"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -465,8 +467,8 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetVersion sets the "version" field.
 func (_u *UserUpdateOne) SetVersion(v int) *UserUpdateOne {
-	_u.mutation.ResetVersion()
-	_u.mutation.SetVersion(v)
+	_ = _u.mutation.ResetField("version")
+	_ = _u.mutation.SetField("version", v)
 	return _u
 }
 
@@ -480,13 +482,13 @@ func (_u *UserUpdateOne) SetNillableVersion(v *int) *UserUpdateOne {
 
 // AddVersion adds value to the "version" field.
 func (_u *UserUpdateOne) AddVersion(v int) *UserUpdateOne {
-	_u.mutation.AddVersion(v)
+	_ = _u.mutation.AddField("version", v)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -500,8 +502,8 @@ func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
 
 // SetWorth sets the "worth" field.
 func (_u *UserUpdateOne) SetWorth(v uint) *UserUpdateOne {
-	_u.mutation.ResetWorth()
-	_u.mutation.SetWorth(v)
+	_ = _u.mutation.ResetField("worth")
+	_ = _u.mutation.SetField("worth", v)
 	return _u
 }
 
@@ -515,19 +517,19 @@ func (_u *UserUpdateOne) SetNillableWorth(v *uint) *UserUpdateOne {
 
 // AddWorth adds value to the "worth" field.
 func (_u *UserUpdateOne) AddWorth(v int) *UserUpdateOne {
-	_u.mutation.AddWorth(v)
+	_ = _u.mutation.AddField("worth", v)
 	return _u
 }
 
 // ClearWorth clears the value of the "worth" field.
 func (_u *UserUpdateOne) ClearWorth() *UserUpdateOne {
-	_u.mutation.ClearWorth()
+	_ = _u.mutation.ClearField("worth")
 	return _u
 }
 
 // SetPassword sets the "password" field.
 func (_u *UserUpdateOne) SetPassword(v string) *UserUpdateOne {
-	_u.mutation.SetPassword(v)
+	_ = _u.mutation.SetField("password", v)
 	return _u
 }
 
@@ -541,13 +543,13 @@ func (_u *UserUpdateOne) SetNillablePassword(v *string) *UserUpdateOne {
 
 // ClearPassword clears the value of the "password" field.
 func (_u *UserUpdateOne) ClearPassword() *UserUpdateOne {
-	_u.mutation.ClearPassword()
+	_ = _u.mutation.ClearField("password")
 	return _u
 }
 
 // SetActive sets the "active" field.
 func (_u *UserUpdateOne) SetActive(v bool) *UserUpdateOne {
-	_u.mutation.SetActive(v)
+	_ = _u.mutation.SetField("active", v)
 	return _u
 }
 
@@ -561,25 +563,25 @@ func (_u *UserUpdateOne) SetNillableActive(v *bool) *UserUpdateOne {
 
 // AddCardIDs adds the "cards" edge to the Card entity by IDs.
 func (_u *UserUpdateOne) AddCardIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddCardIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("cards", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (_u *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddPetIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_u *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddFriendIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // SetBestFriendID sets the "best_friend" edge to the User entity by ID.
 func (_u *UserUpdateOne) SetBestFriendID(id int) *UserUpdateOne {
-	_u.mutation.SetBestFriendID(id)
+	_ = _u.mutation.SetEdgeID("best_friend", id)
 	return _u
 }
 
@@ -598,49 +600,49 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 
 // ClearCards clears all "cards" edges to the Card entity.
 func (_u *UserUpdateOne) ClearCards() *UserUpdateOne {
-	_u.mutation.ClearCards()
+	_ = _u.mutation.ClearEdge("cards")
 	return _u
 }
 
 // RemoveCardIDs removes the "cards" edge to Card entities by IDs.
 func (_u *UserUpdateOne) RemoveCardIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveCardIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("cards", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearPets clears all "pets" edges to the Pet entity.
 func (_u *UserUpdateOne) ClearPets() *UserUpdateOne {
-	_u.mutation.ClearPets()
+	_ = _u.mutation.ClearEdge("pets")
 	return _u
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
 func (_u *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemovePetIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
 func (_u *UserUpdateOne) ClearFriends() *UserUpdateOne {
-	_u.mutation.ClearFriends()
+	_ = _u.mutation.ClearEdge("friends")
 	return _u
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemoveFriendIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearBestFriend clears the "best_friend" edge to the User entity.
 func (_u *UserUpdateOne) ClearBestFriend() *UserUpdateOne {
-	_u.mutation.ClearBestFriend()
+	_ = _u.mutation.ClearEdge("best_friend")
 	return _u
 }
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -680,10 +682,11 @@ func (_u *UserUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "User.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -704,34 +707,36 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Version(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "version"); ok {
 		_spec.SetField(FieldVersion, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedVersion(); ok {
+	if added, ok := _u.mutation.AddedField("version"); ok {
+		value := added.(int)
 		_spec.AddField(FieldVersion, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Worth(); ok {
+	if value, ok := entbuilder.GetField[uint](_u.mutation, "worth"); ok {
 		_spec.SetField(FieldWorth, field.TypeUint, value)
 	}
-	if value, ok := _u.mutation.AddedWorth(); ok {
+	if added, ok := _u.mutation.AddedField("worth"); ok {
+		value := added.(int)
 		_spec.AddField(FieldWorth, field.TypeUint, value)
 	}
-	if _u.mutation.WorthCleared() {
+	if _u.mutation.FieldCleared("worth") {
 		_spec.ClearField(FieldWorth, field.TypeUint)
 	}
-	if value, ok := _u.mutation.Password(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "password"); ok {
 		_spec.SetField(FieldPassword, field.TypeString, value)
 	}
-	if _u.mutation.PasswordCleared() {
+	if _u.mutation.FieldCleared("password") {
 		_spec.ClearField(FieldPassword, field.TypeString)
 	}
-	if value, ok := _u.mutation.Active(); ok {
+	if value, ok := entbuilder.GetField[bool](_u.mutation, "active"); ok {
 		_spec.SetField(FieldActive, field.TypeBool, value)
 	}
-	if _u.mutation.CardsCleared() {
+	if _u.mutation.EdgeCleared("cards") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -744,7 +749,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedCardsIDs(); len(nodes) > 0 && !_u.mutation.CardsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("cards"); len(nodes) > 0 && !_u.mutation.EdgeCleared("cards") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -760,7 +765,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CardsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("cards"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -776,7 +781,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.PetsCleared() {
+	if _u.mutation.EdgeCleared("pets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -789,7 +794,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedPetsIDs(); len(nodes) > 0 && !_u.mutation.PetsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("pets"); len(nodes) > 0 && !_u.mutation.EdgeCleared("pets") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -805,7 +810,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("pets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -821,7 +826,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FriendsCleared() {
+	if _u.mutation.EdgeCleared("friends") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -834,7 +839,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !_u.mutation.FriendsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("friends"); len(nodes) > 0 && !_u.mutation.EdgeCleared("friends") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -850,7 +855,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -866,7 +871,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.BestFriendCleared() {
+	if _u.mutation.EdgeCleared("best_friend") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -879,7 +884,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.BestFriendIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("best_friend"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,

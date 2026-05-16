@@ -30,7 +30,7 @@ func NewUserTweetDelete(c Config, hooks []Hook, mutation *UserTweetMutation) *Us
 
 // Where appends a list predicates to the UserTweetDelete builder.
 func (_d *UserTweetDelete) Where(ps ...predicate.UserTweet) *UserTweetDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -77,7 +77,7 @@ func NewUserTweetDeleteOne(d *UserTweetDelete) *UserTweetDeleteOne {
 
 // Where appends a list predicates to the UserTweetDelete builder.
 func (_d *UserTweetDeleteOne) Where(ps ...predicate.UserTweet) *UserTweetDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

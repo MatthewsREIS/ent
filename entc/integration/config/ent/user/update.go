@@ -32,13 +32,13 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -52,13 +52,13 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 
 // ClearName clears the value of the "name" field.
 func (_u *UserUpdate) ClearName() *UserUpdate {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetLabel sets the "label" field.
 func (_u *UserUpdate) SetLabel(v string) *UserUpdate {
-	_u.mutation.SetLabel(v)
+	_ = _u.mutation.SetField("label", v)
 	return _u
 }
 
@@ -72,7 +72,7 @@ func (_u *UserUpdate) SetNillableLabel(v *string) *UserUpdate {
 
 // ClearLabel clears the value of the "label" field.
 func (_u *UserUpdate) ClearLabel() *UserUpdate {
-	_u.mutation.ClearLabel()
+	_ = _u.mutation.ClearField("label")
 	return _u
 }
 
@@ -117,16 +117,16 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if value, ok := _u.mutation.Label(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "label"); ok {
 		_spec.SetField(FieldLabel, field.TypeString, value)
 	}
-	if _u.mutation.LabelCleared() {
+	if _u.mutation.FieldCleared("label") {
 		_spec.ClearField(FieldLabel, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -156,7 +156,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -170,13 +170,13 @@ func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *UserUpdateOne) ClearName() *UserUpdateOne {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetLabel sets the "label" field.
 func (_u *UserUpdateOne) SetLabel(v string) *UserUpdateOne {
-	_u.mutation.SetLabel(v)
+	_ = _u.mutation.SetField("label", v)
 	return _u
 }
 
@@ -190,7 +190,7 @@ func (_u *UserUpdateOne) SetNillableLabel(v *string) *UserUpdateOne {
 
 // ClearLabel clears the value of the "label" field.
 func (_u *UserUpdateOne) ClearLabel() *UserUpdateOne {
-	_u.mutation.ClearLabel()
+	_ = _u.mutation.ClearField("label")
 	return _u
 }
 
@@ -201,7 +201,7 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -241,10 +241,11 @@ func (_u *UserUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "User.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -265,16 +266,16 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if value, ok := _u.mutation.Label(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "label"); ok {
 		_spec.SetField(FieldLabel, field.TypeString, value)
 	}
-	if _u.mutation.LabelCleared() {
+	if _u.mutation.FieldCleared("label") {
 		_spec.ClearField(FieldLabel, field.TypeString)
 	}
 	_node = &User{Config: _u.Config}

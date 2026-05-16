@@ -27,7 +27,7 @@ func (_q *DeviceQuery) Filter() *DeviceFilter {
 
 // NewDeviceFilterForMutation creates a new DeviceFilter for the given mutation.
 func NewDeviceFilterForMutation(m *DeviceMutation) *DeviceFilter {
-	return &DeviceFilter{Config: m.Config, predicateAdder: m}
+	return &DeviceFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // DeviceFilter provides a generic filtering capability at runtime for DeviceQuery.

@@ -30,7 +30,7 @@ func NewAPIDelete(c Config, hooks []Hook, mutation *APIMutation) *APIDelete {
 
 // Where appends a list predicates to the APIDelete builder.
 func (_d *APIDelete) Where(ps ...predicate.Api) *APIDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -78,7 +78,7 @@ func NewAPIDeleteOne(d *APIDelete) *APIDeleteOne {
 
 // Where appends a list predicates to the APIDelete builder.
 func (_d *APIDeleteOne) Where(ps ...predicate.Api) *APIDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -33,7 +34,7 @@ func NewPetCreate(c Config, hooks []Hook, mutation *PetMutation) *PetCreate {
 
 // SetAge sets the "age" field.
 func (_c *PetCreate) SetAge(v float64) *PetCreate {
-	_c.mutation.SetAge(v)
+	_ = _c.mutation.SetField("age", v)
 	return _c
 }
 
@@ -47,13 +48,13 @@ func (_c *PetCreate) SetNillableAge(v *float64) *PetCreate {
 
 // SetName sets the "name" field.
 func (_c *PetCreate) SetName(v string) *PetCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // SetUUID sets the "uuid" field.
 func (_c *PetCreate) SetUUID(v uuid.UUID) *PetCreate {
-	_c.mutation.SetUUID(v)
+	_ = _c.mutation.SetField("uuid", v)
 	return _c
 }
 
@@ -67,7 +68,7 @@ func (_c *PetCreate) SetNillableUUID(v *uuid.UUID) *PetCreate {
 
 // SetNickname sets the "nickname" field.
 func (_c *PetCreate) SetNickname(v string) *PetCreate {
-	_c.mutation.SetNickname(v)
+	_ = _c.mutation.SetField("nickname", v)
 	return _c
 }
 
@@ -81,7 +82,7 @@ func (_c *PetCreate) SetNillableNickname(v *string) *PetCreate {
 
 // SetTrained sets the "trained" field.
 func (_c *PetCreate) SetTrained(v bool) *PetCreate {
-	_c.mutation.SetTrained(v)
+	_ = _c.mutation.SetField("trained", v)
 	return _c
 }
 
@@ -95,7 +96,7 @@ func (_c *PetCreate) SetNillableTrained(v *bool) *PetCreate {
 
 // SetOptionalTime sets the "optional_time" field.
 func (_c *PetCreate) SetOptionalTime(v time.Time) *PetCreate {
-	_c.mutation.SetOptionalTime(v)
+	_ = _c.mutation.SetField("optional_time", v)
 	return _c
 }
 
@@ -109,7 +110,7 @@ func (_c *PetCreate) SetNillableOptionalTime(v *time.Time) *PetCreate {
 
 // SetTeamID sets the "team" edge to the User entity by ID.
 func (_c *PetCreate) SetTeamID(id int) *PetCreate {
-	_c.mutation.SetTeamID(id)
+	_ = _c.mutation.SetEdgeID("team", id)
 	return _c
 }
 
@@ -123,7 +124,7 @@ func (_c *PetCreate) SetNillableTeamID(id *int) *PetCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *PetCreate) SetOwnerID(id int) *PetCreate {
-	_c.mutation.SetOwnerID(id)
+	_ = _c.mutation.SetEdgeID("owner", id)
 	return _c
 }
 
@@ -170,25 +171,25 @@ func (_c *PetCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *PetCreate) defaults() {
-	if _, ok := _c.mutation.Age(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "age"); !ok {
 		v := DefaultAge
-		_c.mutation.SetAge(v)
+		_ = _c.mutation.SetField("age", v)
 	}
-	if _, ok := _c.mutation.Trained(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "trained"); !ok {
 		v := DefaultTrained
-		_c.mutation.SetTrained(v)
+		_ = _c.mutation.SetField("trained", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *PetCreate) check() error {
-	if _, ok := _c.mutation.Age(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "age"); !ok {
 		return &ValidationError{Name: "age", Err: errors.New(`ent: missing required field "Pet.age"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
-	if _, ok := _c.mutation.Trained(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "trained"); !ok {
 		return &ValidationError{Name: "trained", Err: errors.New(`ent: missing required field "Pet.trained"`)}
 	}
 	return nil
@@ -207,7 +208,7 @@ func (_c *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -218,31 +219,31 @@ func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[float64](_c.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeFloat64, value)
 		_node.Age = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.UUID(); ok {
+	if value, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "uuid"); ok {
 		_spec.SetField(FieldUUID, field.TypeUUID, value)
 		_node.UUID = value
 	}
-	if value, ok := _c.mutation.Nickname(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "nickname"); ok {
 		_spec.SetField(FieldNickname, field.TypeString, value)
 		_node.Nickname = value
 	}
-	if value, ok := _c.mutation.Trained(); ok {
+	if value, ok := entbuilder.GetField[bool](_c.mutation, "trained"); ok {
 		_spec.SetField(FieldTrained, field.TypeBool, value)
 		_node.Trained = value
 	}
-	if value, ok := _c.mutation.OptionalTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "optional_time"); ok {
 		_spec.SetField(FieldOptionalTime, field.TypeTime, value)
 		_node.OptionalTime = value
 	}
-	if nodes := _c.mutation.TeamIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "team"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -258,7 +259,7 @@ func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -663,11 +664,11 @@ func (_c *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

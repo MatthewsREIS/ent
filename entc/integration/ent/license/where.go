@@ -11,7 +11,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -59,59 +58,95 @@ func IDLTE(id int) predicate.License {
 	return predicate.License(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: CreateTime — use where.EQ(FieldCreateTime, v).
-func CreateTime(v time.Time) predicate.License { return where.EQ(FieldCreateTime, v) }
+// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
+func CreateTime(v time.Time) predicate.License {
+	return predicate.License(sql.FieldEQ(FieldCreateTime, v))
+}
 
-// Deprecated: UpdateTime — use where.EQ(FieldUpdateTime, v).
-func UpdateTime(v time.Time) predicate.License { return where.EQ(FieldUpdateTime, v) }
+// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
+func UpdateTime(v time.Time) predicate.License {
+	return predicate.License(sql.FieldEQ(FieldUpdateTime, v))
+}
 
-// Deprecated: CreateTimeEQ — use where.EQ(FieldCreateTime, v).
-func CreateTimeEQ(v time.Time) predicate.License { return where.EQ(FieldCreateTime, v) }
+// CreateTimeEQ applies the EQ predicate on the "create_time" field.
+func CreateTimeEQ(v time.Time) predicate.License {
+	return predicate.License(sql.FieldEQ(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeNEQ — use where.NEQ(FieldCreateTime, v).
-func CreateTimeNEQ(v time.Time) predicate.License { return where.NEQ(FieldCreateTime, v) }
+// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
+func CreateTimeNEQ(v time.Time) predicate.License {
+	return predicate.License(sql.FieldNEQ(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeIn — use where.In(FieldCreateTime, vs...).
-func CreateTimeIn(vs ...time.Time) predicate.License { return where.In(FieldCreateTime, vs...) }
+// CreateTimeIn applies the In predicate on the "create_time" field.
+func CreateTimeIn(vs ...time.Time) predicate.License {
+	return predicate.License(sql.FieldIn(FieldCreateTime, vs...))
+}
 
-// Deprecated: CreateTimeNotIn — use where.NotIn(FieldCreateTime, vs...).
-func CreateTimeNotIn(vs ...time.Time) predicate.License { return where.NotIn(FieldCreateTime, vs...) }
+// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
+func CreateTimeNotIn(vs ...time.Time) predicate.License {
+	return predicate.License(sql.FieldNotIn(FieldCreateTime, vs...))
+}
 
-// Deprecated: CreateTimeGT — use where.GT(FieldCreateTime, v).
-func CreateTimeGT(v time.Time) predicate.License { return where.GT(FieldCreateTime, v) }
+// CreateTimeGT applies the GT predicate on the "create_time" field.
+func CreateTimeGT(v time.Time) predicate.License {
+	return predicate.License(sql.FieldGT(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeGTE — use where.GTE(FieldCreateTime, v).
-func CreateTimeGTE(v time.Time) predicate.License { return where.GTE(FieldCreateTime, v) }
+// CreateTimeGTE applies the GTE predicate on the "create_time" field.
+func CreateTimeGTE(v time.Time) predicate.License {
+	return predicate.License(sql.FieldGTE(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeLT — use where.LT(FieldCreateTime, v).
-func CreateTimeLT(v time.Time) predicate.License { return where.LT(FieldCreateTime, v) }
+// CreateTimeLT applies the LT predicate on the "create_time" field.
+func CreateTimeLT(v time.Time) predicate.License {
+	return predicate.License(sql.FieldLT(FieldCreateTime, v))
+}
 
-// Deprecated: CreateTimeLTE — use where.LTE(FieldCreateTime, v).
-func CreateTimeLTE(v time.Time) predicate.License { return where.LTE(FieldCreateTime, v) }
+// CreateTimeLTE applies the LTE predicate on the "create_time" field.
+func CreateTimeLTE(v time.Time) predicate.License {
+	return predicate.License(sql.FieldLTE(FieldCreateTime, v))
+}
 
-// Deprecated: UpdateTimeEQ — use where.EQ(FieldUpdateTime, v).
-func UpdateTimeEQ(v time.Time) predicate.License { return where.EQ(FieldUpdateTime, v) }
+// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
+func UpdateTimeEQ(v time.Time) predicate.License {
+	return predicate.License(sql.FieldEQ(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeNEQ — use where.NEQ(FieldUpdateTime, v).
-func UpdateTimeNEQ(v time.Time) predicate.License { return where.NEQ(FieldUpdateTime, v) }
+// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
+func UpdateTimeNEQ(v time.Time) predicate.License {
+	return predicate.License(sql.FieldNEQ(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeIn — use where.In(FieldUpdateTime, vs...).
-func UpdateTimeIn(vs ...time.Time) predicate.License { return where.In(FieldUpdateTime, vs...) }
+// UpdateTimeIn applies the In predicate on the "update_time" field.
+func UpdateTimeIn(vs ...time.Time) predicate.License {
+	return predicate.License(sql.FieldIn(FieldUpdateTime, vs...))
+}
 
-// Deprecated: UpdateTimeNotIn — use where.NotIn(FieldUpdateTime, vs...).
-func UpdateTimeNotIn(vs ...time.Time) predicate.License { return where.NotIn(FieldUpdateTime, vs...) }
+// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
+func UpdateTimeNotIn(vs ...time.Time) predicate.License {
+	return predicate.License(sql.FieldNotIn(FieldUpdateTime, vs...))
+}
 
-// Deprecated: UpdateTimeGT — use where.GT(FieldUpdateTime, v).
-func UpdateTimeGT(v time.Time) predicate.License { return where.GT(FieldUpdateTime, v) }
+// UpdateTimeGT applies the GT predicate on the "update_time" field.
+func UpdateTimeGT(v time.Time) predicate.License {
+	return predicate.License(sql.FieldGT(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeGTE — use where.GTE(FieldUpdateTime, v).
-func UpdateTimeGTE(v time.Time) predicate.License { return where.GTE(FieldUpdateTime, v) }
+// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
+func UpdateTimeGTE(v time.Time) predicate.License {
+	return predicate.License(sql.FieldGTE(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeLT — use where.LT(FieldUpdateTime, v).
-func UpdateTimeLT(v time.Time) predicate.License { return where.LT(FieldUpdateTime, v) }
+// UpdateTimeLT applies the LT predicate on the "update_time" field.
+func UpdateTimeLT(v time.Time) predicate.License {
+	return predicate.License(sql.FieldLT(FieldUpdateTime, v))
+}
 
-// Deprecated: UpdateTimeLTE — use where.LTE(FieldUpdateTime, v).
-func UpdateTimeLTE(v time.Time) predicate.License { return where.LTE(FieldUpdateTime, v) }
+// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
+func UpdateTimeLTE(v time.Time) predicate.License {
+	return predicate.License(sql.FieldLTE(FieldUpdateTime, v))
+}
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.License) predicate.License {

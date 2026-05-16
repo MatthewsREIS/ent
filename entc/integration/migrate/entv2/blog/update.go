@@ -32,14 +32,14 @@ func NewBlogUpdate(c Config, hooks []Hook, mutation *BlogMutation) *BlogUpdate {
 
 // Where appends a list predicates to the BlogUpdate builder.
 func (_u *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetOid sets the "oid" field.
 func (_u *BlogUpdate) SetOid(v int) *BlogUpdate {
-	_u.mutation.ResetOid()
-	_u.mutation.SetOid(v)
+	_ = _u.mutation.ResetField("oid")
+	_ = _u.mutation.SetField("oid", v)
 	return _u
 }
 
@@ -53,13 +53,13 @@ func (_u *BlogUpdate) SetNillableOid(v *int) *BlogUpdate {
 
 // AddOid adds value to the "oid" field.
 func (_u *BlogUpdate) AddOid(v int) *BlogUpdate {
-	_u.mutation.AddOid(v)
+	_ = _u.mutation.AddField("oid", v)
 	return _u
 }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
 func (_u *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate {
-	_u.mutation.AddAdminIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("admins", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -70,13 +70,13 @@ func (_u *BlogUpdate) Mutation() *BlogMutation {
 
 // ClearAdmins clears all "admins" edges to the User entity.
 func (_u *BlogUpdate) ClearAdmins() *BlogUpdate {
-	_u.mutation.ClearAdmins()
+	_ = _u.mutation.ClearEdge("admins")
 	return _u
 }
 
 // RemoveAdminIDs removes the "admins" edge to User entities by IDs.
 func (_u *BlogUpdate) RemoveAdminIDs(ids ...int) *BlogUpdate {
-	_u.mutation.RemoveAdminIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("admins", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -116,13 +116,14 @@ func (_u *BlogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Oid(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "oid"); ok {
 		_spec.SetField(FieldOid, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOid(); ok {
+	if added, ok := _u.mutation.AddedField("oid"); ok {
+		value := added.(int)
 		_spec.AddField(FieldOid, field.TypeInt, value)
 	}
-	if _u.mutation.AdminsCleared() {
+	if _u.mutation.EdgeCleared("admins") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -135,7 +136,7 @@ func (_u *BlogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedAdminsIDs(); len(nodes) > 0 && !_u.mutation.AdminsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("admins"); len(nodes) > 0 && !_u.mutation.EdgeCleared("admins") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -151,7 +152,7 @@ func (_u *BlogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AdminsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("admins"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -194,8 +195,8 @@ func NewBlogUpdateOne(c Config, hooks []Hook, mutation *BlogMutation) *BlogUpdat
 
 // SetOid sets the "oid" field.
 func (_u *BlogUpdateOne) SetOid(v int) *BlogUpdateOne {
-	_u.mutation.ResetOid()
-	_u.mutation.SetOid(v)
+	_ = _u.mutation.ResetField("oid")
+	_ = _u.mutation.SetField("oid", v)
 	return _u
 }
 
@@ -209,13 +210,13 @@ func (_u *BlogUpdateOne) SetNillableOid(v *int) *BlogUpdateOne {
 
 // AddOid adds value to the "oid" field.
 func (_u *BlogUpdateOne) AddOid(v int) *BlogUpdateOne {
-	_u.mutation.AddOid(v)
+	_ = _u.mutation.AddField("oid", v)
 	return _u
 }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
 func (_u *BlogUpdateOne) AddAdminIDs(ids ...int) *BlogUpdateOne {
-	_u.mutation.AddAdminIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("admins", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -226,19 +227,19 @@ func (_u *BlogUpdateOne) Mutation() *BlogMutation {
 
 // ClearAdmins clears all "admins" edges to the User entity.
 func (_u *BlogUpdateOne) ClearAdmins() *BlogUpdateOne {
-	_u.mutation.ClearAdmins()
+	_ = _u.mutation.ClearEdge("admins")
 	return _u
 }
 
 // RemoveAdminIDs removes the "admins" edge to User entities by IDs.
 func (_u *BlogUpdateOne) RemoveAdminIDs(ids ...int) *BlogUpdateOne {
-	_u.mutation.RemoveAdminIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("admins", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the BlogUpdate builder.
 func (_u *BlogUpdateOne) Where(ps ...predicate.Blog) *BlogUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -278,10 +279,11 @@ func (_u *BlogUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`entv2: missing "Blog.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -302,13 +304,14 @@ func (_u *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Oid(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "oid"); ok {
 		_spec.SetField(FieldOid, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedOid(); ok {
+	if added, ok := _u.mutation.AddedField("oid"); ok {
+		value := added.(int)
 		_spec.AddField(FieldOid, field.TypeInt, value)
 	}
-	if _u.mutation.AdminsCleared() {
+	if _u.mutation.EdgeCleared("admins") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -321,7 +324,7 @@ func (_u *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedAdminsIDs(); len(nodes) > 0 && !_u.mutation.AdminsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("admins"); len(nodes) > 0 && !_u.mutation.EdgeCleared("admins") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -337,7 +340,7 @@ func (_u *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AdminsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("admins"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

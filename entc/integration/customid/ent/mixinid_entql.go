@@ -25,7 +25,7 @@ func (_q *MixinIDQuery) Filter() *MixinIDFilter {
 
 // NewMixinIDFilterForMutation creates a new MixinIDFilter for the given mutation.
 func NewMixinIDFilterForMutation(m *MixinIDMutation) *MixinIDFilter {
-	return &MixinIDFilter{Config: m.Config, predicateAdder: m}
+	return &MixinIDFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // MixinIDFilter provides a generic filtering capability at runtime for MixinIDQuery.

@@ -100,7 +100,7 @@ func (c *MediaClient) DeleteOne(_m *Media) *media.MediaDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MediaClient) DeleteOneID(id int) *media.MediaDeleteOne {
 	mutation := NewMediaMutation(c.Config, OpDeleteOne, WithMediaID(id, nil))
-	mutation.Where(media.ID(id))
+	mutation.WhereP(media.ID(id))
 	return media.NewMediaDeleteOne(media.NewMediaDelete(c.Config, c.Hooks(), mutation))
 }
 

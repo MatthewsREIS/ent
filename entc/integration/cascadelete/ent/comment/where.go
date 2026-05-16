@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
-	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,62 +57,100 @@ func IDLTE(id int) predicate.Comment {
 	return predicate.Comment(sql.FieldLTE(FieldID, id))
 }
 
-// Deprecated: Text — use where.EQ(FieldText, v).
-func Text(v string) predicate.Comment { return where.EQ(FieldText, v) }
+// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
+func Text(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldText, v))
+}
 
-// Deprecated: PostID — use where.EQ(FieldPostID, v).
-func PostID(v int) predicate.Comment { return where.EQ(FieldPostID, v) }
+// PostID applies equality check predicate on the "post_id" field. It's identical to PostIDEQ.
+func PostID(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldPostID, v))
+}
 
-// Deprecated: TextEQ — use where.EQ(FieldText, v).
-func TextEQ(v string) predicate.Comment { return where.EQ(FieldText, v) }
+// TextEQ applies the EQ predicate on the "text" field.
+func TextEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldText, v))
+}
 
-// Deprecated: TextNEQ — use where.NEQ(FieldText, v).
-func TextNEQ(v string) predicate.Comment { return where.NEQ(FieldText, v) }
+// TextNEQ applies the NEQ predicate on the "text" field.
+func TextNEQ(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldText, v))
+}
 
-// Deprecated: TextIn — use where.In(FieldText, vs...).
-func TextIn(vs ...string) predicate.Comment { return where.In(FieldText, vs...) }
+// TextIn applies the In predicate on the "text" field.
+func TextIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldText, vs...))
+}
 
-// Deprecated: TextNotIn — use where.NotIn(FieldText, vs...).
-func TextNotIn(vs ...string) predicate.Comment { return where.NotIn(FieldText, vs...) }
+// TextNotIn applies the NotIn predicate on the "text" field.
+func TextNotIn(vs ...string) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldText, vs...))
+}
 
-// Deprecated: TextGT — use where.GT(FieldText, v).
-func TextGT(v string) predicate.Comment { return where.GT(FieldText, v) }
+// TextGT applies the GT predicate on the "text" field.
+func TextGT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGT(FieldText, v))
+}
 
-// Deprecated: TextGTE — use where.GTE(FieldText, v).
-func TextGTE(v string) predicate.Comment { return where.GTE(FieldText, v) }
+// TextGTE applies the GTE predicate on the "text" field.
+func TextGTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldGTE(FieldText, v))
+}
 
-// Deprecated: TextLT — use where.LT(FieldText, v).
-func TextLT(v string) predicate.Comment { return where.LT(FieldText, v) }
+// TextLT applies the LT predicate on the "text" field.
+func TextLT(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLT(FieldText, v))
+}
 
-// Deprecated: TextLTE — use where.LTE(FieldText, v).
-func TextLTE(v string) predicate.Comment { return where.LTE(FieldText, v) }
+// TextLTE applies the LTE predicate on the "text" field.
+func TextLTE(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldLTE(FieldText, v))
+}
 
-// Deprecated: TextContains — use where.Contains(FieldText, v).
-func TextContains(v string) predicate.Comment { return where.Contains(FieldText, v) }
+// TextContains applies the Contains predicate on the "text" field.
+func TextContains(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContains(FieldText, v))
+}
 
-// Deprecated: TextHasPrefix — use where.HasPrefix(FieldText, v).
-func TextHasPrefix(v string) predicate.Comment { return where.HasPrefix(FieldText, v) }
+// TextHasPrefix applies the HasPrefix predicate on the "text" field.
+func TextHasPrefix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasPrefix(FieldText, v))
+}
 
-// Deprecated: TextHasSuffix — use where.HasSuffix(FieldText, v).
-func TextHasSuffix(v string) predicate.Comment { return where.HasSuffix(FieldText, v) }
+// TextHasSuffix applies the HasSuffix predicate on the "text" field.
+func TextHasSuffix(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldHasSuffix(FieldText, v))
+}
 
-// Deprecated: TextEqualFold — use where.EqualFold(FieldText, v).
-func TextEqualFold(v string) predicate.Comment { return where.EqualFold(FieldText, v) }
+// TextEqualFold applies the EqualFold predicate on the "text" field.
+func TextEqualFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldEqualFold(FieldText, v))
+}
 
-// Deprecated: TextContainsFold — use where.ContainsFold(FieldText, v).
-func TextContainsFold(v string) predicate.Comment { return where.ContainsFold(FieldText, v) }
+// TextContainsFold applies the ContainsFold predicate on the "text" field.
+func TextContainsFold(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldContainsFold(FieldText, v))
+}
 
-// Deprecated: PostIDEQ — use where.EQ(FieldPostID, v).
-func PostIDEQ(v int) predicate.Comment { return where.EQ(FieldPostID, v) }
+// PostIDEQ applies the EQ predicate on the "post_id" field.
+func PostIDEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldEQ(FieldPostID, v))
+}
 
-// Deprecated: PostIDNEQ — use where.NEQ(FieldPostID, v).
-func PostIDNEQ(v int) predicate.Comment { return where.NEQ(FieldPostID, v) }
+// PostIDNEQ applies the NEQ predicate on the "post_id" field.
+func PostIDNEQ(v int) predicate.Comment {
+	return predicate.Comment(sql.FieldNEQ(FieldPostID, v))
+}
 
-// Deprecated: PostIDIn — use where.In(FieldPostID, vs...).
-func PostIDIn(vs ...int) predicate.Comment { return where.In(FieldPostID, vs...) }
+// PostIDIn applies the In predicate on the "post_id" field.
+func PostIDIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldIn(FieldPostID, vs...))
+}
 
-// Deprecated: PostIDNotIn — use where.NotIn(FieldPostID, vs...).
-func PostIDNotIn(vs ...int) predicate.Comment { return where.NotIn(FieldPostID, vs...) }
+// PostIDNotIn applies the NotIn predicate on the "post_id" field.
+func PostIDNotIn(vs ...int) predicate.Comment {
+	return predicate.Comment(sql.FieldNotIn(FieldPostID, vs...))
+}
 
 // HasPost applies the HasEdge predicate on the "post" edge.
 func HasPost() predicate.Comment {

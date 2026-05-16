@@ -25,7 +25,7 @@ func (_q *PCQuery) Filter() *PCFilter {
 
 // NewPCFilterForMutation creates a new PCFilter for the given mutation.
 func NewPCFilterForMutation(m *PCMutation) *PCFilter {
-	return &PCFilter{Config: m.Config, predicateAdder: m}
+	return &PCFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // PCFilter provides a generic filtering capability at runtime for PCQuery.

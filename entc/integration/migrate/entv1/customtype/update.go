@@ -32,13 +32,13 @@ func NewCustomTypeUpdate(c Config, hooks []Hook, mutation *CustomTypeMutation) *
 
 // Where appends a list predicates to the CustomTypeUpdate builder.
 func (_u *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetCustom sets the "custom" field.
 func (_u *CustomTypeUpdate) SetCustom(v string) *CustomTypeUpdate {
-	_u.mutation.SetCustom(v)
+	_ = _u.mutation.SetField("custom", v)
 	return _u
 }
 
@@ -52,7 +52,7 @@ func (_u *CustomTypeUpdate) SetNillableCustom(v *string) *CustomTypeUpdate {
 
 // ClearCustom clears the value of the "custom" field.
 func (_u *CustomTypeUpdate) ClearCustom() *CustomTypeUpdate {
-	_u.mutation.ClearCustom()
+	_ = _u.mutation.ClearField("custom")
 	return _u
 }
 
@@ -97,10 +97,10 @@ func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Custom(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "custom"); ok {
 		_spec.SetField(FieldCustom, field.TypeString, value)
 	}
-	if _u.mutation.CustomCleared() {
+	if _u.mutation.FieldCleared("custom") {
 		_spec.ClearField(FieldCustom, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -130,7 +130,7 @@ func NewCustomTypeUpdateOne(c Config, hooks []Hook, mutation *CustomTypeMutation
 
 // SetCustom sets the "custom" field.
 func (_u *CustomTypeUpdateOne) SetCustom(v string) *CustomTypeUpdateOne {
-	_u.mutation.SetCustom(v)
+	_ = _u.mutation.SetField("custom", v)
 	return _u
 }
 
@@ -144,7 +144,7 @@ func (_u *CustomTypeUpdateOne) SetNillableCustom(v *string) *CustomTypeUpdateOne
 
 // ClearCustom clears the value of the "custom" field.
 func (_u *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
-	_u.mutation.ClearCustom()
+	_ = _u.mutation.ClearField("custom")
 	return _u
 }
 
@@ -155,7 +155,7 @@ func (_u *CustomTypeUpdateOne) Mutation() *CustomTypeMutation {
 
 // Where appends a list predicates to the CustomTypeUpdate builder.
 func (_u *CustomTypeUpdateOne) Where(ps ...predicate.CustomType) *CustomTypeUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -195,10 +195,11 @@ func (_u *CustomTypeUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	id, ok := _u.mutation.ID()
+	idAny, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`entv1: missing "CustomType.id" for update`)}
 	}
+	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
@@ -219,10 +220,10 @@ func (_u *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType, 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Custom(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "custom"); ok {
 		_spec.SetField(FieldCustom, field.TypeString, value)
 	}
-	if _u.mutation.CustomCleared() {
+	if _u.mutation.FieldCleared("custom") {
 		_spec.ClearField(FieldCustom, field.TypeString)
 	}
 	_node = &CustomType{Config: _u.Config}

@@ -100,7 +100,7 @@ func (c *CustomTypeClient) DeleteOne(_m *CustomType) *customtype.CustomTypeDelet
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CustomTypeClient) DeleteOneID(id int) *customtype.CustomTypeDeleteOne {
 	mutation := NewCustomTypeMutation(c.Config, OpDeleteOne, WithCustomTypeID(id, nil))
-	mutation.Where(customtype.ID(id))
+	mutation.WhereP(customtype.ID(id))
 	return customtype.NewCustomTypeDeleteOne(customtype.NewCustomTypeDelete(c.Config, c.Hooks(), mutation))
 }
 

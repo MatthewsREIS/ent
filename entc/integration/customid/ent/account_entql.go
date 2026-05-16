@@ -27,7 +27,7 @@ func (_q *AccountQuery) Filter() *AccountFilter {
 
 // NewAccountFilterForMutation creates a new AccountFilter for the given mutation.
 func NewAccountFilterForMutation(m *AccountMutation) *AccountFilter {
-	return &AccountFilter{Config: m.Config, predicateAdder: m}
+	return &AccountFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // AccountFilter provides a generic filtering capability at runtime for AccountQuery.

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -47,7 +48,7 @@ func (_c *SessionCreate) SetNillableID(v *schema.ID) *SessionCreate {
 
 // SetDeviceID sets the "device" edge to the Device entity by ID.
 func (_c *SessionCreate) SetDeviceID(id schema.ID) *SessionCreate {
-	_c.mutation.SetDeviceID(id)
+	_ = _c.mutation.SetEdgeID("device", id)
 	return _c
 }
 
@@ -102,7 +103,7 @@ func (_c *SessionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *SessionCreate) check() error {
-	if v, ok := _c.mutation.ID(); ok {
+	if v, ok := entbuilder.GetField[schema.ID](_c.mutation, "id"); ok {
 		if err := IDValidator(v[:]); err != nil {
 			return &ValidationError{Name: "id", Err: fmt.Errorf(`ent: validator failed for field "Session.id": %w`, err)}
 		}
@@ -128,7 +129,7 @@ func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -139,11 +140,12 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeBytes))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(schema.ID)
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if nodes := _c.mutation.DeviceIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[schema.ID](_c.mutation, "device"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -347,7 +349,7 @@ func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

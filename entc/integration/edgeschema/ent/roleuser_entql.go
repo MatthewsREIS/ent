@@ -27,7 +27,7 @@ func (_q *RoleUserQuery) Filter() *RoleUserFilter {
 
 // NewRoleUserFilterForMutation creates a new RoleUserFilter for the given mutation.
 func NewRoleUserFilterForMutation(m *RoleUserMutation) *RoleUserFilter {
-	return &RoleUserFilter{Config: m.Config, predicateAdder: m}
+	return &RoleUserFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // RoleUserFilter provides a generic filtering capability at runtime for RoleUserQuery.

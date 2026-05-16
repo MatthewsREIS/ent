@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewRoleUserCreate(c Config, hooks []Hook, mutation *RoleUserMutation) *Role
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *RoleUserCreate) SetCreatedAt(v time.Time) *RoleUserCreate {
-	_c.mutation.SetCreatedAt(v)
+	_ = _c.mutation.SetField("created_at", v)
 	return _c
 }
 
@@ -46,13 +47,13 @@ func (_c *RoleUserCreate) SetNillableCreatedAt(v *time.Time) *RoleUserCreate {
 
 // SetRoleID sets the "role_id" field.
 func (_c *RoleUserCreate) SetRoleID(v int) *RoleUserCreate {
-	_c.mutation.SetRoleID(v)
+	_ = _c.mutation.SetEdgeID("role", v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
 func (_c *RoleUserCreate) SetUserID(v int) *RoleUserCreate {
-	_c.mutation.SetUserID(v)
+	_ = _c.mutation.SetEdgeID("user", v)
 	return _c
 }
 
@@ -91,27 +92,21 @@ func (_c *RoleUserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *RoleUserCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		v := DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+		_ = _c.mutation.SetField("created_at", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *RoleUserCreate) check() error {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		return &ValidationError{Name: "created_at", Err: errors.New(`ent: missing required field "RoleUser.created_at"`)}
 	}
-	if _, ok := _c.mutation.RoleID(); !ok {
-		return &ValidationError{Name: "role_id", Err: errors.New(`ent: missing required field "RoleUser.role_id"`)}
-	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", Err: errors.New(`ent: missing required field "RoleUser.user_id"`)}
-	}
-	if len(_c.mutation.RoleIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("role")) == 0 {
 		return &ValidationError{Name: "role", Err: errors.New(`ent: missing required edge "RoleUser.role"`)}
 	}
-	if len(_c.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("user")) == 0 {
 		return &ValidationError{Name: "user", Err: errors.New(`ent: missing required edge "RoleUser.user"`)}
 	}
 	return nil
@@ -137,11 +132,11 @@ func (_c *RoleUserCreate) createSpec() (*RoleUser, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, nil)
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := _c.mutation.RoleIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "role"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -158,7 +153,7 @@ func (_c *RoleUserCreate) createSpec() (*RoleUser, *sqlgraph.CreateSpec) {
 		_node.RoleID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

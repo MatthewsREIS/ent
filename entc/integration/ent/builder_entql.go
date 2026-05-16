@@ -25,7 +25,7 @@ func (_q *BuilderQuery) Filter() *BuilderFilter {
 
 // NewBuilderFilterForMutation creates a new BuilderFilter for the given mutation.
 func NewBuilderFilterForMutation(m *BuilderMutation) *BuilderFilter {
-	return &BuilderFilter{Config: m.Config, predicateAdder: m}
+	return &BuilderFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // BuilderFilter provides a generic filtering capability at runtime for BuilderQuery.

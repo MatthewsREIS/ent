@@ -24,13 +24,21 @@ in the LICENSE file in the root directory of this source tree.
 {{ range $f := $fields }}
 	{{ $func := print "Set" $f.StructField }}
 	{{ $ft := $f.Type.String }}{{ if and $.Scope.InSubPackage $f.IsEnum }}{{ $ft = trimPackage $f.Type.String $.Package }}{{ end }}
+	{{ $isIDField := and (not $updater) $.HasOneFieldID (eq $f.Name $.ID.Name) }}
+	{{ $edgeName := $f.EdgeName }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $ft }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $updater $f.SupportsMutationAdd }}
 			_ = {{ $receiver }}.mutation.ResetField({{ printf "%q" $f.Name }})
 		{{- end }}
+		{{- if $isIDField }}
+		{{ $receiver }}.mutation.SetID(v)
+		{{- else if $edgeName }}
+		_ = {{ $receiver }}.mutation.SetEdgeID({{ printf "%q" $edgeName }}, v)
+		{{- else }}
 		_ = {{ $receiver }}.mutation.SetField({{ printf "%q" $f.Name }}, v)
+		{{- end }}
 		return {{ $receiver }}
 	}
 
@@ -69,7 +77,11 @@ in the LICENSE file in the root directory of this source tree.
 		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
 		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
+			{{- if $edgeName }}
+			_ = {{ $receiver }}.mutation.ClearEdge({{ printf "%q" $edgeName }})
+			{{- else }}
 			_ = {{ $receiver }}.mutation.ClearField({{ printf "%q" $f.Name }})
+			{{- end }}
 			return {{ $receiver }}
 		}
 	{{ end }}

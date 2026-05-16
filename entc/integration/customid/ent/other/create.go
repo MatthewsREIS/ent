@@ -109,7 +109,7 @@ func (_c *OtherCreate) sqlSave(ctx context.Context) (*Other, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -120,7 +120,8 @@ func (_c *OtherCreate) createSpec() (*Other, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeOther))
 	)
 	_spec.OnConflict = _c.conflict
-	if id, ok := _c.mutation.ID(); ok {
+	if rawID, ok := _c.mutation.ID(); ok {
+		id := rawID.(sid.ID)
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
@@ -312,7 +313,7 @@ func (_c *OtherCreateBulk) Save(ctx context.Context) ([]*Other, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

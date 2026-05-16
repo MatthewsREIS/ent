@@ -25,7 +25,7 @@ func (_q *FieldTypeQuery) Filter() *FieldTypeFilter {
 
 // NewFieldTypeFilterForMutation creates a new FieldTypeFilter for the given mutation.
 func NewFieldTypeFilterForMutation(m *FieldTypeMutation) *FieldTypeFilter {
-	return &FieldTypeFilter{Config: m.Config, predicateAdder: m}
+	return &FieldTypeFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // FieldTypeFilter provides a generic filtering capability at runtime for FieldTypeQuery.

@@ -32,7 +32,7 @@ func NewPetDelete(c Config, hooks []Hook, mutation *PetMutation) *PetDelete {
 
 // Where appends a list predicates to the PetDelete builder.
 func (_d *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
@@ -89,7 +89,7 @@ func NewPetDeleteOne(d *PetDelete) *PetDeleteOne {
 
 // Where appends a list predicates to the PetDelete builder.
 func (_d *PetDeleteOne) Where(ps ...predicate.Pet) *PetDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

@@ -27,7 +27,7 @@ func (_q *BlobQuery) Filter() *BlobFilter {
 
 // NewBlobFilterForMutation creates a new BlobFilter for the given mutation.
 func NewBlobFilterForMutation(m *BlobMutation) *BlobFilter {
-	return &BlobFilter{Config: m.Config, predicateAdder: m}
+	return &BlobFilter{Config: m.Config.(Config), predicateAdder: m}
 }
 
 // BlobFilter provides a generic filtering capability at runtime for BlobQuery.

@@ -30,7 +30,7 @@ func NewPCUpdate(c Config, hooks []Hook, mutation *PCMutation) *PCUpdate {
 
 // Where appends a list predicates to the PCUpdate builder.
 func (_u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -112,7 +112,7 @@ func (_u *PCUpdateOne) Mutation() *PCMutation {
 
 // Where appends a list predicates to the PCUpdate builder.
 func (_u *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
