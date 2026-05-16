@@ -32,7 +32,7 @@ import (
 
 // AddPredicate implements the predicateAdder interface.
 func ({{ $receiver }} *{{ $builder }}) AddPredicate(pred func(s *sql.Selector)) {
-	{{ $receiver }}.predicates = append({{ $receiver }}.predicates, pred)
+	{{ $receiver }}.Predicates = append({{ $receiver }}.Predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the {{ $builder }} builder.

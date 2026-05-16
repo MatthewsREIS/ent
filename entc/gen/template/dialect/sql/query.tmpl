@@ -168,7 +168,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 					}
 				})
 			})
-			neighbors, err :=  withInterceptors[[]*{{ $e.Type.Name }}](ctx, query, qr, query.inters)
+			neighbors, err :=  withInterceptors[[]*{{ $e.Type.Name }}](ctx, query, qr, query.QueryState.Inters)
 			if err != nil {
 				return err
 			}
@@ -247,8 +247,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 			{{- end }}
 			{{- /* In case of custom field selection, ensure edge-fields used for binding below were selected. */}}
 			{{- if and $e.Ref $e.Ref.Field }}
-				if len(query.ctx.Fields) > 0 {
-					query.ctx.AppendFieldOnce({{ $e.Type.Package }}.{{ $e.Ref.Field.Constant }})
+				if len(query.Ctx.Fields) > 0 {
+					query.Ctx.AppendFieldOnce({{ $e.Type.Package }}.{{ $e.Ref.Field.Constant }})
 				}
 			{{- end }}
 			query.Where(predicate.{{ $e.Type.Name }}(func(s *sql.Selector) {
@@ -296,10 +296,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 		_spec.Unique = false
 		_spec.Node.Columns = nil
 	{{- else }}
-		_spec.Node.Columns = {{ $receiver }}.ctx.Fields
-		if len({{ $receiver }}.ctx.Fields) > 0 {
+		_spec.Node.Columns = {{ $receiver }}.Ctx.Fields
+		if len({{ $receiver }}.Ctx.Fields) > 0 {
 			{{- /* In case of field selection, configure query to unique only if was explicitly set to true. */}}
-			_spec.Unique = {{ $receiver }}.ctx.Unique != nil && *{{ $receiver }}.ctx.Unique
+			_spec.Unique = {{ $receiver }}.Ctx.Unique != nil && *{{ $receiver }}.Ctx.Unique
 		}
 	{{- end }}
 	return sqlgraph.CountNodes(ctx, {{ $receiver }}.Drv, _spec)
@@ -308,13 +308,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error
 func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec({{ $.Package }}.Table, {{ $.Package }}.Columns, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
 	{{- /* Setup any intermediate queries if exist (traversal path). */}}
-	_spec.From = {{ $receiver }}.sql
-	if unique := {{ $receiver }}.ctx.Unique; unique != nil {
+	_spec.From = {{ $receiver }}.Sql
+	if unique := {{ $receiver }}.Ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if {{ $receiver }}.path != nil {
+	} else if {{ $receiver }}.Path != nil {
 		_spec.Unique = true
 	}
-	if fields := {{ $receiver }}.ctx.Fields; len(fields) > 0 {
+	if fields := {{ $receiver }}.Ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		{{- if $.HasOneFieldID }}
 			_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})
@@ -339,17 +339,17 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 			}
 		{{- end }}
 	}
-	if ps := {{ $receiver }}.predicates; len(ps) > 0 {
+	if ps := {{ $receiver }}.Predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := {{ $receiver }}.ctx.Limit; limit != nil {
+	if limit := {{ $receiver }}.Ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := {{ $receiver }}.ctx.Offset; offset != nil {
+	if offset := {{ $receiver }}.Ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := {{ $receiver }}.order; len(ps) > 0 {
@@ -381,16 +381,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 	{{- $builderV := "builder" }}{{ if eq $.Package $builderV }}{{ $builderV = "builderC" }}{{ end }}
 	{{ $builderV }} := sql.Dialect({{ $receiver }}.Drv.Dialect())
 	t1 := {{ $builderV }}.Table({{ $.Package }}.Table)
-	columns := {{ $receiver }}.ctx.Fields
+	columns := {{ $receiver }}.Ctx.Fields
 	if len(columns) == 0 {
 		columns = {{ $.Package }}.Columns
 	}
 	selector := {{ $builderV }}.Select(t1.Columns(columns...)...).From(t1)
-	if {{ $receiver }}.sql != nil {
-		selector = {{ $receiver }}.sql
+	if {{ $receiver }}.Sql != nil {
+		selector = {{ $receiver }}.Sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if {{ $receiver }}.ctx.Unique != nil && *{{ $receiver }}.ctx.Unique {
+	if {{ $receiver }}.Ctx.Unique != nil && *{{ $receiver }}.Ctx.Unique {
 		selector.Distinct()
 	}
 	{{- /* Allow mutating the sql.Selector by ent extensions or user templates.*/}}
@@ -399,18 +399,18 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
-	for _, p := range {{ $receiver }}.predicates {
+	for _, p := range {{ $receiver }}.Predicates {
 		p(selector)
 	}
 	for _, p := range {{ $receiver }}.order {
 		p(selector)
 	}
-	if offset := {{ $receiver }}.ctx.Offset; offset != nil {
+	if offset := {{ $receiver }}.Ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := {{ $receiver }}.ctx.Limit; limit != nil {
+	if limit := {{ $receiver }}.Ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -488,7 +488,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 {{ define "dialect/sql/query/preparecheck" }}
 	{{- $pkg := $.Scope.Package }}
 	{{- $receiver := $.Scope.Receiver }}
-	for _, f := range {{ $receiver }}.ctx.Fields {
+	for _, f := range {{ $receiver }}.Ctx.Fields {
 		if !{{ $.Package }}.ValidColumn(f) {
 			return &ValidationError{Name: f, Err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
 		}

@@ -11,7 +11,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ template "header" $ }}
 
-{{ with extend $ "Imports" $.SiblingImports "CreateUsesEntbuilder" (and $.HasOneFieldID (eq $.Config.Storage.Name "sql")) }}
+{{ with extend $ "Imports" $.SiblingImports "CreateUsesEntbuilder" (and $.HasOneFieldID (eq $.Config.Storage.Name "sql")) "QueryUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -21,10 +21,15 @@ in the LICENSE file in the root directory of this source tree.
 // {{ $builder }} is the builder for querying {{ $.Name }} entities.
 type {{ $builder }} struct {
 	Config
+	{{- if eq $.Config.Storage.Name "sql" }}
+	entbuilder.QueryState[predicate.{{ $.Name }}]
+	order []{{ $.Package }}.OrderOption
+	{{- else }}
 	ctx			*QueryContext
 	order		[]{{ $.Package }}.OrderOption
 	inters		[]Interceptor
 	predicates 	[]predicate.{{ $.Name }}
+	{{- end }}
 	{{- /* Eager loading fields. */}}
 	{{- range $e := $.Edges }}
 		{{ $e.EagerLoadField }} *{{ $e.Type.QueryName }}
@@ -34,34 +39,56 @@ type {{ $builder }} struct {
 	{{- if hasTemplate $tmpl }}
 		{{- xtemplate $tmpl . }}
 	{{- end }}
+	{{- if ne $.Config.Storage.Name "sql" }}
 	// intermediate query (i.e. traversal path).
 	{{ $.Storage }} {{ $.Storage.Builder }}
 	path func(context.Context) ({{ $.Storage.Builder }}, error)
+	{{- end }}
 }
 
 // Where adds a new predicate for the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $receiver}}.predicates = append({{ $receiver }}.predicates, ps...)
+	{{- if eq $.Config.Storage.Name "sql" }}
+	{{ $receiver }}.AddPredicates(ps...)
 	return {{ $receiver }}
+	{{- else }}
+	{{ $receiver }}.predicates = append({{ $receiver }}.predicates, ps...)
+	return {{ $receiver }}
+	{{- end }}
 }
 
 // Limit the number of records to be returned by this query.
 func ({{ $receiver }} *{{ $builder }}) Limit(limit int) *{{ $builder }} {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	{{ $receiver }}.SetLimit(limit)
+	return {{ $receiver }}
+	{{- else }}
 	{{ $receiver }}.ctx.Limit = &limit
 	return {{ $receiver }}
+	{{- end }}
 }
 
 // Offset to start from.
 func ({{ $receiver }} *{{ $builder }}) Offset(offset int) *{{ $builder }} {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	{{ $receiver }}.SetOffset(offset)
+	return {{ $receiver }}
+	{{- else }}
 	{{ $receiver }}.ctx.Offset = &offset
 	return {{ $receiver }}
+	{{- end }}
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func ({{ $receiver }} *{{ $builder }}) Unique(unique bool) *{{ $builder }} {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	{{ $receiver }}.SetUnique(unique)
+	return {{ $receiver }}
+	{{- else }}
 	{{ $receiver }}.ctx.Unique = &unique
 	return {{ $receiver }}
+	{{- end }}
 }
 
 // Order specifies how the records should be ordered.
@@ -76,7 +103,7 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.Package }}.OrderOption) *
 	// Query{{ pascal $e.Name }} chains the current query on the "{{ $e.Name }}" edge.
 	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
 		query := (&{{ $e.Type.ClientName }}{Config: {{ $receiver }}.Config}).Query()
-		query.path = func(ctx context.Context) (fromU {{ $.Storage.Builder }}, err error) {
+		query.{{ if eq $.Config.Storage.Name "sql" }}Path{{ else }}path{{ end }} = func(ctx context.Context) (fromU {{ $.Storage.Builder }}, err error) {
 			if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 				return nil, err
 			}
@@ -90,9 +117,13 @@ func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.Package }}.OrderOption) *
 	}
 {{ end }}
 
-// First returns the first {{ $.Name }} entity from the query. 
+// First returns the first {{ $.Name }} entity from the query.
 // Returns a *NotFoundError when no {{ $.Name }} was found.
 func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	{{ $receiver }}.Limit(1)
+	return entbuilder.RunFirst[*{{ $.Name }}, []*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryFirst, {{ $.Package }}.Label, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
+	{{- else }}
 	nodes, err := {{ $receiver }}.Limit(1).All(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
@@ -101,6 +132,7 @@ func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}
 		return nil, &NotFoundError{Label: {{ $.Package }}.Label}
 	}
 	return nodes[0], nil
+	{{- end }}
 }
 
 // FirstX is like First, but panics if an error occurs.
@@ -117,7 +149,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 	// Returns a *NotFoundError when no {{ $.Name }} ID was found.
 	func ({{ $receiver }} *{{ $builder }}) FirstID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 		var ids []{{ $.ID.Type }}
-		if ids, err = {{ $receiver }}.Limit(1).IDs(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryFirstID)); err != nil {
+		if ids, err = {{ $receiver }}.Limit(1).IDs(setContextOp(ctx, {{ if eq $.Config.Storage.Name "sql" }}{{ $receiver }}.Ctx{{ else }}{{ $receiver }}.ctx{{ end }}, ent.OpQueryFirstID)); err != nil {
 			return
 		}
 		if len(ids) == 0 {
@@ -141,6 +173,10 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 // Returns a *NotSingularError when more than one {{ $.Name }} entity is found.
 // Returns a *NotFoundError when no {{ $.Name }} entities are found.
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	{{ $receiver }}.Limit(2)
+	return entbuilder.RunOnly[*{{ $.Name }}, []*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryOnly, {{ $.Package }}.Label, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
+	{{- else }}
 	nodes, err := {{ $receiver }}.Limit(2).All(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -153,6 +189,7 @@ func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }},
 	default:
 		return nil, &NotSingularError{Label: {{ $.Package }}.Label}
 	}
+	{{- end }}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
@@ -170,7 +207,7 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 	// Returns a *NotFoundError when no entities are found.
 	func ({{ $receiver }} *{{ $builder }}) OnlyID(ctx context.Context) (id {{ $.ID.Type }}, err error) {
 		var ids []{{ $.ID.Type }}
-		if ids, err = {{ $receiver }}.Limit(2).IDs(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryOnlyID)); err != nil {
+		if ids, err = {{ $receiver }}.Limit(2).IDs(setContextOp(ctx, {{ if eq $.Config.Storage.Name "sql" }}{{ $receiver }}.Ctx{{ else }}{{ $receiver }}.ctx{{ end }}, ent.OpQueryOnlyID)); err != nil {
 			return
 		}
 		switch len(ids) {
@@ -196,12 +233,16 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	return entbuilder.RunAll[[]*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryAll, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) })
+	{{- else }}
 	ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryAll)
 	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*{{ $.Name }}, *{{ $builder }}]()
 	return withInterceptors[[]*{{ $.Name }}](ctx, {{ $receiver }}, qr, {{ $receiver }}.inters)
+	{{- end }}
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -217,10 +258,17 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 	// IDs executes the query and returns a list of {{ $.Name }} IDs.
 	func ({{ $receiver }} *{{ $builder }}) IDs(ctx context.Context) (ids []{{ $.ID.Type }}, err error) {
 		{{- /* Since a graph traversal such as JOINs can return duplicate IDs, set the Unique modifier unless specified otherwise. */}}
+		{{- if eq $.Config.Storage.Name "sql" }}
+		if {{ $receiver }}.Ctx.Unique == nil && {{ $receiver }}.Path != nil {
+			{{ $receiver }}.Unique(true)
+		}
+		ctx = setContextOp(ctx, {{ $receiver }}.Ctx, ent.OpQueryIDs)
+		{{- else }}
 		if {{ $receiver }}.ctx.Unique == nil && {{ $receiver }}.path != nil {
 			{{ $receiver }}.Unique(true)
 		}
 		ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryIDs)
+		{{- end }}
 		if err = {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
 			return nil, err
 		}
@@ -239,11 +287,15 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 
 // Count returns the count of the given query.
 func ({{ $receiver }} *{{ $builder }}) Count(ctx context.Context) (int, error) {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	return entbuilder.RunCount(ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryCount, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, {{ $receiver }}.sqlCount)
+	{{- else }}
 	ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryCount)
 	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
 	return withInterceptors[int](ctx, {{ $receiver }}, querierCount[*{{ $builder }}](), {{ $receiver }}.inters)
+	{{- end }}
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -257,7 +309,7 @@ func ({{ $receiver }} *{{ $builder }}) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func ({{ $receiver }} *{{ $builder }}) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryExist)
+	ctx = setContextOp(ctx, {{ if eq $.Config.Storage.Name "sql" }}{{ $receiver }}.Ctx{{ else }}{{ $receiver }}.ctx{{ end }}, ent.OpQueryExist)
 	switch _, err := {{ $receiver }}.First{{ if $.HasOneFieldID }}ID{{ end }}(ctx);{
 	case IsNotFound(err):
 		return false, nil
@@ -285,16 +337,23 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 	}
 	return &{{ $builder }}{
 		Config: 	{{ $receiver }}.Config,
+		{{- if eq $.Config.Storage.Name "sql" }}
+		QueryState: *{{ $receiver }}.QueryState.Clone(),
+		order:      append([]{{ $.Package }}.OrderOption{}, {{ $receiver }}.order...),
+		{{- else }}
 		ctx: 		{{ $receiver }}.ctx.Clone(),
 		order: 		append([]{{ $.Package }}.OrderOption{}, {{ $receiver }}.order...),
 		inters: 	append([]Interceptor{}, {{ $receiver }}.inters...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
+		{{- end }}
 		{{- range $e := $.Edges }}
 			{{ $e.EagerLoadField }}: {{ $receiver }}.{{ $e.EagerLoadField }}.Clone(),
 		{{- end }}
+		{{- if ne $.Config.Storage.Name "sql" }}
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
 		path: {{ $receiver }}.path,
+		{{- end }}
 		{{- if $.FeatureEnabled "sql/modifier" }}
 			modifiers: append([]func(*sql.Selector){}, {{ $receiver }}.modifiers...),
 		{{- end }}
@@ -337,9 +396,15 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 //
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *{{ $groupBuilder }} {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	{{ $receiver }}.Ctx.Fields = append([]string{field}, fields...)
+	grbuild := &{{ $groupBuilder }}{build: {{ $receiver }}}
+	grbuild.flds = &{{ $receiver }}.Ctx.Fields
+	{{- else }}
 	{{ $receiver }}.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &{{ $groupBuilder }}{build: {{ $receiver }}}
 	grbuild.flds = &{{ $receiver }}.ctx.Fields
+	{{- end }}
 	grbuild.label = {{ $.Package }}.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -364,10 +429,17 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 //
 {{- end }}
 func ({{ $receiver }} *{{ $builder }}) Select(fields ...string) *{{ $selectBuilder }} {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	{{ $receiver }}.Ctx.Fields = append({{ $receiver }}.Ctx.Fields, fields...)
+	sbuild := &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
+	sbuild.label = {{ $.Package }}.Label
+	sbuild.flds, sbuild.scan = &{{ $receiver }}.Ctx.Fields, sbuild.Scan
+	{{- else }}
 	{{ $receiver }}.ctx.Fields = append({{ $receiver }}.ctx.Fields, fields...)
 	sbuild := &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
 	sbuild.label = {{ $.Package }}.Label
 	sbuild.flds, sbuild.scan = &{{ $receiver }}.ctx.Fields, sbuild.Scan
+	{{- end }}
 	return sbuild
 }
 
@@ -377,7 +449,7 @@ func ({{ $receiver }} *{{ $builder }}) Aggregate(fns ...AggregateFunc) *{{ $sele
 }
 
 func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
-	for _, inter := range {{ $receiver }}.inters {
+	for _, inter := range {{ if eq $.Config.Storage.Name "sql" }}{{ $receiver }}.QueryState.Inters{{ else }}{{ $receiver }}.inters{{ end }} {
 		if inter == nil {
 			return fmt.Errorf("{{ $pkg }}: uninitialized interceptor (forgotten import {{ $pkg }}/runtime?)")
 		}
@@ -394,6 +466,15 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 			{{- xtemplate $tmpl . }}
 		{{- end }}
 	{{- end }}
+	{{- if eq $.Config.Storage.Name "sql" }}
+	if {{ $receiver }}.Path != nil {
+		prev, err := {{ $receiver }}.Path(ctx)
+		if err != nil {
+			return err
+		}
+		{{ $receiver }}.Sql = prev
+	}
+	{{- else }}
 	if {{ $receiver }}.path != nil {
 		prev, err := {{ $receiver }}.path(ctx)
 		if err != nil {
@@ -401,6 +482,7 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 		}
 		{{ $receiver }}.{{ $.Storage }} = prev
 	}
+	{{- end }}
 	{{- if $.NumPolicy }}
 		if {{ $.Package }}.Policy == nil {
 			return errors.New("{{ $pkg }}: uninitialized {{ $.Package }}.Policy (forgotten import {{ $pkg }}/runtime?)")
@@ -444,11 +526,19 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...AggregateFunc)
 
 // Scan applies the selector query and scans the result into the given value.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v any) error {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	ctx = setContextOp(ctx, {{ $groupReceiver }}.build.Ctx, ent.OpQueryGroupBy)
+	if err := {{ $groupReceiver }}.build.prepareQuery(ctx); err != nil {
+		return err
+	}
+	return scanWithInterceptors[*{{ $builder }}, *{{ $groupBuilder }}](ctx, {{ $groupReceiver }}.build, {{ $groupReceiver }}, {{ $groupReceiver }}.build.QueryState.Inters, v)
+	{{- else }}
 	ctx = setContextOp(ctx, {{ $groupReceiver }}.build.ctx, ent.OpQueryGroupBy)
 	if err := {{ $groupReceiver }}.build.prepareQuery(ctx); err != nil {
 		return err
 	}
 	return scanWithInterceptors[*{{ $builder }}, *{{ $groupBuilder }}](ctx, {{ $groupReceiver }}.build, {{ $groupReceiver }}, {{ $groupReceiver }}.build.inters, v)
+	{{- end }}
 }
 
 {{ with extend $ "Receiver" $groupReceiver "Builder" $groupBuilder }}
@@ -474,11 +564,19 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) Aggregate(fns ...AggregateFun
 
 // Scan applies the selector query and scans the result into the given value.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v any) error {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	ctx = setContextOp(ctx, {{ $selectReceiver }}.Ctx, ent.OpQuerySelect)
+	if err := {{ $selectReceiver }}.prepareQuery(ctx); err != nil {
+		return err
+	}
+	return scanWithInterceptors[*{{ $builder }}, *{{ $selectBuilder }}](ctx, {{ $selectReceiver }}.{{ $.QueryName }}, {{ $selectReceiver }}, {{ $selectReceiver }}.QueryState.Inters, v)
+	{{- else }}
 	ctx = setContextOp(ctx, {{ $selectReceiver }}.ctx, ent.OpQuerySelect)
 	if err := {{ $selectReceiver }}.prepareQuery(ctx); err != nil {
 		return err
 	}
 	return scanWithInterceptors[*{{ $builder }}, *{{ $selectBuilder }}](ctx, {{ $selectReceiver }}.{{ $.QueryName }}, {{ $selectReceiver }}, {{ $selectReceiver }}.inters, v)
+	{{- end }}
 }
 
 {{ with extend $ "Receiver" $selectReceiver "Builder" $selectBuilder }}
