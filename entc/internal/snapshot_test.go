@@ -5,6 +5,7 @@
 package internal
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -42,6 +43,32 @@ func TestSnapshot_Restore(t *testing.T) {
 	cmd.Dir = integrationDir
 	out, err := cmd.CombinedOutput()
 	require.NoError(t, err, "go generate failed in %s:\n%s", integrationDir, string(out))
+}
+
+// TestIsBuildError_TypeCheckerErrors verifies that the type-checker error
+// classes hit users most often are matched as build errors, so the existing
+// mayRecover/snapshot-restore path triggers on them.
+func TestIsBuildError_TypeCheckerErrors(t *testing.T) {
+	cases := []struct {
+		name string
+		msg  string
+		want bool
+	}{
+		{"undefined symbol", "main.go:10:5: undefined: ent.UserMutation", true},
+		{"missing field or method", "main.go:11:7: m.SetNewField undefined (type *ent.UserMutation has no field or method SetNewField)", true},
+		{"undeclared name (older Go)", "main.go:12:3: undeclared name: Helper", true},
+		{"cannot use", "main.go:13:9: cannot use \"foo\" (untyped string constant) as int value in argument to m.SetAge", true},
+		{"existing syntax error still matched", "main.go:1:1: syntax error", true},
+		{"existing could not import still matched", "main.go:1:1: could not import x/y (foo)", true},
+		{"unrelated runtime error not matched", "connection refused", false},
+		{"empty error string not matched", "", false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := IsBuildError(errors.New(tc.msg))
+			require.Equal(t, tc.want, got, "IsBuildError(%q) = %v, want %v", tc.msg, got, tc.want)
+		})
+	}
 }
 
 // addConflicts adds VCS conflicts to the files that match the given patterns.

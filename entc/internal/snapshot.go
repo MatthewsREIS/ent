@@ -220,11 +220,21 @@ func IsBuildError(err error) bool {
 		return true
 	}
 	for _, s := range []string{
+		// Original substrings (syntax-level errors).
 		"syntax error",
 		"previous declaration",
 		"invalid character",
 		"could not import",
 		"found '<<'",
+		// Type-checker errors emitted when schema-side code references
+		// symbols that don't yet exist in the generated ent package.
+		// These hit users most often during normal schema iteration:
+		// add a new field, then a hook that calls SetNewField, then
+		// regenerate -- without this match, mayRecover never triggers.
+		"undefined:",
+		"has no field or method",
+		"undeclared name",
+		"cannot use",
 	} {
 		if strings.Contains(err.Error(), s) {
 			return true
