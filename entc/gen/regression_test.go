@@ -43,28 +43,23 @@ func TestGraph_Gen_GremlinDeleteAvoidsDuplicateSelfImport(t *testing.T) {
 
 	require.NoError(t, graph.Gen())
 
-	path := filepath.Join(target, "task_delete.go")
+	// In the sub-package layout, the delete builder lives in task/delete.go
+	// (inside the task package itself). A self-import of "gremlinregen/ent/task"
+	// must not appear — the entity symbols are unqualified within the sub-package.
+	path := filepath.Join(target, "task", "delete.go")
 	content, err := os.ReadFile(path)
 	require.NoError(t, err)
 
 	file, err := parser.ParseFile(token.NewFileSet(), path, content, parser.ImportsOnly)
 	require.NoError(t, err)
 
-	wantPath := "gremlinregen/ent/task"
-	var total, aliased int
+	selfPath := "gremlinregen/ent/task"
 	for _, imp := range file.Imports {
 		importPath, err := strconv.Unquote(imp.Path.Value)
 		require.NoError(t, err)
-		if importPath != wantPath {
-			continue
-		}
-		total++
-		if imp.Name != nil && imp.Name.Name == "enttask" {
-			aliased++
-		}
+		require.NotEqualf(t, selfPath, importPath,
+			"task/delete.go must not self-import %q (file content:\n%s)", selfPath, content)
 	}
-	require.Equalf(t, 1, total, "unexpected imports in %s:\n%s", path, content)
-	require.Equalf(t, 1, aliased, "unexpected imports in %s:\n%s", path, content)
 }
 
 func TestGraph_Gen_AssignGeneratedUserIntIDAcceptsInt(t *testing.T) {
