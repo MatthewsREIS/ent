@@ -58,8 +58,7 @@ issue and we'll discuss a typed-predicate helper.
 | Release | Status |
 |---|---|
 | Current (PR 3) | New `where` package shipped. Per-entity wrappers deprecated but functional. Both APIs work side by side. |
-| Next | No change. Migrate consumer call sites to `where.XX` at your own pace. |
-| Release after next | Deprecated per-entity wrappers removed. Only `where.XX` and the per-entity edge/ID predicates remain. |
+| Next | Deprecated per-entity wrappers removed. Only `where.XX` and the per-entity edge/ID predicates remain. Migrate before upgrading. |
 
 ## Mechanical migration recipe
 
@@ -70,11 +69,13 @@ Most call sites can be migrated with a regex codemod:
 # user.AgeGT(18)      → where.GT(user.FieldAge, 18)
 # user.NameIn("a","b")→ where.In(user.FieldName, "a", "b")
 
-s/(\w+)\.(\w+)(EQ|NEQ|In|NotIn|GT|GTE|LT|LTE|Contains|HasPrefix|HasSuffix|EqualFold|ContainsFold|HasPrefixFold|HasSuffixFold)\(/where.\3(\1.Field\2, /g
+s/(\w+)\.(\w+)(EQ|NEQ|NotIn|In|GTE|GT|LTE|LT|ContainsFold|Contains|HasPrefixFold|HasPrefix|HasSuffixFold|HasSuffix|EqualFold)\(/where.\3(\1.Field\2, /g
 ```
 
 Test the substitution on a single file before running it globally. Edge and ID
 predicates won't match and stay as-is.
+
+**False-positive caveat.** The pattern matches any `<ident>.<Word><Op>(` invocation, including user-defined methods on non-ent structs that happen to end in `EQ`/`Contains`/`GT`/etc. Run the codemod only on files that import an ent entity package, and always review the diff before committing.
 
 ## What didn't change
 
