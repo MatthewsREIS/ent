@@ -55,3 +55,53 @@ func IsNull(field string) func(*sql.Selector) {
 func NotNull(field string) func(*sql.Selector) {
 	return sql.FieldNotNull(field)
 }
+
+// Contains returns a predicate that matches rows where the field contains the substring.
+func Contains(field, substr string) func(*sql.Selector) {
+	return sql.FieldContains(field, substr)
+}
+
+// ContainsFold returns a case-insensitive Contains.
+func ContainsFold(field, substr string) func(*sql.Selector) {
+	return sql.FieldContainsFold(field, substr)
+}
+
+// EqualFold returns a case-insensitive EQ.
+func EqualFold(field, substr string) func(*sql.Selector) {
+	return sql.FieldEqualFold(field, substr)
+}
+
+// HasPrefix returns a predicate that matches rows where the field has the given prefix.
+func HasPrefix(field, prefix string) func(*sql.Selector) {
+	return sql.FieldHasPrefix(field, prefix)
+}
+
+// HasPrefixFold returns a case-insensitive HasPrefix.
+func HasPrefixFold(field, prefix string) func(*sql.Selector) {
+	return sql.FieldHasPrefixFold(field, prefix)
+}
+
+// HasSuffix returns a predicate that matches rows where the field has the given suffix.
+func HasSuffix(field, suffix string) func(*sql.Selector) {
+	return sql.FieldHasSuffix(field, suffix)
+}
+
+// HasSuffixFold returns a case-insensitive HasSuffix.
+func HasSuffixFold(field, suffix string) func(*sql.Selector) {
+	return sql.FieldHasSuffixFold(field, suffix)
+}
+
+// And combines the given predicates with AND.
+func And(predicates ...func(*sql.Selector)) func(*sql.Selector) {
+	return sql.AndPredicates(predicates...)
+}
+
+// Or combines the given predicates with OR.
+func Or(predicates ...func(*sql.Selector)) func(*sql.Selector) {
+	return sql.OrPredicates(predicates...)
+}
+
+// Not wraps the given predicates with NOT.
+func Not(predicates ...func(*sql.Selector)) func(*sql.Selector) {
+	return sql.NotPredicates(predicates...)
+}

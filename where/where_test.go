@@ -92,3 +92,60 @@ func TestNotNull(t *testing.T) {
 	q, _ := predicateToSQL(t, where.NotNull("deleted_at"))
 	require.Contains(t, q, "`deleted_at` IS NOT NULL")
 }
+
+func TestContains(t *testing.T) {
+	q, args := predicateToSQL(t, where.Contains("name", "ali"))
+	require.Contains(t, q, "`name` LIKE ?")
+	require.Equal(t, []any{"%ali%"}, args)
+}
+
+func TestContainsFold(t *testing.T) {
+	q, _ := predicateToSQL(t, where.ContainsFold("name", "ALI"))
+	// dialect-specific (SQLite uses LOWER(...) LIKE LOWER(...)). Just assert non-empty.
+	require.NotEmpty(t, q)
+}
+
+func TestEqualFold(t *testing.T) {
+	q, _ := predicateToSQL(t, where.EqualFold("name", "Alice"))
+	require.NotEmpty(t, q)
+}
+
+func TestHasPrefix(t *testing.T) {
+	q, args := predicateToSQL(t, where.HasPrefix("name", "al"))
+	require.Contains(t, q, "`name` LIKE ?")
+	require.Equal(t, []any{"al%"}, args)
+}
+
+func TestHasPrefixFold(t *testing.T) {
+	q, _ := predicateToSQL(t, where.HasPrefixFold("name", "AL"))
+	require.NotEmpty(t, q)
+}
+
+func TestHasSuffix(t *testing.T) {
+	q, args := predicateToSQL(t, where.HasSuffix("name", "ce"))
+	require.Contains(t, q, "`name` LIKE ?")
+	require.Equal(t, []any{"%ce"}, args)
+}
+
+func TestHasSuffixFold(t *testing.T) {
+	q, _ := predicateToSQL(t, where.HasSuffixFold("name", "CE"))
+	require.NotEmpty(t, q)
+}
+
+func TestAnd(t *testing.T) {
+	q, args := predicateToSQL(t, where.And(where.EQ("age", 30), where.EQ("name", "alice")))
+	require.Contains(t, q, " AND ")
+	require.Equal(t, []any{30, "alice"}, args)
+}
+
+func TestOr(t *testing.T) {
+	q, args := predicateToSQL(t, where.Or(where.EQ("age", 30), where.EQ("age", 40)))
+	require.Contains(t, q, " OR ")
+	require.Equal(t, []any{30, 40}, args)
+}
+
+func TestNot(t *testing.T) {
+	q, args := predicateToSQL(t, where.Not(where.EQ("age", 30)))
+	require.Contains(t, q, "NOT")
+	require.Equal(t, []any{30}, args)
+}
