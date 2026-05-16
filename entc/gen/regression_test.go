@@ -120,8 +120,10 @@ func TestGraph_Gen_SQLModifierDeleteBuilderHasModify(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	testFile := filepath.Join(target, "task_delete_modifier_test.go")
-	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
+	// In the sub-package layout, TaskDelete lives in ent/task/delete.go
+	// (package "task"), not in the root ent package. Write the test there.
+	testFile := filepath.Join(target, "task", "task_delete_modifier_test.go")
+	require.NoError(t, os.WriteFile(testFile, []byte(`package task
 
 import (
 	"testing"
@@ -135,7 +137,7 @@ func TestTaskDeleteHasModify(t *testing.T) {
 }
 `), 0644))
 
-	cmd := exec.Command("go", "test", "-mod=mod", "./ent", "-run", "TestTaskDeleteHasModify", "-count=1")
+	cmd := exec.Command("go", "test", "-mod=mod", "./ent/task", "-run", "TestTaskDeleteHasModify", "-count=1")
 	cmd.Dir = mod
 	cmd.Env = append(os.Environ(), "GOWORK=off")
 	out, err := cmd.CombinedOutput()

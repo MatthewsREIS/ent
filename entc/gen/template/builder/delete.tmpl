@@ -24,6 +24,11 @@ type {{ $builder }} struct {
 	Config
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
+	{{- /* Additional fields to add to the builder. */}}
+	{{- $deleteFieldsTmpl := printf "dialect/%s/delete/fields" $.Storage }}
+	{{- if hasTemplate $deleteFieldsTmpl }}
+		{{- xtemplate $deleteFieldsTmpl . }}
+	{{- end }}
 }
 
 // New{{ $builder }} returns a new {{ $builder }} initialized with the given config, hooks, and mutation.

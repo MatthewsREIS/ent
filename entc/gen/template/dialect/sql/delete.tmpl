@@ -6,10 +6,26 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
 
+{{/* Additional fields for the delete builder. */}}
+{{ define "dialect/sql/delete/fields" }}
+	{{- with $tmpls := matchTemplate "dialect/sql/delete/fields/additional/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+{{- end }}
+
 {{ define "dialect/sql/delete" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation" }}
+
+{{- /* Allow adding methods to the delete-builder by ent extensions or user templates.*/}}
+{{- with $tmpls := matchTemplate "dialect/sql/delete/additional/*" }}
+	{{- range $tmpl := $tmpls }}
+		{{- xtemplate $tmpl $ }}
+	{{- end }}
+{{- end }}
 
 func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec({{ $.PackageQualifier }}Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.PackageQualifier }}{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
