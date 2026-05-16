@@ -222,10 +222,14 @@ func (m *Mutation[T]) AppendedField(name string) (ent.Value, bool) {
 
 // AppendField records a value to append to the field with the given name.
 // Used for JSON list fields. Returns an error if the field is not in the
-// descriptor.
+// descriptor or the value type does not match the field's expected Go type.
 func (m *Mutation[T]) AppendField(name string, value ent.Value) error {
-	if _, ok := m.desc.Fields[name]; !ok {
+	spec, ok := m.desc.Fields[name]
+	if !ok {
 		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
+	}
+	if value != nil && reflect.TypeOf(value) != spec.Type {
+		return fmt.Errorf("unexpected type %T for field %s (want %s)", value, name, spec.Type)
 	}
 	if m.appended == nil {
 		m.appended = make(map[string]any)

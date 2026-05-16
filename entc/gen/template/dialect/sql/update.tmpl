@@ -120,7 +120,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 				{{- if $f.SupportsMutationAppend }}
 					if value, ok := {{ $mutation }}.AppendedField({{ printf "%q" $f.Name }}); ok {
 						_spec.AddModifier(func(u *sql.UpdateBuilder) {
-							sqljson.Append(u, {{ $.PackageQualifier }}{{ $f.Constant }}, value)
+							sqljson.Append(u, {{ $.PackageQualifier }}{{ $f.Constant }}, value.({{ trimPackage $f.Type.String $.Package }}))
 						})
 					}
 				{{- end }}

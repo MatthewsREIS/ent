@@ -135,5 +135,55 @@ func TestMutation_AddPredicate(t *testing.T) {
 	require.Len(t, m.MutationPredicates(), 1)
 }
 
+func appendDescriptor() *entbuilder.Descriptor {
+	return &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{
+			"tags": {Type: reflect.TypeFor[[]string](), GoName: "Tags"},
+		},
+		Edges: map[string]entbuilder.EdgeSpec{},
+	}
+}
+
+func TestMutation_AppendField_RoundTrip(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	want := []string{"a", "b"}
+	require.NoError(t, m.AppendField("tags", want))
+	got, ok := m.AppendedField("tags")
+	require.True(t, ok)
+	require.Equal(t, want, got)
+}
+
+func TestMutation_AppendedField_Unset(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	v, ok := m.AppendedField("tags")
+	require.False(t, ok)
+	require.Nil(t, v)
+}
+
+func TestMutation_AppendField_UnknownField_Errors(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	require.Error(t, m.AppendField("nonexistent", []string{"x"}))
+}
+
+func TestMutation_AppendField_TypeMismatch_Errors(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	// []int is not []string
+	err := m.AppendField("tags", []int{1, 2})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "unexpected type")
+}
+
+func TestMutation_ResetField_ClearsAppended(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	require.NoError(t, m.AppendField("tags", []string{"x"}))
+	_, ok := m.AppendedField("tags")
+	require.True(t, ok)
+	require.NoError(t, m.ResetField("tags"))
+	_, ok = m.AppendedField("tags")
+	require.False(t, ok)
+}
+
 // Compile-time check; will fail to compile if interface drifts.
 var _ ent.Mutation = (*entbuilder.Mutation[testEntity])(nil)

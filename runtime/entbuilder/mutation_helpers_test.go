@@ -69,3 +69,19 @@ func TestEdgeIDAs(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, 99, id)
 }
+
+func TestToAny_EmptySlice(t *testing.T) {
+	got := entbuilder.ToAny([]int{})
+	require.NotNil(t, got)
+	require.Equal(t, []any{}, got)
+}
+
+func TestToAny_PopulatedIntSlice(t *testing.T) {
+	got := entbuilder.ToAny([]int{1, 2, 3})
+	require.Equal(t, []any{1, 2, 3}, got)
+}
+
+func TestToAny_StringSlice(t *testing.T) {
+	got := entbuilder.ToAny([]string{"a", "b"})
+	require.Equal(t, []any{"a", "b"}, got)
+}
