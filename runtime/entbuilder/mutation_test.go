@@ -173,3 +173,68 @@ func TestMutation_AddedField_Unset(t *testing.T) {
 	_, ok := m.AddedField("title")
 	require.False(t, ok)
 }
+
+func TestMutation_AddField_Accumulates(t *testing.T) {
+	desc := &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{
+			"count": {Type: reflect.TypeFor[int](), GoName: "Count", Numeric: true},
+		},
+	}
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, desc)
+	require.NoError(t, m.AddField("count", 5))
+	require.NoError(t, m.AddField("count", 3))
+	v, ok := m.AddedField("count")
+	require.True(t, ok)
+	require.Equal(t, 8, v) // 5 + 3
+}
+
+func TestMutation_SetField_InterfaceType(t *testing.T) {
+	anyType := reflect.TypeOf((*any)(nil)).Elem()
+	desc := &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{
+			"payload": {Type: anyType, GoName: "Payload"},
+		},
+	}
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, desc)
+	require.NoError(t, m.SetField("payload", "anything"))
+	require.NoError(t, m.SetField("payload", 42))
+	require.NoError(t, m.SetField("payload", []int{1, 2, 3}))
+}
+
+func TestMutation_ClearField_ClearsAddedAndAppended(t *testing.T) {
+	desc := &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{
+			"tags": {Type: reflect.TypeFor[[]string](), GoName: "Tags", Nillable: true, Numeric: true},
+		},
+	}
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, desc)
+	require.NoError(t, m.SetField("tags", []string{"a"}))
+	require.NoError(t, m.AddField("tags", []string{"b"}))
+	require.NoError(t, m.AppendField("tags", []string{"c"}))
+	require.NoError(t, m.ClearField("tags"))
+	_, addedOk := m.AddedField("tags")
+	_, appendedOk := m.AppendedField("tags")
+	require.False(t, addedOk, "added should be cleared")
+	require.False(t, appendedOk, "appended should be cleared")
+}
+
+func TestMutation_SetField_ClearsAppended(t *testing.T) {
+	desc := &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{
+			"tags": {Type: reflect.TypeFor[[]string](), GoName: "Tags"},
+		},
+	}
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, desc)
+	require.NoError(t, m.AppendField("tags", []string{"a", "b"}))
+	require.NoError(t, m.SetField("tags", []string{"c"}))
+	_, appendedOk := m.AppendedField("tags")
+	require.False(t, appendedOk, "appended should be cleared when SetField runs")
+}
