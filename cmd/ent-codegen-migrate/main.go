@@ -17,7 +17,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -52,9 +55,47 @@ func main() {
 	}
 }
 
-// RewritePackage is implemented in rewrite_mutation.go.
-// RewritePackage dispatches to the mutation and predicate rewriters.
+// RewritePackage walks pkgPath for .go files (excluding _test.go and any
+// path matching */ent/* generated trees) and applies both the mutation
+// and predicate rewriters.
 func RewritePackage(pkgPath string, descs Descriptors, dryRun bool) error {
-	// Tasks 14-15 implement this in rewrite_mutation.go / rewrite_predicate.go.
-	return fmt.Errorf("RewritePackage: not yet implemented (Tasks 14-15)")
+	return filepath.WalkDir(pkgPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			// Skip generated trees.
+			if d.Name() == "gen" || d.Name() == "ent" || d.Name() == "internal" {
+				if strings.Contains(path, "/ent/") || strings.HasSuffix(path, "/ent") {
+					return filepath.SkipDir
+				}
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+		src, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		// Mutation rewrite first, then predicate (so AST node identities
+		// stay stable through each pass).
+		out, err := RewriteMutationSource(path, string(src), descs)
+		if err != nil {
+			return fmt.Errorf("%s: mutation rewrite: %w", path, err)
+		}
+		out, err = RewritePredicateSource(path, out, descs)
+		if err != nil {
+			return fmt.Errorf("%s: predicate rewrite: %w", path, err)
+		}
+		if out == string(src) {
+			return nil
+		}
+		if dryRun {
+			fmt.Printf("--- %s (would rewrite) ---\n", path)
+			return nil
+		}
+		return os.WriteFile(path, []byte(out), 0o644)
+	})
 }
