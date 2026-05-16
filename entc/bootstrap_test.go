@@ -115,6 +115,98 @@ func main() {
 	require.NoError(t, statErr, "generated user.go should exist after bootstrap codegen")
 }
 
+// TestBootstrap_SkipPolicyThatReferenceGeneratedMutation is the regression
+// test for bootstrap mode handling Policy() methods. A schema declares a
+// Policy() method whose MutationRule body references a not-yet-generated
+// mutation method. Without bootstrap mode the loader fails to type-check the
+// schema package and codegen aborts. With SkipHookCompilation, codegen
+// succeeds because the AST stripper removes the Policy() body before the
+// loader runs.
+//
+// The test follows the same subprocess + aliased-import pattern as
+// TestBootstrap_SkipHooksThatReferenceGeneratedMutation.
+func TestBootstrap_SkipPolicyThatReferenceGeneratedMutation(t *testing.T) {
+	if _, err := exec.LookPath("go"); err != nil {
+		t.Skip("go toolchain not in PATH")
+	}
+	// Use a distinct module name to avoid any test-cache aliasing with the
+	// hooks test above.
+	mod := writeBootstrapModule(t, "bootstrappolicy")
+
+	schemaDir := filepath.Join(mod, "ent", "schema")
+	require.NoError(t, os.MkdirAll(schemaDir, 0o755))
+
+	// Write a schema with a Policy() body that directly references
+	// (*bootstrapent.UserMutation).NotARealMethod via an unreachable if-false
+	// block. The go/types type-checker still validates the reference even in
+	// unreachable code, so without bootstrap mode the schema package fails to
+	// compile. With SkipHookCompilation the entire Policy() body is
+	// AST-stripped before the loader runs, so bootstrappolicy/ent becomes
+	// unused, is deleted from the import block by the stripper, and codegen
+	// succeeds.
+	require.NoError(t, os.WriteFile(filepath.Join(schemaDir, "user.go"), []byte(`package schema
+
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+
+	bootstrapent "bootstrappolicy/ent"
+)
+
+type User struct {
+	ent.Schema
+}
+
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.String("name"),
+	}
+}
+
+func (User) Policy() ent.Policy {
+	// NotARealMethod does not exist on *UserMutation; the type checker
+	// validates this even in an unreachable branch, so the schema fails
+	// to compile without bootstrap stripping.
+	if false {
+		(*bootstrapent.UserMutation)(nil).NotARealMethod()
+	}
+	return nil
+}
+`), 0o644))
+
+	entDir := filepath.Join(mod, "ent")
+	require.NoError(t, os.WriteFile(filepath.Join(entDir, "gen.go"), []byte(`//go:build ignore
+
+package main
+
+import (
+	"log"
+
+	"entgo.io/ent/entc"
+	"entgo.io/ent/entc/gen"
+)
+
+func main() {
+	if err := entc.Generate("./schema", &gen.Config{}, entc.SkipHookCompilation()); err != nil {
+		log.Fatalf("running ent codegen: %v", err)
+	}
+}
+`), 0o644))
+
+	cmd := exec.Command("go", "run", "-mod=mod", "./gen.go")
+	cmd.Dir = entDir
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	out, err := cmd.CombinedOutput()
+	require.NoError(t, err,
+		"codegen with SkipHookCompilation should succeed even though the schema Policy references a not-yet-generated method;\noutput:\n%s", out)
+
+	// Verify the generated User entity exists (proves codegen actually ran,
+	// not just that the loader silently noop'd).
+	userGo := filepath.Join(entDir, "user.go")
+	_, statErr := os.Stat(userGo)
+	require.NoError(t, statErr, "generated user.go should exist after bootstrap codegen")
+}
+
 // writeBootstrapModule creates a temp Go module with go.mod pointing back at
 // the local ent repo via a replace directive, then runs go mod tidy to
 // populate go.sum. Returns the module root.
