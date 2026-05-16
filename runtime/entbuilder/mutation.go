@@ -114,3 +114,7 @@ func NewMutation[T any](c any, op ent.Op, desc *Descriptor, opts ...func(*Mutati
 	}
 	return m
 }
+
+// Compile-time assertion that Mutation[T] satisfies ent.Mutation.
+// A single concrete instantiation suffices.
+var _ ent.Mutation = (*Mutation[struct{}])(nil)

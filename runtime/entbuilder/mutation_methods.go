@@ -11,6 +11,7 @@ import (
 	"reflect"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 )
 
 // Op returns the operation name.
@@ -402,4 +403,52 @@ func (m *Mutation[T]) ClearedEdges() []string {
 		}
 	}
 	return out
+}
+
+// ID returns the ID value set on the mutation. The second return indicates
+// whether the ID was set.
+func (m *Mutation[T]) ID() (any, bool) {
+	if m.id == nil {
+		return nil, false
+	}
+	return m.id, true
+}
+
+// IDs queries the database and returns entity IDs that match the mutation's
+// predicates. Only valid on Update/Delete operations.
+func (m *Mutation[T]) IDs(ctx context.Context) ([]any, error) {
+	switch {
+	case m.op.Is(ent.OpUpdateOne | ent.OpDeleteOne):
+		if id, ok := m.ID(); ok {
+			return []any{id}, nil
+		}
+		fallthrough
+	case m.op.Is(ent.OpUpdate | ent.OpDelete):
+		if m.idsFunc == nil {
+			return nil, fmt.Errorf("IDs is not allowed on %s operations without an IDsFunc", m.op)
+		}
+		return m.idsFunc(ctx, m.predicates...)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetIDsFunc installs the function used to query entity IDs.
+func (m *Mutation[T]) SetIDsFunc(fn func(context.Context, ...func(*sql.Selector)) ([]any, error)) {
+	m.idsFunc = fn
+}
+
+// WhereP appends predicates to the mutation.
+func (m *Mutation[T]) WhereP(ps ...func(*sql.Selector)) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// AddPredicate is an alias for WhereP usable from entql filters.
+func (m *Mutation[T]) AddPredicate(p func(*sql.Selector)) {
+	m.predicates = append(m.predicates, p)
+}
+
+// MutationPredicates returns the predicates registered on the mutation.
+func (m *Mutation[T]) MutationPredicates() []func(*sql.Selector) {
+	return m.predicates
 }

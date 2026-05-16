@@ -5,10 +5,12 @@
 package entbuilder_test
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
 	"github.com/stretchr/testify/require"
 )
@@ -88,3 +90,50 @@ func TestMutation_AddEdgeIDs_TypeMismatch(t *testing.T) {
 	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, edgeTestDescriptor())
 	require.Error(t, m.AddEdgeIDs("teams", "not-an-int")) // string into int-keyed edge
 }
+
+func TestMutation_IDRoundTrip(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, testDescriptor())
+	_, ok := m.ID()
+	require.False(t, ok)
+	m.SetID(42)
+	id, ok := m.ID()
+	require.True(t, ok)
+	require.Equal(t, 42, id)
+}
+
+func TestMutation_IDs_RejectsNonUpdateDelete(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, testDescriptor())
+	_, err := m.IDs(context.Background())
+	require.Error(t, err)
+}
+
+func TestMutation_IDs_UsesIDsFunc(t *testing.T) {
+	desc := testDescriptor()
+	desc.IDsFn = func(ctx context.Context, c any, preds ...func(*sql.Selector)) ([]any, error) {
+		return []any{1, 2, 3}, nil
+	}
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, desc)
+	m.SetIDsFunc(func(ctx context.Context, preds ...func(*sql.Selector)) ([]any, error) {
+		return desc.IDsFn(ctx, nil, preds...)
+	})
+	ids, err := m.IDs(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, []any{1, 2, 3}, ids)
+}
+
+func TestMutation_WhereP(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, testDescriptor())
+	p1 := func(s *sql.Selector) { s.Where(sql.EQ("id", 1)) }
+	p2 := func(s *sql.Selector) { s.Where(sql.False()) }
+	m.WhereP(p1, p2)
+	require.Len(t, m.MutationPredicates(), 2)
+}
+
+func TestMutation_AddPredicate(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, testDescriptor())
+	m.AddPredicate(func(s *sql.Selector) {})
+	require.Len(t, m.MutationPredicates(), 1)
+}
+
+// Compile-time check; will fail to compile if interface drifts.
+var _ ent.Mutation = (*entbuilder.Mutation[testEntity])(nil)
