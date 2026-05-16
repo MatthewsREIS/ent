@@ -72,9 +72,9 @@ func (User) Fields() []ent.Field {
 	// No feature flags -- only per-entity annotation.
 	runCodegenWithFeatures(t, mod, target, schemaPath, nil)
 
-	// entc.Generate defaults target = filepath.Dir(schemaPath) = mod.
-	// Generated sub-package files land at mod/auditlog/ and mod/user/.
-	genRoot := mod
+	// Codegen now writes to the explicit target (mod/ent) with sub-package layout.
+	// Generated sub-package files land at mod/ent/auditlog/ and mod/ent/user/.
+	genRoot := target
 
 	// AuditLog has ReadOnly: no update or delete sub-package files.
 	auditUpdate, _ := filepath.Glob(filepath.Join(genRoot, "auditlog", "update.go"))

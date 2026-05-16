@@ -135,11 +135,11 @@ import (
 )
 
 func main() {
-	if err := entc.Generate(%q, &gen.Config{}, entc.FeatureNames(%s)); err != nil {
+	if err := entc.Generate(%q, &gen.Config{Target: %q}, entc.FeatureNames(%s)); err != nil {
 		log.Fatalf("running ent codegen: %%v", err)
 	}
 }
-`, schemaPath, featuresLit)
+`, schemaPath, target, featuresLit)
 	require.NoError(t, os.WriteFile(filepath.Join(target, "gen.go"), []byte(genGo), 0o644))
 
 	// go mod tidy so the replace directive's deps resolve.
