@@ -61,26 +61,27 @@ The matthewsreis fork of `entgo.io/ent` generates volumes of Go code that bring 
 
 ## 3. Approach
 
-Eight PRs in a **git-spice stack**, branch prefix `codegen-epic/`. Each attacks a different layer and ships with its own measurement gate. Four layers of attack, applied in order:
+Seven PRs in a **git-spice stack**, branch prefix `codegen-epic/`. Each attacks a different layer and ships with its own measurement gate. Four layers of attack, applied in order:
 
 1. **Fix the developer-workflow deadlock** (PR 1): make codegen survive schema-side code referencing not-yet-generated types so the team stops paying the "comment out, regenerate, uncomment" tax.
-2. **Eliminate work outright or let consumers opt out** (PR 3): negative feature flags for categories the consumer doesn't need.
-3. **Shrink what each entity emits** (PRs 2, 4, 5, 6): generics, helpers, and reflection/unsafe push per-entity boilerplate into shared runtime.
-4. **Shard the compile model** (PR 7): split the giant root `ent` package into per-entity sub-packages so the Go compiler can parallelize and sees smaller per-package working sets.
+2. **Eliminate work outright or let consumers opt out** (PR 2): negative feature flags for categories the consumer doesn't need.
+3. **Shrink what each entity emits** (PRs 3, 4, 5): generics, helpers, and reflection/unsafe push per-entity boilerplate into shared runtime.
+4. **Shard the compile model** (PR 6): split the giant root `ent` package into per-entity sub-packages so the Go compiler can parallelize and sees smaller per-package working sets.
 
 Order rationale: PR 1 first because it's the active DX pain. Then cheap structural changes to validate the bench methodology. API-visible changes in the middle. Biggest structural refactor (per-package split) last so it doesn't confound earlier measurements.
+
+**Note (2026-05-15):** The original PR 2 ("helper de-inlining in templates") was DROPPED after investigation showed the dedup work was already shipped — upstream commit `68a453357` minimized `where.tmpl` to 1-line `sql.FieldEQ`-style delegations, and this fork's COMPACT_HELPERS work already shipped descriptor helpers in `runtime/entbuilder/` that compact `create.tmpl`/`update.tmpl`. PRs 3-7 are renumbered to 2-6.
 
 ### Bloat layer → PR mapping
 
 | Layer | LOC contribution (134-entity baseline, est.) | Attacked by PR |
 |---|---|---|
 | Schema-build deadlock when hooks reference not-yet-generated types | DX, not LOC | 1 |
-| Repeated bodies in `where` / `create` / `update` templates | ~100K | 2 |
-| Selective generation knobs | varies (consumer choice) | 3 |
-| `where.go` predicate factories | ~134K (~1K × 134 entities) | 4 |
-| `_query.go` / `_update.go` / `_delete.go` builders | ~150–200K | 5 |
-| `internal/<entity>_mutation.go` | 355K | 6 |
-| Type-checker working set (per-package symbol table size) | structural | 7 |
+| Selective generation knobs | varies (consumer choice) | 2 |
+| `where.go` predicate factories | ~134K (~1K × 134 entities) | 3 |
+| `_query.go` / `_update.go` / `_delete.go` builders | ~150–200K | 4 |
+| `internal/<entity>_mutation.go` | 355K | 5 |
+| Type-checker working set (per-package symbol table size) | structural | 6 |
 
 ## 4. The stack
 
@@ -156,27 +157,9 @@ Order rationale: PR 1 first because it's the active DX pain. Then cheap structur
 
 ---
 
-### PR 2 — `codegen-epic/02-helper-dedup`
+### PR 2 — `codegen-epic/02-feature-flags`
 
-**Scope.** Extract repeated template bodies in `where.go`, `create.go`, `update.go` into per-type private helpers in the generated file.
-
-**Changes:**
-- In `entc/gen/template/dialect/sql/where.tmpl`: predicate bodies that are emitted identically 8× per field collapse to 1-line calls into per-type helpers (`eqString`, `eqInt`, `eqTime`, …) emitted once at the bottom of the same generated file.
-- Same pattern in `create.tmpl` and `update.tmpl` for repeated setter/getter bodies.
-- No public API change.
-
-**Acceptance:**
-- All existing tests pass
-- Regression fixtures regenerated within this PR
-- LOC delta target: 30–50% reduction inside `where.go` / `create.go` / `update.go` at consumer scale
-
-**Risk:** Low. Pure template refactor; behavior unchanged.
-
-**Consumer impact:** Transparent.
-
----
-
-### PR 3 — `codegen-epic/03-feature-flags`
+(Was PR 3 in the original numbering — promoted after the original PR 2 "helper de-inlining" was dropped on 2026-05-15.)
 
 **Scope.** Add negative feature flags so consumers can opt out of categories of generation.
 
@@ -200,7 +183,7 @@ Order rationale: PR 1 first because it's the active DX pain. Then cheap structur
 
 ---
 
-### PR 4 — `codegen-epic/04-predicate-collapse`
+### PR 3 — `codegen-epic/03-predicate-collapse`
 
 **Scope.** Replace per-(field × op) predicate factories with one generic op per type + field constants.
 
@@ -226,7 +209,7 @@ Order rationale: PR 1 first because it's the active DX pain. Then cheap structur
 
 ---
 
-### PR 5 — `codegen-epic/05-generic-builders`
+### PR 4 — `codegen-epic/04-generic-builders`
 
 **Scope.** Extend the `runtime/entbuilder` descriptor pattern (already used for create) to query, update, delete, and edge loaders.
 
@@ -241,7 +224,7 @@ Order rationale: PR 1 first because it's the active DX pain. Then cheap structur
 - All existing tests pass
 - LOC delta target: 60% reduction in `_query.go` + `_update.go` + `_delete.go` at consumer scale
 - Gen-time RSS reduction (fewer files, shorter templates) — follows COMPACT_HELPERS precedent
-- **Build-time RSS measurement at consumer scale is the critical test:** does generics-based reduction move build time at 134-entity scale even when it didn't at small fixture scale? Record carefully; results inform whether PR 7's package-split is the only build-time lever or one of several.
+- **Build-time RSS measurement at consumer scale is the critical test:** does generics-based reduction move build time at 134-entity scale even when it didn't at small fixture scale? Record carefully; results inform whether PR 6's package-split is the only build-time lever or one of several.
 
 **Risk:** Medium. Already-proven pattern (`SimpleField` etc. shipped via COMPACT_HELPERS), but new ground for query semantics. Likely escape hatches: per-entity overrides for `GroupBy`/`Select` typing with arbitrary `any` results.
 
@@ -249,7 +232,7 @@ Order rationale: PR 1 first because it's the active DX pain. Then cheap structur
 
 ---
 
-### PR 6 — `codegen-epic/06-mutation-collapse`
+### PR 5 — `codegen-epic/05-mutation-collapse`
 
 **Scope.** Drop per-entity `<entity>_mutation.go` files. Replace with generic `Mutation[T]` backed by a per-entity field descriptor.
 
@@ -265,7 +248,7 @@ Order rationale: PR 1 first because it's the active DX pain. Then cheap structur
 - Two implementations to prototype and benchmark within this PR:
   - **A) `unsafe.Offsetof` table** — ~2 ns/access, requires confidence in struct layout invariants
   - **B) Cached `reflect` indices** — ~80 ns/access (cached `map[reflect.Type]map[string]int`), no `unsafe`
-- Migration shim: behind opt-in `FeatureTypedMutation` (from PR 3), codegen synthesizes the old typed methods (`SetName`, `Name`, `ClearName`) as 1-line wrappers around the generic API. Shipped for one release, removed in the next.
+- Migration shim: behind opt-in `FeatureTypedMutation` (from PR 2), codegen synthesizes the old typed methods (`SetName`, `Name`, `ClearName`) as 1-line wrappers around the generic API. Shipped for one release, removed in the next.
 
 **Acceptance:**
 - All existing tests pass; hook integration tests carefully reviewed
@@ -277,11 +260,11 @@ Order rationale: PR 1 first because it's the active DX pain. Then cheap structur
 
 **Consumer impact:** Hook authors update from `m.SetName(v)` / `m.Name()` to `m.SetField(user.FieldName, v)` / `m.Field(user.FieldName)`, or opt into `FeatureTypedMutation` for one release while migrating.
 
-**Migration angle — generic API already exists today.** Every generated `<entity>_mutation.go` already ships the generic methods `Field(name) (ent.Value, bool)`, `SetField(name, v) error`, `AddedField`, `AddField`, `ClearField`, `ResetField`, `FieldCleared`, `OldField`, `Fields()` (see e.g. `entc/integration/privacy/ent/internal/task_mutation.go:452-578`). Hook authors can adopt this API **before this PR ships** as a one-time migration; doing so also resolves the chicken-and-egg pain that PR 1 addresses from a different angle (string-keyed access doesn't depend on per-field methods being generated). PR 6's contribution is to make this the *only* API and delete the typed methods (and the 355K LOC of struct fields backing them). Document this migration path explicitly in `MIGRATION.md` at the start of PR 6, ahead of any deprecation shim work.
+**Migration angle — generic API already exists today.** Every generated `<entity>_mutation.go` already ships the generic methods `Field(name) (ent.Value, bool)`, `SetField(name, v) error`, `AddedField`, `AddField`, `ClearField`, `ResetField`, `FieldCleared`, `OldField`, `Fields()` (see e.g. `entc/integration/privacy/ent/internal/task_mutation.go:452-578`). Hook authors can adopt this API **before this PR ships** as a one-time migration; doing so also resolves the chicken-and-egg pain that PR 1 addresses from a different angle (string-keyed access doesn't depend on per-field methods being generated). PR 5's contribution is to make this the *only* API and delete the typed methods (and the 355K LOC of struct fields backing them). Document this migration path explicitly in `MIGRATION.md` at the start of PR 5, ahead of any deprecation shim work.
 
 ---
 
-### PR 7 — `codegen-epic/07-per-entity-packages`
+### PR 6 — `codegen-epic/06-per-entity-packages`
 
 **Scope.** Move per-entity files from root `ent` package into `ent/<entity>` sub-packages. Make root `ent` a thin facade.
 
@@ -313,7 +296,7 @@ Order rationale: PR 1 first because it's the active DX pain. Then cheap structur
 Two-tier measurement. Every PR records numbers at two scales:
 
 1. **In-repo fixture scale** — ent's own integration test schemas. Fast, deterministic, runs in CI. Mandatory for every PR.
-2. **Consumer scale** — `service-api-go/api-graphql` (134 entities, the real workload). Run manually before merging high-LOC-impact PRs (4, 5, 6, 7). Tracked in `BENCH_RESULTS.md` per PR. PR 1 is a DX-only change and doesn't move these numbers; its acceptance gates are the bootstrap-mode regression tests.
+2. **Consumer scale** — `service-api-go/api-graphql` (134 entities, the real workload). Run manually before merging high-LOC-impact PRs (3, 4, 5, 6). Tracked in `BENCH_RESULTS.md` per PR. PR 1 is a DX-only change and doesn't move these numbers; its acceptance gates are the bootstrap-mode regression tests.
 
 **Metrics per fixture:**
 
@@ -329,11 +312,11 @@ Two-tier measurement. Every PR records numbers at two scales:
 
 ### 5.2 Regression fixture handling
 
-Many `entc/gen` regression tests compare against snapshot output of generated code. PRs that change template output (2, 4, 5, 6, 7) regenerate fixtures as part of the PR. PR 0 adds a `make regen-fixtures` target so this is mechanical. Reviewers diff template changes alongside fixture changes; the bench tool includes a fixture-diff summarizer to keep review tractable. PR 1 changes the loader, not templates — no fixture churn.
+Many `entc/gen` regression tests compare against snapshot output of generated code. PRs that change template output (3, 4, 5, 6) regenerate fixtures as part of the PR. PR 0 adds a `make regen-fixtures` target so this is mechanical. Reviewers diff template changes alongside fixture changes; the bench tool includes a fixture-diff summarizer to keep review tractable. PR 1 changes the loader, not templates — no fixture churn. PR 2 (feature flags) is additive defaults-off — no fixture churn either.
 
 ### 5.3 Deprecation policy
 
-PRs 4 and 6 ship deprecation shims for **one release**. Shim files are clearly marked `// Deprecated: ...`. Removed in the release after. PR 6's shim is itself gated by an opt-in feature flag (`FeatureTypedMutation`) so consumers who don't need it pay no cost.
+PRs 3 and 5 ship deprecation shims for **one release**. Shim files are clearly marked `// Deprecated: ...`. Removed in the release after. PR 5's shim is itself gated by an opt-in feature flag (`FeatureTypedMutation`) so consumers who don't need it pay no cost.
 
 ### 5.4 Consumer re-baseline (recommended, not blocking)
 
@@ -341,26 +324,25 @@ Before PR 0 lands, run codegen against `service-api-go/api-graphql` with the cur
 
 ### 5.5 PR ordering interactions
 
-- PR 5 depends on PR 2 for clean template diffs (not functionally — re-orderable if needed).
-- PR 6 depends on PR 3 for the `FeatureTypedMutation` compat shim.
-- PR 7 must come **after** all template-shrinking PRs (4, 5, 6). Splitting before shrinking shards the bloat instead of removing it.
+- PR 5 (mutation collapse) depends on PR 2 (feature flags) for the `FeatureTypedMutation` compat shim.
+- PR 6 (per-entity packages) must come **after** all template-shrinking PRs (3, 4, 5). Splitting before shrinking shards the bloat instead of removing it.
 
 ## 6. Decisions deferred
 
-- **PR 6: `unsafe.Offsetof` vs cached `reflect`** for mutation field access. Prototype both within PR 6; choose based on bench numbers and consumer concerns about shipping `unsafe` in a generated-code path.
-- **`FeatureTypedMutation` lifetime past one release.** Default: remove after one release. Revisit based on downstream feedback during PR 6's release cycle.
+- **PR 5: `unsafe.Offsetof` vs cached `reflect`** for mutation field access. Prototype both within PR 5; choose based on bench numbers and consumer concerns about shipping `unsafe` in a generated-code path.
+- **`FeatureTypedMutation` lifetime past one release.** Default: remove after one release. Revisit based on downstream feedback during PR 5's release cycle.
 - **Per-entity sub-package naming.** ent currently uses singular (`ent/user/where.go`). Default: stay singular (`ent/user/query.go`). Bikeshed welcome.
 
 ## 7. Risks
 
 | Risk | PR(s) | Mitigation |
 |---|---|---|
-| LOC reduction does not translate to build-time wins at scale (COMPACT_HELPERS was neutral at fixture scale) | 4, 5, 6 | Measure at consumer scale before merging. If 4/5 land neutral, accelerate PR 7 (which moves build time via package parallelism regardless of LOC). |
+| LOC reduction does not translate to build-time wins at scale (COMPACT_HELPERS was neutral at fixture scale) | 3, 4, 5 | Measure at consumer scale before merging. If 3/4 land neutral, accelerate PR 6 (which moves build time via package parallelism regardless of LOC). |
 | `unsafe.Offsetof` mutation table introduces subtle bugs on struct layout changes | 6 | Fall back to cached-reflect; add init-time validation that descriptor matches struct |
 | Per-entity package split creates cyclic imports (M2M edges referencing each other) | 7 | Leaf `ent/<entity>/types` sub-packages for entity + predicate types; builders depend on leaves without depending on each other |
-| Downstream consumers have hand-written code against deprecated APIs | 4, 6 | One-release deprecation shims, `MIGRATION.md` entries, ahead-of-release communication |
+| Downstream consumers have hand-written code against deprecated APIs | 3, 5 | One-release deprecation shims, `MIGRATION.md` entries, ahead-of-release communication |
 | `entc/gen` regression fixtures churn enormously per PR, making review hard | All template PRs | Bench tool includes fixture-diff summarizer; reviewers focus on template + bench, fixtures verified mechanically |
-| Generic instantiation cost (post-Go-1.18 GC-shape stenciling) erodes the LOC win at scale | 5, 6 | Measure; cap generic depth in templates; some methods stay non-generic if benchmarks demand |
+| Generic instantiation cost (post-Go-1.18 GC-shape stenciling) erodes the LOC win at scale | 4, 5 | Measure; cap generic depth in templates; some methods stay non-generic if benchmarks demand |
 | Bootstrap-mode AST stripping of `Hooks` / `Policy` / `Interceptors` fails to satisfy `ent.Schema` (e.g., the stripped stub returns wrong type) and breaks the loader | 1 | Comprehensive test suite of schema-interface signatures; explicit signature check after stripping; fallback to surfacing the original loader error rather than masking it |
 | Bootstrap mode doesn't cover hooks in **subpackages** that import the generated `ent` (documented limitation) | 1 | Documented in PR 1; the practical guidance is "keep generated-type-touching hooks in a package not imported by your schema package" — already standard ent practice for most teams |
 
@@ -377,7 +359,7 @@ At consumer scale (`service-api-go/api-graphql`, 134 entities). Numbers are targ
 | `go build` peak RSS | 12.8 GB | ≤ 5 GB |
 | Generated file count | 2,501 | not a metric — per-entity split may *raise* file count while lowering compile cost |
 
-If COMPACT_HELPERS-style reduction continues to be neutral on build time at scale (i.e., generic instantiation cost cancels LOC savings), success becomes anchored on PR 7's package-parallelism win. If both kinds of reduction compound as we expect, the targets above are conservative.
+If COMPACT_HELPERS-style reduction continues to be neutral on build time at scale (i.e., generic instantiation cost cancels LOC savings), success becomes anchored on PR 6's package-parallelism win. If both kinds of reduction compound as we expect, the targets above are conservative.
 
 ## 9. Out of scope
 
@@ -390,10 +372,9 @@ If COMPACT_HELPERS-style reduction continues to be neutral on build time at scal
 ## 10. Implementation cadence
 
 - PR 0 first; unblocks measurement.
-- PRs 1, 2, 3 are independent in function; for git-spice stack purposes, sequence 1 → 2 → 3 to keep the stack linear.
-- PR 4 after 3.
-- PR 5 after 2.
-- PR 6 after 3 and 5.
-- PR 7 after all of 4, 5, 6.
+- PR 1 (loader UX) next; shipped DX win.
+- PRs 2 (feature flags), 3 (predicate collapse), 4 (generic builders) are functionally independent; sequence 2 → 3 → 4 in the linear stack.
+- PR 5 (mutation collapse) after PR 2 (uses `FeatureTypedMutation` compat shim) and after PR 4 (similar generic-descriptor shape).
+- PR 6 (per-entity packages) last, after all template-shrinking PRs (3, 4, 5).
 
 Per-PR implementation plans are written via the `writing-plans` skill **immediately before starting each PR**, not all upfront. This avoids pre-designing PRs whose requirements will shift based on prior PR measurements.
