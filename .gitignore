@@ -1,3 +1,6 @@
 .omc/
 .beads/
 .sisyphus/
+.gocache/
+.gotmp/
+/ent-codegen-migrate
