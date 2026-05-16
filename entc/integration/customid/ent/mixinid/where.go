@@ -9,6 +9,7 @@ package mixinid
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -57,144 +58,90 @@ func IDLTE(id uuid.UUID) predicate.MixinID {
 	return predicate.MixinID(sql.FieldLTE(FieldID, id))
 }
 
-// SomeField applies equality check predicate on the "some_field" field. It's identical to SomeFieldEQ.
-func SomeField(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldEQ(FieldSomeField, v))
-}
+// Deprecated: SomeField — use where.EQ(FieldSomeField, v).
+func SomeField(v string) predicate.MixinID { return where.EQ(FieldSomeField, v) }
 
-// MixinField applies equality check predicate on the "mixin_field" field. It's identical to MixinFieldEQ.
-func MixinField(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldEQ(FieldMixinField, v))
-}
+// Deprecated: MixinField — use where.EQ(FieldMixinField, v).
+func MixinField(v string) predicate.MixinID { return where.EQ(FieldMixinField, v) }
 
-// SomeFieldEQ applies the EQ predicate on the "some_field" field.
-func SomeFieldEQ(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldEQ(FieldSomeField, v))
-}
+// Deprecated: SomeFieldEQ — use where.EQ(FieldSomeField, v).
+func SomeFieldEQ(v string) predicate.MixinID { return where.EQ(FieldSomeField, v) }
 
-// SomeFieldNEQ applies the NEQ predicate on the "some_field" field.
-func SomeFieldNEQ(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldNEQ(FieldSomeField, v))
-}
+// Deprecated: SomeFieldNEQ — use where.NEQ(FieldSomeField, v).
+func SomeFieldNEQ(v string) predicate.MixinID { return where.NEQ(FieldSomeField, v) }
 
-// SomeFieldIn applies the In predicate on the "some_field" field.
-func SomeFieldIn(vs ...string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldIn(FieldSomeField, vs...))
-}
+// Deprecated: SomeFieldIn — use where.In(FieldSomeField, vs...).
+func SomeFieldIn(vs ...string) predicate.MixinID { return where.In(FieldSomeField, vs...) }
 
-// SomeFieldNotIn applies the NotIn predicate on the "some_field" field.
-func SomeFieldNotIn(vs ...string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldNotIn(FieldSomeField, vs...))
-}
+// Deprecated: SomeFieldNotIn — use where.NotIn(FieldSomeField, vs...).
+func SomeFieldNotIn(vs ...string) predicate.MixinID { return where.NotIn(FieldSomeField, vs...) }
 
-// SomeFieldGT applies the GT predicate on the "some_field" field.
-func SomeFieldGT(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldGT(FieldSomeField, v))
-}
+// Deprecated: SomeFieldGT — use where.GT(FieldSomeField, v).
+func SomeFieldGT(v string) predicate.MixinID { return where.GT(FieldSomeField, v) }
 
-// SomeFieldGTE applies the GTE predicate on the "some_field" field.
-func SomeFieldGTE(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldGTE(FieldSomeField, v))
-}
+// Deprecated: SomeFieldGTE — use where.GTE(FieldSomeField, v).
+func SomeFieldGTE(v string) predicate.MixinID { return where.GTE(FieldSomeField, v) }
 
-// SomeFieldLT applies the LT predicate on the "some_field" field.
-func SomeFieldLT(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldLT(FieldSomeField, v))
-}
+// Deprecated: SomeFieldLT — use where.LT(FieldSomeField, v).
+func SomeFieldLT(v string) predicate.MixinID { return where.LT(FieldSomeField, v) }
 
-// SomeFieldLTE applies the LTE predicate on the "some_field" field.
-func SomeFieldLTE(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldLTE(FieldSomeField, v))
-}
+// Deprecated: SomeFieldLTE — use where.LTE(FieldSomeField, v).
+func SomeFieldLTE(v string) predicate.MixinID { return where.LTE(FieldSomeField, v) }
 
-// SomeFieldContains applies the Contains predicate on the "some_field" field.
-func SomeFieldContains(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldContains(FieldSomeField, v))
-}
+// Deprecated: SomeFieldContains — use where.Contains(FieldSomeField, v).
+func SomeFieldContains(v string) predicate.MixinID { return where.Contains(FieldSomeField, v) }
 
-// SomeFieldHasPrefix applies the HasPrefix predicate on the "some_field" field.
-func SomeFieldHasPrefix(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldHasPrefix(FieldSomeField, v))
-}
+// Deprecated: SomeFieldHasPrefix — use where.HasPrefix(FieldSomeField, v).
+func SomeFieldHasPrefix(v string) predicate.MixinID { return where.HasPrefix(FieldSomeField, v) }
 
-// SomeFieldHasSuffix applies the HasSuffix predicate on the "some_field" field.
-func SomeFieldHasSuffix(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldHasSuffix(FieldSomeField, v))
-}
+// Deprecated: SomeFieldHasSuffix — use where.HasSuffix(FieldSomeField, v).
+func SomeFieldHasSuffix(v string) predicate.MixinID { return where.HasSuffix(FieldSomeField, v) }
 
-// SomeFieldEqualFold applies the EqualFold predicate on the "some_field" field.
-func SomeFieldEqualFold(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldEqualFold(FieldSomeField, v))
-}
+// Deprecated: SomeFieldEqualFold — use where.EqualFold(FieldSomeField, v).
+func SomeFieldEqualFold(v string) predicate.MixinID { return where.EqualFold(FieldSomeField, v) }
 
-// SomeFieldContainsFold applies the ContainsFold predicate on the "some_field" field.
-func SomeFieldContainsFold(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldContainsFold(FieldSomeField, v))
-}
+// Deprecated: SomeFieldContainsFold — use where.ContainsFold(FieldSomeField, v).
+func SomeFieldContainsFold(v string) predicate.MixinID { return where.ContainsFold(FieldSomeField, v) }
 
-// MixinFieldEQ applies the EQ predicate on the "mixin_field" field.
-func MixinFieldEQ(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldEQ(FieldMixinField, v))
-}
+// Deprecated: MixinFieldEQ — use where.EQ(FieldMixinField, v).
+func MixinFieldEQ(v string) predicate.MixinID { return where.EQ(FieldMixinField, v) }
 
-// MixinFieldNEQ applies the NEQ predicate on the "mixin_field" field.
-func MixinFieldNEQ(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldNEQ(FieldMixinField, v))
-}
+// Deprecated: MixinFieldNEQ — use where.NEQ(FieldMixinField, v).
+func MixinFieldNEQ(v string) predicate.MixinID { return where.NEQ(FieldMixinField, v) }
 
-// MixinFieldIn applies the In predicate on the "mixin_field" field.
-func MixinFieldIn(vs ...string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldIn(FieldMixinField, vs...))
-}
+// Deprecated: MixinFieldIn — use where.In(FieldMixinField, vs...).
+func MixinFieldIn(vs ...string) predicate.MixinID { return where.In(FieldMixinField, vs...) }
 
-// MixinFieldNotIn applies the NotIn predicate on the "mixin_field" field.
-func MixinFieldNotIn(vs ...string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldNotIn(FieldMixinField, vs...))
-}
+// Deprecated: MixinFieldNotIn — use where.NotIn(FieldMixinField, vs...).
+func MixinFieldNotIn(vs ...string) predicate.MixinID { return where.NotIn(FieldMixinField, vs...) }
 
-// MixinFieldGT applies the GT predicate on the "mixin_field" field.
-func MixinFieldGT(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldGT(FieldMixinField, v))
-}
+// Deprecated: MixinFieldGT — use where.GT(FieldMixinField, v).
+func MixinFieldGT(v string) predicate.MixinID { return where.GT(FieldMixinField, v) }
 
-// MixinFieldGTE applies the GTE predicate on the "mixin_field" field.
-func MixinFieldGTE(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldGTE(FieldMixinField, v))
-}
+// Deprecated: MixinFieldGTE — use where.GTE(FieldMixinField, v).
+func MixinFieldGTE(v string) predicate.MixinID { return where.GTE(FieldMixinField, v) }
 
-// MixinFieldLT applies the LT predicate on the "mixin_field" field.
-func MixinFieldLT(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldLT(FieldMixinField, v))
-}
+// Deprecated: MixinFieldLT — use where.LT(FieldMixinField, v).
+func MixinFieldLT(v string) predicate.MixinID { return where.LT(FieldMixinField, v) }
 
-// MixinFieldLTE applies the LTE predicate on the "mixin_field" field.
-func MixinFieldLTE(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldLTE(FieldMixinField, v))
-}
+// Deprecated: MixinFieldLTE — use where.LTE(FieldMixinField, v).
+func MixinFieldLTE(v string) predicate.MixinID { return where.LTE(FieldMixinField, v) }
 
-// MixinFieldContains applies the Contains predicate on the "mixin_field" field.
-func MixinFieldContains(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldContains(FieldMixinField, v))
-}
+// Deprecated: MixinFieldContains — use where.Contains(FieldMixinField, v).
+func MixinFieldContains(v string) predicate.MixinID { return where.Contains(FieldMixinField, v) }
 
-// MixinFieldHasPrefix applies the HasPrefix predicate on the "mixin_field" field.
-func MixinFieldHasPrefix(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldHasPrefix(FieldMixinField, v))
-}
+// Deprecated: MixinFieldHasPrefix — use where.HasPrefix(FieldMixinField, v).
+func MixinFieldHasPrefix(v string) predicate.MixinID { return where.HasPrefix(FieldMixinField, v) }
 
-// MixinFieldHasSuffix applies the HasSuffix predicate on the "mixin_field" field.
-func MixinFieldHasSuffix(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldHasSuffix(FieldMixinField, v))
-}
+// Deprecated: MixinFieldHasSuffix — use where.HasSuffix(FieldMixinField, v).
+func MixinFieldHasSuffix(v string) predicate.MixinID { return where.HasSuffix(FieldMixinField, v) }
 
-// MixinFieldEqualFold applies the EqualFold predicate on the "mixin_field" field.
-func MixinFieldEqualFold(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldEqualFold(FieldMixinField, v))
-}
+// Deprecated: MixinFieldEqualFold — use where.EqualFold(FieldMixinField, v).
+func MixinFieldEqualFold(v string) predicate.MixinID { return where.EqualFold(FieldMixinField, v) }
 
-// MixinFieldContainsFold applies the ContainsFold predicate on the "mixin_field" field.
+// Deprecated: MixinFieldContainsFold — use where.ContainsFold(FieldMixinField, v).
 func MixinFieldContainsFold(v string) predicate.MixinID {
-	return predicate.MixinID(sql.FieldContainsFold(FieldMixinField, v))
+	return where.ContainsFold(FieldMixinField, v)
 }
 
 // And groups predicates with the AND operator between them.

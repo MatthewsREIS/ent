@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -58,230 +59,142 @@ func IDLTE(id int) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldID, id))
 }
 
-// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
-func Title(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldTitle, v))
-}
+// Deprecated: Title — use where.EQ(FieldTitle, v).
+func Title(v string) predicate.Task { return where.EQ(FieldTitle, v) }
 
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldDescription, v))
-}
+// Deprecated: Description — use where.EQ(FieldDescription, v).
+func Description(v string) predicate.Task { return where.EQ(FieldDescription, v) }
 
 // UUID applies equality check predicate on the "uuid" field. It's identical to UUIDEQ.
 func UUID(v uuid.UUID) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldUUID, v))
 }
 
-// TitleEQ applies the EQ predicate on the "title" field.
-func TitleEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldTitle, v))
-}
+// Deprecated: TitleEQ — use where.EQ(FieldTitle, v).
+func TitleEQ(v string) predicate.Task { return where.EQ(FieldTitle, v) }
 
-// TitleNEQ applies the NEQ predicate on the "title" field.
-func TitleNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldTitle, v))
-}
+// Deprecated: TitleNEQ — use where.NEQ(FieldTitle, v).
+func TitleNEQ(v string) predicate.Task { return where.NEQ(FieldTitle, v) }
 
-// TitleIn applies the In predicate on the "title" field.
-func TitleIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldTitle, vs...))
-}
+// Deprecated: TitleIn — use where.In(FieldTitle, vs...).
+func TitleIn(vs ...string) predicate.Task { return where.In(FieldTitle, vs...) }
 
-// TitleNotIn applies the NotIn predicate on the "title" field.
-func TitleNotIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldTitle, vs...))
-}
+// Deprecated: TitleNotIn — use where.NotIn(FieldTitle, vs...).
+func TitleNotIn(vs ...string) predicate.Task { return where.NotIn(FieldTitle, vs...) }
 
-// TitleGT applies the GT predicate on the "title" field.
-func TitleGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldTitle, v))
-}
+// Deprecated: TitleGT — use where.GT(FieldTitle, v).
+func TitleGT(v string) predicate.Task { return where.GT(FieldTitle, v) }
 
-// TitleGTE applies the GTE predicate on the "title" field.
-func TitleGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldTitle, v))
-}
+// Deprecated: TitleGTE — use where.GTE(FieldTitle, v).
+func TitleGTE(v string) predicate.Task { return where.GTE(FieldTitle, v) }
 
-// TitleLT applies the LT predicate on the "title" field.
-func TitleLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldTitle, v))
-}
+// Deprecated: TitleLT — use where.LT(FieldTitle, v).
+func TitleLT(v string) predicate.Task { return where.LT(FieldTitle, v) }
 
-// TitleLTE applies the LTE predicate on the "title" field.
-func TitleLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldTitle, v))
-}
+// Deprecated: TitleLTE — use where.LTE(FieldTitle, v).
+func TitleLTE(v string) predicate.Task { return where.LTE(FieldTitle, v) }
 
-// TitleContains applies the Contains predicate on the "title" field.
-func TitleContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldTitle, v))
-}
+// Deprecated: TitleContains — use where.Contains(FieldTitle, v).
+func TitleContains(v string) predicate.Task { return where.Contains(FieldTitle, v) }
 
-// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
-func TitleHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldTitle, v))
-}
+// Deprecated: TitleHasPrefix — use where.HasPrefix(FieldTitle, v).
+func TitleHasPrefix(v string) predicate.Task { return where.HasPrefix(FieldTitle, v) }
 
-// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
-func TitleHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldTitle, v))
-}
+// Deprecated: TitleHasSuffix — use where.HasSuffix(FieldTitle, v).
+func TitleHasSuffix(v string) predicate.Task { return where.HasSuffix(FieldTitle, v) }
 
-// TitleEqualFold applies the EqualFold predicate on the "title" field.
-func TitleEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldTitle, v))
-}
+// Deprecated: TitleEqualFold — use where.EqualFold(FieldTitle, v).
+func TitleEqualFold(v string) predicate.Task { return where.EqualFold(FieldTitle, v) }
 
-// TitleContainsFold applies the ContainsFold predicate on the "title" field.
-func TitleContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldTitle, v))
-}
+// Deprecated: TitleContainsFold — use where.ContainsFold(FieldTitle, v).
+func TitleContainsFold(v string) predicate.Task { return where.ContainsFold(FieldTitle, v) }
 
-// DescriptionEQ applies the EQ predicate on the "description" field.
-func DescriptionEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldDescription, v))
-}
+// Deprecated: DescriptionEQ — use where.EQ(FieldDescription, v).
+func DescriptionEQ(v string) predicate.Task { return where.EQ(FieldDescription, v) }
 
-// DescriptionNEQ applies the NEQ predicate on the "description" field.
-func DescriptionNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldDescription, v))
-}
+// Deprecated: DescriptionNEQ — use where.NEQ(FieldDescription, v).
+func DescriptionNEQ(v string) predicate.Task { return where.NEQ(FieldDescription, v) }
 
-// DescriptionIn applies the In predicate on the "description" field.
-func DescriptionIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldDescription, vs...))
-}
+// Deprecated: DescriptionIn — use where.In(FieldDescription, vs...).
+func DescriptionIn(vs ...string) predicate.Task { return where.In(FieldDescription, vs...) }
 
-// DescriptionNotIn applies the NotIn predicate on the "description" field.
-func DescriptionNotIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldDescription, vs...))
-}
+// Deprecated: DescriptionNotIn — use where.NotIn(FieldDescription, vs...).
+func DescriptionNotIn(vs ...string) predicate.Task { return where.NotIn(FieldDescription, vs...) }
 
-// DescriptionGT applies the GT predicate on the "description" field.
-func DescriptionGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldDescription, v))
-}
+// Deprecated: DescriptionGT — use where.GT(FieldDescription, v).
+func DescriptionGT(v string) predicate.Task { return where.GT(FieldDescription, v) }
 
-// DescriptionGTE applies the GTE predicate on the "description" field.
-func DescriptionGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldDescription, v))
-}
+// Deprecated: DescriptionGTE — use where.GTE(FieldDescription, v).
+func DescriptionGTE(v string) predicate.Task { return where.GTE(FieldDescription, v) }
 
-// DescriptionLT applies the LT predicate on the "description" field.
-func DescriptionLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldDescription, v))
-}
+// Deprecated: DescriptionLT — use where.LT(FieldDescription, v).
+func DescriptionLT(v string) predicate.Task { return where.LT(FieldDescription, v) }
 
-// DescriptionLTE applies the LTE predicate on the "description" field.
-func DescriptionLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldDescription, v))
-}
+// Deprecated: DescriptionLTE — use where.LTE(FieldDescription, v).
+func DescriptionLTE(v string) predicate.Task { return where.LTE(FieldDescription, v) }
 
-// DescriptionContains applies the Contains predicate on the "description" field.
-func DescriptionContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldDescription, v))
-}
+// Deprecated: DescriptionContains — use where.Contains(FieldDescription, v).
+func DescriptionContains(v string) predicate.Task { return where.Contains(FieldDescription, v) }
 
-// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
-func DescriptionHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldDescription, v))
-}
+// Deprecated: DescriptionHasPrefix — use where.HasPrefix(FieldDescription, v).
+func DescriptionHasPrefix(v string) predicate.Task { return where.HasPrefix(FieldDescription, v) }
 
-// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
-func DescriptionHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldDescription, v))
-}
+// Deprecated: DescriptionHasSuffix — use where.HasSuffix(FieldDescription, v).
+func DescriptionHasSuffix(v string) predicate.Task { return where.HasSuffix(FieldDescription, v) }
 
-// DescriptionIsNil applies the IsNil predicate on the "description" field.
-func DescriptionIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldDescription))
-}
+// Deprecated: DescriptionIsNil — use where.IsNull(FieldDescription).
+func DescriptionIsNil() predicate.Task { return where.IsNull(FieldDescription) }
 
-// DescriptionNotNil applies the NotNil predicate on the "description" field.
-func DescriptionNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldDescription))
-}
+// Deprecated: DescriptionNotNil — use where.NotNull(FieldDescription).
+func DescriptionNotNil() predicate.Task { return where.NotNull(FieldDescription) }
 
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldDescription, v))
-}
+// Deprecated: DescriptionEqualFold — use where.EqualFold(FieldDescription, v).
+func DescriptionEqualFold(v string) predicate.Task { return where.EqualFold(FieldDescription, v) }
 
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldDescription, v))
-}
+// Deprecated: DescriptionContainsFold — use where.ContainsFold(FieldDescription, v).
+func DescriptionContainsFold(v string) predicate.Task { return where.ContainsFold(FieldDescription, v) }
 
-// StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v Status) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldStatus, v))
-}
+// Deprecated: StatusEQ — use where.EQ(FieldStatus, v).
+func StatusEQ(v Status) predicate.Task { return where.EQ(FieldStatus, v) }
 
-// StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v Status) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldStatus, v))
-}
+// Deprecated: StatusNEQ — use where.NEQ(FieldStatus, v).
+func StatusNEQ(v Status) predicate.Task { return where.NEQ(FieldStatus, v) }
 
-// StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...Status) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldStatus, vs...))
-}
+// Deprecated: StatusIn — use where.In(FieldStatus, vs...).
+func StatusIn(vs ...Status) predicate.Task { return where.In(FieldStatus, vs...) }
 
-// StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...Status) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldStatus, vs...))
-}
+// Deprecated: StatusNotIn — use where.NotIn(FieldStatus, vs...).
+func StatusNotIn(vs ...Status) predicate.Task { return where.NotIn(FieldStatus, vs...) }
 
-// UUIDEQ applies the EQ predicate on the "uuid" field.
-func UUIDEQ(v uuid.UUID) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldUUID, v))
-}
+// Deprecated: UUIDEQ — use where.EQ(FieldUUID, v).
+func UUIDEQ(v uuid.UUID) predicate.Task { return where.EQ(FieldUUID, v) }
 
-// UUIDNEQ applies the NEQ predicate on the "uuid" field.
-func UUIDNEQ(v uuid.UUID) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldUUID, v))
-}
+// Deprecated: UUIDNEQ — use where.NEQ(FieldUUID, v).
+func UUIDNEQ(v uuid.UUID) predicate.Task { return where.NEQ(FieldUUID, v) }
 
-// UUIDIn applies the In predicate on the "uuid" field.
-func UUIDIn(vs ...uuid.UUID) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldUUID, vs...))
-}
+// Deprecated: UUIDIn — use where.In(FieldUUID, vs...).
+func UUIDIn(vs ...uuid.UUID) predicate.Task { return where.In(FieldUUID, vs...) }
 
-// UUIDNotIn applies the NotIn predicate on the "uuid" field.
-func UUIDNotIn(vs ...uuid.UUID) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldUUID, vs...))
-}
+// Deprecated: UUIDNotIn — use where.NotIn(FieldUUID, vs...).
+func UUIDNotIn(vs ...uuid.UUID) predicate.Task { return where.NotIn(FieldUUID, vs...) }
 
-// UUIDGT applies the GT predicate on the "uuid" field.
-func UUIDGT(v uuid.UUID) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldUUID, v))
-}
+// Deprecated: UUIDGT — use where.GT(FieldUUID, v).
+func UUIDGT(v uuid.UUID) predicate.Task { return where.GT(FieldUUID, v) }
 
-// UUIDGTE applies the GTE predicate on the "uuid" field.
-func UUIDGTE(v uuid.UUID) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldUUID, v))
-}
+// Deprecated: UUIDGTE — use where.GTE(FieldUUID, v).
+func UUIDGTE(v uuid.UUID) predicate.Task { return where.GTE(FieldUUID, v) }
 
-// UUIDLT applies the LT predicate on the "uuid" field.
-func UUIDLT(v uuid.UUID) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldUUID, v))
-}
+// Deprecated: UUIDLT — use where.LT(FieldUUID, v).
+func UUIDLT(v uuid.UUID) predicate.Task { return where.LT(FieldUUID, v) }
 
-// UUIDLTE applies the LTE predicate on the "uuid" field.
-func UUIDLTE(v uuid.UUID) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldUUID, v))
-}
+// Deprecated: UUIDLTE — use where.LTE(FieldUUID, v).
+func UUIDLTE(v uuid.UUID) predicate.Task { return where.LTE(FieldUUID, v) }
 
-// UUIDIsNil applies the IsNil predicate on the "uuid" field.
-func UUIDIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldUUID))
-}
+// Deprecated: UUIDIsNil — use where.IsNull(FieldUUID).
+func UUIDIsNil() predicate.Task { return where.IsNull(FieldUUID) }
 
-// UUIDNotNil applies the NotNil predicate on the "uuid" field.
-func UUIDNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldUUID))
-}
+// Deprecated: UUIDNotNil — use where.NotNull(FieldUUID).
+func UUIDNotNil() predicate.Task { return where.NotNull(FieldUUID) }
 
 // HasTeams applies the HasEdge predicate on the "teams" edge.
 func HasTeams() predicate.Task {
@@ -296,14 +209,15 @@ func HasTeams() predicate.Task {
 
 // HasTeamsWith applies the HasEdge predicate on the "teams" edge with a given conditions (other predicates).
 func HasTeamsWith(preds ...predicate.Team) predicate.Task {
-	return predicate.Task(func(s *sql.Selector) {
-		step := newTeamsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Task(
+		func(s *sql.Selector) {
+			step := newTeamsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
@@ -319,14 +233,15 @@ func HasOwner() predicate.Task {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.Task {
-	return predicate.Task(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Task(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -18,8 +18,9 @@ import (
 // PCDelete is the builder for deleting a PC entity.
 type PCDelete struct {
 	Config
-	hooks    []Hook
-	mutation *PCMutation
+	hooks     []Hook
+	mutation  *PCMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewPCDelete returns a new PCDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *PCDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *PCDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *PCDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *PCDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -450,59 +451,62 @@ func (_q *RentalQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Renta
 	return nodes, nil
 }
 
-var rentalUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Rental, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        rental.UserTable,
-			Columns:      rental.UserColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Rental) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Rental) *int {
-		v := n.UserID
-		return &v
-	},
-}
-var rentalCarEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Rental, Car, int, uuid.UUID]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        rental.CarTable,
-			Columns:      rental.CarColumn,
-			Bidi:         false,
-			TargetColumn: car.FieldID,
-			TargetType:   field.TypeUUID,
-		})
-	},
-	ExtractNodeID: func(n *Rental) int { return n.ID },
-	ExtractEdgeID: func(e *Car) uuid.UUID { return e.ID },
-	ExtractNodeFK: func(n *Rental) *uuid.UUID {
-		v := n.CarID
-		return &v
-	},
-}
-
 func (_q *RentalQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Rental, init func(*Rental), assign func(*Rental, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &rentalUserEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Rental)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *RentalQuery) loadCar(ctx context.Context, query *CarQuery, nodes []*Rental, init func(*Rental), assign func(*Rental, *Car)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &rentalCarEdgeLoadDescriptor, nodes, assign,
-		func(ids []uuid.UUID) {
-			query.Where(car.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Rental)
+	for i := range nodes {
+		fk := nodes[i].CarID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(car.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "car_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -681,4 +685,23 @@ func (_s *RentalSelect) sqlScan(ctx context.Context, root *RentalQuery, v any) e
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// rentalCreateDescriptor holds the metadata and callbacks for constructing a Rental entity.
+var rentalCreateDescriptor = &entbuilder.CreateDescriptor[Config, Rental, *RentalMutation]{
+	Table:   rental.Table,
+	NewNode: func(c Config) *Rental { return &Rental{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Rental, *RentalMutation]{
+		Column:      rental.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Rental, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Rental.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -740,227 +741,230 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	return nodes, nil
 }
 
-var userPetsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Pet, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        user.PetsTable,
-			Columns:      user.PetsColumn,
-			Bidi:         false,
-			TargetColumn: pet.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *Pet) int { return e.ID },
-	ExtractEdgeFK: func(e *Pet) *int {
-		v := e.OwnerID
-		return &v
-	},
-}
-var userParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        user.ParentTable,
-			Columns:      user.ParentColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *User) *int {
-		v := n.ParentID
-		return &v
-	},
-}
-var userChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        user.ChildrenTable,
-			Columns:      user.ChildrenColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractEdgeFK: func(e *User) *int {
-		v := e.ParentID
-		return &v
-	},
-}
-var userSpouseEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      false,
-			Table:        user.SpouseTable,
-			Columns:      user.SpouseColumn,
-			Bidi:         true,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *User) *int {
-		v := n.SpouseID
-		return &v
-	},
-}
-var userCardEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Card, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      false,
-			Table:        user.CardTable,
-			Columns:      user.CardColumn,
-			Bidi:         false,
-			TargetColumn: card.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *Card) int { return e.ID },
-	ExtractEdgeFK: func(e *Card) *int {
-		v := e.OwnerID
-		return &v
-	},
-}
-var userMetadataEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Metadata, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      false,
-			Table:        user.MetadataTable,
-			Columns:      user.MetadataColumn,
-			Bidi:         false,
-			TargetColumn: metadata.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *Metadata) int { return e.ID },
-	ExtractEdgeFK: func(e *Metadata) *int {
-		v := e.ID
-		return &v
-	},
-}
-var userInfoEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Info, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      true,
-			Table:        user.InfoTable,
-			Columns:      user.InfoColumn,
-			Bidi:         false,
-			TargetColumn: info.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *Info) int { return e.ID },
-	ExtractEdgeFK: func(e *Info) *int {
-		v := e.ID
-		return &v
-	},
-}
-var userRentalsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[User, Rental, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        user.RentalsTable,
-			Columns:      user.RentalsColumn,
-			Bidi:         false,
-			TargetColumn: rental.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *User) int { return n.ID },
-	ExtractEdgeID: func(e *Rental) int { return e.ID },
-	ExtractEdgeFK: func(e *Rental) *int {
-		v := e.UserID
-		return &v
-	},
-}
-
 func (_q *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*User, init func(*User), assign func(*User, *Pet)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(pet.FieldOwnerID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userPetsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.OwnerID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *UserQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userParentEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*User)
+	for i := range nodes {
+		fk := nodes[i].ParentID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *UserQuery) loadChildren(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(user.FieldParentID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userChildrenEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ChildrenColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ParentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *UserQuery) loadSpouse(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &userSpouseEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*User)
+	for i := range nodes {
+		fk := nodes[i].SpouseID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "spouse_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *UserQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*User, init func(*User), assign func(*User, *Card)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(card.FieldOwnerID)
 	}
-	return entbuilder.LoadEdgeO2O(ctx, &userCardEdgeLoadDescriptor, nodes, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Card(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CardColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.OwnerID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *UserQuery) loadMetadata(ctx context.Context, query *MetadataQuery, nodes []*User, init func(*User), assign func(*User, *Metadata)) error {
-	return entbuilder.LoadEdgeO2O(ctx, &userMetadataEdgeLoadDescriptor, nodes, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.Where(predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.MetadataColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *UserQuery) loadInfo(ctx context.Context, query *InfoQuery, nodes []*User, init func(*User), assign func(*User, *Info)) error {
-	return entbuilder.LoadEdgeO2M(ctx, &userInfoEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.Info(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.InfoColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *UserQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes []*User, init func(*User), assign func(*User, *Rental)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(rental.FieldUserID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &userRentalsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.RentalsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 
@@ -1195,4 +1199,36 @@ func (_s *UserSelect) sqlScan(ctx context.Context, root *UserQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// userCreateDescriptor holds the metadata and callbacks for constructing a User entity.
+var userCreateDescriptor = &entbuilder.CreateDescriptor[Config, User, *UserMutation]{
+	Table:   user.Table,
+	NewNode: func(c Config) *User { return &User{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, User, *UserMutation]{
+		Column:      user.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: true,
+		Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *User, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(int)
+			return nil
+		},
+		AssignGenerated: func(n *User, v driver.Value) error {
+			switch x := v.(type) {
+			case int:
+				n.ID = x
+			case int64:
+				n.ID = int(x)
+			default:
+				return fmt.Errorf("unexpected User.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

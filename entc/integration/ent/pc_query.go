@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/pc"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -556,4 +558,23 @@ func (_s *PCSelect) sqlScan(ctx context.Context, root *PCQuery, v any) error {
 func (_s *PCSelect) Modify(modifiers ...func(s *sql.Selector)) *PCSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// pcCreateDescriptor holds the metadata and callbacks for constructing a PC entity.
+var pcCreateDescriptor = &entbuilder.CreateDescriptor[Config, PC, *PCMutation]{
+	Table:   pc.Table,
+	NewNode: func(c Config) *PC { return &PC{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, PC, *PCMutation]{
+		Column:      pc.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *PC, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected PC.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

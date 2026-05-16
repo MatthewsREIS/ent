@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/conversion"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -528,4 +530,23 @@ func (_s *ConversionSelect) sqlScan(ctx context.Context, root *ConversionQuery, 
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// conversionCreateDescriptor holds the metadata and callbacks for constructing a Conversion entity.
+var conversionCreateDescriptor = &entbuilder.CreateDescriptor[Config, Conversion, *ConversionMutation]{
+	Table:   conversion.Table,
+	NewNode: func(c Config) *Conversion { return &Conversion{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Conversion, *ConversionMutation]{
+		Column:      conversion.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Conversion, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Conversion.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

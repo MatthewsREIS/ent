@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -59,270 +60,164 @@ func IDLTE(id int) predicate.Group {
 	return predicate.Group(sql.FieldLTE(FieldID, id))
 }
 
-// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
-func Active(v bool) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldActive, v))
-}
+// Deprecated: Active — use where.EQ(FieldActive, v).
+func Active(v bool) predicate.Group { return where.EQ(FieldActive, v) }
 
-// Expire applies equality check predicate on the "expire" field. It's identical to ExpireEQ.
-func Expire(v time.Time) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldExpire, v))
-}
+// Deprecated: Expire — use where.EQ(FieldExpire, v).
+func Expire(v time.Time) predicate.Group { return where.EQ(FieldExpire, v) }
 
-// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
-func Type(v string) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldType, v))
-}
+// Deprecated: Type — use where.EQ(FieldType, v).
+func Type(v string) predicate.Group { return where.EQ(FieldType, v) }
 
-// MaxUsers applies equality check predicate on the "max_users" field. It's identical to MaxUsersEQ.
-func MaxUsers(v int) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsers — use where.EQ(FieldMaxUsers, v).
+func MaxUsers(v int) predicate.Group { return where.EQ(FieldMaxUsers, v) }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldName, v))
-}
+// Deprecated: Name — use where.EQ(FieldName, v).
+func Name(v string) predicate.Group { return where.EQ(FieldName, v) }
 
-// ActiveEQ applies the EQ predicate on the "active" field.
-func ActiveEQ(v bool) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldActive, v))
-}
+// Deprecated: ActiveEQ — use where.EQ(FieldActive, v).
+func ActiveEQ(v bool) predicate.Group { return where.EQ(FieldActive, v) }
 
-// ActiveNEQ applies the NEQ predicate on the "active" field.
-func ActiveNEQ(v bool) predicate.Group {
-	return predicate.Group(sql.FieldNEQ(FieldActive, v))
-}
+// Deprecated: ActiveNEQ — use where.NEQ(FieldActive, v).
+func ActiveNEQ(v bool) predicate.Group { return where.NEQ(FieldActive, v) }
 
-// ExpireEQ applies the EQ predicate on the "expire" field.
-func ExpireEQ(v time.Time) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldExpire, v))
-}
+// Deprecated: ExpireEQ — use where.EQ(FieldExpire, v).
+func ExpireEQ(v time.Time) predicate.Group { return where.EQ(FieldExpire, v) }
 
-// ExpireNEQ applies the NEQ predicate on the "expire" field.
-func ExpireNEQ(v time.Time) predicate.Group {
-	return predicate.Group(sql.FieldNEQ(FieldExpire, v))
-}
+// Deprecated: ExpireNEQ — use where.NEQ(FieldExpire, v).
+func ExpireNEQ(v time.Time) predicate.Group { return where.NEQ(FieldExpire, v) }
 
-// ExpireIn applies the In predicate on the "expire" field.
-func ExpireIn(vs ...time.Time) predicate.Group {
-	return predicate.Group(sql.FieldIn(FieldExpire, vs...))
-}
+// Deprecated: ExpireIn — use where.In(FieldExpire, vs...).
+func ExpireIn(vs ...time.Time) predicate.Group { return where.In(FieldExpire, vs...) }
 
-// ExpireNotIn applies the NotIn predicate on the "expire" field.
-func ExpireNotIn(vs ...time.Time) predicate.Group {
-	return predicate.Group(sql.FieldNotIn(FieldExpire, vs...))
-}
+// Deprecated: ExpireNotIn — use where.NotIn(FieldExpire, vs...).
+func ExpireNotIn(vs ...time.Time) predicate.Group { return where.NotIn(FieldExpire, vs...) }
 
-// ExpireGT applies the GT predicate on the "expire" field.
-func ExpireGT(v time.Time) predicate.Group {
-	return predicate.Group(sql.FieldGT(FieldExpire, v))
-}
+// Deprecated: ExpireGT — use where.GT(FieldExpire, v).
+func ExpireGT(v time.Time) predicate.Group { return where.GT(FieldExpire, v) }
 
-// ExpireGTE applies the GTE predicate on the "expire" field.
-func ExpireGTE(v time.Time) predicate.Group {
-	return predicate.Group(sql.FieldGTE(FieldExpire, v))
-}
+// Deprecated: ExpireGTE — use where.GTE(FieldExpire, v).
+func ExpireGTE(v time.Time) predicate.Group { return where.GTE(FieldExpire, v) }
 
-// ExpireLT applies the LT predicate on the "expire" field.
-func ExpireLT(v time.Time) predicate.Group {
-	return predicate.Group(sql.FieldLT(FieldExpire, v))
-}
+// Deprecated: ExpireLT — use where.LT(FieldExpire, v).
+func ExpireLT(v time.Time) predicate.Group { return where.LT(FieldExpire, v) }
 
-// ExpireLTE applies the LTE predicate on the "expire" field.
-func ExpireLTE(v time.Time) predicate.Group {
-	return predicate.Group(sql.FieldLTE(FieldExpire, v))
-}
+// Deprecated: ExpireLTE — use where.LTE(FieldExpire, v).
+func ExpireLTE(v time.Time) predicate.Group { return where.LTE(FieldExpire, v) }
 
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v string) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldType, v))
-}
+// Deprecated: TypeEQ — use where.EQ(FieldType, v).
+func TypeEQ(v string) predicate.Group { return where.EQ(FieldType, v) }
 
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v string) predicate.Group {
-	return predicate.Group(sql.FieldNEQ(FieldType, v))
-}
+// Deprecated: TypeNEQ — use where.NEQ(FieldType, v).
+func TypeNEQ(v string) predicate.Group { return where.NEQ(FieldType, v) }
 
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...string) predicate.Group {
-	return predicate.Group(sql.FieldIn(FieldType, vs...))
-}
+// Deprecated: TypeIn — use where.In(FieldType, vs...).
+func TypeIn(vs ...string) predicate.Group { return where.In(FieldType, vs...) }
 
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...string) predicate.Group {
-	return predicate.Group(sql.FieldNotIn(FieldType, vs...))
-}
+// Deprecated: TypeNotIn — use where.NotIn(FieldType, vs...).
+func TypeNotIn(vs ...string) predicate.Group { return where.NotIn(FieldType, vs...) }
 
-// TypeGT applies the GT predicate on the "type" field.
-func TypeGT(v string) predicate.Group {
-	return predicate.Group(sql.FieldGT(FieldType, v))
-}
+// Deprecated: TypeGT — use where.GT(FieldType, v).
+func TypeGT(v string) predicate.Group { return where.GT(FieldType, v) }
 
-// TypeGTE applies the GTE predicate on the "type" field.
-func TypeGTE(v string) predicate.Group {
-	return predicate.Group(sql.FieldGTE(FieldType, v))
-}
+// Deprecated: TypeGTE — use where.GTE(FieldType, v).
+func TypeGTE(v string) predicate.Group { return where.GTE(FieldType, v) }
 
-// TypeLT applies the LT predicate on the "type" field.
-func TypeLT(v string) predicate.Group {
-	return predicate.Group(sql.FieldLT(FieldType, v))
-}
+// Deprecated: TypeLT — use where.LT(FieldType, v).
+func TypeLT(v string) predicate.Group { return where.LT(FieldType, v) }
 
-// TypeLTE applies the LTE predicate on the "type" field.
-func TypeLTE(v string) predicate.Group {
-	return predicate.Group(sql.FieldLTE(FieldType, v))
-}
+// Deprecated: TypeLTE — use where.LTE(FieldType, v).
+func TypeLTE(v string) predicate.Group { return where.LTE(FieldType, v) }
 
-// TypeContains applies the Contains predicate on the "type" field.
-func TypeContains(v string) predicate.Group {
-	return predicate.Group(sql.FieldContains(FieldType, v))
-}
+// Deprecated: TypeContains — use where.Contains(FieldType, v).
+func TypeContains(v string) predicate.Group { return where.Contains(FieldType, v) }
 
-// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
-func TypeHasPrefix(v string) predicate.Group {
-	return predicate.Group(sql.FieldHasPrefix(FieldType, v))
-}
+// Deprecated: TypeHasPrefix — use where.HasPrefix(FieldType, v).
+func TypeHasPrefix(v string) predicate.Group { return where.HasPrefix(FieldType, v) }
 
-// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
-func TypeHasSuffix(v string) predicate.Group {
-	return predicate.Group(sql.FieldHasSuffix(FieldType, v))
-}
+// Deprecated: TypeHasSuffix — use where.HasSuffix(FieldType, v).
+func TypeHasSuffix(v string) predicate.Group { return where.HasSuffix(FieldType, v) }
 
-// TypeIsNil applies the IsNil predicate on the "type" field.
-func TypeIsNil() predicate.Group {
-	return predicate.Group(sql.FieldIsNull(FieldType))
-}
+// Deprecated: TypeIsNil — use where.IsNull(FieldType).
+func TypeIsNil() predicate.Group { return where.IsNull(FieldType) }
 
-// TypeNotNil applies the NotNil predicate on the "type" field.
-func TypeNotNil() predicate.Group {
-	return predicate.Group(sql.FieldNotNull(FieldType))
-}
+// Deprecated: TypeNotNil — use where.NotNull(FieldType).
+func TypeNotNil() predicate.Group { return where.NotNull(FieldType) }
 
-// TypeEqualFold applies the EqualFold predicate on the "type" field.
-func TypeEqualFold(v string) predicate.Group {
-	return predicate.Group(sql.FieldEqualFold(FieldType, v))
-}
+// Deprecated: TypeEqualFold — use where.EqualFold(FieldType, v).
+func TypeEqualFold(v string) predicate.Group { return where.EqualFold(FieldType, v) }
 
-// TypeContainsFold applies the ContainsFold predicate on the "type" field.
-func TypeContainsFold(v string) predicate.Group {
-	return predicate.Group(sql.FieldContainsFold(FieldType, v))
-}
+// Deprecated: TypeContainsFold — use where.ContainsFold(FieldType, v).
+func TypeContainsFold(v string) predicate.Group { return where.ContainsFold(FieldType, v) }
 
-// MaxUsersEQ applies the EQ predicate on the "max_users" field.
-func MaxUsersEQ(v int) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersEQ — use where.EQ(FieldMaxUsers, v).
+func MaxUsersEQ(v int) predicate.Group { return where.EQ(FieldMaxUsers, v) }
 
-// MaxUsersNEQ applies the NEQ predicate on the "max_users" field.
-func MaxUsersNEQ(v int) predicate.Group {
-	return predicate.Group(sql.FieldNEQ(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersNEQ — use where.NEQ(FieldMaxUsers, v).
+func MaxUsersNEQ(v int) predicate.Group { return where.NEQ(FieldMaxUsers, v) }
 
-// MaxUsersIn applies the In predicate on the "max_users" field.
-func MaxUsersIn(vs ...int) predicate.Group {
-	return predicate.Group(sql.FieldIn(FieldMaxUsers, vs...))
-}
+// Deprecated: MaxUsersIn — use where.In(FieldMaxUsers, vs...).
+func MaxUsersIn(vs ...int) predicate.Group { return where.In(FieldMaxUsers, vs...) }
 
-// MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
-func MaxUsersNotIn(vs ...int) predicate.Group {
-	return predicate.Group(sql.FieldNotIn(FieldMaxUsers, vs...))
-}
+// Deprecated: MaxUsersNotIn — use where.NotIn(FieldMaxUsers, vs...).
+func MaxUsersNotIn(vs ...int) predicate.Group { return where.NotIn(FieldMaxUsers, vs...) }
 
-// MaxUsersGT applies the GT predicate on the "max_users" field.
-func MaxUsersGT(v int) predicate.Group {
-	return predicate.Group(sql.FieldGT(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersGT — use where.GT(FieldMaxUsers, v).
+func MaxUsersGT(v int) predicate.Group { return where.GT(FieldMaxUsers, v) }
 
-// MaxUsersGTE applies the GTE predicate on the "max_users" field.
-func MaxUsersGTE(v int) predicate.Group {
-	return predicate.Group(sql.FieldGTE(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersGTE — use where.GTE(FieldMaxUsers, v).
+func MaxUsersGTE(v int) predicate.Group { return where.GTE(FieldMaxUsers, v) }
 
-// MaxUsersLT applies the LT predicate on the "max_users" field.
-func MaxUsersLT(v int) predicate.Group {
-	return predicate.Group(sql.FieldLT(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersLT — use where.LT(FieldMaxUsers, v).
+func MaxUsersLT(v int) predicate.Group { return where.LT(FieldMaxUsers, v) }
 
-// MaxUsersLTE applies the LTE predicate on the "max_users" field.
-func MaxUsersLTE(v int) predicate.Group {
-	return predicate.Group(sql.FieldLTE(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersLTE — use where.LTE(FieldMaxUsers, v).
+func MaxUsersLTE(v int) predicate.Group { return where.LTE(FieldMaxUsers, v) }
 
-// MaxUsersIsNil applies the IsNil predicate on the "max_users" field.
-func MaxUsersIsNil() predicate.Group {
-	return predicate.Group(sql.FieldIsNull(FieldMaxUsers))
-}
+// Deprecated: MaxUsersIsNil — use where.IsNull(FieldMaxUsers).
+func MaxUsersIsNil() predicate.Group { return where.IsNull(FieldMaxUsers) }
 
-// MaxUsersNotNil applies the NotNil predicate on the "max_users" field.
-func MaxUsersNotNil() predicate.Group {
-	return predicate.Group(sql.FieldNotNull(FieldMaxUsers))
-}
+// Deprecated: MaxUsersNotNil — use where.NotNull(FieldMaxUsers).
+func MaxUsersNotNil() predicate.Group { return where.NotNull(FieldMaxUsers) }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldName, v))
-}
+// Deprecated: NameEQ — use where.EQ(FieldName, v).
+func NameEQ(v string) predicate.Group { return where.EQ(FieldName, v) }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Group {
-	return predicate.Group(sql.FieldNEQ(FieldName, v))
-}
+// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
+func NameNEQ(v string) predicate.Group { return where.NEQ(FieldName, v) }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Group {
-	return predicate.Group(sql.FieldIn(FieldName, vs...))
-}
+// Deprecated: NameIn — use where.In(FieldName, vs...).
+func NameIn(vs ...string) predicate.Group { return where.In(FieldName, vs...) }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Group {
-	return predicate.Group(sql.FieldNotIn(FieldName, vs...))
-}
+// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
+func NameNotIn(vs ...string) predicate.Group { return where.NotIn(FieldName, vs...) }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Group {
-	return predicate.Group(sql.FieldGT(FieldName, v))
-}
+// Deprecated: NameGT — use where.GT(FieldName, v).
+func NameGT(v string) predicate.Group { return where.GT(FieldName, v) }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Group {
-	return predicate.Group(sql.FieldGTE(FieldName, v))
-}
+// Deprecated: NameGTE — use where.GTE(FieldName, v).
+func NameGTE(v string) predicate.Group { return where.GTE(FieldName, v) }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Group {
-	return predicate.Group(sql.FieldLT(FieldName, v))
-}
+// Deprecated: NameLT — use where.LT(FieldName, v).
+func NameLT(v string) predicate.Group { return where.LT(FieldName, v) }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Group {
-	return predicate.Group(sql.FieldLTE(FieldName, v))
-}
+// Deprecated: NameLTE — use where.LTE(FieldName, v).
+func NameLTE(v string) predicate.Group { return where.LTE(FieldName, v) }
 
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Group {
-	return predicate.Group(sql.FieldContains(FieldName, v))
-}
+// Deprecated: NameContains — use where.Contains(FieldName, v).
+func NameContains(v string) predicate.Group { return where.Contains(FieldName, v) }
 
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Group {
-	return predicate.Group(sql.FieldHasPrefix(FieldName, v))
-}
+// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
+func NameHasPrefix(v string) predicate.Group { return where.HasPrefix(FieldName, v) }
 
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Group {
-	return predicate.Group(sql.FieldHasSuffix(FieldName, v))
-}
+// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
+func NameHasSuffix(v string) predicate.Group { return where.HasSuffix(FieldName, v) }
 
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Group {
-	return predicate.Group(sql.FieldEqualFold(FieldName, v))
-}
+// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
+func NameEqualFold(v string) predicate.Group { return where.EqualFold(FieldName, v) }
 
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Group {
-	return predicate.Group(sql.FieldContainsFold(FieldName, v))
-}
+// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
+func NameContainsFold(v string) predicate.Group { return where.ContainsFold(FieldName, v) }
 
 // HasFiles applies the HasEdge predicate on the "files" edge.
 func HasFiles() predicate.Group {
@@ -337,14 +232,15 @@ func HasFiles() predicate.Group {
 
 // HasFilesWith applies the HasEdge predicate on the "files" edge with a given conditions (other predicates).
 func HasFilesWith(preds ...predicate.File) predicate.Group {
-	return predicate.Group(func(s *sql.Selector) {
-		step := newFilesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Group(
+		func(s *sql.Selector) {
+			step := newFilesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasBlocked applies the HasEdge predicate on the "blocked" edge.
@@ -360,14 +256,15 @@ func HasBlocked() predicate.Group {
 
 // HasBlockedWith applies the HasEdge predicate on the "blocked" edge with a given conditions (other predicates).
 func HasBlockedWith(preds ...predicate.User) predicate.Group {
-	return predicate.Group(func(s *sql.Selector) {
-		step := newBlockedStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Group(
+		func(s *sql.Selector) {
+			step := newBlockedStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUsers applies the HasEdge predicate on the "users" edge.
@@ -383,14 +280,15 @@ func HasUsers() predicate.Group {
 
 // HasUsersWith applies the HasEdge predicate on the "users" edge with a given conditions (other predicates).
 func HasUsersWith(preds ...predicate.User) predicate.Group {
-	return predicate.Group(func(s *sql.Selector) {
-		step := newUsersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Group(
+		func(s *sql.Selector) {
+			step := newUsersStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasInfo applies the HasEdge predicate on the "info" edge.
@@ -406,14 +304,15 @@ func HasInfo() predicate.Group {
 
 // HasInfoWith applies the HasEdge predicate on the "info" edge with a given conditions (other predicates).
 func HasInfoWith(preds ...predicate.GroupInfo) predicate.Group {
-	return predicate.Group(func(s *sql.Selector) {
-		step := newInfoStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Group(
+		func(s *sql.Selector) {
+			step := newInfoStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

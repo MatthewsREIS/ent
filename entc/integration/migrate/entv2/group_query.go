@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/group"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -506,4 +508,23 @@ func (_s *GroupSelect) sqlScan(ctx context.Context, root *GroupQuery, v any) err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// groupCreateDescriptor holds the metadata and callbacks for constructing a Group entity.
+var groupCreateDescriptor = &entbuilder.CreateDescriptor[Config, Group, *GroupMutation]{
+	Table:   group.Table,
+	NewNode: func(c Config) *Group { return &Group{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Group, *GroupMutation]{
+		Column:      group.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Group, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Group.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

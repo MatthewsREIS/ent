@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -507,4 +509,34 @@ func (_s *OtherSelect) sqlScan(ctx context.Context, root *OtherQuery, v any) err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// otherCreateDescriptor holds the metadata and callbacks for constructing a Other entity.
+var otherCreateDescriptor = &entbuilder.CreateDescriptor[Config, Other, *OtherMutation]{
+	Table:   other.Table,
+	NewNode: func(c Config) *Other { return &Other{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Other, *OtherMutation]{
+		Column:      other.FieldID,
+		Type:        field.TypeOther,
+		UserDefined: true,
+		Value: func(m *OtherMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Other, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(sid.ID)
+			return nil
+		},
+		AssignGenerated: func(n *Other, v driver.Value) error {
+			switch x := v.(type) {
+			case sid.ID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Other.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -60,100 +61,64 @@ func IDLTE(id int) predicate.Rental {
 	return predicate.Rental(sql.FieldLTE(FieldID, id))
 }
 
-// Date applies equality check predicate on the "date" field. It's identical to DateEQ.
-func Date(v time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldEQ(FieldDate, v))
-}
+// Deprecated: Date — use where.EQ(FieldDate, v).
+func Date(v time.Time) predicate.Rental { return where.EQ(FieldDate, v) }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Rental {
-	return predicate.Rental(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserID — use where.EQ(FieldUserID, v).
+func UserID(v int) predicate.Rental { return where.EQ(FieldUserID, v) }
 
 // CarID applies equality check predicate on the "car_id" field. It's identical to CarIDEQ.
 func CarID(v uuid.UUID) predicate.Rental {
 	return predicate.Rental(sql.FieldEQ(FieldCarID, v))
 }
 
-// DateEQ applies the EQ predicate on the "date" field.
-func DateEQ(v time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldEQ(FieldDate, v))
-}
+// Deprecated: DateEQ — use where.EQ(FieldDate, v).
+func DateEQ(v time.Time) predicate.Rental { return where.EQ(FieldDate, v) }
 
-// DateNEQ applies the NEQ predicate on the "date" field.
-func DateNEQ(v time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldNEQ(FieldDate, v))
-}
+// Deprecated: DateNEQ — use where.NEQ(FieldDate, v).
+func DateNEQ(v time.Time) predicate.Rental { return where.NEQ(FieldDate, v) }
 
-// DateIn applies the In predicate on the "date" field.
-func DateIn(vs ...time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldIn(FieldDate, vs...))
-}
+// Deprecated: DateIn — use where.In(FieldDate, vs...).
+func DateIn(vs ...time.Time) predicate.Rental { return where.In(FieldDate, vs...) }
 
-// DateNotIn applies the NotIn predicate on the "date" field.
-func DateNotIn(vs ...time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldNotIn(FieldDate, vs...))
-}
+// Deprecated: DateNotIn — use where.NotIn(FieldDate, vs...).
+func DateNotIn(vs ...time.Time) predicate.Rental { return where.NotIn(FieldDate, vs...) }
 
-// DateGT applies the GT predicate on the "date" field.
-func DateGT(v time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldGT(FieldDate, v))
-}
+// Deprecated: DateGT — use where.GT(FieldDate, v).
+func DateGT(v time.Time) predicate.Rental { return where.GT(FieldDate, v) }
 
-// DateGTE applies the GTE predicate on the "date" field.
-func DateGTE(v time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldGTE(FieldDate, v))
-}
+// Deprecated: DateGTE — use where.GTE(FieldDate, v).
+func DateGTE(v time.Time) predicate.Rental { return where.GTE(FieldDate, v) }
 
-// DateLT applies the LT predicate on the "date" field.
-func DateLT(v time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldLT(FieldDate, v))
-}
+// Deprecated: DateLT — use where.LT(FieldDate, v).
+func DateLT(v time.Time) predicate.Rental { return where.LT(FieldDate, v) }
 
-// DateLTE applies the LTE predicate on the "date" field.
-func DateLTE(v time.Time) predicate.Rental {
-	return predicate.Rental(sql.FieldLTE(FieldDate, v))
-}
+// Deprecated: DateLTE — use where.LTE(FieldDate, v).
+func DateLTE(v time.Time) predicate.Rental { return where.LTE(FieldDate, v) }
 
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Rental {
-	return predicate.Rental(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserIDEQ — use where.EQ(FieldUserID, v).
+func UserIDEQ(v int) predicate.Rental { return where.EQ(FieldUserID, v) }
 
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Rental {
-	return predicate.Rental(sql.FieldNEQ(FieldUserID, v))
-}
+// Deprecated: UserIDNEQ — use where.NEQ(FieldUserID, v).
+func UserIDNEQ(v int) predicate.Rental { return where.NEQ(FieldUserID, v) }
 
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Rental {
-	return predicate.Rental(sql.FieldIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDIn — use where.In(FieldUserID, vs...).
+func UserIDIn(vs ...int) predicate.Rental { return where.In(FieldUserID, vs...) }
 
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Rental {
-	return predicate.Rental(sql.FieldNotIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDNotIn — use where.NotIn(FieldUserID, vs...).
+func UserIDNotIn(vs ...int) predicate.Rental { return where.NotIn(FieldUserID, vs...) }
 
-// CarIDEQ applies the EQ predicate on the "car_id" field.
-func CarIDEQ(v uuid.UUID) predicate.Rental {
-	return predicate.Rental(sql.FieldEQ(FieldCarID, v))
-}
+// Deprecated: CarIDEQ — use where.EQ(FieldCarID, v).
+func CarIDEQ(v uuid.UUID) predicate.Rental { return where.EQ(FieldCarID, v) }
 
-// CarIDNEQ applies the NEQ predicate on the "car_id" field.
-func CarIDNEQ(v uuid.UUID) predicate.Rental {
-	return predicate.Rental(sql.FieldNEQ(FieldCarID, v))
-}
+// Deprecated: CarIDNEQ — use where.NEQ(FieldCarID, v).
+func CarIDNEQ(v uuid.UUID) predicate.Rental { return where.NEQ(FieldCarID, v) }
 
-// CarIDIn applies the In predicate on the "car_id" field.
-func CarIDIn(vs ...uuid.UUID) predicate.Rental {
-	return predicate.Rental(sql.FieldIn(FieldCarID, vs...))
-}
+// Deprecated: CarIDIn — use where.In(FieldCarID, vs...).
+func CarIDIn(vs ...uuid.UUID) predicate.Rental { return where.In(FieldCarID, vs...) }
 
-// CarIDNotIn applies the NotIn predicate on the "car_id" field.
-func CarIDNotIn(vs ...uuid.UUID) predicate.Rental {
-	return predicate.Rental(sql.FieldNotIn(FieldCarID, vs...))
-}
+// Deprecated: CarIDNotIn — use where.NotIn(FieldCarID, vs...).
+func CarIDNotIn(vs ...uuid.UUID) predicate.Rental { return where.NotIn(FieldCarID, vs...) }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Rental {
@@ -168,14 +133,15 @@ func HasUser() predicate.Rental {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Rental(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasCar applies the HasEdge predicate on the "car" edge.
@@ -191,14 +157,15 @@ func HasCar() predicate.Rental {
 
 // HasCarWith applies the HasEdge predicate on the "car" edge with a given conditions (other predicates).
 func HasCarWith(preds ...predicate.Car) predicate.Rental {
-	return predicate.Rental(func(s *sql.Selector) {
-		step := newCarStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Rental(
+		func(s *sql.Selector) {
+			step := newCarStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,85 +58,53 @@ func IDLTE(id int) predicate.Metadata {
 	return predicate.Metadata(sql.FieldLTE(FieldID, id))
 }
 
-// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
-func Age(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldEQ(FieldAge, v))
-}
+// Deprecated: Age — use where.EQ(FieldAge, v).
+func Age(v int) predicate.Metadata { return where.EQ(FieldAge, v) }
 
-// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
-func ParentID(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldEQ(FieldParentID, v))
-}
+// Deprecated: ParentID — use where.EQ(FieldParentID, v).
+func ParentID(v int) predicate.Metadata { return where.EQ(FieldParentID, v) }
 
-// AgeEQ applies the EQ predicate on the "age" field.
-func AgeEQ(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldEQ(FieldAge, v))
-}
+// Deprecated: AgeEQ — use where.EQ(FieldAge, v).
+func AgeEQ(v int) predicate.Metadata { return where.EQ(FieldAge, v) }
 
-// AgeNEQ applies the NEQ predicate on the "age" field.
-func AgeNEQ(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldNEQ(FieldAge, v))
-}
+// Deprecated: AgeNEQ — use where.NEQ(FieldAge, v).
+func AgeNEQ(v int) predicate.Metadata { return where.NEQ(FieldAge, v) }
 
-// AgeIn applies the In predicate on the "age" field.
-func AgeIn(vs ...int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldIn(FieldAge, vs...))
-}
+// Deprecated: AgeIn — use where.In(FieldAge, vs...).
+func AgeIn(vs ...int) predicate.Metadata { return where.In(FieldAge, vs...) }
 
-// AgeNotIn applies the NotIn predicate on the "age" field.
-func AgeNotIn(vs ...int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldNotIn(FieldAge, vs...))
-}
+// Deprecated: AgeNotIn — use where.NotIn(FieldAge, vs...).
+func AgeNotIn(vs ...int) predicate.Metadata { return where.NotIn(FieldAge, vs...) }
 
-// AgeGT applies the GT predicate on the "age" field.
-func AgeGT(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldGT(FieldAge, v))
-}
+// Deprecated: AgeGT — use where.GT(FieldAge, v).
+func AgeGT(v int) predicate.Metadata { return where.GT(FieldAge, v) }
 
-// AgeGTE applies the GTE predicate on the "age" field.
-func AgeGTE(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldGTE(FieldAge, v))
-}
+// Deprecated: AgeGTE — use where.GTE(FieldAge, v).
+func AgeGTE(v int) predicate.Metadata { return where.GTE(FieldAge, v) }
 
-// AgeLT applies the LT predicate on the "age" field.
-func AgeLT(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldLT(FieldAge, v))
-}
+// Deprecated: AgeLT — use where.LT(FieldAge, v).
+func AgeLT(v int) predicate.Metadata { return where.LT(FieldAge, v) }
 
-// AgeLTE applies the LTE predicate on the "age" field.
-func AgeLTE(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldLTE(FieldAge, v))
-}
+// Deprecated: AgeLTE — use where.LTE(FieldAge, v).
+func AgeLTE(v int) predicate.Metadata { return where.LTE(FieldAge, v) }
 
-// ParentIDEQ applies the EQ predicate on the "parent_id" field.
-func ParentIDEQ(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldEQ(FieldParentID, v))
-}
+// Deprecated: ParentIDEQ — use where.EQ(FieldParentID, v).
+func ParentIDEQ(v int) predicate.Metadata { return where.EQ(FieldParentID, v) }
 
-// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
-func ParentIDNEQ(v int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldNEQ(FieldParentID, v))
-}
+// Deprecated: ParentIDNEQ — use where.NEQ(FieldParentID, v).
+func ParentIDNEQ(v int) predicate.Metadata { return where.NEQ(FieldParentID, v) }
 
-// ParentIDIn applies the In predicate on the "parent_id" field.
-func ParentIDIn(vs ...int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldIn(FieldParentID, vs...))
-}
+// Deprecated: ParentIDIn — use where.In(FieldParentID, vs...).
+func ParentIDIn(vs ...int) predicate.Metadata { return where.In(FieldParentID, vs...) }
 
-// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
-func ParentIDNotIn(vs ...int) predicate.Metadata {
-	return predicate.Metadata(sql.FieldNotIn(FieldParentID, vs...))
-}
+// Deprecated: ParentIDNotIn — use where.NotIn(FieldParentID, vs...).
+func ParentIDNotIn(vs ...int) predicate.Metadata { return where.NotIn(FieldParentID, vs...) }
 
-// ParentIDIsNil applies the IsNil predicate on the "parent_id" field.
-func ParentIDIsNil() predicate.Metadata {
-	return predicate.Metadata(sql.FieldIsNull(FieldParentID))
-}
+// Deprecated: ParentIDIsNil — use where.IsNull(FieldParentID).
+func ParentIDIsNil() predicate.Metadata { return where.IsNull(FieldParentID) }
 
-// ParentIDNotNil applies the NotNil predicate on the "parent_id" field.
-func ParentIDNotNil() predicate.Metadata {
-	return predicate.Metadata(sql.FieldNotNull(FieldParentID))
-}
+// Deprecated: ParentIDNotNil — use where.NotNull(FieldParentID).
+func ParentIDNotNil() predicate.Metadata { return where.NotNull(FieldParentID) }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Metadata {
@@ -150,14 +119,15 @@ func HasUser() predicate.Metadata {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Metadata {
-	return predicate.Metadata(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Metadata(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasChildren applies the HasEdge predicate on the "children" edge.
@@ -173,14 +143,15 @@ func HasChildren() predicate.Metadata {
 
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.Metadata) predicate.Metadata {
-	return predicate.Metadata(func(s *sql.Selector) {
-		step := newChildrenStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Metadata(
+		func(s *sql.Selector) {
+			step := newChildrenStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
@@ -196,14 +167,15 @@ func HasParent() predicate.Metadata {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.Metadata) predicate.Metadata {
-	return predicate.Metadata(func(s *sql.Selector) {
-		step := newParentStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Metadata(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

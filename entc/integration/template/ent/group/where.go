@@ -9,6 +9,7 @@ package group
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -56,50 +57,32 @@ func IDLTE(id int) predicate.Group {
 	return predicate.Group(sql.FieldLTE(FieldID, id))
 }
 
-// MaxUsers applies equality check predicate on the "max_users" field. It's identical to MaxUsersEQ.
-func MaxUsers(v int) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsers — use where.EQ(FieldMaxUsers, v).
+func MaxUsers(v int) predicate.Group { return where.EQ(FieldMaxUsers, v) }
 
-// MaxUsersEQ applies the EQ predicate on the "max_users" field.
-func MaxUsersEQ(v int) predicate.Group {
-	return predicate.Group(sql.FieldEQ(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersEQ — use where.EQ(FieldMaxUsers, v).
+func MaxUsersEQ(v int) predicate.Group { return where.EQ(FieldMaxUsers, v) }
 
-// MaxUsersNEQ applies the NEQ predicate on the "max_users" field.
-func MaxUsersNEQ(v int) predicate.Group {
-	return predicate.Group(sql.FieldNEQ(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersNEQ — use where.NEQ(FieldMaxUsers, v).
+func MaxUsersNEQ(v int) predicate.Group { return where.NEQ(FieldMaxUsers, v) }
 
-// MaxUsersIn applies the In predicate on the "max_users" field.
-func MaxUsersIn(vs ...int) predicate.Group {
-	return predicate.Group(sql.FieldIn(FieldMaxUsers, vs...))
-}
+// Deprecated: MaxUsersIn — use where.In(FieldMaxUsers, vs...).
+func MaxUsersIn(vs ...int) predicate.Group { return where.In(FieldMaxUsers, vs...) }
 
-// MaxUsersNotIn applies the NotIn predicate on the "max_users" field.
-func MaxUsersNotIn(vs ...int) predicate.Group {
-	return predicate.Group(sql.FieldNotIn(FieldMaxUsers, vs...))
-}
+// Deprecated: MaxUsersNotIn — use where.NotIn(FieldMaxUsers, vs...).
+func MaxUsersNotIn(vs ...int) predicate.Group { return where.NotIn(FieldMaxUsers, vs...) }
 
-// MaxUsersGT applies the GT predicate on the "max_users" field.
-func MaxUsersGT(v int) predicate.Group {
-	return predicate.Group(sql.FieldGT(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersGT — use where.GT(FieldMaxUsers, v).
+func MaxUsersGT(v int) predicate.Group { return where.GT(FieldMaxUsers, v) }
 
-// MaxUsersGTE applies the GTE predicate on the "max_users" field.
-func MaxUsersGTE(v int) predicate.Group {
-	return predicate.Group(sql.FieldGTE(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersGTE — use where.GTE(FieldMaxUsers, v).
+func MaxUsersGTE(v int) predicate.Group { return where.GTE(FieldMaxUsers, v) }
 
-// MaxUsersLT applies the LT predicate on the "max_users" field.
-func MaxUsersLT(v int) predicate.Group {
-	return predicate.Group(sql.FieldLT(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersLT — use where.LT(FieldMaxUsers, v).
+func MaxUsersLT(v int) predicate.Group { return where.LT(FieldMaxUsers, v) }
 
-// MaxUsersLTE applies the LTE predicate on the "max_users" field.
-func MaxUsersLTE(v int) predicate.Group {
-	return predicate.Group(sql.FieldLTE(FieldMaxUsers, v))
-}
+// Deprecated: MaxUsersLTE — use where.LTE(FieldMaxUsers, v).
+func MaxUsersLTE(v int) predicate.Group { return where.LTE(FieldMaxUsers, v) }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Group) predicate.Group {

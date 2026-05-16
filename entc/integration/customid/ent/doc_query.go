@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -794,4 +795,34 @@ func (_s *DocSelect) sqlScan(ctx context.Context, root *DocQuery, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// docCreateDescriptor holds the metadata and callbacks for constructing a Doc entity.
+var docCreateDescriptor = &entbuilder.CreateDescriptor[Config, Doc, *DocMutation]{
+	Table:   doc.Table,
+	NewNode: func(c Config) *Doc { return &Doc{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Doc, *DocMutation]{
+		Column:      doc.FieldID,
+		Type:        field.TypeString,
+		UserDefined: true,
+		Value: func(m *DocMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Doc, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(schema.DocID)
+			return nil
+		},
+		AssignGenerated: func(n *Doc, v driver.Value) error {
+			switch x := v.(type) {
+			case schema.DocID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Doc.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

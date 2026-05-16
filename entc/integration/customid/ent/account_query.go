@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -609,4 +610,34 @@ func (_s *AccountSelect) sqlScan(ctx context.Context, root *AccountQuery, v any)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// accountCreateDescriptor holds the metadata and callbacks for constructing a Account entity.
+var accountCreateDescriptor = &entbuilder.CreateDescriptor[Config, Account, *AccountMutation]{
+	Table:   account.Table,
+	NewNode: func(c Config) *Account { return &Account{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Account, *AccountMutation]{
+		Column:      account.FieldID,
+		Type:        field.TypeOther,
+		UserDefined: true,
+		Value: func(m *AccountMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Account, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(sid.ID)
+			return nil
+		},
+		AssignGenerated: func(n *Account, v driver.Value) error {
+			switch x := v.(type) {
+			case sid.ID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Account.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

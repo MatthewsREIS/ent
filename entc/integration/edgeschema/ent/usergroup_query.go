@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -449,59 +450,62 @@ func (_q *UserGroupQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Us
 	return nodes, nil
 }
 
-var usergroupUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[UserGroup, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        usergroup.UserTable,
-			Columns:      usergroup.UserColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *UserGroup) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *UserGroup) *int {
-		v := n.UserID
-		return &v
-	},
-}
-var usergroupGroupEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[UserGroup, Group, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        usergroup.GroupTable,
-			Columns:      usergroup.GroupColumn,
-			Bidi:         false,
-			TargetColumn: group.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *UserGroup) int { return n.ID },
-	ExtractEdgeID: func(e *Group) int { return e.ID },
-	ExtractNodeFK: func(n *UserGroup) *int {
-		v := n.GroupID
-		return &v
-	},
-}
-
 func (_q *UserGroupQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*UserGroup, init func(*UserGroup), assign func(*UserGroup, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &usergroupUserEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UserGroup)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *UserGroupQuery) loadGroup(ctx context.Context, query *GroupQuery, nodes []*UserGroup, init func(*UserGroup), assign func(*UserGroup, *Group)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &usergroupGroupEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(group.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*UserGroup)
+	for i := range nodes {
+		fk := nodes[i].GroupID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(group.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -680,4 +684,23 @@ func (_s *UserGroupSelect) sqlScan(ctx context.Context, root *UserGroupQuery, v 
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// usergroupCreateDescriptor holds the metadata and callbacks for constructing a UserGroup entity.
+var usergroupCreateDescriptor = &entbuilder.CreateDescriptor[Config, UserGroup, *UserGroupMutation]{
+	Table:   usergroup.Table,
+	NewNode: func(c Config) *UserGroup { return &UserGroup{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, UserGroup, *UserGroupMutation]{
+		Column:      usergroup.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *UserGroup, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected UserGroup.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

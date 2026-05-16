@@ -11,19 +11,19 @@ import (
 )
 
 // CleanUser is the predicate function for cleanuser builders.
-type CleanUser func(*sql.Selector)
+type CleanUser = func(*sql.Selector)
 
 // Friendship is the predicate function for friendship builders.
-type Friendship func(*sql.Selector)
+type Friendship = func(*sql.Selector)
 
 // Group is the predicate function for group builders.
-type Group func(*sql.Selector)
+type Group = func(*sql.Selector)
 
 // Parent is the predicate function for parent builders.
-type Parent func(*sql.Selector)
+type Parent = func(*sql.Selector)
 
 // Pet is the predicate function for pet builders.
-type Pet func(*sql.Selector)
+type Pet = func(*sql.Selector)
 
 // User is the predicate function for user builders.
-type User func(*sql.Selector)
+type User = func(*sql.Selector)

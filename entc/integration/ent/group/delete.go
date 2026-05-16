@@ -18,8 +18,9 @@ import (
 // GroupDelete is the builder for deleting a Group entity.
 type GroupDelete struct {
 	Config
-	hooks    []Hook
-	mutation *GroupMutation
+	hooks     []Hook
+	mutation  *GroupMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewGroupDelete returns a new GroupDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *GroupDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *GroupDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *GroupDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *GroupDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -616,4 +618,34 @@ func (_s *TokenSelect) sqlScan(ctx context.Context, root *TokenQuery, v any) err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// tokenCreateDescriptor holds the metadata and callbacks for constructing a Token entity.
+var tokenCreateDescriptor = &entbuilder.CreateDescriptor[Config, Token, *TokenMutation]{
+	Table:   token.Table,
+	NewNode: func(c Config) *Token { return &Token{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Token, *TokenMutation]{
+		Column:      token.FieldID,
+		Type:        field.TypeOther,
+		UserDefined: true,
+		Value: func(m *TokenMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Token, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(sid.ID)
+			return nil
+		},
+		AssignGenerated: func(n *Token, v driver.Value) error {
+			switch x := v.(type) {
+			case sid.ID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Token.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

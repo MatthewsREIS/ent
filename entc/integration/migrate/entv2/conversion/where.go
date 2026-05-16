@@ -9,6 +9,7 @@ package conversion
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -56,724 +57,530 @@ func IDLTE(id int) predicate.Conversion {
 	return predicate.Conversion(sql.FieldLTE(FieldID, id))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldName, v))
-}
+// Deprecated: Name — use where.EQ(FieldName, v).
+func Name(v string) predicate.Conversion { return where.EQ(FieldName, v) }
 
-// Int8ToString applies equality check predicate on the "int8_to_string" field. It's identical to Int8ToStringEQ.
-func Int8ToString(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldInt8ToString, v))
-}
+// Deprecated: Int8ToString — use where.EQ(FieldInt8ToString, v).
+func Int8ToString(v string) predicate.Conversion { return where.EQ(FieldInt8ToString, v) }
 
-// Uint8ToString applies equality check predicate on the "uint8_to_string" field. It's identical to Uint8ToStringEQ.
-func Uint8ToString(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldUint8ToString, v))
-}
+// Deprecated: Uint8ToString — use where.EQ(FieldUint8ToString, v).
+func Uint8ToString(v string) predicate.Conversion { return where.EQ(FieldUint8ToString, v) }
 
-// Int16ToString applies equality check predicate on the "int16_to_string" field. It's identical to Int16ToStringEQ.
-func Int16ToString(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldInt16ToString, v))
-}
+// Deprecated: Int16ToString — use where.EQ(FieldInt16ToString, v).
+func Int16ToString(v string) predicate.Conversion { return where.EQ(FieldInt16ToString, v) }
 
-// Uint16ToString applies equality check predicate on the "uint16_to_string" field. It's identical to Uint16ToStringEQ.
-func Uint16ToString(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldUint16ToString, v))
-}
+// Deprecated: Uint16ToString — use where.EQ(FieldUint16ToString, v).
+func Uint16ToString(v string) predicate.Conversion { return where.EQ(FieldUint16ToString, v) }
 
-// Int32ToString applies equality check predicate on the "int32_to_string" field. It's identical to Int32ToStringEQ.
-func Int32ToString(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldInt32ToString, v))
-}
+// Deprecated: Int32ToString — use where.EQ(FieldInt32ToString, v).
+func Int32ToString(v string) predicate.Conversion { return where.EQ(FieldInt32ToString, v) }
 
-// Uint32ToString applies equality check predicate on the "uint32_to_string" field. It's identical to Uint32ToStringEQ.
-func Uint32ToString(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldUint32ToString, v))
-}
+// Deprecated: Uint32ToString — use where.EQ(FieldUint32ToString, v).
+func Uint32ToString(v string) predicate.Conversion { return where.EQ(FieldUint32ToString, v) }
 
-// Int64ToString applies equality check predicate on the "int64_to_string" field. It's identical to Int64ToStringEQ.
-func Int64ToString(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldInt64ToString, v))
-}
+// Deprecated: Int64ToString — use where.EQ(FieldInt64ToString, v).
+func Int64ToString(v string) predicate.Conversion { return where.EQ(FieldInt64ToString, v) }
 
-// Uint64ToString applies equality check predicate on the "uint64_to_string" field. It's identical to Uint64ToStringEQ.
-func Uint64ToString(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldUint64ToString, v))
-}
+// Deprecated: Uint64ToString — use where.EQ(FieldUint64ToString, v).
+func Uint64ToString(v string) predicate.Conversion { return where.EQ(FieldUint64ToString, v) }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldName, v))
-}
+// Deprecated: NameEQ — use where.EQ(FieldName, v).
+func NameEQ(v string) predicate.Conversion { return where.EQ(FieldName, v) }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldName, v))
-}
+// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
+func NameNEQ(v string) predicate.Conversion { return where.NEQ(FieldName, v) }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldName, vs...))
-}
+// Deprecated: NameIn — use where.In(FieldName, vs...).
+func NameIn(vs ...string) predicate.Conversion { return where.In(FieldName, vs...) }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldName, vs...))
-}
+// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
+func NameNotIn(vs ...string) predicate.Conversion { return where.NotIn(FieldName, vs...) }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldName, v))
-}
+// Deprecated: NameGT — use where.GT(FieldName, v).
+func NameGT(v string) predicate.Conversion { return where.GT(FieldName, v) }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldName, v))
-}
+// Deprecated: NameGTE — use where.GTE(FieldName, v).
+func NameGTE(v string) predicate.Conversion { return where.GTE(FieldName, v) }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldName, v))
-}
+// Deprecated: NameLT — use where.LT(FieldName, v).
+func NameLT(v string) predicate.Conversion { return where.LT(FieldName, v) }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldName, v))
-}
+// Deprecated: NameLTE — use where.LTE(FieldName, v).
+func NameLTE(v string) predicate.Conversion { return where.LTE(FieldName, v) }
 
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldName, v))
-}
+// Deprecated: NameContains — use where.Contains(FieldName, v).
+func NameContains(v string) predicate.Conversion { return where.Contains(FieldName, v) }
 
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldName, v))
-}
+// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
+func NameHasPrefix(v string) predicate.Conversion { return where.HasPrefix(FieldName, v) }
 
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldName, v))
-}
+// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
+func NameHasSuffix(v string) predicate.Conversion { return where.HasSuffix(FieldName, v) }
 
-// NameIsNil applies the IsNil predicate on the "name" field.
-func NameIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldName))
-}
+// Deprecated: NameIsNil — use where.IsNull(FieldName).
+func NameIsNil() predicate.Conversion { return where.IsNull(FieldName) }
 
-// NameNotNil applies the NotNil predicate on the "name" field.
-func NameNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldName))
-}
+// Deprecated: NameNotNil — use where.NotNull(FieldName).
+func NameNotNil() predicate.Conversion { return where.NotNull(FieldName) }
 
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldName, v))
-}
+// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
+func NameEqualFold(v string) predicate.Conversion { return where.EqualFold(FieldName, v) }
 
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldName, v))
-}
+// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
+func NameContainsFold(v string) predicate.Conversion { return where.ContainsFold(FieldName, v) }
 
-// Int8ToStringEQ applies the EQ predicate on the "int8_to_string" field.
-func Int8ToStringEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldInt8ToString, v))
-}
+// Deprecated: Int8ToStringEQ — use where.EQ(FieldInt8ToString, v).
+func Int8ToStringEQ(v string) predicate.Conversion { return where.EQ(FieldInt8ToString, v) }
 
-// Int8ToStringNEQ applies the NEQ predicate on the "int8_to_string" field.
-func Int8ToStringNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldInt8ToString, v))
-}
+// Deprecated: Int8ToStringNEQ — use where.NEQ(FieldInt8ToString, v).
+func Int8ToStringNEQ(v string) predicate.Conversion { return where.NEQ(FieldInt8ToString, v) }
 
-// Int8ToStringIn applies the In predicate on the "int8_to_string" field.
-func Int8ToStringIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldInt8ToString, vs...))
-}
+// Deprecated: Int8ToStringIn — use where.In(FieldInt8ToString, vs...).
+func Int8ToStringIn(vs ...string) predicate.Conversion { return where.In(FieldInt8ToString, vs...) }
 
-// Int8ToStringNotIn applies the NotIn predicate on the "int8_to_string" field.
+// Deprecated: Int8ToStringNotIn — use where.NotIn(FieldInt8ToString, vs...).
 func Int8ToStringNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldInt8ToString, vs...))
+	return where.NotIn(FieldInt8ToString, vs...)
 }
 
-// Int8ToStringGT applies the GT predicate on the "int8_to_string" field.
-func Int8ToStringGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldInt8ToString, v))
-}
+// Deprecated: Int8ToStringGT — use where.GT(FieldInt8ToString, v).
+func Int8ToStringGT(v string) predicate.Conversion { return where.GT(FieldInt8ToString, v) }
 
-// Int8ToStringGTE applies the GTE predicate on the "int8_to_string" field.
-func Int8ToStringGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldInt8ToString, v))
-}
+// Deprecated: Int8ToStringGTE — use where.GTE(FieldInt8ToString, v).
+func Int8ToStringGTE(v string) predicate.Conversion { return where.GTE(FieldInt8ToString, v) }
 
-// Int8ToStringLT applies the LT predicate on the "int8_to_string" field.
-func Int8ToStringLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldInt8ToString, v))
-}
+// Deprecated: Int8ToStringLT — use where.LT(FieldInt8ToString, v).
+func Int8ToStringLT(v string) predicate.Conversion { return where.LT(FieldInt8ToString, v) }
 
-// Int8ToStringLTE applies the LTE predicate on the "int8_to_string" field.
-func Int8ToStringLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldInt8ToString, v))
-}
+// Deprecated: Int8ToStringLTE — use where.LTE(FieldInt8ToString, v).
+func Int8ToStringLTE(v string) predicate.Conversion { return where.LTE(FieldInt8ToString, v) }
 
-// Int8ToStringContains applies the Contains predicate on the "int8_to_string" field.
-func Int8ToStringContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldInt8ToString, v))
-}
+// Deprecated: Int8ToStringContains — use where.Contains(FieldInt8ToString, v).
+func Int8ToStringContains(v string) predicate.Conversion { return where.Contains(FieldInt8ToString, v) }
 
-// Int8ToStringHasPrefix applies the HasPrefix predicate on the "int8_to_string" field.
+// Deprecated: Int8ToStringHasPrefix — use where.HasPrefix(FieldInt8ToString, v).
 func Int8ToStringHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldInt8ToString, v))
+	return where.HasPrefix(FieldInt8ToString, v)
 }
 
-// Int8ToStringHasSuffix applies the HasSuffix predicate on the "int8_to_string" field.
+// Deprecated: Int8ToStringHasSuffix — use where.HasSuffix(FieldInt8ToString, v).
 func Int8ToStringHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldInt8ToString, v))
+	return where.HasSuffix(FieldInt8ToString, v)
 }
 
-// Int8ToStringIsNil applies the IsNil predicate on the "int8_to_string" field.
-func Int8ToStringIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldInt8ToString))
-}
+// Deprecated: Int8ToStringIsNil — use where.IsNull(FieldInt8ToString).
+func Int8ToStringIsNil() predicate.Conversion { return where.IsNull(FieldInt8ToString) }
 
-// Int8ToStringNotNil applies the NotNil predicate on the "int8_to_string" field.
-func Int8ToStringNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldInt8ToString))
-}
+// Deprecated: Int8ToStringNotNil — use where.NotNull(FieldInt8ToString).
+func Int8ToStringNotNil() predicate.Conversion { return where.NotNull(FieldInt8ToString) }
 
-// Int8ToStringEqualFold applies the EqualFold predicate on the "int8_to_string" field.
+// Deprecated: Int8ToStringEqualFold — use where.EqualFold(FieldInt8ToString, v).
 func Int8ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldInt8ToString, v))
+	return where.EqualFold(FieldInt8ToString, v)
 }
 
-// Int8ToStringContainsFold applies the ContainsFold predicate on the "int8_to_string" field.
+// Deprecated: Int8ToStringContainsFold — use where.ContainsFold(FieldInt8ToString, v).
 func Int8ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldInt8ToString, v))
+	return where.ContainsFold(FieldInt8ToString, v)
 }
 
-// Uint8ToStringEQ applies the EQ predicate on the "uint8_to_string" field.
-func Uint8ToStringEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldUint8ToString, v))
-}
+// Deprecated: Uint8ToStringEQ — use where.EQ(FieldUint8ToString, v).
+func Uint8ToStringEQ(v string) predicate.Conversion { return where.EQ(FieldUint8ToString, v) }
 
-// Uint8ToStringNEQ applies the NEQ predicate on the "uint8_to_string" field.
-func Uint8ToStringNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldUint8ToString, v))
-}
+// Deprecated: Uint8ToStringNEQ — use where.NEQ(FieldUint8ToString, v).
+func Uint8ToStringNEQ(v string) predicate.Conversion { return where.NEQ(FieldUint8ToString, v) }
 
-// Uint8ToStringIn applies the In predicate on the "uint8_to_string" field.
-func Uint8ToStringIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldUint8ToString, vs...))
-}
+// Deprecated: Uint8ToStringIn — use where.In(FieldUint8ToString, vs...).
+func Uint8ToStringIn(vs ...string) predicate.Conversion { return where.In(FieldUint8ToString, vs...) }
 
-// Uint8ToStringNotIn applies the NotIn predicate on the "uint8_to_string" field.
+// Deprecated: Uint8ToStringNotIn — use where.NotIn(FieldUint8ToString, vs...).
 func Uint8ToStringNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldUint8ToString, vs...))
+	return where.NotIn(FieldUint8ToString, vs...)
 }
 
-// Uint8ToStringGT applies the GT predicate on the "uint8_to_string" field.
-func Uint8ToStringGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldUint8ToString, v))
-}
+// Deprecated: Uint8ToStringGT — use where.GT(FieldUint8ToString, v).
+func Uint8ToStringGT(v string) predicate.Conversion { return where.GT(FieldUint8ToString, v) }
 
-// Uint8ToStringGTE applies the GTE predicate on the "uint8_to_string" field.
-func Uint8ToStringGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldUint8ToString, v))
-}
+// Deprecated: Uint8ToStringGTE — use where.GTE(FieldUint8ToString, v).
+func Uint8ToStringGTE(v string) predicate.Conversion { return where.GTE(FieldUint8ToString, v) }
 
-// Uint8ToStringLT applies the LT predicate on the "uint8_to_string" field.
-func Uint8ToStringLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldUint8ToString, v))
-}
+// Deprecated: Uint8ToStringLT — use where.LT(FieldUint8ToString, v).
+func Uint8ToStringLT(v string) predicate.Conversion { return where.LT(FieldUint8ToString, v) }
 
-// Uint8ToStringLTE applies the LTE predicate on the "uint8_to_string" field.
-func Uint8ToStringLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldUint8ToString, v))
-}
+// Deprecated: Uint8ToStringLTE — use where.LTE(FieldUint8ToString, v).
+func Uint8ToStringLTE(v string) predicate.Conversion { return where.LTE(FieldUint8ToString, v) }
 
-// Uint8ToStringContains applies the Contains predicate on the "uint8_to_string" field.
+// Deprecated: Uint8ToStringContains — use where.Contains(FieldUint8ToString, v).
 func Uint8ToStringContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldUint8ToString, v))
+	return where.Contains(FieldUint8ToString, v)
 }
 
-// Uint8ToStringHasPrefix applies the HasPrefix predicate on the "uint8_to_string" field.
+// Deprecated: Uint8ToStringHasPrefix — use where.HasPrefix(FieldUint8ToString, v).
 func Uint8ToStringHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldUint8ToString, v))
+	return where.HasPrefix(FieldUint8ToString, v)
 }
 
-// Uint8ToStringHasSuffix applies the HasSuffix predicate on the "uint8_to_string" field.
+// Deprecated: Uint8ToStringHasSuffix — use where.HasSuffix(FieldUint8ToString, v).
 func Uint8ToStringHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldUint8ToString, v))
+	return where.HasSuffix(FieldUint8ToString, v)
 }
 
-// Uint8ToStringIsNil applies the IsNil predicate on the "uint8_to_string" field.
-func Uint8ToStringIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldUint8ToString))
-}
+// Deprecated: Uint8ToStringIsNil — use where.IsNull(FieldUint8ToString).
+func Uint8ToStringIsNil() predicate.Conversion { return where.IsNull(FieldUint8ToString) }
 
-// Uint8ToStringNotNil applies the NotNil predicate on the "uint8_to_string" field.
-func Uint8ToStringNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldUint8ToString))
-}
+// Deprecated: Uint8ToStringNotNil — use where.NotNull(FieldUint8ToString).
+func Uint8ToStringNotNil() predicate.Conversion { return where.NotNull(FieldUint8ToString) }
 
-// Uint8ToStringEqualFold applies the EqualFold predicate on the "uint8_to_string" field.
+// Deprecated: Uint8ToStringEqualFold — use where.EqualFold(FieldUint8ToString, v).
 func Uint8ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldUint8ToString, v))
+	return where.EqualFold(FieldUint8ToString, v)
 }
 
-// Uint8ToStringContainsFold applies the ContainsFold predicate on the "uint8_to_string" field.
+// Deprecated: Uint8ToStringContainsFold — use where.ContainsFold(FieldUint8ToString, v).
 func Uint8ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldUint8ToString, v))
+	return where.ContainsFold(FieldUint8ToString, v)
 }
 
-// Int16ToStringEQ applies the EQ predicate on the "int16_to_string" field.
-func Int16ToStringEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldInt16ToString, v))
-}
+// Deprecated: Int16ToStringEQ — use where.EQ(FieldInt16ToString, v).
+func Int16ToStringEQ(v string) predicate.Conversion { return where.EQ(FieldInt16ToString, v) }
 
-// Int16ToStringNEQ applies the NEQ predicate on the "int16_to_string" field.
-func Int16ToStringNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldInt16ToString, v))
-}
+// Deprecated: Int16ToStringNEQ — use where.NEQ(FieldInt16ToString, v).
+func Int16ToStringNEQ(v string) predicate.Conversion { return where.NEQ(FieldInt16ToString, v) }
 
-// Int16ToStringIn applies the In predicate on the "int16_to_string" field.
-func Int16ToStringIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldInt16ToString, vs...))
-}
+// Deprecated: Int16ToStringIn — use where.In(FieldInt16ToString, vs...).
+func Int16ToStringIn(vs ...string) predicate.Conversion { return where.In(FieldInt16ToString, vs...) }
 
-// Int16ToStringNotIn applies the NotIn predicate on the "int16_to_string" field.
+// Deprecated: Int16ToStringNotIn — use where.NotIn(FieldInt16ToString, vs...).
 func Int16ToStringNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldInt16ToString, vs...))
+	return where.NotIn(FieldInt16ToString, vs...)
 }
 
-// Int16ToStringGT applies the GT predicate on the "int16_to_string" field.
-func Int16ToStringGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldInt16ToString, v))
-}
+// Deprecated: Int16ToStringGT — use where.GT(FieldInt16ToString, v).
+func Int16ToStringGT(v string) predicate.Conversion { return where.GT(FieldInt16ToString, v) }
 
-// Int16ToStringGTE applies the GTE predicate on the "int16_to_string" field.
-func Int16ToStringGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldInt16ToString, v))
-}
+// Deprecated: Int16ToStringGTE — use where.GTE(FieldInt16ToString, v).
+func Int16ToStringGTE(v string) predicate.Conversion { return where.GTE(FieldInt16ToString, v) }
 
-// Int16ToStringLT applies the LT predicate on the "int16_to_string" field.
-func Int16ToStringLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldInt16ToString, v))
-}
+// Deprecated: Int16ToStringLT — use where.LT(FieldInt16ToString, v).
+func Int16ToStringLT(v string) predicate.Conversion { return where.LT(FieldInt16ToString, v) }
 
-// Int16ToStringLTE applies the LTE predicate on the "int16_to_string" field.
-func Int16ToStringLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldInt16ToString, v))
-}
+// Deprecated: Int16ToStringLTE — use where.LTE(FieldInt16ToString, v).
+func Int16ToStringLTE(v string) predicate.Conversion { return where.LTE(FieldInt16ToString, v) }
 
-// Int16ToStringContains applies the Contains predicate on the "int16_to_string" field.
+// Deprecated: Int16ToStringContains — use where.Contains(FieldInt16ToString, v).
 func Int16ToStringContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldInt16ToString, v))
+	return where.Contains(FieldInt16ToString, v)
 }
 
-// Int16ToStringHasPrefix applies the HasPrefix predicate on the "int16_to_string" field.
+// Deprecated: Int16ToStringHasPrefix — use where.HasPrefix(FieldInt16ToString, v).
 func Int16ToStringHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldInt16ToString, v))
+	return where.HasPrefix(FieldInt16ToString, v)
 }
 
-// Int16ToStringHasSuffix applies the HasSuffix predicate on the "int16_to_string" field.
+// Deprecated: Int16ToStringHasSuffix — use where.HasSuffix(FieldInt16ToString, v).
 func Int16ToStringHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldInt16ToString, v))
+	return where.HasSuffix(FieldInt16ToString, v)
 }
 
-// Int16ToStringIsNil applies the IsNil predicate on the "int16_to_string" field.
-func Int16ToStringIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldInt16ToString))
-}
+// Deprecated: Int16ToStringIsNil — use where.IsNull(FieldInt16ToString).
+func Int16ToStringIsNil() predicate.Conversion { return where.IsNull(FieldInt16ToString) }
 
-// Int16ToStringNotNil applies the NotNil predicate on the "int16_to_string" field.
-func Int16ToStringNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldInt16ToString))
-}
+// Deprecated: Int16ToStringNotNil — use where.NotNull(FieldInt16ToString).
+func Int16ToStringNotNil() predicate.Conversion { return where.NotNull(FieldInt16ToString) }
 
-// Int16ToStringEqualFold applies the EqualFold predicate on the "int16_to_string" field.
+// Deprecated: Int16ToStringEqualFold — use where.EqualFold(FieldInt16ToString, v).
 func Int16ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldInt16ToString, v))
+	return where.EqualFold(FieldInt16ToString, v)
 }
 
-// Int16ToStringContainsFold applies the ContainsFold predicate on the "int16_to_string" field.
+// Deprecated: Int16ToStringContainsFold — use where.ContainsFold(FieldInt16ToString, v).
 func Int16ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldInt16ToString, v))
+	return where.ContainsFold(FieldInt16ToString, v)
 }
 
-// Uint16ToStringEQ applies the EQ predicate on the "uint16_to_string" field.
-func Uint16ToStringEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldUint16ToString, v))
-}
+// Deprecated: Uint16ToStringEQ — use where.EQ(FieldUint16ToString, v).
+func Uint16ToStringEQ(v string) predicate.Conversion { return where.EQ(FieldUint16ToString, v) }
 
-// Uint16ToStringNEQ applies the NEQ predicate on the "uint16_to_string" field.
-func Uint16ToStringNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldUint16ToString, v))
-}
+// Deprecated: Uint16ToStringNEQ — use where.NEQ(FieldUint16ToString, v).
+func Uint16ToStringNEQ(v string) predicate.Conversion { return where.NEQ(FieldUint16ToString, v) }
 
-// Uint16ToStringIn applies the In predicate on the "uint16_to_string" field.
-func Uint16ToStringIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldUint16ToString, vs...))
-}
+// Deprecated: Uint16ToStringIn — use where.In(FieldUint16ToString, vs...).
+func Uint16ToStringIn(vs ...string) predicate.Conversion { return where.In(FieldUint16ToString, vs...) }
 
-// Uint16ToStringNotIn applies the NotIn predicate on the "uint16_to_string" field.
+// Deprecated: Uint16ToStringNotIn — use where.NotIn(FieldUint16ToString, vs...).
 func Uint16ToStringNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldUint16ToString, vs...))
+	return where.NotIn(FieldUint16ToString, vs...)
 }
 
-// Uint16ToStringGT applies the GT predicate on the "uint16_to_string" field.
-func Uint16ToStringGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldUint16ToString, v))
-}
+// Deprecated: Uint16ToStringGT — use where.GT(FieldUint16ToString, v).
+func Uint16ToStringGT(v string) predicate.Conversion { return where.GT(FieldUint16ToString, v) }
 
-// Uint16ToStringGTE applies the GTE predicate on the "uint16_to_string" field.
-func Uint16ToStringGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldUint16ToString, v))
-}
+// Deprecated: Uint16ToStringGTE — use where.GTE(FieldUint16ToString, v).
+func Uint16ToStringGTE(v string) predicate.Conversion { return where.GTE(FieldUint16ToString, v) }
 
-// Uint16ToStringLT applies the LT predicate on the "uint16_to_string" field.
-func Uint16ToStringLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldUint16ToString, v))
-}
+// Deprecated: Uint16ToStringLT — use where.LT(FieldUint16ToString, v).
+func Uint16ToStringLT(v string) predicate.Conversion { return where.LT(FieldUint16ToString, v) }
 
-// Uint16ToStringLTE applies the LTE predicate on the "uint16_to_string" field.
-func Uint16ToStringLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldUint16ToString, v))
-}
+// Deprecated: Uint16ToStringLTE — use where.LTE(FieldUint16ToString, v).
+func Uint16ToStringLTE(v string) predicate.Conversion { return where.LTE(FieldUint16ToString, v) }
 
-// Uint16ToStringContains applies the Contains predicate on the "uint16_to_string" field.
+// Deprecated: Uint16ToStringContains — use where.Contains(FieldUint16ToString, v).
 func Uint16ToStringContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldUint16ToString, v))
+	return where.Contains(FieldUint16ToString, v)
 }
 
-// Uint16ToStringHasPrefix applies the HasPrefix predicate on the "uint16_to_string" field.
+// Deprecated: Uint16ToStringHasPrefix — use where.HasPrefix(FieldUint16ToString, v).
 func Uint16ToStringHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldUint16ToString, v))
+	return where.HasPrefix(FieldUint16ToString, v)
 }
 
-// Uint16ToStringHasSuffix applies the HasSuffix predicate on the "uint16_to_string" field.
+// Deprecated: Uint16ToStringHasSuffix — use where.HasSuffix(FieldUint16ToString, v).
 func Uint16ToStringHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldUint16ToString, v))
+	return where.HasSuffix(FieldUint16ToString, v)
 }
 
-// Uint16ToStringIsNil applies the IsNil predicate on the "uint16_to_string" field.
-func Uint16ToStringIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldUint16ToString))
-}
+// Deprecated: Uint16ToStringIsNil — use where.IsNull(FieldUint16ToString).
+func Uint16ToStringIsNil() predicate.Conversion { return where.IsNull(FieldUint16ToString) }
 
-// Uint16ToStringNotNil applies the NotNil predicate on the "uint16_to_string" field.
-func Uint16ToStringNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldUint16ToString))
-}
+// Deprecated: Uint16ToStringNotNil — use where.NotNull(FieldUint16ToString).
+func Uint16ToStringNotNil() predicate.Conversion { return where.NotNull(FieldUint16ToString) }
 
-// Uint16ToStringEqualFold applies the EqualFold predicate on the "uint16_to_string" field.
+// Deprecated: Uint16ToStringEqualFold — use where.EqualFold(FieldUint16ToString, v).
 func Uint16ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldUint16ToString, v))
+	return where.EqualFold(FieldUint16ToString, v)
 }
 
-// Uint16ToStringContainsFold applies the ContainsFold predicate on the "uint16_to_string" field.
+// Deprecated: Uint16ToStringContainsFold — use where.ContainsFold(FieldUint16ToString, v).
 func Uint16ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldUint16ToString, v))
+	return where.ContainsFold(FieldUint16ToString, v)
 }
 
-// Int32ToStringEQ applies the EQ predicate on the "int32_to_string" field.
-func Int32ToStringEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldInt32ToString, v))
-}
+// Deprecated: Int32ToStringEQ — use where.EQ(FieldInt32ToString, v).
+func Int32ToStringEQ(v string) predicate.Conversion { return where.EQ(FieldInt32ToString, v) }
 
-// Int32ToStringNEQ applies the NEQ predicate on the "int32_to_string" field.
-func Int32ToStringNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldInt32ToString, v))
-}
+// Deprecated: Int32ToStringNEQ — use where.NEQ(FieldInt32ToString, v).
+func Int32ToStringNEQ(v string) predicate.Conversion { return where.NEQ(FieldInt32ToString, v) }
 
-// Int32ToStringIn applies the In predicate on the "int32_to_string" field.
-func Int32ToStringIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldInt32ToString, vs...))
-}
+// Deprecated: Int32ToStringIn — use where.In(FieldInt32ToString, vs...).
+func Int32ToStringIn(vs ...string) predicate.Conversion { return where.In(FieldInt32ToString, vs...) }
 
-// Int32ToStringNotIn applies the NotIn predicate on the "int32_to_string" field.
+// Deprecated: Int32ToStringNotIn — use where.NotIn(FieldInt32ToString, vs...).
 func Int32ToStringNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldInt32ToString, vs...))
+	return where.NotIn(FieldInt32ToString, vs...)
 }
 
-// Int32ToStringGT applies the GT predicate on the "int32_to_string" field.
-func Int32ToStringGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldInt32ToString, v))
-}
+// Deprecated: Int32ToStringGT — use where.GT(FieldInt32ToString, v).
+func Int32ToStringGT(v string) predicate.Conversion { return where.GT(FieldInt32ToString, v) }
 
-// Int32ToStringGTE applies the GTE predicate on the "int32_to_string" field.
-func Int32ToStringGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldInt32ToString, v))
-}
+// Deprecated: Int32ToStringGTE — use where.GTE(FieldInt32ToString, v).
+func Int32ToStringGTE(v string) predicate.Conversion { return where.GTE(FieldInt32ToString, v) }
 
-// Int32ToStringLT applies the LT predicate on the "int32_to_string" field.
-func Int32ToStringLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldInt32ToString, v))
-}
+// Deprecated: Int32ToStringLT — use where.LT(FieldInt32ToString, v).
+func Int32ToStringLT(v string) predicate.Conversion { return where.LT(FieldInt32ToString, v) }
 
-// Int32ToStringLTE applies the LTE predicate on the "int32_to_string" field.
-func Int32ToStringLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldInt32ToString, v))
-}
+// Deprecated: Int32ToStringLTE — use where.LTE(FieldInt32ToString, v).
+func Int32ToStringLTE(v string) predicate.Conversion { return where.LTE(FieldInt32ToString, v) }
 
-// Int32ToStringContains applies the Contains predicate on the "int32_to_string" field.
+// Deprecated: Int32ToStringContains — use where.Contains(FieldInt32ToString, v).
 func Int32ToStringContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldInt32ToString, v))
+	return where.Contains(FieldInt32ToString, v)
 }
 
-// Int32ToStringHasPrefix applies the HasPrefix predicate on the "int32_to_string" field.
+// Deprecated: Int32ToStringHasPrefix — use where.HasPrefix(FieldInt32ToString, v).
 func Int32ToStringHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldInt32ToString, v))
+	return where.HasPrefix(FieldInt32ToString, v)
 }
 
-// Int32ToStringHasSuffix applies the HasSuffix predicate on the "int32_to_string" field.
+// Deprecated: Int32ToStringHasSuffix — use where.HasSuffix(FieldInt32ToString, v).
 func Int32ToStringHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldInt32ToString, v))
+	return where.HasSuffix(FieldInt32ToString, v)
 }
 
-// Int32ToStringIsNil applies the IsNil predicate on the "int32_to_string" field.
-func Int32ToStringIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldInt32ToString))
-}
+// Deprecated: Int32ToStringIsNil — use where.IsNull(FieldInt32ToString).
+func Int32ToStringIsNil() predicate.Conversion { return where.IsNull(FieldInt32ToString) }
 
-// Int32ToStringNotNil applies the NotNil predicate on the "int32_to_string" field.
-func Int32ToStringNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldInt32ToString))
-}
+// Deprecated: Int32ToStringNotNil — use where.NotNull(FieldInt32ToString).
+func Int32ToStringNotNil() predicate.Conversion { return where.NotNull(FieldInt32ToString) }
 
-// Int32ToStringEqualFold applies the EqualFold predicate on the "int32_to_string" field.
+// Deprecated: Int32ToStringEqualFold — use where.EqualFold(FieldInt32ToString, v).
 func Int32ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldInt32ToString, v))
+	return where.EqualFold(FieldInt32ToString, v)
 }
 
-// Int32ToStringContainsFold applies the ContainsFold predicate on the "int32_to_string" field.
+// Deprecated: Int32ToStringContainsFold — use where.ContainsFold(FieldInt32ToString, v).
 func Int32ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldInt32ToString, v))
+	return where.ContainsFold(FieldInt32ToString, v)
 }
 
-// Uint32ToStringEQ applies the EQ predicate on the "uint32_to_string" field.
-func Uint32ToStringEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldUint32ToString, v))
-}
+// Deprecated: Uint32ToStringEQ — use where.EQ(FieldUint32ToString, v).
+func Uint32ToStringEQ(v string) predicate.Conversion { return where.EQ(FieldUint32ToString, v) }
 
-// Uint32ToStringNEQ applies the NEQ predicate on the "uint32_to_string" field.
-func Uint32ToStringNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldUint32ToString, v))
-}
+// Deprecated: Uint32ToStringNEQ — use where.NEQ(FieldUint32ToString, v).
+func Uint32ToStringNEQ(v string) predicate.Conversion { return where.NEQ(FieldUint32ToString, v) }
 
-// Uint32ToStringIn applies the In predicate on the "uint32_to_string" field.
-func Uint32ToStringIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldUint32ToString, vs...))
-}
+// Deprecated: Uint32ToStringIn — use where.In(FieldUint32ToString, vs...).
+func Uint32ToStringIn(vs ...string) predicate.Conversion { return where.In(FieldUint32ToString, vs...) }
 
-// Uint32ToStringNotIn applies the NotIn predicate on the "uint32_to_string" field.
+// Deprecated: Uint32ToStringNotIn — use where.NotIn(FieldUint32ToString, vs...).
 func Uint32ToStringNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldUint32ToString, vs...))
+	return where.NotIn(FieldUint32ToString, vs...)
 }
 
-// Uint32ToStringGT applies the GT predicate on the "uint32_to_string" field.
-func Uint32ToStringGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldUint32ToString, v))
-}
+// Deprecated: Uint32ToStringGT — use where.GT(FieldUint32ToString, v).
+func Uint32ToStringGT(v string) predicate.Conversion { return where.GT(FieldUint32ToString, v) }
 
-// Uint32ToStringGTE applies the GTE predicate on the "uint32_to_string" field.
-func Uint32ToStringGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldUint32ToString, v))
-}
+// Deprecated: Uint32ToStringGTE — use where.GTE(FieldUint32ToString, v).
+func Uint32ToStringGTE(v string) predicate.Conversion { return where.GTE(FieldUint32ToString, v) }
 
-// Uint32ToStringLT applies the LT predicate on the "uint32_to_string" field.
-func Uint32ToStringLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldUint32ToString, v))
-}
+// Deprecated: Uint32ToStringLT — use where.LT(FieldUint32ToString, v).
+func Uint32ToStringLT(v string) predicate.Conversion { return where.LT(FieldUint32ToString, v) }
 
-// Uint32ToStringLTE applies the LTE predicate on the "uint32_to_string" field.
-func Uint32ToStringLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldUint32ToString, v))
-}
+// Deprecated: Uint32ToStringLTE — use where.LTE(FieldUint32ToString, v).
+func Uint32ToStringLTE(v string) predicate.Conversion { return where.LTE(FieldUint32ToString, v) }
 
-// Uint32ToStringContains applies the Contains predicate on the "uint32_to_string" field.
+// Deprecated: Uint32ToStringContains — use where.Contains(FieldUint32ToString, v).
 func Uint32ToStringContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldUint32ToString, v))
+	return where.Contains(FieldUint32ToString, v)
 }
 
-// Uint32ToStringHasPrefix applies the HasPrefix predicate on the "uint32_to_string" field.
+// Deprecated: Uint32ToStringHasPrefix — use where.HasPrefix(FieldUint32ToString, v).
 func Uint32ToStringHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldUint32ToString, v))
+	return where.HasPrefix(FieldUint32ToString, v)
 }
 
-// Uint32ToStringHasSuffix applies the HasSuffix predicate on the "uint32_to_string" field.
+// Deprecated: Uint32ToStringHasSuffix — use where.HasSuffix(FieldUint32ToString, v).
 func Uint32ToStringHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldUint32ToString, v))
+	return where.HasSuffix(FieldUint32ToString, v)
 }
 
-// Uint32ToStringIsNil applies the IsNil predicate on the "uint32_to_string" field.
-func Uint32ToStringIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldUint32ToString))
-}
+// Deprecated: Uint32ToStringIsNil — use where.IsNull(FieldUint32ToString).
+func Uint32ToStringIsNil() predicate.Conversion { return where.IsNull(FieldUint32ToString) }
 
-// Uint32ToStringNotNil applies the NotNil predicate on the "uint32_to_string" field.
-func Uint32ToStringNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldUint32ToString))
-}
+// Deprecated: Uint32ToStringNotNil — use where.NotNull(FieldUint32ToString).
+func Uint32ToStringNotNil() predicate.Conversion { return where.NotNull(FieldUint32ToString) }
 
-// Uint32ToStringEqualFold applies the EqualFold predicate on the "uint32_to_string" field.
+// Deprecated: Uint32ToStringEqualFold — use where.EqualFold(FieldUint32ToString, v).
 func Uint32ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldUint32ToString, v))
+	return where.EqualFold(FieldUint32ToString, v)
 }
 
-// Uint32ToStringContainsFold applies the ContainsFold predicate on the "uint32_to_string" field.
+// Deprecated: Uint32ToStringContainsFold — use where.ContainsFold(FieldUint32ToString, v).
 func Uint32ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldUint32ToString, v))
+	return where.ContainsFold(FieldUint32ToString, v)
 }
 
-// Int64ToStringEQ applies the EQ predicate on the "int64_to_string" field.
-func Int64ToStringEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldInt64ToString, v))
-}
+// Deprecated: Int64ToStringEQ — use where.EQ(FieldInt64ToString, v).
+func Int64ToStringEQ(v string) predicate.Conversion { return where.EQ(FieldInt64ToString, v) }
 
-// Int64ToStringNEQ applies the NEQ predicate on the "int64_to_string" field.
-func Int64ToStringNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldInt64ToString, v))
-}
+// Deprecated: Int64ToStringNEQ — use where.NEQ(FieldInt64ToString, v).
+func Int64ToStringNEQ(v string) predicate.Conversion { return where.NEQ(FieldInt64ToString, v) }
 
-// Int64ToStringIn applies the In predicate on the "int64_to_string" field.
-func Int64ToStringIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldInt64ToString, vs...))
-}
+// Deprecated: Int64ToStringIn — use where.In(FieldInt64ToString, vs...).
+func Int64ToStringIn(vs ...string) predicate.Conversion { return where.In(FieldInt64ToString, vs...) }
 
-// Int64ToStringNotIn applies the NotIn predicate on the "int64_to_string" field.
+// Deprecated: Int64ToStringNotIn — use where.NotIn(FieldInt64ToString, vs...).
 func Int64ToStringNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldInt64ToString, vs...))
+	return where.NotIn(FieldInt64ToString, vs...)
 }
 
-// Int64ToStringGT applies the GT predicate on the "int64_to_string" field.
-func Int64ToStringGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldInt64ToString, v))
-}
+// Deprecated: Int64ToStringGT — use where.GT(FieldInt64ToString, v).
+func Int64ToStringGT(v string) predicate.Conversion { return where.GT(FieldInt64ToString, v) }
 
-// Int64ToStringGTE applies the GTE predicate on the "int64_to_string" field.
-func Int64ToStringGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldInt64ToString, v))
-}
+// Deprecated: Int64ToStringGTE — use where.GTE(FieldInt64ToString, v).
+func Int64ToStringGTE(v string) predicate.Conversion { return where.GTE(FieldInt64ToString, v) }
 
-// Int64ToStringLT applies the LT predicate on the "int64_to_string" field.
-func Int64ToStringLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldInt64ToString, v))
-}
+// Deprecated: Int64ToStringLT — use where.LT(FieldInt64ToString, v).
+func Int64ToStringLT(v string) predicate.Conversion { return where.LT(FieldInt64ToString, v) }
 
-// Int64ToStringLTE applies the LTE predicate on the "int64_to_string" field.
-func Int64ToStringLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldInt64ToString, v))
-}
+// Deprecated: Int64ToStringLTE — use where.LTE(FieldInt64ToString, v).
+func Int64ToStringLTE(v string) predicate.Conversion { return where.LTE(FieldInt64ToString, v) }
 
-// Int64ToStringContains applies the Contains predicate on the "int64_to_string" field.
+// Deprecated: Int64ToStringContains — use where.Contains(FieldInt64ToString, v).
 func Int64ToStringContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldInt64ToString, v))
+	return where.Contains(FieldInt64ToString, v)
 }
 
-// Int64ToStringHasPrefix applies the HasPrefix predicate on the "int64_to_string" field.
+// Deprecated: Int64ToStringHasPrefix — use where.HasPrefix(FieldInt64ToString, v).
 func Int64ToStringHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldInt64ToString, v))
+	return where.HasPrefix(FieldInt64ToString, v)
 }
 
-// Int64ToStringHasSuffix applies the HasSuffix predicate on the "int64_to_string" field.
+// Deprecated: Int64ToStringHasSuffix — use where.HasSuffix(FieldInt64ToString, v).
 func Int64ToStringHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldInt64ToString, v))
+	return where.HasSuffix(FieldInt64ToString, v)
 }
 
-// Int64ToStringIsNil applies the IsNil predicate on the "int64_to_string" field.
-func Int64ToStringIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldInt64ToString))
-}
+// Deprecated: Int64ToStringIsNil — use where.IsNull(FieldInt64ToString).
+func Int64ToStringIsNil() predicate.Conversion { return where.IsNull(FieldInt64ToString) }
 
-// Int64ToStringNotNil applies the NotNil predicate on the "int64_to_string" field.
-func Int64ToStringNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldInt64ToString))
-}
+// Deprecated: Int64ToStringNotNil — use where.NotNull(FieldInt64ToString).
+func Int64ToStringNotNil() predicate.Conversion { return where.NotNull(FieldInt64ToString) }
 
-// Int64ToStringEqualFold applies the EqualFold predicate on the "int64_to_string" field.
+// Deprecated: Int64ToStringEqualFold — use where.EqualFold(FieldInt64ToString, v).
 func Int64ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldInt64ToString, v))
+	return where.EqualFold(FieldInt64ToString, v)
 }
 
-// Int64ToStringContainsFold applies the ContainsFold predicate on the "int64_to_string" field.
+// Deprecated: Int64ToStringContainsFold — use where.ContainsFold(FieldInt64ToString, v).
 func Int64ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldInt64ToString, v))
+	return where.ContainsFold(FieldInt64ToString, v)
 }
 
-// Uint64ToStringEQ applies the EQ predicate on the "uint64_to_string" field.
-func Uint64ToStringEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEQ(FieldUint64ToString, v))
-}
+// Deprecated: Uint64ToStringEQ — use where.EQ(FieldUint64ToString, v).
+func Uint64ToStringEQ(v string) predicate.Conversion { return where.EQ(FieldUint64ToString, v) }
 
-// Uint64ToStringNEQ applies the NEQ predicate on the "uint64_to_string" field.
-func Uint64ToStringNEQ(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNEQ(FieldUint64ToString, v))
-}
+// Deprecated: Uint64ToStringNEQ — use where.NEQ(FieldUint64ToString, v).
+func Uint64ToStringNEQ(v string) predicate.Conversion { return where.NEQ(FieldUint64ToString, v) }
 
-// Uint64ToStringIn applies the In predicate on the "uint64_to_string" field.
-func Uint64ToStringIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldIn(FieldUint64ToString, vs...))
-}
+// Deprecated: Uint64ToStringIn — use where.In(FieldUint64ToString, vs...).
+func Uint64ToStringIn(vs ...string) predicate.Conversion { return where.In(FieldUint64ToString, vs...) }
 
-// Uint64ToStringNotIn applies the NotIn predicate on the "uint64_to_string" field.
+// Deprecated: Uint64ToStringNotIn — use where.NotIn(FieldUint64ToString, vs...).
 func Uint64ToStringNotIn(vs ...string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotIn(FieldUint64ToString, vs...))
+	return where.NotIn(FieldUint64ToString, vs...)
 }
 
-// Uint64ToStringGT applies the GT predicate on the "uint64_to_string" field.
-func Uint64ToStringGT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGT(FieldUint64ToString, v))
-}
+// Deprecated: Uint64ToStringGT — use where.GT(FieldUint64ToString, v).
+func Uint64ToStringGT(v string) predicate.Conversion { return where.GT(FieldUint64ToString, v) }
 
-// Uint64ToStringGTE applies the GTE predicate on the "uint64_to_string" field.
-func Uint64ToStringGTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldGTE(FieldUint64ToString, v))
-}
+// Deprecated: Uint64ToStringGTE — use where.GTE(FieldUint64ToString, v).
+func Uint64ToStringGTE(v string) predicate.Conversion { return where.GTE(FieldUint64ToString, v) }
 
-// Uint64ToStringLT applies the LT predicate on the "uint64_to_string" field.
-func Uint64ToStringLT(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLT(FieldUint64ToString, v))
-}
+// Deprecated: Uint64ToStringLT — use where.LT(FieldUint64ToString, v).
+func Uint64ToStringLT(v string) predicate.Conversion { return where.LT(FieldUint64ToString, v) }
 
-// Uint64ToStringLTE applies the LTE predicate on the "uint64_to_string" field.
-func Uint64ToStringLTE(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldLTE(FieldUint64ToString, v))
-}
+// Deprecated: Uint64ToStringLTE — use where.LTE(FieldUint64ToString, v).
+func Uint64ToStringLTE(v string) predicate.Conversion { return where.LTE(FieldUint64ToString, v) }
 
-// Uint64ToStringContains applies the Contains predicate on the "uint64_to_string" field.
+// Deprecated: Uint64ToStringContains — use where.Contains(FieldUint64ToString, v).
 func Uint64ToStringContains(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContains(FieldUint64ToString, v))
+	return where.Contains(FieldUint64ToString, v)
 }
 
-// Uint64ToStringHasPrefix applies the HasPrefix predicate on the "uint64_to_string" field.
+// Deprecated: Uint64ToStringHasPrefix — use where.HasPrefix(FieldUint64ToString, v).
 func Uint64ToStringHasPrefix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasPrefix(FieldUint64ToString, v))
+	return where.HasPrefix(FieldUint64ToString, v)
 }
 
-// Uint64ToStringHasSuffix applies the HasSuffix predicate on the "uint64_to_string" field.
+// Deprecated: Uint64ToStringHasSuffix — use where.HasSuffix(FieldUint64ToString, v).
 func Uint64ToStringHasSuffix(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldHasSuffix(FieldUint64ToString, v))
+	return where.HasSuffix(FieldUint64ToString, v)
 }
 
-// Uint64ToStringIsNil applies the IsNil predicate on the "uint64_to_string" field.
-func Uint64ToStringIsNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldIsNull(FieldUint64ToString))
-}
+// Deprecated: Uint64ToStringIsNil — use where.IsNull(FieldUint64ToString).
+func Uint64ToStringIsNil() predicate.Conversion { return where.IsNull(FieldUint64ToString) }
 
-// Uint64ToStringNotNil applies the NotNil predicate on the "uint64_to_string" field.
-func Uint64ToStringNotNil() predicate.Conversion {
-	return predicate.Conversion(sql.FieldNotNull(FieldUint64ToString))
-}
+// Deprecated: Uint64ToStringNotNil — use where.NotNull(FieldUint64ToString).
+func Uint64ToStringNotNil() predicate.Conversion { return where.NotNull(FieldUint64ToString) }
 
-// Uint64ToStringEqualFold applies the EqualFold predicate on the "uint64_to_string" field.
+// Deprecated: Uint64ToStringEqualFold — use where.EqualFold(FieldUint64ToString, v).
 func Uint64ToStringEqualFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldEqualFold(FieldUint64ToString, v))
+	return where.EqualFold(FieldUint64ToString, v)
 }
 
-// Uint64ToStringContainsFold applies the ContainsFold predicate on the "uint64_to_string" field.
+// Deprecated: Uint64ToStringContainsFold — use where.ContainsFold(FieldUint64ToString, v).
 func Uint64ToStringContainsFold(v string) predicate.Conversion {
-	return predicate.Conversion(sql.FieldContainsFold(FieldUint64ToString, v))
+	return where.ContainsFold(FieldUint64ToString, v)
 }
 
 // And groups predicates with the AND operator between them.

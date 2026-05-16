@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -583,4 +585,23 @@ func (_s *FieldTypeSelect) sqlScan(ctx context.Context, root *FieldTypeQuery, v 
 func (_s *FieldTypeSelect) Modify(modifiers ...func(s *sql.Selector)) *FieldTypeSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// fieldtypeCreateDescriptor holds the metadata and callbacks for constructing a FieldType entity.
+var fieldtypeCreateDescriptor = &entbuilder.CreateDescriptor[Config, FieldType, *FieldTypeMutation]{
+	Table:   fieldtype.Table,
+	NewNode: func(c Config) *FieldType { return &FieldType{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, FieldType, *FieldTypeMutation]{
+		Column:      fieldtype.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *FieldType, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected FieldType.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

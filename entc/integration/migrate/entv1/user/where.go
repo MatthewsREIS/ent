@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,824 +58,498 @@ func IDLTE(id int) predicate.User {
 	return predicate.User(sql.FieldLTE(FieldID, id))
 }
 
-// Age applies equality check predicate on the "age" field. It's identical to AgeEQ.
-func Age(v int32) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAge, v))
-}
-
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldName, v))
-}
-
-// Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
-func Description(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldDescription, v))
-}
-
-// Nickname applies equality check predicate on the "nickname" field. It's identical to NicknameEQ.
-func Nickname(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldNickname, v))
-}
-
-// Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
-func Address(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAddress, v))
-}
-
-// Renamed applies equality check predicate on the "renamed" field. It's identical to RenamedEQ.
-func Renamed(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldRenamed, v))
-}
-
-// OldToken applies equality check predicate on the "old_token" field. It's identical to OldTokenEQ.
-func OldToken(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldOldToken, v))
-}
-
-// Blob applies equality check predicate on the "blob" field. It's identical to BlobEQ.
-func Blob(v []byte) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldBlob, v))
-}
-
-// Status applies equality check predicate on the "status" field. It's identical to StatusEQ.
-func Status(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldStatus, v))
-}
-
-// Workplace applies equality check predicate on the "workplace" field. It's identical to WorkplaceEQ.
-func Workplace(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldWorkplace, v))
-}
-
-// DropOptional applies equality check predicate on the "drop_optional" field. It's identical to DropOptionalEQ.
-func DropOptional(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldDropOptional, v))
-}
-
-// AgeEQ applies the EQ predicate on the "age" field.
-func AgeEQ(v int32) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAge, v))
-}
-
-// AgeNEQ applies the NEQ predicate on the "age" field.
-func AgeNEQ(v int32) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldAge, v))
-}
-
-// AgeIn applies the In predicate on the "age" field.
-func AgeIn(vs ...int32) predicate.User {
-	return predicate.User(sql.FieldIn(FieldAge, vs...))
-}
-
-// AgeNotIn applies the NotIn predicate on the "age" field.
-func AgeNotIn(vs ...int32) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldAge, vs...))
-}
-
-// AgeGT applies the GT predicate on the "age" field.
-func AgeGT(v int32) predicate.User {
-	return predicate.User(sql.FieldGT(FieldAge, v))
-}
-
-// AgeGTE applies the GTE predicate on the "age" field.
-func AgeGTE(v int32) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldAge, v))
-}
-
-// AgeLT applies the LT predicate on the "age" field.
-func AgeLT(v int32) predicate.User {
-	return predicate.User(sql.FieldLT(FieldAge, v))
-}
-
-// AgeLTE applies the LTE predicate on the "age" field.
-func AgeLTE(v int32) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldAge, v))
-}
-
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldName, v))
-}
-
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldName, v))
-}
-
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldName, vs...))
-}
-
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldName, vs...))
-}
-
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldName, v))
-}
-
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldName, v))
-}
-
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldName, v))
-}
-
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldName, v))
-}
-
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldName, v))
-}
-
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldName, v))
-}
-
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldName, v))
-}
-
-// DescriptionEQ applies the EQ predicate on the "description" field.
-func DescriptionEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldDescription, v))
-}
-
-// DescriptionNEQ applies the NEQ predicate on the "description" field.
-func DescriptionNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldDescription, v))
-}
-
-// DescriptionIn applies the In predicate on the "description" field.
-func DescriptionIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldDescription, vs...))
-}
-
-// DescriptionNotIn applies the NotIn predicate on the "description" field.
-func DescriptionNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldDescription, vs...))
-}
-
-// DescriptionGT applies the GT predicate on the "description" field.
-func DescriptionGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldDescription, v))
-}
-
-// DescriptionGTE applies the GTE predicate on the "description" field.
-func DescriptionGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldDescription, v))
-}
-
-// DescriptionLT applies the LT predicate on the "description" field.
-func DescriptionLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldDescription, v))
-}
-
-// DescriptionLTE applies the LTE predicate on the "description" field.
-func DescriptionLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldDescription, v))
-}
-
-// DescriptionContains applies the Contains predicate on the "description" field.
-func DescriptionContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldDescription, v))
-}
-
-// DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
-func DescriptionHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldDescription, v))
-}
-
-// DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
-func DescriptionHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldDescription, v))
-}
-
-// DescriptionIsNil applies the IsNil predicate on the "description" field.
-func DescriptionIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldDescription))
-}
-
-// DescriptionNotNil applies the NotNil predicate on the "description" field.
-func DescriptionNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldDescription))
-}
-
-// DescriptionEqualFold applies the EqualFold predicate on the "description" field.
-func DescriptionEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldDescription, v))
-}
-
-// DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
-func DescriptionContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldDescription, v))
-}
-
-// NicknameEQ applies the EQ predicate on the "nickname" field.
-func NicknameEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldNickname, v))
-}
-
-// NicknameNEQ applies the NEQ predicate on the "nickname" field.
-func NicknameNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldNickname, v))
-}
-
-// NicknameIn applies the In predicate on the "nickname" field.
-func NicknameIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldNickname, vs...))
-}
-
-// NicknameNotIn applies the NotIn predicate on the "nickname" field.
-func NicknameNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldNickname, vs...))
-}
-
-// NicknameGT applies the GT predicate on the "nickname" field.
-func NicknameGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldNickname, v))
-}
-
-// NicknameGTE applies the GTE predicate on the "nickname" field.
-func NicknameGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldNickname, v))
-}
-
-// NicknameLT applies the LT predicate on the "nickname" field.
-func NicknameLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldNickname, v))
-}
-
-// NicknameLTE applies the LTE predicate on the "nickname" field.
-func NicknameLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldNickname, v))
-}
-
-// NicknameContains applies the Contains predicate on the "nickname" field.
-func NicknameContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldNickname, v))
-}
-
-// NicknameHasPrefix applies the HasPrefix predicate on the "nickname" field.
-func NicknameHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldNickname, v))
-}
-
-// NicknameHasSuffix applies the HasSuffix predicate on the "nickname" field.
-func NicknameHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldNickname, v))
-}
-
-// NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
-func NicknameEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldNickname, v))
-}
-
-// NicknameContainsFold applies the ContainsFold predicate on the "nickname" field.
-func NicknameContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldNickname, v))
-}
-
-// AddressEQ applies the EQ predicate on the "address" field.
-func AddressEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldAddress, v))
-}
-
-// AddressNEQ applies the NEQ predicate on the "address" field.
-func AddressNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldAddress, v))
-}
-
-// AddressIn applies the In predicate on the "address" field.
-func AddressIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldAddress, vs...))
-}
-
-// AddressNotIn applies the NotIn predicate on the "address" field.
-func AddressNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldAddress, vs...))
-}
-
-// AddressGT applies the GT predicate on the "address" field.
-func AddressGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldAddress, v))
-}
-
-// AddressGTE applies the GTE predicate on the "address" field.
-func AddressGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldAddress, v))
-}
-
-// AddressLT applies the LT predicate on the "address" field.
-func AddressLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldAddress, v))
-}
-
-// AddressLTE applies the LTE predicate on the "address" field.
-func AddressLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldAddress, v))
-}
-
-// AddressContains applies the Contains predicate on the "address" field.
-func AddressContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldAddress, v))
-}
-
-// AddressHasPrefix applies the HasPrefix predicate on the "address" field.
-func AddressHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldAddress, v))
-}
-
-// AddressHasSuffix applies the HasSuffix predicate on the "address" field.
-func AddressHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldAddress, v))
-}
-
-// AddressIsNil applies the IsNil predicate on the "address" field.
-func AddressIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldAddress))
-}
-
-// AddressNotNil applies the NotNil predicate on the "address" field.
-func AddressNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldAddress))
-}
-
-// AddressEqualFold applies the EqualFold predicate on the "address" field.
-func AddressEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldAddress, v))
-}
-
-// AddressContainsFold applies the ContainsFold predicate on the "address" field.
-func AddressContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldAddress, v))
-}
-
-// RenamedEQ applies the EQ predicate on the "renamed" field.
-func RenamedEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldRenamed, v))
-}
-
-// RenamedNEQ applies the NEQ predicate on the "renamed" field.
-func RenamedNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldRenamed, v))
-}
-
-// RenamedIn applies the In predicate on the "renamed" field.
-func RenamedIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldRenamed, vs...))
-}
-
-// RenamedNotIn applies the NotIn predicate on the "renamed" field.
-func RenamedNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldRenamed, vs...))
-}
-
-// RenamedGT applies the GT predicate on the "renamed" field.
-func RenamedGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldRenamed, v))
-}
-
-// RenamedGTE applies the GTE predicate on the "renamed" field.
-func RenamedGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldRenamed, v))
-}
-
-// RenamedLT applies the LT predicate on the "renamed" field.
-func RenamedLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldRenamed, v))
-}
-
-// RenamedLTE applies the LTE predicate on the "renamed" field.
-func RenamedLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldRenamed, v))
-}
-
-// RenamedContains applies the Contains predicate on the "renamed" field.
-func RenamedContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldRenamed, v))
-}
-
-// RenamedHasPrefix applies the HasPrefix predicate on the "renamed" field.
-func RenamedHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldRenamed, v))
-}
-
-// RenamedHasSuffix applies the HasSuffix predicate on the "renamed" field.
-func RenamedHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldRenamed, v))
-}
-
-// RenamedIsNil applies the IsNil predicate on the "renamed" field.
-func RenamedIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldRenamed))
-}
-
-// RenamedNotNil applies the NotNil predicate on the "renamed" field.
-func RenamedNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldRenamed))
-}
-
-// RenamedEqualFold applies the EqualFold predicate on the "renamed" field.
-func RenamedEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldRenamed, v))
-}
-
-// RenamedContainsFold applies the ContainsFold predicate on the "renamed" field.
-func RenamedContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldRenamed, v))
-}
-
-// OldTokenEQ applies the EQ predicate on the "old_token" field.
-func OldTokenEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldOldToken, v))
-}
-
-// OldTokenNEQ applies the NEQ predicate on the "old_token" field.
-func OldTokenNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldOldToken, v))
-}
-
-// OldTokenIn applies the In predicate on the "old_token" field.
-func OldTokenIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldOldToken, vs...))
-}
-
-// OldTokenNotIn applies the NotIn predicate on the "old_token" field.
-func OldTokenNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldOldToken, vs...))
-}
-
-// OldTokenGT applies the GT predicate on the "old_token" field.
-func OldTokenGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldOldToken, v))
-}
-
-// OldTokenGTE applies the GTE predicate on the "old_token" field.
-func OldTokenGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldOldToken, v))
-}
-
-// OldTokenLT applies the LT predicate on the "old_token" field.
-func OldTokenLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldOldToken, v))
-}
-
-// OldTokenLTE applies the LTE predicate on the "old_token" field.
-func OldTokenLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldOldToken, v))
-}
-
-// OldTokenContains applies the Contains predicate on the "old_token" field.
-func OldTokenContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldOldToken, v))
-}
-
-// OldTokenHasPrefix applies the HasPrefix predicate on the "old_token" field.
-func OldTokenHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldOldToken, v))
-}
-
-// OldTokenHasSuffix applies the HasSuffix predicate on the "old_token" field.
-func OldTokenHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldOldToken, v))
-}
-
-// OldTokenEqualFold applies the EqualFold predicate on the "old_token" field.
-func OldTokenEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldOldToken, v))
-}
-
-// OldTokenContainsFold applies the ContainsFold predicate on the "old_token" field.
-func OldTokenContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldOldToken, v))
-}
-
-// BlobEQ applies the EQ predicate on the "blob" field.
-func BlobEQ(v []byte) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldBlob, v))
-}
-
-// BlobNEQ applies the NEQ predicate on the "blob" field.
-func BlobNEQ(v []byte) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldBlob, v))
-}
-
-// BlobIn applies the In predicate on the "blob" field.
-func BlobIn(vs ...[]byte) predicate.User {
-	return predicate.User(sql.FieldIn(FieldBlob, vs...))
-}
-
-// BlobNotIn applies the NotIn predicate on the "blob" field.
-func BlobNotIn(vs ...[]byte) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldBlob, vs...))
-}
-
-// BlobGT applies the GT predicate on the "blob" field.
-func BlobGT(v []byte) predicate.User {
-	return predicate.User(sql.FieldGT(FieldBlob, v))
-}
-
-// BlobGTE applies the GTE predicate on the "blob" field.
-func BlobGTE(v []byte) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldBlob, v))
-}
-
-// BlobLT applies the LT predicate on the "blob" field.
-func BlobLT(v []byte) predicate.User {
-	return predicate.User(sql.FieldLT(FieldBlob, v))
-}
-
-// BlobLTE applies the LTE predicate on the "blob" field.
-func BlobLTE(v []byte) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldBlob, v))
-}
-
-// BlobIsNil applies the IsNil predicate on the "blob" field.
-func BlobIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldBlob))
-}
-
-// BlobNotNil applies the NotNil predicate on the "blob" field.
-func BlobNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldBlob))
-}
-
-// StateEQ applies the EQ predicate on the "state" field.
-func StateEQ(v State) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldState, v))
-}
-
-// StateNEQ applies the NEQ predicate on the "state" field.
-func StateNEQ(v State) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldState, v))
-}
-
-// StateIn applies the In predicate on the "state" field.
-func StateIn(vs ...State) predicate.User {
-	return predicate.User(sql.FieldIn(FieldState, vs...))
-}
-
-// StateNotIn applies the NotIn predicate on the "state" field.
-func StateNotIn(vs ...State) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldState, vs...))
-}
-
-// StateIsNil applies the IsNil predicate on the "state" field.
-func StateIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldState))
-}
-
-// StateNotNil applies the NotNil predicate on the "state" field.
-func StateNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldState))
-}
-
-// StatusEQ applies the EQ predicate on the "status" field.
-func StatusEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldStatus, v))
-}
-
-// StatusNEQ applies the NEQ predicate on the "status" field.
-func StatusNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldStatus, v))
-}
-
-// StatusIn applies the In predicate on the "status" field.
-func StatusIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldStatus, vs...))
-}
-
-// StatusNotIn applies the NotIn predicate on the "status" field.
-func StatusNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldStatus, vs...))
-}
-
-// StatusGT applies the GT predicate on the "status" field.
-func StatusGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldStatus, v))
-}
-
-// StatusGTE applies the GTE predicate on the "status" field.
-func StatusGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldStatus, v))
-}
-
-// StatusLT applies the LT predicate on the "status" field.
-func StatusLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldStatus, v))
-}
-
-// StatusLTE applies the LTE predicate on the "status" field.
-func StatusLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldStatus, v))
-}
-
-// StatusContains applies the Contains predicate on the "status" field.
-func StatusContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldStatus, v))
-}
-
-// StatusHasPrefix applies the HasPrefix predicate on the "status" field.
-func StatusHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldStatus, v))
-}
-
-// StatusHasSuffix applies the HasSuffix predicate on the "status" field.
-func StatusHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldStatus, v))
-}
-
-// StatusIsNil applies the IsNil predicate on the "status" field.
-func StatusIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldStatus))
-}
-
-// StatusNotNil applies the NotNil predicate on the "status" field.
-func StatusNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldStatus))
-}
-
-// StatusEqualFold applies the EqualFold predicate on the "status" field.
-func StatusEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldStatus, v))
-}
-
-// StatusContainsFold applies the ContainsFold predicate on the "status" field.
-func StatusContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldStatus, v))
-}
-
-// WorkplaceEQ applies the EQ predicate on the "workplace" field.
-func WorkplaceEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldWorkplace, v))
-}
-
-// WorkplaceNEQ applies the NEQ predicate on the "workplace" field.
-func WorkplaceNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldWorkplace, v))
-}
-
-// WorkplaceIn applies the In predicate on the "workplace" field.
-func WorkplaceIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldWorkplace, vs...))
-}
-
-// WorkplaceNotIn applies the NotIn predicate on the "workplace" field.
-func WorkplaceNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldWorkplace, vs...))
-}
-
-// WorkplaceGT applies the GT predicate on the "workplace" field.
-func WorkplaceGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldWorkplace, v))
-}
-
-// WorkplaceGTE applies the GTE predicate on the "workplace" field.
-func WorkplaceGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldWorkplace, v))
-}
-
-// WorkplaceLT applies the LT predicate on the "workplace" field.
-func WorkplaceLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldWorkplace, v))
-}
-
-// WorkplaceLTE applies the LTE predicate on the "workplace" field.
-func WorkplaceLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldWorkplace, v))
-}
-
-// WorkplaceContains applies the Contains predicate on the "workplace" field.
-func WorkplaceContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldWorkplace, v))
-}
-
-// WorkplaceHasPrefix applies the HasPrefix predicate on the "workplace" field.
-func WorkplaceHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldWorkplace, v))
-}
-
-// WorkplaceHasSuffix applies the HasSuffix predicate on the "workplace" field.
-func WorkplaceHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldWorkplace, v))
-}
-
-// WorkplaceIsNil applies the IsNil predicate on the "workplace" field.
-func WorkplaceIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldWorkplace))
-}
-
-// WorkplaceNotNil applies the NotNil predicate on the "workplace" field.
-func WorkplaceNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldWorkplace))
-}
-
-// WorkplaceEqualFold applies the EqualFold predicate on the "workplace" field.
-func WorkplaceEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldWorkplace, v))
-}
-
-// WorkplaceContainsFold applies the ContainsFold predicate on the "workplace" field.
-func WorkplaceContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldWorkplace, v))
-}
-
-// DropOptionalEQ applies the EQ predicate on the "drop_optional" field.
-func DropOptionalEQ(v string) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldDropOptional, v))
-}
-
-// DropOptionalNEQ applies the NEQ predicate on the "drop_optional" field.
-func DropOptionalNEQ(v string) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldDropOptional, v))
-}
-
-// DropOptionalIn applies the In predicate on the "drop_optional" field.
-func DropOptionalIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldIn(FieldDropOptional, vs...))
-}
-
-// DropOptionalNotIn applies the NotIn predicate on the "drop_optional" field.
-func DropOptionalNotIn(vs ...string) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldDropOptional, vs...))
-}
-
-// DropOptionalGT applies the GT predicate on the "drop_optional" field.
-func DropOptionalGT(v string) predicate.User {
-	return predicate.User(sql.FieldGT(FieldDropOptional, v))
-}
-
-// DropOptionalGTE applies the GTE predicate on the "drop_optional" field.
-func DropOptionalGTE(v string) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldDropOptional, v))
-}
-
-// DropOptionalLT applies the LT predicate on the "drop_optional" field.
-func DropOptionalLT(v string) predicate.User {
-	return predicate.User(sql.FieldLT(FieldDropOptional, v))
-}
-
-// DropOptionalLTE applies the LTE predicate on the "drop_optional" field.
-func DropOptionalLTE(v string) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldDropOptional, v))
-}
-
-// DropOptionalContains applies the Contains predicate on the "drop_optional" field.
-func DropOptionalContains(v string) predicate.User {
-	return predicate.User(sql.FieldContains(FieldDropOptional, v))
-}
-
-// DropOptionalHasPrefix applies the HasPrefix predicate on the "drop_optional" field.
-func DropOptionalHasPrefix(v string) predicate.User {
-	return predicate.User(sql.FieldHasPrefix(FieldDropOptional, v))
-}
-
-// DropOptionalHasSuffix applies the HasSuffix predicate on the "drop_optional" field.
-func DropOptionalHasSuffix(v string) predicate.User {
-	return predicate.User(sql.FieldHasSuffix(FieldDropOptional, v))
-}
-
-// DropOptionalIsNil applies the IsNil predicate on the "drop_optional" field.
-func DropOptionalIsNil() predicate.User {
-	return predicate.User(sql.FieldIsNull(FieldDropOptional))
-}
-
-// DropOptionalNotNil applies the NotNil predicate on the "drop_optional" field.
-func DropOptionalNotNil() predicate.User {
-	return predicate.User(sql.FieldNotNull(FieldDropOptional))
-}
-
-// DropOptionalEqualFold applies the EqualFold predicate on the "drop_optional" field.
-func DropOptionalEqualFold(v string) predicate.User {
-	return predicate.User(sql.FieldEqualFold(FieldDropOptional, v))
-}
-
-// DropOptionalContainsFold applies the ContainsFold predicate on the "drop_optional" field.
+// Deprecated: Age — use where.EQ(FieldAge, v).
+func Age(v int32) predicate.User { return where.EQ(FieldAge, v) }
+
+// Deprecated: Name — use where.EQ(FieldName, v).
+func Name(v string) predicate.User { return where.EQ(FieldName, v) }
+
+// Deprecated: Description — use where.EQ(FieldDescription, v).
+func Description(v string) predicate.User { return where.EQ(FieldDescription, v) }
+
+// Deprecated: Nickname — use where.EQ(FieldNickname, v).
+func Nickname(v string) predicate.User { return where.EQ(FieldNickname, v) }
+
+// Deprecated: Address — use where.EQ(FieldAddress, v).
+func Address(v string) predicate.User { return where.EQ(FieldAddress, v) }
+
+// Deprecated: Renamed — use where.EQ(FieldRenamed, v).
+func Renamed(v string) predicate.User { return where.EQ(FieldRenamed, v) }
+
+// Deprecated: OldToken — use where.EQ(FieldOldToken, v).
+func OldToken(v string) predicate.User { return where.EQ(FieldOldToken, v) }
+
+// Deprecated: Blob — use where.EQ(FieldBlob, v).
+func Blob(v []byte) predicate.User { return where.EQ(FieldBlob, v) }
+
+// Deprecated: Status — use where.EQ(FieldStatus, v).
+func Status(v string) predicate.User { return where.EQ(FieldStatus, v) }
+
+// Deprecated: Workplace — use where.EQ(FieldWorkplace, v).
+func Workplace(v string) predicate.User { return where.EQ(FieldWorkplace, v) }
+
+// Deprecated: DropOptional — use where.EQ(FieldDropOptional, v).
+func DropOptional(v string) predicate.User { return where.EQ(FieldDropOptional, v) }
+
+// Deprecated: AgeEQ — use where.EQ(FieldAge, v).
+func AgeEQ(v int32) predicate.User { return where.EQ(FieldAge, v) }
+
+// Deprecated: AgeNEQ — use where.NEQ(FieldAge, v).
+func AgeNEQ(v int32) predicate.User { return where.NEQ(FieldAge, v) }
+
+// Deprecated: AgeIn — use where.In(FieldAge, vs...).
+func AgeIn(vs ...int32) predicate.User { return where.In(FieldAge, vs...) }
+
+// Deprecated: AgeNotIn — use where.NotIn(FieldAge, vs...).
+func AgeNotIn(vs ...int32) predicate.User { return where.NotIn(FieldAge, vs...) }
+
+// Deprecated: AgeGT — use where.GT(FieldAge, v).
+func AgeGT(v int32) predicate.User { return where.GT(FieldAge, v) }
+
+// Deprecated: AgeGTE — use where.GTE(FieldAge, v).
+func AgeGTE(v int32) predicate.User { return where.GTE(FieldAge, v) }
+
+// Deprecated: AgeLT — use where.LT(FieldAge, v).
+func AgeLT(v int32) predicate.User { return where.LT(FieldAge, v) }
+
+// Deprecated: AgeLTE — use where.LTE(FieldAge, v).
+func AgeLTE(v int32) predicate.User { return where.LTE(FieldAge, v) }
+
+// Deprecated: NameEQ — use where.EQ(FieldName, v).
+func NameEQ(v string) predicate.User { return where.EQ(FieldName, v) }
+
+// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
+func NameNEQ(v string) predicate.User { return where.NEQ(FieldName, v) }
+
+// Deprecated: NameIn — use where.In(FieldName, vs...).
+func NameIn(vs ...string) predicate.User { return where.In(FieldName, vs...) }
+
+// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
+func NameNotIn(vs ...string) predicate.User { return where.NotIn(FieldName, vs...) }
+
+// Deprecated: NameGT — use where.GT(FieldName, v).
+func NameGT(v string) predicate.User { return where.GT(FieldName, v) }
+
+// Deprecated: NameGTE — use where.GTE(FieldName, v).
+func NameGTE(v string) predicate.User { return where.GTE(FieldName, v) }
+
+// Deprecated: NameLT — use where.LT(FieldName, v).
+func NameLT(v string) predicate.User { return where.LT(FieldName, v) }
+
+// Deprecated: NameLTE — use where.LTE(FieldName, v).
+func NameLTE(v string) predicate.User { return where.LTE(FieldName, v) }
+
+// Deprecated: NameContains — use where.Contains(FieldName, v).
+func NameContains(v string) predicate.User { return where.Contains(FieldName, v) }
+
+// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
+func NameHasPrefix(v string) predicate.User { return where.HasPrefix(FieldName, v) }
+
+// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
+func NameHasSuffix(v string) predicate.User { return where.HasSuffix(FieldName, v) }
+
+// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
+func NameEqualFold(v string) predicate.User { return where.EqualFold(FieldName, v) }
+
+// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
+func NameContainsFold(v string) predicate.User { return where.ContainsFold(FieldName, v) }
+
+// Deprecated: DescriptionEQ — use where.EQ(FieldDescription, v).
+func DescriptionEQ(v string) predicate.User { return where.EQ(FieldDescription, v) }
+
+// Deprecated: DescriptionNEQ — use where.NEQ(FieldDescription, v).
+func DescriptionNEQ(v string) predicate.User { return where.NEQ(FieldDescription, v) }
+
+// Deprecated: DescriptionIn — use where.In(FieldDescription, vs...).
+func DescriptionIn(vs ...string) predicate.User { return where.In(FieldDescription, vs...) }
+
+// Deprecated: DescriptionNotIn — use where.NotIn(FieldDescription, vs...).
+func DescriptionNotIn(vs ...string) predicate.User { return where.NotIn(FieldDescription, vs...) }
+
+// Deprecated: DescriptionGT — use where.GT(FieldDescription, v).
+func DescriptionGT(v string) predicate.User { return where.GT(FieldDescription, v) }
+
+// Deprecated: DescriptionGTE — use where.GTE(FieldDescription, v).
+func DescriptionGTE(v string) predicate.User { return where.GTE(FieldDescription, v) }
+
+// Deprecated: DescriptionLT — use where.LT(FieldDescription, v).
+func DescriptionLT(v string) predicate.User { return where.LT(FieldDescription, v) }
+
+// Deprecated: DescriptionLTE — use where.LTE(FieldDescription, v).
+func DescriptionLTE(v string) predicate.User { return where.LTE(FieldDescription, v) }
+
+// Deprecated: DescriptionContains — use where.Contains(FieldDescription, v).
+func DescriptionContains(v string) predicate.User { return where.Contains(FieldDescription, v) }
+
+// Deprecated: DescriptionHasPrefix — use where.HasPrefix(FieldDescription, v).
+func DescriptionHasPrefix(v string) predicate.User { return where.HasPrefix(FieldDescription, v) }
+
+// Deprecated: DescriptionHasSuffix — use where.HasSuffix(FieldDescription, v).
+func DescriptionHasSuffix(v string) predicate.User { return where.HasSuffix(FieldDescription, v) }
+
+// Deprecated: DescriptionIsNil — use where.IsNull(FieldDescription).
+func DescriptionIsNil() predicate.User { return where.IsNull(FieldDescription) }
+
+// Deprecated: DescriptionNotNil — use where.NotNull(FieldDescription).
+func DescriptionNotNil() predicate.User { return where.NotNull(FieldDescription) }
+
+// Deprecated: DescriptionEqualFold — use where.EqualFold(FieldDescription, v).
+func DescriptionEqualFold(v string) predicate.User { return where.EqualFold(FieldDescription, v) }
+
+// Deprecated: DescriptionContainsFold — use where.ContainsFold(FieldDescription, v).
+func DescriptionContainsFold(v string) predicate.User { return where.ContainsFold(FieldDescription, v) }
+
+// Deprecated: NicknameEQ — use where.EQ(FieldNickname, v).
+func NicknameEQ(v string) predicate.User { return where.EQ(FieldNickname, v) }
+
+// Deprecated: NicknameNEQ — use where.NEQ(FieldNickname, v).
+func NicknameNEQ(v string) predicate.User { return where.NEQ(FieldNickname, v) }
+
+// Deprecated: NicknameIn — use where.In(FieldNickname, vs...).
+func NicknameIn(vs ...string) predicate.User { return where.In(FieldNickname, vs...) }
+
+// Deprecated: NicknameNotIn — use where.NotIn(FieldNickname, vs...).
+func NicknameNotIn(vs ...string) predicate.User { return where.NotIn(FieldNickname, vs...) }
+
+// Deprecated: NicknameGT — use where.GT(FieldNickname, v).
+func NicknameGT(v string) predicate.User { return where.GT(FieldNickname, v) }
+
+// Deprecated: NicknameGTE — use where.GTE(FieldNickname, v).
+func NicknameGTE(v string) predicate.User { return where.GTE(FieldNickname, v) }
+
+// Deprecated: NicknameLT — use where.LT(FieldNickname, v).
+func NicknameLT(v string) predicate.User { return where.LT(FieldNickname, v) }
+
+// Deprecated: NicknameLTE — use where.LTE(FieldNickname, v).
+func NicknameLTE(v string) predicate.User { return where.LTE(FieldNickname, v) }
+
+// Deprecated: NicknameContains — use where.Contains(FieldNickname, v).
+func NicknameContains(v string) predicate.User { return where.Contains(FieldNickname, v) }
+
+// Deprecated: NicknameHasPrefix — use where.HasPrefix(FieldNickname, v).
+func NicknameHasPrefix(v string) predicate.User { return where.HasPrefix(FieldNickname, v) }
+
+// Deprecated: NicknameHasSuffix — use where.HasSuffix(FieldNickname, v).
+func NicknameHasSuffix(v string) predicate.User { return where.HasSuffix(FieldNickname, v) }
+
+// Deprecated: NicknameEqualFold — use where.EqualFold(FieldNickname, v).
+func NicknameEqualFold(v string) predicate.User { return where.EqualFold(FieldNickname, v) }
+
+// Deprecated: NicknameContainsFold — use where.ContainsFold(FieldNickname, v).
+func NicknameContainsFold(v string) predicate.User { return where.ContainsFold(FieldNickname, v) }
+
+// Deprecated: AddressEQ — use where.EQ(FieldAddress, v).
+func AddressEQ(v string) predicate.User { return where.EQ(FieldAddress, v) }
+
+// Deprecated: AddressNEQ — use where.NEQ(FieldAddress, v).
+func AddressNEQ(v string) predicate.User { return where.NEQ(FieldAddress, v) }
+
+// Deprecated: AddressIn — use where.In(FieldAddress, vs...).
+func AddressIn(vs ...string) predicate.User { return where.In(FieldAddress, vs...) }
+
+// Deprecated: AddressNotIn — use where.NotIn(FieldAddress, vs...).
+func AddressNotIn(vs ...string) predicate.User { return where.NotIn(FieldAddress, vs...) }
+
+// Deprecated: AddressGT — use where.GT(FieldAddress, v).
+func AddressGT(v string) predicate.User { return where.GT(FieldAddress, v) }
+
+// Deprecated: AddressGTE — use where.GTE(FieldAddress, v).
+func AddressGTE(v string) predicate.User { return where.GTE(FieldAddress, v) }
+
+// Deprecated: AddressLT — use where.LT(FieldAddress, v).
+func AddressLT(v string) predicate.User { return where.LT(FieldAddress, v) }
+
+// Deprecated: AddressLTE — use where.LTE(FieldAddress, v).
+func AddressLTE(v string) predicate.User { return where.LTE(FieldAddress, v) }
+
+// Deprecated: AddressContains — use where.Contains(FieldAddress, v).
+func AddressContains(v string) predicate.User { return where.Contains(FieldAddress, v) }
+
+// Deprecated: AddressHasPrefix — use where.HasPrefix(FieldAddress, v).
+func AddressHasPrefix(v string) predicate.User { return where.HasPrefix(FieldAddress, v) }
+
+// Deprecated: AddressHasSuffix — use where.HasSuffix(FieldAddress, v).
+func AddressHasSuffix(v string) predicate.User { return where.HasSuffix(FieldAddress, v) }
+
+// Deprecated: AddressIsNil — use where.IsNull(FieldAddress).
+func AddressIsNil() predicate.User { return where.IsNull(FieldAddress) }
+
+// Deprecated: AddressNotNil — use where.NotNull(FieldAddress).
+func AddressNotNil() predicate.User { return where.NotNull(FieldAddress) }
+
+// Deprecated: AddressEqualFold — use where.EqualFold(FieldAddress, v).
+func AddressEqualFold(v string) predicate.User { return where.EqualFold(FieldAddress, v) }
+
+// Deprecated: AddressContainsFold — use where.ContainsFold(FieldAddress, v).
+func AddressContainsFold(v string) predicate.User { return where.ContainsFold(FieldAddress, v) }
+
+// Deprecated: RenamedEQ — use where.EQ(FieldRenamed, v).
+func RenamedEQ(v string) predicate.User { return where.EQ(FieldRenamed, v) }
+
+// Deprecated: RenamedNEQ — use where.NEQ(FieldRenamed, v).
+func RenamedNEQ(v string) predicate.User { return where.NEQ(FieldRenamed, v) }
+
+// Deprecated: RenamedIn — use where.In(FieldRenamed, vs...).
+func RenamedIn(vs ...string) predicate.User { return where.In(FieldRenamed, vs...) }
+
+// Deprecated: RenamedNotIn — use where.NotIn(FieldRenamed, vs...).
+func RenamedNotIn(vs ...string) predicate.User { return where.NotIn(FieldRenamed, vs...) }
+
+// Deprecated: RenamedGT — use where.GT(FieldRenamed, v).
+func RenamedGT(v string) predicate.User { return where.GT(FieldRenamed, v) }
+
+// Deprecated: RenamedGTE — use where.GTE(FieldRenamed, v).
+func RenamedGTE(v string) predicate.User { return where.GTE(FieldRenamed, v) }
+
+// Deprecated: RenamedLT — use where.LT(FieldRenamed, v).
+func RenamedLT(v string) predicate.User { return where.LT(FieldRenamed, v) }
+
+// Deprecated: RenamedLTE — use where.LTE(FieldRenamed, v).
+func RenamedLTE(v string) predicate.User { return where.LTE(FieldRenamed, v) }
+
+// Deprecated: RenamedContains — use where.Contains(FieldRenamed, v).
+func RenamedContains(v string) predicate.User { return where.Contains(FieldRenamed, v) }
+
+// Deprecated: RenamedHasPrefix — use where.HasPrefix(FieldRenamed, v).
+func RenamedHasPrefix(v string) predicate.User { return where.HasPrefix(FieldRenamed, v) }
+
+// Deprecated: RenamedHasSuffix — use where.HasSuffix(FieldRenamed, v).
+func RenamedHasSuffix(v string) predicate.User { return where.HasSuffix(FieldRenamed, v) }
+
+// Deprecated: RenamedIsNil — use where.IsNull(FieldRenamed).
+func RenamedIsNil() predicate.User { return where.IsNull(FieldRenamed) }
+
+// Deprecated: RenamedNotNil — use where.NotNull(FieldRenamed).
+func RenamedNotNil() predicate.User { return where.NotNull(FieldRenamed) }
+
+// Deprecated: RenamedEqualFold — use where.EqualFold(FieldRenamed, v).
+func RenamedEqualFold(v string) predicate.User { return where.EqualFold(FieldRenamed, v) }
+
+// Deprecated: RenamedContainsFold — use where.ContainsFold(FieldRenamed, v).
+func RenamedContainsFold(v string) predicate.User { return where.ContainsFold(FieldRenamed, v) }
+
+// Deprecated: OldTokenEQ — use where.EQ(FieldOldToken, v).
+func OldTokenEQ(v string) predicate.User { return where.EQ(FieldOldToken, v) }
+
+// Deprecated: OldTokenNEQ — use where.NEQ(FieldOldToken, v).
+func OldTokenNEQ(v string) predicate.User { return where.NEQ(FieldOldToken, v) }
+
+// Deprecated: OldTokenIn — use where.In(FieldOldToken, vs...).
+func OldTokenIn(vs ...string) predicate.User { return where.In(FieldOldToken, vs...) }
+
+// Deprecated: OldTokenNotIn — use where.NotIn(FieldOldToken, vs...).
+func OldTokenNotIn(vs ...string) predicate.User { return where.NotIn(FieldOldToken, vs...) }
+
+// Deprecated: OldTokenGT — use where.GT(FieldOldToken, v).
+func OldTokenGT(v string) predicate.User { return where.GT(FieldOldToken, v) }
+
+// Deprecated: OldTokenGTE — use where.GTE(FieldOldToken, v).
+func OldTokenGTE(v string) predicate.User { return where.GTE(FieldOldToken, v) }
+
+// Deprecated: OldTokenLT — use where.LT(FieldOldToken, v).
+func OldTokenLT(v string) predicate.User { return where.LT(FieldOldToken, v) }
+
+// Deprecated: OldTokenLTE — use where.LTE(FieldOldToken, v).
+func OldTokenLTE(v string) predicate.User { return where.LTE(FieldOldToken, v) }
+
+// Deprecated: OldTokenContains — use where.Contains(FieldOldToken, v).
+func OldTokenContains(v string) predicate.User { return where.Contains(FieldOldToken, v) }
+
+// Deprecated: OldTokenHasPrefix — use where.HasPrefix(FieldOldToken, v).
+func OldTokenHasPrefix(v string) predicate.User { return where.HasPrefix(FieldOldToken, v) }
+
+// Deprecated: OldTokenHasSuffix — use where.HasSuffix(FieldOldToken, v).
+func OldTokenHasSuffix(v string) predicate.User { return where.HasSuffix(FieldOldToken, v) }
+
+// Deprecated: OldTokenEqualFold — use where.EqualFold(FieldOldToken, v).
+func OldTokenEqualFold(v string) predicate.User { return where.EqualFold(FieldOldToken, v) }
+
+// Deprecated: OldTokenContainsFold — use where.ContainsFold(FieldOldToken, v).
+func OldTokenContainsFold(v string) predicate.User { return where.ContainsFold(FieldOldToken, v) }
+
+// Deprecated: BlobEQ — use where.EQ(FieldBlob, v).
+func BlobEQ(v []byte) predicate.User { return where.EQ(FieldBlob, v) }
+
+// Deprecated: BlobNEQ — use where.NEQ(FieldBlob, v).
+func BlobNEQ(v []byte) predicate.User { return where.NEQ(FieldBlob, v) }
+
+// Deprecated: BlobIn — use where.In(FieldBlob, vs...).
+func BlobIn(vs ...[]byte) predicate.User { return where.In(FieldBlob, vs...) }
+
+// Deprecated: BlobNotIn — use where.NotIn(FieldBlob, vs...).
+func BlobNotIn(vs ...[]byte) predicate.User { return where.NotIn(FieldBlob, vs...) }
+
+// Deprecated: BlobGT — use where.GT(FieldBlob, v).
+func BlobGT(v []byte) predicate.User { return where.GT(FieldBlob, v) }
+
+// Deprecated: BlobGTE — use where.GTE(FieldBlob, v).
+func BlobGTE(v []byte) predicate.User { return where.GTE(FieldBlob, v) }
+
+// Deprecated: BlobLT — use where.LT(FieldBlob, v).
+func BlobLT(v []byte) predicate.User { return where.LT(FieldBlob, v) }
+
+// Deprecated: BlobLTE — use where.LTE(FieldBlob, v).
+func BlobLTE(v []byte) predicate.User { return where.LTE(FieldBlob, v) }
+
+// Deprecated: BlobIsNil — use where.IsNull(FieldBlob).
+func BlobIsNil() predicate.User { return where.IsNull(FieldBlob) }
+
+// Deprecated: BlobNotNil — use where.NotNull(FieldBlob).
+func BlobNotNil() predicate.User { return where.NotNull(FieldBlob) }
+
+// Deprecated: StateEQ — use where.EQ(FieldState, v).
+func StateEQ(v State) predicate.User { return where.EQ(FieldState, v) }
+
+// Deprecated: StateNEQ — use where.NEQ(FieldState, v).
+func StateNEQ(v State) predicate.User { return where.NEQ(FieldState, v) }
+
+// Deprecated: StateIn — use where.In(FieldState, vs...).
+func StateIn(vs ...State) predicate.User { return where.In(FieldState, vs...) }
+
+// Deprecated: StateNotIn — use where.NotIn(FieldState, vs...).
+func StateNotIn(vs ...State) predicate.User { return where.NotIn(FieldState, vs...) }
+
+// Deprecated: StateIsNil — use where.IsNull(FieldState).
+func StateIsNil() predicate.User { return where.IsNull(FieldState) }
+
+// Deprecated: StateNotNil — use where.NotNull(FieldState).
+func StateNotNil() predicate.User { return where.NotNull(FieldState) }
+
+// Deprecated: StatusEQ — use where.EQ(FieldStatus, v).
+func StatusEQ(v string) predicate.User { return where.EQ(FieldStatus, v) }
+
+// Deprecated: StatusNEQ — use where.NEQ(FieldStatus, v).
+func StatusNEQ(v string) predicate.User { return where.NEQ(FieldStatus, v) }
+
+// Deprecated: StatusIn — use where.In(FieldStatus, vs...).
+func StatusIn(vs ...string) predicate.User { return where.In(FieldStatus, vs...) }
+
+// Deprecated: StatusNotIn — use where.NotIn(FieldStatus, vs...).
+func StatusNotIn(vs ...string) predicate.User { return where.NotIn(FieldStatus, vs...) }
+
+// Deprecated: StatusGT — use where.GT(FieldStatus, v).
+func StatusGT(v string) predicate.User { return where.GT(FieldStatus, v) }
+
+// Deprecated: StatusGTE — use where.GTE(FieldStatus, v).
+func StatusGTE(v string) predicate.User { return where.GTE(FieldStatus, v) }
+
+// Deprecated: StatusLT — use where.LT(FieldStatus, v).
+func StatusLT(v string) predicate.User { return where.LT(FieldStatus, v) }
+
+// Deprecated: StatusLTE — use where.LTE(FieldStatus, v).
+func StatusLTE(v string) predicate.User { return where.LTE(FieldStatus, v) }
+
+// Deprecated: StatusContains — use where.Contains(FieldStatus, v).
+func StatusContains(v string) predicate.User { return where.Contains(FieldStatus, v) }
+
+// Deprecated: StatusHasPrefix — use where.HasPrefix(FieldStatus, v).
+func StatusHasPrefix(v string) predicate.User { return where.HasPrefix(FieldStatus, v) }
+
+// Deprecated: StatusHasSuffix — use where.HasSuffix(FieldStatus, v).
+func StatusHasSuffix(v string) predicate.User { return where.HasSuffix(FieldStatus, v) }
+
+// Deprecated: StatusIsNil — use where.IsNull(FieldStatus).
+func StatusIsNil() predicate.User { return where.IsNull(FieldStatus) }
+
+// Deprecated: StatusNotNil — use where.NotNull(FieldStatus).
+func StatusNotNil() predicate.User { return where.NotNull(FieldStatus) }
+
+// Deprecated: StatusEqualFold — use where.EqualFold(FieldStatus, v).
+func StatusEqualFold(v string) predicate.User { return where.EqualFold(FieldStatus, v) }
+
+// Deprecated: StatusContainsFold — use where.ContainsFold(FieldStatus, v).
+func StatusContainsFold(v string) predicate.User { return where.ContainsFold(FieldStatus, v) }
+
+// Deprecated: WorkplaceEQ — use where.EQ(FieldWorkplace, v).
+func WorkplaceEQ(v string) predicate.User { return where.EQ(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceNEQ — use where.NEQ(FieldWorkplace, v).
+func WorkplaceNEQ(v string) predicate.User { return where.NEQ(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceIn — use where.In(FieldWorkplace, vs...).
+func WorkplaceIn(vs ...string) predicate.User { return where.In(FieldWorkplace, vs...) }
+
+// Deprecated: WorkplaceNotIn — use where.NotIn(FieldWorkplace, vs...).
+func WorkplaceNotIn(vs ...string) predicate.User { return where.NotIn(FieldWorkplace, vs...) }
+
+// Deprecated: WorkplaceGT — use where.GT(FieldWorkplace, v).
+func WorkplaceGT(v string) predicate.User { return where.GT(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceGTE — use where.GTE(FieldWorkplace, v).
+func WorkplaceGTE(v string) predicate.User { return where.GTE(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceLT — use where.LT(FieldWorkplace, v).
+func WorkplaceLT(v string) predicate.User { return where.LT(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceLTE — use where.LTE(FieldWorkplace, v).
+func WorkplaceLTE(v string) predicate.User { return where.LTE(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceContains — use where.Contains(FieldWorkplace, v).
+func WorkplaceContains(v string) predicate.User { return where.Contains(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceHasPrefix — use where.HasPrefix(FieldWorkplace, v).
+func WorkplaceHasPrefix(v string) predicate.User { return where.HasPrefix(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceHasSuffix — use where.HasSuffix(FieldWorkplace, v).
+func WorkplaceHasSuffix(v string) predicate.User { return where.HasSuffix(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceIsNil — use where.IsNull(FieldWorkplace).
+func WorkplaceIsNil() predicate.User { return where.IsNull(FieldWorkplace) }
+
+// Deprecated: WorkplaceNotNil — use where.NotNull(FieldWorkplace).
+func WorkplaceNotNil() predicate.User { return where.NotNull(FieldWorkplace) }
+
+// Deprecated: WorkplaceEqualFold — use where.EqualFold(FieldWorkplace, v).
+func WorkplaceEqualFold(v string) predicate.User { return where.EqualFold(FieldWorkplace, v) }
+
+// Deprecated: WorkplaceContainsFold — use where.ContainsFold(FieldWorkplace, v).
+func WorkplaceContainsFold(v string) predicate.User { return where.ContainsFold(FieldWorkplace, v) }
+
+// Deprecated: DropOptionalEQ — use where.EQ(FieldDropOptional, v).
+func DropOptionalEQ(v string) predicate.User { return where.EQ(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalNEQ — use where.NEQ(FieldDropOptional, v).
+func DropOptionalNEQ(v string) predicate.User { return where.NEQ(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalIn — use where.In(FieldDropOptional, vs...).
+func DropOptionalIn(vs ...string) predicate.User { return where.In(FieldDropOptional, vs...) }
+
+// Deprecated: DropOptionalNotIn — use where.NotIn(FieldDropOptional, vs...).
+func DropOptionalNotIn(vs ...string) predicate.User { return where.NotIn(FieldDropOptional, vs...) }
+
+// Deprecated: DropOptionalGT — use where.GT(FieldDropOptional, v).
+func DropOptionalGT(v string) predicate.User { return where.GT(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalGTE — use where.GTE(FieldDropOptional, v).
+func DropOptionalGTE(v string) predicate.User { return where.GTE(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalLT — use where.LT(FieldDropOptional, v).
+func DropOptionalLT(v string) predicate.User { return where.LT(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalLTE — use where.LTE(FieldDropOptional, v).
+func DropOptionalLTE(v string) predicate.User { return where.LTE(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalContains — use where.Contains(FieldDropOptional, v).
+func DropOptionalContains(v string) predicate.User { return where.Contains(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalHasPrefix — use where.HasPrefix(FieldDropOptional, v).
+func DropOptionalHasPrefix(v string) predicate.User { return where.HasPrefix(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalHasSuffix — use where.HasSuffix(FieldDropOptional, v).
+func DropOptionalHasSuffix(v string) predicate.User { return where.HasSuffix(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalIsNil — use where.IsNull(FieldDropOptional).
+func DropOptionalIsNil() predicate.User { return where.IsNull(FieldDropOptional) }
+
+// Deprecated: DropOptionalNotNil — use where.NotNull(FieldDropOptional).
+func DropOptionalNotNil() predicate.User { return where.NotNull(FieldDropOptional) }
+
+// Deprecated: DropOptionalEqualFold — use where.EqualFold(FieldDropOptional, v).
+func DropOptionalEqualFold(v string) predicate.User { return where.EqualFold(FieldDropOptional, v) }
+
+// Deprecated: DropOptionalContainsFold — use where.ContainsFold(FieldDropOptional, v).
 func DropOptionalContainsFold(v string) predicate.User {
-	return predicate.User(sql.FieldContainsFold(FieldDropOptional, v))
+	return where.ContainsFold(FieldDropOptional, v)
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
@@ -890,14 +565,15 @@ func HasParent() predicate.User {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newParentStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasChildren applies the HasEdge predicate on the "children" edge.
@@ -913,14 +589,15 @@ func HasChildren() predicate.User {
 
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newChildrenStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newChildrenStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasSpouse applies the HasEdge predicate on the "spouse" edge.
@@ -936,14 +613,15 @@ func HasSpouse() predicate.User {
 
 // HasSpouseWith applies the HasEdge predicate on the "spouse" edge with a given conditions (other predicates).
 func HasSpouseWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newSpouseStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newSpouseStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasCar applies the HasEdge predicate on the "car" edge.
@@ -959,14 +637,15 @@ func HasCar() predicate.User {
 
 // HasCarWith applies the HasEdge predicate on the "car" edge with a given conditions (other predicates).
 func HasCarWith(preds ...predicate.Car) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newCarStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newCarStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

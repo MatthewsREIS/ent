@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -463,59 +464,62 @@ func (_q *ParentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Paren
 	return nodes, nil
 }
 
-var parentChildEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Parent, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        parent.ChildTable,
-			Columns:      parent.ChildColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Parent) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Parent) *int {
-		v := n.UserID
-		return &v
-	},
-}
-var parentParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Parent, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        parent.ParentTable,
-			Columns:      parent.ParentColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Parent) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Parent) *int {
-		v := n.ParentID
-		return &v
-	},
-}
-
 func (_q *ParentQuery) loadChild(ctx context.Context, query *UserQuery, nodes []*Parent, init func(*Parent), assign func(*Parent, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &parentChildEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Parent)
+	for i := range nodes {
+		fk := nodes[i].UserID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *ParentQuery) loadParent(ctx context.Context, query *UserQuery, nodes []*Parent, init func(*Parent), assign func(*Parent, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &parentParentEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Parent)
+	for i := range nodes {
+		fk := nodes[i].ParentID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -719,4 +723,23 @@ func (_s *ParentSelect) sqlScan(ctx context.Context, root *ParentQuery, v any) e
 func (_s *ParentSelect) Modify(modifiers ...func(s *sql.Selector)) *ParentSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// parentCreateDescriptor holds the metadata and callbacks for constructing a Parent entity.
+var parentCreateDescriptor = &entbuilder.CreateDescriptor[Config, Parent, *ParentMutation]{
+	Table:   parent.Table,
+	NewNode: func(c Config) *Parent { return &Parent{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Parent, *ParentMutation]{
+		Column:      parent.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Parent, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Parent.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

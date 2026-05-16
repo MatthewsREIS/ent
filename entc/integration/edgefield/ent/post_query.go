@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -406,31 +407,36 @@ func (_q *PostQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Post, e
 	return nodes, nil
 }
 
-var postAuthorEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Post, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        post.AuthorTable,
-			Columns:      post.AuthorColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Post) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Post) *int {
-		return n.AuthorID
-	},
-}
-
 func (_q *PostQuery) loadAuthor(ctx context.Context, query *UserQuery, nodes []*Post, init func(*Post), assign func(*Post, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &postAuthorEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Post)
+	for i := range nodes {
+		if nodes[i].AuthorID == nil {
+			continue
+		}
+		fk := *nodes[i].AuthorID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "author_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -606,4 +612,23 @@ func (_s *PostSelect) sqlScan(ctx context.Context, root *PostQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// postCreateDescriptor holds the metadata and callbacks for constructing a Post entity.
+var postCreateDescriptor = &entbuilder.CreateDescriptor[Config, Post, *PostMutation]{
+	Table:   post.Table,
+	NewNode: func(c Config) *Post { return &Post{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Post, *PostMutation]{
+		Column:      post.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Post, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Post.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

@@ -18,8 +18,9 @@ import (
 // BuilderDelete is the builder for deleting a Builder entity.
 type BuilderDelete struct {
 	Config
-	hooks    []Hook
-	mutation *BuilderMutation
+	hooks     []Hook
+	mutation  *BuilderMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewBuilderDelete returns a new BuilderDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *BuilderDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *BuilderDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *BuilderDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *BuilderDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

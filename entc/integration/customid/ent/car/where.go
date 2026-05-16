@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,185 +58,113 @@ func IDLTE(id int) predicate.Car {
 	return predicate.Car(sql.FieldLTE(FieldID, id))
 }
 
-// BeforeID applies equality check predicate on the "before_id" field. It's identical to BeforeIDEQ.
-func BeforeID(v float64) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldBeforeID, v))
-}
+// Deprecated: BeforeID — use where.EQ(FieldBeforeID, v).
+func BeforeID(v float64) predicate.Car { return where.EQ(FieldBeforeID, v) }
 
-// AfterID applies equality check predicate on the "after_id" field. It's identical to AfterIDEQ.
-func AfterID(v float64) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldAfterID, v))
-}
+// Deprecated: AfterID — use where.EQ(FieldAfterID, v).
+func AfterID(v float64) predicate.Car { return where.EQ(FieldAfterID, v) }
 
-// Model applies equality check predicate on the "model" field. It's identical to ModelEQ.
-func Model(v string) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldModel, v))
-}
+// Deprecated: Model — use where.EQ(FieldModel, v).
+func Model(v string) predicate.Car { return where.EQ(FieldModel, v) }
 
-// BeforeIDEQ applies the EQ predicate on the "before_id" field.
-func BeforeIDEQ(v float64) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldBeforeID, v))
-}
+// Deprecated: BeforeIDEQ — use where.EQ(FieldBeforeID, v).
+func BeforeIDEQ(v float64) predicate.Car { return where.EQ(FieldBeforeID, v) }
 
-// BeforeIDNEQ applies the NEQ predicate on the "before_id" field.
-func BeforeIDNEQ(v float64) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldBeforeID, v))
-}
+// Deprecated: BeforeIDNEQ — use where.NEQ(FieldBeforeID, v).
+func BeforeIDNEQ(v float64) predicate.Car { return where.NEQ(FieldBeforeID, v) }
 
-// BeforeIDIn applies the In predicate on the "before_id" field.
-func BeforeIDIn(vs ...float64) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldBeforeID, vs...))
-}
+// Deprecated: BeforeIDIn — use where.In(FieldBeforeID, vs...).
+func BeforeIDIn(vs ...float64) predicate.Car { return where.In(FieldBeforeID, vs...) }
 
-// BeforeIDNotIn applies the NotIn predicate on the "before_id" field.
-func BeforeIDNotIn(vs ...float64) predicate.Car {
-	return predicate.Car(sql.FieldNotIn(FieldBeforeID, vs...))
-}
+// Deprecated: BeforeIDNotIn — use where.NotIn(FieldBeforeID, vs...).
+func BeforeIDNotIn(vs ...float64) predicate.Car { return where.NotIn(FieldBeforeID, vs...) }
 
-// BeforeIDGT applies the GT predicate on the "before_id" field.
-func BeforeIDGT(v float64) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldBeforeID, v))
-}
+// Deprecated: BeforeIDGT — use where.GT(FieldBeforeID, v).
+func BeforeIDGT(v float64) predicate.Car { return where.GT(FieldBeforeID, v) }
 
-// BeforeIDGTE applies the GTE predicate on the "before_id" field.
-func BeforeIDGTE(v float64) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldBeforeID, v))
-}
+// Deprecated: BeforeIDGTE — use where.GTE(FieldBeforeID, v).
+func BeforeIDGTE(v float64) predicate.Car { return where.GTE(FieldBeforeID, v) }
 
-// BeforeIDLT applies the LT predicate on the "before_id" field.
-func BeforeIDLT(v float64) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldBeforeID, v))
-}
+// Deprecated: BeforeIDLT — use where.LT(FieldBeforeID, v).
+func BeforeIDLT(v float64) predicate.Car { return where.LT(FieldBeforeID, v) }
 
-// BeforeIDLTE applies the LTE predicate on the "before_id" field.
-func BeforeIDLTE(v float64) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldBeforeID, v))
-}
+// Deprecated: BeforeIDLTE — use where.LTE(FieldBeforeID, v).
+func BeforeIDLTE(v float64) predicate.Car { return where.LTE(FieldBeforeID, v) }
 
-// BeforeIDIsNil applies the IsNil predicate on the "before_id" field.
-func BeforeIDIsNil() predicate.Car {
-	return predicate.Car(sql.FieldIsNull(FieldBeforeID))
-}
+// Deprecated: BeforeIDIsNil — use where.IsNull(FieldBeforeID).
+func BeforeIDIsNil() predicate.Car { return where.IsNull(FieldBeforeID) }
 
-// BeforeIDNotNil applies the NotNil predicate on the "before_id" field.
-func BeforeIDNotNil() predicate.Car {
-	return predicate.Car(sql.FieldNotNull(FieldBeforeID))
-}
+// Deprecated: BeforeIDNotNil — use where.NotNull(FieldBeforeID).
+func BeforeIDNotNil() predicate.Car { return where.NotNull(FieldBeforeID) }
 
-// AfterIDEQ applies the EQ predicate on the "after_id" field.
-func AfterIDEQ(v float64) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldAfterID, v))
-}
+// Deprecated: AfterIDEQ — use where.EQ(FieldAfterID, v).
+func AfterIDEQ(v float64) predicate.Car { return where.EQ(FieldAfterID, v) }
 
-// AfterIDNEQ applies the NEQ predicate on the "after_id" field.
-func AfterIDNEQ(v float64) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldAfterID, v))
-}
+// Deprecated: AfterIDNEQ — use where.NEQ(FieldAfterID, v).
+func AfterIDNEQ(v float64) predicate.Car { return where.NEQ(FieldAfterID, v) }
 
-// AfterIDIn applies the In predicate on the "after_id" field.
-func AfterIDIn(vs ...float64) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldAfterID, vs...))
-}
+// Deprecated: AfterIDIn — use where.In(FieldAfterID, vs...).
+func AfterIDIn(vs ...float64) predicate.Car { return where.In(FieldAfterID, vs...) }
 
-// AfterIDNotIn applies the NotIn predicate on the "after_id" field.
-func AfterIDNotIn(vs ...float64) predicate.Car {
-	return predicate.Car(sql.FieldNotIn(FieldAfterID, vs...))
-}
+// Deprecated: AfterIDNotIn — use where.NotIn(FieldAfterID, vs...).
+func AfterIDNotIn(vs ...float64) predicate.Car { return where.NotIn(FieldAfterID, vs...) }
 
-// AfterIDGT applies the GT predicate on the "after_id" field.
-func AfterIDGT(v float64) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldAfterID, v))
-}
+// Deprecated: AfterIDGT — use where.GT(FieldAfterID, v).
+func AfterIDGT(v float64) predicate.Car { return where.GT(FieldAfterID, v) }
 
-// AfterIDGTE applies the GTE predicate on the "after_id" field.
-func AfterIDGTE(v float64) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldAfterID, v))
-}
+// Deprecated: AfterIDGTE — use where.GTE(FieldAfterID, v).
+func AfterIDGTE(v float64) predicate.Car { return where.GTE(FieldAfterID, v) }
 
-// AfterIDLT applies the LT predicate on the "after_id" field.
-func AfterIDLT(v float64) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldAfterID, v))
-}
+// Deprecated: AfterIDLT — use where.LT(FieldAfterID, v).
+func AfterIDLT(v float64) predicate.Car { return where.LT(FieldAfterID, v) }
 
-// AfterIDLTE applies the LTE predicate on the "after_id" field.
-func AfterIDLTE(v float64) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldAfterID, v))
-}
+// Deprecated: AfterIDLTE — use where.LTE(FieldAfterID, v).
+func AfterIDLTE(v float64) predicate.Car { return where.LTE(FieldAfterID, v) }
 
-// AfterIDIsNil applies the IsNil predicate on the "after_id" field.
-func AfterIDIsNil() predicate.Car {
-	return predicate.Car(sql.FieldIsNull(FieldAfterID))
-}
+// Deprecated: AfterIDIsNil — use where.IsNull(FieldAfterID).
+func AfterIDIsNil() predicate.Car { return where.IsNull(FieldAfterID) }
 
-// AfterIDNotNil applies the NotNil predicate on the "after_id" field.
-func AfterIDNotNil() predicate.Car {
-	return predicate.Car(sql.FieldNotNull(FieldAfterID))
-}
+// Deprecated: AfterIDNotNil — use where.NotNull(FieldAfterID).
+func AfterIDNotNil() predicate.Car { return where.NotNull(FieldAfterID) }
 
-// ModelEQ applies the EQ predicate on the "model" field.
-func ModelEQ(v string) predicate.Car {
-	return predicate.Car(sql.FieldEQ(FieldModel, v))
-}
+// Deprecated: ModelEQ — use where.EQ(FieldModel, v).
+func ModelEQ(v string) predicate.Car { return where.EQ(FieldModel, v) }
 
-// ModelNEQ applies the NEQ predicate on the "model" field.
-func ModelNEQ(v string) predicate.Car {
-	return predicate.Car(sql.FieldNEQ(FieldModel, v))
-}
+// Deprecated: ModelNEQ — use where.NEQ(FieldModel, v).
+func ModelNEQ(v string) predicate.Car { return where.NEQ(FieldModel, v) }
 
-// ModelIn applies the In predicate on the "model" field.
-func ModelIn(vs ...string) predicate.Car {
-	return predicate.Car(sql.FieldIn(FieldModel, vs...))
-}
+// Deprecated: ModelIn — use where.In(FieldModel, vs...).
+func ModelIn(vs ...string) predicate.Car { return where.In(FieldModel, vs...) }
 
-// ModelNotIn applies the NotIn predicate on the "model" field.
-func ModelNotIn(vs ...string) predicate.Car {
-	return predicate.Car(sql.FieldNotIn(FieldModel, vs...))
-}
+// Deprecated: ModelNotIn — use where.NotIn(FieldModel, vs...).
+func ModelNotIn(vs ...string) predicate.Car { return where.NotIn(FieldModel, vs...) }
 
-// ModelGT applies the GT predicate on the "model" field.
-func ModelGT(v string) predicate.Car {
-	return predicate.Car(sql.FieldGT(FieldModel, v))
-}
+// Deprecated: ModelGT — use where.GT(FieldModel, v).
+func ModelGT(v string) predicate.Car { return where.GT(FieldModel, v) }
 
-// ModelGTE applies the GTE predicate on the "model" field.
-func ModelGTE(v string) predicate.Car {
-	return predicate.Car(sql.FieldGTE(FieldModel, v))
-}
+// Deprecated: ModelGTE — use where.GTE(FieldModel, v).
+func ModelGTE(v string) predicate.Car { return where.GTE(FieldModel, v) }
 
-// ModelLT applies the LT predicate on the "model" field.
-func ModelLT(v string) predicate.Car {
-	return predicate.Car(sql.FieldLT(FieldModel, v))
-}
+// Deprecated: ModelLT — use where.LT(FieldModel, v).
+func ModelLT(v string) predicate.Car { return where.LT(FieldModel, v) }
 
-// ModelLTE applies the LTE predicate on the "model" field.
-func ModelLTE(v string) predicate.Car {
-	return predicate.Car(sql.FieldLTE(FieldModel, v))
-}
+// Deprecated: ModelLTE — use where.LTE(FieldModel, v).
+func ModelLTE(v string) predicate.Car { return where.LTE(FieldModel, v) }
 
-// ModelContains applies the Contains predicate on the "model" field.
-func ModelContains(v string) predicate.Car {
-	return predicate.Car(sql.FieldContains(FieldModel, v))
-}
+// Deprecated: ModelContains — use where.Contains(FieldModel, v).
+func ModelContains(v string) predicate.Car { return where.Contains(FieldModel, v) }
 
-// ModelHasPrefix applies the HasPrefix predicate on the "model" field.
-func ModelHasPrefix(v string) predicate.Car {
-	return predicate.Car(sql.FieldHasPrefix(FieldModel, v))
-}
+// Deprecated: ModelHasPrefix — use where.HasPrefix(FieldModel, v).
+func ModelHasPrefix(v string) predicate.Car { return where.HasPrefix(FieldModel, v) }
 
-// ModelHasSuffix applies the HasSuffix predicate on the "model" field.
-func ModelHasSuffix(v string) predicate.Car {
-	return predicate.Car(sql.FieldHasSuffix(FieldModel, v))
-}
+// Deprecated: ModelHasSuffix — use where.HasSuffix(FieldModel, v).
+func ModelHasSuffix(v string) predicate.Car { return where.HasSuffix(FieldModel, v) }
 
-// ModelEqualFold applies the EqualFold predicate on the "model" field.
-func ModelEqualFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldEqualFold(FieldModel, v))
-}
+// Deprecated: ModelEqualFold — use where.EqualFold(FieldModel, v).
+func ModelEqualFold(v string) predicate.Car { return where.EqualFold(FieldModel, v) }
 
-// ModelContainsFold applies the ContainsFold predicate on the "model" field.
-func ModelContainsFold(v string) predicate.Car {
-	return predicate.Car(sql.FieldContainsFold(FieldModel, v))
-}
+// Deprecated: ModelContainsFold — use where.ContainsFold(FieldModel, v).
+func ModelContainsFold(v string) predicate.Car { return where.ContainsFold(FieldModel, v) }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Car {
@@ -250,14 +179,15 @@ func HasOwner() predicate.Car {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.Pet) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Car(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

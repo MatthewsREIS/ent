@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,110 +58,68 @@ func IDLTE(id int) predicate.Post {
 	return predicate.Post(sql.FieldLTE(FieldID, id))
 }
 
-// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
-func Text(v string) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: Text — use where.EQ(FieldText, v).
+func Text(v string) predicate.Post { return where.EQ(FieldText, v) }
 
-// AuthorID applies equality check predicate on the "author_id" field. It's identical to AuthorIDEQ.
-func AuthorID(v int) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldAuthorID, v))
-}
+// Deprecated: AuthorID — use where.EQ(FieldAuthorID, v).
+func AuthorID(v int) predicate.Post { return where.EQ(FieldAuthorID, v) }
 
-// TextEQ applies the EQ predicate on the "text" field.
-func TextEQ(v string) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: TextEQ — use where.EQ(FieldText, v).
+func TextEQ(v string) predicate.Post { return where.EQ(FieldText, v) }
 
-// TextNEQ applies the NEQ predicate on the "text" field.
-func TextNEQ(v string) predicate.Post {
-	return predicate.Post(sql.FieldNEQ(FieldText, v))
-}
+// Deprecated: TextNEQ — use where.NEQ(FieldText, v).
+func TextNEQ(v string) predicate.Post { return where.NEQ(FieldText, v) }
 
-// TextIn applies the In predicate on the "text" field.
-func TextIn(vs ...string) predicate.Post {
-	return predicate.Post(sql.FieldIn(FieldText, vs...))
-}
+// Deprecated: TextIn — use where.In(FieldText, vs...).
+func TextIn(vs ...string) predicate.Post { return where.In(FieldText, vs...) }
 
-// TextNotIn applies the NotIn predicate on the "text" field.
-func TextNotIn(vs ...string) predicate.Post {
-	return predicate.Post(sql.FieldNotIn(FieldText, vs...))
-}
+// Deprecated: TextNotIn — use where.NotIn(FieldText, vs...).
+func TextNotIn(vs ...string) predicate.Post { return where.NotIn(FieldText, vs...) }
 
-// TextGT applies the GT predicate on the "text" field.
-func TextGT(v string) predicate.Post {
-	return predicate.Post(sql.FieldGT(FieldText, v))
-}
+// Deprecated: TextGT — use where.GT(FieldText, v).
+func TextGT(v string) predicate.Post { return where.GT(FieldText, v) }
 
-// TextGTE applies the GTE predicate on the "text" field.
-func TextGTE(v string) predicate.Post {
-	return predicate.Post(sql.FieldGTE(FieldText, v))
-}
+// Deprecated: TextGTE — use where.GTE(FieldText, v).
+func TextGTE(v string) predicate.Post { return where.GTE(FieldText, v) }
 
-// TextLT applies the LT predicate on the "text" field.
-func TextLT(v string) predicate.Post {
-	return predicate.Post(sql.FieldLT(FieldText, v))
-}
+// Deprecated: TextLT — use where.LT(FieldText, v).
+func TextLT(v string) predicate.Post { return where.LT(FieldText, v) }
 
-// TextLTE applies the LTE predicate on the "text" field.
-func TextLTE(v string) predicate.Post {
-	return predicate.Post(sql.FieldLTE(FieldText, v))
-}
+// Deprecated: TextLTE — use where.LTE(FieldText, v).
+func TextLTE(v string) predicate.Post { return where.LTE(FieldText, v) }
 
-// TextContains applies the Contains predicate on the "text" field.
-func TextContains(v string) predicate.Post {
-	return predicate.Post(sql.FieldContains(FieldText, v))
-}
+// Deprecated: TextContains — use where.Contains(FieldText, v).
+func TextContains(v string) predicate.Post { return where.Contains(FieldText, v) }
 
-// TextHasPrefix applies the HasPrefix predicate on the "text" field.
-func TextHasPrefix(v string) predicate.Post {
-	return predicate.Post(sql.FieldHasPrefix(FieldText, v))
-}
+// Deprecated: TextHasPrefix — use where.HasPrefix(FieldText, v).
+func TextHasPrefix(v string) predicate.Post { return where.HasPrefix(FieldText, v) }
 
-// TextHasSuffix applies the HasSuffix predicate on the "text" field.
-func TextHasSuffix(v string) predicate.Post {
-	return predicate.Post(sql.FieldHasSuffix(FieldText, v))
-}
+// Deprecated: TextHasSuffix — use where.HasSuffix(FieldText, v).
+func TextHasSuffix(v string) predicate.Post { return where.HasSuffix(FieldText, v) }
 
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Post {
-	return predicate.Post(sql.FieldEqualFold(FieldText, v))
-}
+// Deprecated: TextEqualFold — use where.EqualFold(FieldText, v).
+func TextEqualFold(v string) predicate.Post { return where.EqualFold(FieldText, v) }
 
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Post {
-	return predicate.Post(sql.FieldContainsFold(FieldText, v))
-}
+// Deprecated: TextContainsFold — use where.ContainsFold(FieldText, v).
+func TextContainsFold(v string) predicate.Post { return where.ContainsFold(FieldText, v) }
 
-// AuthorIDEQ applies the EQ predicate on the "author_id" field.
-func AuthorIDEQ(v int) predicate.Post {
-	return predicate.Post(sql.FieldEQ(FieldAuthorID, v))
-}
+// Deprecated: AuthorIDEQ — use where.EQ(FieldAuthorID, v).
+func AuthorIDEQ(v int) predicate.Post { return where.EQ(FieldAuthorID, v) }
 
-// AuthorIDNEQ applies the NEQ predicate on the "author_id" field.
-func AuthorIDNEQ(v int) predicate.Post {
-	return predicate.Post(sql.FieldNEQ(FieldAuthorID, v))
-}
+// Deprecated: AuthorIDNEQ — use where.NEQ(FieldAuthorID, v).
+func AuthorIDNEQ(v int) predicate.Post { return where.NEQ(FieldAuthorID, v) }
 
-// AuthorIDIn applies the In predicate on the "author_id" field.
-func AuthorIDIn(vs ...int) predicate.Post {
-	return predicate.Post(sql.FieldIn(FieldAuthorID, vs...))
-}
+// Deprecated: AuthorIDIn — use where.In(FieldAuthorID, vs...).
+func AuthorIDIn(vs ...int) predicate.Post { return where.In(FieldAuthorID, vs...) }
 
-// AuthorIDNotIn applies the NotIn predicate on the "author_id" field.
-func AuthorIDNotIn(vs ...int) predicate.Post {
-	return predicate.Post(sql.FieldNotIn(FieldAuthorID, vs...))
-}
+// Deprecated: AuthorIDNotIn — use where.NotIn(FieldAuthorID, vs...).
+func AuthorIDNotIn(vs ...int) predicate.Post { return where.NotIn(FieldAuthorID, vs...) }
 
-// AuthorIDIsNil applies the IsNil predicate on the "author_id" field.
-func AuthorIDIsNil() predicate.Post {
-	return predicate.Post(sql.FieldIsNull(FieldAuthorID))
-}
+// Deprecated: AuthorIDIsNil — use where.IsNull(FieldAuthorID).
+func AuthorIDIsNil() predicate.Post { return where.IsNull(FieldAuthorID) }
 
-// AuthorIDNotNil applies the NotNil predicate on the "author_id" field.
-func AuthorIDNotNil() predicate.Post {
-	return predicate.Post(sql.FieldNotNull(FieldAuthorID))
-}
+// Deprecated: AuthorIDNotNil — use where.NotNull(FieldAuthorID).
+func AuthorIDNotNil() predicate.Post { return where.NotNull(FieldAuthorID) }
 
 // HasAuthor applies the HasEdge predicate on the "author" edge.
 func HasAuthor() predicate.Post {
@@ -175,14 +134,15 @@ func HasAuthor() predicate.Post {
 
 // HasAuthorWith applies the HasEdge predicate on the "author" edge with a given conditions (other predicates).
 func HasAuthorWith(preds ...predicate.User) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		step := newAuthorStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Post(
+		func(s *sql.Selector) {
+			step := newAuthorStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasComments applies the HasEdge predicate on the "comments" edge.
@@ -198,14 +158,15 @@ func HasComments() predicate.Post {
 
 // HasCommentsWith applies the HasEdge predicate on the "comments" edge with a given conditions (other predicates).
 func HasCommentsWith(preds ...predicate.Comment) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		step := newCommentsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Post(
+		func(s *sql.Selector) {
+			step := newCommentsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

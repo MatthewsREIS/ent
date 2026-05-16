@@ -18,8 +18,9 @@ import (
 // PetDelete is the builder for deleting a Pet entity.
 type PetDelete struct {
 	Config
-	hooks    []Hook
-	mutation *PetMutation
+	hooks     []Hook
+	mutation  *PetMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewPetDelete returns a new PetDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *PetDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *PetDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *PetDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *PetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

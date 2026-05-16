@@ -8,6 +8,7 @@ package entv1
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/customtype"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -528,4 +530,23 @@ func (_s *CustomTypeSelect) sqlScan(ctx context.Context, root *CustomTypeQuery, 
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// customtypeCreateDescriptor holds the metadata and callbacks for constructing a CustomType entity.
+var customtypeCreateDescriptor = &entbuilder.CreateDescriptor[Config, CustomType, *CustomTypeMutation]{
+	Table:   customtype.Table,
+	NewNode: func(c Config) *CustomType { return &CustomType{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, CustomType, *CustomTypeMutation]{
+		Column:      customtype.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *CustomType, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected CustomType.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

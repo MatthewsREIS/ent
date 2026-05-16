@@ -18,8 +18,9 @@ import (
 // GoodsDelete is the builder for deleting a Goods entity.
 type GoodsDelete struct {
 	Config
-	hooks    []Hook
-	mutation *GoodsMutation
+	hooks     []Hook
+	mutation  *GoodsMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewGoodsDelete returns a new GoodsDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *GoodsDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *GoodsDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *GoodsDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *GoodsDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

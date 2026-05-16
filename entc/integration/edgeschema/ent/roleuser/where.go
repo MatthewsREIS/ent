@@ -12,102 +12,65 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/where"
 )
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldEQ(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAt — use where.EQ(FieldCreatedAt, v).
+func CreatedAt(v time.Time) predicate.RoleUser { return where.EQ(FieldCreatedAt, v) }
 
-// RoleID applies equality check predicate on the "role_id" field. It's identical to RoleIDEQ.
-func RoleID(v int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldEQ(FieldRoleID, v))
-}
+// Deprecated: RoleID — use where.EQ(FieldRoleID, v).
+func RoleID(v int) predicate.RoleUser { return where.EQ(FieldRoleID, v) }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserID — use where.EQ(FieldUserID, v).
+func UserID(v int) predicate.RoleUser { return where.EQ(FieldUserID, v) }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldEQ(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtEQ — use where.EQ(FieldCreatedAt, v).
+func CreatedAtEQ(v time.Time) predicate.RoleUser { return where.EQ(FieldCreatedAt, v) }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldNEQ(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtNEQ — use where.NEQ(FieldCreatedAt, v).
+func CreatedAtNEQ(v time.Time) predicate.RoleUser { return where.NEQ(FieldCreatedAt, v) }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldIn(FieldCreatedAt, vs...))
-}
+// Deprecated: CreatedAtIn — use where.In(FieldCreatedAt, vs...).
+func CreatedAtIn(vs ...time.Time) predicate.RoleUser { return where.In(FieldCreatedAt, vs...) }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldNotIn(FieldCreatedAt, vs...))
-}
+// Deprecated: CreatedAtNotIn — use where.NotIn(FieldCreatedAt, vs...).
+func CreatedAtNotIn(vs ...time.Time) predicate.RoleUser { return where.NotIn(FieldCreatedAt, vs...) }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldGT(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtGT — use where.GT(FieldCreatedAt, v).
+func CreatedAtGT(v time.Time) predicate.RoleUser { return where.GT(FieldCreatedAt, v) }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldGTE(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtGTE — use where.GTE(FieldCreatedAt, v).
+func CreatedAtGTE(v time.Time) predicate.RoleUser { return where.GTE(FieldCreatedAt, v) }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldLT(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtLT — use where.LT(FieldCreatedAt, v).
+func CreatedAtLT(v time.Time) predicate.RoleUser { return where.LT(FieldCreatedAt, v) }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldLTE(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtLTE — use where.LTE(FieldCreatedAt, v).
+func CreatedAtLTE(v time.Time) predicate.RoleUser { return where.LTE(FieldCreatedAt, v) }
 
-// RoleIDEQ applies the EQ predicate on the "role_id" field.
-func RoleIDEQ(v int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldEQ(FieldRoleID, v))
-}
+// Deprecated: RoleIDEQ — use where.EQ(FieldRoleID, v).
+func RoleIDEQ(v int) predicate.RoleUser { return where.EQ(FieldRoleID, v) }
 
-// RoleIDNEQ applies the NEQ predicate on the "role_id" field.
-func RoleIDNEQ(v int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldNEQ(FieldRoleID, v))
-}
+// Deprecated: RoleIDNEQ — use where.NEQ(FieldRoleID, v).
+func RoleIDNEQ(v int) predicate.RoleUser { return where.NEQ(FieldRoleID, v) }
 
-// RoleIDIn applies the In predicate on the "role_id" field.
-func RoleIDIn(vs ...int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldIn(FieldRoleID, vs...))
-}
+// Deprecated: RoleIDIn — use where.In(FieldRoleID, vs...).
+func RoleIDIn(vs ...int) predicate.RoleUser { return where.In(FieldRoleID, vs...) }
 
-// RoleIDNotIn applies the NotIn predicate on the "role_id" field.
-func RoleIDNotIn(vs ...int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldNotIn(FieldRoleID, vs...))
-}
+// Deprecated: RoleIDNotIn — use where.NotIn(FieldRoleID, vs...).
+func RoleIDNotIn(vs ...int) predicate.RoleUser { return where.NotIn(FieldRoleID, vs...) }
 
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserIDEQ — use where.EQ(FieldUserID, v).
+func UserIDEQ(v int) predicate.RoleUser { return where.EQ(FieldUserID, v) }
 
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldNEQ(FieldUserID, v))
-}
+// Deprecated: UserIDNEQ — use where.NEQ(FieldUserID, v).
+func UserIDNEQ(v int) predicate.RoleUser { return where.NEQ(FieldUserID, v) }
 
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDIn — use where.In(FieldUserID, vs...).
+func UserIDIn(vs ...int) predicate.RoleUser { return where.In(FieldUserID, vs...) }
 
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.RoleUser {
-	return predicate.RoleUser(sql.FieldNotIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDNotIn — use where.NotIn(FieldUserID, vs...).
+func UserIDNotIn(vs ...int) predicate.RoleUser { return where.NotIn(FieldUserID, vs...) }
 
 // HasRole applies the HasEdge predicate on the "role" edge.
 func HasRole() predicate.RoleUser {
@@ -122,14 +85,15 @@ func HasRole() predicate.RoleUser {
 
 // HasRoleWith applies the HasEdge predicate on the "role" edge with a given conditions (other predicates).
 func HasRoleWith(preds ...predicate.Role) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		step := newRoleStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.RoleUser(
+		func(s *sql.Selector) {
+			step := newRoleStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -145,14 +109,15 @@ func HasUser() predicate.RoleUser {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.RoleUser {
-	return predicate.RoleUser(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.RoleUser(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/versioned/pet"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
 	"entgo.io/ent/entc/integration/multischema/versioned/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -1154,4 +1155,23 @@ func (_s *UserSelect) sqlScan(ctx context.Context, root *UserQuery, v any) error
 func (_s *UserSelect) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// userCreateDescriptor holds the metadata and callbacks for constructing a User entity.
+var userCreateDescriptor = &entbuilder.CreateDescriptor[Config, User, *UserMutation]{
+	Table:   user.Table,
+	NewNode: func(c Config) *User { return &User{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, User, *UserMutation]{
+		Column:      user.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *User, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected User.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv1/car"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv1/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -834,4 +835,36 @@ func (_s *UserSelect) sqlScan(ctx context.Context, root *UserQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// userCreateDescriptor holds the metadata and callbacks for constructing a User entity.
+var userCreateDescriptor = &entbuilder.CreateDescriptor[Config, User, *UserMutation]{
+	Table:   user.Table,
+	NewNode: func(c Config) *User { return &User{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, User, *UserMutation]{
+		Column:      user.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: true,
+		Value: func(m *UserMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *User, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(int)
+			return nil
+		},
+		AssignGenerated: func(n *User, v driver.Value) error {
+			switch x := v.(type) {
+			case int:
+				n.ID = x
+			case int64:
+				n.ID = int(x)
+			default:
+				return fmt.Errorf("unexpected User.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

@@ -11,19 +11,19 @@ import (
 )
 
 // Api is the predicate function for api builders.
-type Api func(*dsl.Traversal)
+type Api = func(*dsl.Traversal)
 
 // Builder is the predicate function for builder builders.
-type Builder func(*dsl.Traversal)
+type Builder = func(*dsl.Traversal)
 
 // Card is the predicate function for card builders.
-type Card func(*dsl.Traversal)
+type Card = func(*dsl.Traversal)
 
 // Comment is the predicate function for comment builders.
-type Comment func(*dsl.Traversal)
+type Comment = func(*dsl.Traversal)
 
 // ExValueScan is the predicate function for exvaluescan builders.
-type ExValueScan func(*dsl.Traversal)
+type ExValueScan = func(*dsl.Traversal)
 
 // ExValueScanOrErr calls the predicate only if the error is not nit.
 func ExValueScanOrErr(p ExValueScan, err error) ExValueScan {
@@ -37,43 +37,43 @@ func ExValueScanOrErr(p ExValueScan, err error) ExValueScan {
 }
 
 // FieldType is the predicate function for fieldtype builders.
-type FieldType func(*dsl.Traversal)
+type FieldType = func(*dsl.Traversal)
 
 // File is the predicate function for file builders.
-type File func(*dsl.Traversal)
+type File = func(*dsl.Traversal)
 
 // FileType is the predicate function for filetype builders.
-type FileType func(*dsl.Traversal)
+type FileType = func(*dsl.Traversal)
 
 // Goods is the predicate function for goods builders.
-type Goods func(*dsl.Traversal)
+type Goods = func(*dsl.Traversal)
 
 // Group is the predicate function for group builders.
-type Group func(*dsl.Traversal)
+type Group = func(*dsl.Traversal)
 
 // GroupInfo is the predicate function for groupinfo builders.
-type GroupInfo func(*dsl.Traversal)
+type GroupInfo = func(*dsl.Traversal)
 
 // Item is the predicate function for item builders.
-type Item func(*dsl.Traversal)
+type Item = func(*dsl.Traversal)
 
 // License is the predicate function for license builders.
-type License func(*dsl.Traversal)
+type License = func(*dsl.Traversal)
 
 // Node is the predicate function for node builders.
-type Node func(*dsl.Traversal)
+type Node = func(*dsl.Traversal)
 
 // PC is the predicate function for pc builders.
-type PC func(*dsl.Traversal)
+type PC = func(*dsl.Traversal)
 
 // Pet is the predicate function for pet builders.
-type Pet func(*dsl.Traversal)
+type Pet = func(*dsl.Traversal)
 
 // Spec is the predicate function for spec builders.
-type Spec func(*dsl.Traversal)
+type Spec = func(*dsl.Traversal)
 
 // Task is the predicate function for enttask builders.
-type Task func(*dsl.Traversal)
+type Task = func(*dsl.Traversal)
 
 // User is the predicate function for user builders.
-type User func(*dsl.Traversal)
+type User = func(*dsl.Traversal)

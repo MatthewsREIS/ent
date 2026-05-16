@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -608,4 +609,36 @@ func (_s *BlogSelect) sqlScan(ctx context.Context, root *BlogQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// blogCreateDescriptor holds the metadata and callbacks for constructing a Blog entity.
+var blogCreateDescriptor = &entbuilder.CreateDescriptor[Config, Blog, *BlogMutation]{
+	Table:   blog.Table,
+	NewNode: func(c Config) *Blog { return &Blog{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Blog, *BlogMutation]{
+		Column:      blog.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: true,
+		Value: func(m *BlogMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Blog, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(int)
+			return nil
+		},
+		AssignGenerated: func(n *Blog, v driver.Value) error {
+			switch x := v.(type) {
+			case int:
+				n.ID = x
+			case int64:
+				n.ID = int(x)
+			default:
+				return fmt.Errorf("unexpected Blog.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -416,34 +417,34 @@ func (_q *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	return nodes, nil
 }
 
-var carRentalsEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Car, Rental, uuid.UUID, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      false,
-			Table:        car.RentalsTable,
-			Columns:      car.RentalsColumn,
-			Bidi:         false,
-			TargetColumn: rental.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Car) uuid.UUID { return n.ID },
-	ExtractEdgeID: func(e *Rental) int { return e.ID },
-	ExtractEdgeFK: func(e *Rental) *uuid.UUID {
-		v := e.CarID
-		return &v
-	},
-}
-
 func (_q *CarQuery) loadRentals(ctx context.Context, query *RentalQuery, nodes []*Car, init func(*Car), assign func(*Car, *Rental)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Car)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(rental.FieldCarID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &carRentalsEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(car.RentalsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CarID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "car_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 
@@ -630,4 +631,34 @@ func (_s *CarSelect) sqlScan(ctx context.Context, root *CarQuery, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// carCreateDescriptor holds the metadata and callbacks for constructing a Car entity.
+var carCreateDescriptor = &entbuilder.CreateDescriptor[Config, Car, *CarMutation]{
+	Table:   car.Table,
+	NewNode: func(c Config) *Car { return &Car{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Car, *CarMutation]{
+		Column:      car.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *CarMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Car, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(n *Car, v driver.Value) error {
+			switch x := v.(type) {
+			case uuid.UUID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Car.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

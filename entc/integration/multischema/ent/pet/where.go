@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,110 +59,68 @@ func IDLTE(id int) predicate.Pet {
 	return predicate.Pet(sql.FieldLTE(FieldID, id))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldName, v))
-}
+// Deprecated: Name — use where.EQ(FieldName, v).
+func Name(v string) predicate.Pet { return where.EQ(FieldName, v) }
 
-// OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
-func OwnerID(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldOwnerID, v))
-}
+// Deprecated: OwnerID — use where.EQ(FieldOwnerID, v).
+func OwnerID(v int) predicate.Pet { return where.EQ(FieldOwnerID, v) }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldName, v))
-}
+// Deprecated: NameEQ — use where.EQ(FieldName, v).
+func NameEQ(v string) predicate.Pet { return where.EQ(FieldName, v) }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldName, v))
-}
+// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
+func NameNEQ(v string) predicate.Pet { return where.NEQ(FieldName, v) }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Pet {
-	return predicate.Pet(sql.FieldIn(FieldName, vs...))
-}
+// Deprecated: NameIn — use where.In(FieldName, vs...).
+func NameIn(vs ...string) predicate.Pet { return where.In(FieldName, vs...) }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Pet {
-	return predicate.Pet(sql.FieldNotIn(FieldName, vs...))
-}
+// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
+func NameNotIn(vs ...string) predicate.Pet { return where.NotIn(FieldName, vs...) }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldGT(FieldName, v))
-}
+// Deprecated: NameGT — use where.GT(FieldName, v).
+func NameGT(v string) predicate.Pet { return where.GT(FieldName, v) }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldGTE(FieldName, v))
-}
+// Deprecated: NameGTE — use where.GTE(FieldName, v).
+func NameGTE(v string) predicate.Pet { return where.GTE(FieldName, v) }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldLT(FieldName, v))
-}
+// Deprecated: NameLT — use where.LT(FieldName, v).
+func NameLT(v string) predicate.Pet { return where.LT(FieldName, v) }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldLTE(FieldName, v))
-}
+// Deprecated: NameLTE — use where.LTE(FieldName, v).
+func NameLTE(v string) predicate.Pet { return where.LTE(FieldName, v) }
 
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldContains(FieldName, v))
-}
+// Deprecated: NameContains — use where.Contains(FieldName, v).
+func NameContains(v string) predicate.Pet { return where.Contains(FieldName, v) }
 
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldHasPrefix(FieldName, v))
-}
+// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
+func NameHasPrefix(v string) predicate.Pet { return where.HasPrefix(FieldName, v) }
 
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldHasSuffix(FieldName, v))
-}
+// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
+func NameHasSuffix(v string) predicate.Pet { return where.HasSuffix(FieldName, v) }
 
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldEqualFold(FieldName, v))
-}
+// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
+func NameEqualFold(v string) predicate.Pet { return where.EqualFold(FieldName, v) }
 
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Pet {
-	return predicate.Pet(sql.FieldContainsFold(FieldName, v))
-}
+// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
+func NameContainsFold(v string) predicate.Pet { return where.ContainsFold(FieldName, v) }
 
-// OwnerIDEQ applies the EQ predicate on the "owner_id" field.
-func OwnerIDEQ(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldOwnerID, v))
-}
+// Deprecated: OwnerIDEQ — use where.EQ(FieldOwnerID, v).
+func OwnerIDEQ(v int) predicate.Pet { return where.EQ(FieldOwnerID, v) }
 
-// OwnerIDNEQ applies the NEQ predicate on the "owner_id" field.
-func OwnerIDNEQ(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldOwnerID, v))
-}
+// Deprecated: OwnerIDNEQ — use where.NEQ(FieldOwnerID, v).
+func OwnerIDNEQ(v int) predicate.Pet { return where.NEQ(FieldOwnerID, v) }
 
-// OwnerIDIn applies the In predicate on the "owner_id" field.
-func OwnerIDIn(vs ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldIn(FieldOwnerID, vs...))
-}
+// Deprecated: OwnerIDIn — use where.In(FieldOwnerID, vs...).
+func OwnerIDIn(vs ...int) predicate.Pet { return where.In(FieldOwnerID, vs...) }
 
-// OwnerIDNotIn applies the NotIn predicate on the "owner_id" field.
-func OwnerIDNotIn(vs ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldNotIn(FieldOwnerID, vs...))
-}
+// Deprecated: OwnerIDNotIn — use where.NotIn(FieldOwnerID, vs...).
+func OwnerIDNotIn(vs ...int) predicate.Pet { return where.NotIn(FieldOwnerID, vs...) }
 
-// OwnerIDIsNil applies the IsNil predicate on the "owner_id" field.
-func OwnerIDIsNil() predicate.Pet {
-	return predicate.Pet(sql.FieldIsNull(FieldOwnerID))
-}
+// Deprecated: OwnerIDIsNil — use where.IsNull(FieldOwnerID).
+func OwnerIDIsNil() predicate.Pet { return where.IsNull(FieldOwnerID) }
 
-// OwnerIDNotNil applies the NotNil predicate on the "owner_id" field.
-func OwnerIDNotNil() predicate.Pet {
-	return predicate.Pet(sql.FieldNotNull(FieldOwnerID))
-}
+// Deprecated: OwnerIDNotNil — use where.NotNull(FieldOwnerID).
+func OwnerIDNotNil() predicate.Pet { return where.NotNull(FieldOwnerID) }
 
 // HasOwner applies the HasEdge predicate on the "owner" edge.
 func HasOwner() predicate.Pet {
@@ -179,17 +138,18 @@ func HasOwner() predicate.Pet {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.Pet {
-	return predicate.Pet(func(s *sql.Selector) {
-		step := newOwnerStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Pet
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Pet(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Pet
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

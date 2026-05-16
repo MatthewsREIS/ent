@@ -18,8 +18,9 @@ import (
 // CommentDelete is the builder for deleting a Comment entity.
 type CommentDelete struct {
 	Config
-	hooks    []Hook
-	mutation *CommentMutation
+	hooks     []Hook
+	mutation  *CommentMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewCommentDelete returns a new CommentDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *CommentDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *CommentDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *CommentDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *CommentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -578,4 +580,36 @@ func (_s *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any)
 func (_s *LicenseSelect) Modify(modifiers ...func(s *sql.Selector)) *LicenseSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// licenseCreateDescriptor holds the metadata and callbacks for constructing a License entity.
+var licenseCreateDescriptor = &entbuilder.CreateDescriptor[Config, License, *LicenseMutation]{
+	Table:   license.Table,
+	NewNode: func(c Config) *License { return &License{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, License, *LicenseMutation]{
+		Column:      license.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: true,
+		Value: func(m *LicenseMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *License, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(int)
+			return nil
+		},
+		AssignGenerated: func(n *License, v driver.Value) error {
+			switch x := v.(type) {
+			case int:
+				n.ID = x
+			case int64:
+				n.ID = int(x)
+			default:
+				return fmt.Errorf("unexpected License.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

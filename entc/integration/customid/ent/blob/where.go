@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -63,90 +64,56 @@ func UUID(v uuid.UUID) predicate.Blob {
 	return predicate.Blob(sql.FieldEQ(FieldUUID, v))
 }
 
-// Count applies equality check predicate on the "count" field. It's identical to CountEQ.
-func Count(v int) predicate.Blob {
-	return predicate.Blob(sql.FieldEQ(FieldCount, v))
-}
+// Deprecated: Count — use where.EQ(FieldCount, v).
+func Count(v int) predicate.Blob { return where.EQ(FieldCount, v) }
 
-// UUIDEQ applies the EQ predicate on the "uuid" field.
-func UUIDEQ(v uuid.UUID) predicate.Blob {
-	return predicate.Blob(sql.FieldEQ(FieldUUID, v))
-}
+// Deprecated: UUIDEQ — use where.EQ(FieldUUID, v).
+func UUIDEQ(v uuid.UUID) predicate.Blob { return where.EQ(FieldUUID, v) }
 
-// UUIDNEQ applies the NEQ predicate on the "uuid" field.
-func UUIDNEQ(v uuid.UUID) predicate.Blob {
-	return predicate.Blob(sql.FieldNEQ(FieldUUID, v))
-}
+// Deprecated: UUIDNEQ — use where.NEQ(FieldUUID, v).
+func UUIDNEQ(v uuid.UUID) predicate.Blob { return where.NEQ(FieldUUID, v) }
 
-// UUIDIn applies the In predicate on the "uuid" field.
-func UUIDIn(vs ...uuid.UUID) predicate.Blob {
-	return predicate.Blob(sql.FieldIn(FieldUUID, vs...))
-}
+// Deprecated: UUIDIn — use where.In(FieldUUID, vs...).
+func UUIDIn(vs ...uuid.UUID) predicate.Blob { return where.In(FieldUUID, vs...) }
 
-// UUIDNotIn applies the NotIn predicate on the "uuid" field.
-func UUIDNotIn(vs ...uuid.UUID) predicate.Blob {
-	return predicate.Blob(sql.FieldNotIn(FieldUUID, vs...))
-}
+// Deprecated: UUIDNotIn — use where.NotIn(FieldUUID, vs...).
+func UUIDNotIn(vs ...uuid.UUID) predicate.Blob { return where.NotIn(FieldUUID, vs...) }
 
-// UUIDGT applies the GT predicate on the "uuid" field.
-func UUIDGT(v uuid.UUID) predicate.Blob {
-	return predicate.Blob(sql.FieldGT(FieldUUID, v))
-}
+// Deprecated: UUIDGT — use where.GT(FieldUUID, v).
+func UUIDGT(v uuid.UUID) predicate.Blob { return where.GT(FieldUUID, v) }
 
-// UUIDGTE applies the GTE predicate on the "uuid" field.
-func UUIDGTE(v uuid.UUID) predicate.Blob {
-	return predicate.Blob(sql.FieldGTE(FieldUUID, v))
-}
+// Deprecated: UUIDGTE — use where.GTE(FieldUUID, v).
+func UUIDGTE(v uuid.UUID) predicate.Blob { return where.GTE(FieldUUID, v) }
 
-// UUIDLT applies the LT predicate on the "uuid" field.
-func UUIDLT(v uuid.UUID) predicate.Blob {
-	return predicate.Blob(sql.FieldLT(FieldUUID, v))
-}
+// Deprecated: UUIDLT — use where.LT(FieldUUID, v).
+func UUIDLT(v uuid.UUID) predicate.Blob { return where.LT(FieldUUID, v) }
 
-// UUIDLTE applies the LTE predicate on the "uuid" field.
-func UUIDLTE(v uuid.UUID) predicate.Blob {
-	return predicate.Blob(sql.FieldLTE(FieldUUID, v))
-}
+// Deprecated: UUIDLTE — use where.LTE(FieldUUID, v).
+func UUIDLTE(v uuid.UUID) predicate.Blob { return where.LTE(FieldUUID, v) }
 
-// CountEQ applies the EQ predicate on the "count" field.
-func CountEQ(v int) predicate.Blob {
-	return predicate.Blob(sql.FieldEQ(FieldCount, v))
-}
+// Deprecated: CountEQ — use where.EQ(FieldCount, v).
+func CountEQ(v int) predicate.Blob { return where.EQ(FieldCount, v) }
 
-// CountNEQ applies the NEQ predicate on the "count" field.
-func CountNEQ(v int) predicate.Blob {
-	return predicate.Blob(sql.FieldNEQ(FieldCount, v))
-}
+// Deprecated: CountNEQ — use where.NEQ(FieldCount, v).
+func CountNEQ(v int) predicate.Blob { return where.NEQ(FieldCount, v) }
 
-// CountIn applies the In predicate on the "count" field.
-func CountIn(vs ...int) predicate.Blob {
-	return predicate.Blob(sql.FieldIn(FieldCount, vs...))
-}
+// Deprecated: CountIn — use where.In(FieldCount, vs...).
+func CountIn(vs ...int) predicate.Blob { return where.In(FieldCount, vs...) }
 
-// CountNotIn applies the NotIn predicate on the "count" field.
-func CountNotIn(vs ...int) predicate.Blob {
-	return predicate.Blob(sql.FieldNotIn(FieldCount, vs...))
-}
+// Deprecated: CountNotIn — use where.NotIn(FieldCount, vs...).
+func CountNotIn(vs ...int) predicate.Blob { return where.NotIn(FieldCount, vs...) }
 
-// CountGT applies the GT predicate on the "count" field.
-func CountGT(v int) predicate.Blob {
-	return predicate.Blob(sql.FieldGT(FieldCount, v))
-}
+// Deprecated: CountGT — use where.GT(FieldCount, v).
+func CountGT(v int) predicate.Blob { return where.GT(FieldCount, v) }
 
-// CountGTE applies the GTE predicate on the "count" field.
-func CountGTE(v int) predicate.Blob {
-	return predicate.Blob(sql.FieldGTE(FieldCount, v))
-}
+// Deprecated: CountGTE — use where.GTE(FieldCount, v).
+func CountGTE(v int) predicate.Blob { return where.GTE(FieldCount, v) }
 
-// CountLT applies the LT predicate on the "count" field.
-func CountLT(v int) predicate.Blob {
-	return predicate.Blob(sql.FieldLT(FieldCount, v))
-}
+// Deprecated: CountLT — use where.LT(FieldCount, v).
+func CountLT(v int) predicate.Blob { return where.LT(FieldCount, v) }
 
-// CountLTE applies the LTE predicate on the "count" field.
-func CountLTE(v int) predicate.Blob {
-	return predicate.Blob(sql.FieldLTE(FieldCount, v))
-}
+// Deprecated: CountLTE — use where.LTE(FieldCount, v).
+func CountLTE(v int) predicate.Blob { return where.LTE(FieldCount, v) }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Blob {
@@ -161,14 +128,15 @@ func HasParent() predicate.Blob {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.Blob) predicate.Blob {
-	return predicate.Blob(func(s *sql.Selector) {
-		step := newParentStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Blob(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasLinks applies the HasEdge predicate on the "links" edge.
@@ -184,14 +152,15 @@ func HasLinks() predicate.Blob {
 
 // HasLinksWith applies the HasEdge predicate on the "links" edge with a given conditions (other predicates).
 func HasLinksWith(preds ...predicate.Blob) predicate.Blob {
-	return predicate.Blob(func(s *sql.Selector) {
-		step := newLinksStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Blob(
+		func(s *sql.Selector) {
+			step := newLinksStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasBlobLinks applies the HasEdge predicate on the "blob_links" edge.
@@ -207,14 +176,15 @@ func HasBlobLinks() predicate.Blob {
 
 // HasBlobLinksWith applies the HasEdge predicate on the "blob_links" edge with a given conditions (other predicates).
 func HasBlobLinksWith(preds ...predicate.BlobLink) predicate.Blob {
-	return predicate.Blob(func(s *sql.Selector) {
-		step := newBlobLinksStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Blob(
+		func(s *sql.Selector) {
+			step := newBlobLinksStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

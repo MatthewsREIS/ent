@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/versioned/internal"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
 	"entgo.io/ent/entc/integration/multischema/versioned/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -676,4 +677,23 @@ func (_s *GroupSelect) sqlScan(ctx context.Context, root *GroupQuery, v any) err
 func (_s *GroupSelect) Modify(modifiers ...func(s *sql.Selector)) *GroupSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// groupCreateDescriptor holds the metadata and callbacks for constructing a Group entity.
+var groupCreateDescriptor = &entbuilder.CreateDescriptor[Config, Group, *GroupMutation]{
+	Table:   group.Table,
+	NewNode: func(c Config) *Group { return &Group{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Group, *GroupMutation]{
+		Column:      group.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Group, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Group.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

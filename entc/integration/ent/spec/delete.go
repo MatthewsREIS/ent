@@ -18,8 +18,9 @@ import (
 // SpecDelete is the builder for deleting a Spec entity.
 type SpecDelete struct {
 	Config
-	hooks    []Hook
-	mutation *SpecMutation
+	hooks     []Hook
+	mutation  *SpecMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewSpecDelete returns a new SpecDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *SpecDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *SpecDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *SpecDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *SpecDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

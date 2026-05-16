@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -65,30 +66,20 @@ func Priority(v task.Priority) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldPriority, vc))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAt — use where.EQ(FieldCreatedAt, v).
+func CreatedAt(v time.Time) predicate.Task { return where.EQ(FieldCreatedAt, v) }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldName, v))
-}
+// Deprecated: Name — use where.EQ(FieldName, v).
+func Name(v string) predicate.Task { return where.EQ(FieldName, v) }
 
-// Owner applies equality check predicate on the "owner" field. It's identical to OwnerEQ.
-func Owner(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOwner, v))
-}
+// Deprecated: Owner — use where.EQ(FieldOwner, v).
+func Owner(v string) predicate.Task { return where.EQ(FieldOwner, v) }
 
-// Order applies equality check predicate on the "order" field. It's identical to OrderEQ.
-func Order(v int) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOrder, v))
-}
+// Deprecated: Order — use where.EQ(FieldOrder, v).
+func Order(v int) predicate.Task { return where.EQ(FieldOrder, v) }
 
-// Op applies equality check predicate on the "op" field. It's identical to OpEQ.
-func Op(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOp, v))
-}
+// Deprecated: Op — use where.EQ(FieldOp, v).
+func Op(v string) predicate.Task { return where.EQ(FieldOp, v) }
 
 // PriorityEQ applies the EQ predicate on the "priority" field.
 func PriorityEQ(v task.Priority) predicate.Task {
@@ -154,360 +145,218 @@ func PrioritiesNotNil() predicate.Task {
 	return predicate.Task(sql.FieldNotNull(FieldPriorities))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldCreatedAt, v))
-}
-
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldCreatedAt, v))
-}
-
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldCreatedAt, vs...))
-}
-
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldCreatedAt, vs...))
-}
-
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldCreatedAt, v))
-}
-
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldCreatedAt, v))
-}
-
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldCreatedAt, v))
-}
-
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldCreatedAt, v))
-}
-
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldName, v))
-}
-
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldName, v))
-}
-
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldName, vs...))
-}
-
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldName, vs...))
-}
-
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldName, v))
-}
-
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldName, v))
-}
-
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldName, v))
-}
-
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldName, v))
-}
-
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldName, v))
-}
-
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldName, v))
-}
-
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameIsNil applies the IsNil predicate on the "name" field.
-func NameIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldName))
-}
-
-// NameNotNil applies the NotNil predicate on the "name" field.
-func NameNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldName))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldName, v))
-}
-
-// OwnerEQ applies the EQ predicate on the "owner" field.
-func OwnerEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOwner, v))
-}
-
-// OwnerNEQ applies the NEQ predicate on the "owner" field.
-func OwnerNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldOwner, v))
-}
-
-// OwnerIn applies the In predicate on the "owner" field.
-func OwnerIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldOwner, vs...))
-}
-
-// OwnerNotIn applies the NotIn predicate on the "owner" field.
-func OwnerNotIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldOwner, vs...))
-}
-
-// OwnerGT applies the GT predicate on the "owner" field.
-func OwnerGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldOwner, v))
-}
-
-// OwnerGTE applies the GTE predicate on the "owner" field.
-func OwnerGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldOwner, v))
-}
-
-// OwnerLT applies the LT predicate on the "owner" field.
-func OwnerLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldOwner, v))
-}
-
-// OwnerLTE applies the LTE predicate on the "owner" field.
-func OwnerLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldOwner, v))
-}
-
-// OwnerContains applies the Contains predicate on the "owner" field.
-func OwnerContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldOwner, v))
-}
-
-// OwnerHasPrefix applies the HasPrefix predicate on the "owner" field.
-func OwnerHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldOwner, v))
-}
-
-// OwnerHasSuffix applies the HasSuffix predicate on the "owner" field.
-func OwnerHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldOwner, v))
-}
-
-// OwnerIsNil applies the IsNil predicate on the "owner" field.
-func OwnerIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldOwner))
-}
-
-// OwnerNotNil applies the NotNil predicate on the "owner" field.
-func OwnerNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldOwner))
-}
-
-// OwnerEqualFold applies the EqualFold predicate on the "owner" field.
-func OwnerEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldOwner, v))
-}
-
-// OwnerContainsFold applies the ContainsFold predicate on the "owner" field.
-func OwnerContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldOwner, v))
-}
-
-// OrderEQ applies the EQ predicate on the "order" field.
-func OrderEQ(v int) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOrder, v))
-}
-
-// OrderNEQ applies the NEQ predicate on the "order" field.
-func OrderNEQ(v int) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldOrder, v))
-}
-
-// OrderIn applies the In predicate on the "order" field.
-func OrderIn(vs ...int) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldOrder, vs...))
-}
-
-// OrderNotIn applies the NotIn predicate on the "order" field.
-func OrderNotIn(vs ...int) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldOrder, vs...))
-}
-
-// OrderGT applies the GT predicate on the "order" field.
-func OrderGT(v int) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldOrder, v))
-}
-
-// OrderGTE applies the GTE predicate on the "order" field.
-func OrderGTE(v int) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldOrder, v))
-}
-
-// OrderLT applies the LT predicate on the "order" field.
-func OrderLT(v int) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldOrder, v))
-}
-
-// OrderLTE applies the LTE predicate on the "order" field.
-func OrderLTE(v int) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldOrder, v))
-}
-
-// OrderIsNil applies the IsNil predicate on the "order" field.
-func OrderIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldOrder))
-}
-
-// OrderNotNil applies the NotNil predicate on the "order" field.
-func OrderNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldOrder))
-}
-
-// OrderOptionEQ applies the EQ predicate on the "order_option" field.
-func OrderOptionEQ(v int) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOrderOption, v))
-}
-
-// OrderOptionNEQ applies the NEQ predicate on the "order_option" field.
-func OrderOptionNEQ(v int) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldOrderOption, v))
-}
-
-// OrderOptionIn applies the In predicate on the "order_option" field.
-func OrderOptionIn(vs ...int) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldOrderOption, vs...))
-}
-
-// OrderOptionNotIn applies the NotIn predicate on the "order_option" field.
-func OrderOptionNotIn(vs ...int) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldOrderOption, vs...))
-}
-
-// OrderOptionGT applies the GT predicate on the "order_option" field.
-func OrderOptionGT(v int) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldOrderOption, v))
-}
-
-// OrderOptionGTE applies the GTE predicate on the "order_option" field.
-func OrderOptionGTE(v int) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldOrderOption, v))
-}
-
-// OrderOptionLT applies the LT predicate on the "order_option" field.
-func OrderOptionLT(v int) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldOrderOption, v))
-}
-
-// OrderOptionLTE applies the LTE predicate on the "order_option" field.
-func OrderOptionLTE(v int) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldOrderOption, v))
-}
-
-// OrderOptionIsNil applies the IsNil predicate on the "order_option" field.
-func OrderOptionIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldOrderOption))
-}
-
-// OrderOptionNotNil applies the NotNil predicate on the "order_option" field.
-func OrderOptionNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldOrderOption))
-}
-
-// OpEQ applies the EQ predicate on the "op" field.
-func OpEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldOp, v))
-}
-
-// OpNEQ applies the NEQ predicate on the "op" field.
-func OpNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldOp, v))
-}
-
-// OpIn applies the In predicate on the "op" field.
-func OpIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldOp, vs...))
-}
-
-// OpNotIn applies the NotIn predicate on the "op" field.
-func OpNotIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldOp, vs...))
-}
-
-// OpGT applies the GT predicate on the "op" field.
-func OpGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldOp, v))
-}
-
-// OpGTE applies the GTE predicate on the "op" field.
-func OpGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldOp, v))
-}
-
-// OpLT applies the LT predicate on the "op" field.
-func OpLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldOp, v))
-}
-
-// OpLTE applies the LTE predicate on the "op" field.
-func OpLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldOp, v))
-}
-
-// OpContains applies the Contains predicate on the "op" field.
-func OpContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldOp, v))
-}
-
-// OpHasPrefix applies the HasPrefix predicate on the "op" field.
-func OpHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldOp, v))
-}
-
-// OpHasSuffix applies the HasSuffix predicate on the "op" field.
-func OpHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldOp, v))
-}
-
-// OpEqualFold applies the EqualFold predicate on the "op" field.
-func OpEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldOp, v))
-}
-
-// OpContainsFold applies the ContainsFold predicate on the "op" field.
-func OpContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldOp, v))
-}
+// Deprecated: CreatedAtEQ — use where.EQ(FieldCreatedAt, v).
+func CreatedAtEQ(v time.Time) predicate.Task { return where.EQ(FieldCreatedAt, v) }
+
+// Deprecated: CreatedAtNEQ — use where.NEQ(FieldCreatedAt, v).
+func CreatedAtNEQ(v time.Time) predicate.Task { return where.NEQ(FieldCreatedAt, v) }
+
+// Deprecated: CreatedAtIn — use where.In(FieldCreatedAt, vs...).
+func CreatedAtIn(vs ...time.Time) predicate.Task { return where.In(FieldCreatedAt, vs...) }
+
+// Deprecated: CreatedAtNotIn — use where.NotIn(FieldCreatedAt, vs...).
+func CreatedAtNotIn(vs ...time.Time) predicate.Task { return where.NotIn(FieldCreatedAt, vs...) }
+
+// Deprecated: CreatedAtGT — use where.GT(FieldCreatedAt, v).
+func CreatedAtGT(v time.Time) predicate.Task { return where.GT(FieldCreatedAt, v) }
+
+// Deprecated: CreatedAtGTE — use where.GTE(FieldCreatedAt, v).
+func CreatedAtGTE(v time.Time) predicate.Task { return where.GTE(FieldCreatedAt, v) }
+
+// Deprecated: CreatedAtLT — use where.LT(FieldCreatedAt, v).
+func CreatedAtLT(v time.Time) predicate.Task { return where.LT(FieldCreatedAt, v) }
+
+// Deprecated: CreatedAtLTE — use where.LTE(FieldCreatedAt, v).
+func CreatedAtLTE(v time.Time) predicate.Task { return where.LTE(FieldCreatedAt, v) }
+
+// Deprecated: NameEQ — use where.EQ(FieldName, v).
+func NameEQ(v string) predicate.Task { return where.EQ(FieldName, v) }
+
+// Deprecated: NameNEQ — use where.NEQ(FieldName, v).
+func NameNEQ(v string) predicate.Task { return where.NEQ(FieldName, v) }
+
+// Deprecated: NameIn — use where.In(FieldName, vs...).
+func NameIn(vs ...string) predicate.Task { return where.In(FieldName, vs...) }
+
+// Deprecated: NameNotIn — use where.NotIn(FieldName, vs...).
+func NameNotIn(vs ...string) predicate.Task { return where.NotIn(FieldName, vs...) }
+
+// Deprecated: NameGT — use where.GT(FieldName, v).
+func NameGT(v string) predicate.Task { return where.GT(FieldName, v) }
+
+// Deprecated: NameGTE — use where.GTE(FieldName, v).
+func NameGTE(v string) predicate.Task { return where.GTE(FieldName, v) }
+
+// Deprecated: NameLT — use where.LT(FieldName, v).
+func NameLT(v string) predicate.Task { return where.LT(FieldName, v) }
+
+// Deprecated: NameLTE — use where.LTE(FieldName, v).
+func NameLTE(v string) predicate.Task { return where.LTE(FieldName, v) }
+
+// Deprecated: NameContains — use where.Contains(FieldName, v).
+func NameContains(v string) predicate.Task { return where.Contains(FieldName, v) }
+
+// Deprecated: NameHasPrefix — use where.HasPrefix(FieldName, v).
+func NameHasPrefix(v string) predicate.Task { return where.HasPrefix(FieldName, v) }
+
+// Deprecated: NameHasSuffix — use where.HasSuffix(FieldName, v).
+func NameHasSuffix(v string) predicate.Task { return where.HasSuffix(FieldName, v) }
+
+// Deprecated: NameIsNil — use where.IsNull(FieldName).
+func NameIsNil() predicate.Task { return where.IsNull(FieldName) }
+
+// Deprecated: NameNotNil — use where.NotNull(FieldName).
+func NameNotNil() predicate.Task { return where.NotNull(FieldName) }
+
+// Deprecated: NameEqualFold — use where.EqualFold(FieldName, v).
+func NameEqualFold(v string) predicate.Task { return where.EqualFold(FieldName, v) }
+
+// Deprecated: NameContainsFold — use where.ContainsFold(FieldName, v).
+func NameContainsFold(v string) predicate.Task { return where.ContainsFold(FieldName, v) }
+
+// Deprecated: OwnerEQ — use where.EQ(FieldOwner, v).
+func OwnerEQ(v string) predicate.Task { return where.EQ(FieldOwner, v) }
+
+// Deprecated: OwnerNEQ — use where.NEQ(FieldOwner, v).
+func OwnerNEQ(v string) predicate.Task { return where.NEQ(FieldOwner, v) }
+
+// Deprecated: OwnerIn — use where.In(FieldOwner, vs...).
+func OwnerIn(vs ...string) predicate.Task { return where.In(FieldOwner, vs...) }
+
+// Deprecated: OwnerNotIn — use where.NotIn(FieldOwner, vs...).
+func OwnerNotIn(vs ...string) predicate.Task { return where.NotIn(FieldOwner, vs...) }
+
+// Deprecated: OwnerGT — use where.GT(FieldOwner, v).
+func OwnerGT(v string) predicate.Task { return where.GT(FieldOwner, v) }
+
+// Deprecated: OwnerGTE — use where.GTE(FieldOwner, v).
+func OwnerGTE(v string) predicate.Task { return where.GTE(FieldOwner, v) }
+
+// Deprecated: OwnerLT — use where.LT(FieldOwner, v).
+func OwnerLT(v string) predicate.Task { return where.LT(FieldOwner, v) }
+
+// Deprecated: OwnerLTE — use where.LTE(FieldOwner, v).
+func OwnerLTE(v string) predicate.Task { return where.LTE(FieldOwner, v) }
+
+// Deprecated: OwnerContains — use where.Contains(FieldOwner, v).
+func OwnerContains(v string) predicate.Task { return where.Contains(FieldOwner, v) }
+
+// Deprecated: OwnerHasPrefix — use where.HasPrefix(FieldOwner, v).
+func OwnerHasPrefix(v string) predicate.Task { return where.HasPrefix(FieldOwner, v) }
+
+// Deprecated: OwnerHasSuffix — use where.HasSuffix(FieldOwner, v).
+func OwnerHasSuffix(v string) predicate.Task { return where.HasSuffix(FieldOwner, v) }
+
+// Deprecated: OwnerIsNil — use where.IsNull(FieldOwner).
+func OwnerIsNil() predicate.Task { return where.IsNull(FieldOwner) }
+
+// Deprecated: OwnerNotNil — use where.NotNull(FieldOwner).
+func OwnerNotNil() predicate.Task { return where.NotNull(FieldOwner) }
+
+// Deprecated: OwnerEqualFold — use where.EqualFold(FieldOwner, v).
+func OwnerEqualFold(v string) predicate.Task { return where.EqualFold(FieldOwner, v) }
+
+// Deprecated: OwnerContainsFold — use where.ContainsFold(FieldOwner, v).
+func OwnerContainsFold(v string) predicate.Task { return where.ContainsFold(FieldOwner, v) }
+
+// Deprecated: OrderEQ — use where.EQ(FieldOrder, v).
+func OrderEQ(v int) predicate.Task { return where.EQ(FieldOrder, v) }
+
+// Deprecated: OrderNEQ — use where.NEQ(FieldOrder, v).
+func OrderNEQ(v int) predicate.Task { return where.NEQ(FieldOrder, v) }
+
+// Deprecated: OrderIn — use where.In(FieldOrder, vs...).
+func OrderIn(vs ...int) predicate.Task { return where.In(FieldOrder, vs...) }
+
+// Deprecated: OrderNotIn — use where.NotIn(FieldOrder, vs...).
+func OrderNotIn(vs ...int) predicate.Task { return where.NotIn(FieldOrder, vs...) }
+
+// Deprecated: OrderGT — use where.GT(FieldOrder, v).
+func OrderGT(v int) predicate.Task { return where.GT(FieldOrder, v) }
+
+// Deprecated: OrderGTE — use where.GTE(FieldOrder, v).
+func OrderGTE(v int) predicate.Task { return where.GTE(FieldOrder, v) }
+
+// Deprecated: OrderLT — use where.LT(FieldOrder, v).
+func OrderLT(v int) predicate.Task { return where.LT(FieldOrder, v) }
+
+// Deprecated: OrderLTE — use where.LTE(FieldOrder, v).
+func OrderLTE(v int) predicate.Task { return where.LTE(FieldOrder, v) }
+
+// Deprecated: OrderIsNil — use where.IsNull(FieldOrder).
+func OrderIsNil() predicate.Task { return where.IsNull(FieldOrder) }
+
+// Deprecated: OrderNotNil — use where.NotNull(FieldOrder).
+func OrderNotNil() predicate.Task { return where.NotNull(FieldOrder) }
+
+// Deprecated: OrderOptionEQ — use where.EQ(FieldOrderOption, v).
+func OrderOptionEQ(v int) predicate.Task { return where.EQ(FieldOrderOption, v) }
+
+// Deprecated: OrderOptionNEQ — use where.NEQ(FieldOrderOption, v).
+func OrderOptionNEQ(v int) predicate.Task { return where.NEQ(FieldOrderOption, v) }
+
+// Deprecated: OrderOptionIn — use where.In(FieldOrderOption, vs...).
+func OrderOptionIn(vs ...int) predicate.Task { return where.In(FieldOrderOption, vs...) }
+
+// Deprecated: OrderOptionNotIn — use where.NotIn(FieldOrderOption, vs...).
+func OrderOptionNotIn(vs ...int) predicate.Task { return where.NotIn(FieldOrderOption, vs...) }
+
+// Deprecated: OrderOptionGT — use where.GT(FieldOrderOption, v).
+func OrderOptionGT(v int) predicate.Task { return where.GT(FieldOrderOption, v) }
+
+// Deprecated: OrderOptionGTE — use where.GTE(FieldOrderOption, v).
+func OrderOptionGTE(v int) predicate.Task { return where.GTE(FieldOrderOption, v) }
+
+// Deprecated: OrderOptionLT — use where.LT(FieldOrderOption, v).
+func OrderOptionLT(v int) predicate.Task { return where.LT(FieldOrderOption, v) }
+
+// Deprecated: OrderOptionLTE — use where.LTE(FieldOrderOption, v).
+func OrderOptionLTE(v int) predicate.Task { return where.LTE(FieldOrderOption, v) }
+
+// Deprecated: OrderOptionIsNil — use where.IsNull(FieldOrderOption).
+func OrderOptionIsNil() predicate.Task { return where.IsNull(FieldOrderOption) }
+
+// Deprecated: OrderOptionNotNil — use where.NotNull(FieldOrderOption).
+func OrderOptionNotNil() predicate.Task { return where.NotNull(FieldOrderOption) }
+
+// Deprecated: OpEQ — use where.EQ(FieldOp, v).
+func OpEQ(v string) predicate.Task { return where.EQ(FieldOp, v) }
+
+// Deprecated: OpNEQ — use where.NEQ(FieldOp, v).
+func OpNEQ(v string) predicate.Task { return where.NEQ(FieldOp, v) }
+
+// Deprecated: OpIn — use where.In(FieldOp, vs...).
+func OpIn(vs ...string) predicate.Task { return where.In(FieldOp, vs...) }
+
+// Deprecated: OpNotIn — use where.NotIn(FieldOp, vs...).
+func OpNotIn(vs ...string) predicate.Task { return where.NotIn(FieldOp, vs...) }
+
+// Deprecated: OpGT — use where.GT(FieldOp, v).
+func OpGT(v string) predicate.Task { return where.GT(FieldOp, v) }
+
+// Deprecated: OpGTE — use where.GTE(FieldOp, v).
+func OpGTE(v string) predicate.Task { return where.GTE(FieldOp, v) }
+
+// Deprecated: OpLT — use where.LT(FieldOp, v).
+func OpLT(v string) predicate.Task { return where.LT(FieldOp, v) }
+
+// Deprecated: OpLTE — use where.LTE(FieldOp, v).
+func OpLTE(v string) predicate.Task { return where.LTE(FieldOp, v) }
+
+// Deprecated: OpContains — use where.Contains(FieldOp, v).
+func OpContains(v string) predicate.Task { return where.Contains(FieldOp, v) }
+
+// Deprecated: OpHasPrefix — use where.HasPrefix(FieldOp, v).
+func OpHasPrefix(v string) predicate.Task { return where.HasPrefix(FieldOp, v) }
+
+// Deprecated: OpHasSuffix — use where.HasSuffix(FieldOp, v).
+func OpHasSuffix(v string) predicate.Task { return where.HasSuffix(FieldOp, v) }
+
+// Deprecated: OpEqualFold — use where.EqualFold(FieldOp, v).
+func OpEqualFold(v string) predicate.Task { return where.EqualFold(FieldOp, v) }
+
+// Deprecated: OpContainsFold — use where.ContainsFold(FieldOp, v).
+func OpContainsFold(v string) predicate.Task { return where.ContainsFold(FieldOp, v) }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Task) predicate.Task {

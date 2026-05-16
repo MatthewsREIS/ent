@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -60,145 +61,89 @@ func IDLTE(id int) predicate.Friendship {
 	return predicate.Friendship(sql.FieldLTE(FieldID, id))
 }
 
-// Weight applies equality check predicate on the "weight" field. It's identical to WeightEQ.
-func Weight(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldWeight, v))
-}
+// Deprecated: Weight — use where.EQ(FieldWeight, v).
+func Weight(v int) predicate.Friendship { return where.EQ(FieldWeight, v) }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAt — use where.EQ(FieldCreatedAt, v).
+func CreatedAt(v time.Time) predicate.Friendship { return where.EQ(FieldCreatedAt, v) }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserID — use where.EQ(FieldUserID, v).
+func UserID(v int) predicate.Friendship { return where.EQ(FieldUserID, v) }
 
-// FriendID applies equality check predicate on the "friend_id" field. It's identical to FriendIDEQ.
-func FriendID(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldFriendID, v))
-}
+// Deprecated: FriendID — use where.EQ(FieldFriendID, v).
+func FriendID(v int) predicate.Friendship { return where.EQ(FieldFriendID, v) }
 
-// WeightEQ applies the EQ predicate on the "weight" field.
-func WeightEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldWeight, v))
-}
+// Deprecated: WeightEQ — use where.EQ(FieldWeight, v).
+func WeightEQ(v int) predicate.Friendship { return where.EQ(FieldWeight, v) }
 
-// WeightNEQ applies the NEQ predicate on the "weight" field.
-func WeightNEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldWeight, v))
-}
+// Deprecated: WeightNEQ — use where.NEQ(FieldWeight, v).
+func WeightNEQ(v int) predicate.Friendship { return where.NEQ(FieldWeight, v) }
 
-// WeightIn applies the In predicate on the "weight" field.
-func WeightIn(vs ...int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldIn(FieldWeight, vs...))
-}
+// Deprecated: WeightIn — use where.In(FieldWeight, vs...).
+func WeightIn(vs ...int) predicate.Friendship { return where.In(FieldWeight, vs...) }
 
-// WeightNotIn applies the NotIn predicate on the "weight" field.
-func WeightNotIn(vs ...int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNotIn(FieldWeight, vs...))
-}
+// Deprecated: WeightNotIn — use where.NotIn(FieldWeight, vs...).
+func WeightNotIn(vs ...int) predicate.Friendship { return where.NotIn(FieldWeight, vs...) }
 
-// WeightGT applies the GT predicate on the "weight" field.
-func WeightGT(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGT(FieldWeight, v))
-}
+// Deprecated: WeightGT — use where.GT(FieldWeight, v).
+func WeightGT(v int) predicate.Friendship { return where.GT(FieldWeight, v) }
 
-// WeightGTE applies the GTE predicate on the "weight" field.
-func WeightGTE(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGTE(FieldWeight, v))
-}
+// Deprecated: WeightGTE — use where.GTE(FieldWeight, v).
+func WeightGTE(v int) predicate.Friendship { return where.GTE(FieldWeight, v) }
 
-// WeightLT applies the LT predicate on the "weight" field.
-func WeightLT(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLT(FieldWeight, v))
-}
+// Deprecated: WeightLT — use where.LT(FieldWeight, v).
+func WeightLT(v int) predicate.Friendship { return where.LT(FieldWeight, v) }
 
-// WeightLTE applies the LTE predicate on the "weight" field.
-func WeightLTE(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLTE(FieldWeight, v))
-}
+// Deprecated: WeightLTE — use where.LTE(FieldWeight, v).
+func WeightLTE(v int) predicate.Friendship { return where.LTE(FieldWeight, v) }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtEQ — use where.EQ(FieldCreatedAt, v).
+func CreatedAtEQ(v time.Time) predicate.Friendship { return where.EQ(FieldCreatedAt, v) }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtNEQ — use where.NEQ(FieldCreatedAt, v).
+func CreatedAtNEQ(v time.Time) predicate.Friendship { return where.NEQ(FieldCreatedAt, v) }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldIn(FieldCreatedAt, vs...))
-}
+// Deprecated: CreatedAtIn — use where.In(FieldCreatedAt, vs...).
+func CreatedAtIn(vs ...time.Time) predicate.Friendship { return where.In(FieldCreatedAt, vs...) }
 
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNotIn(FieldCreatedAt, vs...))
-}
+// Deprecated: CreatedAtNotIn — use where.NotIn(FieldCreatedAt, vs...).
+func CreatedAtNotIn(vs ...time.Time) predicate.Friendship { return where.NotIn(FieldCreatedAt, vs...) }
 
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGT(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtGT — use where.GT(FieldCreatedAt, v).
+func CreatedAtGT(v time.Time) predicate.Friendship { return where.GT(FieldCreatedAt, v) }
 
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldGTE(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtGTE — use where.GTE(FieldCreatedAt, v).
+func CreatedAtGTE(v time.Time) predicate.Friendship { return where.GTE(FieldCreatedAt, v) }
 
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLT(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtLT — use where.LT(FieldCreatedAt, v).
+func CreatedAtLT(v time.Time) predicate.Friendship { return where.LT(FieldCreatedAt, v) }
 
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.Friendship {
-	return predicate.Friendship(sql.FieldLTE(FieldCreatedAt, v))
-}
+// Deprecated: CreatedAtLTE — use where.LTE(FieldCreatedAt, v).
+func CreatedAtLTE(v time.Time) predicate.Friendship { return where.LTE(FieldCreatedAt, v) }
 
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserIDEQ — use where.EQ(FieldUserID, v).
+func UserIDEQ(v int) predicate.Friendship { return where.EQ(FieldUserID, v) }
 
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldUserID, v))
-}
+// Deprecated: UserIDNEQ — use where.NEQ(FieldUserID, v).
+func UserIDNEQ(v int) predicate.Friendship { return where.NEQ(FieldUserID, v) }
 
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDIn — use where.In(FieldUserID, vs...).
+func UserIDIn(vs ...int) predicate.Friendship { return where.In(FieldUserID, vs...) }
 
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNotIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDNotIn — use where.NotIn(FieldUserID, vs...).
+func UserIDNotIn(vs ...int) predicate.Friendship { return where.NotIn(FieldUserID, vs...) }
 
-// FriendIDEQ applies the EQ predicate on the "friend_id" field.
-func FriendIDEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldEQ(FieldFriendID, v))
-}
+// Deprecated: FriendIDEQ — use where.EQ(FieldFriendID, v).
+func FriendIDEQ(v int) predicate.Friendship { return where.EQ(FieldFriendID, v) }
 
-// FriendIDNEQ applies the NEQ predicate on the "friend_id" field.
-func FriendIDNEQ(v int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNEQ(FieldFriendID, v))
-}
+// Deprecated: FriendIDNEQ — use where.NEQ(FieldFriendID, v).
+func FriendIDNEQ(v int) predicate.Friendship { return where.NEQ(FieldFriendID, v) }
 
-// FriendIDIn applies the In predicate on the "friend_id" field.
-func FriendIDIn(vs ...int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldIn(FieldFriendID, vs...))
-}
+// Deprecated: FriendIDIn — use where.In(FieldFriendID, vs...).
+func FriendIDIn(vs ...int) predicate.Friendship { return where.In(FieldFriendID, vs...) }
 
-// FriendIDNotIn applies the NotIn predicate on the "friend_id" field.
-func FriendIDNotIn(vs ...int) predicate.Friendship {
-	return predicate.Friendship(sql.FieldNotIn(FieldFriendID, vs...))
-}
+// Deprecated: FriendIDNotIn — use where.NotIn(FieldFriendID, vs...).
+func FriendIDNotIn(vs ...int) predicate.Friendship { return where.NotIn(FieldFriendID, vs...) }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.Friendship {
@@ -216,17 +161,18 @@ func HasUser() predicate.Friendship {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Friendship {
-	return predicate.Friendship(func(s *sql.Selector) {
-		step := newUserStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Friendship
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Friendship(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Friendship
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFriend applies the HasEdge predicate on the "friend" edge.
@@ -245,17 +191,18 @@ func HasFriend() predicate.Friendship {
 
 // HasFriendWith applies the HasEdge predicate on the "friend" edge with a given conditions (other predicates).
 func HasFriendWith(preds ...predicate.User) predicate.Friendship {
-	return predicate.Friendship(func(s *sql.Selector) {
-		step := newFriendStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Friendship
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Friendship(
+		func(s *sql.Selector) {
+			step := newFriendStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Friendship
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

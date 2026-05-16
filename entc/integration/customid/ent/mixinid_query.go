@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -529,4 +531,34 @@ func (_s *MixinIDSelect) sqlScan(ctx context.Context, root *MixinIDQuery, v any)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// mixinidCreateDescriptor holds the metadata and callbacks for constructing a MixinID entity.
+var mixinidCreateDescriptor = &entbuilder.CreateDescriptor[Config, MixinID, *MixinIDMutation]{
+	Table:   mixinid.Table,
+	NewNode: func(c Config) *MixinID { return &MixinID{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, MixinID, *MixinIDMutation]{
+		Column:      mixinid.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *MixinIDMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *MixinID, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(n *MixinID, v driver.Value) error {
+			switch x := v.(type) {
+			case uuid.UUID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected MixinID.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

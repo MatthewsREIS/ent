@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -720,4 +721,23 @@ func (_s *UserSelect) sqlScan(ctx context.Context, root *UserQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// userCreateDescriptor holds the metadata and callbacks for constructing a User entity.
+var userCreateDescriptor = &entbuilder.CreateDescriptor[Config, User, *UserMutation]{
+	Table:   user.Table,
+	NewNode: func(c Config) *User { return &User{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, User, *UserMutation]{
+		Column:      user.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *User, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected User.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

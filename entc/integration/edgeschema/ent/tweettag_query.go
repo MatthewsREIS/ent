@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -450,59 +451,62 @@ func (_q *TweetTagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Twe
 	return nodes, nil
 }
 
-var tweettagTagEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[TweetTag, Tag, uuid.UUID, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        tweettag.TagTable,
-			Columns:      tweettag.TagColumn,
-			Bidi:         false,
-			TargetColumn: tag.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *TweetTag) uuid.UUID { return n.ID },
-	ExtractEdgeID: func(e *Tag) int { return e.ID },
-	ExtractNodeFK: func(n *TweetTag) *int {
-		v := n.TagID
-		return &v
-	},
-}
-var tweettagTweetEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[TweetTag, Tweet, uuid.UUID, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        tweettag.TweetTable,
-			Columns:      tweettag.TweetColumn,
-			Bidi:         false,
-			TargetColumn: tweet.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *TweetTag) uuid.UUID { return n.ID },
-	ExtractEdgeID: func(e *Tweet) int { return e.ID },
-	ExtractNodeFK: func(n *TweetTag) *int {
-		v := n.TweetID
-		return &v
-	},
-}
-
 func (_q *TweetTagQuery) loadTag(ctx context.Context, query *TagQuery, nodes []*TweetTag, init func(*TweetTag), assign func(*TweetTag, *Tag)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &tweettagTagEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(tag.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TweetTag)
+	for i := range nodes {
+		fk := nodes[i].TagID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tag.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *TweetTagQuery) loadTweet(ctx context.Context, query *TweetQuery, nodes []*TweetTag, init func(*TweetTag), assign func(*TweetTag, *Tweet)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &tweettagTweetEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(tweet.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*TweetTag)
+	for i := range nodes {
+		fk := nodes[i].TweetID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(tweet.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -681,4 +685,34 @@ func (_s *TweetTagSelect) sqlScan(ctx context.Context, root *TweetTagQuery, v an
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// tweettagCreateDescriptor holds the metadata and callbacks for constructing a TweetTag entity.
+var tweettagCreateDescriptor = &entbuilder.CreateDescriptor[Config, TweetTag, *TweetTagMutation]{
+	Table:   tweettag.Table,
+	NewNode: func(c Config) *TweetTag { return &TweetTag{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, TweetTag, *TweetTagMutation]{
+		Column:      tweettag.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *TweetTagMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *TweetTag, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(n *TweetTag, v driver.Value) error {
+			switch x := v.(type) {
+			case uuid.UUID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected TweetTag.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

@@ -18,8 +18,9 @@ import (
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	Config
-	hooks    []Hook
-	mutation *GroupInfoMutation
+	hooks     []Hook
+	mutation  *GroupInfoMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewGroupInfoDelete returns a new GroupInfoDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *GroupInfoDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *GroupInfoDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *GroupInfoDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

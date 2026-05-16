@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/goods"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -556,4 +558,23 @@ func (_s *GoodsSelect) sqlScan(ctx context.Context, root *GoodsQuery, v any) err
 func (_s *GoodsSelect) Modify(modifiers ...func(s *sql.Selector)) *GoodsSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// goodsCreateDescriptor holds the metadata and callbacks for constructing a Goods entity.
+var goodsCreateDescriptor = &entbuilder.CreateDescriptor[Config, Goods, *GoodsMutation]{
+	Table:   goods.Table,
+	NewNode: func(c Config) *Goods { return &Goods{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Goods, *GoodsMutation]{
+		Column:      goods.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Goods, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Goods.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

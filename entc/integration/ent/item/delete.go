@@ -18,8 +18,9 @@ import (
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	Config
-	hooks    []Hook
-	mutation *ItemMutation
+	hooks     []Hook
+	mutation  *ItemMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewItemDelete returns a new ItemDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *ItemDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *ItemDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ItemDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *ItemDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

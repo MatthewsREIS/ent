@@ -12,102 +12,65 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/where"
 )
 
-// LikedAt applies equality check predicate on the "liked_at" field. It's identical to LikedAtEQ.
-func LikedAt(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldLikedAt, v))
-}
+// Deprecated: LikedAt — use where.EQ(FieldLikedAt, v).
+func LikedAt(v time.Time) predicate.TweetLike { return where.EQ(FieldLikedAt, v) }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserID — use where.EQ(FieldUserID, v).
+func UserID(v int) predicate.TweetLike { return where.EQ(FieldUserID, v) }
 
-// TweetID applies equality check predicate on the "tweet_id" field. It's identical to TweetIDEQ.
-func TweetID(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldTweetID, v))
-}
+// Deprecated: TweetID — use where.EQ(FieldTweetID, v).
+func TweetID(v int) predicate.TweetLike { return where.EQ(FieldTweetID, v) }
 
-// LikedAtEQ applies the EQ predicate on the "liked_at" field.
-func LikedAtEQ(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldLikedAt, v))
-}
+// Deprecated: LikedAtEQ — use where.EQ(FieldLikedAt, v).
+func LikedAtEQ(v time.Time) predicate.TweetLike { return where.EQ(FieldLikedAt, v) }
 
-// LikedAtNEQ applies the NEQ predicate on the "liked_at" field.
-func LikedAtNEQ(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNEQ(FieldLikedAt, v))
-}
+// Deprecated: LikedAtNEQ — use where.NEQ(FieldLikedAt, v).
+func LikedAtNEQ(v time.Time) predicate.TweetLike { return where.NEQ(FieldLikedAt, v) }
 
-// LikedAtIn applies the In predicate on the "liked_at" field.
-func LikedAtIn(vs ...time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldIn(FieldLikedAt, vs...))
-}
+// Deprecated: LikedAtIn — use where.In(FieldLikedAt, vs...).
+func LikedAtIn(vs ...time.Time) predicate.TweetLike { return where.In(FieldLikedAt, vs...) }
 
-// LikedAtNotIn applies the NotIn predicate on the "liked_at" field.
-func LikedAtNotIn(vs ...time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNotIn(FieldLikedAt, vs...))
-}
+// Deprecated: LikedAtNotIn — use where.NotIn(FieldLikedAt, vs...).
+func LikedAtNotIn(vs ...time.Time) predicate.TweetLike { return where.NotIn(FieldLikedAt, vs...) }
 
-// LikedAtGT applies the GT predicate on the "liked_at" field.
-func LikedAtGT(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldGT(FieldLikedAt, v))
-}
+// Deprecated: LikedAtGT — use where.GT(FieldLikedAt, v).
+func LikedAtGT(v time.Time) predicate.TweetLike { return where.GT(FieldLikedAt, v) }
 
-// LikedAtGTE applies the GTE predicate on the "liked_at" field.
-func LikedAtGTE(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldGTE(FieldLikedAt, v))
-}
+// Deprecated: LikedAtGTE — use where.GTE(FieldLikedAt, v).
+func LikedAtGTE(v time.Time) predicate.TweetLike { return where.GTE(FieldLikedAt, v) }
 
-// LikedAtLT applies the LT predicate on the "liked_at" field.
-func LikedAtLT(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldLT(FieldLikedAt, v))
-}
+// Deprecated: LikedAtLT — use where.LT(FieldLikedAt, v).
+func LikedAtLT(v time.Time) predicate.TweetLike { return where.LT(FieldLikedAt, v) }
 
-// LikedAtLTE applies the LTE predicate on the "liked_at" field.
-func LikedAtLTE(v time.Time) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldLTE(FieldLikedAt, v))
-}
+// Deprecated: LikedAtLTE — use where.LTE(FieldLikedAt, v).
+func LikedAtLTE(v time.Time) predicate.TweetLike { return where.LTE(FieldLikedAt, v) }
 
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserIDEQ — use where.EQ(FieldUserID, v).
+func UserIDEQ(v int) predicate.TweetLike { return where.EQ(FieldUserID, v) }
 
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNEQ(FieldUserID, v))
-}
+// Deprecated: UserIDNEQ — use where.NEQ(FieldUserID, v).
+func UserIDNEQ(v int) predicate.TweetLike { return where.NEQ(FieldUserID, v) }
 
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDIn — use where.In(FieldUserID, vs...).
+func UserIDIn(vs ...int) predicate.TweetLike { return where.In(FieldUserID, vs...) }
 
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNotIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDNotIn — use where.NotIn(FieldUserID, vs...).
+func UserIDNotIn(vs ...int) predicate.TweetLike { return where.NotIn(FieldUserID, vs...) }
 
-// TweetIDEQ applies the EQ predicate on the "tweet_id" field.
-func TweetIDEQ(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldEQ(FieldTweetID, v))
-}
+// Deprecated: TweetIDEQ — use where.EQ(FieldTweetID, v).
+func TweetIDEQ(v int) predicate.TweetLike { return where.EQ(FieldTweetID, v) }
 
-// TweetIDNEQ applies the NEQ predicate on the "tweet_id" field.
-func TweetIDNEQ(v int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNEQ(FieldTweetID, v))
-}
+// Deprecated: TweetIDNEQ — use where.NEQ(FieldTweetID, v).
+func TweetIDNEQ(v int) predicate.TweetLike { return where.NEQ(FieldTweetID, v) }
 
-// TweetIDIn applies the In predicate on the "tweet_id" field.
-func TweetIDIn(vs ...int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldIn(FieldTweetID, vs...))
-}
+// Deprecated: TweetIDIn — use where.In(FieldTweetID, vs...).
+func TweetIDIn(vs ...int) predicate.TweetLike { return where.In(FieldTweetID, vs...) }
 
-// TweetIDNotIn applies the NotIn predicate on the "tweet_id" field.
-func TweetIDNotIn(vs ...int) predicate.TweetLike {
-	return predicate.TweetLike(sql.FieldNotIn(FieldTweetID, vs...))
-}
+// Deprecated: TweetIDNotIn — use where.NotIn(FieldTweetID, vs...).
+func TweetIDNotIn(vs ...int) predicate.TweetLike { return where.NotIn(FieldTweetID, vs...) }
 
 // HasTweet applies the HasEdge predicate on the "tweet" edge.
 func HasTweet() predicate.TweetLike {
@@ -122,14 +85,15 @@ func HasTweet() predicate.TweetLike {
 
 // HasTweetWith applies the HasEdge predicate on the "tweet" edge with a given conditions (other predicates).
 func HasTweetWith(preds ...predicate.Tweet) predicate.TweetLike {
-	return predicate.TweetLike(func(s *sql.Selector) {
-		step := newTweetStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.TweetLike(
+		func(s *sql.Selector) {
+			step := newTweetStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -145,14 +109,15 @@ func HasUser() predicate.TweetLike {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.TweetLike {
-	return predicate.TweetLike(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.TweetLike(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/where"
 	"github.com/google/uuid"
 )
 
@@ -63,135 +64,85 @@ func IDLTE(id int) predicate.FieldType {
 	return predicate.FieldType(sql.FieldLTE(FieldID, id))
 }
 
-// Int applies equality check predicate on the "int" field. It's identical to IntEQ.
-func Int(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt, v))
-}
+// Deprecated: Int — use where.EQ(FieldInt, v).
+func Int(v int) predicate.FieldType { return where.EQ(FieldInt, v) }
 
-// Int8 applies equality check predicate on the "int8" field. It's identical to Int8EQ.
-func Int8(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt8, v))
-}
+// Deprecated: Int8 — use where.EQ(FieldInt8, v).
+func Int8(v int8) predicate.FieldType { return where.EQ(FieldInt8, v) }
 
-// Int16 applies equality check predicate on the "int16" field. It's identical to Int16EQ.
-func Int16(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt16, v))
-}
+// Deprecated: Int16 — use where.EQ(FieldInt16, v).
+func Int16(v int16) predicate.FieldType { return where.EQ(FieldInt16, v) }
 
-// Int32 applies equality check predicate on the "int32" field. It's identical to Int32EQ.
-func Int32(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt32, v))
-}
+// Deprecated: Int32 — use where.EQ(FieldInt32, v).
+func Int32(v int32) predicate.FieldType { return where.EQ(FieldInt32, v) }
 
-// Int64 applies equality check predicate on the "int64" field. It's identical to Int64EQ.
-func Int64(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt64, v))
-}
+// Deprecated: Int64 — use where.EQ(FieldInt64, v).
+func Int64(v int64) predicate.FieldType { return where.EQ(FieldInt64, v) }
 
-// OptionalInt applies equality check predicate on the "optional_int" field. It's identical to OptionalIntEQ.
-func OptionalInt(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt, v))
-}
+// Deprecated: OptionalInt — use where.EQ(FieldOptionalInt, v).
+func OptionalInt(v int) predicate.FieldType { return where.EQ(FieldOptionalInt, v) }
 
-// OptionalInt8 applies equality check predicate on the "optional_int8" field. It's identical to OptionalInt8EQ.
-func OptionalInt8(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt8, v))
-}
+// Deprecated: OptionalInt8 — use where.EQ(FieldOptionalInt8, v).
+func OptionalInt8(v int8) predicate.FieldType { return where.EQ(FieldOptionalInt8, v) }
 
-// OptionalInt16 applies equality check predicate on the "optional_int16" field. It's identical to OptionalInt16EQ.
-func OptionalInt16(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt16, v))
-}
+// Deprecated: OptionalInt16 — use where.EQ(FieldOptionalInt16, v).
+func OptionalInt16(v int16) predicate.FieldType { return where.EQ(FieldOptionalInt16, v) }
 
-// OptionalInt32 applies equality check predicate on the "optional_int32" field. It's identical to OptionalInt32EQ.
-func OptionalInt32(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt32, v))
-}
+// Deprecated: OptionalInt32 — use where.EQ(FieldOptionalInt32, v).
+func OptionalInt32(v int32) predicate.FieldType { return where.EQ(FieldOptionalInt32, v) }
 
-// OptionalInt64 applies equality check predicate on the "optional_int64" field. It's identical to OptionalInt64EQ.
-func OptionalInt64(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt64, v))
-}
+// Deprecated: OptionalInt64 — use where.EQ(FieldOptionalInt64, v).
+func OptionalInt64(v int64) predicate.FieldType { return where.EQ(FieldOptionalInt64, v) }
 
-// NillableInt applies equality check predicate on the "nillable_int" field. It's identical to NillableIntEQ.
-func NillableInt(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt, v))
-}
+// Deprecated: NillableInt — use where.EQ(FieldNillableInt, v).
+func NillableInt(v int) predicate.FieldType { return where.EQ(FieldNillableInt, v) }
 
-// NillableInt8 applies equality check predicate on the "nillable_int8" field. It's identical to NillableInt8EQ.
-func NillableInt8(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt8, v))
-}
+// Deprecated: NillableInt8 — use where.EQ(FieldNillableInt8, v).
+func NillableInt8(v int8) predicate.FieldType { return where.EQ(FieldNillableInt8, v) }
 
-// NillableInt16 applies equality check predicate on the "nillable_int16" field. It's identical to NillableInt16EQ.
-func NillableInt16(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt16, v))
-}
+// Deprecated: NillableInt16 — use where.EQ(FieldNillableInt16, v).
+func NillableInt16(v int16) predicate.FieldType { return where.EQ(FieldNillableInt16, v) }
 
-// NillableInt32 applies equality check predicate on the "nillable_int32" field. It's identical to NillableInt32EQ.
-func NillableInt32(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt32, v))
-}
+// Deprecated: NillableInt32 — use where.EQ(FieldNillableInt32, v).
+func NillableInt32(v int32) predicate.FieldType { return where.EQ(FieldNillableInt32, v) }
 
-// NillableInt64 applies equality check predicate on the "nillable_int64" field. It's identical to NillableInt64EQ.
-func NillableInt64(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt64, v))
-}
+// Deprecated: NillableInt64 — use where.EQ(FieldNillableInt64, v).
+func NillableInt64(v int64) predicate.FieldType { return where.EQ(FieldNillableInt64, v) }
 
-// ValidateOptionalInt32 applies equality check predicate on the "validate_optional_int32" field. It's identical to ValidateOptionalInt32EQ.
+// Deprecated: ValidateOptionalInt32 — use where.EQ(FieldValidateOptionalInt32, v).
 func ValidateOptionalInt32(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldValidateOptionalInt32, v))
+	return where.EQ(FieldValidateOptionalInt32, v)
 }
 
-// OptionalUint applies equality check predicate on the "optional_uint" field. It's identical to OptionalUintEQ.
-func OptionalUint(v uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint, v))
-}
+// Deprecated: OptionalUint — use where.EQ(FieldOptionalUint, v).
+func OptionalUint(v uint) predicate.FieldType { return where.EQ(FieldOptionalUint, v) }
 
-// OptionalUint8 applies equality check predicate on the "optional_uint8" field. It's identical to OptionalUint8EQ.
-func OptionalUint8(v uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint8, v))
-}
+// Deprecated: OptionalUint8 — use where.EQ(FieldOptionalUint8, v).
+func OptionalUint8(v uint8) predicate.FieldType { return where.EQ(FieldOptionalUint8, v) }
 
-// OptionalUint16 applies equality check predicate on the "optional_uint16" field. It's identical to OptionalUint16EQ.
-func OptionalUint16(v uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint16, v))
-}
+// Deprecated: OptionalUint16 — use where.EQ(FieldOptionalUint16, v).
+func OptionalUint16(v uint16) predicate.FieldType { return where.EQ(FieldOptionalUint16, v) }
 
-// OptionalUint32 applies equality check predicate on the "optional_uint32" field. It's identical to OptionalUint32EQ.
-func OptionalUint32(v uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint32, v))
-}
+// Deprecated: OptionalUint32 — use where.EQ(FieldOptionalUint32, v).
+func OptionalUint32(v uint32) predicate.FieldType { return where.EQ(FieldOptionalUint32, v) }
 
-// OptionalUint64 applies equality check predicate on the "optional_uint64" field. It's identical to OptionalUint64EQ.
-func OptionalUint64(v uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint64, v))
-}
+// Deprecated: OptionalUint64 — use where.EQ(FieldOptionalUint64, v).
+func OptionalUint64(v uint64) predicate.FieldType { return where.EQ(FieldOptionalUint64, v) }
 
-// OptionalFloat applies equality check predicate on the "optional_float" field. It's identical to OptionalFloatEQ.
-func OptionalFloat(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalFloat, v))
-}
+// Deprecated: OptionalFloat — use where.EQ(FieldOptionalFloat, v).
+func OptionalFloat(v float64) predicate.FieldType { return where.EQ(FieldOptionalFloat, v) }
 
-// OptionalFloat32 applies equality check predicate on the "optional_float32" field. It's identical to OptionalFloat32EQ.
-func OptionalFloat32(v float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalFloat32, v))
-}
+// Deprecated: OptionalFloat32 — use where.EQ(FieldOptionalFloat32, v).
+func OptionalFloat32(v float32) predicate.FieldType { return where.EQ(FieldOptionalFloat32, v) }
 
-// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
-func Text(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: Text — use where.EQ(FieldText, v).
+func Text(v string) predicate.FieldType { return where.EQ(FieldText, v) }
 
-// Datetime applies equality check predicate on the "datetime" field. It's identical to DatetimeEQ.
-func Datetime(v time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldDatetime, v))
-}
+// Deprecated: Datetime — use where.EQ(FieldDatetime, v).
+func Datetime(v time.Time) predicate.FieldType { return where.EQ(FieldDatetime, v) }
 
-// Decimal applies equality check predicate on the "decimal" field. It's identical to DecimalEQ.
-func Decimal(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldDecimal, v))
-}
+// Deprecated: Decimal — use where.EQ(FieldDecimal, v).
+func Decimal(v float64) predicate.FieldType { return where.EQ(FieldDecimal, v) }
 
 // LinkOther applies equality check predicate on the "link_other" field. It's identical to LinkOtherEQ.
 func LinkOther(v *schema.Link) predicate.FieldType {
@@ -213,10 +164,8 @@ func StringArray(v schema.Strings) predicate.FieldType {
 	return predicate.FieldType(sql.FieldEQ(FieldStringArray, v))
 }
 
-// Password applies equality check predicate on the "password" field. It's identical to PasswordEQ.
-func Password(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldPassword, v))
-}
+// Deprecated: Password — use where.EQ(FieldPassword, v).
+func Password(v string) predicate.FieldType { return where.EQ(FieldPassword, v) }
 
 // StringScanner applies equality check predicate on the "string_scanner" field. It's identical to StringScannerEQ.
 func StringScanner(v schema.StringScanner) predicate.FieldType {
@@ -283,15 +232,11 @@ func DeletedAt(v *sql.NullTime) predicate.FieldType {
 	return predicate.FieldType(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// RawData applies equality check predicate on the "raw_data" field. It's identical to RawDataEQ.
-func RawData(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldRawData, v))
-}
+// Deprecated: RawData — use where.EQ(FieldRawData, v).
+func RawData(v []byte) predicate.FieldType { return where.EQ(FieldRawData, v) }
 
-// Sensitive applies equality check predicate on the "sensitive" field. It's identical to SensitiveEQ.
-func Sensitive(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldSensitive, v))
-}
+// Deprecated: Sensitive — use where.EQ(FieldSensitive, v).
+func Sensitive(v []byte) predicate.FieldType { return where.EQ(FieldSensitive, v) }
 
 // IP applies equality check predicate on the "ip" field. It's identical to IPEQ.
 func IP(v net.IP) predicate.FieldType {
@@ -379,1450 +324,924 @@ func PasswordOther(v schema.Password) predicate.FieldType {
 	return predicate.FieldType(sql.FieldEQ(FieldPasswordOther, v))
 }
 
-// IntEQ applies the EQ predicate on the "int" field.
-func IntEQ(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt, v))
-}
+// Deprecated: IntEQ — use where.EQ(FieldInt, v).
+func IntEQ(v int) predicate.FieldType { return where.EQ(FieldInt, v) }
 
-// IntNEQ applies the NEQ predicate on the "int" field.
-func IntNEQ(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldInt, v))
-}
+// Deprecated: IntNEQ — use where.NEQ(FieldInt, v).
+func IntNEQ(v int) predicate.FieldType { return where.NEQ(FieldInt, v) }
 
-// IntIn applies the In predicate on the "int" field.
-func IntIn(vs ...int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldInt, vs...))
-}
+// Deprecated: IntIn — use where.In(FieldInt, vs...).
+func IntIn(vs ...int) predicate.FieldType { return where.In(FieldInt, vs...) }
 
-// IntNotIn applies the NotIn predicate on the "int" field.
-func IntNotIn(vs ...int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldInt, vs...))
-}
+// Deprecated: IntNotIn — use where.NotIn(FieldInt, vs...).
+func IntNotIn(vs ...int) predicate.FieldType { return where.NotIn(FieldInt, vs...) }
 
-// IntGT applies the GT predicate on the "int" field.
-func IntGT(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldInt, v))
-}
+// Deprecated: IntGT — use where.GT(FieldInt, v).
+func IntGT(v int) predicate.FieldType { return where.GT(FieldInt, v) }
 
-// IntGTE applies the GTE predicate on the "int" field.
-func IntGTE(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldInt, v))
-}
+// Deprecated: IntGTE — use where.GTE(FieldInt, v).
+func IntGTE(v int) predicate.FieldType { return where.GTE(FieldInt, v) }
 
-// IntLT applies the LT predicate on the "int" field.
-func IntLT(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldInt, v))
-}
+// Deprecated: IntLT — use where.LT(FieldInt, v).
+func IntLT(v int) predicate.FieldType { return where.LT(FieldInt, v) }
 
-// IntLTE applies the LTE predicate on the "int" field.
-func IntLTE(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldInt, v))
-}
+// Deprecated: IntLTE — use where.LTE(FieldInt, v).
+func IntLTE(v int) predicate.FieldType { return where.LTE(FieldInt, v) }
 
-// Int8EQ applies the EQ predicate on the "int8" field.
-func Int8EQ(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt8, v))
-}
+// Deprecated: Int8EQ — use where.EQ(FieldInt8, v).
+func Int8EQ(v int8) predicate.FieldType { return where.EQ(FieldInt8, v) }
 
-// Int8NEQ applies the NEQ predicate on the "int8" field.
-func Int8NEQ(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldInt8, v))
-}
+// Deprecated: Int8NEQ — use where.NEQ(FieldInt8, v).
+func Int8NEQ(v int8) predicate.FieldType { return where.NEQ(FieldInt8, v) }
 
-// Int8In applies the In predicate on the "int8" field.
-func Int8In(vs ...int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldInt8, vs...))
-}
+// Deprecated: Int8In — use where.In(FieldInt8, vs...).
+func Int8In(vs ...int8) predicate.FieldType { return where.In(FieldInt8, vs...) }
 
-// Int8NotIn applies the NotIn predicate on the "int8" field.
-func Int8NotIn(vs ...int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldInt8, vs...))
-}
+// Deprecated: Int8NotIn — use where.NotIn(FieldInt8, vs...).
+func Int8NotIn(vs ...int8) predicate.FieldType { return where.NotIn(FieldInt8, vs...) }
 
-// Int8GT applies the GT predicate on the "int8" field.
-func Int8GT(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldInt8, v))
-}
+// Deprecated: Int8GT — use where.GT(FieldInt8, v).
+func Int8GT(v int8) predicate.FieldType { return where.GT(FieldInt8, v) }
 
-// Int8GTE applies the GTE predicate on the "int8" field.
-func Int8GTE(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldInt8, v))
-}
+// Deprecated: Int8GTE — use where.GTE(FieldInt8, v).
+func Int8GTE(v int8) predicate.FieldType { return where.GTE(FieldInt8, v) }
 
-// Int8LT applies the LT predicate on the "int8" field.
-func Int8LT(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldInt8, v))
-}
+// Deprecated: Int8LT — use where.LT(FieldInt8, v).
+func Int8LT(v int8) predicate.FieldType { return where.LT(FieldInt8, v) }
 
-// Int8LTE applies the LTE predicate on the "int8" field.
-func Int8LTE(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldInt8, v))
-}
+// Deprecated: Int8LTE — use where.LTE(FieldInt8, v).
+func Int8LTE(v int8) predicate.FieldType { return where.LTE(FieldInt8, v) }
 
-// Int16EQ applies the EQ predicate on the "int16" field.
-func Int16EQ(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt16, v))
-}
+// Deprecated: Int16EQ — use where.EQ(FieldInt16, v).
+func Int16EQ(v int16) predicate.FieldType { return where.EQ(FieldInt16, v) }
 
-// Int16NEQ applies the NEQ predicate on the "int16" field.
-func Int16NEQ(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldInt16, v))
-}
+// Deprecated: Int16NEQ — use where.NEQ(FieldInt16, v).
+func Int16NEQ(v int16) predicate.FieldType { return where.NEQ(FieldInt16, v) }
 
-// Int16In applies the In predicate on the "int16" field.
-func Int16In(vs ...int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldInt16, vs...))
-}
+// Deprecated: Int16In — use where.In(FieldInt16, vs...).
+func Int16In(vs ...int16) predicate.FieldType { return where.In(FieldInt16, vs...) }
 
-// Int16NotIn applies the NotIn predicate on the "int16" field.
-func Int16NotIn(vs ...int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldInt16, vs...))
-}
+// Deprecated: Int16NotIn — use where.NotIn(FieldInt16, vs...).
+func Int16NotIn(vs ...int16) predicate.FieldType { return where.NotIn(FieldInt16, vs...) }
 
-// Int16GT applies the GT predicate on the "int16" field.
-func Int16GT(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldInt16, v))
-}
+// Deprecated: Int16GT — use where.GT(FieldInt16, v).
+func Int16GT(v int16) predicate.FieldType { return where.GT(FieldInt16, v) }
 
-// Int16GTE applies the GTE predicate on the "int16" field.
-func Int16GTE(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldInt16, v))
-}
+// Deprecated: Int16GTE — use where.GTE(FieldInt16, v).
+func Int16GTE(v int16) predicate.FieldType { return where.GTE(FieldInt16, v) }
 
-// Int16LT applies the LT predicate on the "int16" field.
-func Int16LT(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldInt16, v))
-}
+// Deprecated: Int16LT — use where.LT(FieldInt16, v).
+func Int16LT(v int16) predicate.FieldType { return where.LT(FieldInt16, v) }
 
-// Int16LTE applies the LTE predicate on the "int16" field.
-func Int16LTE(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldInt16, v))
-}
+// Deprecated: Int16LTE — use where.LTE(FieldInt16, v).
+func Int16LTE(v int16) predicate.FieldType { return where.LTE(FieldInt16, v) }
 
-// Int32EQ applies the EQ predicate on the "int32" field.
-func Int32EQ(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt32, v))
-}
+// Deprecated: Int32EQ — use where.EQ(FieldInt32, v).
+func Int32EQ(v int32) predicate.FieldType { return where.EQ(FieldInt32, v) }
 
-// Int32NEQ applies the NEQ predicate on the "int32" field.
-func Int32NEQ(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldInt32, v))
-}
+// Deprecated: Int32NEQ — use where.NEQ(FieldInt32, v).
+func Int32NEQ(v int32) predicate.FieldType { return where.NEQ(FieldInt32, v) }
 
-// Int32In applies the In predicate on the "int32" field.
-func Int32In(vs ...int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldInt32, vs...))
-}
+// Deprecated: Int32In — use where.In(FieldInt32, vs...).
+func Int32In(vs ...int32) predicate.FieldType { return where.In(FieldInt32, vs...) }
 
-// Int32NotIn applies the NotIn predicate on the "int32" field.
-func Int32NotIn(vs ...int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldInt32, vs...))
-}
+// Deprecated: Int32NotIn — use where.NotIn(FieldInt32, vs...).
+func Int32NotIn(vs ...int32) predicate.FieldType { return where.NotIn(FieldInt32, vs...) }
 
-// Int32GT applies the GT predicate on the "int32" field.
-func Int32GT(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldInt32, v))
-}
+// Deprecated: Int32GT — use where.GT(FieldInt32, v).
+func Int32GT(v int32) predicate.FieldType { return where.GT(FieldInt32, v) }
 
-// Int32GTE applies the GTE predicate on the "int32" field.
-func Int32GTE(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldInt32, v))
-}
+// Deprecated: Int32GTE — use where.GTE(FieldInt32, v).
+func Int32GTE(v int32) predicate.FieldType { return where.GTE(FieldInt32, v) }
 
-// Int32LT applies the LT predicate on the "int32" field.
-func Int32LT(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldInt32, v))
-}
+// Deprecated: Int32LT — use where.LT(FieldInt32, v).
+func Int32LT(v int32) predicate.FieldType { return where.LT(FieldInt32, v) }
 
-// Int32LTE applies the LTE predicate on the "int32" field.
-func Int32LTE(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldInt32, v))
-}
+// Deprecated: Int32LTE — use where.LTE(FieldInt32, v).
+func Int32LTE(v int32) predicate.FieldType { return where.LTE(FieldInt32, v) }
 
-// Int64EQ applies the EQ predicate on the "int64" field.
-func Int64EQ(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldInt64, v))
-}
+// Deprecated: Int64EQ — use where.EQ(FieldInt64, v).
+func Int64EQ(v int64) predicate.FieldType { return where.EQ(FieldInt64, v) }
 
-// Int64NEQ applies the NEQ predicate on the "int64" field.
-func Int64NEQ(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldInt64, v))
-}
+// Deprecated: Int64NEQ — use where.NEQ(FieldInt64, v).
+func Int64NEQ(v int64) predicate.FieldType { return where.NEQ(FieldInt64, v) }
 
-// Int64In applies the In predicate on the "int64" field.
-func Int64In(vs ...int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldInt64, vs...))
-}
+// Deprecated: Int64In — use where.In(FieldInt64, vs...).
+func Int64In(vs ...int64) predicate.FieldType { return where.In(FieldInt64, vs...) }
 
-// Int64NotIn applies the NotIn predicate on the "int64" field.
-func Int64NotIn(vs ...int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldInt64, vs...))
-}
+// Deprecated: Int64NotIn — use where.NotIn(FieldInt64, vs...).
+func Int64NotIn(vs ...int64) predicate.FieldType { return where.NotIn(FieldInt64, vs...) }
 
-// Int64GT applies the GT predicate on the "int64" field.
-func Int64GT(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldInt64, v))
-}
+// Deprecated: Int64GT — use where.GT(FieldInt64, v).
+func Int64GT(v int64) predicate.FieldType { return where.GT(FieldInt64, v) }
 
-// Int64GTE applies the GTE predicate on the "int64" field.
-func Int64GTE(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldInt64, v))
-}
+// Deprecated: Int64GTE — use where.GTE(FieldInt64, v).
+func Int64GTE(v int64) predicate.FieldType { return where.GTE(FieldInt64, v) }
 
-// Int64LT applies the LT predicate on the "int64" field.
-func Int64LT(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldInt64, v))
-}
+// Deprecated: Int64LT — use where.LT(FieldInt64, v).
+func Int64LT(v int64) predicate.FieldType { return where.LT(FieldInt64, v) }
 
-// Int64LTE applies the LTE predicate on the "int64" field.
-func Int64LTE(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldInt64, v))
-}
+// Deprecated: Int64LTE — use where.LTE(FieldInt64, v).
+func Int64LTE(v int64) predicate.FieldType { return where.LTE(FieldInt64, v) }
 
-// OptionalIntEQ applies the EQ predicate on the "optional_int" field.
-func OptionalIntEQ(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt, v))
-}
+// Deprecated: OptionalIntEQ — use where.EQ(FieldOptionalInt, v).
+func OptionalIntEQ(v int) predicate.FieldType { return where.EQ(FieldOptionalInt, v) }
 
-// OptionalIntNEQ applies the NEQ predicate on the "optional_int" field.
-func OptionalIntNEQ(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalInt, v))
-}
+// Deprecated: OptionalIntNEQ — use where.NEQ(FieldOptionalInt, v).
+func OptionalIntNEQ(v int) predicate.FieldType { return where.NEQ(FieldOptionalInt, v) }
 
-// OptionalIntIn applies the In predicate on the "optional_int" field.
-func OptionalIntIn(vs ...int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalInt, vs...))
-}
+// Deprecated: OptionalIntIn — use where.In(FieldOptionalInt, vs...).
+func OptionalIntIn(vs ...int) predicate.FieldType { return where.In(FieldOptionalInt, vs...) }
 
-// OptionalIntNotIn applies the NotIn predicate on the "optional_int" field.
-func OptionalIntNotIn(vs ...int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalInt, vs...))
-}
+// Deprecated: OptionalIntNotIn — use where.NotIn(FieldOptionalInt, vs...).
+func OptionalIntNotIn(vs ...int) predicate.FieldType { return where.NotIn(FieldOptionalInt, vs...) }
 
-// OptionalIntGT applies the GT predicate on the "optional_int" field.
-func OptionalIntGT(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalInt, v))
-}
+// Deprecated: OptionalIntGT — use where.GT(FieldOptionalInt, v).
+func OptionalIntGT(v int) predicate.FieldType { return where.GT(FieldOptionalInt, v) }
 
-// OptionalIntGTE applies the GTE predicate on the "optional_int" field.
-func OptionalIntGTE(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalInt, v))
-}
+// Deprecated: OptionalIntGTE — use where.GTE(FieldOptionalInt, v).
+func OptionalIntGTE(v int) predicate.FieldType { return where.GTE(FieldOptionalInt, v) }
 
-// OptionalIntLT applies the LT predicate on the "optional_int" field.
-func OptionalIntLT(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalInt, v))
-}
+// Deprecated: OptionalIntLT — use where.LT(FieldOptionalInt, v).
+func OptionalIntLT(v int) predicate.FieldType { return where.LT(FieldOptionalInt, v) }
 
-// OptionalIntLTE applies the LTE predicate on the "optional_int" field.
-func OptionalIntLTE(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalInt, v))
-}
+// Deprecated: OptionalIntLTE — use where.LTE(FieldOptionalInt, v).
+func OptionalIntLTE(v int) predicate.FieldType { return where.LTE(FieldOptionalInt, v) }
 
-// OptionalIntIsNil applies the IsNil predicate on the "optional_int" field.
-func OptionalIntIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalInt))
-}
+// Deprecated: OptionalIntIsNil — use where.IsNull(FieldOptionalInt).
+func OptionalIntIsNil() predicate.FieldType { return where.IsNull(FieldOptionalInt) }
 
-// OptionalIntNotNil applies the NotNil predicate on the "optional_int" field.
-func OptionalIntNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalInt))
-}
+// Deprecated: OptionalIntNotNil — use where.NotNull(FieldOptionalInt).
+func OptionalIntNotNil() predicate.FieldType { return where.NotNull(FieldOptionalInt) }
 
-// OptionalInt8EQ applies the EQ predicate on the "optional_int8" field.
-func OptionalInt8EQ(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt8, v))
-}
+// Deprecated: OptionalInt8EQ — use where.EQ(FieldOptionalInt8, v).
+func OptionalInt8EQ(v int8) predicate.FieldType { return where.EQ(FieldOptionalInt8, v) }
 
-// OptionalInt8NEQ applies the NEQ predicate on the "optional_int8" field.
-func OptionalInt8NEQ(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalInt8, v))
-}
+// Deprecated: OptionalInt8NEQ — use where.NEQ(FieldOptionalInt8, v).
+func OptionalInt8NEQ(v int8) predicate.FieldType { return where.NEQ(FieldOptionalInt8, v) }
 
-// OptionalInt8In applies the In predicate on the "optional_int8" field.
-func OptionalInt8In(vs ...int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalInt8, vs...))
-}
+// Deprecated: OptionalInt8In — use where.In(FieldOptionalInt8, vs...).
+func OptionalInt8In(vs ...int8) predicate.FieldType { return where.In(FieldOptionalInt8, vs...) }
 
-// OptionalInt8NotIn applies the NotIn predicate on the "optional_int8" field.
-func OptionalInt8NotIn(vs ...int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalInt8, vs...))
-}
+// Deprecated: OptionalInt8NotIn — use where.NotIn(FieldOptionalInt8, vs...).
+func OptionalInt8NotIn(vs ...int8) predicate.FieldType { return where.NotIn(FieldOptionalInt8, vs...) }
 
-// OptionalInt8GT applies the GT predicate on the "optional_int8" field.
-func OptionalInt8GT(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalInt8, v))
-}
+// Deprecated: OptionalInt8GT — use where.GT(FieldOptionalInt8, v).
+func OptionalInt8GT(v int8) predicate.FieldType { return where.GT(FieldOptionalInt8, v) }
 
-// OptionalInt8GTE applies the GTE predicate on the "optional_int8" field.
-func OptionalInt8GTE(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalInt8, v))
-}
+// Deprecated: OptionalInt8GTE — use where.GTE(FieldOptionalInt8, v).
+func OptionalInt8GTE(v int8) predicate.FieldType { return where.GTE(FieldOptionalInt8, v) }
 
-// OptionalInt8LT applies the LT predicate on the "optional_int8" field.
-func OptionalInt8LT(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalInt8, v))
-}
+// Deprecated: OptionalInt8LT — use where.LT(FieldOptionalInt8, v).
+func OptionalInt8LT(v int8) predicate.FieldType { return where.LT(FieldOptionalInt8, v) }
 
-// OptionalInt8LTE applies the LTE predicate on the "optional_int8" field.
-func OptionalInt8LTE(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalInt8, v))
-}
+// Deprecated: OptionalInt8LTE — use where.LTE(FieldOptionalInt8, v).
+func OptionalInt8LTE(v int8) predicate.FieldType { return where.LTE(FieldOptionalInt8, v) }
 
-// OptionalInt8IsNil applies the IsNil predicate on the "optional_int8" field.
-func OptionalInt8IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalInt8))
-}
+// Deprecated: OptionalInt8IsNil — use where.IsNull(FieldOptionalInt8).
+func OptionalInt8IsNil() predicate.FieldType { return where.IsNull(FieldOptionalInt8) }
 
-// OptionalInt8NotNil applies the NotNil predicate on the "optional_int8" field.
-func OptionalInt8NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalInt8))
-}
+// Deprecated: OptionalInt8NotNil — use where.NotNull(FieldOptionalInt8).
+func OptionalInt8NotNil() predicate.FieldType { return where.NotNull(FieldOptionalInt8) }
 
-// OptionalInt16EQ applies the EQ predicate on the "optional_int16" field.
-func OptionalInt16EQ(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt16, v))
-}
+// Deprecated: OptionalInt16EQ — use where.EQ(FieldOptionalInt16, v).
+func OptionalInt16EQ(v int16) predicate.FieldType { return where.EQ(FieldOptionalInt16, v) }
 
-// OptionalInt16NEQ applies the NEQ predicate on the "optional_int16" field.
-func OptionalInt16NEQ(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalInt16, v))
-}
+// Deprecated: OptionalInt16NEQ — use where.NEQ(FieldOptionalInt16, v).
+func OptionalInt16NEQ(v int16) predicate.FieldType { return where.NEQ(FieldOptionalInt16, v) }
 
-// OptionalInt16In applies the In predicate on the "optional_int16" field.
-func OptionalInt16In(vs ...int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalInt16, vs...))
-}
+// Deprecated: OptionalInt16In — use where.In(FieldOptionalInt16, vs...).
+func OptionalInt16In(vs ...int16) predicate.FieldType { return where.In(FieldOptionalInt16, vs...) }
 
-// OptionalInt16NotIn applies the NotIn predicate on the "optional_int16" field.
+// Deprecated: OptionalInt16NotIn — use where.NotIn(FieldOptionalInt16, vs...).
 func OptionalInt16NotIn(vs ...int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalInt16, vs...))
+	return where.NotIn(FieldOptionalInt16, vs...)
 }
 
-// OptionalInt16GT applies the GT predicate on the "optional_int16" field.
-func OptionalInt16GT(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalInt16, v))
-}
+// Deprecated: OptionalInt16GT — use where.GT(FieldOptionalInt16, v).
+func OptionalInt16GT(v int16) predicate.FieldType { return where.GT(FieldOptionalInt16, v) }
 
-// OptionalInt16GTE applies the GTE predicate on the "optional_int16" field.
-func OptionalInt16GTE(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalInt16, v))
-}
+// Deprecated: OptionalInt16GTE — use where.GTE(FieldOptionalInt16, v).
+func OptionalInt16GTE(v int16) predicate.FieldType { return where.GTE(FieldOptionalInt16, v) }
 
-// OptionalInt16LT applies the LT predicate on the "optional_int16" field.
-func OptionalInt16LT(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalInt16, v))
-}
+// Deprecated: OptionalInt16LT — use where.LT(FieldOptionalInt16, v).
+func OptionalInt16LT(v int16) predicate.FieldType { return where.LT(FieldOptionalInt16, v) }
 
-// OptionalInt16LTE applies the LTE predicate on the "optional_int16" field.
-func OptionalInt16LTE(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalInt16, v))
-}
+// Deprecated: OptionalInt16LTE — use where.LTE(FieldOptionalInt16, v).
+func OptionalInt16LTE(v int16) predicate.FieldType { return where.LTE(FieldOptionalInt16, v) }
 
-// OptionalInt16IsNil applies the IsNil predicate on the "optional_int16" field.
-func OptionalInt16IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalInt16))
-}
+// Deprecated: OptionalInt16IsNil — use where.IsNull(FieldOptionalInt16).
+func OptionalInt16IsNil() predicate.FieldType { return where.IsNull(FieldOptionalInt16) }
 
-// OptionalInt16NotNil applies the NotNil predicate on the "optional_int16" field.
-func OptionalInt16NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalInt16))
-}
+// Deprecated: OptionalInt16NotNil — use where.NotNull(FieldOptionalInt16).
+func OptionalInt16NotNil() predicate.FieldType { return where.NotNull(FieldOptionalInt16) }
 
-// OptionalInt32EQ applies the EQ predicate on the "optional_int32" field.
-func OptionalInt32EQ(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt32, v))
-}
+// Deprecated: OptionalInt32EQ — use where.EQ(FieldOptionalInt32, v).
+func OptionalInt32EQ(v int32) predicate.FieldType { return where.EQ(FieldOptionalInt32, v) }
 
-// OptionalInt32NEQ applies the NEQ predicate on the "optional_int32" field.
-func OptionalInt32NEQ(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalInt32, v))
-}
+// Deprecated: OptionalInt32NEQ — use where.NEQ(FieldOptionalInt32, v).
+func OptionalInt32NEQ(v int32) predicate.FieldType { return where.NEQ(FieldOptionalInt32, v) }
 
-// OptionalInt32In applies the In predicate on the "optional_int32" field.
-func OptionalInt32In(vs ...int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalInt32, vs...))
-}
+// Deprecated: OptionalInt32In — use where.In(FieldOptionalInt32, vs...).
+func OptionalInt32In(vs ...int32) predicate.FieldType { return where.In(FieldOptionalInt32, vs...) }
 
-// OptionalInt32NotIn applies the NotIn predicate on the "optional_int32" field.
+// Deprecated: OptionalInt32NotIn — use where.NotIn(FieldOptionalInt32, vs...).
 func OptionalInt32NotIn(vs ...int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalInt32, vs...))
+	return where.NotIn(FieldOptionalInt32, vs...)
 }
 
-// OptionalInt32GT applies the GT predicate on the "optional_int32" field.
-func OptionalInt32GT(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalInt32, v))
-}
+// Deprecated: OptionalInt32GT — use where.GT(FieldOptionalInt32, v).
+func OptionalInt32GT(v int32) predicate.FieldType { return where.GT(FieldOptionalInt32, v) }
 
-// OptionalInt32GTE applies the GTE predicate on the "optional_int32" field.
-func OptionalInt32GTE(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalInt32, v))
-}
+// Deprecated: OptionalInt32GTE — use where.GTE(FieldOptionalInt32, v).
+func OptionalInt32GTE(v int32) predicate.FieldType { return where.GTE(FieldOptionalInt32, v) }
 
-// OptionalInt32LT applies the LT predicate on the "optional_int32" field.
-func OptionalInt32LT(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalInt32, v))
-}
+// Deprecated: OptionalInt32LT — use where.LT(FieldOptionalInt32, v).
+func OptionalInt32LT(v int32) predicate.FieldType { return where.LT(FieldOptionalInt32, v) }
 
-// OptionalInt32LTE applies the LTE predicate on the "optional_int32" field.
-func OptionalInt32LTE(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalInt32, v))
-}
+// Deprecated: OptionalInt32LTE — use where.LTE(FieldOptionalInt32, v).
+func OptionalInt32LTE(v int32) predicate.FieldType { return where.LTE(FieldOptionalInt32, v) }
 
-// OptionalInt32IsNil applies the IsNil predicate on the "optional_int32" field.
-func OptionalInt32IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalInt32))
-}
+// Deprecated: OptionalInt32IsNil — use where.IsNull(FieldOptionalInt32).
+func OptionalInt32IsNil() predicate.FieldType { return where.IsNull(FieldOptionalInt32) }
 
-// OptionalInt32NotNil applies the NotNil predicate on the "optional_int32" field.
-func OptionalInt32NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalInt32))
-}
+// Deprecated: OptionalInt32NotNil — use where.NotNull(FieldOptionalInt32).
+func OptionalInt32NotNil() predicate.FieldType { return where.NotNull(FieldOptionalInt32) }
 
-// OptionalInt64EQ applies the EQ predicate on the "optional_int64" field.
-func OptionalInt64EQ(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalInt64, v))
-}
+// Deprecated: OptionalInt64EQ — use where.EQ(FieldOptionalInt64, v).
+func OptionalInt64EQ(v int64) predicate.FieldType { return where.EQ(FieldOptionalInt64, v) }
 
-// OptionalInt64NEQ applies the NEQ predicate on the "optional_int64" field.
-func OptionalInt64NEQ(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalInt64, v))
-}
+// Deprecated: OptionalInt64NEQ — use where.NEQ(FieldOptionalInt64, v).
+func OptionalInt64NEQ(v int64) predicate.FieldType { return where.NEQ(FieldOptionalInt64, v) }
 
-// OptionalInt64In applies the In predicate on the "optional_int64" field.
-func OptionalInt64In(vs ...int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalInt64, vs...))
-}
+// Deprecated: OptionalInt64In — use where.In(FieldOptionalInt64, vs...).
+func OptionalInt64In(vs ...int64) predicate.FieldType { return where.In(FieldOptionalInt64, vs...) }
 
-// OptionalInt64NotIn applies the NotIn predicate on the "optional_int64" field.
+// Deprecated: OptionalInt64NotIn — use where.NotIn(FieldOptionalInt64, vs...).
 func OptionalInt64NotIn(vs ...int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalInt64, vs...))
+	return where.NotIn(FieldOptionalInt64, vs...)
 }
 
-// OptionalInt64GT applies the GT predicate on the "optional_int64" field.
-func OptionalInt64GT(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalInt64, v))
-}
+// Deprecated: OptionalInt64GT — use where.GT(FieldOptionalInt64, v).
+func OptionalInt64GT(v int64) predicate.FieldType { return where.GT(FieldOptionalInt64, v) }
 
-// OptionalInt64GTE applies the GTE predicate on the "optional_int64" field.
-func OptionalInt64GTE(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalInt64, v))
-}
+// Deprecated: OptionalInt64GTE — use where.GTE(FieldOptionalInt64, v).
+func OptionalInt64GTE(v int64) predicate.FieldType { return where.GTE(FieldOptionalInt64, v) }
 
-// OptionalInt64LT applies the LT predicate on the "optional_int64" field.
-func OptionalInt64LT(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalInt64, v))
-}
+// Deprecated: OptionalInt64LT — use where.LT(FieldOptionalInt64, v).
+func OptionalInt64LT(v int64) predicate.FieldType { return where.LT(FieldOptionalInt64, v) }
 
-// OptionalInt64LTE applies the LTE predicate on the "optional_int64" field.
-func OptionalInt64LTE(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalInt64, v))
-}
+// Deprecated: OptionalInt64LTE — use where.LTE(FieldOptionalInt64, v).
+func OptionalInt64LTE(v int64) predicate.FieldType { return where.LTE(FieldOptionalInt64, v) }
 
-// OptionalInt64IsNil applies the IsNil predicate on the "optional_int64" field.
-func OptionalInt64IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalInt64))
-}
+// Deprecated: OptionalInt64IsNil — use where.IsNull(FieldOptionalInt64).
+func OptionalInt64IsNil() predicate.FieldType { return where.IsNull(FieldOptionalInt64) }
 
-// OptionalInt64NotNil applies the NotNil predicate on the "optional_int64" field.
-func OptionalInt64NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalInt64))
-}
+// Deprecated: OptionalInt64NotNil — use where.NotNull(FieldOptionalInt64).
+func OptionalInt64NotNil() predicate.FieldType { return where.NotNull(FieldOptionalInt64) }
 
-// NillableIntEQ applies the EQ predicate on the "nillable_int" field.
-func NillableIntEQ(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt, v))
-}
+// Deprecated: NillableIntEQ — use where.EQ(FieldNillableInt, v).
+func NillableIntEQ(v int) predicate.FieldType { return where.EQ(FieldNillableInt, v) }
 
-// NillableIntNEQ applies the NEQ predicate on the "nillable_int" field.
-func NillableIntNEQ(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNillableInt, v))
-}
+// Deprecated: NillableIntNEQ — use where.NEQ(FieldNillableInt, v).
+func NillableIntNEQ(v int) predicate.FieldType { return where.NEQ(FieldNillableInt, v) }
 
-// NillableIntIn applies the In predicate on the "nillable_int" field.
-func NillableIntIn(vs ...int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNillableInt, vs...))
-}
+// Deprecated: NillableIntIn — use where.In(FieldNillableInt, vs...).
+func NillableIntIn(vs ...int) predicate.FieldType { return where.In(FieldNillableInt, vs...) }
 
-// NillableIntNotIn applies the NotIn predicate on the "nillable_int" field.
-func NillableIntNotIn(vs ...int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNillableInt, vs...))
-}
+// Deprecated: NillableIntNotIn — use where.NotIn(FieldNillableInt, vs...).
+func NillableIntNotIn(vs ...int) predicate.FieldType { return where.NotIn(FieldNillableInt, vs...) }
 
-// NillableIntGT applies the GT predicate on the "nillable_int" field.
-func NillableIntGT(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNillableInt, v))
-}
+// Deprecated: NillableIntGT — use where.GT(FieldNillableInt, v).
+func NillableIntGT(v int) predicate.FieldType { return where.GT(FieldNillableInt, v) }
 
-// NillableIntGTE applies the GTE predicate on the "nillable_int" field.
-func NillableIntGTE(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNillableInt, v))
-}
+// Deprecated: NillableIntGTE — use where.GTE(FieldNillableInt, v).
+func NillableIntGTE(v int) predicate.FieldType { return where.GTE(FieldNillableInt, v) }
 
-// NillableIntLT applies the LT predicate on the "nillable_int" field.
-func NillableIntLT(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNillableInt, v))
-}
+// Deprecated: NillableIntLT — use where.LT(FieldNillableInt, v).
+func NillableIntLT(v int) predicate.FieldType { return where.LT(FieldNillableInt, v) }
 
-// NillableIntLTE applies the LTE predicate on the "nillable_int" field.
-func NillableIntLTE(v int) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNillableInt, v))
-}
+// Deprecated: NillableIntLTE — use where.LTE(FieldNillableInt, v).
+func NillableIntLTE(v int) predicate.FieldType { return where.LTE(FieldNillableInt, v) }
 
-// NillableIntIsNil applies the IsNil predicate on the "nillable_int" field.
-func NillableIntIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNillableInt))
-}
+// Deprecated: NillableIntIsNil — use where.IsNull(FieldNillableInt).
+func NillableIntIsNil() predicate.FieldType { return where.IsNull(FieldNillableInt) }
 
-// NillableIntNotNil applies the NotNil predicate on the "nillable_int" field.
-func NillableIntNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNillableInt))
-}
+// Deprecated: NillableIntNotNil — use where.NotNull(FieldNillableInt).
+func NillableIntNotNil() predicate.FieldType { return where.NotNull(FieldNillableInt) }
 
-// NillableInt8EQ applies the EQ predicate on the "nillable_int8" field.
-func NillableInt8EQ(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt8, v))
-}
+// Deprecated: NillableInt8EQ — use where.EQ(FieldNillableInt8, v).
+func NillableInt8EQ(v int8) predicate.FieldType { return where.EQ(FieldNillableInt8, v) }
 
-// NillableInt8NEQ applies the NEQ predicate on the "nillable_int8" field.
-func NillableInt8NEQ(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNillableInt8, v))
-}
+// Deprecated: NillableInt8NEQ — use where.NEQ(FieldNillableInt8, v).
+func NillableInt8NEQ(v int8) predicate.FieldType { return where.NEQ(FieldNillableInt8, v) }
 
-// NillableInt8In applies the In predicate on the "nillable_int8" field.
-func NillableInt8In(vs ...int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNillableInt8, vs...))
-}
+// Deprecated: NillableInt8In — use where.In(FieldNillableInt8, vs...).
+func NillableInt8In(vs ...int8) predicate.FieldType { return where.In(FieldNillableInt8, vs...) }
 
-// NillableInt8NotIn applies the NotIn predicate on the "nillable_int8" field.
-func NillableInt8NotIn(vs ...int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNillableInt8, vs...))
-}
+// Deprecated: NillableInt8NotIn — use where.NotIn(FieldNillableInt8, vs...).
+func NillableInt8NotIn(vs ...int8) predicate.FieldType { return where.NotIn(FieldNillableInt8, vs...) }
 
-// NillableInt8GT applies the GT predicate on the "nillable_int8" field.
-func NillableInt8GT(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNillableInt8, v))
-}
+// Deprecated: NillableInt8GT — use where.GT(FieldNillableInt8, v).
+func NillableInt8GT(v int8) predicate.FieldType { return where.GT(FieldNillableInt8, v) }
 
-// NillableInt8GTE applies the GTE predicate on the "nillable_int8" field.
-func NillableInt8GTE(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNillableInt8, v))
-}
+// Deprecated: NillableInt8GTE — use where.GTE(FieldNillableInt8, v).
+func NillableInt8GTE(v int8) predicate.FieldType { return where.GTE(FieldNillableInt8, v) }
 
-// NillableInt8LT applies the LT predicate on the "nillable_int8" field.
-func NillableInt8LT(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNillableInt8, v))
-}
+// Deprecated: NillableInt8LT — use where.LT(FieldNillableInt8, v).
+func NillableInt8LT(v int8) predicate.FieldType { return where.LT(FieldNillableInt8, v) }
 
-// NillableInt8LTE applies the LTE predicate on the "nillable_int8" field.
-func NillableInt8LTE(v int8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNillableInt8, v))
-}
+// Deprecated: NillableInt8LTE — use where.LTE(FieldNillableInt8, v).
+func NillableInt8LTE(v int8) predicate.FieldType { return where.LTE(FieldNillableInt8, v) }
 
-// NillableInt8IsNil applies the IsNil predicate on the "nillable_int8" field.
-func NillableInt8IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNillableInt8))
-}
+// Deprecated: NillableInt8IsNil — use where.IsNull(FieldNillableInt8).
+func NillableInt8IsNil() predicate.FieldType { return where.IsNull(FieldNillableInt8) }
 
-// NillableInt8NotNil applies the NotNil predicate on the "nillable_int8" field.
-func NillableInt8NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNillableInt8))
-}
+// Deprecated: NillableInt8NotNil — use where.NotNull(FieldNillableInt8).
+func NillableInt8NotNil() predicate.FieldType { return where.NotNull(FieldNillableInt8) }
 
-// NillableInt16EQ applies the EQ predicate on the "nillable_int16" field.
-func NillableInt16EQ(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt16, v))
-}
+// Deprecated: NillableInt16EQ — use where.EQ(FieldNillableInt16, v).
+func NillableInt16EQ(v int16) predicate.FieldType { return where.EQ(FieldNillableInt16, v) }
 
-// NillableInt16NEQ applies the NEQ predicate on the "nillable_int16" field.
-func NillableInt16NEQ(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNillableInt16, v))
-}
+// Deprecated: NillableInt16NEQ — use where.NEQ(FieldNillableInt16, v).
+func NillableInt16NEQ(v int16) predicate.FieldType { return where.NEQ(FieldNillableInt16, v) }
 
-// NillableInt16In applies the In predicate on the "nillable_int16" field.
-func NillableInt16In(vs ...int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNillableInt16, vs...))
-}
+// Deprecated: NillableInt16In — use where.In(FieldNillableInt16, vs...).
+func NillableInt16In(vs ...int16) predicate.FieldType { return where.In(FieldNillableInt16, vs...) }
 
-// NillableInt16NotIn applies the NotIn predicate on the "nillable_int16" field.
+// Deprecated: NillableInt16NotIn — use where.NotIn(FieldNillableInt16, vs...).
 func NillableInt16NotIn(vs ...int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNillableInt16, vs...))
+	return where.NotIn(FieldNillableInt16, vs...)
 }
 
-// NillableInt16GT applies the GT predicate on the "nillable_int16" field.
-func NillableInt16GT(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNillableInt16, v))
-}
+// Deprecated: NillableInt16GT — use where.GT(FieldNillableInt16, v).
+func NillableInt16GT(v int16) predicate.FieldType { return where.GT(FieldNillableInt16, v) }
 
-// NillableInt16GTE applies the GTE predicate on the "nillable_int16" field.
-func NillableInt16GTE(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNillableInt16, v))
-}
+// Deprecated: NillableInt16GTE — use where.GTE(FieldNillableInt16, v).
+func NillableInt16GTE(v int16) predicate.FieldType { return where.GTE(FieldNillableInt16, v) }
 
-// NillableInt16LT applies the LT predicate on the "nillable_int16" field.
-func NillableInt16LT(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNillableInt16, v))
-}
+// Deprecated: NillableInt16LT — use where.LT(FieldNillableInt16, v).
+func NillableInt16LT(v int16) predicate.FieldType { return where.LT(FieldNillableInt16, v) }
 
-// NillableInt16LTE applies the LTE predicate on the "nillable_int16" field.
-func NillableInt16LTE(v int16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNillableInt16, v))
-}
+// Deprecated: NillableInt16LTE — use where.LTE(FieldNillableInt16, v).
+func NillableInt16LTE(v int16) predicate.FieldType { return where.LTE(FieldNillableInt16, v) }
 
-// NillableInt16IsNil applies the IsNil predicate on the "nillable_int16" field.
-func NillableInt16IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNillableInt16))
-}
+// Deprecated: NillableInt16IsNil — use where.IsNull(FieldNillableInt16).
+func NillableInt16IsNil() predicate.FieldType { return where.IsNull(FieldNillableInt16) }
 
-// NillableInt16NotNil applies the NotNil predicate on the "nillable_int16" field.
-func NillableInt16NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNillableInt16))
-}
+// Deprecated: NillableInt16NotNil — use where.NotNull(FieldNillableInt16).
+func NillableInt16NotNil() predicate.FieldType { return where.NotNull(FieldNillableInt16) }
 
-// NillableInt32EQ applies the EQ predicate on the "nillable_int32" field.
-func NillableInt32EQ(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt32, v))
-}
+// Deprecated: NillableInt32EQ — use where.EQ(FieldNillableInt32, v).
+func NillableInt32EQ(v int32) predicate.FieldType { return where.EQ(FieldNillableInt32, v) }
 
-// NillableInt32NEQ applies the NEQ predicate on the "nillable_int32" field.
-func NillableInt32NEQ(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNillableInt32, v))
-}
+// Deprecated: NillableInt32NEQ — use where.NEQ(FieldNillableInt32, v).
+func NillableInt32NEQ(v int32) predicate.FieldType { return where.NEQ(FieldNillableInt32, v) }
 
-// NillableInt32In applies the In predicate on the "nillable_int32" field.
-func NillableInt32In(vs ...int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNillableInt32, vs...))
-}
+// Deprecated: NillableInt32In — use where.In(FieldNillableInt32, vs...).
+func NillableInt32In(vs ...int32) predicate.FieldType { return where.In(FieldNillableInt32, vs...) }
 
-// NillableInt32NotIn applies the NotIn predicate on the "nillable_int32" field.
+// Deprecated: NillableInt32NotIn — use where.NotIn(FieldNillableInt32, vs...).
 func NillableInt32NotIn(vs ...int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNillableInt32, vs...))
+	return where.NotIn(FieldNillableInt32, vs...)
 }
 
-// NillableInt32GT applies the GT predicate on the "nillable_int32" field.
-func NillableInt32GT(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNillableInt32, v))
-}
+// Deprecated: NillableInt32GT — use where.GT(FieldNillableInt32, v).
+func NillableInt32GT(v int32) predicate.FieldType { return where.GT(FieldNillableInt32, v) }
 
-// NillableInt32GTE applies the GTE predicate on the "nillable_int32" field.
-func NillableInt32GTE(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNillableInt32, v))
-}
+// Deprecated: NillableInt32GTE — use where.GTE(FieldNillableInt32, v).
+func NillableInt32GTE(v int32) predicate.FieldType { return where.GTE(FieldNillableInt32, v) }
 
-// NillableInt32LT applies the LT predicate on the "nillable_int32" field.
-func NillableInt32LT(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNillableInt32, v))
-}
+// Deprecated: NillableInt32LT — use where.LT(FieldNillableInt32, v).
+func NillableInt32LT(v int32) predicate.FieldType { return where.LT(FieldNillableInt32, v) }
 
-// NillableInt32LTE applies the LTE predicate on the "nillable_int32" field.
-func NillableInt32LTE(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNillableInt32, v))
-}
+// Deprecated: NillableInt32LTE — use where.LTE(FieldNillableInt32, v).
+func NillableInt32LTE(v int32) predicate.FieldType { return where.LTE(FieldNillableInt32, v) }
 
-// NillableInt32IsNil applies the IsNil predicate on the "nillable_int32" field.
-func NillableInt32IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNillableInt32))
-}
+// Deprecated: NillableInt32IsNil — use where.IsNull(FieldNillableInt32).
+func NillableInt32IsNil() predicate.FieldType { return where.IsNull(FieldNillableInt32) }
 
-// NillableInt32NotNil applies the NotNil predicate on the "nillable_int32" field.
-func NillableInt32NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNillableInt32))
-}
+// Deprecated: NillableInt32NotNil — use where.NotNull(FieldNillableInt32).
+func NillableInt32NotNil() predicate.FieldType { return where.NotNull(FieldNillableInt32) }
 
-// NillableInt64EQ applies the EQ predicate on the "nillable_int64" field.
-func NillableInt64EQ(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableInt64, v))
-}
+// Deprecated: NillableInt64EQ — use where.EQ(FieldNillableInt64, v).
+func NillableInt64EQ(v int64) predicate.FieldType { return where.EQ(FieldNillableInt64, v) }
 
-// NillableInt64NEQ applies the NEQ predicate on the "nillable_int64" field.
-func NillableInt64NEQ(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNillableInt64, v))
-}
+// Deprecated: NillableInt64NEQ — use where.NEQ(FieldNillableInt64, v).
+func NillableInt64NEQ(v int64) predicate.FieldType { return where.NEQ(FieldNillableInt64, v) }
 
-// NillableInt64In applies the In predicate on the "nillable_int64" field.
-func NillableInt64In(vs ...int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNillableInt64, vs...))
-}
+// Deprecated: NillableInt64In — use where.In(FieldNillableInt64, vs...).
+func NillableInt64In(vs ...int64) predicate.FieldType { return where.In(FieldNillableInt64, vs...) }
 
-// NillableInt64NotIn applies the NotIn predicate on the "nillable_int64" field.
+// Deprecated: NillableInt64NotIn — use where.NotIn(FieldNillableInt64, vs...).
 func NillableInt64NotIn(vs ...int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNillableInt64, vs...))
+	return where.NotIn(FieldNillableInt64, vs...)
 }
 
-// NillableInt64GT applies the GT predicate on the "nillable_int64" field.
-func NillableInt64GT(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNillableInt64, v))
-}
+// Deprecated: NillableInt64GT — use where.GT(FieldNillableInt64, v).
+func NillableInt64GT(v int64) predicate.FieldType { return where.GT(FieldNillableInt64, v) }
 
-// NillableInt64GTE applies the GTE predicate on the "nillable_int64" field.
-func NillableInt64GTE(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNillableInt64, v))
-}
+// Deprecated: NillableInt64GTE — use where.GTE(FieldNillableInt64, v).
+func NillableInt64GTE(v int64) predicate.FieldType { return where.GTE(FieldNillableInt64, v) }
 
-// NillableInt64LT applies the LT predicate on the "nillable_int64" field.
-func NillableInt64LT(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNillableInt64, v))
-}
+// Deprecated: NillableInt64LT — use where.LT(FieldNillableInt64, v).
+func NillableInt64LT(v int64) predicate.FieldType { return where.LT(FieldNillableInt64, v) }
 
-// NillableInt64LTE applies the LTE predicate on the "nillable_int64" field.
-func NillableInt64LTE(v int64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNillableInt64, v))
-}
+// Deprecated: NillableInt64LTE — use where.LTE(FieldNillableInt64, v).
+func NillableInt64LTE(v int64) predicate.FieldType { return where.LTE(FieldNillableInt64, v) }
 
-// NillableInt64IsNil applies the IsNil predicate on the "nillable_int64" field.
-func NillableInt64IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNillableInt64))
-}
+// Deprecated: NillableInt64IsNil — use where.IsNull(FieldNillableInt64).
+func NillableInt64IsNil() predicate.FieldType { return where.IsNull(FieldNillableInt64) }
 
-// NillableInt64NotNil applies the NotNil predicate on the "nillable_int64" field.
-func NillableInt64NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNillableInt64))
-}
+// Deprecated: NillableInt64NotNil — use where.NotNull(FieldNillableInt64).
+func NillableInt64NotNil() predicate.FieldType { return where.NotNull(FieldNillableInt64) }
 
-// ValidateOptionalInt32EQ applies the EQ predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32EQ — use where.EQ(FieldValidateOptionalInt32, v).
 func ValidateOptionalInt32EQ(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldValidateOptionalInt32, v))
+	return where.EQ(FieldValidateOptionalInt32, v)
 }
 
-// ValidateOptionalInt32NEQ applies the NEQ predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32NEQ — use where.NEQ(FieldValidateOptionalInt32, v).
 func ValidateOptionalInt32NEQ(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldValidateOptionalInt32, v))
+	return where.NEQ(FieldValidateOptionalInt32, v)
 }
 
-// ValidateOptionalInt32In applies the In predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32In — use where.In(FieldValidateOptionalInt32, vs...).
 func ValidateOptionalInt32In(vs ...int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldValidateOptionalInt32, vs...))
+	return where.In(FieldValidateOptionalInt32, vs...)
 }
 
-// ValidateOptionalInt32NotIn applies the NotIn predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32NotIn — use where.NotIn(FieldValidateOptionalInt32, vs...).
 func ValidateOptionalInt32NotIn(vs ...int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldValidateOptionalInt32, vs...))
+	return where.NotIn(FieldValidateOptionalInt32, vs...)
 }
 
-// ValidateOptionalInt32GT applies the GT predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32GT — use where.GT(FieldValidateOptionalInt32, v).
 func ValidateOptionalInt32GT(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldValidateOptionalInt32, v))
+	return where.GT(FieldValidateOptionalInt32, v)
 }
 
-// ValidateOptionalInt32GTE applies the GTE predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32GTE — use where.GTE(FieldValidateOptionalInt32, v).
 func ValidateOptionalInt32GTE(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldValidateOptionalInt32, v))
+	return where.GTE(FieldValidateOptionalInt32, v)
 }
 
-// ValidateOptionalInt32LT applies the LT predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32LT — use where.LT(FieldValidateOptionalInt32, v).
 func ValidateOptionalInt32LT(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldValidateOptionalInt32, v))
+	return where.LT(FieldValidateOptionalInt32, v)
 }
 
-// ValidateOptionalInt32LTE applies the LTE predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32LTE — use where.LTE(FieldValidateOptionalInt32, v).
 func ValidateOptionalInt32LTE(v int32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldValidateOptionalInt32, v))
+	return where.LTE(FieldValidateOptionalInt32, v)
 }
 
-// ValidateOptionalInt32IsNil applies the IsNil predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32IsNil — use where.IsNull(FieldValidateOptionalInt32).
 func ValidateOptionalInt32IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldValidateOptionalInt32))
+	return where.IsNull(FieldValidateOptionalInt32)
 }
 
-// ValidateOptionalInt32NotNil applies the NotNil predicate on the "validate_optional_int32" field.
+// Deprecated: ValidateOptionalInt32NotNil — use where.NotNull(FieldValidateOptionalInt32).
 func ValidateOptionalInt32NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldValidateOptionalInt32))
+	return where.NotNull(FieldValidateOptionalInt32)
 }
 
-// OptionalUintEQ applies the EQ predicate on the "optional_uint" field.
-func OptionalUintEQ(v uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint, v))
-}
+// Deprecated: OptionalUintEQ — use where.EQ(FieldOptionalUint, v).
+func OptionalUintEQ(v uint) predicate.FieldType { return where.EQ(FieldOptionalUint, v) }
 
-// OptionalUintNEQ applies the NEQ predicate on the "optional_uint" field.
-func OptionalUintNEQ(v uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalUint, v))
-}
+// Deprecated: OptionalUintNEQ — use where.NEQ(FieldOptionalUint, v).
+func OptionalUintNEQ(v uint) predicate.FieldType { return where.NEQ(FieldOptionalUint, v) }
 
-// OptionalUintIn applies the In predicate on the "optional_uint" field.
-func OptionalUintIn(vs ...uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalUint, vs...))
-}
+// Deprecated: OptionalUintIn — use where.In(FieldOptionalUint, vs...).
+func OptionalUintIn(vs ...uint) predicate.FieldType { return where.In(FieldOptionalUint, vs...) }
 
-// OptionalUintNotIn applies the NotIn predicate on the "optional_uint" field.
-func OptionalUintNotIn(vs ...uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalUint, vs...))
-}
+// Deprecated: OptionalUintNotIn — use where.NotIn(FieldOptionalUint, vs...).
+func OptionalUintNotIn(vs ...uint) predicate.FieldType { return where.NotIn(FieldOptionalUint, vs...) }
 
-// OptionalUintGT applies the GT predicate on the "optional_uint" field.
-func OptionalUintGT(v uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalUint, v))
-}
+// Deprecated: OptionalUintGT — use where.GT(FieldOptionalUint, v).
+func OptionalUintGT(v uint) predicate.FieldType { return where.GT(FieldOptionalUint, v) }
 
-// OptionalUintGTE applies the GTE predicate on the "optional_uint" field.
-func OptionalUintGTE(v uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalUint, v))
-}
+// Deprecated: OptionalUintGTE — use where.GTE(FieldOptionalUint, v).
+func OptionalUintGTE(v uint) predicate.FieldType { return where.GTE(FieldOptionalUint, v) }
 
-// OptionalUintLT applies the LT predicate on the "optional_uint" field.
-func OptionalUintLT(v uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalUint, v))
-}
+// Deprecated: OptionalUintLT — use where.LT(FieldOptionalUint, v).
+func OptionalUintLT(v uint) predicate.FieldType { return where.LT(FieldOptionalUint, v) }
 
-// OptionalUintLTE applies the LTE predicate on the "optional_uint" field.
-func OptionalUintLTE(v uint) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalUint, v))
-}
+// Deprecated: OptionalUintLTE — use where.LTE(FieldOptionalUint, v).
+func OptionalUintLTE(v uint) predicate.FieldType { return where.LTE(FieldOptionalUint, v) }
 
-// OptionalUintIsNil applies the IsNil predicate on the "optional_uint" field.
-func OptionalUintIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalUint))
-}
+// Deprecated: OptionalUintIsNil — use where.IsNull(FieldOptionalUint).
+func OptionalUintIsNil() predicate.FieldType { return where.IsNull(FieldOptionalUint) }
 
-// OptionalUintNotNil applies the NotNil predicate on the "optional_uint" field.
-func OptionalUintNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalUint))
-}
+// Deprecated: OptionalUintNotNil — use where.NotNull(FieldOptionalUint).
+func OptionalUintNotNil() predicate.FieldType { return where.NotNull(FieldOptionalUint) }
 
-// OptionalUint8EQ applies the EQ predicate on the "optional_uint8" field.
-func OptionalUint8EQ(v uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint8, v))
-}
+// Deprecated: OptionalUint8EQ — use where.EQ(FieldOptionalUint8, v).
+func OptionalUint8EQ(v uint8) predicate.FieldType { return where.EQ(FieldOptionalUint8, v) }
 
-// OptionalUint8NEQ applies the NEQ predicate on the "optional_uint8" field.
-func OptionalUint8NEQ(v uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalUint8, v))
-}
+// Deprecated: OptionalUint8NEQ — use where.NEQ(FieldOptionalUint8, v).
+func OptionalUint8NEQ(v uint8) predicate.FieldType { return where.NEQ(FieldOptionalUint8, v) }
 
-// OptionalUint8In applies the In predicate on the "optional_uint8" field.
-func OptionalUint8In(vs ...uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalUint8, vs...))
-}
+// Deprecated: OptionalUint8In — use where.In(FieldOptionalUint8, vs...).
+func OptionalUint8In(vs ...uint8) predicate.FieldType { return where.In(FieldOptionalUint8, vs...) }
 
-// OptionalUint8NotIn applies the NotIn predicate on the "optional_uint8" field.
+// Deprecated: OptionalUint8NotIn — use where.NotIn(FieldOptionalUint8, vs...).
 func OptionalUint8NotIn(vs ...uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalUint8, vs...))
+	return where.NotIn(FieldOptionalUint8, vs...)
 }
 
-// OptionalUint8GT applies the GT predicate on the "optional_uint8" field.
-func OptionalUint8GT(v uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalUint8, v))
-}
+// Deprecated: OptionalUint8GT — use where.GT(FieldOptionalUint8, v).
+func OptionalUint8GT(v uint8) predicate.FieldType { return where.GT(FieldOptionalUint8, v) }
 
-// OptionalUint8GTE applies the GTE predicate on the "optional_uint8" field.
-func OptionalUint8GTE(v uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalUint8, v))
-}
+// Deprecated: OptionalUint8GTE — use where.GTE(FieldOptionalUint8, v).
+func OptionalUint8GTE(v uint8) predicate.FieldType { return where.GTE(FieldOptionalUint8, v) }
 
-// OptionalUint8LT applies the LT predicate on the "optional_uint8" field.
-func OptionalUint8LT(v uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalUint8, v))
-}
+// Deprecated: OptionalUint8LT — use where.LT(FieldOptionalUint8, v).
+func OptionalUint8LT(v uint8) predicate.FieldType { return where.LT(FieldOptionalUint8, v) }
 
-// OptionalUint8LTE applies the LTE predicate on the "optional_uint8" field.
-func OptionalUint8LTE(v uint8) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalUint8, v))
-}
+// Deprecated: OptionalUint8LTE — use where.LTE(FieldOptionalUint8, v).
+func OptionalUint8LTE(v uint8) predicate.FieldType { return where.LTE(FieldOptionalUint8, v) }
 
-// OptionalUint8IsNil applies the IsNil predicate on the "optional_uint8" field.
-func OptionalUint8IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalUint8))
-}
+// Deprecated: OptionalUint8IsNil — use where.IsNull(FieldOptionalUint8).
+func OptionalUint8IsNil() predicate.FieldType { return where.IsNull(FieldOptionalUint8) }
 
-// OptionalUint8NotNil applies the NotNil predicate on the "optional_uint8" field.
-func OptionalUint8NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalUint8))
-}
+// Deprecated: OptionalUint8NotNil — use where.NotNull(FieldOptionalUint8).
+func OptionalUint8NotNil() predicate.FieldType { return where.NotNull(FieldOptionalUint8) }
 
-// OptionalUint16EQ applies the EQ predicate on the "optional_uint16" field.
-func OptionalUint16EQ(v uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint16, v))
-}
+// Deprecated: OptionalUint16EQ — use where.EQ(FieldOptionalUint16, v).
+func OptionalUint16EQ(v uint16) predicate.FieldType { return where.EQ(FieldOptionalUint16, v) }
 
-// OptionalUint16NEQ applies the NEQ predicate on the "optional_uint16" field.
-func OptionalUint16NEQ(v uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalUint16, v))
-}
+// Deprecated: OptionalUint16NEQ — use where.NEQ(FieldOptionalUint16, v).
+func OptionalUint16NEQ(v uint16) predicate.FieldType { return where.NEQ(FieldOptionalUint16, v) }
 
-// OptionalUint16In applies the In predicate on the "optional_uint16" field.
-func OptionalUint16In(vs ...uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalUint16, vs...))
-}
+// Deprecated: OptionalUint16In — use where.In(FieldOptionalUint16, vs...).
+func OptionalUint16In(vs ...uint16) predicate.FieldType { return where.In(FieldOptionalUint16, vs...) }
 
-// OptionalUint16NotIn applies the NotIn predicate on the "optional_uint16" field.
+// Deprecated: OptionalUint16NotIn — use where.NotIn(FieldOptionalUint16, vs...).
 func OptionalUint16NotIn(vs ...uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalUint16, vs...))
+	return where.NotIn(FieldOptionalUint16, vs...)
 }
 
-// OptionalUint16GT applies the GT predicate on the "optional_uint16" field.
-func OptionalUint16GT(v uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalUint16, v))
-}
+// Deprecated: OptionalUint16GT — use where.GT(FieldOptionalUint16, v).
+func OptionalUint16GT(v uint16) predicate.FieldType { return where.GT(FieldOptionalUint16, v) }
 
-// OptionalUint16GTE applies the GTE predicate on the "optional_uint16" field.
-func OptionalUint16GTE(v uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalUint16, v))
-}
+// Deprecated: OptionalUint16GTE — use where.GTE(FieldOptionalUint16, v).
+func OptionalUint16GTE(v uint16) predicate.FieldType { return where.GTE(FieldOptionalUint16, v) }
 
-// OptionalUint16LT applies the LT predicate on the "optional_uint16" field.
-func OptionalUint16LT(v uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalUint16, v))
-}
+// Deprecated: OptionalUint16LT — use where.LT(FieldOptionalUint16, v).
+func OptionalUint16LT(v uint16) predicate.FieldType { return where.LT(FieldOptionalUint16, v) }
 
-// OptionalUint16LTE applies the LTE predicate on the "optional_uint16" field.
-func OptionalUint16LTE(v uint16) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalUint16, v))
-}
+// Deprecated: OptionalUint16LTE — use where.LTE(FieldOptionalUint16, v).
+func OptionalUint16LTE(v uint16) predicate.FieldType { return where.LTE(FieldOptionalUint16, v) }
 
-// OptionalUint16IsNil applies the IsNil predicate on the "optional_uint16" field.
-func OptionalUint16IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalUint16))
-}
+// Deprecated: OptionalUint16IsNil — use where.IsNull(FieldOptionalUint16).
+func OptionalUint16IsNil() predicate.FieldType { return where.IsNull(FieldOptionalUint16) }
 
-// OptionalUint16NotNil applies the NotNil predicate on the "optional_uint16" field.
-func OptionalUint16NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalUint16))
-}
+// Deprecated: OptionalUint16NotNil — use where.NotNull(FieldOptionalUint16).
+func OptionalUint16NotNil() predicate.FieldType { return where.NotNull(FieldOptionalUint16) }
 
-// OptionalUint32EQ applies the EQ predicate on the "optional_uint32" field.
-func OptionalUint32EQ(v uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint32, v))
-}
+// Deprecated: OptionalUint32EQ — use where.EQ(FieldOptionalUint32, v).
+func OptionalUint32EQ(v uint32) predicate.FieldType { return where.EQ(FieldOptionalUint32, v) }
 
-// OptionalUint32NEQ applies the NEQ predicate on the "optional_uint32" field.
-func OptionalUint32NEQ(v uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalUint32, v))
-}
+// Deprecated: OptionalUint32NEQ — use where.NEQ(FieldOptionalUint32, v).
+func OptionalUint32NEQ(v uint32) predicate.FieldType { return where.NEQ(FieldOptionalUint32, v) }
 
-// OptionalUint32In applies the In predicate on the "optional_uint32" field.
-func OptionalUint32In(vs ...uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalUint32, vs...))
-}
+// Deprecated: OptionalUint32In — use where.In(FieldOptionalUint32, vs...).
+func OptionalUint32In(vs ...uint32) predicate.FieldType { return where.In(FieldOptionalUint32, vs...) }
 
-// OptionalUint32NotIn applies the NotIn predicate on the "optional_uint32" field.
+// Deprecated: OptionalUint32NotIn — use where.NotIn(FieldOptionalUint32, vs...).
 func OptionalUint32NotIn(vs ...uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalUint32, vs...))
+	return where.NotIn(FieldOptionalUint32, vs...)
 }
 
-// OptionalUint32GT applies the GT predicate on the "optional_uint32" field.
-func OptionalUint32GT(v uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalUint32, v))
-}
+// Deprecated: OptionalUint32GT — use where.GT(FieldOptionalUint32, v).
+func OptionalUint32GT(v uint32) predicate.FieldType { return where.GT(FieldOptionalUint32, v) }
 
-// OptionalUint32GTE applies the GTE predicate on the "optional_uint32" field.
-func OptionalUint32GTE(v uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalUint32, v))
-}
+// Deprecated: OptionalUint32GTE — use where.GTE(FieldOptionalUint32, v).
+func OptionalUint32GTE(v uint32) predicate.FieldType { return where.GTE(FieldOptionalUint32, v) }
 
-// OptionalUint32LT applies the LT predicate on the "optional_uint32" field.
-func OptionalUint32LT(v uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalUint32, v))
-}
+// Deprecated: OptionalUint32LT — use where.LT(FieldOptionalUint32, v).
+func OptionalUint32LT(v uint32) predicate.FieldType { return where.LT(FieldOptionalUint32, v) }
 
-// OptionalUint32LTE applies the LTE predicate on the "optional_uint32" field.
-func OptionalUint32LTE(v uint32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalUint32, v))
-}
+// Deprecated: OptionalUint32LTE — use where.LTE(FieldOptionalUint32, v).
+func OptionalUint32LTE(v uint32) predicate.FieldType { return where.LTE(FieldOptionalUint32, v) }
 
-// OptionalUint32IsNil applies the IsNil predicate on the "optional_uint32" field.
-func OptionalUint32IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalUint32))
-}
+// Deprecated: OptionalUint32IsNil — use where.IsNull(FieldOptionalUint32).
+func OptionalUint32IsNil() predicate.FieldType { return where.IsNull(FieldOptionalUint32) }
 
-// OptionalUint32NotNil applies the NotNil predicate on the "optional_uint32" field.
-func OptionalUint32NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalUint32))
-}
+// Deprecated: OptionalUint32NotNil — use where.NotNull(FieldOptionalUint32).
+func OptionalUint32NotNil() predicate.FieldType { return where.NotNull(FieldOptionalUint32) }
 
-// OptionalUint64EQ applies the EQ predicate on the "optional_uint64" field.
-func OptionalUint64EQ(v uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUint64, v))
-}
+// Deprecated: OptionalUint64EQ — use where.EQ(FieldOptionalUint64, v).
+func OptionalUint64EQ(v uint64) predicate.FieldType { return where.EQ(FieldOptionalUint64, v) }
 
-// OptionalUint64NEQ applies the NEQ predicate on the "optional_uint64" field.
-func OptionalUint64NEQ(v uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalUint64, v))
-}
+// Deprecated: OptionalUint64NEQ — use where.NEQ(FieldOptionalUint64, v).
+func OptionalUint64NEQ(v uint64) predicate.FieldType { return where.NEQ(FieldOptionalUint64, v) }
 
-// OptionalUint64In applies the In predicate on the "optional_uint64" field.
-func OptionalUint64In(vs ...uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalUint64, vs...))
-}
+// Deprecated: OptionalUint64In — use where.In(FieldOptionalUint64, vs...).
+func OptionalUint64In(vs ...uint64) predicate.FieldType { return where.In(FieldOptionalUint64, vs...) }
 
-// OptionalUint64NotIn applies the NotIn predicate on the "optional_uint64" field.
+// Deprecated: OptionalUint64NotIn — use where.NotIn(FieldOptionalUint64, vs...).
 func OptionalUint64NotIn(vs ...uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalUint64, vs...))
+	return where.NotIn(FieldOptionalUint64, vs...)
 }
 
-// OptionalUint64GT applies the GT predicate on the "optional_uint64" field.
-func OptionalUint64GT(v uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalUint64, v))
-}
+// Deprecated: OptionalUint64GT — use where.GT(FieldOptionalUint64, v).
+func OptionalUint64GT(v uint64) predicate.FieldType { return where.GT(FieldOptionalUint64, v) }
 
-// OptionalUint64GTE applies the GTE predicate on the "optional_uint64" field.
-func OptionalUint64GTE(v uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalUint64, v))
-}
+// Deprecated: OptionalUint64GTE — use where.GTE(FieldOptionalUint64, v).
+func OptionalUint64GTE(v uint64) predicate.FieldType { return where.GTE(FieldOptionalUint64, v) }
 
-// OptionalUint64LT applies the LT predicate on the "optional_uint64" field.
-func OptionalUint64LT(v uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalUint64, v))
-}
+// Deprecated: OptionalUint64LT — use where.LT(FieldOptionalUint64, v).
+func OptionalUint64LT(v uint64) predicate.FieldType { return where.LT(FieldOptionalUint64, v) }
 
-// OptionalUint64LTE applies the LTE predicate on the "optional_uint64" field.
-func OptionalUint64LTE(v uint64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalUint64, v))
-}
+// Deprecated: OptionalUint64LTE — use where.LTE(FieldOptionalUint64, v).
+func OptionalUint64LTE(v uint64) predicate.FieldType { return where.LTE(FieldOptionalUint64, v) }
 
-// OptionalUint64IsNil applies the IsNil predicate on the "optional_uint64" field.
-func OptionalUint64IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalUint64))
-}
+// Deprecated: OptionalUint64IsNil — use where.IsNull(FieldOptionalUint64).
+func OptionalUint64IsNil() predicate.FieldType { return where.IsNull(FieldOptionalUint64) }
 
-// OptionalUint64NotNil applies the NotNil predicate on the "optional_uint64" field.
-func OptionalUint64NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalUint64))
-}
+// Deprecated: OptionalUint64NotNil — use where.NotNull(FieldOptionalUint64).
+func OptionalUint64NotNil() predicate.FieldType { return where.NotNull(FieldOptionalUint64) }
 
-// StateEQ applies the EQ predicate on the "state" field.
-func StateEQ(v State) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldState, v))
-}
+// Deprecated: StateEQ — use where.EQ(FieldState, v).
+func StateEQ(v State) predicate.FieldType { return where.EQ(FieldState, v) }
 
-// StateNEQ applies the NEQ predicate on the "state" field.
-func StateNEQ(v State) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldState, v))
-}
+// Deprecated: StateNEQ — use where.NEQ(FieldState, v).
+func StateNEQ(v State) predicate.FieldType { return where.NEQ(FieldState, v) }
 
-// StateIn applies the In predicate on the "state" field.
-func StateIn(vs ...State) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldState, vs...))
-}
+// Deprecated: StateIn — use where.In(FieldState, vs...).
+func StateIn(vs ...State) predicate.FieldType { return where.In(FieldState, vs...) }
 
-// StateNotIn applies the NotIn predicate on the "state" field.
-func StateNotIn(vs ...State) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldState, vs...))
-}
+// Deprecated: StateNotIn — use where.NotIn(FieldState, vs...).
+func StateNotIn(vs ...State) predicate.FieldType { return where.NotIn(FieldState, vs...) }
 
-// StateIsNil applies the IsNil predicate on the "state" field.
-func StateIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldState))
-}
+// Deprecated: StateIsNil — use where.IsNull(FieldState).
+func StateIsNil() predicate.FieldType { return where.IsNull(FieldState) }
 
-// StateNotNil applies the NotNil predicate on the "state" field.
-func StateNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldState))
-}
+// Deprecated: StateNotNil — use where.NotNull(FieldState).
+func StateNotNil() predicate.FieldType { return where.NotNull(FieldState) }
 
-// OptionalFloatEQ applies the EQ predicate on the "optional_float" field.
-func OptionalFloatEQ(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalFloat, v))
-}
+// Deprecated: OptionalFloatEQ — use where.EQ(FieldOptionalFloat, v).
+func OptionalFloatEQ(v float64) predicate.FieldType { return where.EQ(FieldOptionalFloat, v) }
 
-// OptionalFloatNEQ applies the NEQ predicate on the "optional_float" field.
-func OptionalFloatNEQ(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalFloat, v))
-}
+// Deprecated: OptionalFloatNEQ — use where.NEQ(FieldOptionalFloat, v).
+func OptionalFloatNEQ(v float64) predicate.FieldType { return where.NEQ(FieldOptionalFloat, v) }
 
-// OptionalFloatIn applies the In predicate on the "optional_float" field.
-func OptionalFloatIn(vs ...float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalFloat, vs...))
-}
+// Deprecated: OptionalFloatIn — use where.In(FieldOptionalFloat, vs...).
+func OptionalFloatIn(vs ...float64) predicate.FieldType { return where.In(FieldOptionalFloat, vs...) }
 
-// OptionalFloatNotIn applies the NotIn predicate on the "optional_float" field.
+// Deprecated: OptionalFloatNotIn — use where.NotIn(FieldOptionalFloat, vs...).
 func OptionalFloatNotIn(vs ...float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalFloat, vs...))
+	return where.NotIn(FieldOptionalFloat, vs...)
 }
 
-// OptionalFloatGT applies the GT predicate on the "optional_float" field.
-func OptionalFloatGT(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalFloat, v))
-}
+// Deprecated: OptionalFloatGT — use where.GT(FieldOptionalFloat, v).
+func OptionalFloatGT(v float64) predicate.FieldType { return where.GT(FieldOptionalFloat, v) }
 
-// OptionalFloatGTE applies the GTE predicate on the "optional_float" field.
-func OptionalFloatGTE(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalFloat, v))
-}
+// Deprecated: OptionalFloatGTE — use where.GTE(FieldOptionalFloat, v).
+func OptionalFloatGTE(v float64) predicate.FieldType { return where.GTE(FieldOptionalFloat, v) }
 
-// OptionalFloatLT applies the LT predicate on the "optional_float" field.
-func OptionalFloatLT(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalFloat, v))
-}
+// Deprecated: OptionalFloatLT — use where.LT(FieldOptionalFloat, v).
+func OptionalFloatLT(v float64) predicate.FieldType { return where.LT(FieldOptionalFloat, v) }
 
-// OptionalFloatLTE applies the LTE predicate on the "optional_float" field.
-func OptionalFloatLTE(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalFloat, v))
-}
+// Deprecated: OptionalFloatLTE — use where.LTE(FieldOptionalFloat, v).
+func OptionalFloatLTE(v float64) predicate.FieldType { return where.LTE(FieldOptionalFloat, v) }
 
-// OptionalFloatIsNil applies the IsNil predicate on the "optional_float" field.
-func OptionalFloatIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalFloat))
-}
+// Deprecated: OptionalFloatIsNil — use where.IsNull(FieldOptionalFloat).
+func OptionalFloatIsNil() predicate.FieldType { return where.IsNull(FieldOptionalFloat) }
 
-// OptionalFloatNotNil applies the NotNil predicate on the "optional_float" field.
-func OptionalFloatNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalFloat))
-}
+// Deprecated: OptionalFloatNotNil — use where.NotNull(FieldOptionalFloat).
+func OptionalFloatNotNil() predicate.FieldType { return where.NotNull(FieldOptionalFloat) }
 
-// OptionalFloat32EQ applies the EQ predicate on the "optional_float32" field.
-func OptionalFloat32EQ(v float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalFloat32, v))
-}
+// Deprecated: OptionalFloat32EQ — use where.EQ(FieldOptionalFloat32, v).
+func OptionalFloat32EQ(v float32) predicate.FieldType { return where.EQ(FieldOptionalFloat32, v) }
 
-// OptionalFloat32NEQ applies the NEQ predicate on the "optional_float32" field.
-func OptionalFloat32NEQ(v float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalFloat32, v))
-}
+// Deprecated: OptionalFloat32NEQ — use where.NEQ(FieldOptionalFloat32, v).
+func OptionalFloat32NEQ(v float32) predicate.FieldType { return where.NEQ(FieldOptionalFloat32, v) }
 
-// OptionalFloat32In applies the In predicate on the "optional_float32" field.
+// Deprecated: OptionalFloat32In — use where.In(FieldOptionalFloat32, vs...).
 func OptionalFloat32In(vs ...float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalFloat32, vs...))
+	return where.In(FieldOptionalFloat32, vs...)
 }
 
-// OptionalFloat32NotIn applies the NotIn predicate on the "optional_float32" field.
+// Deprecated: OptionalFloat32NotIn — use where.NotIn(FieldOptionalFloat32, vs...).
 func OptionalFloat32NotIn(vs ...float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalFloat32, vs...))
+	return where.NotIn(FieldOptionalFloat32, vs...)
 }
 
-// OptionalFloat32GT applies the GT predicate on the "optional_float32" field.
-func OptionalFloat32GT(v float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalFloat32, v))
-}
+// Deprecated: OptionalFloat32GT — use where.GT(FieldOptionalFloat32, v).
+func OptionalFloat32GT(v float32) predicate.FieldType { return where.GT(FieldOptionalFloat32, v) }
 
-// OptionalFloat32GTE applies the GTE predicate on the "optional_float32" field.
-func OptionalFloat32GTE(v float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalFloat32, v))
-}
+// Deprecated: OptionalFloat32GTE — use where.GTE(FieldOptionalFloat32, v).
+func OptionalFloat32GTE(v float32) predicate.FieldType { return where.GTE(FieldOptionalFloat32, v) }
 
-// OptionalFloat32LT applies the LT predicate on the "optional_float32" field.
-func OptionalFloat32LT(v float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalFloat32, v))
-}
+// Deprecated: OptionalFloat32LT — use where.LT(FieldOptionalFloat32, v).
+func OptionalFloat32LT(v float32) predicate.FieldType { return where.LT(FieldOptionalFloat32, v) }
 
-// OptionalFloat32LTE applies the LTE predicate on the "optional_float32" field.
-func OptionalFloat32LTE(v float32) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalFloat32, v))
-}
+// Deprecated: OptionalFloat32LTE — use where.LTE(FieldOptionalFloat32, v).
+func OptionalFloat32LTE(v float32) predicate.FieldType { return where.LTE(FieldOptionalFloat32, v) }
 
-// OptionalFloat32IsNil applies the IsNil predicate on the "optional_float32" field.
-func OptionalFloat32IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalFloat32))
-}
+// Deprecated: OptionalFloat32IsNil — use where.IsNull(FieldOptionalFloat32).
+func OptionalFloat32IsNil() predicate.FieldType { return where.IsNull(FieldOptionalFloat32) }
 
-// OptionalFloat32NotNil applies the NotNil predicate on the "optional_float32" field.
-func OptionalFloat32NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalFloat32))
-}
+// Deprecated: OptionalFloat32NotNil — use where.NotNull(FieldOptionalFloat32).
+func OptionalFloat32NotNil() predicate.FieldType { return where.NotNull(FieldOptionalFloat32) }
 
-// TextEQ applies the EQ predicate on the "text" field.
-func TextEQ(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: TextEQ — use where.EQ(FieldText, v).
+func TextEQ(v string) predicate.FieldType { return where.EQ(FieldText, v) }
 
-// TextNEQ applies the NEQ predicate on the "text" field.
-func TextNEQ(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldText, v))
-}
+// Deprecated: TextNEQ — use where.NEQ(FieldText, v).
+func TextNEQ(v string) predicate.FieldType { return where.NEQ(FieldText, v) }
 
-// TextIn applies the In predicate on the "text" field.
-func TextIn(vs ...string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldText, vs...))
-}
+// Deprecated: TextIn — use where.In(FieldText, vs...).
+func TextIn(vs ...string) predicate.FieldType { return where.In(FieldText, vs...) }
 
-// TextNotIn applies the NotIn predicate on the "text" field.
-func TextNotIn(vs ...string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldText, vs...))
-}
+// Deprecated: TextNotIn — use where.NotIn(FieldText, vs...).
+func TextNotIn(vs ...string) predicate.FieldType { return where.NotIn(FieldText, vs...) }
 
-// TextGT applies the GT predicate on the "text" field.
-func TextGT(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldText, v))
-}
+// Deprecated: TextGT — use where.GT(FieldText, v).
+func TextGT(v string) predicate.FieldType { return where.GT(FieldText, v) }
 
-// TextGTE applies the GTE predicate on the "text" field.
-func TextGTE(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldText, v))
-}
+// Deprecated: TextGTE — use where.GTE(FieldText, v).
+func TextGTE(v string) predicate.FieldType { return where.GTE(FieldText, v) }
 
-// TextLT applies the LT predicate on the "text" field.
-func TextLT(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldText, v))
-}
+// Deprecated: TextLT — use where.LT(FieldText, v).
+func TextLT(v string) predicate.FieldType { return where.LT(FieldText, v) }
 
-// TextLTE applies the LTE predicate on the "text" field.
-func TextLTE(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldText, v))
-}
+// Deprecated: TextLTE — use where.LTE(FieldText, v).
+func TextLTE(v string) predicate.FieldType { return where.LTE(FieldText, v) }
 
-// TextContains applies the Contains predicate on the "text" field.
-func TextContains(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldContains(FieldText, v))
-}
+// Deprecated: TextContains — use where.Contains(FieldText, v).
+func TextContains(v string) predicate.FieldType { return where.Contains(FieldText, v) }
 
-// TextHasPrefix applies the HasPrefix predicate on the "text" field.
-func TextHasPrefix(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldHasPrefix(FieldText, v))
-}
+// Deprecated: TextHasPrefix — use where.HasPrefix(FieldText, v).
+func TextHasPrefix(v string) predicate.FieldType { return where.HasPrefix(FieldText, v) }
 
-// TextHasSuffix applies the HasSuffix predicate on the "text" field.
-func TextHasSuffix(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldHasSuffix(FieldText, v))
-}
+// Deprecated: TextHasSuffix — use where.HasSuffix(FieldText, v).
+func TextHasSuffix(v string) predicate.FieldType { return where.HasSuffix(FieldText, v) }
 
-// TextIsNil applies the IsNil predicate on the "text" field.
-func TextIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldText))
-}
+// Deprecated: TextIsNil — use where.IsNull(FieldText).
+func TextIsNil() predicate.FieldType { return where.IsNull(FieldText) }
 
-// TextNotNil applies the NotNil predicate on the "text" field.
-func TextNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldText))
-}
+// Deprecated: TextNotNil — use where.NotNull(FieldText).
+func TextNotNil() predicate.FieldType { return where.NotNull(FieldText) }
 
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEqualFold(FieldText, v))
-}
+// Deprecated: TextEqualFold — use where.EqualFold(FieldText, v).
+func TextEqualFold(v string) predicate.FieldType { return where.EqualFold(FieldText, v) }
 
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldContainsFold(FieldText, v))
-}
+// Deprecated: TextContainsFold — use where.ContainsFold(FieldText, v).
+func TextContainsFold(v string) predicate.FieldType { return where.ContainsFold(FieldText, v) }
 
-// DatetimeEQ applies the EQ predicate on the "datetime" field.
-func DatetimeEQ(v time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldDatetime, v))
-}
+// Deprecated: DatetimeEQ — use where.EQ(FieldDatetime, v).
+func DatetimeEQ(v time.Time) predicate.FieldType { return where.EQ(FieldDatetime, v) }
 
-// DatetimeNEQ applies the NEQ predicate on the "datetime" field.
-func DatetimeNEQ(v time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldDatetime, v))
-}
+// Deprecated: DatetimeNEQ — use where.NEQ(FieldDatetime, v).
+func DatetimeNEQ(v time.Time) predicate.FieldType { return where.NEQ(FieldDatetime, v) }
 
-// DatetimeIn applies the In predicate on the "datetime" field.
-func DatetimeIn(vs ...time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldDatetime, vs...))
-}
+// Deprecated: DatetimeIn — use where.In(FieldDatetime, vs...).
+func DatetimeIn(vs ...time.Time) predicate.FieldType { return where.In(FieldDatetime, vs...) }
 
-// DatetimeNotIn applies the NotIn predicate on the "datetime" field.
-func DatetimeNotIn(vs ...time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldDatetime, vs...))
-}
+// Deprecated: DatetimeNotIn — use where.NotIn(FieldDatetime, vs...).
+func DatetimeNotIn(vs ...time.Time) predicate.FieldType { return where.NotIn(FieldDatetime, vs...) }
 
-// DatetimeGT applies the GT predicate on the "datetime" field.
-func DatetimeGT(v time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldDatetime, v))
-}
+// Deprecated: DatetimeGT — use where.GT(FieldDatetime, v).
+func DatetimeGT(v time.Time) predicate.FieldType { return where.GT(FieldDatetime, v) }
 
-// DatetimeGTE applies the GTE predicate on the "datetime" field.
-func DatetimeGTE(v time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldDatetime, v))
-}
+// Deprecated: DatetimeGTE — use where.GTE(FieldDatetime, v).
+func DatetimeGTE(v time.Time) predicate.FieldType { return where.GTE(FieldDatetime, v) }
 
-// DatetimeLT applies the LT predicate on the "datetime" field.
-func DatetimeLT(v time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldDatetime, v))
-}
+// Deprecated: DatetimeLT — use where.LT(FieldDatetime, v).
+func DatetimeLT(v time.Time) predicate.FieldType { return where.LT(FieldDatetime, v) }
 
-// DatetimeLTE applies the LTE predicate on the "datetime" field.
-func DatetimeLTE(v time.Time) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldDatetime, v))
-}
+// Deprecated: DatetimeLTE — use where.LTE(FieldDatetime, v).
+func DatetimeLTE(v time.Time) predicate.FieldType { return where.LTE(FieldDatetime, v) }
 
-// DatetimeIsNil applies the IsNil predicate on the "datetime" field.
-func DatetimeIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldDatetime))
-}
+// Deprecated: DatetimeIsNil — use where.IsNull(FieldDatetime).
+func DatetimeIsNil() predicate.FieldType { return where.IsNull(FieldDatetime) }
 
-// DatetimeNotNil applies the NotNil predicate on the "datetime" field.
-func DatetimeNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldDatetime))
-}
+// Deprecated: DatetimeNotNil — use where.NotNull(FieldDatetime).
+func DatetimeNotNil() predicate.FieldType { return where.NotNull(FieldDatetime) }
 
-// DecimalEQ applies the EQ predicate on the "decimal" field.
-func DecimalEQ(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldDecimal, v))
-}
+// Deprecated: DecimalEQ — use where.EQ(FieldDecimal, v).
+func DecimalEQ(v float64) predicate.FieldType { return where.EQ(FieldDecimal, v) }
 
-// DecimalNEQ applies the NEQ predicate on the "decimal" field.
-func DecimalNEQ(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldDecimal, v))
-}
+// Deprecated: DecimalNEQ — use where.NEQ(FieldDecimal, v).
+func DecimalNEQ(v float64) predicate.FieldType { return where.NEQ(FieldDecimal, v) }
 
-// DecimalIn applies the In predicate on the "decimal" field.
-func DecimalIn(vs ...float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldDecimal, vs...))
-}
+// Deprecated: DecimalIn — use where.In(FieldDecimal, vs...).
+func DecimalIn(vs ...float64) predicate.FieldType { return where.In(FieldDecimal, vs...) }
 
-// DecimalNotIn applies the NotIn predicate on the "decimal" field.
-func DecimalNotIn(vs ...float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldDecimal, vs...))
-}
+// Deprecated: DecimalNotIn — use where.NotIn(FieldDecimal, vs...).
+func DecimalNotIn(vs ...float64) predicate.FieldType { return where.NotIn(FieldDecimal, vs...) }
 
-// DecimalGT applies the GT predicate on the "decimal" field.
-func DecimalGT(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldDecimal, v))
-}
+// Deprecated: DecimalGT — use where.GT(FieldDecimal, v).
+func DecimalGT(v float64) predicate.FieldType { return where.GT(FieldDecimal, v) }
 
-// DecimalGTE applies the GTE predicate on the "decimal" field.
-func DecimalGTE(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldDecimal, v))
-}
+// Deprecated: DecimalGTE — use where.GTE(FieldDecimal, v).
+func DecimalGTE(v float64) predicate.FieldType { return where.GTE(FieldDecimal, v) }
 
-// DecimalLT applies the LT predicate on the "decimal" field.
-func DecimalLT(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldDecimal, v))
-}
+// Deprecated: DecimalLT — use where.LT(FieldDecimal, v).
+func DecimalLT(v float64) predicate.FieldType { return where.LT(FieldDecimal, v) }
 
-// DecimalLTE applies the LTE predicate on the "decimal" field.
-func DecimalLTE(v float64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldDecimal, v))
-}
+// Deprecated: DecimalLTE — use where.LTE(FieldDecimal, v).
+func DecimalLTE(v float64) predicate.FieldType { return where.LTE(FieldDecimal, v) }
 
-// DecimalIsNil applies the IsNil predicate on the "decimal" field.
-func DecimalIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldDecimal))
-}
+// Deprecated: DecimalIsNil — use where.IsNull(FieldDecimal).
+func DecimalIsNil() predicate.FieldType { return where.IsNull(FieldDecimal) }
 
-// DecimalNotNil applies the NotNil predicate on the "decimal" field.
-func DecimalNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldDecimal))
-}
+// Deprecated: DecimalNotNil — use where.NotNull(FieldDecimal).
+func DecimalNotNil() predicate.FieldType { return where.NotNull(FieldDecimal) }
 
-// LinkOtherEQ applies the EQ predicate on the "link_other" field.
-func LinkOtherEQ(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldLinkOther, v))
-}
+// Deprecated: LinkOtherEQ — use where.EQ(FieldLinkOther, v).
+func LinkOtherEQ(v *schema.Link) predicate.FieldType { return where.EQ(FieldLinkOther, v) }
 
-// LinkOtherNEQ applies the NEQ predicate on the "link_other" field.
-func LinkOtherNEQ(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldLinkOther, v))
-}
+// Deprecated: LinkOtherNEQ — use where.NEQ(FieldLinkOther, v).
+func LinkOtherNEQ(v *schema.Link) predicate.FieldType { return where.NEQ(FieldLinkOther, v) }
 
-// LinkOtherIn applies the In predicate on the "link_other" field.
-func LinkOtherIn(vs ...*schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldLinkOther, vs...))
-}
+// Deprecated: LinkOtherIn — use where.In(FieldLinkOther, vs...).
+func LinkOtherIn(vs ...*schema.Link) predicate.FieldType { return where.In(FieldLinkOther, vs...) }
 
-// LinkOtherNotIn applies the NotIn predicate on the "link_other" field.
+// Deprecated: LinkOtherNotIn — use where.NotIn(FieldLinkOther, vs...).
 func LinkOtherNotIn(vs ...*schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldLinkOther, vs...))
+	return where.NotIn(FieldLinkOther, vs...)
 }
 
-// LinkOtherGT applies the GT predicate on the "link_other" field.
-func LinkOtherGT(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldLinkOther, v))
-}
+// Deprecated: LinkOtherGT — use where.GT(FieldLinkOther, v).
+func LinkOtherGT(v *schema.Link) predicate.FieldType { return where.GT(FieldLinkOther, v) }
 
-// LinkOtherGTE applies the GTE predicate on the "link_other" field.
-func LinkOtherGTE(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldLinkOther, v))
-}
+// Deprecated: LinkOtherGTE — use where.GTE(FieldLinkOther, v).
+func LinkOtherGTE(v *schema.Link) predicate.FieldType { return where.GTE(FieldLinkOther, v) }
 
-// LinkOtherLT applies the LT predicate on the "link_other" field.
-func LinkOtherLT(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldLinkOther, v))
-}
+// Deprecated: LinkOtherLT — use where.LT(FieldLinkOther, v).
+func LinkOtherLT(v *schema.Link) predicate.FieldType { return where.LT(FieldLinkOther, v) }
 
-// LinkOtherLTE applies the LTE predicate on the "link_other" field.
-func LinkOtherLTE(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldLinkOther, v))
-}
+// Deprecated: LinkOtherLTE — use where.LTE(FieldLinkOther, v).
+func LinkOtherLTE(v *schema.Link) predicate.FieldType { return where.LTE(FieldLinkOther, v) }
 
-// LinkOtherIsNil applies the IsNil predicate on the "link_other" field.
-func LinkOtherIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldLinkOther))
-}
+// Deprecated: LinkOtherIsNil — use where.IsNull(FieldLinkOther).
+func LinkOtherIsNil() predicate.FieldType { return where.IsNull(FieldLinkOther) }
 
-// LinkOtherNotNil applies the NotNil predicate on the "link_other" field.
-func LinkOtherNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldLinkOther))
-}
+// Deprecated: LinkOtherNotNil — use where.NotNull(FieldLinkOther).
+func LinkOtherNotNil() predicate.FieldType { return where.NotNull(FieldLinkOther) }
 
-// LinkOtherFuncEQ applies the EQ predicate on the "link_other_func" field.
-func LinkOtherFuncEQ(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldLinkOtherFunc, v))
-}
+// Deprecated: LinkOtherFuncEQ — use where.EQ(FieldLinkOtherFunc, v).
+func LinkOtherFuncEQ(v *schema.Link) predicate.FieldType { return where.EQ(FieldLinkOtherFunc, v) }
 
-// LinkOtherFuncNEQ applies the NEQ predicate on the "link_other_func" field.
-func LinkOtherFuncNEQ(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldLinkOtherFunc, v))
-}
+// Deprecated: LinkOtherFuncNEQ — use where.NEQ(FieldLinkOtherFunc, v).
+func LinkOtherFuncNEQ(v *schema.Link) predicate.FieldType { return where.NEQ(FieldLinkOtherFunc, v) }
 
-// LinkOtherFuncIn applies the In predicate on the "link_other_func" field.
+// Deprecated: LinkOtherFuncIn — use where.In(FieldLinkOtherFunc, vs...).
 func LinkOtherFuncIn(vs ...*schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldLinkOtherFunc, vs...))
+	return where.In(FieldLinkOtherFunc, vs...)
 }
 
-// LinkOtherFuncNotIn applies the NotIn predicate on the "link_other_func" field.
+// Deprecated: LinkOtherFuncNotIn — use where.NotIn(FieldLinkOtherFunc, vs...).
 func LinkOtherFuncNotIn(vs ...*schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldLinkOtherFunc, vs...))
+	return where.NotIn(FieldLinkOtherFunc, vs...)
 }
 
-// LinkOtherFuncGT applies the GT predicate on the "link_other_func" field.
-func LinkOtherFuncGT(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldLinkOtherFunc, v))
-}
+// Deprecated: LinkOtherFuncGT — use where.GT(FieldLinkOtherFunc, v).
+func LinkOtherFuncGT(v *schema.Link) predicate.FieldType { return where.GT(FieldLinkOtherFunc, v) }
 
-// LinkOtherFuncGTE applies the GTE predicate on the "link_other_func" field.
-func LinkOtherFuncGTE(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldLinkOtherFunc, v))
-}
+// Deprecated: LinkOtherFuncGTE — use where.GTE(FieldLinkOtherFunc, v).
+func LinkOtherFuncGTE(v *schema.Link) predicate.FieldType { return where.GTE(FieldLinkOtherFunc, v) }
 
-// LinkOtherFuncLT applies the LT predicate on the "link_other_func" field.
-func LinkOtherFuncLT(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldLinkOtherFunc, v))
-}
+// Deprecated: LinkOtherFuncLT — use where.LT(FieldLinkOtherFunc, v).
+func LinkOtherFuncLT(v *schema.Link) predicate.FieldType { return where.LT(FieldLinkOtherFunc, v) }
 
-// LinkOtherFuncLTE applies the LTE predicate on the "link_other_func" field.
-func LinkOtherFuncLTE(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldLinkOtherFunc, v))
-}
+// Deprecated: LinkOtherFuncLTE — use where.LTE(FieldLinkOtherFunc, v).
+func LinkOtherFuncLTE(v *schema.Link) predicate.FieldType { return where.LTE(FieldLinkOtherFunc, v) }
 
-// LinkOtherFuncIsNil applies the IsNil predicate on the "link_other_func" field.
-func LinkOtherFuncIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldLinkOtherFunc))
-}
+// Deprecated: LinkOtherFuncIsNil — use where.IsNull(FieldLinkOtherFunc).
+func LinkOtherFuncIsNil() predicate.FieldType { return where.IsNull(FieldLinkOtherFunc) }
 
-// LinkOtherFuncNotNil applies the NotNil predicate on the "link_other_func" field.
-func LinkOtherFuncNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldLinkOtherFunc))
-}
+// Deprecated: LinkOtherFuncNotNil — use where.NotNull(FieldLinkOtherFunc).
+func LinkOtherFuncNotNil() predicate.FieldType { return where.NotNull(FieldLinkOtherFunc) }
 
-// MACEQ applies the EQ predicate on the "mac" field.
-func MACEQ(v schema.MAC) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldMAC, v))
-}
+// Deprecated: MACEQ — use where.EQ(FieldMAC, v).
+func MACEQ(v schema.MAC) predicate.FieldType { return where.EQ(FieldMAC, v) }
 
-// MACNEQ applies the NEQ predicate on the "mac" field.
-func MACNEQ(v schema.MAC) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldMAC, v))
-}
+// Deprecated: MACNEQ — use where.NEQ(FieldMAC, v).
+func MACNEQ(v schema.MAC) predicate.FieldType { return where.NEQ(FieldMAC, v) }
 
-// MACIn applies the In predicate on the "mac" field.
-func MACIn(vs ...schema.MAC) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldMAC, vs...))
-}
+// Deprecated: MACIn — use where.In(FieldMAC, vs...).
+func MACIn(vs ...schema.MAC) predicate.FieldType { return where.In(FieldMAC, vs...) }
 
-// MACNotIn applies the NotIn predicate on the "mac" field.
-func MACNotIn(vs ...schema.MAC) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldMAC, vs...))
-}
+// Deprecated: MACNotIn — use where.NotIn(FieldMAC, vs...).
+func MACNotIn(vs ...schema.MAC) predicate.FieldType { return where.NotIn(FieldMAC, vs...) }
 
-// MACGT applies the GT predicate on the "mac" field.
-func MACGT(v schema.MAC) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldMAC, v))
-}
+// Deprecated: MACGT — use where.GT(FieldMAC, v).
+func MACGT(v schema.MAC) predicate.FieldType { return where.GT(FieldMAC, v) }
 
-// MACGTE applies the GTE predicate on the "mac" field.
-func MACGTE(v schema.MAC) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldMAC, v))
-}
+// Deprecated: MACGTE — use where.GTE(FieldMAC, v).
+func MACGTE(v schema.MAC) predicate.FieldType { return where.GTE(FieldMAC, v) }
 
-// MACLT applies the LT predicate on the "mac" field.
-func MACLT(v schema.MAC) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldMAC, v))
-}
+// Deprecated: MACLT — use where.LT(FieldMAC, v).
+func MACLT(v schema.MAC) predicate.FieldType { return where.LT(FieldMAC, v) }
 
-// MACLTE applies the LTE predicate on the "mac" field.
-func MACLTE(v schema.MAC) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldMAC, v))
-}
+// Deprecated: MACLTE — use where.LTE(FieldMAC, v).
+func MACLTE(v schema.MAC) predicate.FieldType { return where.LTE(FieldMAC, v) }
 
 // MACContains applies the Contains predicate on the "mac" field.
 func MACContains(v schema.MAC) predicate.FieldType {
@@ -1842,15 +1261,11 @@ func MACHasSuffix(v schema.MAC) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldMAC, vc))
 }
 
-// MACIsNil applies the IsNil predicate on the "mac" field.
-func MACIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldMAC))
-}
+// Deprecated: MACIsNil — use where.IsNull(FieldMAC).
+func MACIsNil() predicate.FieldType { return where.IsNull(FieldMAC) }
 
-// MACNotNil applies the NotNil predicate on the "mac" field.
-func MACNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldMAC))
-}
+// Deprecated: MACNotNil — use where.NotNull(FieldMAC).
+func MACNotNil() predicate.FieldType { return where.NotNull(FieldMAC) }
 
 // MACEqualFold applies the EqualFold predicate on the "mac" field.
 func MACEqualFold(v schema.MAC) predicate.FieldType {
@@ -1864,169 +1279,123 @@ func MACContainsFold(v schema.MAC) predicate.FieldType {
 	return predicate.FieldType(sql.FieldContainsFold(FieldMAC, vc))
 }
 
-// StringArrayEQ applies the EQ predicate on the "string_array" field.
-func StringArrayEQ(v schema.Strings) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldStringArray, v))
-}
+// Deprecated: StringArrayEQ — use where.EQ(FieldStringArray, v).
+func StringArrayEQ(v schema.Strings) predicate.FieldType { return where.EQ(FieldStringArray, v) }
 
-// StringArrayNEQ applies the NEQ predicate on the "string_array" field.
-func StringArrayNEQ(v schema.Strings) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldStringArray, v))
-}
+// Deprecated: StringArrayNEQ — use where.NEQ(FieldStringArray, v).
+func StringArrayNEQ(v schema.Strings) predicate.FieldType { return where.NEQ(FieldStringArray, v) }
 
-// StringArrayIn applies the In predicate on the "string_array" field.
+// Deprecated: StringArrayIn — use where.In(FieldStringArray, vs...).
 func StringArrayIn(vs ...schema.Strings) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldStringArray, vs...))
+	return where.In(FieldStringArray, vs...)
 }
 
-// StringArrayNotIn applies the NotIn predicate on the "string_array" field.
+// Deprecated: StringArrayNotIn — use where.NotIn(FieldStringArray, vs...).
 func StringArrayNotIn(vs ...schema.Strings) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldStringArray, vs...))
+	return where.NotIn(FieldStringArray, vs...)
 }
 
-// StringArrayGT applies the GT predicate on the "string_array" field.
-func StringArrayGT(v schema.Strings) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldStringArray, v))
-}
+// Deprecated: StringArrayGT — use where.GT(FieldStringArray, v).
+func StringArrayGT(v schema.Strings) predicate.FieldType { return where.GT(FieldStringArray, v) }
 
-// StringArrayGTE applies the GTE predicate on the "string_array" field.
-func StringArrayGTE(v schema.Strings) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldStringArray, v))
-}
+// Deprecated: StringArrayGTE — use where.GTE(FieldStringArray, v).
+func StringArrayGTE(v schema.Strings) predicate.FieldType { return where.GTE(FieldStringArray, v) }
 
-// StringArrayLT applies the LT predicate on the "string_array" field.
-func StringArrayLT(v schema.Strings) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldStringArray, v))
-}
+// Deprecated: StringArrayLT — use where.LT(FieldStringArray, v).
+func StringArrayLT(v schema.Strings) predicate.FieldType { return where.LT(FieldStringArray, v) }
 
-// StringArrayLTE applies the LTE predicate on the "string_array" field.
-func StringArrayLTE(v schema.Strings) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldStringArray, v))
-}
+// Deprecated: StringArrayLTE — use where.LTE(FieldStringArray, v).
+func StringArrayLTE(v schema.Strings) predicate.FieldType { return where.LTE(FieldStringArray, v) }
 
-// StringArrayIsNil applies the IsNil predicate on the "string_array" field.
-func StringArrayIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldStringArray))
-}
+// Deprecated: StringArrayIsNil — use where.IsNull(FieldStringArray).
+func StringArrayIsNil() predicate.FieldType { return where.IsNull(FieldStringArray) }
 
-// StringArrayNotNil applies the NotNil predicate on the "string_array" field.
-func StringArrayNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldStringArray))
-}
+// Deprecated: StringArrayNotNil — use where.NotNull(FieldStringArray).
+func StringArrayNotNil() predicate.FieldType { return where.NotNull(FieldStringArray) }
 
-// PasswordEQ applies the EQ predicate on the "password" field.
-func PasswordEQ(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldPassword, v))
-}
+// Deprecated: PasswordEQ — use where.EQ(FieldPassword, v).
+func PasswordEQ(v string) predicate.FieldType { return where.EQ(FieldPassword, v) }
 
-// PasswordNEQ applies the NEQ predicate on the "password" field.
-func PasswordNEQ(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldPassword, v))
-}
+// Deprecated: PasswordNEQ — use where.NEQ(FieldPassword, v).
+func PasswordNEQ(v string) predicate.FieldType { return where.NEQ(FieldPassword, v) }
 
-// PasswordIn applies the In predicate on the "password" field.
-func PasswordIn(vs ...string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldPassword, vs...))
-}
+// Deprecated: PasswordIn — use where.In(FieldPassword, vs...).
+func PasswordIn(vs ...string) predicate.FieldType { return where.In(FieldPassword, vs...) }
 
-// PasswordNotIn applies the NotIn predicate on the "password" field.
-func PasswordNotIn(vs ...string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldPassword, vs...))
-}
+// Deprecated: PasswordNotIn — use where.NotIn(FieldPassword, vs...).
+func PasswordNotIn(vs ...string) predicate.FieldType { return where.NotIn(FieldPassword, vs...) }
 
-// PasswordGT applies the GT predicate on the "password" field.
-func PasswordGT(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldPassword, v))
-}
+// Deprecated: PasswordGT — use where.GT(FieldPassword, v).
+func PasswordGT(v string) predicate.FieldType { return where.GT(FieldPassword, v) }
 
-// PasswordGTE applies the GTE predicate on the "password" field.
-func PasswordGTE(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldPassword, v))
-}
+// Deprecated: PasswordGTE — use where.GTE(FieldPassword, v).
+func PasswordGTE(v string) predicate.FieldType { return where.GTE(FieldPassword, v) }
 
-// PasswordLT applies the LT predicate on the "password" field.
-func PasswordLT(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldPassword, v))
-}
+// Deprecated: PasswordLT — use where.LT(FieldPassword, v).
+func PasswordLT(v string) predicate.FieldType { return where.LT(FieldPassword, v) }
 
-// PasswordLTE applies the LTE predicate on the "password" field.
-func PasswordLTE(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldPassword, v))
-}
+// Deprecated: PasswordLTE — use where.LTE(FieldPassword, v).
+func PasswordLTE(v string) predicate.FieldType { return where.LTE(FieldPassword, v) }
 
-// PasswordContains applies the Contains predicate on the "password" field.
-func PasswordContains(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldContains(FieldPassword, v))
-}
+// Deprecated: PasswordContains — use where.Contains(FieldPassword, v).
+func PasswordContains(v string) predicate.FieldType { return where.Contains(FieldPassword, v) }
 
-// PasswordHasPrefix applies the HasPrefix predicate on the "password" field.
-func PasswordHasPrefix(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldHasPrefix(FieldPassword, v))
-}
+// Deprecated: PasswordHasPrefix — use where.HasPrefix(FieldPassword, v).
+func PasswordHasPrefix(v string) predicate.FieldType { return where.HasPrefix(FieldPassword, v) }
 
-// PasswordHasSuffix applies the HasSuffix predicate on the "password" field.
-func PasswordHasSuffix(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldHasSuffix(FieldPassword, v))
-}
+// Deprecated: PasswordHasSuffix — use where.HasSuffix(FieldPassword, v).
+func PasswordHasSuffix(v string) predicate.FieldType { return where.HasSuffix(FieldPassword, v) }
 
-// PasswordIsNil applies the IsNil predicate on the "password" field.
-func PasswordIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldPassword))
-}
+// Deprecated: PasswordIsNil — use where.IsNull(FieldPassword).
+func PasswordIsNil() predicate.FieldType { return where.IsNull(FieldPassword) }
 
-// PasswordNotNil applies the NotNil predicate on the "password" field.
-func PasswordNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldPassword))
-}
+// Deprecated: PasswordNotNil — use where.NotNull(FieldPassword).
+func PasswordNotNil() predicate.FieldType { return where.NotNull(FieldPassword) }
 
-// PasswordEqualFold applies the EqualFold predicate on the "password" field.
-func PasswordEqualFold(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEqualFold(FieldPassword, v))
-}
+// Deprecated: PasswordEqualFold — use where.EqualFold(FieldPassword, v).
+func PasswordEqualFold(v string) predicate.FieldType { return where.EqualFold(FieldPassword, v) }
 
-// PasswordContainsFold applies the ContainsFold predicate on the "password" field.
-func PasswordContainsFold(v string) predicate.FieldType {
-	return predicate.FieldType(sql.FieldContainsFold(FieldPassword, v))
-}
+// Deprecated: PasswordContainsFold — use where.ContainsFold(FieldPassword, v).
+func PasswordContainsFold(v string) predicate.FieldType { return where.ContainsFold(FieldPassword, v) }
 
-// StringScannerEQ applies the EQ predicate on the "string_scanner" field.
+// Deprecated: StringScannerEQ — use where.EQ(FieldStringScanner, v).
 func StringScannerEQ(v schema.StringScanner) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldStringScanner, v))
+	return where.EQ(FieldStringScanner, v)
 }
 
-// StringScannerNEQ applies the NEQ predicate on the "string_scanner" field.
+// Deprecated: StringScannerNEQ — use where.NEQ(FieldStringScanner, v).
 func StringScannerNEQ(v schema.StringScanner) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldStringScanner, v))
+	return where.NEQ(FieldStringScanner, v)
 }
 
-// StringScannerIn applies the In predicate on the "string_scanner" field.
+// Deprecated: StringScannerIn — use where.In(FieldStringScanner, vs...).
 func StringScannerIn(vs ...schema.StringScanner) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldStringScanner, vs...))
+	return where.In(FieldStringScanner, vs...)
 }
 
-// StringScannerNotIn applies the NotIn predicate on the "string_scanner" field.
+// Deprecated: StringScannerNotIn — use where.NotIn(FieldStringScanner, vs...).
 func StringScannerNotIn(vs ...schema.StringScanner) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldStringScanner, vs...))
+	return where.NotIn(FieldStringScanner, vs...)
 }
 
-// StringScannerGT applies the GT predicate on the "string_scanner" field.
+// Deprecated: StringScannerGT — use where.GT(FieldStringScanner, v).
 func StringScannerGT(v schema.StringScanner) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldStringScanner, v))
+	return where.GT(FieldStringScanner, v)
 }
 
-// StringScannerGTE applies the GTE predicate on the "string_scanner" field.
+// Deprecated: StringScannerGTE — use where.GTE(FieldStringScanner, v).
 func StringScannerGTE(v schema.StringScanner) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldStringScanner, v))
+	return where.GTE(FieldStringScanner, v)
 }
 
-// StringScannerLT applies the LT predicate on the "string_scanner" field.
+// Deprecated: StringScannerLT — use where.LT(FieldStringScanner, v).
 func StringScannerLT(v schema.StringScanner) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldStringScanner, v))
+	return where.LT(FieldStringScanner, v)
 }
 
-// StringScannerLTE applies the LTE predicate on the "string_scanner" field.
+// Deprecated: StringScannerLTE — use where.LTE(FieldStringScanner, v).
 func StringScannerLTE(v schema.StringScanner) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldStringScanner, v))
+	return where.LTE(FieldStringScanner, v)
 }
 
 // StringScannerContains applies the Contains predicate on the "string_scanner" field.
@@ -2047,15 +1416,11 @@ func StringScannerHasSuffix(v schema.StringScanner) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldStringScanner, vc))
 }
 
-// StringScannerIsNil applies the IsNil predicate on the "string_scanner" field.
-func StringScannerIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldStringScanner))
-}
+// Deprecated: StringScannerIsNil — use where.IsNull(FieldStringScanner).
+func StringScannerIsNil() predicate.FieldType { return where.IsNull(FieldStringScanner) }
 
-// StringScannerNotNil applies the NotNil predicate on the "string_scanner" field.
-func StringScannerNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldStringScanner))
-}
+// Deprecated: StringScannerNotNil — use where.NotNull(FieldStringScanner).
+func StringScannerNotNil() predicate.FieldType { return where.NotNull(FieldStringScanner) }
 
 // StringScannerEqualFold applies the EqualFold predicate on the "string_scanner" field.
 func StringScannerEqualFold(v schema.StringScanner) predicate.FieldType {
@@ -2311,45 +1676,29 @@ func NdirContainsFold(v http.Dir) predicate.FieldType {
 	return predicate.FieldType(sql.FieldContainsFold(FieldNdir, vc))
 }
 
-// StrEQ applies the EQ predicate on the "str" field.
-func StrEQ(v sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldStr, v))
-}
+// Deprecated: StrEQ — use where.EQ(FieldStr, v).
+func StrEQ(v sql.NullString) predicate.FieldType { return where.EQ(FieldStr, v) }
 
-// StrNEQ applies the NEQ predicate on the "str" field.
-func StrNEQ(v sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldStr, v))
-}
+// Deprecated: StrNEQ — use where.NEQ(FieldStr, v).
+func StrNEQ(v sql.NullString) predicate.FieldType { return where.NEQ(FieldStr, v) }
 
-// StrIn applies the In predicate on the "str" field.
-func StrIn(vs ...sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldStr, vs...))
-}
+// Deprecated: StrIn — use where.In(FieldStr, vs...).
+func StrIn(vs ...sql.NullString) predicate.FieldType { return where.In(FieldStr, vs...) }
 
-// StrNotIn applies the NotIn predicate on the "str" field.
-func StrNotIn(vs ...sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldStr, vs...))
-}
+// Deprecated: StrNotIn — use where.NotIn(FieldStr, vs...).
+func StrNotIn(vs ...sql.NullString) predicate.FieldType { return where.NotIn(FieldStr, vs...) }
 
-// StrGT applies the GT predicate on the "str" field.
-func StrGT(v sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldStr, v))
-}
+// Deprecated: StrGT — use where.GT(FieldStr, v).
+func StrGT(v sql.NullString) predicate.FieldType { return where.GT(FieldStr, v) }
 
-// StrGTE applies the GTE predicate on the "str" field.
-func StrGTE(v sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldStr, v))
-}
+// Deprecated: StrGTE — use where.GTE(FieldStr, v).
+func StrGTE(v sql.NullString) predicate.FieldType { return where.GTE(FieldStr, v) }
 
-// StrLT applies the LT predicate on the "str" field.
-func StrLT(v sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldStr, v))
-}
+// Deprecated: StrLT — use where.LT(FieldStr, v).
+func StrLT(v sql.NullString) predicate.FieldType { return where.LT(FieldStr, v) }
 
-// StrLTE applies the LTE predicate on the "str" field.
-func StrLTE(v sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldStr, v))
-}
+// Deprecated: StrLTE — use where.LTE(FieldStr, v).
+func StrLTE(v sql.NullString) predicate.FieldType { return where.LTE(FieldStr, v) }
 
 // StrContains applies the Contains predicate on the "str" field.
 func StrContains(v sql.NullString) predicate.FieldType {
@@ -2369,15 +1718,11 @@ func StrHasSuffix(v sql.NullString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldStr, vc))
 }
 
-// StrIsNil applies the IsNil predicate on the "str" field.
-func StrIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldStr))
-}
+// Deprecated: StrIsNil — use where.IsNull(FieldStr).
+func StrIsNil() predicate.FieldType { return where.IsNull(FieldStr) }
 
-// StrNotNil applies the NotNil predicate on the "str" field.
-func StrNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldStr))
-}
+// Deprecated: StrNotNil — use where.NotNull(FieldStr).
+func StrNotNil() predicate.FieldType { return where.NotNull(FieldStr) }
 
 // StrEqualFold applies the EqualFold predicate on the "str" field.
 func StrEqualFold(v sql.NullString) predicate.FieldType {
@@ -2391,45 +1736,29 @@ func StrContainsFold(v sql.NullString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldContainsFold(FieldStr, vc))
 }
 
-// NullStrEQ applies the EQ predicate on the "null_str" field.
-func NullStrEQ(v *sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNullStr, v))
-}
+// Deprecated: NullStrEQ — use where.EQ(FieldNullStr, v).
+func NullStrEQ(v *sql.NullString) predicate.FieldType { return where.EQ(FieldNullStr, v) }
 
-// NullStrNEQ applies the NEQ predicate on the "null_str" field.
-func NullStrNEQ(v *sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNullStr, v))
-}
+// Deprecated: NullStrNEQ — use where.NEQ(FieldNullStr, v).
+func NullStrNEQ(v *sql.NullString) predicate.FieldType { return where.NEQ(FieldNullStr, v) }
 
-// NullStrIn applies the In predicate on the "null_str" field.
-func NullStrIn(vs ...*sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNullStr, vs...))
-}
+// Deprecated: NullStrIn — use where.In(FieldNullStr, vs...).
+func NullStrIn(vs ...*sql.NullString) predicate.FieldType { return where.In(FieldNullStr, vs...) }
 
-// NullStrNotIn applies the NotIn predicate on the "null_str" field.
-func NullStrNotIn(vs ...*sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNullStr, vs...))
-}
+// Deprecated: NullStrNotIn — use where.NotIn(FieldNullStr, vs...).
+func NullStrNotIn(vs ...*sql.NullString) predicate.FieldType { return where.NotIn(FieldNullStr, vs...) }
 
-// NullStrGT applies the GT predicate on the "null_str" field.
-func NullStrGT(v *sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNullStr, v))
-}
+// Deprecated: NullStrGT — use where.GT(FieldNullStr, v).
+func NullStrGT(v *sql.NullString) predicate.FieldType { return where.GT(FieldNullStr, v) }
 
-// NullStrGTE applies the GTE predicate on the "null_str" field.
-func NullStrGTE(v *sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNullStr, v))
-}
+// Deprecated: NullStrGTE — use where.GTE(FieldNullStr, v).
+func NullStrGTE(v *sql.NullString) predicate.FieldType { return where.GTE(FieldNullStr, v) }
 
-// NullStrLT applies the LT predicate on the "null_str" field.
-func NullStrLT(v *sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNullStr, v))
-}
+// Deprecated: NullStrLT — use where.LT(FieldNullStr, v).
+func NullStrLT(v *sql.NullString) predicate.FieldType { return where.LT(FieldNullStr, v) }
 
-// NullStrLTE applies the LTE predicate on the "null_str" field.
-func NullStrLTE(v *sql.NullString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNullStr, v))
-}
+// Deprecated: NullStrLTE — use where.LTE(FieldNullStr, v).
+func NullStrLTE(v *sql.NullString) predicate.FieldType { return where.LTE(FieldNullStr, v) }
 
 // NullStrContains applies the Contains predicate on the "null_str" field.
 func NullStrContains(v *sql.NullString) predicate.FieldType {
@@ -2449,15 +1778,11 @@ func NullStrHasSuffix(v *sql.NullString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldNullStr, vc))
 }
 
-// NullStrIsNil applies the IsNil predicate on the "null_str" field.
-func NullStrIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNullStr))
-}
+// Deprecated: NullStrIsNil — use where.IsNull(FieldNullStr).
+func NullStrIsNil() predicate.FieldType { return where.IsNull(FieldNullStr) }
 
-// NullStrNotNil applies the NotNil predicate on the "null_str" field.
-func NullStrNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNullStr))
-}
+// Deprecated: NullStrNotNil — use where.NotNull(FieldNullStr).
+func NullStrNotNil() predicate.FieldType { return where.NotNull(FieldNullStr) }
 
 // NullStrEqualFold applies the EqualFold predicate on the "null_str" field.
 func NullStrEqualFold(v *sql.NullString) predicate.FieldType {
@@ -2471,45 +1796,29 @@ func NullStrContainsFold(v *sql.NullString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldContainsFold(FieldNullStr, vc))
 }
 
-// LinkEQ applies the EQ predicate on the "link" field.
-func LinkEQ(v schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldLink, v))
-}
+// Deprecated: LinkEQ — use where.EQ(FieldLink, v).
+func LinkEQ(v schema.Link) predicate.FieldType { return where.EQ(FieldLink, v) }
 
-// LinkNEQ applies the NEQ predicate on the "link" field.
-func LinkNEQ(v schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldLink, v))
-}
+// Deprecated: LinkNEQ — use where.NEQ(FieldLink, v).
+func LinkNEQ(v schema.Link) predicate.FieldType { return where.NEQ(FieldLink, v) }
 
-// LinkIn applies the In predicate on the "link" field.
-func LinkIn(vs ...schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldLink, vs...))
-}
+// Deprecated: LinkIn — use where.In(FieldLink, vs...).
+func LinkIn(vs ...schema.Link) predicate.FieldType { return where.In(FieldLink, vs...) }
 
-// LinkNotIn applies the NotIn predicate on the "link" field.
-func LinkNotIn(vs ...schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldLink, vs...))
-}
+// Deprecated: LinkNotIn — use where.NotIn(FieldLink, vs...).
+func LinkNotIn(vs ...schema.Link) predicate.FieldType { return where.NotIn(FieldLink, vs...) }
 
-// LinkGT applies the GT predicate on the "link" field.
-func LinkGT(v schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldLink, v))
-}
+// Deprecated: LinkGT — use where.GT(FieldLink, v).
+func LinkGT(v schema.Link) predicate.FieldType { return where.GT(FieldLink, v) }
 
-// LinkGTE applies the GTE predicate on the "link" field.
-func LinkGTE(v schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldLink, v))
-}
+// Deprecated: LinkGTE — use where.GTE(FieldLink, v).
+func LinkGTE(v schema.Link) predicate.FieldType { return where.GTE(FieldLink, v) }
 
-// LinkLT applies the LT predicate on the "link" field.
-func LinkLT(v schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldLink, v))
-}
+// Deprecated: LinkLT — use where.LT(FieldLink, v).
+func LinkLT(v schema.Link) predicate.FieldType { return where.LT(FieldLink, v) }
 
-// LinkLTE applies the LTE predicate on the "link" field.
-func LinkLTE(v schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldLink, v))
-}
+// Deprecated: LinkLTE — use where.LTE(FieldLink, v).
+func LinkLTE(v schema.Link) predicate.FieldType { return where.LTE(FieldLink, v) }
 
 // LinkContains applies the Contains predicate on the "link" field.
 func LinkContains(v schema.Link) predicate.FieldType {
@@ -2529,15 +1838,11 @@ func LinkHasSuffix(v schema.Link) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldLink, vc))
 }
 
-// LinkIsNil applies the IsNil predicate on the "link" field.
-func LinkIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldLink))
-}
+// Deprecated: LinkIsNil — use where.IsNull(FieldLink).
+func LinkIsNil() predicate.FieldType { return where.IsNull(FieldLink) }
 
-// LinkNotNil applies the NotNil predicate on the "link" field.
-func LinkNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldLink))
-}
+// Deprecated: LinkNotNil — use where.NotNull(FieldLink).
+func LinkNotNil() predicate.FieldType { return where.NotNull(FieldLink) }
 
 // LinkEqualFold applies the EqualFold predicate on the "link" field.
 func LinkEqualFold(v schema.Link) predicate.FieldType {
@@ -2551,45 +1856,29 @@ func LinkContainsFold(v schema.Link) predicate.FieldType {
 	return predicate.FieldType(sql.FieldContainsFold(FieldLink, vc))
 }
 
-// NullLinkEQ applies the EQ predicate on the "null_link" field.
-func NullLinkEQ(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNullLink, v))
-}
+// Deprecated: NullLinkEQ — use where.EQ(FieldNullLink, v).
+func NullLinkEQ(v *schema.Link) predicate.FieldType { return where.EQ(FieldNullLink, v) }
 
-// NullLinkNEQ applies the NEQ predicate on the "null_link" field.
-func NullLinkNEQ(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNullLink, v))
-}
+// Deprecated: NullLinkNEQ — use where.NEQ(FieldNullLink, v).
+func NullLinkNEQ(v *schema.Link) predicate.FieldType { return where.NEQ(FieldNullLink, v) }
 
-// NullLinkIn applies the In predicate on the "null_link" field.
-func NullLinkIn(vs ...*schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNullLink, vs...))
-}
+// Deprecated: NullLinkIn — use where.In(FieldNullLink, vs...).
+func NullLinkIn(vs ...*schema.Link) predicate.FieldType { return where.In(FieldNullLink, vs...) }
 
-// NullLinkNotIn applies the NotIn predicate on the "null_link" field.
-func NullLinkNotIn(vs ...*schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNullLink, vs...))
-}
+// Deprecated: NullLinkNotIn — use where.NotIn(FieldNullLink, vs...).
+func NullLinkNotIn(vs ...*schema.Link) predicate.FieldType { return where.NotIn(FieldNullLink, vs...) }
 
-// NullLinkGT applies the GT predicate on the "null_link" field.
-func NullLinkGT(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNullLink, v))
-}
+// Deprecated: NullLinkGT — use where.GT(FieldNullLink, v).
+func NullLinkGT(v *schema.Link) predicate.FieldType { return where.GT(FieldNullLink, v) }
 
-// NullLinkGTE applies the GTE predicate on the "null_link" field.
-func NullLinkGTE(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNullLink, v))
-}
+// Deprecated: NullLinkGTE — use where.GTE(FieldNullLink, v).
+func NullLinkGTE(v *schema.Link) predicate.FieldType { return where.GTE(FieldNullLink, v) }
 
-// NullLinkLT applies the LT predicate on the "null_link" field.
-func NullLinkLT(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNullLink, v))
-}
+// Deprecated: NullLinkLT — use where.LT(FieldNullLink, v).
+func NullLinkLT(v *schema.Link) predicate.FieldType { return where.LT(FieldNullLink, v) }
 
-// NullLinkLTE applies the LTE predicate on the "null_link" field.
-func NullLinkLTE(v *schema.Link) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNullLink, v))
-}
+// Deprecated: NullLinkLTE — use where.LTE(FieldNullLink, v).
+func NullLinkLTE(v *schema.Link) predicate.FieldType { return where.LTE(FieldNullLink, v) }
 
 // NullLinkContains applies the Contains predicate on the "null_link" field.
 func NullLinkContains(v *schema.Link) predicate.FieldType {
@@ -2609,15 +1898,11 @@ func NullLinkHasSuffix(v *schema.Link) predicate.FieldType {
 	return predicate.FieldType(sql.FieldHasSuffix(FieldNullLink, vc))
 }
 
-// NullLinkIsNil applies the IsNil predicate on the "null_link" field.
-func NullLinkIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNullLink))
-}
+// Deprecated: NullLinkIsNil — use where.IsNull(FieldNullLink).
+func NullLinkIsNil() predicate.FieldType { return where.IsNull(FieldNullLink) }
 
-// NullLinkNotNil applies the NotNil predicate on the "null_link" field.
-func NullLinkNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNullLink))
-}
+// Deprecated: NullLinkNotNil — use where.NotNull(FieldNullLink).
+func NullLinkNotNil() predicate.FieldType { return where.NotNull(FieldNullLink) }
 
 // NullLinkEqualFold applies the EqualFold predicate on the "null_link" field.
 func NullLinkEqualFold(v *schema.Link) predicate.FieldType {
@@ -2675,175 +1960,109 @@ func NullActiveNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldNullActive))
 }
 
-// DeletedEQ applies the EQ predicate on the "deleted" field.
-func DeletedEQ(v *sql.NullBool) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldDeleted, v))
-}
+// Deprecated: DeletedEQ — use where.EQ(FieldDeleted, v).
+func DeletedEQ(v *sql.NullBool) predicate.FieldType { return where.EQ(FieldDeleted, v) }
 
-// DeletedNEQ applies the NEQ predicate on the "deleted" field.
-func DeletedNEQ(v *sql.NullBool) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldDeleted, v))
-}
+// Deprecated: DeletedNEQ — use where.NEQ(FieldDeleted, v).
+func DeletedNEQ(v *sql.NullBool) predicate.FieldType { return where.NEQ(FieldDeleted, v) }
 
-// DeletedIsNil applies the IsNil predicate on the "deleted" field.
-func DeletedIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldDeleted))
-}
+// Deprecated: DeletedIsNil — use where.IsNull(FieldDeleted).
+func DeletedIsNil() predicate.FieldType { return where.IsNull(FieldDeleted) }
 
-// DeletedNotNil applies the NotNil predicate on the "deleted" field.
-func DeletedNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldDeleted))
-}
+// Deprecated: DeletedNotNil — use where.NotNull(FieldDeleted).
+func DeletedNotNil() predicate.FieldType { return where.NotNull(FieldDeleted) }
 
-// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
-func DeletedAtEQ(v *sql.NullTime) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldDeletedAt, v))
-}
+// Deprecated: DeletedAtEQ — use where.EQ(FieldDeletedAt, v).
+func DeletedAtEQ(v *sql.NullTime) predicate.FieldType { return where.EQ(FieldDeletedAt, v) }
 
-// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
-func DeletedAtNEQ(v *sql.NullTime) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldDeletedAt, v))
-}
+// Deprecated: DeletedAtNEQ — use where.NEQ(FieldDeletedAt, v).
+func DeletedAtNEQ(v *sql.NullTime) predicate.FieldType { return where.NEQ(FieldDeletedAt, v) }
 
-// DeletedAtIn applies the In predicate on the "deleted_at" field.
-func DeletedAtIn(vs ...*sql.NullTime) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldDeletedAt, vs...))
-}
+// Deprecated: DeletedAtIn — use where.In(FieldDeletedAt, vs...).
+func DeletedAtIn(vs ...*sql.NullTime) predicate.FieldType { return where.In(FieldDeletedAt, vs...) }
 
-// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+// Deprecated: DeletedAtNotIn — use where.NotIn(FieldDeletedAt, vs...).
 func DeletedAtNotIn(vs ...*sql.NullTime) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldDeletedAt, vs...))
+	return where.NotIn(FieldDeletedAt, vs...)
 }
 
-// DeletedAtGT applies the GT predicate on the "deleted_at" field.
-func DeletedAtGT(v *sql.NullTime) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldDeletedAt, v))
-}
+// Deprecated: DeletedAtGT — use where.GT(FieldDeletedAt, v).
+func DeletedAtGT(v *sql.NullTime) predicate.FieldType { return where.GT(FieldDeletedAt, v) }
 
-// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
-func DeletedAtGTE(v *sql.NullTime) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldDeletedAt, v))
-}
+// Deprecated: DeletedAtGTE — use where.GTE(FieldDeletedAt, v).
+func DeletedAtGTE(v *sql.NullTime) predicate.FieldType { return where.GTE(FieldDeletedAt, v) }
 
-// DeletedAtLT applies the LT predicate on the "deleted_at" field.
-func DeletedAtLT(v *sql.NullTime) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldDeletedAt, v))
-}
+// Deprecated: DeletedAtLT — use where.LT(FieldDeletedAt, v).
+func DeletedAtLT(v *sql.NullTime) predicate.FieldType { return where.LT(FieldDeletedAt, v) }
 
-// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
-func DeletedAtLTE(v *sql.NullTime) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldDeletedAt, v))
-}
+// Deprecated: DeletedAtLTE — use where.LTE(FieldDeletedAt, v).
+func DeletedAtLTE(v *sql.NullTime) predicate.FieldType { return where.LTE(FieldDeletedAt, v) }
 
-// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
-func DeletedAtIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldDeletedAt))
-}
+// Deprecated: DeletedAtIsNil — use where.IsNull(FieldDeletedAt).
+func DeletedAtIsNil() predicate.FieldType { return where.IsNull(FieldDeletedAt) }
 
-// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
-func DeletedAtNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldDeletedAt))
-}
+// Deprecated: DeletedAtNotNil — use where.NotNull(FieldDeletedAt).
+func DeletedAtNotNil() predicate.FieldType { return where.NotNull(FieldDeletedAt) }
 
-// RawDataEQ applies the EQ predicate on the "raw_data" field.
-func RawDataEQ(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldRawData, v))
-}
+// Deprecated: RawDataEQ — use where.EQ(FieldRawData, v).
+func RawDataEQ(v []byte) predicate.FieldType { return where.EQ(FieldRawData, v) }
 
-// RawDataNEQ applies the NEQ predicate on the "raw_data" field.
-func RawDataNEQ(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldRawData, v))
-}
+// Deprecated: RawDataNEQ — use where.NEQ(FieldRawData, v).
+func RawDataNEQ(v []byte) predicate.FieldType { return where.NEQ(FieldRawData, v) }
 
-// RawDataIn applies the In predicate on the "raw_data" field.
-func RawDataIn(vs ...[]byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldRawData, vs...))
-}
+// Deprecated: RawDataIn — use where.In(FieldRawData, vs...).
+func RawDataIn(vs ...[]byte) predicate.FieldType { return where.In(FieldRawData, vs...) }
 
-// RawDataNotIn applies the NotIn predicate on the "raw_data" field.
-func RawDataNotIn(vs ...[]byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldRawData, vs...))
-}
+// Deprecated: RawDataNotIn — use where.NotIn(FieldRawData, vs...).
+func RawDataNotIn(vs ...[]byte) predicate.FieldType { return where.NotIn(FieldRawData, vs...) }
 
-// RawDataGT applies the GT predicate on the "raw_data" field.
-func RawDataGT(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldRawData, v))
-}
+// Deprecated: RawDataGT — use where.GT(FieldRawData, v).
+func RawDataGT(v []byte) predicate.FieldType { return where.GT(FieldRawData, v) }
 
-// RawDataGTE applies the GTE predicate on the "raw_data" field.
-func RawDataGTE(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldRawData, v))
-}
+// Deprecated: RawDataGTE — use where.GTE(FieldRawData, v).
+func RawDataGTE(v []byte) predicate.FieldType { return where.GTE(FieldRawData, v) }
 
-// RawDataLT applies the LT predicate on the "raw_data" field.
-func RawDataLT(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldRawData, v))
-}
+// Deprecated: RawDataLT — use where.LT(FieldRawData, v).
+func RawDataLT(v []byte) predicate.FieldType { return where.LT(FieldRawData, v) }
 
-// RawDataLTE applies the LTE predicate on the "raw_data" field.
-func RawDataLTE(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldRawData, v))
-}
+// Deprecated: RawDataLTE — use where.LTE(FieldRawData, v).
+func RawDataLTE(v []byte) predicate.FieldType { return where.LTE(FieldRawData, v) }
 
-// RawDataIsNil applies the IsNil predicate on the "raw_data" field.
-func RawDataIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldRawData))
-}
+// Deprecated: RawDataIsNil — use where.IsNull(FieldRawData).
+func RawDataIsNil() predicate.FieldType { return where.IsNull(FieldRawData) }
 
-// RawDataNotNil applies the NotNil predicate on the "raw_data" field.
-func RawDataNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldRawData))
-}
+// Deprecated: RawDataNotNil — use where.NotNull(FieldRawData).
+func RawDataNotNil() predicate.FieldType { return where.NotNull(FieldRawData) }
 
-// SensitiveEQ applies the EQ predicate on the "sensitive" field.
-func SensitiveEQ(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldSensitive, v))
-}
+// Deprecated: SensitiveEQ — use where.EQ(FieldSensitive, v).
+func SensitiveEQ(v []byte) predicate.FieldType { return where.EQ(FieldSensitive, v) }
 
-// SensitiveNEQ applies the NEQ predicate on the "sensitive" field.
-func SensitiveNEQ(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldSensitive, v))
-}
+// Deprecated: SensitiveNEQ — use where.NEQ(FieldSensitive, v).
+func SensitiveNEQ(v []byte) predicate.FieldType { return where.NEQ(FieldSensitive, v) }
 
-// SensitiveIn applies the In predicate on the "sensitive" field.
-func SensitiveIn(vs ...[]byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldSensitive, vs...))
-}
+// Deprecated: SensitiveIn — use where.In(FieldSensitive, vs...).
+func SensitiveIn(vs ...[]byte) predicate.FieldType { return where.In(FieldSensitive, vs...) }
 
-// SensitiveNotIn applies the NotIn predicate on the "sensitive" field.
-func SensitiveNotIn(vs ...[]byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldSensitive, vs...))
-}
+// Deprecated: SensitiveNotIn — use where.NotIn(FieldSensitive, vs...).
+func SensitiveNotIn(vs ...[]byte) predicate.FieldType { return where.NotIn(FieldSensitive, vs...) }
 
-// SensitiveGT applies the GT predicate on the "sensitive" field.
-func SensitiveGT(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldSensitive, v))
-}
+// Deprecated: SensitiveGT — use where.GT(FieldSensitive, v).
+func SensitiveGT(v []byte) predicate.FieldType { return where.GT(FieldSensitive, v) }
 
-// SensitiveGTE applies the GTE predicate on the "sensitive" field.
-func SensitiveGTE(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldSensitive, v))
-}
+// Deprecated: SensitiveGTE — use where.GTE(FieldSensitive, v).
+func SensitiveGTE(v []byte) predicate.FieldType { return where.GTE(FieldSensitive, v) }
 
-// SensitiveLT applies the LT predicate on the "sensitive" field.
-func SensitiveLT(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldSensitive, v))
-}
+// Deprecated: SensitiveLT — use where.LT(FieldSensitive, v).
+func SensitiveLT(v []byte) predicate.FieldType { return where.LT(FieldSensitive, v) }
 
-// SensitiveLTE applies the LTE predicate on the "sensitive" field.
-func SensitiveLTE(v []byte) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldSensitive, v))
-}
+// Deprecated: SensitiveLTE — use where.LTE(FieldSensitive, v).
+func SensitiveLTE(v []byte) predicate.FieldType { return where.LTE(FieldSensitive, v) }
 
-// SensitiveIsNil applies the IsNil predicate on the "sensitive" field.
-func SensitiveIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldSensitive))
-}
+// Deprecated: SensitiveIsNil — use where.IsNull(FieldSensitive).
+func SensitiveIsNil() predicate.FieldType { return where.IsNull(FieldSensitive) }
 
-// SensitiveNotNil applies the NotNil predicate on the "sensitive" field.
-func SensitiveNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldSensitive))
-}
+// Deprecated: SensitiveNotNil — use where.NotNull(FieldSensitive).
+func SensitiveNotNil() predicate.FieldType { return where.NotNull(FieldSensitive) }
 
 // IPEQ applies the EQ predicate on the "ip" field.
 func IPEQ(v net.IP) predicate.FieldType {
@@ -2909,55 +2128,37 @@ func IPNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldIP))
 }
 
-// NullInt64EQ applies the EQ predicate on the "null_int64" field.
-func NullInt64EQ(v *sql.NullInt64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNullInt64, v))
-}
+// Deprecated: NullInt64EQ — use where.EQ(FieldNullInt64, v).
+func NullInt64EQ(v *sql.NullInt64) predicate.FieldType { return where.EQ(FieldNullInt64, v) }
 
-// NullInt64NEQ applies the NEQ predicate on the "null_int64" field.
-func NullInt64NEQ(v *sql.NullInt64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNullInt64, v))
-}
+// Deprecated: NullInt64NEQ — use where.NEQ(FieldNullInt64, v).
+func NullInt64NEQ(v *sql.NullInt64) predicate.FieldType { return where.NEQ(FieldNullInt64, v) }
 
-// NullInt64In applies the In predicate on the "null_int64" field.
-func NullInt64In(vs ...*sql.NullInt64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNullInt64, vs...))
-}
+// Deprecated: NullInt64In — use where.In(FieldNullInt64, vs...).
+func NullInt64In(vs ...*sql.NullInt64) predicate.FieldType { return where.In(FieldNullInt64, vs...) }
 
-// NullInt64NotIn applies the NotIn predicate on the "null_int64" field.
+// Deprecated: NullInt64NotIn — use where.NotIn(FieldNullInt64, vs...).
 func NullInt64NotIn(vs ...*sql.NullInt64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNullInt64, vs...))
+	return where.NotIn(FieldNullInt64, vs...)
 }
 
-// NullInt64GT applies the GT predicate on the "null_int64" field.
-func NullInt64GT(v *sql.NullInt64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNullInt64, v))
-}
+// Deprecated: NullInt64GT — use where.GT(FieldNullInt64, v).
+func NullInt64GT(v *sql.NullInt64) predicate.FieldType { return where.GT(FieldNullInt64, v) }
 
-// NullInt64GTE applies the GTE predicate on the "null_int64" field.
-func NullInt64GTE(v *sql.NullInt64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNullInt64, v))
-}
+// Deprecated: NullInt64GTE — use where.GTE(FieldNullInt64, v).
+func NullInt64GTE(v *sql.NullInt64) predicate.FieldType { return where.GTE(FieldNullInt64, v) }
 
-// NullInt64LT applies the LT predicate on the "null_int64" field.
-func NullInt64LT(v *sql.NullInt64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNullInt64, v))
-}
+// Deprecated: NullInt64LT — use where.LT(FieldNullInt64, v).
+func NullInt64LT(v *sql.NullInt64) predicate.FieldType { return where.LT(FieldNullInt64, v) }
 
-// NullInt64LTE applies the LTE predicate on the "null_int64" field.
-func NullInt64LTE(v *sql.NullInt64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNullInt64, v))
-}
+// Deprecated: NullInt64LTE — use where.LTE(FieldNullInt64, v).
+func NullInt64LTE(v *sql.NullInt64) predicate.FieldType { return where.LTE(FieldNullInt64, v) }
 
-// NullInt64IsNil applies the IsNil predicate on the "null_int64" field.
-func NullInt64IsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNullInt64))
-}
+// Deprecated: NullInt64IsNil — use where.IsNull(FieldNullInt64).
+func NullInt64IsNil() predicate.FieldType { return where.IsNull(FieldNullInt64) }
 
-// NullInt64NotNil applies the NotNil predicate on the "null_int64" field.
-func NullInt64NotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNullInt64))
-}
+// Deprecated: NullInt64NotNil — use where.NotNull(FieldNullInt64).
+func NullInt64NotNil() predicate.FieldType { return where.NotNull(FieldNullInt64) }
 
 // SchemaIntEQ applies the EQ predicate on the "schema_int" field.
 func SchemaIntEQ(v schema.Int) predicate.FieldType {
@@ -3279,55 +2480,37 @@ func SchemaFloat32NotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldSchemaFloat32))
 }
 
-// NullFloatEQ applies the EQ predicate on the "null_float" field.
-func NullFloatEQ(v *sql.NullFloat64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNullFloat, v))
-}
+// Deprecated: NullFloatEQ — use where.EQ(FieldNullFloat, v).
+func NullFloatEQ(v *sql.NullFloat64) predicate.FieldType { return where.EQ(FieldNullFloat, v) }
 
-// NullFloatNEQ applies the NEQ predicate on the "null_float" field.
-func NullFloatNEQ(v *sql.NullFloat64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNullFloat, v))
-}
+// Deprecated: NullFloatNEQ — use where.NEQ(FieldNullFloat, v).
+func NullFloatNEQ(v *sql.NullFloat64) predicate.FieldType { return where.NEQ(FieldNullFloat, v) }
 
-// NullFloatIn applies the In predicate on the "null_float" field.
-func NullFloatIn(vs ...*sql.NullFloat64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNullFloat, vs...))
-}
+// Deprecated: NullFloatIn — use where.In(FieldNullFloat, vs...).
+func NullFloatIn(vs ...*sql.NullFloat64) predicate.FieldType { return where.In(FieldNullFloat, vs...) }
 
-// NullFloatNotIn applies the NotIn predicate on the "null_float" field.
+// Deprecated: NullFloatNotIn — use where.NotIn(FieldNullFloat, vs...).
 func NullFloatNotIn(vs ...*sql.NullFloat64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNullFloat, vs...))
+	return where.NotIn(FieldNullFloat, vs...)
 }
 
-// NullFloatGT applies the GT predicate on the "null_float" field.
-func NullFloatGT(v *sql.NullFloat64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNullFloat, v))
-}
+// Deprecated: NullFloatGT — use where.GT(FieldNullFloat, v).
+func NullFloatGT(v *sql.NullFloat64) predicate.FieldType { return where.GT(FieldNullFloat, v) }
 
-// NullFloatGTE applies the GTE predicate on the "null_float" field.
-func NullFloatGTE(v *sql.NullFloat64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNullFloat, v))
-}
+// Deprecated: NullFloatGTE — use where.GTE(FieldNullFloat, v).
+func NullFloatGTE(v *sql.NullFloat64) predicate.FieldType { return where.GTE(FieldNullFloat, v) }
 
-// NullFloatLT applies the LT predicate on the "null_float" field.
-func NullFloatLT(v *sql.NullFloat64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNullFloat, v))
-}
+// Deprecated: NullFloatLT — use where.LT(FieldNullFloat, v).
+func NullFloatLT(v *sql.NullFloat64) predicate.FieldType { return where.LT(FieldNullFloat, v) }
 
-// NullFloatLTE applies the LTE predicate on the "null_float" field.
-func NullFloatLTE(v *sql.NullFloat64) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNullFloat, v))
-}
+// Deprecated: NullFloatLTE — use where.LTE(FieldNullFloat, v).
+func NullFloatLTE(v *sql.NullFloat64) predicate.FieldType { return where.LTE(FieldNullFloat, v) }
 
-// NullFloatIsNil applies the IsNil predicate on the "null_float" field.
-func NullFloatIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNullFloat))
-}
+// Deprecated: NullFloatIsNil — use where.IsNull(FieldNullFloat).
+func NullFloatIsNil() predicate.FieldType { return where.IsNull(FieldNullFloat) }
 
-// NullFloatNotNil applies the NotNil predicate on the "null_float" field.
-func NullFloatNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNullFloat))
-}
+// Deprecated: NullFloatNotNil — use where.NotNull(FieldNullFloat).
+func NullFloatNotNil() predicate.FieldType { return where.NotNull(FieldNullFloat) }
 
 // RoleEQ applies the EQ predicate on the "role" field.
 func RoleEQ(v role.Role) predicate.FieldType {
@@ -3359,135 +2542,87 @@ func RoleNotIn(vs ...role.Role) predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotIn(FieldRole, v...))
 }
 
-// PriorityEQ applies the EQ predicate on the "priority" field.
-func PriorityEQ(v role.Priority) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldPriority, v))
-}
+// Deprecated: PriorityEQ — use where.EQ(FieldPriority, v).
+func PriorityEQ(v role.Priority) predicate.FieldType { return where.EQ(FieldPriority, v) }
 
-// PriorityNEQ applies the NEQ predicate on the "priority" field.
-func PriorityNEQ(v role.Priority) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldPriority, v))
-}
+// Deprecated: PriorityNEQ — use where.NEQ(FieldPriority, v).
+func PriorityNEQ(v role.Priority) predicate.FieldType { return where.NEQ(FieldPriority, v) }
 
-// PriorityIn applies the In predicate on the "priority" field.
-func PriorityIn(vs ...role.Priority) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldPriority, vs...))
-}
+// Deprecated: PriorityIn — use where.In(FieldPriority, vs...).
+func PriorityIn(vs ...role.Priority) predicate.FieldType { return where.In(FieldPriority, vs...) }
 
-// PriorityNotIn applies the NotIn predicate on the "priority" field.
-func PriorityNotIn(vs ...role.Priority) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldPriority, vs...))
-}
+// Deprecated: PriorityNotIn — use where.NotIn(FieldPriority, vs...).
+func PriorityNotIn(vs ...role.Priority) predicate.FieldType { return where.NotIn(FieldPriority, vs...) }
 
-// PriorityIsNil applies the IsNil predicate on the "priority" field.
-func PriorityIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldPriority))
-}
+// Deprecated: PriorityIsNil — use where.IsNull(FieldPriority).
+func PriorityIsNil() predicate.FieldType { return where.IsNull(FieldPriority) }
 
-// PriorityNotNil applies the NotNil predicate on the "priority" field.
-func PriorityNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldPriority))
-}
+// Deprecated: PriorityNotNil — use where.NotNull(FieldPriority).
+func PriorityNotNil() predicate.FieldType { return where.NotNull(FieldPriority) }
 
-// OptionalUUIDEQ applies the EQ predicate on the "optional_uuid" field.
-func OptionalUUIDEQ(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldOptionalUUID, v))
-}
+// Deprecated: OptionalUUIDEQ — use where.EQ(FieldOptionalUUID, v).
+func OptionalUUIDEQ(v uuid.UUID) predicate.FieldType { return where.EQ(FieldOptionalUUID, v) }
 
-// OptionalUUIDNEQ applies the NEQ predicate on the "optional_uuid" field.
-func OptionalUUIDNEQ(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldOptionalUUID, v))
-}
+// Deprecated: OptionalUUIDNEQ — use where.NEQ(FieldOptionalUUID, v).
+func OptionalUUIDNEQ(v uuid.UUID) predicate.FieldType { return where.NEQ(FieldOptionalUUID, v) }
 
-// OptionalUUIDIn applies the In predicate on the "optional_uuid" field.
-func OptionalUUIDIn(vs ...uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldOptionalUUID, vs...))
-}
+// Deprecated: OptionalUUIDIn — use where.In(FieldOptionalUUID, vs...).
+func OptionalUUIDIn(vs ...uuid.UUID) predicate.FieldType { return where.In(FieldOptionalUUID, vs...) }
 
-// OptionalUUIDNotIn applies the NotIn predicate on the "optional_uuid" field.
+// Deprecated: OptionalUUIDNotIn — use where.NotIn(FieldOptionalUUID, vs...).
 func OptionalUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldOptionalUUID, vs...))
+	return where.NotIn(FieldOptionalUUID, vs...)
 }
 
-// OptionalUUIDGT applies the GT predicate on the "optional_uuid" field.
-func OptionalUUIDGT(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldOptionalUUID, v))
-}
+// Deprecated: OptionalUUIDGT — use where.GT(FieldOptionalUUID, v).
+func OptionalUUIDGT(v uuid.UUID) predicate.FieldType { return where.GT(FieldOptionalUUID, v) }
 
-// OptionalUUIDGTE applies the GTE predicate on the "optional_uuid" field.
-func OptionalUUIDGTE(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldOptionalUUID, v))
-}
+// Deprecated: OptionalUUIDGTE — use where.GTE(FieldOptionalUUID, v).
+func OptionalUUIDGTE(v uuid.UUID) predicate.FieldType { return where.GTE(FieldOptionalUUID, v) }
 
-// OptionalUUIDLT applies the LT predicate on the "optional_uuid" field.
-func OptionalUUIDLT(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldOptionalUUID, v))
-}
+// Deprecated: OptionalUUIDLT — use where.LT(FieldOptionalUUID, v).
+func OptionalUUIDLT(v uuid.UUID) predicate.FieldType { return where.LT(FieldOptionalUUID, v) }
 
-// OptionalUUIDLTE applies the LTE predicate on the "optional_uuid" field.
-func OptionalUUIDLTE(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldOptionalUUID, v))
-}
+// Deprecated: OptionalUUIDLTE — use where.LTE(FieldOptionalUUID, v).
+func OptionalUUIDLTE(v uuid.UUID) predicate.FieldType { return where.LTE(FieldOptionalUUID, v) }
 
-// OptionalUUIDIsNil applies the IsNil predicate on the "optional_uuid" field.
-func OptionalUUIDIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldOptionalUUID))
-}
+// Deprecated: OptionalUUIDIsNil — use where.IsNull(FieldOptionalUUID).
+func OptionalUUIDIsNil() predicate.FieldType { return where.IsNull(FieldOptionalUUID) }
 
-// OptionalUUIDNotNil applies the NotNil predicate on the "optional_uuid" field.
-func OptionalUUIDNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldOptionalUUID))
-}
+// Deprecated: OptionalUUIDNotNil — use where.NotNull(FieldOptionalUUID).
+func OptionalUUIDNotNil() predicate.FieldType { return where.NotNull(FieldOptionalUUID) }
 
-// NillableUUIDEQ applies the EQ predicate on the "nillable_uuid" field.
-func NillableUUIDEQ(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNillableUUID, v))
-}
+// Deprecated: NillableUUIDEQ — use where.EQ(FieldNillableUUID, v).
+func NillableUUIDEQ(v uuid.UUID) predicate.FieldType { return where.EQ(FieldNillableUUID, v) }
 
-// NillableUUIDNEQ applies the NEQ predicate on the "nillable_uuid" field.
-func NillableUUIDNEQ(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNillableUUID, v))
-}
+// Deprecated: NillableUUIDNEQ — use where.NEQ(FieldNillableUUID, v).
+func NillableUUIDNEQ(v uuid.UUID) predicate.FieldType { return where.NEQ(FieldNillableUUID, v) }
 
-// NillableUUIDIn applies the In predicate on the "nillable_uuid" field.
-func NillableUUIDIn(vs ...uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNillableUUID, vs...))
-}
+// Deprecated: NillableUUIDIn — use where.In(FieldNillableUUID, vs...).
+func NillableUUIDIn(vs ...uuid.UUID) predicate.FieldType { return where.In(FieldNillableUUID, vs...) }
 
-// NillableUUIDNotIn applies the NotIn predicate on the "nillable_uuid" field.
+// Deprecated: NillableUUIDNotIn — use where.NotIn(FieldNillableUUID, vs...).
 func NillableUUIDNotIn(vs ...uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNillableUUID, vs...))
+	return where.NotIn(FieldNillableUUID, vs...)
 }
 
-// NillableUUIDGT applies the GT predicate on the "nillable_uuid" field.
-func NillableUUIDGT(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNillableUUID, v))
-}
+// Deprecated: NillableUUIDGT — use where.GT(FieldNillableUUID, v).
+func NillableUUIDGT(v uuid.UUID) predicate.FieldType { return where.GT(FieldNillableUUID, v) }
 
-// NillableUUIDGTE applies the GTE predicate on the "nillable_uuid" field.
-func NillableUUIDGTE(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNillableUUID, v))
-}
+// Deprecated: NillableUUIDGTE — use where.GTE(FieldNillableUUID, v).
+func NillableUUIDGTE(v uuid.UUID) predicate.FieldType { return where.GTE(FieldNillableUUID, v) }
 
-// NillableUUIDLT applies the LT predicate on the "nillable_uuid" field.
-func NillableUUIDLT(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNillableUUID, v))
-}
+// Deprecated: NillableUUIDLT — use where.LT(FieldNillableUUID, v).
+func NillableUUIDLT(v uuid.UUID) predicate.FieldType { return where.LT(FieldNillableUUID, v) }
 
-// NillableUUIDLTE applies the LTE predicate on the "nillable_uuid" field.
-func NillableUUIDLTE(v uuid.UUID) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNillableUUID, v))
-}
+// Deprecated: NillableUUIDLTE — use where.LTE(FieldNillableUUID, v).
+func NillableUUIDLTE(v uuid.UUID) predicate.FieldType { return where.LTE(FieldNillableUUID, v) }
 
-// NillableUUIDIsNil applies the IsNil predicate on the "nillable_uuid" field.
-func NillableUUIDIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNillableUUID))
-}
+// Deprecated: NillableUUIDIsNil — use where.IsNull(FieldNillableUUID).
+func NillableUUIDIsNil() predicate.FieldType { return where.IsNull(FieldNillableUUID) }
 
-// NillableUUIDNotNil applies the NotNil predicate on the "nillable_uuid" field.
-func NillableUUIDNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNillableUUID))
-}
+// Deprecated: NillableUUIDNotNil — use where.NotNull(FieldNillableUUID).
+func NillableUUIDNotNil() predicate.FieldType { return where.NotNull(FieldNillableUUID) }
 
 // StringsIsNil applies the IsNil predicate on the "strings" field.
 func StringsIsNil() predicate.FieldType {
@@ -3499,135 +2634,83 @@ func StringsNotNil() predicate.FieldType {
 	return predicate.FieldType(sql.FieldNotNull(FieldStrings))
 }
 
-// PairEQ applies the EQ predicate on the "pair" field.
-func PairEQ(v schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldPair, v))
-}
+// Deprecated: PairEQ — use where.EQ(FieldPair, v).
+func PairEQ(v schema.Pair) predicate.FieldType { return where.EQ(FieldPair, v) }
 
-// PairNEQ applies the NEQ predicate on the "pair" field.
-func PairNEQ(v schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldPair, v))
-}
+// Deprecated: PairNEQ — use where.NEQ(FieldPair, v).
+func PairNEQ(v schema.Pair) predicate.FieldType { return where.NEQ(FieldPair, v) }
 
-// PairIn applies the In predicate on the "pair" field.
-func PairIn(vs ...schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldPair, vs...))
-}
+// Deprecated: PairIn — use where.In(FieldPair, vs...).
+func PairIn(vs ...schema.Pair) predicate.FieldType { return where.In(FieldPair, vs...) }
 
-// PairNotIn applies the NotIn predicate on the "pair" field.
-func PairNotIn(vs ...schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldPair, vs...))
-}
+// Deprecated: PairNotIn — use where.NotIn(FieldPair, vs...).
+func PairNotIn(vs ...schema.Pair) predicate.FieldType { return where.NotIn(FieldPair, vs...) }
 
-// PairGT applies the GT predicate on the "pair" field.
-func PairGT(v schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldPair, v))
-}
+// Deprecated: PairGT — use where.GT(FieldPair, v).
+func PairGT(v schema.Pair) predicate.FieldType { return where.GT(FieldPair, v) }
 
-// PairGTE applies the GTE predicate on the "pair" field.
-func PairGTE(v schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldPair, v))
-}
+// Deprecated: PairGTE — use where.GTE(FieldPair, v).
+func PairGTE(v schema.Pair) predicate.FieldType { return where.GTE(FieldPair, v) }
 
-// PairLT applies the LT predicate on the "pair" field.
-func PairLT(v schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldPair, v))
-}
+// Deprecated: PairLT — use where.LT(FieldPair, v).
+func PairLT(v schema.Pair) predicate.FieldType { return where.LT(FieldPair, v) }
 
-// PairLTE applies the LTE predicate on the "pair" field.
-func PairLTE(v schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldPair, v))
-}
+// Deprecated: PairLTE — use where.LTE(FieldPair, v).
+func PairLTE(v schema.Pair) predicate.FieldType { return where.LTE(FieldPair, v) }
 
-// NilPairEQ applies the EQ predicate on the "nil_pair" field.
-func NilPairEQ(v *schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldNilPair, v))
-}
+// Deprecated: NilPairEQ — use where.EQ(FieldNilPair, v).
+func NilPairEQ(v *schema.Pair) predicate.FieldType { return where.EQ(FieldNilPair, v) }
 
-// NilPairNEQ applies the NEQ predicate on the "nil_pair" field.
-func NilPairNEQ(v *schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldNilPair, v))
-}
+// Deprecated: NilPairNEQ — use where.NEQ(FieldNilPair, v).
+func NilPairNEQ(v *schema.Pair) predicate.FieldType { return where.NEQ(FieldNilPair, v) }
 
-// NilPairIn applies the In predicate on the "nil_pair" field.
-func NilPairIn(vs ...*schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldNilPair, vs...))
-}
+// Deprecated: NilPairIn — use where.In(FieldNilPair, vs...).
+func NilPairIn(vs ...*schema.Pair) predicate.FieldType { return where.In(FieldNilPair, vs...) }
 
-// NilPairNotIn applies the NotIn predicate on the "nil_pair" field.
-func NilPairNotIn(vs ...*schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldNilPair, vs...))
-}
+// Deprecated: NilPairNotIn — use where.NotIn(FieldNilPair, vs...).
+func NilPairNotIn(vs ...*schema.Pair) predicate.FieldType { return where.NotIn(FieldNilPair, vs...) }
 
-// NilPairGT applies the GT predicate on the "nil_pair" field.
-func NilPairGT(v *schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldNilPair, v))
-}
+// Deprecated: NilPairGT — use where.GT(FieldNilPair, v).
+func NilPairGT(v *schema.Pair) predicate.FieldType { return where.GT(FieldNilPair, v) }
 
-// NilPairGTE applies the GTE predicate on the "nil_pair" field.
-func NilPairGTE(v *schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldNilPair, v))
-}
+// Deprecated: NilPairGTE — use where.GTE(FieldNilPair, v).
+func NilPairGTE(v *schema.Pair) predicate.FieldType { return where.GTE(FieldNilPair, v) }
 
-// NilPairLT applies the LT predicate on the "nil_pair" field.
-func NilPairLT(v *schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldNilPair, v))
-}
+// Deprecated: NilPairLT — use where.LT(FieldNilPair, v).
+func NilPairLT(v *schema.Pair) predicate.FieldType { return where.LT(FieldNilPair, v) }
 
-// NilPairLTE applies the LTE predicate on the "nil_pair" field.
-func NilPairLTE(v *schema.Pair) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldNilPair, v))
-}
+// Deprecated: NilPairLTE — use where.LTE(FieldNilPair, v).
+func NilPairLTE(v *schema.Pair) predicate.FieldType { return where.LTE(FieldNilPair, v) }
 
-// NilPairIsNil applies the IsNil predicate on the "nil_pair" field.
-func NilPairIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldNilPair))
-}
+// Deprecated: NilPairIsNil — use where.IsNull(FieldNilPair).
+func NilPairIsNil() predicate.FieldType { return where.IsNull(FieldNilPair) }
 
-// NilPairNotNil applies the NotNil predicate on the "nil_pair" field.
-func NilPairNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldNilPair))
-}
+// Deprecated: NilPairNotNil — use where.NotNull(FieldNilPair).
+func NilPairNotNil() predicate.FieldType { return where.NotNull(FieldNilPair) }
 
-// VstringEQ applies the EQ predicate on the "vstring" field.
-func VstringEQ(v schema.VString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldVstring, v))
-}
+// Deprecated: VstringEQ — use where.EQ(FieldVstring, v).
+func VstringEQ(v schema.VString) predicate.FieldType { return where.EQ(FieldVstring, v) }
 
-// VstringNEQ applies the NEQ predicate on the "vstring" field.
-func VstringNEQ(v schema.VString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldVstring, v))
-}
+// Deprecated: VstringNEQ — use where.NEQ(FieldVstring, v).
+func VstringNEQ(v schema.VString) predicate.FieldType { return where.NEQ(FieldVstring, v) }
 
-// VstringIn applies the In predicate on the "vstring" field.
-func VstringIn(vs ...schema.VString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldVstring, vs...))
-}
+// Deprecated: VstringIn — use where.In(FieldVstring, vs...).
+func VstringIn(vs ...schema.VString) predicate.FieldType { return where.In(FieldVstring, vs...) }
 
-// VstringNotIn applies the NotIn predicate on the "vstring" field.
-func VstringNotIn(vs ...schema.VString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldVstring, vs...))
-}
+// Deprecated: VstringNotIn — use where.NotIn(FieldVstring, vs...).
+func VstringNotIn(vs ...schema.VString) predicate.FieldType { return where.NotIn(FieldVstring, vs...) }
 
-// VstringGT applies the GT predicate on the "vstring" field.
-func VstringGT(v schema.VString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldVstring, v))
-}
+// Deprecated: VstringGT — use where.GT(FieldVstring, v).
+func VstringGT(v schema.VString) predicate.FieldType { return where.GT(FieldVstring, v) }
 
-// VstringGTE applies the GTE predicate on the "vstring" field.
-func VstringGTE(v schema.VString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldVstring, v))
-}
+// Deprecated: VstringGTE — use where.GTE(FieldVstring, v).
+func VstringGTE(v schema.VString) predicate.FieldType { return where.GTE(FieldVstring, v) }
 
-// VstringLT applies the LT predicate on the "vstring" field.
-func VstringLT(v schema.VString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldVstring, v))
-}
+// Deprecated: VstringLT — use where.LT(FieldVstring, v).
+func VstringLT(v schema.VString) predicate.FieldType { return where.LT(FieldVstring, v) }
 
-// VstringLTE applies the LTE predicate on the "vstring" field.
-func VstringLTE(v schema.VString) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldVstring, v))
-}
+// Deprecated: VstringLTE — use where.LTE(FieldVstring, v).
+func VstringLTE(v schema.VString) predicate.FieldType { return where.LTE(FieldVstring, v) }
 
 // VstringContains applies the Contains predicate on the "vstring" field.
 func VstringContains(v schema.VString) predicate.FieldType {
@@ -3659,145 +2742,93 @@ func VstringContainsFold(v schema.VString) predicate.FieldType {
 	return predicate.FieldType(sql.FieldContainsFold(FieldVstring, vc))
 }
 
-// TripleEQ applies the EQ predicate on the "triple" field.
-func TripleEQ(v schema.Triple) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldTriple, v))
-}
+// Deprecated: TripleEQ — use where.EQ(FieldTriple, v).
+func TripleEQ(v schema.Triple) predicate.FieldType { return where.EQ(FieldTriple, v) }
 
-// TripleNEQ applies the NEQ predicate on the "triple" field.
-func TripleNEQ(v schema.Triple) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldTriple, v))
-}
+// Deprecated: TripleNEQ — use where.NEQ(FieldTriple, v).
+func TripleNEQ(v schema.Triple) predicate.FieldType { return where.NEQ(FieldTriple, v) }
 
-// TripleIn applies the In predicate on the "triple" field.
-func TripleIn(vs ...schema.Triple) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldTriple, vs...))
-}
+// Deprecated: TripleIn — use where.In(FieldTriple, vs...).
+func TripleIn(vs ...schema.Triple) predicate.FieldType { return where.In(FieldTriple, vs...) }
 
-// TripleNotIn applies the NotIn predicate on the "triple" field.
-func TripleNotIn(vs ...schema.Triple) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldTriple, vs...))
-}
+// Deprecated: TripleNotIn — use where.NotIn(FieldTriple, vs...).
+func TripleNotIn(vs ...schema.Triple) predicate.FieldType { return where.NotIn(FieldTriple, vs...) }
 
-// TripleGT applies the GT predicate on the "triple" field.
-func TripleGT(v schema.Triple) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldTriple, v))
-}
+// Deprecated: TripleGT — use where.GT(FieldTriple, v).
+func TripleGT(v schema.Triple) predicate.FieldType { return where.GT(FieldTriple, v) }
 
-// TripleGTE applies the GTE predicate on the "triple" field.
-func TripleGTE(v schema.Triple) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldTriple, v))
-}
+// Deprecated: TripleGTE — use where.GTE(FieldTriple, v).
+func TripleGTE(v schema.Triple) predicate.FieldType { return where.GTE(FieldTriple, v) }
 
-// TripleLT applies the LT predicate on the "triple" field.
-func TripleLT(v schema.Triple) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldTriple, v))
-}
+// Deprecated: TripleLT — use where.LT(FieldTriple, v).
+func TripleLT(v schema.Triple) predicate.FieldType { return where.LT(FieldTriple, v) }
 
-// TripleLTE applies the LTE predicate on the "triple" field.
-func TripleLTE(v schema.Triple) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldTriple, v))
-}
+// Deprecated: TripleLTE — use where.LTE(FieldTriple, v).
+func TripleLTE(v schema.Triple) predicate.FieldType { return where.LTE(FieldTriple, v) }
 
-// BigIntEQ applies the EQ predicate on the "big_int" field.
-func BigIntEQ(v schema.BigInt) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldBigInt, v))
-}
+// Deprecated: BigIntEQ — use where.EQ(FieldBigInt, v).
+func BigIntEQ(v schema.BigInt) predicate.FieldType { return where.EQ(FieldBigInt, v) }
 
-// BigIntNEQ applies the NEQ predicate on the "big_int" field.
-func BigIntNEQ(v schema.BigInt) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldBigInt, v))
-}
+// Deprecated: BigIntNEQ — use where.NEQ(FieldBigInt, v).
+func BigIntNEQ(v schema.BigInt) predicate.FieldType { return where.NEQ(FieldBigInt, v) }
 
-// BigIntIn applies the In predicate on the "big_int" field.
-func BigIntIn(vs ...schema.BigInt) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldBigInt, vs...))
-}
+// Deprecated: BigIntIn — use where.In(FieldBigInt, vs...).
+func BigIntIn(vs ...schema.BigInt) predicate.FieldType { return where.In(FieldBigInt, vs...) }
 
-// BigIntNotIn applies the NotIn predicate on the "big_int" field.
-func BigIntNotIn(vs ...schema.BigInt) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldBigInt, vs...))
-}
+// Deprecated: BigIntNotIn — use where.NotIn(FieldBigInt, vs...).
+func BigIntNotIn(vs ...schema.BigInt) predicate.FieldType { return where.NotIn(FieldBigInt, vs...) }
 
-// BigIntGT applies the GT predicate on the "big_int" field.
-func BigIntGT(v schema.BigInt) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldBigInt, v))
-}
+// Deprecated: BigIntGT — use where.GT(FieldBigInt, v).
+func BigIntGT(v schema.BigInt) predicate.FieldType { return where.GT(FieldBigInt, v) }
 
-// BigIntGTE applies the GTE predicate on the "big_int" field.
-func BigIntGTE(v schema.BigInt) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldBigInt, v))
-}
+// Deprecated: BigIntGTE — use where.GTE(FieldBigInt, v).
+func BigIntGTE(v schema.BigInt) predicate.FieldType { return where.GTE(FieldBigInt, v) }
 
-// BigIntLT applies the LT predicate on the "big_int" field.
-func BigIntLT(v schema.BigInt) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldBigInt, v))
-}
+// Deprecated: BigIntLT — use where.LT(FieldBigInt, v).
+func BigIntLT(v schema.BigInt) predicate.FieldType { return where.LT(FieldBigInt, v) }
 
-// BigIntLTE applies the LTE predicate on the "big_int" field.
-func BigIntLTE(v schema.BigInt) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldBigInt, v))
-}
+// Deprecated: BigIntLTE — use where.LTE(FieldBigInt, v).
+func BigIntLTE(v schema.BigInt) predicate.FieldType { return where.LTE(FieldBigInt, v) }
 
-// BigIntIsNil applies the IsNil predicate on the "big_int" field.
-func BigIntIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldBigInt))
-}
+// Deprecated: BigIntIsNil — use where.IsNull(FieldBigInt).
+func BigIntIsNil() predicate.FieldType { return where.IsNull(FieldBigInt) }
 
-// BigIntNotNil applies the NotNil predicate on the "big_int" field.
-func BigIntNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldBigInt))
-}
+// Deprecated: BigIntNotNil — use where.NotNull(FieldBigInt).
+func BigIntNotNil() predicate.FieldType { return where.NotNull(FieldBigInt) }
 
-// PasswordOtherEQ applies the EQ predicate on the "password_other" field.
-func PasswordOtherEQ(v schema.Password) predicate.FieldType {
-	return predicate.FieldType(sql.FieldEQ(FieldPasswordOther, v))
-}
+// Deprecated: PasswordOtherEQ — use where.EQ(FieldPasswordOther, v).
+func PasswordOtherEQ(v schema.Password) predicate.FieldType { return where.EQ(FieldPasswordOther, v) }
 
-// PasswordOtherNEQ applies the NEQ predicate on the "password_other" field.
-func PasswordOtherNEQ(v schema.Password) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNEQ(FieldPasswordOther, v))
-}
+// Deprecated: PasswordOtherNEQ — use where.NEQ(FieldPasswordOther, v).
+func PasswordOtherNEQ(v schema.Password) predicate.FieldType { return where.NEQ(FieldPasswordOther, v) }
 
-// PasswordOtherIn applies the In predicate on the "password_other" field.
+// Deprecated: PasswordOtherIn — use where.In(FieldPasswordOther, vs...).
 func PasswordOtherIn(vs ...schema.Password) predicate.FieldType {
-	return predicate.FieldType(sql.FieldIn(FieldPasswordOther, vs...))
+	return where.In(FieldPasswordOther, vs...)
 }
 
-// PasswordOtherNotIn applies the NotIn predicate on the "password_other" field.
+// Deprecated: PasswordOtherNotIn — use where.NotIn(FieldPasswordOther, vs...).
 func PasswordOtherNotIn(vs ...schema.Password) predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotIn(FieldPasswordOther, vs...))
+	return where.NotIn(FieldPasswordOther, vs...)
 }
 
-// PasswordOtherGT applies the GT predicate on the "password_other" field.
-func PasswordOtherGT(v schema.Password) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGT(FieldPasswordOther, v))
-}
+// Deprecated: PasswordOtherGT — use where.GT(FieldPasswordOther, v).
+func PasswordOtherGT(v schema.Password) predicate.FieldType { return where.GT(FieldPasswordOther, v) }
 
-// PasswordOtherGTE applies the GTE predicate on the "password_other" field.
-func PasswordOtherGTE(v schema.Password) predicate.FieldType {
-	return predicate.FieldType(sql.FieldGTE(FieldPasswordOther, v))
-}
+// Deprecated: PasswordOtherGTE — use where.GTE(FieldPasswordOther, v).
+func PasswordOtherGTE(v schema.Password) predicate.FieldType { return where.GTE(FieldPasswordOther, v) }
 
-// PasswordOtherLT applies the LT predicate on the "password_other" field.
-func PasswordOtherLT(v schema.Password) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLT(FieldPasswordOther, v))
-}
+// Deprecated: PasswordOtherLT — use where.LT(FieldPasswordOther, v).
+func PasswordOtherLT(v schema.Password) predicate.FieldType { return where.LT(FieldPasswordOther, v) }
 
-// PasswordOtherLTE applies the LTE predicate on the "password_other" field.
-func PasswordOtherLTE(v schema.Password) predicate.FieldType {
-	return predicate.FieldType(sql.FieldLTE(FieldPasswordOther, v))
-}
+// Deprecated: PasswordOtherLTE — use where.LTE(FieldPasswordOther, v).
+func PasswordOtherLTE(v schema.Password) predicate.FieldType { return where.LTE(FieldPasswordOther, v) }
 
-// PasswordOtherIsNil applies the IsNil predicate on the "password_other" field.
-func PasswordOtherIsNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldIsNull(FieldPasswordOther))
-}
+// Deprecated: PasswordOtherIsNil — use where.IsNull(FieldPasswordOther).
+func PasswordOtherIsNil() predicate.FieldType { return where.IsNull(FieldPasswordOther) }
 
-// PasswordOtherNotNil applies the NotNil predicate on the "password_other" field.
-func PasswordOtherNotNil() predicate.FieldType {
-	return predicate.FieldType(sql.FieldNotNull(FieldPasswordOther))
-}
+// Deprecated: PasswordOtherNotNil — use where.NotNull(FieldPasswordOther).
+func PasswordOtherNotNil() predicate.FieldType { return where.NotNull(FieldPasswordOther) }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.FieldType) predicate.FieldType {

@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/filetype"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -838,4 +839,23 @@ func (_s *FileSelect) sqlScan(ctx context.Context, root *FileQuery, v any) error
 func (_s *FileSelect) Modify(modifiers ...func(s *sql.Selector)) *FileSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// fileCreateDescriptor holds the metadata and callbacks for constructing a File entity.
+var fileCreateDescriptor = &entbuilder.CreateDescriptor[Config, File, *FileMutation]{
+	Table:   file.Table,
+	NewNode: func(c Config) *File { return &File{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, File, *FileMutation]{
+		Column:      file.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *File, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected File.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

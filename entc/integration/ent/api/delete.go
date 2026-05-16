@@ -18,8 +18,9 @@ import (
 // APIDelete is the builder for deleting a Api entity.
 type APIDelete struct {
 	Config
-	hooks    []Hook
-	mutation *APIMutation
+	hooks     []Hook
+	mutation  *APIMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewAPIDelete returns a new APIDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *APIDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *APIDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *APIDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *APIDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

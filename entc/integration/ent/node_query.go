@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/node"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -745,4 +746,23 @@ func (_s *NodeSelect) sqlScan(ctx context.Context, root *NodeQuery, v any) error
 func (_s *NodeSelect) Modify(modifiers ...func(s *sql.Selector)) *NodeSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// nodeCreateDescriptor holds the metadata and callbacks for constructing a Node entity.
+var nodeCreateDescriptor = &entbuilder.CreateDescriptor[Config, Node, *NodeMutation]{
+	Table:   node.Table,
+	NewNode: func(c Config) *Node { return &Node{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Node, *NodeMutation]{
+		Column:      node.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Node, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Node.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

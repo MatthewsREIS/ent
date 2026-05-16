@@ -19,8 +19,9 @@ import (
 // ParentDelete is the builder for deleting a Parent entity.
 type ParentDelete struct {
 	Config
-	hooks    []Hook
-	mutation *ParentMutation
+	hooks     []Hook
+	mutation  *ParentMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewParentDelete returns a new ParentDelete initialized with the given config, hooks, and mutation.
@@ -48,11 +49,18 @@ func (_d *ParentDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *ParentDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ParentDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *ParentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	schemaConfig := _d.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Parent
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

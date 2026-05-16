@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,80 +58,50 @@ func IDLTE(id int) predicate.Node {
 	return predicate.Node(sql.FieldLTE(FieldID, id))
 }
 
-// PrevID applies equality check predicate on the "prev_id" field. It's identical to PrevIDEQ.
-func PrevID(v int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldPrevID, v))
-}
+// Deprecated: PrevID — use where.EQ(FieldPrevID, v).
+func PrevID(v int) predicate.Node { return where.EQ(FieldPrevID, v) }
 
-// ValueEQ applies the EQ predicate on the "value" field.
-func ValueEQ(v int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldValue, v))
-}
+// Deprecated: ValueEQ — use where.EQ(FieldValue, v).
+func ValueEQ(v int) predicate.Node { return where.EQ(FieldValue, v) }
 
-// ValueNEQ applies the NEQ predicate on the "value" field.
-func ValueNEQ(v int) predicate.Node {
-	return predicate.Node(sql.FieldNEQ(FieldValue, v))
-}
+// Deprecated: ValueNEQ — use where.NEQ(FieldValue, v).
+func ValueNEQ(v int) predicate.Node { return where.NEQ(FieldValue, v) }
 
-// ValueIn applies the In predicate on the "value" field.
-func ValueIn(vs ...int) predicate.Node {
-	return predicate.Node(sql.FieldIn(FieldValue, vs...))
-}
+// Deprecated: ValueIn — use where.In(FieldValue, vs...).
+func ValueIn(vs ...int) predicate.Node { return where.In(FieldValue, vs...) }
 
-// ValueNotIn applies the NotIn predicate on the "value" field.
-func ValueNotIn(vs ...int) predicate.Node {
-	return predicate.Node(sql.FieldNotIn(FieldValue, vs...))
-}
+// Deprecated: ValueNotIn — use where.NotIn(FieldValue, vs...).
+func ValueNotIn(vs ...int) predicate.Node { return where.NotIn(FieldValue, vs...) }
 
-// ValueGT applies the GT predicate on the "value" field.
-func ValueGT(v int) predicate.Node {
-	return predicate.Node(sql.FieldGT(FieldValue, v))
-}
+// Deprecated: ValueGT — use where.GT(FieldValue, v).
+func ValueGT(v int) predicate.Node { return where.GT(FieldValue, v) }
 
-// ValueGTE applies the GTE predicate on the "value" field.
-func ValueGTE(v int) predicate.Node {
-	return predicate.Node(sql.FieldGTE(FieldValue, v))
-}
+// Deprecated: ValueGTE — use where.GTE(FieldValue, v).
+func ValueGTE(v int) predicate.Node { return where.GTE(FieldValue, v) }
 
-// ValueLT applies the LT predicate on the "value" field.
-func ValueLT(v int) predicate.Node {
-	return predicate.Node(sql.FieldLT(FieldValue, v))
-}
+// Deprecated: ValueLT — use where.LT(FieldValue, v).
+func ValueLT(v int) predicate.Node { return where.LT(FieldValue, v) }
 
-// ValueLTE applies the LTE predicate on the "value" field.
-func ValueLTE(v int) predicate.Node {
-	return predicate.Node(sql.FieldLTE(FieldValue, v))
-}
+// Deprecated: ValueLTE — use where.LTE(FieldValue, v).
+func ValueLTE(v int) predicate.Node { return where.LTE(FieldValue, v) }
 
-// PrevIDEQ applies the EQ predicate on the "prev_id" field.
-func PrevIDEQ(v int) predicate.Node {
-	return predicate.Node(sql.FieldEQ(FieldPrevID, v))
-}
+// Deprecated: PrevIDEQ — use where.EQ(FieldPrevID, v).
+func PrevIDEQ(v int) predicate.Node { return where.EQ(FieldPrevID, v) }
 
-// PrevIDNEQ applies the NEQ predicate on the "prev_id" field.
-func PrevIDNEQ(v int) predicate.Node {
-	return predicate.Node(sql.FieldNEQ(FieldPrevID, v))
-}
+// Deprecated: PrevIDNEQ — use where.NEQ(FieldPrevID, v).
+func PrevIDNEQ(v int) predicate.Node { return where.NEQ(FieldPrevID, v) }
 
-// PrevIDIn applies the In predicate on the "prev_id" field.
-func PrevIDIn(vs ...int) predicate.Node {
-	return predicate.Node(sql.FieldIn(FieldPrevID, vs...))
-}
+// Deprecated: PrevIDIn — use where.In(FieldPrevID, vs...).
+func PrevIDIn(vs ...int) predicate.Node { return where.In(FieldPrevID, vs...) }
 
-// PrevIDNotIn applies the NotIn predicate on the "prev_id" field.
-func PrevIDNotIn(vs ...int) predicate.Node {
-	return predicate.Node(sql.FieldNotIn(FieldPrevID, vs...))
-}
+// Deprecated: PrevIDNotIn — use where.NotIn(FieldPrevID, vs...).
+func PrevIDNotIn(vs ...int) predicate.Node { return where.NotIn(FieldPrevID, vs...) }
 
-// PrevIDIsNil applies the IsNil predicate on the "prev_id" field.
-func PrevIDIsNil() predicate.Node {
-	return predicate.Node(sql.FieldIsNull(FieldPrevID))
-}
+// Deprecated: PrevIDIsNil — use where.IsNull(FieldPrevID).
+func PrevIDIsNil() predicate.Node { return where.IsNull(FieldPrevID) }
 
-// PrevIDNotNil applies the NotNil predicate on the "prev_id" field.
-func PrevIDNotNil() predicate.Node {
-	return predicate.Node(sql.FieldNotNull(FieldPrevID))
-}
+// Deprecated: PrevIDNotNil — use where.NotNull(FieldPrevID).
+func PrevIDNotNil() predicate.Node { return where.NotNull(FieldPrevID) }
 
 // HasPrev applies the HasEdge predicate on the "prev" edge.
 func HasPrev() predicate.Node {
@@ -145,14 +116,15 @@ func HasPrev() predicate.Node {
 
 // HasPrevWith applies the HasEdge predicate on the "prev" edge with a given conditions (other predicates).
 func HasPrevWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		step := newPrevStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Node(
+		func(s *sql.Selector) {
+			step := newPrevStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasNext applies the HasEdge predicate on the "next" edge.
@@ -168,14 +140,15 @@ func HasNext() predicate.Node {
 
 // HasNextWith applies the HasEdge predicate on the "next" edge with a given conditions (other predicates).
 func HasNextWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		step := newNextStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Node(
+		func(s *sql.Selector) {
+			step := newNextStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv2/zoo"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -506,4 +508,36 @@ func (_s *ZooSelect) sqlScan(ctx context.Context, root *ZooQuery, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// zooCreateDescriptor holds the metadata and callbacks for constructing a Zoo entity.
+var zooCreateDescriptor = &entbuilder.CreateDescriptor[Config, Zoo, *ZooMutation]{
+	Table:   zoo.Table,
+	NewNode: func(c Config) *Zoo { return &Zoo{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Zoo, *ZooMutation]{
+		Column:      zoo.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: true,
+		Value: func(m *ZooMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Zoo, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(int)
+			return nil
+		},
+		AssignGenerated: func(n *Zoo, v driver.Value) error {
+			switch x := v.(type) {
+			case int:
+				n.ID = x
+			case int64:
+				n.ID = int(x)
+			default:
+				return fmt.Errorf("unexpected Zoo.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

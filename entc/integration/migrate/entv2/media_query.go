@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/media"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -528,4 +530,23 @@ func (_s *MediaSelect) sqlScan(ctx context.Context, root *MediaQuery, v any) err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// mediaCreateDescriptor holds the metadata and callbacks for constructing a Media entity.
+var mediaCreateDescriptor = &entbuilder.CreateDescriptor[Config, Media, *MediaMutation]{
+	Table:   media.Table,
+	NewNode: func(c Config) *Media { return &Media{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Media, *MediaMutation]{
+		Column:      media.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Media, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Media.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

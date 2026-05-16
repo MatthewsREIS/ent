@@ -9,6 +9,7 @@ package media
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -56,245 +57,149 @@ func IDLTE(id int) predicate.Media {
 	return predicate.Media(sql.FieldLTE(FieldID, id))
 }
 
-// Source applies equality check predicate on the "source" field. It's identical to SourceEQ.
-func Source(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldSource, v))
-}
+// Deprecated: Source — use where.EQ(FieldSource, v).
+func Source(v string) predicate.Media { return where.EQ(FieldSource, v) }
 
-// SourceURI applies equality check predicate on the "source_uri" field. It's identical to SourceURIEQ.
-func SourceURI(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldSourceURI, v))
-}
+// Deprecated: SourceURI — use where.EQ(FieldSourceURI, v).
+func SourceURI(v string) predicate.Media { return where.EQ(FieldSourceURI, v) }
 
-// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
-func Text(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: Text — use where.EQ(FieldText, v).
+func Text(v string) predicate.Media { return where.EQ(FieldText, v) }
 
-// SourceEQ applies the EQ predicate on the "source" field.
-func SourceEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldSource, v))
-}
+// Deprecated: SourceEQ — use where.EQ(FieldSource, v).
+func SourceEQ(v string) predicate.Media { return where.EQ(FieldSource, v) }
 
-// SourceNEQ applies the NEQ predicate on the "source" field.
-func SourceNEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldSource, v))
-}
+// Deprecated: SourceNEQ — use where.NEQ(FieldSource, v).
+func SourceNEQ(v string) predicate.Media { return where.NEQ(FieldSource, v) }
 
-// SourceIn applies the In predicate on the "source" field.
-func SourceIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldIn(FieldSource, vs...))
-}
+// Deprecated: SourceIn — use where.In(FieldSource, vs...).
+func SourceIn(vs ...string) predicate.Media { return where.In(FieldSource, vs...) }
 
-// SourceNotIn applies the NotIn predicate on the "source" field.
-func SourceNotIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldNotIn(FieldSource, vs...))
-}
+// Deprecated: SourceNotIn — use where.NotIn(FieldSource, vs...).
+func SourceNotIn(vs ...string) predicate.Media { return where.NotIn(FieldSource, vs...) }
 
-// SourceGT applies the GT predicate on the "source" field.
-func SourceGT(v string) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldSource, v))
-}
+// Deprecated: SourceGT — use where.GT(FieldSource, v).
+func SourceGT(v string) predicate.Media { return where.GT(FieldSource, v) }
 
-// SourceGTE applies the GTE predicate on the "source" field.
-func SourceGTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldSource, v))
-}
+// Deprecated: SourceGTE — use where.GTE(FieldSource, v).
+func SourceGTE(v string) predicate.Media { return where.GTE(FieldSource, v) }
 
-// SourceLT applies the LT predicate on the "source" field.
-func SourceLT(v string) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldSource, v))
-}
+// Deprecated: SourceLT — use where.LT(FieldSource, v).
+func SourceLT(v string) predicate.Media { return where.LT(FieldSource, v) }
 
-// SourceLTE applies the LTE predicate on the "source" field.
-func SourceLTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldSource, v))
-}
+// Deprecated: SourceLTE — use where.LTE(FieldSource, v).
+func SourceLTE(v string) predicate.Media { return where.LTE(FieldSource, v) }
 
-// SourceContains applies the Contains predicate on the "source" field.
-func SourceContains(v string) predicate.Media {
-	return predicate.Media(sql.FieldContains(FieldSource, v))
-}
+// Deprecated: SourceContains — use where.Contains(FieldSource, v).
+func SourceContains(v string) predicate.Media { return where.Contains(FieldSource, v) }
 
-// SourceHasPrefix applies the HasPrefix predicate on the "source" field.
-func SourceHasPrefix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasPrefix(FieldSource, v))
-}
+// Deprecated: SourceHasPrefix — use where.HasPrefix(FieldSource, v).
+func SourceHasPrefix(v string) predicate.Media { return where.HasPrefix(FieldSource, v) }
 
-// SourceHasSuffix applies the HasSuffix predicate on the "source" field.
-func SourceHasSuffix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasSuffix(FieldSource, v))
-}
+// Deprecated: SourceHasSuffix — use where.HasSuffix(FieldSource, v).
+func SourceHasSuffix(v string) predicate.Media { return where.HasSuffix(FieldSource, v) }
 
-// SourceIsNil applies the IsNil predicate on the "source" field.
-func SourceIsNil() predicate.Media {
-	return predicate.Media(sql.FieldIsNull(FieldSource))
-}
+// Deprecated: SourceIsNil — use where.IsNull(FieldSource).
+func SourceIsNil() predicate.Media { return where.IsNull(FieldSource) }
 
-// SourceNotNil applies the NotNil predicate on the "source" field.
-func SourceNotNil() predicate.Media {
-	return predicate.Media(sql.FieldNotNull(FieldSource))
-}
+// Deprecated: SourceNotNil — use where.NotNull(FieldSource).
+func SourceNotNil() predicate.Media { return where.NotNull(FieldSource) }
 
-// SourceEqualFold applies the EqualFold predicate on the "source" field.
-func SourceEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldSource, v))
-}
+// Deprecated: SourceEqualFold — use where.EqualFold(FieldSource, v).
+func SourceEqualFold(v string) predicate.Media { return where.EqualFold(FieldSource, v) }
 
-// SourceContainsFold applies the ContainsFold predicate on the "source" field.
-func SourceContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldSource, v))
-}
+// Deprecated: SourceContainsFold — use where.ContainsFold(FieldSource, v).
+func SourceContainsFold(v string) predicate.Media { return where.ContainsFold(FieldSource, v) }
 
-// SourceURIEQ applies the EQ predicate on the "source_uri" field.
-func SourceURIEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldSourceURI, v))
-}
+// Deprecated: SourceURIEQ — use where.EQ(FieldSourceURI, v).
+func SourceURIEQ(v string) predicate.Media { return where.EQ(FieldSourceURI, v) }
 
-// SourceURINEQ applies the NEQ predicate on the "source_uri" field.
-func SourceURINEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldSourceURI, v))
-}
+// Deprecated: SourceURINEQ — use where.NEQ(FieldSourceURI, v).
+func SourceURINEQ(v string) predicate.Media { return where.NEQ(FieldSourceURI, v) }
 
-// SourceURIIn applies the In predicate on the "source_uri" field.
-func SourceURIIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldIn(FieldSourceURI, vs...))
-}
+// Deprecated: SourceURIIn — use where.In(FieldSourceURI, vs...).
+func SourceURIIn(vs ...string) predicate.Media { return where.In(FieldSourceURI, vs...) }
 
-// SourceURINotIn applies the NotIn predicate on the "source_uri" field.
-func SourceURINotIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldNotIn(FieldSourceURI, vs...))
-}
+// Deprecated: SourceURINotIn — use where.NotIn(FieldSourceURI, vs...).
+func SourceURINotIn(vs ...string) predicate.Media { return where.NotIn(FieldSourceURI, vs...) }
 
-// SourceURIGT applies the GT predicate on the "source_uri" field.
-func SourceURIGT(v string) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldSourceURI, v))
-}
+// Deprecated: SourceURIGT — use where.GT(FieldSourceURI, v).
+func SourceURIGT(v string) predicate.Media { return where.GT(FieldSourceURI, v) }
 
-// SourceURIGTE applies the GTE predicate on the "source_uri" field.
-func SourceURIGTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldSourceURI, v))
-}
+// Deprecated: SourceURIGTE — use where.GTE(FieldSourceURI, v).
+func SourceURIGTE(v string) predicate.Media { return where.GTE(FieldSourceURI, v) }
 
-// SourceURILT applies the LT predicate on the "source_uri" field.
-func SourceURILT(v string) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldSourceURI, v))
-}
+// Deprecated: SourceURILT — use where.LT(FieldSourceURI, v).
+func SourceURILT(v string) predicate.Media { return where.LT(FieldSourceURI, v) }
 
-// SourceURILTE applies the LTE predicate on the "source_uri" field.
-func SourceURILTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldSourceURI, v))
-}
+// Deprecated: SourceURILTE — use where.LTE(FieldSourceURI, v).
+func SourceURILTE(v string) predicate.Media { return where.LTE(FieldSourceURI, v) }
 
-// SourceURIContains applies the Contains predicate on the "source_uri" field.
-func SourceURIContains(v string) predicate.Media {
-	return predicate.Media(sql.FieldContains(FieldSourceURI, v))
-}
+// Deprecated: SourceURIContains — use where.Contains(FieldSourceURI, v).
+func SourceURIContains(v string) predicate.Media { return where.Contains(FieldSourceURI, v) }
 
-// SourceURIHasPrefix applies the HasPrefix predicate on the "source_uri" field.
-func SourceURIHasPrefix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasPrefix(FieldSourceURI, v))
-}
+// Deprecated: SourceURIHasPrefix — use where.HasPrefix(FieldSourceURI, v).
+func SourceURIHasPrefix(v string) predicate.Media { return where.HasPrefix(FieldSourceURI, v) }
 
-// SourceURIHasSuffix applies the HasSuffix predicate on the "source_uri" field.
-func SourceURIHasSuffix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasSuffix(FieldSourceURI, v))
-}
+// Deprecated: SourceURIHasSuffix — use where.HasSuffix(FieldSourceURI, v).
+func SourceURIHasSuffix(v string) predicate.Media { return where.HasSuffix(FieldSourceURI, v) }
 
-// SourceURIIsNil applies the IsNil predicate on the "source_uri" field.
-func SourceURIIsNil() predicate.Media {
-	return predicate.Media(sql.FieldIsNull(FieldSourceURI))
-}
+// Deprecated: SourceURIIsNil — use where.IsNull(FieldSourceURI).
+func SourceURIIsNil() predicate.Media { return where.IsNull(FieldSourceURI) }
 
-// SourceURINotNil applies the NotNil predicate on the "source_uri" field.
-func SourceURINotNil() predicate.Media {
-	return predicate.Media(sql.FieldNotNull(FieldSourceURI))
-}
+// Deprecated: SourceURINotNil — use where.NotNull(FieldSourceURI).
+func SourceURINotNil() predicate.Media { return where.NotNull(FieldSourceURI) }
 
-// SourceURIEqualFold applies the EqualFold predicate on the "source_uri" field.
-func SourceURIEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldSourceURI, v))
-}
+// Deprecated: SourceURIEqualFold — use where.EqualFold(FieldSourceURI, v).
+func SourceURIEqualFold(v string) predicate.Media { return where.EqualFold(FieldSourceURI, v) }
 
-// SourceURIContainsFold applies the ContainsFold predicate on the "source_uri" field.
-func SourceURIContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldSourceURI, v))
-}
+// Deprecated: SourceURIContainsFold — use where.ContainsFold(FieldSourceURI, v).
+func SourceURIContainsFold(v string) predicate.Media { return where.ContainsFold(FieldSourceURI, v) }
 
-// TextEQ applies the EQ predicate on the "text" field.
-func TextEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: TextEQ — use where.EQ(FieldText, v).
+func TextEQ(v string) predicate.Media { return where.EQ(FieldText, v) }
 
-// TextNEQ applies the NEQ predicate on the "text" field.
-func TextNEQ(v string) predicate.Media {
-	return predicate.Media(sql.FieldNEQ(FieldText, v))
-}
+// Deprecated: TextNEQ — use where.NEQ(FieldText, v).
+func TextNEQ(v string) predicate.Media { return where.NEQ(FieldText, v) }
 
-// TextIn applies the In predicate on the "text" field.
-func TextIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldIn(FieldText, vs...))
-}
+// Deprecated: TextIn — use where.In(FieldText, vs...).
+func TextIn(vs ...string) predicate.Media { return where.In(FieldText, vs...) }
 
-// TextNotIn applies the NotIn predicate on the "text" field.
-func TextNotIn(vs ...string) predicate.Media {
-	return predicate.Media(sql.FieldNotIn(FieldText, vs...))
-}
+// Deprecated: TextNotIn — use where.NotIn(FieldText, vs...).
+func TextNotIn(vs ...string) predicate.Media { return where.NotIn(FieldText, vs...) }
 
-// TextGT applies the GT predicate on the "text" field.
-func TextGT(v string) predicate.Media {
-	return predicate.Media(sql.FieldGT(FieldText, v))
-}
+// Deprecated: TextGT — use where.GT(FieldText, v).
+func TextGT(v string) predicate.Media { return where.GT(FieldText, v) }
 
-// TextGTE applies the GTE predicate on the "text" field.
-func TextGTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldGTE(FieldText, v))
-}
+// Deprecated: TextGTE — use where.GTE(FieldText, v).
+func TextGTE(v string) predicate.Media { return where.GTE(FieldText, v) }
 
-// TextLT applies the LT predicate on the "text" field.
-func TextLT(v string) predicate.Media {
-	return predicate.Media(sql.FieldLT(FieldText, v))
-}
+// Deprecated: TextLT — use where.LT(FieldText, v).
+func TextLT(v string) predicate.Media { return where.LT(FieldText, v) }
 
-// TextLTE applies the LTE predicate on the "text" field.
-func TextLTE(v string) predicate.Media {
-	return predicate.Media(sql.FieldLTE(FieldText, v))
-}
+// Deprecated: TextLTE — use where.LTE(FieldText, v).
+func TextLTE(v string) predicate.Media { return where.LTE(FieldText, v) }
 
-// TextContains applies the Contains predicate on the "text" field.
-func TextContains(v string) predicate.Media {
-	return predicate.Media(sql.FieldContains(FieldText, v))
-}
+// Deprecated: TextContains — use where.Contains(FieldText, v).
+func TextContains(v string) predicate.Media { return where.Contains(FieldText, v) }
 
-// TextHasPrefix applies the HasPrefix predicate on the "text" field.
-func TextHasPrefix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasPrefix(FieldText, v))
-}
+// Deprecated: TextHasPrefix — use where.HasPrefix(FieldText, v).
+func TextHasPrefix(v string) predicate.Media { return where.HasPrefix(FieldText, v) }
 
-// TextHasSuffix applies the HasSuffix predicate on the "text" field.
-func TextHasSuffix(v string) predicate.Media {
-	return predicate.Media(sql.FieldHasSuffix(FieldText, v))
-}
+// Deprecated: TextHasSuffix — use where.HasSuffix(FieldText, v).
+func TextHasSuffix(v string) predicate.Media { return where.HasSuffix(FieldText, v) }
 
-// TextIsNil applies the IsNil predicate on the "text" field.
-func TextIsNil() predicate.Media {
-	return predicate.Media(sql.FieldIsNull(FieldText))
-}
+// Deprecated: TextIsNil — use where.IsNull(FieldText).
+func TextIsNil() predicate.Media { return where.IsNull(FieldText) }
 
-// TextNotNil applies the NotNil predicate on the "text" field.
-func TextNotNil() predicate.Media {
-	return predicate.Media(sql.FieldNotNull(FieldText))
-}
+// Deprecated: TextNotNil — use where.NotNull(FieldText).
+func TextNotNil() predicate.Media { return where.NotNull(FieldText) }
 
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldEqualFold(FieldText, v))
-}
+// Deprecated: TextEqualFold — use where.EqualFold(FieldText, v).
+func TextEqualFold(v string) predicate.Media { return where.EqualFold(FieldText, v) }
 
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Media {
-	return predicate.Media(sql.FieldContainsFold(FieldText, v))
-}
+// Deprecated: TextContainsFold — use where.ContainsFold(FieldText, v).
+func TextContainsFold(v string) predicate.Media { return where.ContainsFold(FieldText, v) }
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Media) predicate.Media {

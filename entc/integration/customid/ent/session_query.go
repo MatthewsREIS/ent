@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -594,4 +596,34 @@ func (_s *SessionSelect) sqlScan(ctx context.Context, root *SessionQuery, v any)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// sessionCreateDescriptor holds the metadata and callbacks for constructing a Session entity.
+var sessionCreateDescriptor = &entbuilder.CreateDescriptor[Config, Session, *SessionMutation]{
+	Table:   session.Table,
+	NewNode: func(c Config) *Session { return &Session{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Session, *SessionMutation]{
+		Column:      session.FieldID,
+		Type:        field.TypeBytes,
+		UserDefined: true,
+		Value: func(m *SessionMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Session, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(schema.ID)
+			return nil
+		},
+		AssignGenerated: func(n *Session, v driver.Value) error {
+			switch x := v.(type) {
+			case schema.ID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Session.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

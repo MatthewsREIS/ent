@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/builder"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -556,4 +558,23 @@ func (_s *BuilderSelect) sqlScan(ctx context.Context, root *BuilderQuery, v any)
 func (_s *BuilderSelect) Modify(modifiers ...func(s *sql.Selector)) *BuilderSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// builderCreateDescriptor holds the metadata and callbacks for constructing a Builder entity.
+var builderCreateDescriptor = &entbuilder.CreateDescriptor[Config, Builder, *BuilderMutation]{
+	Table:   builder.Table,
+	NewNode: func(c Config) *Builder { return &Builder{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Builder, *BuilderMutation]{
+		Column:      builder.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Builder, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Builder.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

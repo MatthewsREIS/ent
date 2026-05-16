@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -794,4 +795,34 @@ func (_s *BlobSelect) sqlScan(ctx context.Context, root *BlobQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// blobCreateDescriptor holds the metadata and callbacks for constructing a Blob entity.
+var blobCreateDescriptor = &entbuilder.CreateDescriptor[Config, Blob, *BlobMutation]{
+	Table:   blob.Table,
+	NewNode: func(c Config) *Blob { return &Blob{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Blob, *BlobMutation]{
+		Column:      blob.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *BlobMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Blob, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(uuid.UUID)
+			return nil
+		},
+		AssignGenerated: func(n *Blob, v driver.Value) error {
+			switch x := v.(type) {
+			case uuid.UUID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Blob.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

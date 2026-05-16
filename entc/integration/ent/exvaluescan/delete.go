@@ -18,8 +18,9 @@ import (
 // ExValueScanDelete is the builder for deleting a ExValueScan entity.
 type ExValueScanDelete struct {
 	Config
-	hooks    []Hook
-	mutation *ExValueScanMutation
+	hooks     []Hook
+	mutation  *ExValueScanMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewExValueScanDelete returns a new ExValueScanDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *ExValueScanDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *ExValueScanDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ExValueScanDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *ExValueScanDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

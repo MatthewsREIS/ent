@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -578,4 +580,23 @@ func (_s *CommentSelect) sqlScan(ctx context.Context, root *CommentQuery, v any)
 func (_s *CommentSelect) Modify(modifiers ...func(s *sql.Selector)) *CommentSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// commentCreateDescriptor holds the metadata and callbacks for constructing a Comment entity.
+var commentCreateDescriptor = &entbuilder.CreateDescriptor[Config, Comment, *CommentMutation]{
+	Table:   comment.Table,
+	NewNode: func(c Config) *Comment { return &Comment{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Comment, *CommentMutation]{
+		Column:      comment.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Comment, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Comment.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

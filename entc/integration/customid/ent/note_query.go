@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/note"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -690,4 +691,34 @@ func (_s *NoteSelect) sqlScan(ctx context.Context, root *NoteQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// noteCreateDescriptor holds the metadata and callbacks for constructing a Note entity.
+var noteCreateDescriptor = &entbuilder.CreateDescriptor[Config, Note, *NoteMutation]{
+	Table:   note.Table,
+	NewNode: func(c Config) *Note { return &Note{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Note, *NoteMutation]{
+		Column:      note.FieldID,
+		Type:        field.TypeString,
+		UserDefined: true,
+		Value: func(m *NoteMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Note, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(schema.NoteID)
+			return nil
+		},
+		AssignGenerated: func(n *Note, v driver.Value) error {
+			switch x := v.(type) {
+			case schema.NoteID:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Note.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

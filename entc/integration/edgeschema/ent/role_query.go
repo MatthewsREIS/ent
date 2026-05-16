@@ -452,58 +452,65 @@ func (_q *RoleQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Role, e
 	return nodes, nil
 }
 
-var roleUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Role, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2M,
-			Inverse:      true,
-			Table:        role.UserTable,
-			Columns:      role.UserPrimaryKey,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Role) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ConvertNodeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	ConvertEdgeIDFromScan: func(v any) int {
-		return int(v.(*sql.NullInt64).Int64)
-	},
-	NewNodeIDScanner: func() any { return new(sql.NullInt64) },
-	NewEdgeIDScanner: func() any { return new(sql.NullInt64) },
-}
-
 func (_q *RoleQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Role, init func(*Role), assign func(*Role, *User)) error {
-	return entbuilder.LoadEdgeM2M(ctx, &roleUserEdgeLoadDescriptor, nodes, init, assign, [2]int{1, 0},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.prepareQuery,
-		func(ctx context.Context, modifiers ...func(context.Context, *sqlgraph.QuerySpec)) ([]*User, error) {
-			hooks := make([]queryHook, len(modifiers))
-			for i := range modifiers {
-				hooks[i] = modifiers[i]
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Role)
+	nids := make(map[int]map[*Role]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(role.UserTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(role.UserPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(role.UserPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(role.UserPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return query.sqlAll(ctx, hooks...)
-		},
-		func(ctx context.Context, q, qr, inters any) (any, error) {
-			// Wrap the entbuilder.querierFunc into an ent.Querier
-			querierFn, ok := qr.(interface {
-				Query(context.Context, any) (any, error)
-			})
-			if !ok {
-				return nil, fmt.Errorf("unexpected querier type %T", qr)
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Role]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			querierWrapper := QuerierFunc(func(ctx context.Context, query Query) (Value, error) {
-				return querierFn.Query(ctx, query)
-			})
-			return withInterceptors[[]*User](ctx, q.(Query), querierWrapper, inters.([]Interceptor))
-		},
-		query,
-		query.inters,
-		func(joinT *sql.SelectTable) {
 		})
+	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "user" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
 	return nil
 }
 func (_q *RoleQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, nodes []*Role, init func(*Role), assign func(*Role, *RoleUser)) error {
@@ -519,17 +526,18 @@ func (_q *RoleQuery) loadRolesUsers(ctx context.Context, query *RoleUserQuery, n
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(roleuser.FieldRoleID)
 	}
-	query.Where(func(s *sql.Selector) {
+	query.Where(predicate.RoleUser(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(role.RolesUsersColumn), fks...))
-	})
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		node, ok := nodeids[n.RoleID]
+		fk := n.RoleID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "role_id" returned %v`, n.RoleID)
+			return fmt.Errorf(`unexpected referenced foreign-key "role_id" returned %v for node %v`, fk, n)
 		}
 		assign(node, n)
 	}
@@ -705,4 +713,23 @@ func (_s *RoleSelect) sqlScan(ctx context.Context, root *RoleQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// roleCreateDescriptor holds the metadata and callbacks for constructing a Role entity.
+var roleCreateDescriptor = &entbuilder.CreateDescriptor[Config, Role, *RoleMutation]{
+	Table:   role.Table,
+	NewNode: func(c Config) *Role { return &Role{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Role, *RoleMutation]{
+		Column:      role.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Role, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Role.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

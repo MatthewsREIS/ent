@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -406,32 +407,33 @@ func (_q *InfoQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Info, e
 	return nodes, nil
 }
 
-var infoUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Info, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        info.UserTable,
-			Columns:      info.UserColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Info) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Info) *int {
-		v := n.ID
-		return &v
-	},
-}
-
 func (_q *InfoQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Info, init func(*Info), assign func(*Info, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &infoUserEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Info)
+	for i := range nodes {
+		fk := nodes[i].ID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -604,4 +606,36 @@ func (_s *InfoSelect) sqlScan(ctx context.Context, root *InfoQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// infoCreateDescriptor holds the metadata and callbacks for constructing a Info entity.
+var infoCreateDescriptor = &entbuilder.CreateDescriptor[Config, Info, *InfoMutation]{
+	Table:   info.Table,
+	NewNode: func(c Config) *Info { return &Info{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Info, *InfoMutation]{
+		Column:      info.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: true,
+		Value: func(m *InfoMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Info, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(int)
+			return nil
+		},
+		AssignGenerated: func(n *Info, v driver.Value) error {
+			switch x := v.(type) {
+			case int:
+				n.ID = x
+			case int64:
+				n.ID = int(x)
+			default:
+				return fmt.Errorf("unexpected Info.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

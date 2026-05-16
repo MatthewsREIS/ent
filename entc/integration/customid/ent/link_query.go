@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -529,4 +531,34 @@ func (_s *LinkSelect) sqlScan(ctx context.Context, root *LinkQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// linkCreateDescriptor holds the metadata and callbacks for constructing a Link entity.
+var linkCreateDescriptor = &entbuilder.CreateDescriptor[Config, Link, *LinkMutation]{
+	Table:   link.Table,
+	NewNode: func(c Config) *Link { return &Link{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Link, *LinkMutation]{
+		Column:      link.FieldID,
+		Type:        field.TypeUUID,
+		UserDefined: true,
+		Value: func(m *LinkMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Link, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(uuidc.UUIDC)
+			return nil
+		},
+		AssignGenerated: func(n *Link, v driver.Value) error {
+			switch x := v.(type) {
+			case uuidc.UUIDC:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Link.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

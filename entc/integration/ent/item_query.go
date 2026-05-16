@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -578,4 +580,34 @@ func (_s *ItemSelect) sqlScan(ctx context.Context, root *ItemQuery, v any) error
 func (_s *ItemSelect) Modify(modifiers ...func(s *sql.Selector)) *ItemSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// itemCreateDescriptor holds the metadata and callbacks for constructing a Item entity.
+var itemCreateDescriptor = &entbuilder.CreateDescriptor[Config, Item, *ItemMutation]{
+	Table:   item.Table,
+	NewNode: func(c Config) *Item { return &Item{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Item, *ItemMutation]{
+		Column:      item.FieldID,
+		Type:        field.TypeString,
+		UserDefined: true,
+		Value: func(m *ItemMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Item, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(string)
+			return nil
+		},
+		AssignGenerated: func(n *Item, v driver.Value) error {
+			switch x := v.(type) {
+			case string:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Item.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

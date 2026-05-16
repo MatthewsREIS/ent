@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -18,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -744,4 +746,23 @@ func (_s *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {
 func (_s *PetSelect) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// petCreateDescriptor holds the metadata and callbacks for constructing a Pet entity.
+var petCreateDescriptor = &entbuilder.CreateDescriptor[Config, Pet, *PetMutation]{
+	Table:   pet.Table,
+	NewNode: func(c Config) *Pet { return &Pet{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Pet, *PetMutation]{
+		Column:      pet.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Pet, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Pet.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

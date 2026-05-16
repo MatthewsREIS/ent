@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -16,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/revision"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -506,4 +508,34 @@ func (_s *RevisionSelect) sqlScan(ctx context.Context, root *RevisionQuery, v an
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// revisionCreateDescriptor holds the metadata and callbacks for constructing a Revision entity.
+var revisionCreateDescriptor = &entbuilder.CreateDescriptor[Config, Revision, *RevisionMutation]{
+	Table:   revision.Table,
+	NewNode: func(c Config) *Revision { return &Revision{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Revision, *RevisionMutation]{
+		Column:      revision.FieldID,
+		Type:        field.TypeString,
+		UserDefined: true,
+		Value: func(m *RevisionMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Revision, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(string)
+			return nil
+		},
+		AssignGenerated: func(n *Revision, v driver.Value) error {
+			switch x := v.(type) {
+			case string:
+				n.ID = x
+			default:
+				return fmt.Errorf("unexpected Revision.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

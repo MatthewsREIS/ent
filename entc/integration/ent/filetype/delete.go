@@ -18,8 +18,9 @@ import (
 // FileTypeDelete is the builder for deleting a FileType entity.
 type FileTypeDelete struct {
 	Config
-	hooks    []Hook
-	mutation *FileTypeMutation
+	hooks     []Hook
+	mutation  *FileTypeMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewFileTypeDelete returns a new FileTypeDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *FileTypeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *FileTypeDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *FileTypeDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *FileTypeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

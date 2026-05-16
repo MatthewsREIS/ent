@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -406,32 +407,33 @@ func (_q *CommentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Comm
 	return nodes, nil
 }
 
-var commentPostEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Comment, Post, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        comment.PostTable,
-			Columns:      comment.PostColumn,
-			Bidi:         false,
-			TargetColumn: post.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Comment) int { return n.ID },
-	ExtractEdgeID: func(e *Post) int { return e.ID },
-	ExtractNodeFK: func(n *Comment) *int {
-		v := n.PostID
-		return &v
-	},
-}
-
 func (_q *CommentQuery) loadPost(ctx context.Context, query *PostQuery, nodes []*Comment, init func(*Comment), assign func(*Comment, *Post)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &commentPostEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(post.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Comment)
+	for i := range nodes {
+		fk := nodes[i].PostID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(post.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "post_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -607,4 +609,23 @@ func (_s *CommentSelect) sqlScan(ctx context.Context, root *CommentQuery, v any)
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// commentCreateDescriptor holds the metadata and callbacks for constructing a Comment entity.
+var commentCreateDescriptor = &entbuilder.CreateDescriptor[Config, Comment, *CommentMutation]{
+	Table:   comment.Table,
+	NewNode: func(c Config) *Comment { return &Comment{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Comment, *CommentMutation]{
+		Column:      comment.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Comment, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Comment.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

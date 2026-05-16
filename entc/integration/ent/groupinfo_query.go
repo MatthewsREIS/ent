@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -690,4 +691,23 @@ func (_s *GroupInfoSelect) sqlScan(ctx context.Context, root *GroupInfoQuery, v 
 func (_s *GroupInfoSelect) Modify(modifiers ...func(s *sql.Selector)) *GroupInfoSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// groupinfoCreateDescriptor holds the metadata and callbacks for constructing a GroupInfo entity.
+var groupinfoCreateDescriptor = &entbuilder.CreateDescriptor[Config, GroupInfo, *GroupInfoMutation]{
+	Table:   groupinfo.Table,
+	NewNode: func(c Config) *GroupInfo { return &GroupInfo{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, GroupInfo, *GroupInfoMutation]{
+		Column:      groupinfo.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *GroupInfo, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected GroupInfo.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

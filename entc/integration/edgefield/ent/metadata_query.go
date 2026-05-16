@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -499,88 +500,92 @@ func (_q *MetadataQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Met
 	return nodes, nil
 }
 
-var metadataUserEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Metadata, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2O,
-			Inverse:      true,
-			Table:        metadata.UserTable,
-			Columns:      metadata.UserColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Metadata) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Metadata) *int {
-		v := n.ID
-		return &v
-	},
-}
-var metadataChildrenEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Metadata, Metadata, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.O2M,
-			Inverse:      true,
-			Table:        metadata.ChildrenTable,
-			Columns:      metadata.ChildrenColumn,
-			Bidi:         false,
-			TargetColumn: metadata.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Metadata) int { return n.ID },
-	ExtractEdgeID: func(e *Metadata) int { return e.ID },
-	ExtractEdgeFK: func(e *Metadata) *int {
-		v := e.ParentID
-		return &v
-	},
-}
-var metadataParentEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Metadata, Metadata, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      false,
-			Table:        metadata.ParentTable,
-			Columns:      metadata.ParentColumn,
-			Bidi:         false,
-			TargetColumn: metadata.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Metadata) int { return n.ID },
-	ExtractEdgeID: func(e *Metadata) int { return e.ID },
-	ExtractNodeFK: func(n *Metadata) *int {
-		v := n.ParentID
-		return &v
-	},
-}
-
 func (_q *MetadataQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &metadataUserEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Metadata)
+	for i := range nodes {
+		fk := nodes[i].ID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 func (_q *MetadataQuery) loadChildren(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Metadata)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(metadata.FieldParentID)
 	}
-	return entbuilder.LoadEdgeO2M(ctx, &metadataChildrenEdgeLoadDescriptor, nodes, init, assign,
-		func(bool) {},
-		func(fn func(*sql.Selector)) { query.Where(fn) },
-		query.All)
+	query.Where(predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(metadata.ChildrenColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ParentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
 	return nil
 }
 func (_q *MetadataQuery) loadParent(ctx context.Context, query *MetadataQuery, nodes []*Metadata, init func(*Metadata), assign func(*Metadata, *Metadata)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &metadataParentEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(metadata.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Metadata)
+	for i := range nodes {
+		fk := nodes[i].ParentID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(metadata.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -770,4 +775,36 @@ func (_s *MetadataSelect) sqlScan(ctx context.Context, root *MetadataQuery, v an
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// metadataCreateDescriptor holds the metadata and callbacks for constructing a Metadata entity.
+var metadataCreateDescriptor = &entbuilder.CreateDescriptor[Config, Metadata, *MetadataMutation]{
+	Table:   metadata.Table,
+	NewNode: func(c Config) *Metadata { return &Metadata{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Metadata, *MetadataMutation]{
+		Column:      metadata.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: true,
+		Value: func(m *MetadataMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *Metadata, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(int)
+			return nil
+		},
+		AssignGenerated: func(n *Metadata, v driver.Value) error {
+			switch x := v.(type) {
+			case int:
+				n.ID = x
+			case int64:
+				n.ID = int(x)
+			default:
+				return fmt.Errorf("unexpected Metadata.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

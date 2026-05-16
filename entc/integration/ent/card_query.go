@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/spec"
 	"entgo.io/ent/entc/integration/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -798,4 +799,23 @@ func (_s *CardSelect) sqlScan(ctx context.Context, root *CardQuery, v any) error
 func (_s *CardSelect) Modify(modifiers ...func(s *sql.Selector)) *CardSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// cardCreateDescriptor holds the metadata and callbacks for constructing a Card entity.
+var cardCreateDescriptor = &entbuilder.CreateDescriptor[Config, Card, *CardMutation]{
+	Table:   card.Table,
+	NewNode: func(c Config) *Card { return &Card{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Card, *CardMutation]{
+		Column:      card.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Card, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Card.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

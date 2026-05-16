@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -668,4 +669,36 @@ func (_s *IntSIDSelect) sqlScan(ctx context.Context, root *IntSIDQuery, v any) e
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// intsidCreateDescriptor holds the metadata and callbacks for constructing a IntSID entity.
+var intsidCreateDescriptor = &entbuilder.CreateDescriptor[Config, IntSID, *IntSIDMutation]{
+	Table:   intsid.Table,
+	NewNode: func(c Config) *IntSID { return &IntSID{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, IntSID, *IntSIDMutation]{
+		Column:      intsid.FieldID,
+		Type:        field.TypeInt64,
+		UserDefined: true,
+		Value: func(m *IntSIDMutation) (entbuilder.FieldValue, bool, error) {
+			if id, ok := m.ID(); ok {
+				return entbuilder.FieldValue{Spec: id, Node: id}, true, nil
+			}
+			return entbuilder.FieldValue{}, false, nil
+		},
+		AssignNode: func(n *IntSID, fv entbuilder.FieldValue) error {
+			n.ID = fv.Node.(sid.ID)
+			return nil
+		},
+		AssignGenerated: func(n *IntSID, v driver.Value) error {
+			switch x := v.(type) {
+			case sid.ID:
+				n.ID = x
+			case int64:
+				n.ID = sid.ID(x)
+			default:
+				return fmt.Errorf("unexpected IntSID.ID type: %T", v)
+			}
+			return nil
+		},
+	},
 }

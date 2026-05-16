@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,75 +59,47 @@ func IDLTE(id sid.ID) predicate.Token {
 	return predicate.Token(sql.FieldLTE(FieldID, id))
 }
 
-// Body applies equality check predicate on the "body" field. It's identical to BodyEQ.
-func Body(v string) predicate.Token {
-	return predicate.Token(sql.FieldEQ(FieldBody, v))
-}
+// Deprecated: Body — use where.EQ(FieldBody, v).
+func Body(v string) predicate.Token { return where.EQ(FieldBody, v) }
 
-// BodyEQ applies the EQ predicate on the "body" field.
-func BodyEQ(v string) predicate.Token {
-	return predicate.Token(sql.FieldEQ(FieldBody, v))
-}
+// Deprecated: BodyEQ — use where.EQ(FieldBody, v).
+func BodyEQ(v string) predicate.Token { return where.EQ(FieldBody, v) }
 
-// BodyNEQ applies the NEQ predicate on the "body" field.
-func BodyNEQ(v string) predicate.Token {
-	return predicate.Token(sql.FieldNEQ(FieldBody, v))
-}
+// Deprecated: BodyNEQ — use where.NEQ(FieldBody, v).
+func BodyNEQ(v string) predicate.Token { return where.NEQ(FieldBody, v) }
 
-// BodyIn applies the In predicate on the "body" field.
-func BodyIn(vs ...string) predicate.Token {
-	return predicate.Token(sql.FieldIn(FieldBody, vs...))
-}
+// Deprecated: BodyIn — use where.In(FieldBody, vs...).
+func BodyIn(vs ...string) predicate.Token { return where.In(FieldBody, vs...) }
 
-// BodyNotIn applies the NotIn predicate on the "body" field.
-func BodyNotIn(vs ...string) predicate.Token {
-	return predicate.Token(sql.FieldNotIn(FieldBody, vs...))
-}
+// Deprecated: BodyNotIn — use where.NotIn(FieldBody, vs...).
+func BodyNotIn(vs ...string) predicate.Token { return where.NotIn(FieldBody, vs...) }
 
-// BodyGT applies the GT predicate on the "body" field.
-func BodyGT(v string) predicate.Token {
-	return predicate.Token(sql.FieldGT(FieldBody, v))
-}
+// Deprecated: BodyGT — use where.GT(FieldBody, v).
+func BodyGT(v string) predicate.Token { return where.GT(FieldBody, v) }
 
-// BodyGTE applies the GTE predicate on the "body" field.
-func BodyGTE(v string) predicate.Token {
-	return predicate.Token(sql.FieldGTE(FieldBody, v))
-}
+// Deprecated: BodyGTE — use where.GTE(FieldBody, v).
+func BodyGTE(v string) predicate.Token { return where.GTE(FieldBody, v) }
 
-// BodyLT applies the LT predicate on the "body" field.
-func BodyLT(v string) predicate.Token {
-	return predicate.Token(sql.FieldLT(FieldBody, v))
-}
+// Deprecated: BodyLT — use where.LT(FieldBody, v).
+func BodyLT(v string) predicate.Token { return where.LT(FieldBody, v) }
 
-// BodyLTE applies the LTE predicate on the "body" field.
-func BodyLTE(v string) predicate.Token {
-	return predicate.Token(sql.FieldLTE(FieldBody, v))
-}
+// Deprecated: BodyLTE — use where.LTE(FieldBody, v).
+func BodyLTE(v string) predicate.Token { return where.LTE(FieldBody, v) }
 
-// BodyContains applies the Contains predicate on the "body" field.
-func BodyContains(v string) predicate.Token {
-	return predicate.Token(sql.FieldContains(FieldBody, v))
-}
+// Deprecated: BodyContains — use where.Contains(FieldBody, v).
+func BodyContains(v string) predicate.Token { return where.Contains(FieldBody, v) }
 
-// BodyHasPrefix applies the HasPrefix predicate on the "body" field.
-func BodyHasPrefix(v string) predicate.Token {
-	return predicate.Token(sql.FieldHasPrefix(FieldBody, v))
-}
+// Deprecated: BodyHasPrefix — use where.HasPrefix(FieldBody, v).
+func BodyHasPrefix(v string) predicate.Token { return where.HasPrefix(FieldBody, v) }
 
-// BodyHasSuffix applies the HasSuffix predicate on the "body" field.
-func BodyHasSuffix(v string) predicate.Token {
-	return predicate.Token(sql.FieldHasSuffix(FieldBody, v))
-}
+// Deprecated: BodyHasSuffix — use where.HasSuffix(FieldBody, v).
+func BodyHasSuffix(v string) predicate.Token { return where.HasSuffix(FieldBody, v) }
 
-// BodyEqualFold applies the EqualFold predicate on the "body" field.
-func BodyEqualFold(v string) predicate.Token {
-	return predicate.Token(sql.FieldEqualFold(FieldBody, v))
-}
+// Deprecated: BodyEqualFold — use where.EqualFold(FieldBody, v).
+func BodyEqualFold(v string) predicate.Token { return where.EqualFold(FieldBody, v) }
 
-// BodyContainsFold applies the ContainsFold predicate on the "body" field.
-func BodyContainsFold(v string) predicate.Token {
-	return predicate.Token(sql.FieldContainsFold(FieldBody, v))
-}
+// Deprecated: BodyContainsFold — use where.ContainsFold(FieldBody, v).
+func BodyContainsFold(v string) predicate.Token { return where.ContainsFold(FieldBody, v) }
 
 // HasAccount applies the HasEdge predicate on the "account" edge.
 func HasAccount() predicate.Token {
@@ -141,14 +114,15 @@ func HasAccount() predicate.Token {
 
 // HasAccountWith applies the HasEdge predicate on the "account" edge with a given conditions (other predicates).
 func HasAccountWith(preds ...predicate.Account) predicate.Token {
-	return predicate.Token(func(s *sql.Selector) {
-		step := newAccountStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Token(
+		func(s *sql.Selector) {
+			step := newAccountStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

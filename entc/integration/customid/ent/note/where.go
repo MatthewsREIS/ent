@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -58,85 +59,53 @@ func IDLTE(id schema.NoteID) predicate.Note {
 	return predicate.Note(sql.FieldLTE(FieldID, id))
 }
 
-// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
-func Text(v string) predicate.Note {
-	return predicate.Note(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: Text — use where.EQ(FieldText, v).
+func Text(v string) predicate.Note { return where.EQ(FieldText, v) }
 
-// TextEQ applies the EQ predicate on the "text" field.
-func TextEQ(v string) predicate.Note {
-	return predicate.Note(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: TextEQ — use where.EQ(FieldText, v).
+func TextEQ(v string) predicate.Note { return where.EQ(FieldText, v) }
 
-// TextNEQ applies the NEQ predicate on the "text" field.
-func TextNEQ(v string) predicate.Note {
-	return predicate.Note(sql.FieldNEQ(FieldText, v))
-}
+// Deprecated: TextNEQ — use where.NEQ(FieldText, v).
+func TextNEQ(v string) predicate.Note { return where.NEQ(FieldText, v) }
 
-// TextIn applies the In predicate on the "text" field.
-func TextIn(vs ...string) predicate.Note {
-	return predicate.Note(sql.FieldIn(FieldText, vs...))
-}
+// Deprecated: TextIn — use where.In(FieldText, vs...).
+func TextIn(vs ...string) predicate.Note { return where.In(FieldText, vs...) }
 
-// TextNotIn applies the NotIn predicate on the "text" field.
-func TextNotIn(vs ...string) predicate.Note {
-	return predicate.Note(sql.FieldNotIn(FieldText, vs...))
-}
+// Deprecated: TextNotIn — use where.NotIn(FieldText, vs...).
+func TextNotIn(vs ...string) predicate.Note { return where.NotIn(FieldText, vs...) }
 
-// TextGT applies the GT predicate on the "text" field.
-func TextGT(v string) predicate.Note {
-	return predicate.Note(sql.FieldGT(FieldText, v))
-}
+// Deprecated: TextGT — use where.GT(FieldText, v).
+func TextGT(v string) predicate.Note { return where.GT(FieldText, v) }
 
-// TextGTE applies the GTE predicate on the "text" field.
-func TextGTE(v string) predicate.Note {
-	return predicate.Note(sql.FieldGTE(FieldText, v))
-}
+// Deprecated: TextGTE — use where.GTE(FieldText, v).
+func TextGTE(v string) predicate.Note { return where.GTE(FieldText, v) }
 
-// TextLT applies the LT predicate on the "text" field.
-func TextLT(v string) predicate.Note {
-	return predicate.Note(sql.FieldLT(FieldText, v))
-}
+// Deprecated: TextLT — use where.LT(FieldText, v).
+func TextLT(v string) predicate.Note { return where.LT(FieldText, v) }
 
-// TextLTE applies the LTE predicate on the "text" field.
-func TextLTE(v string) predicate.Note {
-	return predicate.Note(sql.FieldLTE(FieldText, v))
-}
+// Deprecated: TextLTE — use where.LTE(FieldText, v).
+func TextLTE(v string) predicate.Note { return where.LTE(FieldText, v) }
 
-// TextContains applies the Contains predicate on the "text" field.
-func TextContains(v string) predicate.Note {
-	return predicate.Note(sql.FieldContains(FieldText, v))
-}
+// Deprecated: TextContains — use where.Contains(FieldText, v).
+func TextContains(v string) predicate.Note { return where.Contains(FieldText, v) }
 
-// TextHasPrefix applies the HasPrefix predicate on the "text" field.
-func TextHasPrefix(v string) predicate.Note {
-	return predicate.Note(sql.FieldHasPrefix(FieldText, v))
-}
+// Deprecated: TextHasPrefix — use where.HasPrefix(FieldText, v).
+func TextHasPrefix(v string) predicate.Note { return where.HasPrefix(FieldText, v) }
 
-// TextHasSuffix applies the HasSuffix predicate on the "text" field.
-func TextHasSuffix(v string) predicate.Note {
-	return predicate.Note(sql.FieldHasSuffix(FieldText, v))
-}
+// Deprecated: TextHasSuffix — use where.HasSuffix(FieldText, v).
+func TextHasSuffix(v string) predicate.Note { return where.HasSuffix(FieldText, v) }
 
-// TextIsNil applies the IsNil predicate on the "text" field.
-func TextIsNil() predicate.Note {
-	return predicate.Note(sql.FieldIsNull(FieldText))
-}
+// Deprecated: TextIsNil — use where.IsNull(FieldText).
+func TextIsNil() predicate.Note { return where.IsNull(FieldText) }
 
-// TextNotNil applies the NotNil predicate on the "text" field.
-func TextNotNil() predicate.Note {
-	return predicate.Note(sql.FieldNotNull(FieldText))
-}
+// Deprecated: TextNotNil — use where.NotNull(FieldText).
+func TextNotNil() predicate.Note { return where.NotNull(FieldText) }
 
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Note {
-	return predicate.Note(sql.FieldEqualFold(FieldText, v))
-}
+// Deprecated: TextEqualFold — use where.EqualFold(FieldText, v).
+func TextEqualFold(v string) predicate.Note { return where.EqualFold(FieldText, v) }
 
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Note {
-	return predicate.Note(sql.FieldContainsFold(FieldText, v))
-}
+// Deprecated: TextContainsFold — use where.ContainsFold(FieldText, v).
+func TextContainsFold(v string) predicate.Note { return where.ContainsFold(FieldText, v) }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
 func HasParent() predicate.Note {
@@ -151,14 +120,15 @@ func HasParent() predicate.Note {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.Note) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		step := newParentStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Note(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasChildren applies the HasEdge predicate on the "children" edge.
@@ -174,14 +144,15 @@ func HasChildren() predicate.Note {
 
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.Note) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		step := newChildrenStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Note(
+		func(s *sql.Selector) {
+			step := newChildrenStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

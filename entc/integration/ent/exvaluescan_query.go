@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -578,4 +580,23 @@ func (_s *ExValueScanSelect) sqlScan(ctx context.Context, root *ExValueScanQuery
 func (_s *ExValueScanSelect) Modify(modifiers ...func(s *sql.Selector)) *ExValueScanSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// exvaluescanCreateDescriptor holds the metadata and callbacks for constructing a ExValueScan entity.
+var exvaluescanCreateDescriptor = &entbuilder.CreateDescriptor[Config, ExValueScan, *ExValueScanMutation]{
+	Table:   exvaluescan.Table,
+	NewNode: func(c Config) *ExValueScan { return &ExValueScan{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, ExValueScan, *ExValueScanMutation]{
+		Column:      exvaluescan.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *ExValueScan, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected ExValueScan.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

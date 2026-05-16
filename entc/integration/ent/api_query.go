@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/api"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -556,4 +558,23 @@ func (_s *APISelect) sqlScan(ctx context.Context, root *APIQuery, v any) error {
 func (_s *APISelect) Modify(modifiers ...func(s *sql.Selector)) *APISelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// apiCreateDescriptor holds the metadata and callbacks for constructing a Api entity.
+var apiCreateDescriptor = &entbuilder.CreateDescriptor[Config, Api, *APIMutation]{
+	Table:   api.Table,
+	NewNode: func(c Config) *Api { return &Api{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Api, *APIMutation]{
+		Column:      api.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Api, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Api.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

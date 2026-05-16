@@ -8,6 +8,7 @@ package entv1
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/migrate/entv1/car"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 	"entgo.io/ent/entc/integration/migrate/entv1/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -593,4 +595,23 @@ func (_s *CarSelect) sqlScan(ctx context.Context, root *CarQuery, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// carCreateDescriptor holds the metadata and callbacks for constructing a Car entity.
+var carCreateDescriptor = &entbuilder.CreateDescriptor[Config, Car, *CarMutation]{
+	Table:   car.Table,
+	NewNode: func(c Config) *Car { return &Car{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Car, *CarMutation]{
+		Column:      car.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Car, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Car.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

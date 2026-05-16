@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -418,32 +419,33 @@ func (_q *PetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Pet, err
 	return nodes, nil
 }
 
-var petOwnerEdgeLoadDescriptor = entbuilder.EdgeLoadDescriptor[Pet, User, int, int]{
-	EdgeSpec: func() *sqlgraph.EdgeSpec {
-		return entbuilder.NewEdgeSpec(entbuilder.EdgeSpecParams{
-			Rel:          sqlgraph.M2O,
-			Inverse:      true,
-			Table:        pet.OwnerTable,
-			Columns:      pet.OwnerColumn,
-			Bidi:         false,
-			TargetColumn: user.FieldID,
-			TargetType:   field.TypeInt,
-		})
-	},
-	ExtractNodeID: func(n *Pet) int { return n.ID },
-	ExtractEdgeID: func(e *User) int { return e.ID },
-	ExtractNodeFK: func(n *Pet) *int {
-		v := n.OwnerID
-		return &v
-	},
-}
-
 func (_q *PetQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Pet, init func(*Pet), assign func(*Pet, *User)) error {
-	return entbuilder.LoadEdgeM2O(ctx, &petOwnerEdgeLoadDescriptor, nodes, assign,
-		func(ids []int) {
-			query.Where(user.IDIn(ids...))
-		},
-		query.All)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Pet)
+	for i := range nodes {
+		fk := nodes[i].OwnerID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "owner_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
 	return nil
 }
 
@@ -644,4 +646,23 @@ func (_s *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {
 func (_s *PetSelect) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// petCreateDescriptor holds the metadata and callbacks for constructing a Pet entity.
+var petCreateDescriptor = &entbuilder.CreateDescriptor[Config, Pet, *PetMutation]{
+	Table:   pet.Table,
+	NewNode: func(c Config) *Pet { return &Pet{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Pet, *PetMutation]{
+		Column:      pet.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Pet, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Pet.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

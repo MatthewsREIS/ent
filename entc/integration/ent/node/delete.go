@@ -18,8 +18,9 @@ import (
 // NodeDelete is the builder for deleting a Node entity.
 type NodeDelete struct {
 	Config
-	hooks    []Hook
-	mutation *NodeMutation
+	hooks     []Hook
+	mutation  *NodeMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewNodeDelete returns a new NodeDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *NodeDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *NodeDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *NodeDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *NodeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

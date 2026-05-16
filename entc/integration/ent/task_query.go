@@ -8,6 +8,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -17,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	enttask "entgo.io/ent/entc/integration/ent/task"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -578,4 +580,23 @@ func (_s *TaskSelect) sqlScan(ctx context.Context, root *TaskQuery, v any) error
 func (_s *TaskSelect) Modify(modifiers ...func(s *sql.Selector)) *TaskSelect {
 	_s.modifiers = append(_s.modifiers, modifiers...)
 	return _s
+}
+
+// taskCreateDescriptor holds the metadata and callbacks for constructing a Task entity.
+var taskCreateDescriptor = &entbuilder.CreateDescriptor[Config, Task, *TaskMutation]{
+	Table:   enttask.Table,
+	NewNode: func(c Config) *Task { return &Task{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Task, *TaskMutation]{
+		Column:      enttask.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Task, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Task.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

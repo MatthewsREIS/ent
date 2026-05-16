@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -728,4 +729,23 @@ func (_s *TaskSelect) sqlScan(ctx context.Context, root *TaskQuery, v any) error
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// taskCreateDescriptor holds the metadata and callbacks for constructing a Task entity.
+var taskCreateDescriptor = &entbuilder.CreateDescriptor[Config, Task, *TaskMutation]{
+	Table:   task.Table,
+	NewNode: func(c Config) *Task { return &Task{Config: c} },
+	ID: &entbuilder.IDDescriptor[Config, Task, *TaskMutation]{
+		Column:      task.FieldID,
+		Type:        field.TypeInt,
+		UserDefined: false,
+		AssignGenerated: func(n *Task, v driver.Value) error {
+			id, ok := v.(int64)
+			if !ok {
+				return fmt.Errorf("unexpected Task.ID type: %T", v)
+			}
+			n.ID = int(id)
+			return nil
+		},
+	},
 }

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -57,75 +58,47 @@ func IDLTE(id int) predicate.Tweet {
 	return predicate.Tweet(sql.FieldLTE(FieldID, id))
 }
 
-// Text applies equality check predicate on the "text" field. It's identical to TextEQ.
-func Text(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: Text — use where.EQ(FieldText, v).
+func Text(v string) predicate.Tweet { return where.EQ(FieldText, v) }
 
-// TextEQ applies the EQ predicate on the "text" field.
-func TextEQ(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldEQ(FieldText, v))
-}
+// Deprecated: TextEQ — use where.EQ(FieldText, v).
+func TextEQ(v string) predicate.Tweet { return where.EQ(FieldText, v) }
 
-// TextNEQ applies the NEQ predicate on the "text" field.
-func TextNEQ(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldNEQ(FieldText, v))
-}
+// Deprecated: TextNEQ — use where.NEQ(FieldText, v).
+func TextNEQ(v string) predicate.Tweet { return where.NEQ(FieldText, v) }
 
-// TextIn applies the In predicate on the "text" field.
-func TextIn(vs ...string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldIn(FieldText, vs...))
-}
+// Deprecated: TextIn — use where.In(FieldText, vs...).
+func TextIn(vs ...string) predicate.Tweet { return where.In(FieldText, vs...) }
 
-// TextNotIn applies the NotIn predicate on the "text" field.
-func TextNotIn(vs ...string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldNotIn(FieldText, vs...))
-}
+// Deprecated: TextNotIn — use where.NotIn(FieldText, vs...).
+func TextNotIn(vs ...string) predicate.Tweet { return where.NotIn(FieldText, vs...) }
 
-// TextGT applies the GT predicate on the "text" field.
-func TextGT(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldGT(FieldText, v))
-}
+// Deprecated: TextGT — use where.GT(FieldText, v).
+func TextGT(v string) predicate.Tweet { return where.GT(FieldText, v) }
 
-// TextGTE applies the GTE predicate on the "text" field.
-func TextGTE(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldGTE(FieldText, v))
-}
+// Deprecated: TextGTE — use where.GTE(FieldText, v).
+func TextGTE(v string) predicate.Tweet { return where.GTE(FieldText, v) }
 
-// TextLT applies the LT predicate on the "text" field.
-func TextLT(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldLT(FieldText, v))
-}
+// Deprecated: TextLT — use where.LT(FieldText, v).
+func TextLT(v string) predicate.Tweet { return where.LT(FieldText, v) }
 
-// TextLTE applies the LTE predicate on the "text" field.
-func TextLTE(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldLTE(FieldText, v))
-}
+// Deprecated: TextLTE — use where.LTE(FieldText, v).
+func TextLTE(v string) predicate.Tweet { return where.LTE(FieldText, v) }
 
-// TextContains applies the Contains predicate on the "text" field.
-func TextContains(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldContains(FieldText, v))
-}
+// Deprecated: TextContains — use where.Contains(FieldText, v).
+func TextContains(v string) predicate.Tweet { return where.Contains(FieldText, v) }
 
-// TextHasPrefix applies the HasPrefix predicate on the "text" field.
-func TextHasPrefix(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldHasPrefix(FieldText, v))
-}
+// Deprecated: TextHasPrefix — use where.HasPrefix(FieldText, v).
+func TextHasPrefix(v string) predicate.Tweet { return where.HasPrefix(FieldText, v) }
 
-// TextHasSuffix applies the HasSuffix predicate on the "text" field.
-func TextHasSuffix(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldHasSuffix(FieldText, v))
-}
+// Deprecated: TextHasSuffix — use where.HasSuffix(FieldText, v).
+func TextHasSuffix(v string) predicate.Tweet { return where.HasSuffix(FieldText, v) }
 
-// TextEqualFold applies the EqualFold predicate on the "text" field.
-func TextEqualFold(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldEqualFold(FieldText, v))
-}
+// Deprecated: TextEqualFold — use where.EqualFold(FieldText, v).
+func TextEqualFold(v string) predicate.Tweet { return where.EqualFold(FieldText, v) }
 
-// TextContainsFold applies the ContainsFold predicate on the "text" field.
-func TextContainsFold(v string) predicate.Tweet {
-	return predicate.Tweet(sql.FieldContainsFold(FieldText, v))
-}
+// Deprecated: TextContainsFold — use where.ContainsFold(FieldText, v).
+func TextContainsFold(v string) predicate.Tweet { return where.ContainsFold(FieldText, v) }
 
 // HasLikedUsers applies the HasEdge predicate on the "liked_users" edge.
 func HasLikedUsers() predicate.Tweet {
@@ -140,14 +113,15 @@ func HasLikedUsers() predicate.Tweet {
 
 // HasLikedUsersWith applies the HasEdge predicate on the "liked_users" edge with a given conditions (other predicates).
 func HasLikedUsersWith(preds ...predicate.User) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newLikedUsersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newLikedUsersStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -163,14 +137,15 @@ func HasUser() predicate.Tweet {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTags applies the HasEdge predicate on the "tags" edge.
@@ -186,14 +161,15 @@ func HasTags() predicate.Tweet {
 
 // HasTagsWith applies the HasEdge predicate on the "tags" edge with a given conditions (other predicates).
 func HasTagsWith(preds ...predicate.Tag) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newTagsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newTagsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasLikes applies the HasEdge predicate on the "likes" edge.
@@ -209,14 +185,15 @@ func HasLikes() predicate.Tweet {
 
 // HasLikesWith applies the HasEdge predicate on the "likes" edge with a given conditions (other predicates).
 func HasLikesWith(preds ...predicate.TweetLike) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newLikesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newLikesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTweetUser applies the HasEdge predicate on the "tweet_user" edge.
@@ -232,14 +209,15 @@ func HasTweetUser() predicate.Tweet {
 
 // HasTweetUserWith applies the HasEdge predicate on the "tweet_user" edge with a given conditions (other predicates).
 func HasTweetUserWith(preds ...predicate.UserTweet) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newTweetUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newTweetUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTweetTags applies the HasEdge predicate on the "tweet_tags" edge.
@@ -255,14 +233,15 @@ func HasTweetTags() predicate.Tweet {
 
 // HasTweetTagsWith applies the HasEdge predicate on the "tweet_tags" edge with a given conditions (other predicates).
 func HasTweetTagsWith(preds ...predicate.TweetTag) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newTweetTagsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newTweetTagsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

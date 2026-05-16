@@ -18,8 +18,9 @@ import (
 // TaskDelete is the builder for deleting a Task entity.
 type TaskDelete struct {
 	Config
-	hooks    []Hook
-	mutation *TaskMutation
+	hooks     []Hook
+	mutation  *TaskMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewTaskDelete returns a new TaskDelete initialized with the given config, hooks, and mutation.
@@ -47,8 +48,15 @@ func (_d *TaskDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *TaskDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *TaskDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *TaskDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

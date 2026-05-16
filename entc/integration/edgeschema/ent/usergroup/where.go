@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/where"
 )
 
 // ID filters vertices based on their ID field.
@@ -59,100 +60,62 @@ func IDLTE(id int) predicate.UserGroup {
 	return predicate.UserGroup(sql.FieldLTE(FieldID, id))
 }
 
-// JoinedAt applies equality check predicate on the "joined_at" field. It's identical to JoinedAtEQ.
-func JoinedAt(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldJoinedAt, v))
-}
+// Deprecated: JoinedAt — use where.EQ(FieldJoinedAt, v).
+func JoinedAt(v time.Time) predicate.UserGroup { return where.EQ(FieldJoinedAt, v) }
 
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserID — use where.EQ(FieldUserID, v).
+func UserID(v int) predicate.UserGroup { return where.EQ(FieldUserID, v) }
 
-// GroupID applies equality check predicate on the "group_id" field. It's identical to GroupIDEQ.
-func GroupID(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldGroupID, v))
-}
+// Deprecated: GroupID — use where.EQ(FieldGroupID, v).
+func GroupID(v int) predicate.UserGroup { return where.EQ(FieldGroupID, v) }
 
-// JoinedAtEQ applies the EQ predicate on the "joined_at" field.
-func JoinedAtEQ(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldJoinedAt, v))
-}
+// Deprecated: JoinedAtEQ — use where.EQ(FieldJoinedAt, v).
+func JoinedAtEQ(v time.Time) predicate.UserGroup { return where.EQ(FieldJoinedAt, v) }
 
-// JoinedAtNEQ applies the NEQ predicate on the "joined_at" field.
-func JoinedAtNEQ(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNEQ(FieldJoinedAt, v))
-}
+// Deprecated: JoinedAtNEQ — use where.NEQ(FieldJoinedAt, v).
+func JoinedAtNEQ(v time.Time) predicate.UserGroup { return where.NEQ(FieldJoinedAt, v) }
 
-// JoinedAtIn applies the In predicate on the "joined_at" field.
-func JoinedAtIn(vs ...time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldIn(FieldJoinedAt, vs...))
-}
+// Deprecated: JoinedAtIn — use where.In(FieldJoinedAt, vs...).
+func JoinedAtIn(vs ...time.Time) predicate.UserGroup { return where.In(FieldJoinedAt, vs...) }
 
-// JoinedAtNotIn applies the NotIn predicate on the "joined_at" field.
-func JoinedAtNotIn(vs ...time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNotIn(FieldJoinedAt, vs...))
-}
+// Deprecated: JoinedAtNotIn — use where.NotIn(FieldJoinedAt, vs...).
+func JoinedAtNotIn(vs ...time.Time) predicate.UserGroup { return where.NotIn(FieldJoinedAt, vs...) }
 
-// JoinedAtGT applies the GT predicate on the "joined_at" field.
-func JoinedAtGT(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldGT(FieldJoinedAt, v))
-}
+// Deprecated: JoinedAtGT — use where.GT(FieldJoinedAt, v).
+func JoinedAtGT(v time.Time) predicate.UserGroup { return where.GT(FieldJoinedAt, v) }
 
-// JoinedAtGTE applies the GTE predicate on the "joined_at" field.
-func JoinedAtGTE(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldGTE(FieldJoinedAt, v))
-}
+// Deprecated: JoinedAtGTE — use where.GTE(FieldJoinedAt, v).
+func JoinedAtGTE(v time.Time) predicate.UserGroup { return where.GTE(FieldJoinedAt, v) }
 
-// JoinedAtLT applies the LT predicate on the "joined_at" field.
-func JoinedAtLT(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldLT(FieldJoinedAt, v))
-}
+// Deprecated: JoinedAtLT — use where.LT(FieldJoinedAt, v).
+func JoinedAtLT(v time.Time) predicate.UserGroup { return where.LT(FieldJoinedAt, v) }
 
-// JoinedAtLTE applies the LTE predicate on the "joined_at" field.
-func JoinedAtLTE(v time.Time) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldLTE(FieldJoinedAt, v))
-}
+// Deprecated: JoinedAtLTE — use where.LTE(FieldJoinedAt, v).
+func JoinedAtLTE(v time.Time) predicate.UserGroup { return where.LTE(FieldJoinedAt, v) }
 
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldUserID, v))
-}
+// Deprecated: UserIDEQ — use where.EQ(FieldUserID, v).
+func UserIDEQ(v int) predicate.UserGroup { return where.EQ(FieldUserID, v) }
 
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNEQ(FieldUserID, v))
-}
+// Deprecated: UserIDNEQ — use where.NEQ(FieldUserID, v).
+func UserIDNEQ(v int) predicate.UserGroup { return where.NEQ(FieldUserID, v) }
 
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDIn — use where.In(FieldUserID, vs...).
+func UserIDIn(vs ...int) predicate.UserGroup { return where.In(FieldUserID, vs...) }
 
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNotIn(FieldUserID, vs...))
-}
+// Deprecated: UserIDNotIn — use where.NotIn(FieldUserID, vs...).
+func UserIDNotIn(vs ...int) predicate.UserGroup { return where.NotIn(FieldUserID, vs...) }
 
-// GroupIDEQ applies the EQ predicate on the "group_id" field.
-func GroupIDEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldEQ(FieldGroupID, v))
-}
+// Deprecated: GroupIDEQ — use where.EQ(FieldGroupID, v).
+func GroupIDEQ(v int) predicate.UserGroup { return where.EQ(FieldGroupID, v) }
 
-// GroupIDNEQ applies the NEQ predicate on the "group_id" field.
-func GroupIDNEQ(v int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNEQ(FieldGroupID, v))
-}
+// Deprecated: GroupIDNEQ — use where.NEQ(FieldGroupID, v).
+func GroupIDNEQ(v int) predicate.UserGroup { return where.NEQ(FieldGroupID, v) }
 
-// GroupIDIn applies the In predicate on the "group_id" field.
-func GroupIDIn(vs ...int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldIn(FieldGroupID, vs...))
-}
+// Deprecated: GroupIDIn — use where.In(FieldGroupID, vs...).
+func GroupIDIn(vs ...int) predicate.UserGroup { return where.In(FieldGroupID, vs...) }
 
-// GroupIDNotIn applies the NotIn predicate on the "group_id" field.
-func GroupIDNotIn(vs ...int) predicate.UserGroup {
-	return predicate.UserGroup(sql.FieldNotIn(FieldGroupID, vs...))
-}
+// Deprecated: GroupIDNotIn — use where.NotIn(FieldGroupID, vs...).
+func GroupIDNotIn(vs ...int) predicate.UserGroup { return where.NotIn(FieldGroupID, vs...) }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
 func HasUser() predicate.UserGroup {
@@ -167,14 +130,15 @@ func HasUser() predicate.UserGroup {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.UserGroup(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasGroup applies the HasEdge predicate on the "group" edge.
@@ -190,14 +154,15 @@ func HasGroup() predicate.UserGroup {
 
 // HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
 func HasGroupWith(preds ...predicate.Group) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		step := newGroupStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.UserGroup(
+		func(s *sql.Selector) {
+			step := newGroupStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.
