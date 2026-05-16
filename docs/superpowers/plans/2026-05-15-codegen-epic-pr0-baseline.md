@@ -1383,41 +1383,17 @@ Run: `git log --oneline master..HEAD`
 
 Expected: ~10 commits (one per task that committed). Commit ordering matches the task numbering.
 
-- [ ] **Step 6: Push the branch and open a draft PR**
+- [ ] **Step 6: Leave the branch local — do NOT push or open a PR yet**
 
-If using git-spice:
+Per epic-level policy: no PRs until end-of-epic, after every PR in the stack has been merged locally and the team has verified DX + build-time wins with the bench harness. Each epic PR is built and committed locally on its own branch; pushing and PR creation happen once at the end as a coordinated stack submission.
 
-```
-gs branch submit
-```
+Verify no accidental push:
 
-Otherwise:
+Run: `git config --get branch.codegen-epic/00-baseline.remote || echo "no upstream configured (expected)"`
 
-```
-git push -u origin codegen-epic/00-baseline
-gh pr create --draft --title "codegen-epic/00 — baseline bench harness + entc/gen fixes" \
-  --body-file <(cat <<'EOF'
-## Summary
-PR 0 of the codegen-reduction epic. Stands up the bench harness (`internal/bench`,
-`cmd/bench-codegen`) and fixes the 4 pre-existing `entc/gen` regression failures
-so subsequent epic PRs have a clean green baseline to diff against.
+Expected: `no upstream configured (expected)`.
 
-See `docs/superpowers/specs/2026-05-15-ent-codegen-reduction-epic.md` for the
-full epic plan and `docs/superpowers/plans/2026-05-15-codegen-epic-pr0-baseline.md`
-for the per-task implementation plan that produced this PR.
-
-## Measurement
-Baseline captured in `internal/bench/baseline.jsonl`. Subsequent PRs will
-include a Measurement section diffed against that file.
-
-## Test plan
-- [x] `go test -count=1 ./entc/gen/...` passes clean
-- [x] `go test -count=1 ./internal/bench/...` passes
-- [x] `go run ./cmd/bench-codegen` produces 3 JSON lines for in-repo fixtures
-- [x] `internal/bench/README.md` documents consumer-scale measurement
-EOF
-)
-```
+The branch stays local. When the full epic is ready, a separate end-of-epic procedure will push the stack via `gs stack submit` (or equivalent) and open the PRs.
 
 ---
 
