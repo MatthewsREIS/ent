@@ -141,3 +141,35 @@ func TestMutation_ResetField_UnknownErrors(t *testing.T) {
 
 // guard: SetField wraps assignment failures wisely
 var _ = errors.New
+
+func TestMutation_AddField_Numeric(t *testing.T) {
+	desc := &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{
+			"count": {Type: reflect.TypeFor[int](), GoName: "Count", Numeric: true},
+		},
+	}
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, desc)
+	require.NoError(t, m.AddField("count", 5))
+	v, ok := m.AddedField("count")
+	require.True(t, ok)
+	require.Equal(t, 5, v)
+	require.ElementsMatch(t, []string{"count"}, m.AddedFields())
+}
+
+func TestMutation_AddField_NotNumeric_Errors(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, testDescriptor()) // title not numeric
+	require.Error(t, m.AddField("title", 5))
+}
+
+func TestMutation_AddField_Unknown_Errors(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, testDescriptor())
+	require.Error(t, m.AddField("nope", 5))
+}
+
+func TestMutation_AddedField_Unset(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, testDescriptor())
+	_, ok := m.AddedField("title")
+	require.False(t, ok)
+}

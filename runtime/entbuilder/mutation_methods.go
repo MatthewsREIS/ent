@@ -166,3 +166,44 @@ func (m *Mutation[T]) ResetField(name string) error {
 	delete(m.added, name)
 	return nil
 }
+
+// AddedFields returns all numeric fields that were incremented/decremented
+// during this mutation.
+func (m *Mutation[T]) AddedFields() []string {
+	out := make([]string, 0, len(m.added))
+	for k := range m.added {
+		out = append(out, k)
+	}
+	return out
+}
+
+// AddedField returns the numeric value that was incremented/decremented on
+// the field with the given name. The second return value indicates whether
+// the field was set.
+func (m *Mutation[T]) AddedField(name string) (ent.Value, bool) {
+	if m.added == nil {
+		return nil, false
+	}
+	v, ok := m.added[name]
+	return v, ok
+}
+
+// AddField adds the value to the field with the given name. Returns an
+// error if the field is not in the descriptor or is not Numeric.
+func (m *Mutation[T]) AddField(name string, value ent.Value) error {
+	spec, ok := m.desc.Fields[name]
+	if !ok {
+		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
+	}
+	if !spec.Numeric {
+		return fmt.Errorf("entbuilder: %s field %s is not numeric", m.desc.Name, name)
+	}
+	if value != nil && reflect.TypeOf(value) != spec.Type {
+		return fmt.Errorf("unexpected type %T for field %s (want %s)", value, name, spec.Type)
+	}
+	if m.added == nil {
+		m.added = make(map[string]any)
+	}
+	m.added[name] = value
+	return nil
+}
