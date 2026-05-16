@@ -1,9 +1,23 @@
 # ent codegen reduction — epic design
 
-**Status:** Draft for review
-**Date:** 2026-05-15
-**Worktree:** `.claude/worktrees/wiggly-singing-pancake`
-**Stack tool:** git-spice
+**Status:** In progress (3 of 7 PRs complete as of 2026-05-16)
+**Date:** 2026-05-15 (created); progress tracker updated 2026-05-16
+**Worktree:** `.claude/worktrees/wiggly-singing-pancake` on branch `worktree-wiggly-singing-pancake`
+**Stack tool:** git-spice (deferred — all commits stay local until end-of-epic per [[feedback-no-prs-until-end-of-epic]])
+
+## 0. Progress
+
+| PR | Title | Status | Plan | Commits range (top → bottom) |
+|---|---|---|---|---|
+| 0 | baseline (bench harness + entc/gen fixes) | ✅ complete | `docs/superpowers/plans/2026-05-15-codegen-epic-pr0-baseline.md` | `f3471df35` … `21bb66022` |
+| 1 | loader UX / bootstrap mode (DX win) | ✅ complete | `docs/superpowers/plans/2026-05-15-codegen-epic-pr1-loader-ux.md` | `7fa162c05` … `6371e0b27` |
+| 2 | feature flags (NoUpdate / NoDelete / `entc.ReadOnly`) | ✅ complete | `docs/superpowers/plans/2026-05-15-codegen-epic-pr2-feature-flags.md` | `1982c3389` … `348be29dd` |
+| 3 | predicate collapse | ⏳ next | not yet written | — |
+| 4 | generic builders | ⏳ pending | not yet written | — |
+| 5 | mutation collapse (biggest LOC pull, ~355K) | ⏳ pending | not yet written | — |
+| 6 | per-entity packages (biggest compile-time win) | ⏳ pending | not yet written | — |
+
+**Branch state:** all commits live on `worktree-wiggly-singing-pancake`. `master` is at `origin/master` (`7e9d99b1435d541286a773ca128be1a1931d6cc8`), untouched. No upstream configured; no PRs opened. To resume in a new session, see §11.
 
 ## 1. Problem
 
@@ -378,3 +392,34 @@ If COMPACT_HELPERS-style reduction continues to be neutral on build time at scal
 - PR 6 (per-entity packages) last, after all template-shrinking PRs (3, 4, 5).
 
 Per-PR implementation plans are written via the `writing-plans` skill **immediately before starting each PR**, not all upfront. This avoids pre-designing PRs whose requirements will shift based on prior PR measurements.
+
+## 11. Resuming in a new session
+
+A fresh session has the auto-loaded MEMORY index pointing at this spec. The minimal startup sequence:
+
+1. **Verify environment.** Confirm worktree is at `/var/home/smoothbrain/dev/matthewsreis/ent/.claude/worktrees/wiggly-singing-pancake`, branch is `worktree-wiggly-singing-pancake`, `master` is at `7e9d99b1435d541286a773ca128be1a1931d6cc8` (origin/master). No upstream should be configured.
+2. **Verify the epic is green.** Run `go test -count=1 ./entc/...` — every package should pass. Run `go test -count=1 -run 'TestBootstrap_Skip|TestFeatureNo|TestReadOnly|TestSnapshot' ./entc/... ./entc/internal/...` to confirm the headline regression tests from PRs 0-2 all pass.
+3. **Decide the next move.** Either run the consumer-scale bench (`go run ./cmd/bench-codegen -schema /path/to/service/ent/schema -label service-baseline -out /tmp/...`) to see how the shipped PR 0-2 work has landed in real numbers, OR proceed to write the PR 3 (predicate collapse) implementation plan via the `writing-plans` skill.
+4. **Stay local.** Per [[feedback-no-prs-until-end-of-epic]], no `git push`, no `gh pr create`, no `gs branch submit` / `gs stack submit` until every PR is built locally and bench numbers confirm DX + build-time wins.
+
+### Known artefacts that are NOT issues
+
+- Pre-existing uncommitted modifications in `entc/integration/privacy/ent/task/where.go`, `team/where.go`, `team_query.go`, `user/where.go`, `task_query.go`, `user_query.go`. These were already there when the worktree was created and are NOT from any epic PR. Ignore them or `git checkout --` them at session start if they create noise.
+
+### Recurring failure mode (3 incidents during PRs 0-2)
+
+Implementer subagents sometimes commit to `master` instead of `worktree-wiggly-singing-pancake` because they `cd` to the parent repo at `/var/home/smoothbrain/dev/matthewsreis/ent/` (which is on master). After every implementer subagent reports DONE, the controller has been verifying:
+
+```bash
+git rev-parse --abbrev-ref HEAD   # must be worktree-wiggly-singing-pancake
+git log -1 --oneline              # the new commit
+git rev-parse master              # must still be 7e9d99b1435d541286a773ca128be1a1931d6cc8
+```
+
+If the new commit landed on master, recover with:
+```bash
+git cherry-pick <wrong-master-sha>
+git update-ref refs/heads/master origin/master
+```
+
+Future implementer prompts should include explicit `pwd && git rev-parse --abbrev-ref HEAD` re-verification immediately before every `git commit`. Three of ~20 subagent dispatches hit this; the recovery is mechanical but should be expected.
