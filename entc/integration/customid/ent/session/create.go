@@ -140,8 +140,7 @@ func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeBytes))
 	)
 	_spec.OnConflict = _c.conflict
-	if rawID, ok := _c.mutation.ID(); ok {
-		id := rawID.(schema.ID)
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}

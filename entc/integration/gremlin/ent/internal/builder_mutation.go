@@ -17,7 +17,7 @@ import (
 )
 
 // BuilderMutation is an alias for entbuilder.Mutation parameterised by Builder.
-type BuilderMutation = entbuilder.Mutation[Builder]
+type BuilderMutation = entbuilder.Mutation[Builder, string]
 
 // BuilderMutationOption is a functional option for BuilderMutation.
 type BuilderMutationOption = func(*BuilderMutation)
@@ -32,7 +32,7 @@ var builderDescriptor = &entbuilder.Descriptor{
 
 // NewBuilderMutation creates a new mutation for the Builder entity.
 func NewBuilderMutation(c Config, op Op, opts ...BuilderMutationOption) *BuilderMutation {
-	return entbuilder.NewMutation[Builder](&c, op, builderDescriptor, opts...)
+	return entbuilder.NewMutation[Builder, string](&c, op, builderDescriptor, opts...)
 }
 
 // WithBuilderID sets the ID field and old-value loader of the mutation.

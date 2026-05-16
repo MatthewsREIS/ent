@@ -210,7 +210,7 @@ func TestDeletion(t *testing.T) {
 			if !ok {
 				return nil, fmt.Errorf("missing id")
 			}
-			ent.NewCardClient(*m.Config.(*ent.Config)).Delete().Where(card.HasOwnerWith(user.ID(id.(int)))).ExecX(ctx)
+			ent.NewCardClient(*m.Config.(*ent.Config)).Delete().Where(card.HasOwnerWith(user.ID(id))).ExecX(ctx)
 			return next.Mutate(ctx, m)
 		})
 	})

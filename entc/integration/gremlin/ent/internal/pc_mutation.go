@@ -17,7 +17,7 @@ import (
 )
 
 // PCMutation is an alias for entbuilder.Mutation parameterised by PC.
-type PCMutation = entbuilder.Mutation[PC]
+type PCMutation = entbuilder.Mutation[PC, string]
 
 // PCMutationOption is a functional option for PCMutation.
 type PCMutationOption = func(*PCMutation)
@@ -32,7 +32,7 @@ var pcDescriptor = &entbuilder.Descriptor{
 
 // NewPCMutation creates a new mutation for the PC entity.
 func NewPCMutation(c Config, op Op, opts ...PCMutationOption) *PCMutation {
-	return entbuilder.NewMutation[PC](&c, op, pcDescriptor, opts...)
+	return entbuilder.NewMutation[PC, string](&c, op, pcDescriptor, opts...)
 }
 
 // WithPCID sets the ID field and old-value loader of the mutation.

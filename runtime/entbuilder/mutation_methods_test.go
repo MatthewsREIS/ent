@@ -28,7 +28,7 @@ func edgeTestDescriptor() *entbuilder.Descriptor {
 }
 
 func TestMutation_AddEdgeIDs_M2M(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, edgeTestDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, edgeTestDescriptor())
 	require.NoError(t, m.AddEdgeIDs("teams", 1, 2, 3))
 	ids := m.EdgeIDs("teams")
 	require.ElementsMatch(t, []any{1, 2, 3}, ids)
@@ -38,7 +38,7 @@ func TestMutation_AddEdgeIDs_M2M(t *testing.T) {
 }
 
 func TestMutation_RemoveEdgeIDs_M2M(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, edgeTestDescriptor())
 	require.NoError(t, m.AddEdgeIDs("teams", 1, 2, 3))
 	require.NoError(t, m.RemoveEdgeIDs("teams", 2))
 	require.ElementsMatch(t, []any{1, 3}, m.EdgeIDs("teams"))
@@ -48,13 +48,13 @@ func TestMutation_RemoveEdgeIDs_M2M(t *testing.T) {
 }
 
 func TestMutation_RemoveEdgeIDs_UniqueErrors(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, edgeTestDescriptor())
 	require.NoError(t, m.SetEdgeID("owner", 99))
 	require.Error(t, m.RemoveEdgeIDs("owner", 99)) // not allowed on unique edges
 }
 
 func TestMutation_SetEdgeID_Unique(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, edgeTestDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, edgeTestDescriptor())
 	require.NoError(t, m.SetEdgeID("owner", 7))
 	id, ok := m.EdgeID("owner")
 	require.True(t, ok)
@@ -64,19 +64,19 @@ func TestMutation_SetEdgeID_Unique(t *testing.T) {
 }
 
 func TestMutation_ClearEdge(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, edgeTestDescriptor())
 	require.NoError(t, m.ClearEdge("owner"))
 	require.True(t, m.EdgeCleared("owner"))
 	require.ElementsMatch(t, []string{"owner"}, m.ClearedEdges())
 }
 
 func TestMutation_ClearEdge_UnknownErrors(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, edgeTestDescriptor())
 	require.Error(t, m.ClearEdge("nope"))
 }
 
 func TestMutation_ResetEdge_M2M(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, edgeTestDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, edgeTestDescriptor())
 	require.NoError(t, m.AddEdgeIDs("teams", 1, 2))
 	require.NoError(t, m.RemoveEdgeIDs("teams", 1))
 	require.NoError(t, m.ClearEdge("teams"))
@@ -87,12 +87,12 @@ func TestMutation_ResetEdge_M2M(t *testing.T) {
 }
 
 func TestMutation_AddEdgeIDs_TypeMismatch(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, edgeTestDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, edgeTestDescriptor())
 	require.Error(t, m.AddEdgeIDs("teams", "not-an-int")) // string into int-keyed edge
 }
 
 func TestMutation_IDRoundTrip(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, testDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, testDescriptor())
 	_, ok := m.ID()
 	require.False(t, ok)
 	m.SetID(42)
@@ -101,8 +101,24 @@ func TestMutation_IDRoundTrip(t *testing.T) {
 	require.Equal(t, 42, id)
 }
 
+// TestMutation_IDTypedReturn pins the static type of m.ID() to the second
+// type parameter I, so per-entity mutations preserve the typed ID accessor
+// that consumer hooks rely on (e.g. `id, _ := m.ID()` where id is uuid.UUID).
+func TestMutation_IDTypedReturn(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, testDescriptor())
+	m.SetID(42)
+	id, ok := m.ID()
+	require.True(t, ok)
+	// Static type check: this line compiles only when m.ID() returns int.
+	// If the second type param is dropped or ID() reverts to (any, bool),
+	// the assignment fails the build — which is exactly the regression we
+	// are guarding against.
+	var typed int = id
+	require.Equal(t, 42, typed)
+}
+
 func TestMutation_IDs_RejectsNonUpdateDelete(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, testDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, testDescriptor())
 	_, err := m.IDs(context.Background())
 	require.Error(t, err)
 }
@@ -112,7 +128,7 @@ func TestMutation_IDs_UsesIDsFunc(t *testing.T) {
 	desc.IDsFn = func(ctx context.Context, c any, preds ...func(*sql.Selector)) ([]any, error) {
 		return []any{1, 2, 3}, nil
 	}
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, desc)
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, desc)
 	m.SetIDsFunc(func(ctx context.Context, preds ...func(*sql.Selector)) ([]any, error) {
 		return desc.IDsFn(ctx, nil, preds...)
 	})
@@ -122,7 +138,7 @@ func TestMutation_IDs_UsesIDsFunc(t *testing.T) {
 }
 
 func TestMutation_WhereP(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, testDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, testDescriptor())
 	p1 := func(s *sql.Selector) { s.Where(sql.EQ("id", 1)) }
 	p2 := func(s *sql.Selector) { s.Where(sql.False()) }
 	m.WhereP(p1, p2)
@@ -130,7 +146,7 @@ func TestMutation_WhereP(t *testing.T) {
 }
 
 func TestMutation_AddPredicate(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, testDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, testDescriptor())
 	m.AddPredicate(func(s *sql.Selector) {})
 	require.Len(t, m.MutationPredicates(), 1)
 }
@@ -147,7 +163,7 @@ func appendDescriptor() *entbuilder.Descriptor {
 }
 
 func TestMutation_AppendField_RoundTrip(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, appendDescriptor())
 	want := []string{"a", "b"}
 	require.NoError(t, m.AppendField("tags", want))
 	got, ok := m.AppendedField("tags")
@@ -156,19 +172,19 @@ func TestMutation_AppendField_RoundTrip(t *testing.T) {
 }
 
 func TestMutation_AppendedField_Unset(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, appendDescriptor())
 	v, ok := m.AppendedField("tags")
 	require.False(t, ok)
 	require.Nil(t, v)
 }
 
 func TestMutation_AppendField_UnknownField_Errors(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, appendDescriptor())
 	require.Error(t, m.AppendField("nonexistent", []string{"x"}))
 }
 
 func TestMutation_AppendField_TypeMismatch_Errors(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, appendDescriptor())
 	// []int is not []string
 	err := m.AppendField("tags", []int{1, 2})
 	require.Error(t, err)
@@ -176,7 +192,7 @@ func TestMutation_AppendField_TypeMismatch_Errors(t *testing.T) {
 }
 
 func TestMutation_ResetField_ClearsAppended(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdate, appendDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, appendDescriptor())
 	require.NoError(t, m.AppendField("tags", []string{"x"}))
 	_, ok := m.AppendedField("tags")
 	require.True(t, ok)
@@ -186,4 +202,4 @@ func TestMutation_ResetField_ClearsAppended(t *testing.T) {
 }
 
 // Compile-time check; will fail to compile if interface drifts.
-var _ ent.Mutation = (*entbuilder.Mutation[testEntity])(nil)
+var _ ent.Mutation = (*entbuilder.Mutation[testEntity, int])(nil)

@@ -19,7 +19,7 @@ import (
 )
 
 // InfoMutation is an alias for entbuilder.Mutation parameterised by Info.
-type InfoMutation = entbuilder.Mutation[Info]
+type InfoMutation = entbuilder.Mutation[Info, int]
 
 // InfoMutationOption is a functional option for InfoMutation.
 type InfoMutationOption = func(*InfoMutation)
@@ -45,7 +45,7 @@ var infoDescriptor = &entbuilder.Descriptor{
 
 // NewInfoMutation creates a new mutation for the Info entity.
 func NewInfoMutation(c Config, op Op, opts ...InfoMutationOption) *InfoMutation {
-	return entbuilder.NewMutation[Info](&c, op, infoDescriptor, opts...)
+	return entbuilder.NewMutation[Info, int](&c, op, infoDescriptor, opts...)
 }
 
 // WithInfoID sets the ID field and old-value loader of the mutation.

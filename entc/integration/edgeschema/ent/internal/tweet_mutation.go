@@ -18,7 +18,7 @@ import (
 )
 
 // TweetMutation is an alias for entbuilder.Mutation parameterised by Tweet.
-type TweetMutation = entbuilder.Mutation[Tweet]
+type TweetMutation = entbuilder.Mutation[Tweet, int]
 
 // TweetMutationOption is a functional option for TweetMutation.
 type TweetMutationOption = func(*TweetMutation)
@@ -69,7 +69,7 @@ var tweetDescriptor = &entbuilder.Descriptor{
 
 // NewTweetMutation creates a new mutation for the Tweet entity.
 func NewTweetMutation(c Config, op Op, opts ...TweetMutationOption) *TweetMutation {
-	return entbuilder.NewMutation[Tweet](&c, op, tweetDescriptor, opts...)
+	return entbuilder.NewMutation[Tweet, int](&c, op, tweetDescriptor, opts...)
 }
 
 // WithTweetID sets the ID field and old-value loader of the mutation.

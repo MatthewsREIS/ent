@@ -17,7 +17,7 @@ import (
 )
 
 // ItemMutation is an alias for entbuilder.Mutation parameterised by Item.
-type ItemMutation = entbuilder.Mutation[Item]
+type ItemMutation = entbuilder.Mutation[Item, string]
 
 // ItemMutationOption is a functional option for ItemMutation.
 type ItemMutationOption = func(*ItemMutation)
@@ -38,7 +38,7 @@ var itemDescriptor = &entbuilder.Descriptor{
 
 // NewItemMutation creates a new mutation for the Item entity.
 func NewItemMutation(c Config, op Op, opts ...ItemMutationOption) *ItemMutation {
-	return entbuilder.NewMutation[Item](&c, op, itemDescriptor, opts...)
+	return entbuilder.NewMutation[Item, string](&c, op, itemDescriptor, opts...)
 }
 
 // WithItemID sets the ID field and old-value loader of the mutation.

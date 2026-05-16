@@ -17,7 +17,7 @@ import (
 )
 
 // RevisionMutation is an alias for entbuilder.Mutation parameterised by Revision.
-type RevisionMutation = entbuilder.Mutation[Revision]
+type RevisionMutation = entbuilder.Mutation[Revision, string]
 
 // RevisionMutationOption is a functional option for RevisionMutation.
 type RevisionMutationOption = func(*RevisionMutation)
@@ -32,7 +32,7 @@ var revisionDescriptor = &entbuilder.Descriptor{
 
 // NewRevisionMutation creates a new mutation for the Revision entity.
 func NewRevisionMutation(c Config, op Op, opts ...RevisionMutationOption) *RevisionMutation {
-	return entbuilder.NewMutation[Revision](&c, op, revisionDescriptor, opts...)
+	return entbuilder.NewMutation[Revision, string](&c, op, revisionDescriptor, opts...)
 }
 
 // WithRevisionID sets the ID field and old-value loader of the mutation.

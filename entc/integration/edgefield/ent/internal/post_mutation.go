@@ -17,7 +17,7 @@ import (
 )
 
 // PostMutation is an alias for entbuilder.Mutation parameterised by Post.
-type PostMutation = entbuilder.Mutation[Post]
+type PostMutation = entbuilder.Mutation[Post, int]
 
 // PostMutationOption is a functional option for PostMutation.
 type PostMutationOption = func(*PostMutation)
@@ -43,7 +43,7 @@ var postDescriptor = &entbuilder.Descriptor{
 
 // NewPostMutation creates a new mutation for the Post entity.
 func NewPostMutation(c Config, op Op, opts ...PostMutationOption) *PostMutation {
-	return entbuilder.NewMutation[Post](&c, op, postDescriptor, opts...)
+	return entbuilder.NewMutation[Post, int](&c, op, postDescriptor, opts...)
 }
 
 // WithPostID sets the ID field and old-value loader of the mutation.

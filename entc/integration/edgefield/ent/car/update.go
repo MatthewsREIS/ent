@@ -16,7 +16,6 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // CarUpdate is the builder for updating Car entities.
@@ -277,11 +276,10 @@ func (_u *CarUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	idAny, ok := _u.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Car.id" for update`)}
 	}
-	id := idAny.(uuid.UUID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

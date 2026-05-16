@@ -17,7 +17,7 @@ import (
 )
 
 // GoodsMutation is an alias for entbuilder.Mutation parameterised by Goods.
-type GoodsMutation = entbuilder.Mutation[Goods]
+type GoodsMutation = entbuilder.Mutation[Goods, int]
 
 // GoodsMutationOption is a functional option for GoodsMutation.
 type GoodsMutationOption = func(*GoodsMutation)
@@ -32,7 +32,7 @@ var goodsDescriptor = &entbuilder.Descriptor{
 
 // NewGoodsMutation creates a new mutation for the Goods entity.
 func NewGoodsMutation(c Config, op Op, opts ...GoodsMutationOption) *GoodsMutation {
-	return entbuilder.NewMutation[Goods](&c, op, goodsDescriptor, opts...)
+	return entbuilder.NewMutation[Goods, int](&c, op, goodsDescriptor, opts...)
 }
 
 // WithGoodsID sets the ID field and old-value loader of the mutation.

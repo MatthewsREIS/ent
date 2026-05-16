@@ -18,7 +18,7 @@ import (
 )
 
 // RoleMutation is an alias for entbuilder.Mutation parameterised by Role.
-type RoleMutation = entbuilder.Mutation[Role]
+type RoleMutation = entbuilder.Mutation[Role, int]
 
 // RoleMutationOption is a functional option for RoleMutation.
 type RoleMutationOption = func(*RoleMutation)
@@ -49,7 +49,7 @@ var roleDescriptor = &entbuilder.Descriptor{
 
 // NewRoleMutation creates a new mutation for the Role entity.
 func NewRoleMutation(c Config, op Op, opts ...RoleMutationOption) *RoleMutation {
-	return entbuilder.NewMutation[Role](&c, op, roleDescriptor, opts...)
+	return entbuilder.NewMutation[Role, int](&c, op, roleDescriptor, opts...)
 }
 
 // WithRoleID sets the ID field and old-value loader of the mutation.

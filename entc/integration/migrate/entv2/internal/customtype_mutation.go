@@ -18,7 +18,7 @@ import (
 )
 
 // CustomTypeMutation is an alias for entbuilder.Mutation parameterised by CustomType.
-type CustomTypeMutation = entbuilder.Mutation[CustomType]
+type CustomTypeMutation = entbuilder.Mutation[CustomType, int]
 
 // CustomTypeMutationOption is a functional option for CustomTypeMutation.
 type CustomTypeMutationOption = func(*CustomTypeMutation)
@@ -49,7 +49,7 @@ var customtypeDescriptor = &entbuilder.Descriptor{
 
 // NewCustomTypeMutation creates a new mutation for the CustomType entity.
 func NewCustomTypeMutation(c Config, op Op, opts ...CustomTypeMutationOption) *CustomTypeMutation {
-	return entbuilder.NewMutation[CustomType](&c, op, customtypeDescriptor, opts...)
+	return entbuilder.NewMutation[CustomType, int](&c, op, customtypeDescriptor, opts...)
 }
 
 // WithCustomTypeID sets the ID field and old-value loader of the mutation.

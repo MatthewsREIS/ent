@@ -17,7 +17,7 @@ import (
 )
 
 // GroupTagMutation is an alias for entbuilder.Mutation parameterised by GroupTag.
-type GroupTagMutation = entbuilder.Mutation[GroupTag]
+type GroupTagMutation = entbuilder.Mutation[GroupTag, int]
 
 // GroupTagMutationOption is a functional option for GroupTagMutation.
 type GroupTagMutationOption = func(*GroupTagMutation)
@@ -43,7 +43,7 @@ var grouptagDescriptor = &entbuilder.Descriptor{
 
 // NewGroupTagMutation creates a new mutation for the GroupTag entity.
 func NewGroupTagMutation(c Config, op Op, opts ...GroupTagMutationOption) *GroupTagMutation {
-	return entbuilder.NewMutation[GroupTag](&c, op, grouptagDescriptor, opts...)
+	return entbuilder.NewMutation[GroupTag, int](&c, op, grouptagDescriptor, opts...)
 }
 
 // WithGroupTagID sets the ID field and old-value loader of the mutation.

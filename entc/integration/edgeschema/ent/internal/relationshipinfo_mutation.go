@@ -17,7 +17,7 @@ import (
 )
 
 // RelationshipInfoMutation is an alias for entbuilder.Mutation parameterised by RelationshipInfo.
-type RelationshipInfoMutation = entbuilder.Mutation[RelationshipInfo]
+type RelationshipInfoMutation = entbuilder.Mutation[RelationshipInfo, int]
 
 // RelationshipInfoMutationOption is a functional option for RelationshipInfoMutation.
 type RelationshipInfoMutationOption = func(*RelationshipInfoMutation)
@@ -37,7 +37,7 @@ var relationshipinfoDescriptor = &entbuilder.Descriptor{
 
 // NewRelationshipInfoMutation creates a new mutation for the RelationshipInfo entity.
 func NewRelationshipInfoMutation(c Config, op Op, opts ...RelationshipInfoMutationOption) *RelationshipInfoMutation {
-	return entbuilder.NewMutation[RelationshipInfo](&c, op, relationshipinfoDescriptor, opts...)
+	return entbuilder.NewMutation[RelationshipInfo, int](&c, op, relationshipinfoDescriptor, opts...)
 }
 
 // WithRelationshipInfoID sets the ID field and old-value loader of the mutation.

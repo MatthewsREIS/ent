@@ -300,11 +300,10 @@ func (_u *DeviceUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *DeviceUpdateOne) sqlSave(ctx context.Context) (_node *Device, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeBytes))
-	idAny, ok := _u.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Device.id" for update`)}
 	}
-	id := idAny.(schema.ID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

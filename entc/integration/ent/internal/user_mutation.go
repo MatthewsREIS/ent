@@ -17,7 +17,7 @@ import (
 )
 
 // UserMutation is an alias for entbuilder.Mutation parameterised by User.
-type UserMutation = entbuilder.Mutation[User]
+type UserMutation = entbuilder.Mutation[User, int]
 
 // UserMutationOption is a functional option for UserMutation.
 type UserMutationOption = func(*UserMutation)
@@ -149,7 +149,7 @@ var userDescriptor = &entbuilder.Descriptor{
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {
-	return entbuilder.NewMutation[User](&c, op, userDescriptor, opts...)
+	return entbuilder.NewMutation[User, int](&c, op, userDescriptor, opts...)
 }
 
 // WithUserID sets the ID field and old-value loader of the mutation.

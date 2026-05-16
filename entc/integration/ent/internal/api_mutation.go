@@ -17,7 +17,7 @@ import (
 )
 
 // APIMutation is an alias for entbuilder.Mutation parameterised by Api.
-type APIMutation = entbuilder.Mutation[Api]
+type APIMutation = entbuilder.Mutation[Api, int]
 
 // APIMutationOption is a functional option for APIMutation.
 type APIMutationOption = func(*APIMutation)
@@ -32,7 +32,7 @@ var apiDescriptor = &entbuilder.Descriptor{
 
 // NewAPIMutation creates a new mutation for the Api entity.
 func NewAPIMutation(c Config, op Op, opts ...APIMutationOption) *APIMutation {
-	return entbuilder.NewMutation[Api](&c, op, apiDescriptor, opts...)
+	return entbuilder.NewMutation[Api, int](&c, op, apiDescriptor, opts...)
 }
 
 // WithApiID sets the ID field and old-value loader of the mutation.

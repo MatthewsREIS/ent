@@ -17,7 +17,7 @@ import (
 )
 
 // NodeMutation is an alias for entbuilder.Mutation parameterised by Node.
-type NodeMutation = entbuilder.Mutation[Node]
+type NodeMutation = entbuilder.Mutation[Node, int]
 
 // NodeMutationOption is a functional option for NodeMutation.
 type NodeMutationOption = func(*NodeMutation)
@@ -50,7 +50,7 @@ var nodeDescriptor = &entbuilder.Descriptor{
 
 // NewNodeMutation creates a new mutation for the Node entity.
 func NewNodeMutation(c Config, op Op, opts ...NodeMutationOption) *NodeMutation {
-	return entbuilder.NewMutation[Node](&c, op, nodeDescriptor, opts...)
+	return entbuilder.NewMutation[Node, int](&c, op, nodeDescriptor, opts...)
 }
 
 // WithNodeID sets the ID field and old-value loader of the mutation.

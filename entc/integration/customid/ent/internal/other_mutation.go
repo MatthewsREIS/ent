@@ -18,7 +18,7 @@ import (
 )
 
 // OtherMutation is an alias for entbuilder.Mutation parameterised by Other.
-type OtherMutation = entbuilder.Mutation[Other]
+type OtherMutation = entbuilder.Mutation[Other, sid.ID]
 
 // OtherMutationOption is a functional option for OtherMutation.
 type OtherMutationOption = func(*OtherMutation)
@@ -33,7 +33,7 @@ var otherDescriptor = &entbuilder.Descriptor{
 
 // NewOtherMutation creates a new mutation for the Other entity.
 func NewOtherMutation(c Config, op Op, opts ...OtherMutationOption) *OtherMutation {
-	return entbuilder.NewMutation[Other](&c, op, otherDescriptor, opts...)
+	return entbuilder.NewMutation[Other, sid.ID](&c, op, otherDescriptor, opts...)
 }
 
 // WithOtherID sets the ID field and old-value loader of the mutation.

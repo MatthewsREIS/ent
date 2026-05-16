@@ -135,8 +135,7 @@ func (_c *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = _c.conflict
-	if rawID, ok := _c.mutation.ID(); ok {
-		id := rawID.(uuidc.UUIDC)
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}

@@ -138,7 +138,7 @@ func DenyIfStatusChangedByOther() privacy.MutationRule {
 		if !ok {
 			return fmt.Errorf("missing task id")
 		}
-		owner, err := ent.NewUserClient(*m.Config.(*ent.Config)).Query().Where(user.HasTasksWith(task.ID(id.(int)))).Only(ctx)
+		owner, err := ent.NewUserClient(*m.Config.(*ent.Config)).Query().Where(user.HasTasksWith(task.ID(id))).Only(ctx)
 		if err != nil {
 			return err
 		}
@@ -171,7 +171,7 @@ func AllowIfViewerInTheSameTeam() privacy.MutationRule {
 		// does not belong to the task namespace/team.
 		if _, err = ent.NewTaskClient(*m.Config.(*ent.Config)).Query().
 			Where(
-				task.ID(id.(int)),
+				task.ID(id),
 				task.HasTeamsWith(team.NameIn(teams...)),
 			).
 			Only(ctx); err != nil {

@@ -17,7 +17,7 @@ import (
 )
 
 // ParentMutation is an alias for entbuilder.Mutation parameterised by Parent.
-type ParentMutation = entbuilder.Mutation[Parent]
+type ParentMutation = entbuilder.Mutation[Parent, int]
 
 // ParentMutationOption is a functional option for ParentMutation.
 type ParentMutationOption = func(*ParentMutation)
@@ -48,7 +48,7 @@ var parentDescriptor = &entbuilder.Descriptor{
 
 // NewParentMutation creates a new mutation for the Parent entity.
 func NewParentMutation(c Config, op Op, opts ...ParentMutationOption) *ParentMutation {
-	return entbuilder.NewMutation[Parent](&c, op, parentDescriptor, opts...)
+	return entbuilder.NewMutation[Parent, int](&c, op, parentDescriptor, opts...)
 }
 
 // WithParentID sets the ID field and old-value loader of the mutation.

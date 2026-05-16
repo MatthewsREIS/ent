@@ -427,11 +427,10 @@ func (_u *DocUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *DocUpdateOne) sqlSave(ctx context.Context) (_node *Doc, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
-	idAny, ok := _u.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Doc.id" for update`)}
 	}
-	id := idAny.(schema.DocID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

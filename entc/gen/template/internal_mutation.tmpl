@@ -38,8 +38,13 @@ import (
 {{ $n := $ }}
 {{ $mutation := $n.MutationName }}
 
+{{- /* IDType: the second type parameter on entbuilder.Mutation[T, I]. For
+       single-ID entities this is the schema-declared ID type so m.ID()
+       returns the typed value (uuid.UUID, int, etc.). Entities without a
+       single-field ID fall back to `any`, matching the pre-typed-I behavior. */ -}}
+
 // {{ $mutation }} is an alias for entbuilder.Mutation parameterised by {{ $n.Name }}.
-type {{ $mutation }} = entbuilder.Mutation[{{ $n.Name }}]
+type {{ $mutation }} = entbuilder.Mutation[{{ $n.Name }}, {{ if $n.HasOneFieldID }}{{ $n.ID.Type }}{{ else }}any{{ end }}]
 
 // {{ $mutation }}Option is a functional option for {{ $mutation }}.
 type {{ $mutation }}Option = func(*{{ $mutation }})
@@ -85,7 +90,7 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 
 // New{{ $mutation }} creates a new mutation for the {{ $n.Name }} entity.
 func New{{ $mutation }}(c Config, op Op, opts ...{{ $mutation }}Option) *{{ $mutation }} {
-	return entbuilder.NewMutation[{{ $n.Name }}](&c, op, {{ $n.Package }}Descriptor, opts...)
+	return entbuilder.NewMutation[{{ $n.Name }}, {{ if $n.HasOneFieldID }}{{ $n.ID.Type }}{{ else }}any{{ end }}](&c, op, {{ $n.Package }}Descriptor, opts...)
 }
 
 {{ with $n.HasOneFieldID }}

@@ -15,7 +15,7 @@ import (
 )
 
 func TestGetField_Set(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, testDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, testDescriptor())
 	require.NoError(t, m.SetField("title", "hello"))
 	v, ok := entbuilder.GetField[string](m, "title")
 	require.True(t, ok)
@@ -23,7 +23,7 @@ func TestGetField_Set(t *testing.T) {
 }
 
 func TestGetField_Unset(t *testing.T) {
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, testDescriptor())
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, testDescriptor())
 	v, ok := entbuilder.GetField[string](m, "title")
 	require.False(t, ok)
 	require.Equal(t, "", v)
@@ -31,7 +31,7 @@ func TestGetField_Unset(t *testing.T) {
 
 func TestOldFieldAs(t *testing.T) {
 	desc := testDescriptor()
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpUpdateOne, desc)
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdateOne, desc)
 	m.SetID(7)
 	m.SetOldValueLoader(func(ctx context.Context) (any, error) {
 		return &testEntity{ID: 7, Title: "old"}, nil
@@ -49,7 +49,7 @@ func TestEdgeIDsAs(t *testing.T) {
 			"teams": {Cardinality: entbuilder.M2M, TargetIDType: reflect.TypeFor[int]()},
 		},
 	}
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, desc)
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, desc)
 	require.NoError(t, m.AddEdgeIDs("teams", 1, 2, 3))
 	ids := entbuilder.EdgeIDsAs[int](m, "teams")
 	require.ElementsMatch(t, []int{1, 2, 3}, ids)
@@ -63,7 +63,7 @@ func TestEdgeIDAs(t *testing.T) {
 			"owner": {Cardinality: entbuilder.O2OUnique, TargetIDType: reflect.TypeFor[int]()},
 		},
 	}
-	m := entbuilder.NewMutation[testEntity](nil, ent.OpCreate, desc)
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, desc)
 	require.NoError(t, m.SetEdgeID("owner", 99))
 	id, ok := entbuilder.EdgeIDAs[int](m, "owner")
 	require.True(t, ok)

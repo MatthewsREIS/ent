@@ -17,7 +17,7 @@ import (
 )
 
 // BlogMutation is an alias for entbuilder.Mutation parameterised by Blog.
-type BlogMutation = entbuilder.Mutation[Blog]
+type BlogMutation = entbuilder.Mutation[Blog, int]
 
 // BlogMutationOption is a functional option for BlogMutation.
 type BlogMutationOption = func(*BlogMutation)
@@ -44,7 +44,7 @@ var blogDescriptor = &entbuilder.Descriptor{
 
 // NewBlogMutation creates a new mutation for the Blog entity.
 func NewBlogMutation(c Config, op Op, opts ...BlogMutationOption) *BlogMutation {
-	return entbuilder.NewMutation[Blog](&c, op, blogDescriptor, opts...)
+	return entbuilder.NewMutation[Blog, int](&c, op, blogDescriptor, opts...)
 }
 
 // WithBlogID sets the ID field and old-value loader of the mutation.

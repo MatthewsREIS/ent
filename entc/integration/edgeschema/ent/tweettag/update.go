@@ -17,7 +17,6 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // TweetTagUpdate is the builder for updating TweetTag entities.
@@ -348,11 +347,10 @@ func (_u *TweetTagUpdateOne) sqlSave(ctx context.Context) (_node *TweetTag, err 
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	idAny, ok := _u.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "TweetTag.id" for update`)}
 	}
-	id := idAny.(uuid.UUID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

@@ -17,7 +17,7 @@ import (
 )
 
 // MetadataMutation is an alias for entbuilder.Mutation parameterised by Metadata.
-type MetadataMutation = entbuilder.Mutation[Metadata]
+type MetadataMutation = entbuilder.Mutation[Metadata, int]
 
 // MetadataMutationOption is a functional option for MetadataMutation.
 type MetadataMutationOption = func(*MetadataMutation)
@@ -56,7 +56,7 @@ var metadataDescriptor = &entbuilder.Descriptor{
 
 // NewMetadataMutation creates a new mutation for the Metadata entity.
 func NewMetadataMutation(c Config, op Op, opts ...MetadataMutationOption) *MetadataMutation {
-	return entbuilder.NewMutation[Metadata](&c, op, metadataDescriptor, opts...)
+	return entbuilder.NewMutation[Metadata, int](&c, op, metadataDescriptor, opts...)
 }
 
 // WithMetadataID sets the ID field and old-value loader of the mutation.

@@ -18,7 +18,7 @@ import (
 )
 
 // FriendshipMutation is an alias for entbuilder.Mutation parameterised by Friendship.
-type FriendshipMutation = entbuilder.Mutation[Friendship]
+type FriendshipMutation = entbuilder.Mutation[Friendship, int]
 
 // FriendshipMutationOption is a functional option for FriendshipMutation.
 type FriendshipMutationOption = func(*FriendshipMutation)
@@ -54,7 +54,7 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 
 // NewFriendshipMutation creates a new mutation for the Friendship entity.
 func NewFriendshipMutation(c Config, op Op, opts ...FriendshipMutationOption) *FriendshipMutation {
-	return entbuilder.NewMutation[Friendship](&c, op, friendshipDescriptor, opts...)
+	return entbuilder.NewMutation[Friendship, int](&c, op, friendshipDescriptor, opts...)
 }
 
 // WithFriendshipID sets the ID field and old-value loader of the mutation.

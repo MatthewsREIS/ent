@@ -18,7 +18,7 @@ import (
 )
 
 // CardMutation is an alias for entbuilder.Mutation parameterised by Card.
-type CardMutation = entbuilder.Mutation[Card]
+type CardMutation = entbuilder.Mutation[Card, int]
 
 // CardMutationOption is a functional option for CardMutation.
 type CardMutationOption = func(*CardMutation)
@@ -63,7 +63,7 @@ var cardDescriptor = &entbuilder.Descriptor{
 
 // NewCardMutation creates a new mutation for the Card entity.
 func NewCardMutation(c Config, op Op, opts ...CardMutationOption) *CardMutation {
-	return entbuilder.NewMutation[Card](&c, op, cardDescriptor, opts...)
+	return entbuilder.NewMutation[Card, int](&c, op, cardDescriptor, opts...)
 }
 
 // WithCardID sets the ID field and old-value loader of the mutation.

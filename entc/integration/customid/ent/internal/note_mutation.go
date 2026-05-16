@@ -18,7 +18,7 @@ import (
 )
 
 // NoteMutation is an alias for entbuilder.Mutation parameterised by Note.
-type NoteMutation = entbuilder.Mutation[Note]
+type NoteMutation = entbuilder.Mutation[Note, schema.NoteID]
 
 // NoteMutationOption is a functional option for NoteMutation.
 type NoteMutationOption = func(*NoteMutation)
@@ -51,7 +51,7 @@ var noteDescriptor = &entbuilder.Descriptor{
 
 // NewNoteMutation creates a new mutation for the Note entity.
 func NewNoteMutation(c Config, op Op, opts ...NoteMutationOption) *NoteMutation {
-	return entbuilder.NewMutation[Note](&c, op, noteDescriptor, opts...)
+	return entbuilder.NewMutation[Note, schema.NoteID](&c, op, noteDescriptor, opts...)
 }
 
 // WithNoteID sets the ID field and old-value loader of the mutation.

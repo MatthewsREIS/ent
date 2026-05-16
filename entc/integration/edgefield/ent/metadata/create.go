@@ -156,8 +156,7 @@ func (_c *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 		_node = &Metadata{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if rawID, ok := _c.mutation.ID(); ok {
-		id := rawID.(int)
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}

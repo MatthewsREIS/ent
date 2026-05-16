@@ -17,7 +17,7 @@ import (
 )
 
 // CarMutation is an alias for entbuilder.Mutation parameterised by Car.
-type CarMutation = entbuilder.Mutation[Car]
+type CarMutation = entbuilder.Mutation[Car, int]
 
 // CarMutationOption is a functional option for CarMutation.
 type CarMutationOption = func(*CarMutation)
@@ -56,7 +56,7 @@ var carDescriptor = &entbuilder.Descriptor{
 
 // NewCarMutation creates a new mutation for the Car entity.
 func NewCarMutation(c Config, op Op, opts ...CarMutationOption) *CarMutation {
-	return entbuilder.NewMutation[Car](&c, op, carDescriptor, opts...)
+	return entbuilder.NewMutation[Car, int](&c, op, carDescriptor, opts...)
 }
 
 // WithCarID sets the ID field and old-value loader of the mutation.

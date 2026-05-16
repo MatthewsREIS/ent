@@ -17,7 +17,7 @@ import (
 )
 
 // MediaMutation is an alias for entbuilder.Mutation parameterised by Media.
-type MediaMutation = entbuilder.Mutation[Media]
+type MediaMutation = entbuilder.Mutation[Media, int]
 
 // MediaMutationOption is a functional option for MediaMutation.
 type MediaMutationOption = func(*MediaMutation)
@@ -48,7 +48,7 @@ var mediaDescriptor = &entbuilder.Descriptor{
 
 // NewMediaMutation creates a new mutation for the Media entity.
 func NewMediaMutation(c Config, op Op, opts ...MediaMutationOption) *MediaMutation {
-	return entbuilder.NewMutation[Media](&c, op, mediaDescriptor, opts...)
+	return entbuilder.NewMutation[Media, int](&c, op, mediaDescriptor, opts...)
 }
 
 // WithMediaID sets the ID field and old-value loader of the mutation.

@@ -18,7 +18,7 @@ import (
 )
 
 // PetMutation is an alias for entbuilder.Mutation parameterised by Pet.
-type PetMutation = entbuilder.Mutation[Pet]
+type PetMutation = entbuilder.Mutation[Pet, int]
 
 // PetMutationOption is a functional option for PetMutation.
 type PetMutationOption = func(*PetMutation)
@@ -51,7 +51,7 @@ var petDescriptor = &entbuilder.Descriptor{
 
 // NewPetMutation creates a new mutation for the Pet entity.
 func NewPetMutation(c Config, op Op, opts ...PetMutationOption) *PetMutation {
-	return entbuilder.NewMutation[Pet](&c, op, petDescriptor, opts...)
+	return entbuilder.NewMutation[Pet, int](&c, op, petDescriptor, opts...)
 }
 
 // WithPetID sets the ID field and old-value loader of the mutation.

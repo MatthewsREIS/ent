@@ -18,7 +18,7 @@ import (
 )
 
 // AttachedFileMutation is an alias for entbuilder.Mutation parameterised by AttachedFile.
-type AttachedFileMutation = entbuilder.Mutation[AttachedFile]
+type AttachedFileMutation = entbuilder.Mutation[AttachedFile, int]
 
 // AttachedFileMutationOption is a functional option for AttachedFileMutation.
 type AttachedFileMutationOption = func(*AttachedFileMutation)
@@ -49,7 +49,7 @@ var attachedfileDescriptor = &entbuilder.Descriptor{
 
 // NewAttachedFileMutation creates a new mutation for the AttachedFile entity.
 func NewAttachedFileMutation(c Config, op Op, opts ...AttachedFileMutationOption) *AttachedFileMutation {
-	return entbuilder.NewMutation[AttachedFile](&c, op, attachedfileDescriptor, opts...)
+	return entbuilder.NewMutation[AttachedFile, int](&c, op, attachedfileDescriptor, opts...)
 }
 
 // WithAttachedFileID sets the ID field and old-value loader of the mutation.

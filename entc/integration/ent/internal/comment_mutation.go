@@ -18,7 +18,7 @@ import (
 )
 
 // CommentMutation is an alias for entbuilder.Mutation parameterised by Comment.
-type CommentMutation = entbuilder.Mutation[Comment]
+type CommentMutation = entbuilder.Mutation[Comment, int]
 
 // CommentMutationOption is a functional option for CommentMutation.
 type CommentMutationOption = func(*CommentMutation)
@@ -65,7 +65,7 @@ var commentDescriptor = &entbuilder.Descriptor{
 
 // NewCommentMutation creates a new mutation for the Comment entity.
 func NewCommentMutation(c Config, op Op, opts ...CommentMutationOption) *CommentMutation {
-	return entbuilder.NewMutation[Comment](&c, op, commentDescriptor, opts...)
+	return entbuilder.NewMutation[Comment, int](&c, op, commentDescriptor, opts...)
 }
 
 // WithCommentID sets the ID field and old-value loader of the mutation.

@@ -17,7 +17,7 @@ import (
 )
 
 // TeamMutation is an alias for entbuilder.Mutation parameterised by Team.
-type TeamMutation = entbuilder.Mutation[Team]
+type TeamMutation = entbuilder.Mutation[Team, int]
 
 // TeamMutationOption is a functional option for TeamMutation.
 type TeamMutationOption = func(*TeamMutation)
@@ -50,7 +50,7 @@ var teamDescriptor = &entbuilder.Descriptor{
 
 // NewTeamMutation creates a new mutation for the Team entity.
 func NewTeamMutation(c Config, op Op, opts ...TeamMutationOption) *TeamMutation {
-	return entbuilder.NewMutation[Team](&c, op, teamDescriptor, opts...)
+	return entbuilder.NewMutation[Team, int](&c, op, teamDescriptor, opts...)
 }
 
 // WithTeamID sets the ID field and old-value loader of the mutation.

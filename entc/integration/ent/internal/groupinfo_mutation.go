@@ -17,7 +17,7 @@ import (
 )
 
 // GroupInfoMutation is an alias for entbuilder.Mutation parameterised by GroupInfo.
-type GroupInfoMutation = entbuilder.Mutation[GroupInfo]
+type GroupInfoMutation = entbuilder.Mutation[GroupInfo, int]
 
 // GroupInfoMutationOption is a functional option for GroupInfoMutation.
 type GroupInfoMutationOption = func(*GroupInfoMutation)
@@ -49,7 +49,7 @@ var groupinfoDescriptor = &entbuilder.Descriptor{
 
 // NewGroupInfoMutation creates a new mutation for the GroupInfo entity.
 func NewGroupInfoMutation(c Config, op Op, opts ...GroupInfoMutationOption) *GroupInfoMutation {
-	return entbuilder.NewMutation[GroupInfo](&c, op, groupinfoDescriptor, opts...)
+	return entbuilder.NewMutation[GroupInfo, int](&c, op, groupinfoDescriptor, opts...)
 }
 
 // WithGroupInfoID sets the ID field and old-value loader of the mutation.

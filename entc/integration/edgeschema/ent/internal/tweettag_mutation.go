@@ -19,7 +19,7 @@ import (
 )
 
 // TweetTagMutation is an alias for entbuilder.Mutation parameterised by TweetTag.
-type TweetTagMutation = entbuilder.Mutation[TweetTag]
+type TweetTagMutation = entbuilder.Mutation[TweetTag, uuid.UUID]
 
 // TweetTagMutationOption is a functional option for TweetTagMutation.
 type TweetTagMutationOption = func(*TweetTagMutation)
@@ -50,7 +50,7 @@ var tweettagDescriptor = &entbuilder.Descriptor{
 
 // NewTweetTagMutation creates a new mutation for the TweetTag entity.
 func NewTweetTagMutation(c Config, op Op, opts ...TweetTagMutationOption) *TweetTagMutation {
-	return entbuilder.NewMutation[TweetTag](&c, op, tweettagDescriptor, opts...)
+	return entbuilder.NewMutation[TweetTag, uuid.UUID](&c, op, tweettagDescriptor, opts...)
 }
 
 // WithTweetTagID sets the ID field and old-value loader of the mutation.

@@ -18,7 +18,7 @@ import (
 )
 
 // TagMutation is an alias for entbuilder.Mutation parameterised by Tag.
-type TagMutation = entbuilder.Mutation[Tag]
+type TagMutation = entbuilder.Mutation[Tag, int]
 
 // TagMutationOption is a functional option for TagMutation.
 type TagMutationOption = func(*TagMutation)
@@ -61,7 +61,7 @@ var tagDescriptor = &entbuilder.Descriptor{
 
 // NewTagMutation creates a new mutation for the Tag entity.
 func NewTagMutation(c Config, op Op, opts ...TagMutationOption) *TagMutation {
-	return entbuilder.NewMutation[Tag](&c, op, tagDescriptor, opts...)
+	return entbuilder.NewMutation[Tag, int](&c, op, tagDescriptor, opts...)
 }
 
 // WithTagID sets the ID field and old-value loader of the mutation.

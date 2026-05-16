@@ -15,7 +15,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
-	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
@@ -166,11 +165,10 @@ func (_u *LinkUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	idAny, ok := _u.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Link.id" for update`)}
 	}
-	id := idAny.(uuidc.UUIDC)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

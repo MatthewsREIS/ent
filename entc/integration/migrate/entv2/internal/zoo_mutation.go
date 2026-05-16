@@ -17,7 +17,7 @@ import (
 )
 
 // ZooMutation is an alias for entbuilder.Mutation parameterised by Zoo.
-type ZooMutation = entbuilder.Mutation[Zoo]
+type ZooMutation = entbuilder.Mutation[Zoo, int]
 
 // ZooMutationOption is a functional option for ZooMutation.
 type ZooMutationOption = func(*ZooMutation)
@@ -32,7 +32,7 @@ var zooDescriptor = &entbuilder.Descriptor{
 
 // NewZooMutation creates a new mutation for the Zoo entity.
 func NewZooMutation(c Config, op Op, opts ...ZooMutationOption) *ZooMutation {
-	return entbuilder.NewMutation[Zoo](&c, op, zooDescriptor, opts...)
+	return entbuilder.NewMutation[Zoo, int](&c, op, zooDescriptor, opts...)
 }
 
 // WithZooID sets the ID field and old-value loader of the mutation.

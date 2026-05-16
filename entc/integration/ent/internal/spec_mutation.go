@@ -17,7 +17,7 @@ import (
 )
 
 // SpecMutation is an alias for entbuilder.Mutation parameterised by Spec.
-type SpecMutation = entbuilder.Mutation[Spec]
+type SpecMutation = entbuilder.Mutation[Spec, int]
 
 // SpecMutationOption is a functional option for SpecMutation.
 type SpecMutationOption = func(*SpecMutation)
@@ -38,7 +38,7 @@ var specDescriptor = &entbuilder.Descriptor{
 
 // NewSpecMutation creates a new mutation for the Spec entity.
 func NewSpecMutation(c Config, op Op, opts ...SpecMutationOption) *SpecMutation {
-	return entbuilder.NewMutation[Spec](&c, op, specDescriptor, opts...)
+	return entbuilder.NewMutation[Spec, int](&c, op, specDescriptor, opts...)
 }
 
 // WithSpecID sets the ID field and old-value loader of the mutation.

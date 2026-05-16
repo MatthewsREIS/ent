@@ -219,11 +219,10 @@ func (_u *SessionUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeBytes))
-	idAny, ok := _u.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "Session.id" for update`)}
 	}
-	id := idAny.(schema.ID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

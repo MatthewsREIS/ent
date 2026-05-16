@@ -17,7 +17,7 @@ import (
 )
 
 // ProcessMutation is an alias for entbuilder.Mutation parameterised by Process.
-type ProcessMutation = entbuilder.Mutation[Process]
+type ProcessMutation = entbuilder.Mutation[Process, int]
 
 // ProcessMutationOption is a functional option for ProcessMutation.
 type ProcessMutationOption = func(*ProcessMutation)
@@ -44,7 +44,7 @@ var processDescriptor = &entbuilder.Descriptor{
 
 // NewProcessMutation creates a new mutation for the Process entity.
 func NewProcessMutation(c Config, op Op, opts ...ProcessMutationOption) *ProcessMutation {
-	return entbuilder.NewMutation[Process](&c, op, processDescriptor, opts...)
+	return entbuilder.NewMutation[Process, int](&c, op, processDescriptor, opts...)
 }
 
 // WithProcessID sets the ID field and old-value loader of the mutation.

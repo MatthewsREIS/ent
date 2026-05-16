@@ -18,7 +18,7 @@ import (
 )
 
 // MixinIDMutation is an alias for entbuilder.Mutation parameterised by MixinID.
-type MixinIDMutation = entbuilder.Mutation[MixinID]
+type MixinIDMutation = entbuilder.Mutation[MixinID, uuid.UUID]
 
 // MixinIDMutationOption is a functional option for MixinIDMutation.
 type MixinIDMutationOption = func(*MixinIDMutation)
@@ -42,7 +42,7 @@ var mixinidDescriptor = &entbuilder.Descriptor{
 
 // NewMixinIDMutation creates a new mutation for the MixinID entity.
 func NewMixinIDMutation(c Config, op Op, opts ...MixinIDMutationOption) *MixinIDMutation {
-	return entbuilder.NewMutation[MixinID](&c, op, mixinidDescriptor, opts...)
+	return entbuilder.NewMutation[MixinID, uuid.UUID](&c, op, mixinidDescriptor, opts...)
 }
 
 // WithMixinIDID sets the ID field and old-value loader of the mutation.

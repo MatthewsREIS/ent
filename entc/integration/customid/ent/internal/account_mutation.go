@@ -18,7 +18,7 @@ import (
 )
 
 // AccountMutation is an alias for entbuilder.Mutation parameterised by Account.
-type AccountMutation = entbuilder.Mutation[Account]
+type AccountMutation = entbuilder.Mutation[Account, sid.ID]
 
 // AccountMutationOption is a functional option for AccountMutation.
 type AccountMutationOption = func(*AccountMutation)
@@ -44,7 +44,7 @@ var accountDescriptor = &entbuilder.Descriptor{
 
 // NewAccountMutation creates a new mutation for the Account entity.
 func NewAccountMutation(c Config, op Op, opts ...AccountMutationOption) *AccountMutation {
-	return entbuilder.NewMutation[Account](&c, op, accountDescriptor, opts...)
+	return entbuilder.NewMutation[Account, sid.ID](&c, op, accountDescriptor, opts...)
 }
 
 // WithAccountID sets the ID field and old-value loader of the mutation.

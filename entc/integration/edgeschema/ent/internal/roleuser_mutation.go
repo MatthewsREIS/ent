@@ -14,7 +14,7 @@ import (
 )
 
 // RoleUserMutation is an alias for entbuilder.Mutation parameterised by RoleUser.
-type RoleUserMutation = entbuilder.Mutation[RoleUser]
+type RoleUserMutation = entbuilder.Mutation[RoleUser, any]
 
 // RoleUserMutationOption is a functional option for RoleUserMutation.
 type RoleUserMutationOption = func(*RoleUserMutation)
@@ -44,5 +44,5 @@ var roleuserDescriptor = &entbuilder.Descriptor{
 
 // NewRoleUserMutation creates a new mutation for the RoleUser entity.
 func NewRoleUserMutation(c Config, op Op, opts ...RoleUserMutationOption) *RoleUserMutation {
-	return entbuilder.NewMutation[RoleUser](&c, op, roleuserDescriptor, opts...)
+	return entbuilder.NewMutation[RoleUser, any](&c, op, roleuserDescriptor, opts...)
 }

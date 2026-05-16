@@ -18,7 +18,7 @@ import (
 )
 
 // DeviceMutation is an alias for entbuilder.Mutation parameterised by Device.
-type DeviceMutation = entbuilder.Mutation[Device]
+type DeviceMutation = entbuilder.Mutation[Device, schema.ID]
 
 // DeviceMutationOption is a functional option for DeviceMutation.
 type DeviceMutationOption = func(*DeviceMutation)
@@ -44,7 +44,7 @@ var deviceDescriptor = &entbuilder.Descriptor{
 
 // NewDeviceMutation creates a new mutation for the Device entity.
 func NewDeviceMutation(c Config, op Op, opts ...DeviceMutationOption) *DeviceMutation {
-	return entbuilder.NewMutation[Device](&c, op, deviceDescriptor, opts...)
+	return entbuilder.NewMutation[Device, schema.ID](&c, op, deviceDescriptor, opts...)
 }
 
 // WithDeviceID sets the ID field and old-value loader of the mutation.

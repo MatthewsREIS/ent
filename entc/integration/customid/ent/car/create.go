@@ -165,8 +165,7 @@ func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if rawID, ok := _c.mutation.ID(); ok {
-		id := rawID.(int)
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}

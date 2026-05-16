@@ -14,7 +14,7 @@ import (
 )
 
 // TweetLikeMutation is an alias for entbuilder.Mutation parameterised by TweetLike.
-type TweetLikeMutation = entbuilder.Mutation[TweetLike]
+type TweetLikeMutation = entbuilder.Mutation[TweetLike, any]
 
 // TweetLikeMutationOption is a functional option for TweetLikeMutation.
 type TweetLikeMutationOption = func(*TweetLikeMutation)
@@ -44,5 +44,5 @@ var tweetlikeDescriptor = &entbuilder.Descriptor{
 
 // NewTweetLikeMutation creates a new mutation for the TweetLike entity.
 func NewTweetLikeMutation(c Config, op Op, opts ...TweetLikeMutationOption) *TweetLikeMutation {
-	return entbuilder.NewMutation[TweetLike](&c, op, tweetlikeDescriptor, opts...)
+	return entbuilder.NewMutation[TweetLike, any](&c, op, tweetlikeDescriptor, opts...)
 }

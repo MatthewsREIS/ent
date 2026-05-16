@@ -115,8 +115,7 @@ func (_c *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
 		_node = &Blog{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if rawID, ok := _c.mutation.ID(); ok {
-		id := rawID.(int)
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}

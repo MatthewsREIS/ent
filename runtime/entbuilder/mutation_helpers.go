@@ -8,7 +8,7 @@ import "context"
 
 // GetField returns the typed value of a field on the mutation.
 // Returns the zero value and false if the field is unset.
-func GetField[V any, T any](m *Mutation[T], name string) (V, bool) {
+func GetField[V any, T any, I any](m *Mutation[T, I], name string) (V, bool) {
 	v, ok := m.Field(name)
 	if !ok {
 		var z V
@@ -19,7 +19,7 @@ func GetField[V any, T any](m *Mutation[T], name string) (V, bool) {
 
 // OldFieldAs returns the typed pre-mutation value of a field on the
 // mutation. Returns the zero value if OldField errors.
-func OldFieldAs[V any, T any](ctx context.Context, m *Mutation[T], name string) (V, error) {
+func OldFieldAs[V any, T any, I any](ctx context.Context, m *Mutation[T, I], name string) (V, error) {
 	v, err := m.OldField(ctx, name)
 	if err != nil {
 		var z V
@@ -29,7 +29,7 @@ func OldFieldAs[V any, T any](ctx context.Context, m *Mutation[T], name string) 
 }
 
 // EdgeIDsAs returns the typed neighbor IDs on an edge.
-func EdgeIDsAs[ID any, T any](m *Mutation[T], edge string) []ID {
+func EdgeIDsAs[ID any, T any, I any](m *Mutation[T, I], edge string) []ID {
 	ids := m.EdgeIDs(edge)
 	if ids == nil {
 		return nil
@@ -42,7 +42,7 @@ func EdgeIDsAs[ID any, T any](m *Mutation[T], edge string) []ID {
 }
 
 // EdgeIDAs returns the typed neighbor ID on a unique edge.
-func EdgeIDAs[ID any, T any](m *Mutation[T], edge string) (ID, bool) {
+func EdgeIDAs[ID any, T any, I any](m *Mutation[T, I], edge string) (ID, bool) {
 	id, ok := m.EdgeID(edge)
 	if !ok {
 		var z ID

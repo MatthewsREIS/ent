@@ -16,7 +16,6 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // MixinIDUpdate is the builder for updating MixinID entities.
@@ -212,11 +211,10 @@ func (_u *MixinIDUpdateOne) ExecX(ctx context.Context) {
 
 func (_u *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	idAny, ok := _u.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "MixinID.id" for update`)}
 	}
-	id := idAny.(uuid.UUID)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

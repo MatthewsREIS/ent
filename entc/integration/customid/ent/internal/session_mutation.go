@@ -18,7 +18,7 @@ import (
 )
 
 // SessionMutation is an alias for entbuilder.Mutation parameterised by Session.
-type SessionMutation = entbuilder.Mutation[Session]
+type SessionMutation = entbuilder.Mutation[Session, schema.ID]
 
 // SessionMutationOption is a functional option for SessionMutation.
 type SessionMutationOption = func(*SessionMutation)
@@ -40,7 +40,7 @@ var sessionDescriptor = &entbuilder.Descriptor{
 
 // NewSessionMutation creates a new mutation for the Session entity.
 func NewSessionMutation(c Config, op Op, opts ...SessionMutationOption) *SessionMutation {
-	return entbuilder.NewMutation[Session](&c, op, sessionDescriptor, opts...)
+	return entbuilder.NewMutation[Session, schema.ID](&c, op, sessionDescriptor, opts...)
 }
 
 // WithSessionID sets the ID field and old-value loader of the mutation.

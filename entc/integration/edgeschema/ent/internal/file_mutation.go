@@ -17,7 +17,7 @@ import (
 )
 
 // FileMutation is an alias for entbuilder.Mutation parameterised by File.
-type FileMutation = entbuilder.Mutation[File]
+type FileMutation = entbuilder.Mutation[File, int]
 
 // FileMutationOption is a functional option for FileMutation.
 type FileMutationOption = func(*FileMutation)
@@ -44,7 +44,7 @@ var fileDescriptor = &entbuilder.Descriptor{
 
 // NewFileMutation creates a new mutation for the File entity.
 func NewFileMutation(c Config, op Op, opts ...FileMutationOption) *FileMutation {
-	return entbuilder.NewMutation[File](&c, op, fileDescriptor, opts...)
+	return entbuilder.NewMutation[File, int](&c, op, fileDescriptor, opts...)
 }
 
 // WithFileID sets the ID field and old-value loader of the mutation.

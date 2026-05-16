@@ -136,8 +136,7 @@ func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_node = &Car{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
 	)
-	if rawID, ok := _c.mutation.ID(); ok {
-		id := rawID.(uuid.UUID)
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}

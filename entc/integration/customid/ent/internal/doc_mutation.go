@@ -18,7 +18,7 @@ import (
 )
 
 // DocMutation is an alias for entbuilder.Mutation parameterised by Doc.
-type DocMutation = entbuilder.Mutation[Doc]
+type DocMutation = entbuilder.Mutation[Doc, schema.DocID]
 
 // DocMutationOption is a functional option for DocMutation.
 type DocMutationOption = func(*DocMutation)
@@ -56,7 +56,7 @@ var docDescriptor = &entbuilder.Descriptor{
 
 // NewDocMutation creates a new mutation for the Doc entity.
 func NewDocMutation(c Config, op Op, opts ...DocMutationOption) *DocMutation {
-	return entbuilder.NewMutation[Doc](&c, op, docDescriptor, opts...)
+	return entbuilder.NewMutation[Doc, schema.DocID](&c, op, docDescriptor, opts...)
 }
 
 // WithDocID sets the ID field and old-value loader of the mutation.

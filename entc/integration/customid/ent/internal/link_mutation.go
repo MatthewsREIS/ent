@@ -19,7 +19,7 @@ import (
 )
 
 // LinkMutation is an alias for entbuilder.Mutation parameterised by Link.
-type LinkMutation = entbuilder.Mutation[Link]
+type LinkMutation = entbuilder.Mutation[Link, uuidc.UUIDC]
 
 // LinkMutationOption is a functional option for LinkMutation.
 type LinkMutationOption = func(*LinkMutation)
@@ -39,7 +39,7 @@ var linkDescriptor = &entbuilder.Descriptor{
 
 // NewLinkMutation creates a new mutation for the Link entity.
 func NewLinkMutation(c Config, op Op, opts ...LinkMutationOption) *LinkMutation {
-	return entbuilder.NewMutation[Link](&c, op, linkDescriptor, opts...)
+	return entbuilder.NewMutation[Link, uuidc.UUIDC](&c, op, linkDescriptor, opts...)
 }
 
 // WithLinkID sets the ID field and old-value loader of the mutation.

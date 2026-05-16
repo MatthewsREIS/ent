@@ -18,7 +18,7 @@ import (
 )
 
 // TokenMutation is an alias for entbuilder.Mutation parameterised by Token.
-type TokenMutation = entbuilder.Mutation[Token]
+type TokenMutation = entbuilder.Mutation[Token, sid.ID]
 
 // TokenMutationOption is a functional option for TokenMutation.
 type TokenMutationOption = func(*TokenMutation)
@@ -45,7 +45,7 @@ var tokenDescriptor = &entbuilder.Descriptor{
 
 // NewTokenMutation creates a new mutation for the Token entity.
 func NewTokenMutation(c Config, op Op, opts ...TokenMutationOption) *TokenMutation {
-	return entbuilder.NewMutation[Token](&c, op, tokenDescriptor, opts...)
+	return entbuilder.NewMutation[Token, sid.ID](&c, op, tokenDescriptor, opts...)
 }
 
 // WithTokenID sets the ID field and old-value loader of the mutation.

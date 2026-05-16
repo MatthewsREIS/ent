@@ -18,7 +18,7 @@ import (
 )
 
 // BlobMutation is an alias for entbuilder.Mutation parameterised by Blob.
-type BlobMutation = entbuilder.Mutation[Blob]
+type BlobMutation = entbuilder.Mutation[Blob, uuid.UUID]
 
 // BlobMutationOption is a functional option for BlobMutation.
 type BlobMutationOption = func(*BlobMutation)
@@ -54,7 +54,7 @@ var blobDescriptor = &entbuilder.Descriptor{
 
 // NewBlobMutation creates a new mutation for the Blob entity.
 func NewBlobMutation(c Config, op Op, opts ...BlobMutationOption) *BlobMutation {
-	return entbuilder.NewMutation[Blob](&c, op, blobDescriptor, opts...)
+	return entbuilder.NewMutation[Blob, uuid.UUID](&c, op, blobDescriptor, opts...)
 }
 
 // WithBlobID sets the ID field and old-value loader of the mutation.

@@ -46,11 +46,10 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		{{- end }})
 	{{- if $one }}
 		{{- if $.HasOneFieldID }}
-			idAny, ok := {{ $mutation }}.ID()
+			id, ok := {{ $mutation }}.ID()
 			if !ok {
 				return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", Err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
 			}
-			id := idAny.({{ $.ID.Type }})
 			_spec.Node.ID.Value = id
 			if fields := {{ $receiver }}.fields; len(fields) > 0 {
 				_spec.Node.Columns = make([]string, 0, len(fields))

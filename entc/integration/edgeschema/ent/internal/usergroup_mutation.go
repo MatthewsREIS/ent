@@ -18,7 +18,7 @@ import (
 )
 
 // UserGroupMutation is an alias for entbuilder.Mutation parameterised by UserGroup.
-type UserGroupMutation = entbuilder.Mutation[UserGroup]
+type UserGroupMutation = entbuilder.Mutation[UserGroup, int]
 
 // UserGroupMutationOption is a functional option for UserGroupMutation.
 type UserGroupMutationOption = func(*UserGroupMutation)
@@ -49,7 +49,7 @@ var usergroupDescriptor = &entbuilder.Descriptor{
 
 // NewUserGroupMutation creates a new mutation for the UserGroup entity.
 func NewUserGroupMutation(c Config, op Op, opts ...UserGroupMutationOption) *UserGroupMutation {
-	return entbuilder.NewMutation[UserGroup](&c, op, usergroupDescriptor, opts...)
+	return entbuilder.NewMutation[UserGroup, int](&c, op, usergroupDescriptor, opts...)
 }
 
 // WithUserGroupID sets the ID field and old-value loader of the mutation.

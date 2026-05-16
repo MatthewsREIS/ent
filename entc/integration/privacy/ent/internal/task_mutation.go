@@ -18,7 +18,7 @@ import (
 )
 
 // TaskMutation is an alias for entbuilder.Mutation parameterised by Task.
-type TaskMutation = entbuilder.Mutation[Task]
+type TaskMutation = entbuilder.Mutation[Task, int]
 
 // TaskMutationOption is a functional option for TaskMutation.
 type TaskMutationOption = func(*TaskMutation)
@@ -64,7 +64,7 @@ var taskDescriptor = &entbuilder.Descriptor{
 
 // NewTaskMutation creates a new mutation for the Task entity.
 func NewTaskMutation(c Config, op Op, opts ...TaskMutationOption) *TaskMutation {
-	return entbuilder.NewMutation[Task](&c, op, taskDescriptor, opts...)
+	return entbuilder.NewMutation[Task, int](&c, op, taskDescriptor, opts...)
 }
 
 // WithTaskID sets the ID field and old-value loader of the mutation.

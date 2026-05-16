@@ -18,7 +18,7 @@ import (
 )
 
 // LicenseMutation is an alias for entbuilder.Mutation parameterised by License.
-type LicenseMutation = entbuilder.Mutation[License]
+type LicenseMutation = entbuilder.Mutation[License, int]
 
 // LicenseMutationOption is a functional option for LicenseMutation.
 type LicenseMutationOption = func(*LicenseMutation)
@@ -42,7 +42,7 @@ var licenseDescriptor = &entbuilder.Descriptor{
 
 // NewLicenseMutation creates a new mutation for the License entity.
 func NewLicenseMutation(c Config, op Op, opts ...LicenseMutationOption) *LicenseMutation {
-	return entbuilder.NewMutation[License](&c, op, licenseDescriptor, opts...)
+	return entbuilder.NewMutation[License, int](&c, op, licenseDescriptor, opts...)
 }
 
 // WithLicenseID sets the ID field and old-value loader of the mutation.

@@ -325,11 +325,10 @@ func (_u *GroupInfoUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *G
 
 func (_u *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	idAny, ok := _u.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", Err: errors.New(`ent: missing "GroupInfo.id" for update`)}
 	}
-	id := idAny.(int)
 	_spec.Node.ID.Value = id
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))

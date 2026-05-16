@@ -71,15 +71,17 @@ type Descriptor struct {
 
 // Mutation is the single generic mutation type used by every entity.
 // T is a phantom marker used by typed helpers (GetField, OldFieldAs, etc.)
-// but holds no T-typed fields on the mutation itself.
-type Mutation[T any] struct {
+// but holds no T-typed fields on the mutation itself. I is the entity's ID
+// type — propagated through ID() and SetID() so per-entity mutation aliases
+// preserve the typed ID accessor that consumer hooks rely on.
+type Mutation[T any, I any] struct {
 	// Config is the per-package Config; opaque to entbuilder.
 	Config any
 
 	desc *Descriptor
 
 	op  ent.Op
-	id  any
+	id  *I
 	typ string
 
 	// Field state (lazy-allocated).
@@ -103,8 +105,8 @@ type Mutation[T any] struct {
 }
 
 // NewMutation constructs a generic mutation for an entity.
-func NewMutation[T any](c any, op ent.Op, desc *Descriptor, opts ...func(*Mutation[T])) *Mutation[T] {
-	m := &Mutation[T]{
+func NewMutation[T any, I any](c any, op ent.Op, desc *Descriptor, opts ...func(*Mutation[T, I])) *Mutation[T, I] {
+	m := &Mutation[T, I]{
 		Config: c,
 		desc:   desc,
 		op:     op,
@@ -116,6 +118,8 @@ func NewMutation[T any](c any, op ent.Op, desc *Descriptor, opts ...func(*Mutati
 	return m
 }
 
-// Compile-time assertion that Mutation[T] satisfies ent.Mutation.
-// A single concrete instantiation suffices.
-var _ ent.Mutation = (*Mutation[struct{}])(nil)
+// Compile-time assertion that Mutation[T, I] satisfies ent.Mutation.
+// A single concrete instantiation suffices (ent.Mutation has no ID method,
+// so I's choice here is immaterial — `any` keeps the assertion stable for
+// entities with composite or otherwise non-uniform ID types).
+var _ ent.Mutation = (*Mutation[struct{}, any])(nil)

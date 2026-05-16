@@ -18,7 +18,7 @@ import (
 )
 
 // IntSIDMutation is an alias for entbuilder.Mutation parameterised by IntSID.
-type IntSIDMutation = entbuilder.Mutation[IntSID]
+type IntSIDMutation = entbuilder.Mutation[IntSID, sid.ID]
 
 // IntSIDMutationOption is a functional option for IntSIDMutation.
 type IntSIDMutationOption = func(*IntSIDMutation)
@@ -45,7 +45,7 @@ var intsidDescriptor = &entbuilder.Descriptor{
 
 // NewIntSIDMutation creates a new mutation for the IntSID entity.
 func NewIntSIDMutation(c Config, op Op, opts ...IntSIDMutationOption) *IntSIDMutation {
-	return entbuilder.NewMutation[IntSID](&c, op, intsidDescriptor, opts...)
+	return entbuilder.NewMutation[IntSID, sid.ID](&c, op, intsidDescriptor, opts...)
 }
 
 // WithIntSIDID sets the ID field and old-value loader of the mutation.

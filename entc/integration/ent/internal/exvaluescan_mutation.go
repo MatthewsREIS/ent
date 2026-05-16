@@ -20,7 +20,7 @@ import (
 )
 
 // ExValueScanMutation is an alias for entbuilder.Mutation parameterised by ExValueScan.
-type ExValueScanMutation = entbuilder.Mutation[ExValueScan]
+type ExValueScanMutation = entbuilder.Mutation[ExValueScan, int]
 
 // ExValueScanMutationOption is a functional option for ExValueScanMutation.
 type ExValueScanMutationOption = func(*ExValueScanMutation)
@@ -71,7 +71,7 @@ var exvaluescanDescriptor = &entbuilder.Descriptor{
 
 // NewExValueScanMutation creates a new mutation for the ExValueScan entity.
 func NewExValueScanMutation(c Config, op Op, opts ...ExValueScanMutationOption) *ExValueScanMutation {
-	return entbuilder.NewMutation[ExValueScan](&c, op, exvaluescanDescriptor, opts...)
+	return entbuilder.NewMutation[ExValueScan, int](&c, op, exvaluescanDescriptor, opts...)
 }
 
 // WithExValueScanID sets the ID field and old-value loader of the mutation.

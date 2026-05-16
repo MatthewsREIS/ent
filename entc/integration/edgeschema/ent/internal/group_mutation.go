@@ -17,7 +17,7 @@ import (
 )
 
 // GroupMutation is an alias for entbuilder.Mutation parameterised by Group.
-type GroupMutation = entbuilder.Mutation[Group]
+type GroupMutation = entbuilder.Mutation[Group, int]
 
 // GroupMutationOption is a functional option for GroupMutation.
 type GroupMutationOption = func(*GroupMutation)
@@ -62,7 +62,7 @@ var groupDescriptor = &entbuilder.Descriptor{
 
 // NewGroupMutation creates a new mutation for the Group entity.
 func NewGroupMutation(c Config, op Op, opts ...GroupMutationOption) *GroupMutation {
-	return entbuilder.NewMutation[Group](&c, op, groupDescriptor, opts...)
+	return entbuilder.NewMutation[Group, int](&c, op, groupDescriptor, opts...)
 }
 
 // WithGroupID sets the ID field and old-value loader of the mutation.

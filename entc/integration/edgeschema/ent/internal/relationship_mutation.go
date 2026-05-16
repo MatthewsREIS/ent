@@ -13,7 +13,7 @@ import (
 )
 
 // RelationshipMutation is an alias for entbuilder.Mutation parameterised by Relationship.
-type RelationshipMutation = entbuilder.Mutation[Relationship]
+type RelationshipMutation = entbuilder.Mutation[Relationship, any]
 
 // RelationshipMutationOption is a functional option for RelationshipMutation.
 type RelationshipMutationOption = func(*RelationshipMutation)
@@ -49,5 +49,5 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 
 // NewRelationshipMutation creates a new mutation for the Relationship entity.
 func NewRelationshipMutation(c Config, op Op, opts ...RelationshipMutationOption) *RelationshipMutation {
-	return entbuilder.NewMutation[Relationship](&c, op, relationshipDescriptor, opts...)
+	return entbuilder.NewMutation[Relationship, any](&c, op, relationshipDescriptor, opts...)
 }

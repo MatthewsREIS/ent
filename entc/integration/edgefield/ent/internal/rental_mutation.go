@@ -19,7 +19,7 @@ import (
 )
 
 // RentalMutation is an alias for entbuilder.Mutation parameterised by Rental.
-type RentalMutation = entbuilder.Mutation[Rental]
+type RentalMutation = entbuilder.Mutation[Rental, int]
 
 // RentalMutationOption is a functional option for RentalMutation.
 type RentalMutationOption = func(*RentalMutation)
@@ -52,7 +52,7 @@ var rentalDescriptor = &entbuilder.Descriptor{
 
 // NewRentalMutation creates a new mutation for the Rental entity.
 func NewRentalMutation(c Config, op Op, opts ...RentalMutationOption) *RentalMutation {
-	return entbuilder.NewMutation[Rental](&c, op, rentalDescriptor, opts...)
+	return entbuilder.NewMutation[Rental, int](&c, op, rentalDescriptor, opts...)
 }
 
 // WithRentalID sets the ID field and old-value loader of the mutation.

@@ -24,7 +24,7 @@ import (
 )
 
 // FieldTypeMutation is an alias for entbuilder.Mutation parameterised by FieldType.
-type FieldTypeMutation = entbuilder.Mutation[FieldType]
+type FieldTypeMutation = entbuilder.Mutation[FieldType, int]
 
 // FieldTypeMutationOption is a functional option for FieldTypeMutation.
 type FieldTypeMutationOption = func(*FieldTypeMutation)
@@ -386,7 +386,7 @@ var fieldtypeDescriptor = &entbuilder.Descriptor{
 
 // NewFieldTypeMutation creates a new mutation for the FieldType entity.
 func NewFieldTypeMutation(c Config, op Op, opts ...FieldTypeMutationOption) *FieldTypeMutation {
-	return entbuilder.NewMutation[FieldType](&c, op, fieldtypeDescriptor, opts...)
+	return entbuilder.NewMutation[FieldType, int](&c, op, fieldtypeDescriptor, opts...)
 }
 
 // WithFieldTypeID sets the ID field and old-value loader of the mutation.

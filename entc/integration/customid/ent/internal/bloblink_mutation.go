@@ -16,7 +16,7 @@ import (
 )
 
 // BlobLinkMutation is an alias for entbuilder.Mutation parameterised by BlobLink.
-type BlobLinkMutation = entbuilder.Mutation[BlobLink]
+type BlobLinkMutation = entbuilder.Mutation[BlobLink, any]
 
 // BlobLinkMutationOption is a functional option for BlobLinkMutation.
 type BlobLinkMutationOption = func(*BlobLinkMutation)
@@ -46,5 +46,5 @@ var bloblinkDescriptor = &entbuilder.Descriptor{
 
 // NewBlobLinkMutation creates a new mutation for the BlobLink entity.
 func NewBlobLinkMutation(c Config, op Op, opts ...BlobLinkMutationOption) *BlobLinkMutation {
-	return entbuilder.NewMutation[BlobLink](&c, op, bloblinkDescriptor, opts...)
+	return entbuilder.NewMutation[BlobLink, any](&c, op, bloblinkDescriptor, opts...)
 }

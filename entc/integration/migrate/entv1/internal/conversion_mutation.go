@@ -17,7 +17,7 @@ import (
 )
 
 // ConversionMutation is an alias for entbuilder.Mutation parameterised by Conversion.
-type ConversionMutation = entbuilder.Mutation[Conversion]
+type ConversionMutation = entbuilder.Mutation[Conversion, int]
 
 // ConversionMutationOption is a functional option for ConversionMutation.
 type ConversionMutationOption = func(*ConversionMutation)
@@ -86,7 +86,7 @@ var conversionDescriptor = &entbuilder.Descriptor{
 
 // NewConversionMutation creates a new mutation for the Conversion entity.
 func NewConversionMutation(c Config, op Op, opts ...ConversionMutationOption) *ConversionMutation {
-	return entbuilder.NewMutation[Conversion](&c, op, conversionDescriptor, opts...)
+	return entbuilder.NewMutation[Conversion, int](&c, op, conversionDescriptor, opts...)
 }
 
 // WithConversionID sets the ID field and old-value loader of the mutation.

@@ -76,8 +76,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		{{- end }}
 	{{- end }}
 	{{- if and (not $.HasCompositeID) $.ID.UserDefined }}
-		if rawID, ok := {{ $mutation }}.ID(); ok {
-			id := rawID.({{ trimPackage $.ID.Type.String $.Package }})
+		if id, ok := {{ $mutation }}.ID(); ok {
 			_node.ID = id
 			_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
 		}
