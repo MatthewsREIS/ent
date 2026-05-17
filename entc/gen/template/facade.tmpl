@@ -183,8 +183,14 @@ func {{ $lfunc }}(ctx context.Context, query *{{ $edgeQuery }}, nodes []*{{ $n.N
 			byID[node.ID] = node
 			node.Edges.{{ $e.StructField }} = []*{{ $e.Type.Name }}{}
 		}
+		{{- /* SchemaConfig hook needs the source node ($n) so the joinT
+		       schema lookup picks the correct table; the receiver here is
+		       the parent query q, which has Config.SchemaConfig() in scope. */}}
 		query.Where(func(s *sql.Selector) {
 			joinT := sql.Table({{ $pkg }}.{{ $e.TableConstant }})
+			{{- with extend $n "Builder" $n.QueryName "Edge" $e "Receiver" "query" "Ident" "joinT" "CallSet" true }}
+				{{- template "dialect/sql/defedge/spec/schemaconfig" . }}
+			{{- end }}
 			{{- $edgeid := print $e.Type.Package "." $e.Type.ID.Constant }}
 			{{- $fk1idx := 1 }}{{- $fk2idx := 0 }}{{ if $e.IsInverse }}{{ $fk1idx = 0 }}{{ $fk2idx = 1 }}{{ end }}
 			s.Join(joinT).On(s.C({{ $edgeid }}), joinT.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk1idx }}]))
@@ -387,6 +393,9 @@ func {{ $nlfunc }}(ctx context.Context, query *{{ $edgeQuery }}, nodes []*{{ $n.
 		}
 		query.Where(func(s *sql.Selector) {
 			joinT := sql.Table({{ $pkg }}.{{ $e.TableConstant }})
+			{{- with extend $n "Builder" $n.QueryName "Edge" $e "Receiver" "query" "Ident" "joinT" "CallSet" true }}
+				{{- template "dialect/sql/defedge/spec/schemaconfig" . }}
+			{{- end }}
 			{{- $edgeid := print $e.Type.Package "." $e.Type.ID.Constant }}
 			{{- $fk1idx := 1 }}{{- $fk2idx := 0 }}{{ if $e.IsInverse }}{{ $fk1idx = 0 }}{{ $fk2idx = 1 }}{{ end }}
 			s.Join(joinT).On(s.C({{ $edgeid }}), joinT.C({{ $pkg }}.{{ $e.PKConstant }}[{{ $fk1idx }}]))

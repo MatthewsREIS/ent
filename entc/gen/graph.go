@@ -1163,37 +1163,72 @@ func cleanOldNodes(assets assets, target string) {
 	if err != nil {
 		return
 	}
-	// Find deleted nodes by selecting one generated
-	// file from standard templates (<T>_query.go), or split variants.
+	// Find deleted nodes from two layouts:
+	//   * Old (pre-PR6): root-level <T>_query.go and split variants;
+	//   * New (PR6):     <T>/ sub-package directory containing query.go.
+	// A node is considered deleted when its detector artifact exists on
+	// disk but the gen pass did not contribute any files under its
+	// sub-package dir (assets.dirs[<target>/<typ.PackageDir>]).
 	var deleted []*Type
-	for _, f := range d {
-		name, ok := queryTemplateNode(f.Name())
-		if !ok {
-			continue
+	seen := make(map[string]bool)
+	considerType := func(typ *Type) {
+		if seen[typ.Name] {
+			return
 		}
-		typ := &Type{Name: name}
+		seen[typ.Name] = true
 		path := filepath.Join(target, typ.PackageDir())
 		if _, ok := assets.dirs[path]; ok {
-			continue
+			return
 		}
-		// If it is a node, it must have a model file (or split variants) and a dir.
-		hasModel := false
-		if _, err := os.Stat(path + ".go"); err == nil {
-			hasModel = true
-		}
-		if !hasModel {
-			for _, pattern := range []string{path + "_base.go", path + "_part*.go", path + "_*.go"} {
-				matches, err := filepath.Glob(pattern)
-				if err == nil && len(matches) > 0 {
+		deleted = append(deleted, typ)
+	}
+	for _, f := range d {
+		if !f.IsDir() {
+			if name, ok := queryTemplateNode(f.Name()); ok {
+				typ := &Type{Name: name}
+				path := filepath.Join(target, typ.PackageDir())
+				hasModel := false
+				if _, err := os.Stat(path + ".go"); err == nil {
 					hasModel = true
-					break
+				}
+				if !hasModel {
+					for _, pattern := range []string{path + "_base.go", path + "_part*.go", path + "_*.go"} {
+						matches, err := filepath.Glob(pattern)
+						if err == nil && len(matches) > 0 {
+							hasModel = true
+							break
+						}
+					}
+				}
+				f2, err2 := os.Stat(path)
+				if hasModel && err2 == nil && f2.IsDir() {
+					considerType(typ)
 				}
 			}
+			continue
 		}
-		f2, err2 := os.Stat(path)
-		if hasModel && err2 == nil && f2.IsDir() {
-			deleted = append(deleted, typ)
+		// PR 6 sub-package layout: a directory <entity>/ holding query.go
+		// (and other per-entity sources) is the marker. With the split
+		// feature enabled, query.go becomes query_base.go + query_*.go
+		// variants — so we accept either as the marker. Bail on non-entity
+		// directories (internal, predicate, migrate, schema, runtime, ...)
+		// — those don't carry a query.* file.
+		subDir := filepath.Join(target, f.Name())
+		hasQuery := false
+		if _, err := os.Stat(filepath.Join(subDir, "query.go")); err == nil {
+			hasQuery = true
+		} else if matches, _ := filepath.Glob(filepath.Join(subDir, "query_*.go")); len(matches) > 0 {
+			hasQuery = true
+		} else if _, err := os.Stat(filepath.Join(subDir, "query_base.go")); err == nil {
+			hasQuery = true
 		}
+		if !hasQuery {
+			continue
+		}
+		// Map directory name back to a Type with the same PackageDir().
+		// Type.PackageDir lowercases Name, so seeding Name with the dir
+		// name (already lowercase) round-trips correctly.
+		considerType(&Type{Name: f.Name()})
 	}
 	for _, typ := range deleted {
 		for _, t := range Templates {
@@ -1214,6 +1249,24 @@ func cleanOldNodes(assets assets, target string) {
 		// its contents (create.go, update.go, delete.go, client.go, etc.).
 		if err := os.RemoveAll(filepath.Join(target, typ.PackageDir())); err != nil {
 			log.Printf("remove old dir %s: %s\n", filepath.Join(target, typ.PackageDir()), err)
+		}
+		// PR 6 also emits per-entity files under internal/ (entity model,
+		// mutation_base, builder helpers). Sweep them so the package
+		// compiles after the entity is gone. cleanupSplit / write tracks
+		// any internal/* the current gen pass owns; everything else
+		// matching <entity>_*.go is orphaned and removable.
+		internalDir := filepath.Join(target, "internal")
+		for _, pattern := range []string{
+			typ.PackageDir() + "_*.go",
+			typ.PackageDir() + "_*_base.go",
+			typ.PackageDir() + "_*_part*.go",
+		} {
+			matches, _ := filepath.Glob(filepath.Join(internalDir, pattern))
+			for _, m := range matches {
+				if err := os.Remove(m); err != nil && !os.IsNotExist(err) {
+					log.Printf("remove old file %s: %s\n", m, err)
+				}
+			}
 		}
 	}
 }

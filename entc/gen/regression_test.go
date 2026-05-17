@@ -79,8 +79,11 @@ func TestGraph_Gen_AssignGeneratedUserIntIDAcceptsInt(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	testFile := filepath.Join(target, "user_create_generated_id_test.go")
-	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
+	// PR 6: userCreateDescriptor lives in the user sub-package now, so
+	// the regression test moves alongside it instead of asserting from
+	// the root ent package.
+	testFile := filepath.Join(target, "user", "user_create_generated_id_test.go")
+	require.NoError(t, os.WriteFile(testFile, []byte(`package user
 
 import "testing"
 
@@ -95,7 +98,7 @@ func TestUserCreateDescriptorAssignGeneratedInt(t *testing.T) {
 }
 `), 0644))
 
-	cmd := exec.Command("go", "test", "-mod=mod", "./ent", "-run", "TestUserCreateDescriptorAssignGeneratedInt", "-count=1")
+	cmd := exec.Command("go", "test", "-mod=mod", "./ent/user", "-run", "TestUserCreateDescriptorAssignGeneratedInt", "-count=1")
 	cmd.Dir = mod
 	cmd.Env = append(os.Environ(), "GOWORK=off")
 	out, err := cmd.CombinedOutput()
@@ -173,10 +176,15 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	userQuery, err := os.ReadFile(filepath.Join(target, "user_query.go"))
+	// PR 6: the M2M load (and the joinT.Schema hook on it) moved out of
+	// user_query.go into the root facade's loadUserGroups in
+	// user_facade.go. The sub-query parameter there is named `query`,
+	// so the hook emits query.Config.SchemaConfig() (Config is shared
+	// across builders in a client).
+	userFacade, err := os.ReadFile(filepath.Join(target, "user_facade.go"))
 	require.NoError(t, err)
-	require.Contains(t, string(userQuery), "joinT.Schema(_q.Config.SchemaConfig().UserGroups)")
-	require.NotContains(t, string(userQuery), "edge.Schema = _q.Config.SchemaConfig().UserGroups")
+	require.Contains(t, string(userFacade), "joinT.Schema(query.Config.SchemaConfig().UserGroups)")
+	require.NotContains(t, string(userFacade), "edge.Schema = query.Config.SchemaConfig().UserGroups")
 
 	groupUpdate, err := os.ReadFile(filepath.Join(target, "group", "update.go"))
 	require.NoError(t, err)
@@ -188,6 +196,9 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 	)
 	require.NotContains(t, string(groupUpdate), "edge.Schema = _u.schemaConfig.UserGroups")
 
+	// PR 6: WithGroups moved from a method on *UserQuery to the
+	// root-facade free function WithUserGroups; ClearUsers stays a
+	// method on *GroupUpdate inside the group sub-package.
 	testFile := filepath.Join(target, "schemaconfig_compile_test.go")
 	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
 
@@ -198,7 +209,7 @@ import (
 )
 
 func TestGeneratedSchemaConfigDescriptorPathsCompile(t *testing.T) {
-	_ = (*UserQuery).WithGroups
+	_ = WithUserGroups
 	_ = (*group.GroupUpdate).ClearUsers
 }
 `), 0644))

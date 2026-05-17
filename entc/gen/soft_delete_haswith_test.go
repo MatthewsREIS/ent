@@ -57,14 +57,16 @@ func TestGraph_Gen_HasWithSoftDeleteFilter(t *testing.T) {
 		"HasParentWith should NOT inject soft-delete filter because Parent has no deleted_at field")
 
 	// Verify generated code compiles.
+	// PR 6: WithChildren / WithParent moved from *XQuery methods to
+	// root-facade free functions WithParentChildren / WithChildParent.
 	testFile := filepath.Join(target, "softdelete_compile_test.go")
 	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
 
 import "testing"
 
 func TestSoftDeleteHasWithCompiles(t *testing.T) {
-	_ = (*ParentQuery).WithChildren
-	_ = (*ChildQuery).WithParent
+	_ = WithParentChildren
+	_ = WithChildParent
 }
 `), 0644))
 

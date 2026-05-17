@@ -267,6 +267,10 @@ var (
 		"%s_query.go",
 		"%s_mutation.go",
 		"%s_entql.go",
+		// PR 6: per-entity facade file at root; when an entity is dropped
+		// from the schema the facade must be cleaned up too, otherwise
+		// it leaves dangling references to deleted sub-package symbols.
+		"%s_facade.go",
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
