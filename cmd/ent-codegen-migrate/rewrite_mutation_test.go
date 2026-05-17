@@ -80,6 +80,31 @@ func hook(m *TaskMutation) { fmt.Println("hi"); m.SetTitle("hi") }
 	require.Contains(t, out, `m.SetField("title", "hi")`)
 }
 
+func TestRewriteMutation_SkipsSchemaDSLFalsePositive(t *testing.T) {
+	// Simulates the schema-DSL false-positive bug: a non-mutation receiver
+	// (e.g. schema field-builder) with a method name that overlaps a
+	// descriptor's known field (e.g. SetTitle) must not be rewritten.
+	// Before the fix: the matcher dispatched purely on method name and
+	// would rewrite f.SetTitle("hello") → f.SetField("title", "hello")
+	// on any receiver, corrupting consumer schema code.
+	descs := Descriptors{
+		"Task": &EntityDesc{
+			Name:   "Task",
+			Fields: map[string]FieldDesc{"title": {GoName: "Title", Type: "string"}},
+		},
+	}
+	src := `package x
+type SchemaField struct{}
+func (f *SchemaField) SetTitle(s string) *SchemaField { return f }
+func use(f *SchemaField) { f.SetTitle("hello") }
+`
+	out, err := RewriteMutationSource("schema.go", src, descs)
+	require.NoError(t, err)
+	require.Contains(t, out, `f.SetTitle("hello")`, "non-mutation receiver must be skipped")
+	require.NotContains(t, out, "SetField", "must not rewrite to mutation API on non-mutation receiver")
+	require.NotContains(t, out, "entbuilder", "must not add entbuilder import for skipped rewrite")
+}
+
 func TestRewriteMutation_AddsImportWhenNeeded(t *testing.T) {
 	descs := Descriptors{
 		"Task": &EntityDesc{Name: "Task", Fields: map[string]FieldDesc{"title": {GoName: "Title", Type: "string"}}},

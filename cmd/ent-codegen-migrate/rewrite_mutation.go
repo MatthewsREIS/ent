@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"fmt"
 	"go/ast"
-	"go/parser"
 	"go/printer"
 	"go/token"
 	"strings"
@@ -19,22 +18,24 @@ import (
 // RewriteMutationSource parses src, applies mutation API rewrites, and
 // returns the rewritten source. Used directly by tests; production callers
 // go through RewritePackage which file-walks.
+//
+// Rewrites are gated on the receiver's static type being a
+// *<pkg>.<Entity>Mutation — schema-DSL types with coincidentally-named
+// methods are left untouched. False-on-uncertain is the safe default:
+// a missed rewrite is recoverable by a follow-up tool run; a wrong
+// rewrite corrupts consumer code.
+//
+// Idempotent: re-running on already-transformed code produces the same
+// output (the new SetField/GetField/EdgeIDAs call shapes don't match
+// matchMutationCall patterns).
 func RewriteMutationSource(filename, src string, descs Descriptors) (string, error) {
-	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, filename, src, parser.ParseComments)
+	r, err := NewResolver(filename, src)
 	if err != nil {
-		return "", fmt.Errorf("parse: %w", err)
+		return "", err
 	}
+	fset := r.Fset
+	file := r.File
 
-	// Walk every CallExpr. Heuristic dispatch (no type info):
-	//   1. matchMutationCall parses the method name into (action, fieldOrEdge, isEdge)
-	//   2. lookup field/edge in any descriptor — first match wins
-	//   3. apply rewriteCall
-	// Special action "where" applies without descriptor lookup.
-	// False-positive risk: a non-mutation receiver with a method named like
-	// "SetTitle" gets rewritten. Mitigated by the integration test (Task 16)
-	// which runs `go build` on rewritten output; bad rewrites surface as
-	// compile errors. Production callers can pass `-dry-run` first.
 	needsEntbuilder := false
 	astutil.Apply(file, func(c *astutil.Cursor) bool {
 		call, ok := c.Node().(*ast.CallExpr)
@@ -47,6 +48,13 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 		}
 		_, action, fieldOrEdge, isEdge := matchMutationCall(sel.Sel.Name)
 		if action == "" {
+			return true
+		}
+		// Receiver-type gate: rewrite only if the receiver is a
+		// *<pkg>.<Entity>Mutation for some Entity in descs. Schema-DSL
+		// receivers (EdgeBuilder, FieldBuilder, custom helpers) are
+		// skipped — this was the bug that corrupted consumer schema files.
+		if !isMutationReceiver(r, call, descs) {
 			return true
 		}
 		// "where" doesn't need descriptor lookup — it's a pure rename.
@@ -111,6 +119,25 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 		return "", err
 	}
 	return buf.String(), nil
+}
+
+// isMutationReceiver reports whether the receiver of call has a static
+// type matching any *<pkg>.<Entity>Mutation in descs. Returns false on
+// uncertain (no type info) — safer to skip than to corrupt.
+func isMutationReceiver(r *Resolver, call *ast.CallExpr, descs Descriptors) bool {
+	return r.ReceiverTypeMatchesPattern(call, func(typeName string) bool {
+		// typeName looks like "*x.TaskMutation" or "*example.com/foo.TaskMutation".
+		// Match the trailing "<Entity>Mutation" against descriptor keys.
+		if !strings.HasPrefix(typeName, "*") {
+			return false
+		}
+		for ent := range descs {
+			if strings.HasSuffix(typeName, "."+ent+"Mutation") {
+				return true
+			}
+		}
+		return false
+	})
 }
 
 // matchMutationCall recognises method names like "SetTitle", "Title",
