@@ -47,21 +47,37 @@ func main() {
 		os.Exit(1)
 	}
 
+	// The generated root is the parent of the -descriptors directory
+	// (i.e. the parent of the internal/ package). The walker skips this
+	// subtree by absolute-path equality so consumer layouts where
+	// src/ent/ holds both src/ent/gen/ (generated) and
+	// src/ent/schema/ (hand-written) only skip the generated half.
+	genRoot, err := filepath.Abs(filepath.Dir(*descriptorsFlag))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ent-codegen-migrate: resolve generated root: %v\n", err)
+		os.Exit(1)
+	}
+
 	for _, pkg := range flag.Args() {
-		if err := RewritePackage(pkg, descs, *dryRunFlag); err != nil {
+		if err := RewritePackage(pkg, descs, genRoot, *dryRunFlag); err != nil {
 			fmt.Fprintf(os.Stderr, "ent-codegen-migrate: rewrite %s: %v\n", pkg, err)
 			os.Exit(1)
 		}
 	}
 }
 
-// RewritePackage walks pkgPath for .go files (excluding _test.go and any
-// path matching */ent/* generated trees) and applies all rewriters in
+// RewritePackage walks pkgPath for .go files and applies all rewriters in
 // canonical order: mutation → predicate → edge-method → typed-edge-accessor.
+//
+// The genRoot argument is the absolute path of the generated package root
+// (the parent of the -descriptors internal/ directory). The walker skips
+// that subtree by absolute-path equality so it does not rewrite generated
+// code while still descending into sibling hand-written packages (e.g.
+// src/ent/schema/ in consumer layouts).
 //
 // Each pass is idempotent; the chain is safe to re-run. Order matters
 // because later passes may inspect shapes produced by earlier ones.
-func RewritePackage(pkgPath string, descs Descriptors, dryRun bool) error {
+func RewritePackage(pkgPath string, descs Descriptors, genRoot string, dryRun bool) error {
 	passes := []struct {
 		name string
 		fn   func(string, string, Descriptors) (string, error)
@@ -76,11 +92,12 @@ func RewritePackage(pkgPath string, descs Descriptors, dryRun bool) error {
 			return err
 		}
 		if d.IsDir() {
-			// Skip generated trees.
-			if d.Name() == "gen" || d.Name() == "ent" || d.Name() == "internal" {
-				if strings.Contains(path, "/ent/") || strings.HasSuffix(path, "/ent") {
-					return filepath.SkipDir
-				}
+			absPath, err := filepath.Abs(path)
+			if err != nil {
+				return err
+			}
+			if absPath == genRoot {
+				return filepath.SkipDir
 			}
 			return nil
 		}
