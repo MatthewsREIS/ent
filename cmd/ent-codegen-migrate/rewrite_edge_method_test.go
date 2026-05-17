@@ -314,8 +314,8 @@ func use(ctx context.Context) {
 `
 	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
-	require.Contains(t, out, "ent.WithChatterMessageThread(",
-		"WithThread after Select must be rewritten to WithChatterMessageThread facade")
+	require.Contains(t, out, "ent.WithChatterMessageThread(q.Clone().",
+		"WithThread after Select must be rewritten to WithChatterMessageThread facade with correct chain receiver")
 	require.NotContains(t, out, ".WithThread(", "original WithThread call must not remain")
 }
 

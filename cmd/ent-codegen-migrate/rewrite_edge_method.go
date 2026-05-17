@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/printer"
+	"go/token"
 	"path"
 	"strings"
 
@@ -187,7 +188,7 @@ func resolveGenAlias(r *Resolver, genImportPath string) (alias string, addImport
 	return path.Base(genImportPath), true
 }
 
-// inferQueryReceiverEntity tries to deduce the entity name behind a
+// inferQueryReceiverEntityInFile deduces the entity name behind a
 // *<Entity>Query (or *<Entity>Select) receiver expression by walking the
 // AST when go/types resolution is unavailable (cross-package consumer
 // files where the importer can't see the generated ent package).
@@ -213,12 +214,7 @@ func resolveGenAlias(r *Resolver, genImportPath string) (alias string, addImport
 // Returns the entity name and true only when the chain unambiguously
 // resolves to an entity present in descs. Returns false otherwise — a
 // missed rewrite is recoverable, a wrong rewrite corrupts user code.
-func inferQueryReceiverEntity(expr ast.Expr, descs Descriptors, genAlias string) (string, bool) {
-	return inferQueryReceiverEntityInFile(expr, nil, descs, genAlias)
-}
-
-// inferQueryReceiverEntityInFile is the file-aware variant of
-// inferQueryReceiverEntity. file may be nil (disables ident scanning).
+// file may be nil (disables ident scanning).
 func inferQueryReceiverEntityInFile(expr ast.Expr, file *ast.File, descs Descriptors, genAlias string) (string, bool) {
 	// Terminal case: bare identifier — scan the file for its declaration.
 	if ident, ok := expr.(*ast.Ident); ok {
@@ -308,7 +304,7 @@ func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors) (
 			return false
 		}
 		assign, ok := n.(*ast.AssignStmt)
-		if !ok || assign.Tok.String() != ":=" {
+		if !ok || assign.Tok != token.DEFINE {
 			return true
 		}
 		for i, lhs := range assign.Lhs {
@@ -343,7 +339,7 @@ func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors) (
 func entityFromCompositeLitPtr(expr ast.Expr, descs Descriptors) (string, bool) {
 	// Unwrap & (unary address-of).
 	unary, ok := expr.(*ast.UnaryExpr)
-	if !ok || unary.Op.String() != "&" {
+	if !ok || unary.Op != token.AND {
 		return "", false
 	}
 	lit, ok := unary.X.(*ast.CompositeLit)
