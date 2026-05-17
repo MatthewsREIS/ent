@@ -90,6 +90,16 @@ type {{ plural $.Name }} = internal.{{ plural $.Name }}
 
 {{- /* Mutation aliases moved to mutation_type.tmpl (PR 6 sub-package owner). */}}
 
+// Error-check function aliases for the shared helpers in the internal package.
+var (
+	IsValidationError = internal.IsValidationError
+	IsNotFound        = internal.IsNotFound
+	MaskNotFound      = internal.MaskNotFound
+	IsNotSingular     = internal.IsNotSingular
+	IsNotLoaded       = internal.IsNotLoaded
+	IsConstraintError = internal.IsConstraintError
+)
+
 // setContextOp is an alias for the shared helper in the internal package.
 var setContextOp = internal.SetContextOp
 

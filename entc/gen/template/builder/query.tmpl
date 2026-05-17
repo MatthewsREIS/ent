@@ -393,14 +393,14 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 	{{- if eq $.Config.Storage.Name "sql" }}
 	{{ $receiver }}.Ctx.Fields = append([]string{field}, fields...)
 	grbuild := &{{ $groupBuilder }}{build: {{ $receiver }}}
-	grbuild.flds = &{{ $receiver }}.Ctx.Fields
+	grbuild.Flds = &{{ $receiver }}.Ctx.Fields
 	{{- else }}
 	{{ $receiver }}.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &{{ $groupBuilder }}{build: {{ $receiver }}}
-	grbuild.flds = &{{ $receiver }}.ctx.Fields
+	grbuild.Flds = &{{ $receiver }}.ctx.Fields
 	{{- end }}
-	grbuild.label = {{ $.PackageQualifier }}Label
-	grbuild.scan = grbuild.Scan
+	grbuild.Label = {{ $.PackageQualifier }}Label
+	grbuild.ScanFn = grbuild.Scan
 	return grbuild
 }
 
@@ -426,13 +426,13 @@ func ({{ $receiver }} *{{ $builder }}) Select(fields ...string) *{{ $selectBuild
 	{{- if eq $.Config.Storage.Name "sql" }}
 	{{ $receiver }}.Ctx.Fields = append({{ $receiver }}.Ctx.Fields, fields...)
 	sbuild := &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
-	sbuild.label = {{ $.PackageQualifier }}Label
-	sbuild.flds, sbuild.scan = &{{ $receiver }}.Ctx.Fields, sbuild.Scan
+	sbuild.Label = {{ $.PackageQualifier }}Label
+	sbuild.Flds, sbuild.ScanFn = &{{ $receiver }}.Ctx.Fields, sbuild.Scan
 	{{- else }}
 	{{ $receiver }}.ctx.Fields = append({{ $receiver }}.ctx.Fields, fields...)
 	sbuild := &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
-	sbuild.label = {{ $.PackageQualifier }}Label
-	sbuild.flds, sbuild.scan = &{{ $receiver }}.ctx.Fields, sbuild.Scan
+	sbuild.Label = {{ $.PackageQualifier }}Label
+	sbuild.Flds, sbuild.ScanFn = &{{ $receiver }}.ctx.Fields, sbuild.Scan
 	{{- end }}
 	return sbuild
 }
@@ -514,7 +514,7 @@ type {{ $groupBuilder }} struct {
 
 // Aggregate adds the given aggregation functions to the group-by query.
 func ({{ $groupReceiver }} *{{ $groupBuilder }}) Aggregate(fns ...AggregateFunc) *{{ $groupBuilder }} {
-	{{ $groupReceiver }}.fns = append({{ $groupReceiver }}.fns, fns...)
+	{{ $groupReceiver }}.Fns = append({{ $groupReceiver }}.Fns, fns...)
 	return {{ $groupReceiver }}
 }
 
@@ -552,7 +552,7 @@ type {{ $selectBuilder }} struct {
 
 // Aggregate adds the given aggregation functions to the selector query.
 func ({{ $selectReceiver }} *{{ $selectBuilder }}) Aggregate(fns ...AggregateFunc) *{{ $selectBuilder }} {
-	{{ $selectReceiver }}.fns = append({{ $selectReceiver }}.fns, fns...)
+	{{ $selectReceiver }}.Fns = append({{ $selectReceiver }}.Fns, fns...)
 	return {{ $selectReceiver }}
 }
 

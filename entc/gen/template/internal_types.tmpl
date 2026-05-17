@@ -357,18 +357,22 @@ type PredicateAdder interface {
 type QueryHook = func(context.Context, *sqlgraph.QuerySpec)
 
 // Selector embedded by the different Select/GroupBy builders.
+//
 // Fields are exported so both root and per-entity sub-package builders
 // (which receive Selector via a type alias) can assign and read them.
+// The scan-fn field is named ScanFn (not Scan) because the outer GroupBy
+// and Select types define their own Scan method — a same-named field would
+// be shadowed by the outer method and unassignable through the embed.
 type Selector struct {
-	Label string
-	Flds  *[]string
-	Fns   []AggregateFunc
-	Scan  func(context.Context, any) error
+	Label  string
+	Flds   *[]string
+	Fns    []AggregateFunc
+	ScanFn func(context.Context, any) error
 }
 
 // ScanX is like Scan, but panics if an error occurs.
 func (s *Selector) ScanX(ctx context.Context, v any) {
-	if err := s.Scan(ctx, v); err != nil {
+	if err := s.ScanFn(ctx, v); err != nil {
 		panic(err)
 	}
 }
@@ -381,7 +385,7 @@ func (s *Selector) ScanX(ctx context.Context, v any) {
 			return nil, errors.New("ent: {{ $plural }} is not achievable when selecting more than 1 field")
 		}
 		var v []{{ $t }}
-		if err := s.Scan(ctx, &v); err != nil {
+		if err := s.ScanFn(ctx, &v); err != nil {
 			return nil, err
 		}
 		return v, nil

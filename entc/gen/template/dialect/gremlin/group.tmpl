@@ -15,17 +15,17 @@ func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, root *{{
 		trs []any
 		names []any
 	)
-	for _, fn := range {{ $receiver }}.fns {
+	for _, fn := range {{ $receiver }}.Fns {
 		name, tr := fn("p", "")
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range *{{ $receiver }}.flds {
+	for _, f := range *{{ $receiver }}.Flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
 	query, bindings := root.gremlinQuery(ctx).Group().
-				By(__.Values(*{{ $receiver }}.flds...).Fold()).
+				By(__.Values(*{{ $receiver }}.Flds...).Fold()).
 				By(__.Fold().Match(trs...).Select(names...)).
 				Select(dsl.Values).
 				Next().
@@ -34,7 +34,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlinScan(ctx context.Context, root *{{
 	if err := {{ $receiver }}.build.Drv.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(*{{ $receiver }}.flds)+len({{ $receiver }}.fns) == 1 {
+	if len(*{{ $receiver }}.Flds)+len({{ $receiver }}.Fns) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()

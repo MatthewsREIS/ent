@@ -178,17 +178,24 @@ func IsConstraintError(err error) bool {
 }
 
 
-// selector embedded by the different Select/GroupBy builders.
+// selector is the embedded type used by the different Select/GroupBy builders.
+// It aliases internal.Selector — exported fields let both root and per-entity
+// sub-package builders assign Label/Flds/Fns/Scan via the embed.
+{{- if eq $.Storage.Name "sql" }}
+type selector = internal.Selector
+{{- else }}
+// For gremlin, selector retains its own struct because AggregateFunc has a
+// different signature and isn't shared via internal.
 type selector struct {
-    label string
-    flds *[]string
-	fns  []AggregateFunc
-	scan func (context.Context, any) error
+	Label  string
+	Flds   *[]string
+	Fns    []AggregateFunc
+	ScanFn func(context.Context, any) error
 }
 
 // ScanX is like Scan, but panics if an error occurs.
 func (s *selector) ScanX(ctx context.Context, v any) {
-	if err := s.scan(ctx, v); err != nil {
+	if err := s.ScanFn(ctx, v); err != nil {
 		panic(err)
 	}
 }
@@ -197,11 +204,11 @@ func (s *selector) ScanX(ctx context.Context, v any) {
 	{{ $plural := pascal $t | plural }}
 	// {{ $plural }} returns list of {{ plural $t }} from a selector. It is only allowed when selecting one field.
 	func (s *selector) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
-		if len(*s.flds) > 1 {
+		if len(*s.Flds) > 1 {
 			return nil, errors.New("{{ $pkg }}: {{ $plural }} is not achievable when selecting more than 1 field")
 		}
 		var v []{{ $t }}
-		if err := s.scan(ctx, &v); err != nil {
+		if err := s.ScanFn(ctx, &v); err != nil {
 			return nil, err
 		}
 		return v, nil
@@ -227,7 +234,7 @@ func (s *selector) ScanX(ctx context.Context, v any) {
 		case 1:
 			return v[0], nil
 		case 0:
-			err = &NotFoundError{Label: s.label}
+			err = &NotFoundError{Label: s.Label}
 		default:
 			err = fmt.Errorf("{{ $pkg }}: {{ $plural }} returned %d results when one was expected", len(v))
 		}
@@ -243,6 +250,7 @@ func (s *selector) ScanX(ctx context.Context, v any) {
 		return v
 	}
 {{ end }}
+{{- end }}
 
 
 // WithHooks invokes the builder operation with the given hooks, if any.
@@ -253,14 +261,8 @@ func WithHooks[V Value, M any, PM interface {
 	return internal.WithHooks[V, M, PM](ctx, exec, mutation, hooks)
 }
 
-// setContextOp returns a new context with the given QueryContext attached (including its op) in case it does not exist.
-func setContextOp(ctx context.Context, qc *QueryContext, op string) context.Context {
-	if ent.QueryFromContext(ctx) == nil {
-		qc.Op = op
-		ctx = ent.NewQueryContext(ctx, qc)
-	}
-	return ctx
-}
+// setContextOp aliases the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
 
 func querierAll[V Value, Q interface {
 	{{ $.Storage }}All(context.Context, ...queryHook) (V, error)
@@ -286,19 +288,10 @@ func querierCount[Q interface {
 	})
 }
 
-func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (v V, err error) {
-	for i := len(inters) - 1; i >= 0; i-- {
-		qr = inters[i].Intercept(qr)
-	}
-	rv, err := qr.Query(ctx, q)
-	if err != nil {
-		return v, err
-	}
-	vt, ok := rv.(V)
-	if !ok {
-		return v, fmt.Errorf("unexpected type %T returned from %T. expected type: %T", vt, q, v)
-	}
-	return vt, nil
+// withInterceptors wraps internal.WithInterceptors. Generic functions can't be
+// assigned to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
 }
 
 

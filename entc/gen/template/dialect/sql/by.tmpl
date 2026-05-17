@@ -43,7 +43,7 @@ func checkColumn(t, c string) error {
 
 {{/* custom signature for group-by function */}}
 {{ define "dialect/sql/group/signature" -}}
-	type AggregateFunc func(*sql.Selector) string
+	type AggregateFunc = internal.AggregateFunc
 {{- end }}
 
 {{ define "dialect/sql/group/as" -}}
