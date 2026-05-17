@@ -81,3 +81,67 @@ jq -s '.[0] as $a | .[1] as $b | $b | {fixture, total_loc_delta: (.total_loc - $
 ```
 
 (Adapt by fixture if running multiple — the snippet above assumes one-line files.)
+
+## PR 6 measurement (per-entity sub-packages)
+
+Fixture-scale numbers captured the same way as prior PRs:
+
+```
+go run ./cmd/bench-codegen -fixture privacy    > /tmp/pr6-privacy.jsonl
+go run ./cmd/bench-codegen -fixture hooks      > /tmp/pr6-hooks.jsonl
+go run ./cmd/bench-codegen -fixture edgeschema > /tmp/pr6-edgeschema.jsonl
+grep -h '^{' /tmp/pr6-*.jsonl > internal/bench/pr6.jsonl
+```
+
+Comparison against `pr5.jsonl` (git_sha `97573bbcb`):
+
+| Fixture    | Metric                    | PR 5     | PR 6     | Δ      |
+|------------|---------------------------|----------|----------|--------|
+| privacy    | total_loc                 | 9,878    | 10,515   | +6.4%  |
+| privacy    | build_peak_rss (MB)       | 87.0     | 67.3     | -22.7% |
+| privacy    | build_wall (ms)           | 661.2    | 674.6    | +2.0%  |
+| hooks      | total_loc                 | 10,560   | 11,190   | +6.0%  |
+| hooks      | build_peak_rss (MB)       | 81.8     | 70.7     | -13.6% |
+| hooks      | build_wall (ms)           | 659.4    | 693.1    | +5.1%  |
+| edgeschema | total_loc                 | 47,144   | 50,541   | +7.2%  |
+| edgeschema | build_peak_rss (MB)       | 255.2    | 138.4    | -45.8% |
+| edgeschema | build_wall (ms)           | 2,463.5  | 2,388.0  | -3.1%  |
+
+(Full precision in the JSONL; MB = 1,048,576 bytes.)
+
+### Fixture-scale findings
+
+- **LOC up ~6–7%** across all three fixtures. Expected: each entity now ships
+  in its own leaf sub-package, which adds per-package boilerplate (package
+  clause, imports, facade re-exports) that is amortized poorly at low entity
+  counts (3–13 entities here).
+- **build_wall stays in the noise** at fixture scale — small fixtures fit in
+  one compile process, so the parallel-compile win from sub-packages does
+  not materialize.
+- **build_peak_rss drops 14–46%** — the headline PR 6 win at fixture scale.
+  Each sub-package is compiled independently, so the Go compiler holds far
+  less per-package state in memory at any one time. The edgeschema fixture
+  (largest, 13 entities) sees the biggest reduction because peak RSS in PR 5
+  was dominated by a single large `ent` package.
+
+### Consumer-scale measurement (deferred)
+
+Consumer-scale numbers require:
+
+1. Migrate consumer source via `go run ./cmd/ent-codegen-migrate -gen-package <pkg> <consumer-dir>`
+2. Regenerate consumer ent via the consumer's `go generate`
+3. Run `bash /tmp/bench-pr6.sh post-pr6` to capture the JSONL
+
+This is deferred pending two follow-up items outside PR 6 scope:
+
+- **Migration tool gap**: `.With<Edge>()` chains in the schema package need
+  a syntactic fallback when type resolution can't load the schema package
+  (mirrors the chain walker added for `Query<Edge>()` in commit `5de8a3cde`).
+  Without this, schema files referencing the stale gen API can't be migrated.
+- **External dependency**: `entgo.io/contrib/entgql`'s `gql_collection_*.go`
+  template emits methods on `*<Entity>Query`, but those types now live in
+  per-entity sub-packages. Fixing this requires a template update in the
+  `entgql` repo.
+
+PR 6 codegen correctness is independently proven via the `entc/integration`
+fixture suite (Task 20).
