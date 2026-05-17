@@ -319,6 +319,84 @@ func use(ctx context.Context) {
 	require.NotContains(t, out, ".WithThread(", "original WithThread call must not remain")
 }
 
+// TestRewriteEdgeMethod_WithEdge_AfterSelect_TypeAssertion covers the real
+// consumer pattern where the query variable is obtained via a type assertion:
+//
+//	query, ok := q.(*gen.ChatterMessageQuery)
+//
+// The chain walker must resolve the bare ident "query" through its
+// type-assertion RHS to extract the entity name (ChatterMessage) and
+// rewrite the subsequent WithThread call.
+func TestRewriteEdgeMethod_WithEdge_AfterSelect_TypeAssertion(t *testing.T) {
+	descs := Descriptors{
+		"ChatterMessage": &EntityDesc{
+			Name: "ChatterMessage",
+			Edges: map[string]EdgeDesc{
+				"thread": {Cardinality: "entbuilder.M2O", TargetIDType: "int", Target: "ChatterThread"},
+			},
+		},
+		"ChatterThread": &EntityDesc{
+			Name:  "ChatterThread",
+			Edges: map[string]EdgeDesc{},
+		},
+	}
+	src := `package x
+import "external/gen"
+import "external/chattermessage"
+import "context"
+func use(ctx context.Context, q any) error {
+    query, ok := q.(*gen.ChatterMessageQuery)
+    if !ok {
+        return nil
+    }
+    _, err := query.Clone().
+        Select(chattermessage.FieldID).
+        WithThread(func(qq *gen.ChatterThreadQuery) {}).
+        All(ctx)
+    return err
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.WithChatterMessageThread(query.Clone().",
+		"WithThread after type-assertion must be rewritten with correct chain receiver")
+	require.NotContains(t, out, ".WithThread(", "original WithThread call must not remain")
+}
+
+// TestRewriteEdgeMethod_WithEdge_TypeAssertion_NoCommaOk covers the
+// single-value type-assertion form (without comma-ok):
+//
+//	query := q.(*gen.ChatterMessageQuery)
+//
+// The walker must resolve "query" to ChatterMessage and rewrite WithThread.
+func TestRewriteEdgeMethod_WithEdge_TypeAssertion_NoCommaOk(t *testing.T) {
+	descs := Descriptors{
+		"ChatterMessage": &EntityDesc{
+			Name: "ChatterMessage",
+			Edges: map[string]EdgeDesc{
+				"thread": {Cardinality: "entbuilder.M2O", TargetIDType: "int", Target: "ChatterThread"},
+			},
+		},
+		"ChatterThread": &EntityDesc{
+			Name:  "ChatterThread",
+			Edges: map[string]EdgeDesc{},
+		},
+	}
+	src := `package x
+import "external/gen"
+import "context"
+func use(ctx context.Context, q any) {
+    query := q.(*gen.ChatterMessageQuery)
+    _ = query.WithThread(func(qq *gen.ChatterThreadQuery) {})
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.WithChatterMessageThread(query,",
+		"WithThread after no-comma-ok type assertion must be rewritten")
+	require.NotContains(t, out, "query.WithThread(", "original WithThread call must not remain")
+}
+
 // TestRewriteEdgeMethod_WithEdge_AfterSelect_NoMatchOnUnknownEdge verifies
 // that a .Select().WithFoo() chain where "foo" is NOT an edge on the
 // inferred entity is NOT rewritten. This guards the new Select-handling

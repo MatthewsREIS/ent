@@ -315,8 +315,10 @@ func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors) (
 			if i >= len(assign.Rhs) {
 				continue
 			}
-			// Look for &<pkg>.<Entity>Query{} or &<pkg>.<Entity>Select{} on the RHS.
-			if entity, ok := entityFromCompositeLitPtr(assign.Rhs[i], descs); ok {
+			// Look for &<pkg>.<Entity>Query{} / &<pkg>.<Entity>Select{}
+			// composite literals, or q.(*<pkg>.<Entity>Query) type
+			// assertions (comma-ok and single-value forms) on the RHS.
+			if entity, ok := entityFromAssignedPtrType(assign.Rhs[i], descs); ok {
 				found = entity
 				return false
 			}
@@ -329,34 +331,64 @@ func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors) (
 	return "", false
 }
 
-// entityFromCompositeLitPtr checks whether expr is &<pkg>.<Entity>{Query,Select}{}
-// and returns the entity name when the type name matches a known entity.
+// entityFromAssignedPtrType extracts the entity name from two RHS expression
+// shapes that assign a typed query/select pointer to a short variable:
+//
+//  1. Composite-literal pointer:   &<pkg>.<Entity>{Query,Select,Client}{}
+//  2. Type-assertion pointer:      <expr>.(*<pkg>.<Entity>{Query,Select,Client})
+//     — covers both the comma-ok form (query, ok := ...) and the
+//     single-value form (query := ...).
+//
 // Both *<Entity>Query and *<Entity>Select are recognised (same entity context).
 // The package qualifier is not checked — any qualified type whose name suffix
-// is "Query" or "Select" and whose prefix matches a known entity is accepted.
-// This mirrors the permissiveness of the existing "Query" selector case in
-// inferQueryReceiverEntityInFile which also omits a package-qualifier check.
-func entityFromCompositeLitPtr(expr ast.Expr, descs Descriptors) (string, bool) {
-	// Unwrap & (unary address-of).
-	unary, ok := expr.(*ast.UnaryExpr)
-	if !ok || unary.Op != token.AND {
-		return "", false
+// is "Query", "Select", or "Client" and whose prefix matches a known entity is
+// accepted. This mirrors the permissiveness of the existing "Query" selector
+// case in inferQueryReceiverEntityInFile which also omits a package check.
+// The safety gate is the descs lookup: only known entities are returned.
+func entityFromAssignedPtrType(expr ast.Expr, descs Descriptors) (string, bool) {
+	// Shape 1: &<pkg>.<Entity>Query{} — unary address-of a composite literal.
+	if unary, ok := expr.(*ast.UnaryExpr); ok && unary.Op == token.AND {
+		if lit, ok := unary.X.(*ast.CompositeLit); ok && lit.Type != nil {
+			var typeName string
+			switch t := lit.Type.(type) {
+			case *ast.SelectorExpr:
+				typeName = t.Sel.Name
+			case *ast.Ident:
+				typeName = t.Name
+			}
+			if entity, ok := entityNameFromQueryTypeName(typeName, descs); ok {
+				return entity, true
+			}
+		}
 	}
-	lit, ok := unary.X.(*ast.CompositeLit)
-	if !ok || lit.Type == nil {
-		return "", false
+
+	// Shape 2: <expr>.(*<pkg>.<Entity>Query) — type assertion to a pointer type.
+	// The asserted type must be *T where T encodes the entity name.
+	if ta, ok := expr.(*ast.TypeAssertExpr); ok && ta.Type != nil {
+		star, ok := ta.Type.(*ast.StarExpr)
+		if !ok {
+			return "", false
+		}
+		var typeName string
+		switch t := star.X.(type) {
+		case *ast.SelectorExpr:
+			typeName = t.Sel.Name
+		case *ast.Ident:
+			typeName = t.Name
+		}
+		if entity, ok := entityNameFromQueryTypeName(typeName, descs); ok {
+			return entity, true
+		}
 	}
-	// Accept both "pkg.EntityQuery{}" (SelectorExpr) and "EntityQuery{}" (Ident).
-	var typeName string
-	switch t := lit.Type.(type) {
-	case *ast.SelectorExpr:
-		typeName = t.Sel.Name
-	case *ast.Ident:
-		typeName = t.Name
-	default:
-		return "", false
-	}
-	for _, suffix := range []string{"Query", "Select"} {
+
+	return "", false
+}
+
+// entityNameFromQueryTypeName strips a recognised suffix ("Query", "Select",
+// "Client") from typeName and returns the entity prefix when it exists in
+// descs. Returns ("", false) otherwise.
+func entityNameFromQueryTypeName(typeName string, descs Descriptors) (string, bool) {
+	for _, suffix := range []string{"Query", "Select", "Client"} {
 		if entity, found := strings.CutSuffix(typeName, suffix); found && entity != "" {
 			if _, present := descs[entity]; present {
 				return entity, true
