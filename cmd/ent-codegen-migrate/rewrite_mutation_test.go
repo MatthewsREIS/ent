@@ -105,6 +105,35 @@ func use(f *SchemaField) { f.SetTitle("hello") }
 	require.NotContains(t, out, "entbuilder", "must not add entbuilder import for skipped rewrite")
 }
 
+func TestRewriteMutation_Idempotent(t *testing.T) {
+	descs := Descriptors{
+		"Task": &EntityDesc{
+			Name:   "Task",
+			Fields: map[string]FieldDesc{"title": {GoName: "Title", Type: "string"}},
+			Edges:  map[string]EdgeDesc{"teams": {Cardinality: "entbuilder.M2M", TargetIDType: "int"}},
+		},
+	}
+	src := `package x
+type TaskMutation struct{}
+func (m *TaskMutation) SetTitle(s string) {}
+func (m *TaskMutation) Title() (string, bool) { return "", false }
+func (m *TaskMutation) AddTeamIDs(ids ...int) {}
+func hook(m *TaskMutation) {
+	m.SetTitle("hi")
+	v, _ := m.Title()
+	_ = v
+	m.AddTeamIDs(1, 2)
+}
+`
+	pass1, err := RewriteMutationSource("hook.go", src, descs)
+	require.NoError(t, err)
+	require.NotEqual(t, src, pass1, "first pass must transform the source")
+
+	pass2, err := RewriteMutationSource("hook.go", pass1, descs)
+	require.NoError(t, err)
+	require.Equal(t, pass1, pass2, "second pass must be a no-op (idempotent)")
+}
+
 func TestRewriteMutation_AddsImportWhenNeeded(t *testing.T) {
 	descs := Descriptors{
 		"Task": &EntityDesc{Name: "Task", Fields: map[string]FieldDesc{"title": {GoName: "Title", Type: "string"}}},
