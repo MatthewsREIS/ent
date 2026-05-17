@@ -207,7 +207,10 @@ func (c *{{ $client }}) Interceptors() []Interceptor {
 }
 
 {{ if not $n.IsView }}
-func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (Value, error) {
+// Mutate dispatches a mutation to the appropriate builder. Exported so
+// the root Client.Mutate switch can dispatch into the sub-package across
+// the package boundary (PR 6).
+func (c *{{ $client }}) Mutate(ctx context.Context, m *{{ $n.MutationName }}) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
 		return {{ $q }}New{{ $n.CreateName }}(c.Config, c.Hooks(), m).Save(ctx)

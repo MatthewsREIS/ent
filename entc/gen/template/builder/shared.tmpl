@@ -229,11 +229,24 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 
 {{- if $.Config.FeatureEnabled "entql" }}
 
-// schemaGraph holds a single-node view of this entity's schema for
-// entql predicate evaluation. Cross-edge references use string names
-// only so no sibling-package imports are needed.
+// schemaGraph holds this entity's schema for entql predicate evaluation.
+// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
+// (Type name only — cross-entity field/column metadata is not accessible
+// from a leaf sub-package). The stubs are sufficient for entql.HasEdge /
+// HasEdgeWith dispatch on the join table; cross-edge field predicates
+// against sibling entities are out of scope at the sub-package boundary.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 1)}
+	{{- /* Deduplicate edge target names: an entity can have multiple edges
+	       pointing at the same neighbor (e.g., owner + reviewer → User). */}}
+	{{- $stubs := dict $.Name true }}
+	{{- $stubNames := list }}
+	{{- range $e := $.Edges }}
+	{{- if not (hasKey $stubs $e.Type.Name) }}
+	{{- $stubs = set $stubs $e.Type.Name true }}
+	{{- $stubNames = append $stubNames $e.Type.Name }}
+	{{- end }}
+	{{- end }}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, {{ add 1 (len $stubNames) }})}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   Table,
@@ -258,6 +271,9 @@ var schemaGraph = func() *sqlgraph.Schema {
 			{{- end }}
 		},
 	}
+	{{- range $i, $name := $stubNames }}
+	graph.Nodes[{{ add 1 $i }}] = &sqlgraph.Node{Type: "{{ $name }}"}
+	{{- end }}
 	{{- range $e := $.Edges }}
 	graph.MustAddE(
 		"{{ $e.Name }}",

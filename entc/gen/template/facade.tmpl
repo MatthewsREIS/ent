@@ -74,6 +74,9 @@ type (
 // Constructor aliases — the sub-package's New<X> stays the source of truth.
 var (
 	New{{ $client }} = {{ $.PackageDir }}.New{{ $client }}
+	{{- if and (not $n.IsView) ($n.FeatureEnabled "entql") }}
+	New{{ $n.FilterName }}ForMutation = {{ $.PackageDir }}.New{{ $n.FilterName }}ForMutation
+	{{- end }}
 )
 
 {{- /* Cross-entity edge wiring. Sub-package *Query / *Client are leaves;
