@@ -9,7 +9,9 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "client/type" }}
 {{ $pkg := base $.Config.Package }}
 
-{{ template "header" $ }}
+{{ with extend $ "Package" $.Package }}
+	{{ template "header" . }}
+{{ end }}
 
 {{ with extend $ "Imports" $.SiblingImports "CreateUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
 	{{ template "import" . }}
