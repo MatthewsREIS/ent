@@ -247,3 +247,111 @@ func use(h *Helper) *Helper { return h.QueryTeams() }
 	require.NotContains(t, out, genPath,
 		"no rewrite emitted → no gen import should be added")
 }
+
+// TestRewriteEdgeMethod_WithEdge_Chained covers the cross-package shape:
+// gen.FromContext(ctx).ChatterMessage.Query().WithThread(...).AllX(ctx)
+// where go/types cannot resolve the receiver because the consumer file
+// imports an external gen package. The syntactic chain walker must infer
+// the *ChatterMessageQuery receiver from the .<Entity>.Query() prefix
+// and rewrite to the With<Entity><Edge> facade variant.
+func TestRewriteEdgeMethod_WithEdge_Chained(t *testing.T) {
+	descs := Descriptors{
+		"ChatterMessage": &EntityDesc{
+			Name: "ChatterMessage",
+			Edges: map[string]EdgeDesc{
+				"thread": {Cardinality: "entbuilder.M2O", TargetIDType: "int", Target: "ChatterThread"},
+			},
+		},
+		"ChatterThread": &EntityDesc{
+			Name:  "ChatterThread",
+			Edges: map[string]EdgeDesc{},
+		},
+	}
+	src := `package x
+import "external/gen"
+import "context"
+func use(ctx context.Context) {
+    _ = gen.FromContext(ctx).ChatterMessage.Query().
+        WithThread(func(q *gen.ChatterThreadQuery) {}).
+        AllX(ctx)
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.WithChatterMessageThread(gen.FromContext(ctx).ChatterMessage.Query(),",
+		"cross-package WithThread must be rewritten to WithChatterMessageThread facade")
+	require.NotContains(t, out, ".WithThread(", "original WithThread call must not remain")
+}
+
+// TestRewriteEdgeMethod_WithEdge_AfterSelect covers the real consumer shape:
+// q.Clone().Select(...).WithThread(...).All(ctx) where after .Select(...)
+// the receiver becomes *<Entity>Select (not *<Entity>Query), which the chain
+// walker must recognise as still belonging to the same entity.
+func TestRewriteEdgeMethod_WithEdge_AfterSelect(t *testing.T) {
+	descs := Descriptors{
+		"ChatterMessage": &EntityDesc{
+			Name: "ChatterMessage",
+			Edges: map[string]EdgeDesc{
+				"thread": {Cardinality: "entbuilder.M2O", TargetIDType: "int", Target: "ChatterThread"},
+			},
+		},
+		"ChatterThread": &EntityDesc{
+			Name:  "ChatterThread",
+			Edges: map[string]EdgeDesc{},
+		},
+	}
+	src := `package x
+import "external/gen"
+import "external/chattermessage"
+import "context"
+func use(ctx context.Context) {
+    q := &gen.ChatterMessageQuery{}
+    _, _ = q.Clone().
+        Select(chattermessage.FieldID).
+        WithThread(func(qq *gen.ChatterThreadQuery) {}).
+        All(ctx)
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.WithChatterMessageThread(",
+		"WithThread after Select must be rewritten to WithChatterMessageThread facade")
+	require.NotContains(t, out, ".WithThread(", "original WithThread call must not remain")
+}
+
+// TestRewriteEdgeMethod_WithEdge_AfterSelect_NoMatchOnUnknownEdge verifies
+// that a .Select().WithFoo() chain where "foo" is NOT an edge on the
+// inferred entity is NOT rewritten. This guards the new Select-handling
+// path against false-positive matches on unrelated method names.
+func TestRewriteEdgeMethod_WithEdge_AfterSelect_NoMatchOnUnknownEdge(t *testing.T) {
+	descs := Descriptors{
+		"ChatterMessage": &EntityDesc{
+			Name: "ChatterMessage",
+			Edges: map[string]EdgeDesc{
+				"thread": {Cardinality: "entbuilder.M2O", TargetIDType: "int", Target: "ChatterThread"},
+			},
+		},
+		"ChatterThread": &EntityDesc{
+			Name:  "ChatterThread",
+			Edges: map[string]EdgeDesc{},
+		},
+	}
+	src := `package x
+import "external/gen"
+import "external/chattermessage"
+import "context"
+func use(ctx context.Context) {
+    q := &gen.ChatterMessageQuery{}
+    _, _ = q.Clone().
+        Select(chattermessage.FieldID).
+        WithUnknownEdge(func() {}).
+        All(ctx)
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, "WithUnknownEdge(",
+		"unknown edge must NOT be rewritten")
+	require.NotContains(t, out, "ent.WithChatterMessage",
+		"no rewrite must fire for unknown edge")
+}

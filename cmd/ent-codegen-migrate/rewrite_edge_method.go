@@ -88,6 +88,23 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors, genImportP
 				})
 				return true
 			}
+			// Syntactic fallback for cross-package consumers where go/types
+			// can't resolve the receiver. Walk the call chain to infer the
+			// entity from the *<Entity>Query (or *<Entity>Select) receiver,
+			// then verify the edge exists before emitting.
+			if entity, ok := inferQueryReceiverEntityInFile(sel.X, r.File, descs, alias); ok {
+				if edgeDescLookup(descs[entity], edge) {
+					newArgs := append([]ast.Expr{sel.X}, call.Args...)
+					emit(c, &ast.CallExpr{
+						Fun: &ast.SelectorExpr{
+							X:   ast.NewIdent(alias),
+							Sel: ast.NewIdent("With" + entity + edge),
+						},
+						Args: newArgs,
+					})
+					return true
+				}
+			}
 		}
 		if edge, ok := strings.CutPrefix(methodName, "Query"); ok && edge != "" {
 			if entity, matched := matchEdgeReceiver(r, call, descs, "Client", edge); matched {
@@ -115,7 +132,7 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors, genImportP
 				})
 				return true
 			}
-			if entity, ok := inferQueryReceiverEntity(sel.X, descs, alias); ok {
+			if entity, ok := inferQueryReceiverEntityInFile(sel.X, r.File, descs, alias); ok {
 				if edgeDescLookup(descs[entity], edge) {
 					emit(c, &ast.CallExpr{
 						Fun: &ast.SelectorExpr{
@@ -171,9 +188,9 @@ func resolveGenAlias(r *Resolver, genImportPath string) (alias string, addImport
 }
 
 // inferQueryReceiverEntity tries to deduce the entity name behind a
-// *<Entity>Query receiver expression by walking the AST when go/types
-// resolution is unavailable (cross-package consumer files where the
-// importer can't see the generated ent package).
+// *<Entity>Query (or *<Entity>Select) receiver expression by walking the
+// AST when go/types resolution is unavailable (cross-package consumer
+// files where the importer can't see the generated ent package).
 //
 // Recognised shapes (chained from a client):
 //
@@ -181,6 +198,12 @@ func resolveGenAlias(r *Resolver, genImportPath string) (alias string, addImport
 //	<expr>.Query<Edge>()                → descs[parent(expr)].Edges[edge].Target
 //	<expr>.Where(...) | .Order(...) etc → recurse into <expr>
 //	<expr>.Clone() | .Modify(...) etc   → recurse into <expr>
+//	<expr>.Select(...)                  → recurse into <expr> (entity preserved)
+//	<ident> declared as &<pkg>.<E>Query{} → entity (via file short-var scan)
+//
+// file is the file's AST (may be nil). When non-nil it enables a terminal
+// fallback that looks up bare identifiers via their short-var declarations
+// (e.g. "q := &gen.ChatterMessageQuery{}" → "ChatterMessage").
 //
 // genAlias is the local identifier this file binds the gen package to;
 // it gates the "prior pass rewrote an inner segment" branch so we only
@@ -191,6 +214,19 @@ func resolveGenAlias(r *Resolver, genImportPath string) (alias string, addImport
 // resolves to an entity present in descs. Returns false otherwise — a
 // missed rewrite is recoverable, a wrong rewrite corrupts user code.
 func inferQueryReceiverEntity(expr ast.Expr, descs Descriptors, genAlias string) (string, bool) {
+	return inferQueryReceiverEntityInFile(expr, nil, descs, genAlias)
+}
+
+// inferQueryReceiverEntityInFile is the file-aware variant of
+// inferQueryReceiverEntity. file may be nil (disables ident scanning).
+func inferQueryReceiverEntityInFile(expr ast.Expr, file *ast.File, descs Descriptors, genAlias string) (string, bool) {
+	// Terminal case: bare identifier — scan the file for its declaration.
+	if ident, ok := expr.(*ast.Ident); ok {
+		if file == nil {
+			return "", false
+		}
+		return inferEntityFromIdent(ident, file, descs)
+	}
 	call, ok := expr.(*ast.CallExpr)
 	if !ok {
 		return "", false
@@ -222,7 +258,7 @@ func inferQueryReceiverEntity(expr ast.Expr, descs Descriptors, genAlias string)
 		}
 		// QueryEdge: walk back to the parent entity, then look up edge target.
 		if edge, found := strings.CutPrefix(sel.Sel.Name, "Query"); found && edge != "" {
-			parent, ok := inferQueryReceiverEntity(sel.X, descs, genAlias)
+			parent, ok := inferQueryReceiverEntityInFile(sel.X, file, descs, genAlias)
 			if !ok {
 				return "", false
 			}
@@ -239,14 +275,99 @@ func inferQueryReceiverEntity(expr ast.Expr, descs Descriptors, genAlias string)
 			}
 			return edesc.Target, true
 		}
+		// Select returns *<Entity>Select (not *<Entity>Query), so it is NOT
+		// a passthrough in the isQueryPassthrough sense. However the entity
+		// context is the same — Select operates on the same entity as the
+		// preceding Query call — so we can safely recurse into sel.X.
+		if sel.Sel.Name == "Select" {
+			return inferQueryReceiverEntityInFile(sel.X, file, descs, genAlias)
+		}
 		// Pass-through query-builder methods that preserve receiver type.
 		// Be conservative: only recurse on names known to belong to the
 		// generated *<Entity>Query builder so we don't follow random calls.
 		if isQueryPassthrough(sel.Sel.Name) {
-			return inferQueryReceiverEntity(sel.X, descs, genAlias)
+			return inferQueryReceiverEntityInFile(sel.X, file, descs, genAlias)
 		}
 		return "", false
 	}
+}
+
+// inferEntityFromIdent resolves a bare identifier to an entity name by
+// scanning the file AST for the identifier's short-var declaration.
+// Handles the common consumer pattern:
+//
+//	q := &<genAlias>.<Entity>Query{}
+//
+// where the RHS composite literal's type name encodes the entity.
+// Returns ("", false) if no recognisable declaration is found.
+func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors) (string, bool) {
+	want := ident.Name
+	var found string
+	ast.Inspect(file, func(n ast.Node) bool {
+		if found != "" {
+			return false
+		}
+		assign, ok := n.(*ast.AssignStmt)
+		if !ok || assign.Tok.String() != ":=" {
+			return true
+		}
+		for i, lhs := range assign.Lhs {
+			lhsIdent, ok := lhs.(*ast.Ident)
+			if !ok || lhsIdent.Name != want {
+				continue
+			}
+			if i >= len(assign.Rhs) {
+				continue
+			}
+			// Look for &<pkg>.<Entity>Query{} or &<pkg>.<Entity>Select{} on the RHS.
+			if entity, ok := entityFromCompositeLitPtr(assign.Rhs[i], descs); ok {
+				found = entity
+				return false
+			}
+		}
+		return true
+	})
+	if found != "" {
+		return found, true
+	}
+	return "", false
+}
+
+// entityFromCompositeLitPtr checks whether expr is &<pkg>.<Entity>{Query,Select}{}
+// and returns the entity name when the type name matches a known entity.
+// Both *<Entity>Query and *<Entity>Select are recognised (same entity context).
+// The package qualifier is not checked — any qualified type whose name suffix
+// is "Query" or "Select" and whose prefix matches a known entity is accepted.
+// This mirrors the permissiveness of the existing "Query" selector case in
+// inferQueryReceiverEntityInFile which also omits a package-qualifier check.
+func entityFromCompositeLitPtr(expr ast.Expr, descs Descriptors) (string, bool) {
+	// Unwrap & (unary address-of).
+	unary, ok := expr.(*ast.UnaryExpr)
+	if !ok || unary.Op.String() != "&" {
+		return "", false
+	}
+	lit, ok := unary.X.(*ast.CompositeLit)
+	if !ok || lit.Type == nil {
+		return "", false
+	}
+	// Accept both "pkg.EntityQuery{}" (SelectorExpr) and "EntityQuery{}" (Ident).
+	var typeName string
+	switch t := lit.Type.(type) {
+	case *ast.SelectorExpr:
+		typeName = t.Sel.Name
+	case *ast.Ident:
+		typeName = t.Name
+	default:
+		return "", false
+	}
+	for _, suffix := range []string{"Query", "Select"} {
+		if entity, found := strings.CutSuffix(typeName, suffix); found && entity != "" {
+			if _, present := descs[entity]; present {
+				return entity, true
+			}
+		}
+	}
+	return "", false
 }
 
 // entityFromFacadeName extracts the result entity from a rewritten facade
