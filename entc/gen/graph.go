@@ -340,6 +340,15 @@ func generate(g *Graph) error {
 		for _, pattern := range deletedTypeTemplates {
 			name := fmt.Sprintf(pattern, n.PackageDir())
 			p := filepath.Join(g.Target, name)
+			// Skip files that are about to be (re)written from the in-memory
+			// assets — only stub paths that are genuinely orphaned on disk.
+			// Some patterns in deletedTypeTemplates (e.g. %s_facade.go) still
+			// correspond to active emissions; without this guard we'd clobber
+			// the freshly-generated content and rely on assets.format()
+			// rewriting it back from the in-memory map.
+			if _, regenerated := assets.files[p]; regenerated {
+				continue
+			}
 			if _, err := os.Stat(p); err == nil {
 				if err := os.WriteFile(p, stub, 0644); err != nil {
 					log.Printf("stub old file %s: %s\n", p, err)
