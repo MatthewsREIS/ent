@@ -56,9 +56,21 @@ func main() {
 }
 
 // RewritePackage walks pkgPath for .go files (excluding _test.go and any
-// path matching */ent/* generated trees) and applies both the mutation
-// and predicate rewriters.
+// path matching */ent/* generated trees) and applies all rewriters in
+// canonical order: mutation → predicate → edge-method → typed-edge-accessor.
+//
+// Each pass is idempotent; the chain is safe to re-run. Order matters
+// because later passes may inspect shapes produced by earlier ones.
 func RewritePackage(pkgPath string, descs Descriptors, dryRun bool) error {
+	passes := []struct {
+		name string
+		fn   func(string, string, Descriptors) (string, error)
+	}{
+		{"mutation", RewriteMutationSource},
+		{"predicate", RewritePredicateSource},
+		{"edge-method", RewriteEdgeMethodSource},
+		{"typed-edge-accessor", RewriteTypedEdgeAccessorSource},
+	}
 	return filepath.WalkDir(pkgPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -79,15 +91,12 @@ func RewritePackage(pkgPath string, descs Descriptors, dryRun bool) error {
 		if err != nil {
 			return err
 		}
-		// Mutation rewrite first, then predicate (so AST node identities
-		// stay stable through each pass).
-		out, err := RewriteMutationSource(path, string(src), descs)
-		if err != nil {
-			return fmt.Errorf("%s: mutation rewrite: %w", path, err)
-		}
-		out, err = RewritePredicateSource(path, out, descs)
-		if err != nil {
-			return fmt.Errorf("%s: predicate rewrite: %w", path, err)
+		out := string(src)
+		for _, p := range passes {
+			out, err = p.fn(path, out, descs)
+			if err != nil {
+				return fmt.Errorf("%s: %s rewrite: %w", path, p.name, err)
+			}
 		}
 		if out == string(src) {
 			return nil

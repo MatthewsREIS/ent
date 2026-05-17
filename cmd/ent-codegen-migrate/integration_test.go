@@ -13,6 +13,33 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestIntegration_AllPassesAgainstEdgesFixture(t *testing.T) {
+	_, here, _, _ := runtime.Caller(0)
+	root := filepath.Join(filepath.Dir(here), "..", "..")
+	descsDir := filepath.Join(root, "entc/integration/privacy/ent/internal")
+
+	descs, err := LoadDescriptors(descsDir)
+	require.NoError(t, err)
+	require.NotEmpty(t, descs)
+
+	before, err := os.ReadFile(filepath.Join("testdata", "before", "edges.go.txt"))
+	require.NoError(t, err)
+	wantAfter, err := os.ReadFile(filepath.Join("testdata", "after", "edges.go.txt"))
+	require.NoError(t, err)
+
+	out := string(before)
+	for _, fn := range []func(string, string, Descriptors) (string, error){
+		RewriteMutationSource,
+		RewritePredicateSource,
+		RewriteEdgeMethodSource,
+		RewriteTypedEdgeAccessorSource,
+	} {
+		out, err = fn("edges.go", out, descs)
+		require.NoError(t, err)
+	}
+	require.Equal(t, string(wantAfter), out)
+}
+
 func TestIntegration_RewritePrivacyFixtureHooks(t *testing.T) {
 	_, here, _, _ := runtime.Caller(0)
 	root := filepath.Join(filepath.Dir(here), "..", "..")
