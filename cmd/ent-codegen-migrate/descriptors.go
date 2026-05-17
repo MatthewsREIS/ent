@@ -73,14 +73,17 @@ func LoadDescriptors(dir string) (Descriptors, error) {
 					if i >= len(vs.Values) {
 						continue
 					}
-					ent := name.Name[:len(name.Name)-len("Descriptor")]
-					ent = strings.Title(ent) //nolint:staticcheck // "task" → "Task"
 					ed := parseDescriptorLiteral(vs.Values[i])
 					if ed == nil {
 						continue
 					}
-					ed.Name = ent
-					out[ent] = ed
+					if ed.Name == "" {
+						// Fallback to the filename-derived name for descriptors that
+						// (somehow) lack the Name field — preserves prior behavior.
+						ent := name.Name[:len(name.Name)-len("Descriptor")]
+						ed.Name = strings.Title(ent) //nolint:staticcheck // "task" → "Task"
+					}
+					out[ed.Name] = ed
 				}
 			}
 		}
@@ -115,6 +118,10 @@ func parseDescriptorLiteral(expr ast.Expr) *EntityDesc {
 			continue
 		}
 		switch key.Name {
+		case "Name":
+			if s, ok := stringLiteral(kv.Value); ok {
+				ed.Name = s
+			}
 		case "IDType":
 			ed.IDType = exprToString(kv.Value)
 		case "Fields":
