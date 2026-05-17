@@ -157,6 +157,11 @@ func loadUserTeams(ctx context.Context, query *TeamQuery, nodes []*User) error {
 			kn.Edges.Teams = append(kn.Edges.Teams, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

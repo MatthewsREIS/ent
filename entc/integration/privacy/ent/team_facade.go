@@ -156,6 +156,11 @@ func loadTeamTasks(ctx context.Context, query *TaskQuery, nodes []*Team) error {
 			kn.Edges.Tasks = append(kn.Edges.Tasks, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -271,6 +276,11 @@ func loadTeamUsers(ctx context.Context, query *UserQuery, nodes []*Team) error {
 		}
 		for kn := range parents {
 			kn.Edges.Users = append(kn.Edges.Users, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
 		}
 	}
 	return nil
