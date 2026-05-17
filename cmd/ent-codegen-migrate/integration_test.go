@@ -28,10 +28,16 @@ func TestIntegration_AllPassesAgainstEdgesFixture(t *testing.T) {
 	require.NoError(t, err)
 
 	out := string(before)
+	// Bridge RewriteEdgeMethodSource (which takes a genImportPath param)
+	// to the genPackage-less per-pass signature used by the other three
+	// rewriters. Empty path → "ent" alias fallback, matching the fixture.
+	edgeMethod := func(filename, src string, d Descriptors) (string, error) {
+		return RewriteEdgeMethodSource(filename, src, d, "")
+	}
 	for _, fn := range []func(string, string, Descriptors) (string, error){
 		RewriteMutationSource,
 		RewritePredicateSource,
-		RewriteEdgeMethodSource,
+		edgeMethod,
 		RewriteTypedEdgeAccessorSource,
 	} {
 		out, err = fn("edges.go", out, descs)

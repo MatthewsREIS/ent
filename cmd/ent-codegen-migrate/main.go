@@ -26,12 +26,18 @@ import (
 func main() {
 	var (
 		descriptorsFlag = flag.String("descriptors", "", "path to the consumer's regenerated <pkg>/internal/ directory")
+		genPackageFlag  = flag.String("gen-package", "", "full import path of the consumer's generated ent package (e.g. github.com/foo/bar/internal/ent/gen). Required: the rewriter emits cross-package facade calls (ent.Query<X><Y>FromQuery) and needs to qualify them with the correct local alias per consumer file. If the file imports the gen package as \"gen\", the call becomes gen.Query...; if aliased as \"myent\", it becomes myent.Query...")
 		dryRunFlag      = flag.Bool("dry-run", false, "print changes without writing files")
 	)
 	flag.Parse()
 
 	if *descriptorsFlag == "" {
 		fmt.Fprintln(os.Stderr, "ent-codegen-migrate: -descriptors is required")
+		flag.Usage()
+		os.Exit(1)
+	}
+	if *genPackageFlag == "" {
+		fmt.Fprintln(os.Stderr, "ent-codegen-migrate: -gen-package is required")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -59,7 +65,7 @@ func main() {
 	}
 
 	for _, pkg := range flag.Args() {
-		if err := RewritePackage(pkg, descs, genRoot, *dryRunFlag); err != nil {
+		if err := RewritePackage(pkg, descs, genRoot, *genPackageFlag, *dryRunFlag); err != nil {
 			fmt.Fprintf(os.Stderr, "ent-codegen-migrate: rewrite %s: %v\n", pkg, err)
 			os.Exit(1)
 		}
@@ -75,17 +81,36 @@ func main() {
 // code while still descending into sibling hand-written packages (e.g.
 // src/ent/schema/ in consumer layouts).
 //
+// genPackage is the full import path of the consumer's generated package
+// (e.g. "github.com/foo/bar/internal/ent/gen"). The edge-method pass uses
+// it to resolve the local alias for each file emitting facade calls.
+//
 // Each pass is idempotent; the chain is safe to re-run. Order matters
 // because later passes may inspect shapes produced by earlier ones.
-func RewritePackage(pkgPath string, descs Descriptors, genRoot string, dryRun bool) error {
+func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage string, dryRun bool) error {
+	// Adapt the three rewriters that don't care about the gen package
+	// to the four-arg pass signature. Keeping their public signatures
+	// unchanged keeps the existing per-pass tests stable.
+	edgeMethodPass := func(filename, src string, d Descriptors, gp string) (string, error) {
+		return RewriteEdgeMethodSource(filename, src, d, gp)
+	}
+	mutationPass := func(filename, src string, d Descriptors, _ string) (string, error) {
+		return RewriteMutationSource(filename, src, d)
+	}
+	predicatePass := func(filename, src string, d Descriptors, _ string) (string, error) {
+		return RewritePredicateSource(filename, src, d)
+	}
+	typedEdgePass := func(filename, src string, d Descriptors, _ string) (string, error) {
+		return RewriteTypedEdgeAccessorSource(filename, src, d)
+	}
 	passes := []struct {
 		name string
-		fn   func(string, string, Descriptors) (string, error)
+		fn   func(string, string, Descriptors, string) (string, error)
 	}{
-		{"mutation", RewriteMutationSource},
-		{"predicate", RewritePredicateSource},
-		{"edge-method", RewriteEdgeMethodSource},
-		{"typed-edge-accessor", RewriteTypedEdgeAccessorSource},
+		{"mutation", mutationPass},
+		{"predicate", predicatePass},
+		{"edge-method", edgeMethodPass},
+		{"typed-edge-accessor", typedEdgePass},
 	}
 	return filepath.WalkDir(pkgPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -110,7 +135,7 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot string, dryRun bo
 		}
 		out := string(src)
 		for _, p := range passes {
-			out, err = p.fn(path, out, descs)
+			out, err = p.fn(path, out, descs, genPackage)
 			if err != nil {
 				return fmt.Errorf("%s: %s rewrite: %w", path, p.name, err)
 			}

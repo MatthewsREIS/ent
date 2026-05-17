@@ -23,7 +23,7 @@ type TeamQuery struct{}
 func (q *TaskQuery) WithTeams(opts ...func(*TeamQuery)) *TaskQuery { return q }
 func use(q *TaskQuery) *TaskQuery { return q.WithTeams(func(q *TeamQuery) {}) }
 `
-	out, err := RewriteEdgeMethodSource("x.go", src, descs)
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, "ent.WithTaskTeams(q,")
 	require.NotContains(t, out, "q.WithTeams(")
@@ -43,7 +43,7 @@ type TeamQuery struct{}
 func (c *TaskClient) QueryTeams(t *Task) *TeamQuery { return &TeamQuery{} }
 func use(c *TaskClient, t *Task) *TeamQuery { return c.QueryTeams(t) }
 `
-	out, err := RewriteEdgeMethodSource("x.go", src, descs)
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, "ent.QueryTaskTeams(c, t)")
 	require.NotContains(t, out, "c.QueryTeams(t)")
@@ -62,7 +62,7 @@ type MarketingQuery struct{}
 func (q *ProposalQuery) QueryMarketing() *MarketingQuery { return &MarketingQuery{} }
 func use(q *ProposalQuery) *MarketingQuery { return q.QueryMarketing() }
 `
-	out, err := RewriteEdgeMethodSource("x.go", src, descs)
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, "ent.QueryProposalMarketingFromQuery(q)")
 	require.NotContains(t, out, "q.QueryMarketing()")
@@ -97,7 +97,7 @@ func use(ctx context.Context, id int) {
 		IDs(ctx)
 }
 `
-	out, err := RewriteEdgeMethodSource("x.go", src, descs)
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, "ent.QueryProposalMarketingFromQuery(gen.FromContext(ctx).Proposal.Query().\n\t\tWhere(proposal.ID(id)))")
 	require.Contains(t, out, "ent.QueryMarketingWrikeProjectFromQuery(ent.QueryProposalMarketingFromQuery(")
@@ -118,9 +118,9 @@ type TeamQuery struct{}
 func (q *TaskQuery) WithTeams(opts ...func(*TeamQuery)) *TaskQuery { return q }
 func use(q *TaskQuery) *TaskQuery { return q.WithTeams(func(q *TeamQuery) {}) }
 `
-	pass1, err := RewriteEdgeMethodSource("x.go", src, descs)
+	pass1, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
-	pass2, err := RewriteEdgeMethodSource("x.go", pass1, descs)
+	pass2, err := RewriteEdgeMethodSource("x.go", pass1, descs, "")
 	require.NoError(t, err)
 	require.Equal(t, pass1, pass2)
 }
@@ -137,8 +137,113 @@ type OtherType struct{}
 func (o *OtherType) WithTeams(opts ...func()) *OtherType { return o }
 func use(o *OtherType) *OtherType { return o.WithTeams(func() {}) }
 `
-	out, err := RewriteEdgeMethodSource("x.go", src, descs)
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, "o.WithTeams(", "non-Query receiver must be skipped")
 	require.NotContains(t, out, "ent.WithTaskTeams", "no rewrite expected")
+}
+
+// TestRewriteEdgeMethod_AliasesFacadeCallToGenPackage covers the gemini
+// consumer shape: the generated ent package lives at .../api-graphql/src/ent/gen
+// and is imported as "gen" (the default leaf-segment binding). Before the
+// alias fix, the rewriter hardcoded "ent" as the package selector, which
+// either resolved to upstream entgo.io/ent (compile error, undefined symbol)
+// or to nothing. The rewriter must qualify facade calls with the file's
+// actual local alias.
+func TestRewriteEdgeMethod_AliasesFacadeCallToGenPackage(t *testing.T) {
+	descs := Descriptors{
+		"Proposal": &EntityDesc{
+			Name:  "Proposal",
+			Edges: map[string]EdgeDesc{"marketing": {Cardinality: "entbuilder.O2OUnique", TargetIDType: "uuid.UUID", Target: "Marketing"}},
+		},
+	}
+	const genPath = "github.com/example/svc/internal/ent/gen"
+	src := `package x
+import "github.com/example/svc/internal/ent/gen"
+type ProposalQuery struct{}
+type MarketingQuery struct{}
+func (q *ProposalQuery) QueryMarketing() *MarketingQuery { return &MarketingQuery{} }
+var _ = gen.Foo
+func use(q *ProposalQuery) *MarketingQuery { return q.QueryMarketing() }
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, genPath)
+	require.NoError(t, err)
+	require.Contains(t, out, "gen.QueryProposalMarketingFromQuery(q)")
+	require.NotContains(t, out, "ent.QueryProposalMarketingFromQuery",
+		"facade call must NOT use the literal 'ent.' prefix when the gen package is imported as 'gen'")
+}
+
+// TestRewriteEdgeMethod_HonoursExplicitImportAlias verifies a custom
+// import alias is preserved: `import myent "..."` → `myent.Query...`.
+func TestRewriteEdgeMethod_HonoursExplicitImportAlias(t *testing.T) {
+	descs := Descriptors{
+		"Proposal": &EntityDesc{
+			Name:  "Proposal",
+			Edges: map[string]EdgeDesc{"marketing": {Cardinality: "entbuilder.O2OUnique", TargetIDType: "uuid.UUID", Target: "Marketing"}},
+		},
+	}
+	const genPath = "github.com/example/svc/internal/ent/gen"
+	src := `package x
+import myent "github.com/example/svc/internal/ent/gen"
+type ProposalQuery struct{}
+type MarketingQuery struct{}
+func (q *ProposalQuery) QueryMarketing() *MarketingQuery { return &MarketingQuery{} }
+var _ = myent.Foo
+func use(q *ProposalQuery) *MarketingQuery { return q.QueryMarketing() }
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, genPath)
+	require.NoError(t, err)
+	require.Contains(t, out, "myent.QueryProposalMarketingFromQuery(q)")
+	// Substring check must avoid matching "myent." — assert with a
+	// space prefix so we only catch a bare "ent." selector.
+	require.NotContains(t, out, " ent.QueryProposalMarketingFromQuery")
+	require.NotContains(t, out, " gen.QueryProposalMarketingFromQuery")
+}
+
+// TestRewriteEdgeMethod_AddsMissingGenImport covers the edge case where a
+// consumer file matches the rewrite pattern but doesn't yet import the
+// gen package (e.g. a hand-written schema/hook file that previously only
+// called methods on locally-defined types). The rewriter must add the
+// import so the emitted call resolves at compile time.
+func TestRewriteEdgeMethod_AddsMissingGenImport(t *testing.T) {
+	descs := Descriptors{
+		"Proposal": &EntityDesc{
+			Name:  "Proposal",
+			Edges: map[string]EdgeDesc{"marketing": {Cardinality: "entbuilder.O2OUnique", TargetIDType: "uuid.UUID", Target: "Marketing"}},
+		},
+	}
+	const genPath = "github.com/example/svc/internal/ent/gen"
+	src := `package x
+type ProposalQuery struct{}
+type MarketingQuery struct{}
+func (q *ProposalQuery) QueryMarketing() *MarketingQuery { return &MarketingQuery{} }
+func use(q *ProposalQuery) *MarketingQuery { return q.QueryMarketing() }
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, genPath)
+	require.NoError(t, err)
+	require.Contains(t, out, "gen.QueryProposalMarketingFromQuery(q)")
+	require.Contains(t, out, `"github.com/example/svc/internal/ent/gen"`,
+		"missing gen-package import must be added when a rewrite fires")
+}
+
+// TestRewriteEdgeMethod_NoImportAddedWhenNoRewrite verifies the
+// counterpart safety: if no rewrite actually fires in a file, the gen
+// import must NOT be added (else go build fails with imported and not used).
+func TestRewriteEdgeMethod_NoImportAddedWhenNoRewrite(t *testing.T) {
+	descs := Descriptors{
+		"Task": &EntityDesc{
+			Name:  "Task",
+			Edges: map[string]EdgeDesc{"teams": {Cardinality: "entbuilder.M2M", TargetIDType: "int"}},
+		},
+	}
+	const genPath = "github.com/example/svc/internal/ent/gen"
+	src := `package x
+type Helper struct{}
+func (h *Helper) QueryTeams() *Helper { return h }
+func use(h *Helper) *Helper { return h.QueryTeams() }
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, genPath)
+	require.NoError(t, err)
+	require.NotContains(t, out, genPath,
+		"no rewrite emitted → no gen import should be added")
 }

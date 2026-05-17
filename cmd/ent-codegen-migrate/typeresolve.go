@@ -13,6 +13,8 @@ import (
 	"go/printer"
 	"go/token"
 	"go/types"
+	"path"
+	"strconv"
 )
 
 // Resolver provides type-aware AST navigation for a single Go file.
@@ -243,4 +245,40 @@ func renderExpr(fset *token.FileSet, expr ast.Expr) string {
 		return ""
 	}
 	return buf.String()
+}
+
+// GenAlias returns the local name bound to genImportPath in this file
+// (the import's explicit alias, or the package-name leaf of the import
+// path if no alias was given), plus true.
+//
+// Returns ("", false) when this file does not import genImportPath at
+// all — callers should treat that as "no rewrite emits in this file" or
+// add the import themselves before emitting.
+//
+// genImportPath must be the canonical full module path of the consumer's
+// generated ent package (e.g. "github.com/foo/bar/internal/ent/gen").
+// Comparison is byte-exact against the unquoted import path; aliasing
+// inside other modules is irrelevant here.
+func (r *Resolver) GenAlias(genImportPath string) (string, bool) {
+	if r.File == nil || genImportPath == "" {
+		return "", false
+	}
+	for _, imp := range r.File.Imports {
+		raw, err := strconv.Unquote(imp.Path.Value)
+		if err != nil {
+			continue
+		}
+		if raw != genImportPath {
+			continue
+		}
+		if imp.Name != nil && imp.Name.Name != "" {
+			return imp.Name.Name, true
+		}
+		// No alias — the local binding is the package's declared name.
+		// In the absence of cross-package type info, fall back to the
+		// import path's leaf segment (the conventional case where the
+		// directory name matches the package name).
+		return path.Base(raw), true
+	}
+	return "", false
 }

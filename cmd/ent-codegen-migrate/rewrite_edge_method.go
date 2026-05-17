@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/printer"
+	"path"
 	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
@@ -18,26 +19,51 @@ import (
 // methods that PR 6 lifted out of per-entity sub-packages into the root
 // facade:
 //
-//	q.With<Edge>(opts...)  →  ent.With<Entity><Edge>(q, opts...)
-//	c.Query<Edge>(t)       →  ent.Query<Entity><Edge>(c, t)
-//	q.Query<Edge>()        →  ent.Query<Entity><Edge>FromQuery(q)
+//	q.With<Edge>(opts...)  →  <alias>.With<Entity><Edge>(q, opts...)
+//	c.Query<Edge>(t)       →  <alias>.Query<Entity><Edge>(c, t)
+//	q.Query<Edge>()        →  <alias>.Query<Entity><Edge>FromQuery(q)
 //
 // where q is *<pkg>.<Entity>Query and c is *<pkg>.<Entity>Client.
 // Other receivers are left untouched (schema-DSL and unrelated user
 // types with overlapping method names).
 //
+// <alias> is the local name the file binds genImportPath to. If the
+// file imports genImportPath without an alias, the alias is the import
+// path's leaf segment (e.g. "gen" for ".../ent/gen"). If genImportPath
+// is not imported in this file, the rewriter adds the import so the
+// emitted call resolves at compile time.
+//
+// genImportPath is the full module path of the consumer's generated ent
+// package (carried in from main's -gen-package flag). It must be
+// non-empty for the rewriter to know how to qualify the facade calls.
+// When empty (as in legacy per-pass tests that predate the flag), the
+// rewriter falls back to the historical "ent" identifier.
+//
 // Idempotent: re-running on already-transformed code is a no-op (the
 // new shapes are plain function calls — no With/Query-prefixed method
 // on a Query/Client receiver remains to match).
-func RewriteEdgeMethodSource(filename, src string, descs Descriptors) (string, error) {
+func RewriteEdgeMethodSource(filename, src string, descs Descriptors, genImportPath string) (string, error) {
 	r, err := NewResolver(filename, src)
 	if err != nil {
 		return "", fmt.Errorf("parse: %w", err)
 	}
 
+	// Resolve the local alias for the gen package once per file. The
+	// facade calls emitted below all qualify with this name. If the
+	// gen package is not imported in this file, fall through to the
+	// default leaf name and add the import — without the import the
+	// emitted call would not compile.
+	alias, addImport := resolveGenAlias(r, genImportPath)
+
+	rewrote := false
+	emit := func(c *astutil.Cursor, expr ast.Expr) {
+		c.Replace(expr)
+		rewrote = true
+	}
+
 	// Post-order traversal: rewrite inner calls before outer ones so a
 	// chained pattern like q.QueryX().QueryY() is processed bottom-up.
-	// The outer pass sees the already-rewritten inner (an `ent.QueryEFromQuery`
+	// The outer pass sees the already-rewritten inner (an `<alias>.QueryEFromQuery`
 	// call) and can rebuild the chain receiver-type chain syntactically.
 	astutil.Apply(r.File, nil, func(c *astutil.Cursor) bool {
 		call, ok := c.Node().(*ast.CallExpr)
@@ -53,9 +79,9 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors) (string, e
 		if edge, ok := strings.CutPrefix(methodName, "With"); ok && edge != "" {
 			if entity, matched := matchEdgeReceiver(r, call, descs, "Query", edge); matched {
 				newArgs := append([]ast.Expr{sel.X}, call.Args...)
-				c.Replace(&ast.CallExpr{
+				emit(c, &ast.CallExpr{
 					Fun: &ast.SelectorExpr{
-						X:   ast.NewIdent("ent"),
+						X:   ast.NewIdent(alias),
 						Sel: ast.NewIdent("With" + entity + edge),
 					},
 					Args: newArgs,
@@ -66,9 +92,9 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors) (string, e
 		if edge, ok := strings.CutPrefix(methodName, "Query"); ok && edge != "" {
 			if entity, matched := matchEdgeReceiver(r, call, descs, "Client", edge); matched {
 				newArgs := append([]ast.Expr{sel.X}, call.Args...)
-				c.Replace(&ast.CallExpr{
+				emit(c, &ast.CallExpr{
 					Fun: &ast.SelectorExpr{
-						X:   ast.NewIdent("ent"),
+						X:   ast.NewIdent(alias),
 						Sel: ast.NewIdent("Query" + entity + edge),
 					},
 					Args: newArgs,
@@ -80,20 +106,20 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors) (string, e
 			// chain walk for cross-package call sites where the importer
 			// can't see consumer packages.
 			if entity, matched := matchEdgeReceiver(r, call, descs, "Query", edge); matched {
-				c.Replace(&ast.CallExpr{
+				emit(c, &ast.CallExpr{
 					Fun: &ast.SelectorExpr{
-						X:   ast.NewIdent("ent"),
+						X:   ast.NewIdent(alias),
 						Sel: ast.NewIdent("Query" + entity + edge + "FromQuery"),
 					},
 					Args: []ast.Expr{sel.X},
 				})
 				return true
 			}
-			if entity, ok := inferQueryReceiverEntity(sel.X, descs); ok {
+			if entity, ok := inferQueryReceiverEntity(sel.X, descs, alias); ok {
 				if edgeDescLookup(descs[entity], edge) {
-					c.Replace(&ast.CallExpr{
+					emit(c, &ast.CallExpr{
 						Fun: &ast.SelectorExpr{
-							X:   ast.NewIdent("ent"),
+							X:   ast.NewIdent(alias),
 							Sel: ast.NewIdent("Query" + entity + edge + "FromQuery"),
 						},
 						Args: []ast.Expr{sel.X},
@@ -105,11 +131,43 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors) (string, e
 		return true
 	})
 
+	// Add the missing import only if a rewrite actually fired in this
+	// file. Files that didn't emit any facade call don't need the import
+	// — adding it would produce an unused-import build error.
+	if rewrote && addImport && genImportPath != "" {
+		astutil.AddImport(r.Fset, r.File, genImportPath)
+	}
+
 	var buf bytes.Buffer
 	if err := printer.Fprint(&buf, r.Fset, r.File); err != nil {
 		return "", err
 	}
 	return buf.String(), nil
+}
+
+// resolveGenAlias returns the package-selector identifier to emit for
+// facade calls in this file, plus a flag indicating whether the gen
+// package import is missing and must be added.
+//
+// Resolution:
+//   - genImportPath == "": legacy callers (and most per-pass tests)
+//     pre-date the flag; fall back to "ent" with no import add — those
+//     test fixtures declare their own dummy "ent" package or rely on
+//     existing imports.
+//   - Imported in this file: return the alias (or the import path's
+//     leaf segment if no alias).
+//   - Not imported: return the leaf segment AND signal that the import
+//     must be added if the rewriter ends up emitting a call.
+func resolveGenAlias(r *Resolver, genImportPath string) (alias string, addImport bool) {
+	if genImportPath == "" {
+		return "ent", false
+	}
+	if name, ok := r.GenAlias(genImportPath); ok {
+		return name, false
+	}
+	// Not imported. Default to the path leaf as the alias and ask the
+	// caller to add the import iff a rewrite fires.
+	return path.Base(genImportPath), true
 }
 
 // inferQueryReceiverEntity tries to deduce the entity name behind a
@@ -124,10 +182,15 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors) (string, e
 //	<expr>.Where(...) | .Order(...) etc → recurse into <expr>
 //	<expr>.Clone() | .Modify(...) etc   → recurse into <expr>
 //
+// genAlias is the local identifier this file binds the gen package to;
+// it gates the "prior pass rewrote an inner segment" branch so we only
+// follow our own rewritten chains (e.g. gen.QueryXFromQuery(...)),
+// not unrelated package selectors.
+//
 // Returns the entity name and true only when the chain unambiguously
 // resolves to an entity present in descs. Returns false otherwise — a
 // missed rewrite is recoverable, a wrong rewrite corrupts user code.
-func inferQueryReceiverEntity(expr ast.Expr, descs Descriptors) (string, bool) {
+func inferQueryReceiverEntity(expr ast.Expr, descs Descriptors, genAlias string) (string, bool) {
 	call, ok := expr.(*ast.CallExpr)
 	if !ok {
 		return "", false
@@ -149,17 +212,17 @@ func inferQueryReceiverEntity(expr ast.Expr, descs Descriptors) (string, bool) {
 		}
 		return "", false
 	default:
-		// ent.Query<Parent><Edge>FromQuery(...) — rewritten form produced by
+		// <alias>.Query<Parent><Edge>FromQuery(...) — rewritten form produced by
 		// a prior post-order pass on an inner chain segment. Return the
 		// edge's target entity (== Y in Query<X><Y>FromQuery → returns *<Y>Query).
-		if x, ok := sel.X.(*ast.Ident); ok && x.Name == "ent" {
+		if x, ok := sel.X.(*ast.Ident); ok && x.Name == genAlias {
 			if entity, found := entityFromFacadeName(sel.Sel.Name, descs); found {
 				return entity, true
 			}
 		}
 		// QueryEdge: walk back to the parent entity, then look up edge target.
 		if edge, found := strings.CutPrefix(sel.Sel.Name, "Query"); found && edge != "" {
-			parent, ok := inferQueryReceiverEntity(sel.X, descs)
+			parent, ok := inferQueryReceiverEntity(sel.X, descs, genAlias)
 			if !ok {
 				return "", false
 			}
@@ -180,7 +243,7 @@ func inferQueryReceiverEntity(expr ast.Expr, descs Descriptors) (string, bool) {
 		// Be conservative: only recurse on names known to belong to the
 		// generated *<Entity>Query builder so we don't follow random calls.
 		if isQueryPassthrough(sel.Sel.Name) {
-			return inferQueryReceiverEntity(sel.X, descs)
+			return inferQueryReceiverEntity(sel.X, descs, genAlias)
 		}
 		return "", false
 	}
