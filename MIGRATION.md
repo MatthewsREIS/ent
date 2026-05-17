@@ -2,6 +2,93 @@
 
 <!-- NEW SECTIONS GO AT THE TOP; older sections below -->
 
+## Per-Entity Sub-Packages (codegen-epic PR 6)
+
+PR 6 splits the monolithic `ent` package so that each entity's query / client / mutation / create / update / delete builders live in their own sub-package (`ent/internal/<entity>`). The top-level `ent` package retains type aliases (`type TaskQuery = task.Query`, `type TaskClient = task.Client`, …) so existing variable types keep working, but **cross-entity edge methods can no longer live on the alias** — they have been moved to package-level facade functions in `ent`.
+
+### What changed (consumer-visible)
+
+Cross-entity edge access — the four call shapes — must move from method calls on `*ent.TaskQuery` / `*ent.TaskClient` to facade functions in `ent`:
+
+| Before (method on the alias) | After (facade function in `ent`) |
+|---|---|
+| `client.Task.Query().WithTeams(func(q *ent.TeamQuery) { ... })` | `ent.WithTaskTeams(client.Task.Query(), func(q *ent.TeamQuery) { ... })` |
+| `client.Task.QueryTeams(t)` | `ent.QueryTaskTeams(client.Task, t)` |
+| `q.QueryTeams()` (chained from another query) | `ent.QueryTaskTeamsFromQuery(q)` |
+| `q.WithNamedTeams("foo", func(q *ent.TeamQuery) { ... })` | `ent.WithNamedTaskTeams(q, "foo", func(q *ent.TeamQuery) { ... })` |
+
+Naming pattern is `<Verb><NodeName><EdgeName>` (and `<Verb><NodeName><EdgeName>FromQuery` for the chained form). The first argument is always the receiver that used to be the method's `this`.
+
+### What did NOT change
+
+- `*ent.TaskQuery`, `*ent.TaskClient`, `*ent.TaskMutation`, `*ent.TaskCreate`, `*ent.TaskUpdate`, `*ent.TaskUpdateOne`, `*ent.TaskDelete`, `*ent.TaskDeleteOne` are still importable from `ent`. They are now type aliases to the sub-package types, so existing function signatures, variable declarations, and type assertions keep compiling.
+- Self-only chaining — `Where(...)`, `Limit(...)`, `Order(...)`, `Offset(...)`, `Unique(...)`, `All(ctx)`, `First(ctx)`, `Only(ctx)`, `Count(ctx)`, `Exist(ctx)`, `Clone()`, `Select(...)`, `GroupBy(...)`, `Aggregate(...)` — is unchanged. Anything that doesn't cross an entity boundary still works as a method.
+- Hook / interceptor / policy / schema-extension APIs are untouched.
+
+Note on **chained cross-entity traversals**: a single expression like `client.Task.Query().QueryTeams().QueryMembers()` becomes a step-by-step facade-call rewrite, because each chain link is now a separate function:
+
+```go
+tq  := client.Task.Query()
+teq := ent.QueryTaskTeamsFromQuery(tq)
+meq := ent.QueryTeamMembersFromQuery(teq)
+```
+
+The migration tool handles this automatically, but the resulting code is intentionally less dense than the original method chain.
+
+### Why
+
+Sub-packages are part of the codegen-reduction epic. Splitting per-entity code into its own Go package lets the Go compiler shard work across packages in parallel, cutting wall-clock build time on large schemas. The catch is that **edge methods are inherently cross-entity** (`TaskQuery.QueryTeams` returns `*TeamQuery`), so leaving them as methods on the alias would force `ent/internal/task` to import `ent/internal/team` and vice versa — re-introducing the import cycle the split exists to eliminate. Moving the edge surface to package-level facades in the top-level `ent` package is what makes the split viable.
+
+### Migration
+
+1. Regenerate ent code with the PR 6 generator:
+   ```bash
+   go generate ./internal/ent
+   ```
+2. Run the migration tool against your consumer source tree:
+   ```bash
+   go run entgo.io/ent/cmd/ent-codegen-migrate \
+       -descriptors ./internal/ent/internal \
+       ./internal/  ./pkg/...
+   ```
+3. Verify the build:
+   ```bash
+   go build ./...
+   ```
+
+The tool runs four passes over each file (mutation rewrites from PR 5 → predicate rewrites from PR 3 → edge-method rewrites → typed-edge-accessor rewrites). Each pass is idempotent and re-running the whole tool on already-migrated code is a no-op. The `-descriptors` flag points at the regenerated `internal/` directory so the tool can learn each entity's edge cardinalities and target types from the descriptor literals.
+
+### Recovery from the broken pre-PR6 tool
+
+An earlier revision of `ent-codegen-migrate` (shipped during PR 6 development) emitted malformed rewrites for the edge passes — e.g. dropped arguments, wrong receiver order, or partially-rewritten chains. If you ran that version and your tree no longer builds:
+
+```bash
+# 1. Restore the consumer source to its pre-migration state
+git checkout -- ./internal ./pkg
+
+# 2. Re-run the now-fixed tool (idempotent; safe on a clean tree)
+go run entgo.io/ent/cmd/ent-codegen-migrate \
+    -descriptors ./internal/ent/internal \
+    ./internal/  ./pkg/...
+
+# 3. Verify
+go build ./...
+```
+
+If you'd already hand-edited some files before the tool was fixed, those hand edits are preserved by `git checkout` only if you committed them first — otherwise restore from your editor's history or re-do them after step 2.
+
+### Additional API surface introduced
+
+Beyond the four documented edge shapes, PR 6 introduces these symbols on the `ent` facade and on each sub-package query type:
+
+- `ent.With<Node><Edge>(q, opts...)` — eager-load the edge from a base query (the `WithX` replacement above).
+- `ent.WithNamed<Node><Edge>(q, name, opts...)` — named eager-load variant.
+- `ent.Query<Node><Edge>(client.<Node>, instance)` — from-client edge query (the `client.Node.QueryX(inst)` replacement).
+- `ent.Query<Node><Edge>FromQuery(q)` — chained edge query (the `q.QueryX()` replacement).
+- On each `<entity>.Query` type: `SQLQuery(ctx)`, `PrepareQuery(ctx)`, and `IncludeForeignKeys(bool)` are now exported (they were package-private before the split). These are primarily for internal integrations (e.g. custom schema extensions); typical consumers don't need to call them.
+
+---
+
 ## Mutation Collapse (codegen-epic PR 5)
 
 PR 5 rewrites `internal_mutation.tmpl` so that generated entities no longer emit per-field typed mutation methods (`SetName`, `AddAge`, `Name`, `OldName`, etc.) or the backing struct fields (`name`, `oldName`, `addAge`, …). The `runtime/entbuilder.Mutation[T]` generic type becomes the sole mutation carrier.
