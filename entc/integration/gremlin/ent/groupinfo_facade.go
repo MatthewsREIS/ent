@@ -69,6 +69,31 @@ func QueryGroupInfoGroups(c *GroupInfoClient, _m *GroupInfo) *GroupQuery {
 	return query
 }
 
+// QueryGroupInfoGroupsFromQuery returns a GroupQuery that traverses the "groups" edge
+// of every GroupInfo matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupInfoQuery).QueryGroups method, hoisted to root so it
+// can reference the cross-package GroupQuery type.
+func QueryGroupInfoGroupsFromQuery(q *GroupInfoQuery) *GroupQuery {
+	query := NewGroupClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupInfoGroups performs the eager-load for the "groups" edge. Body mirrors
 // the pre-PR6 *GroupInfoQuery.loadGroups method, hoisted to root
 // so it can reference cross-package types directly.
@@ -80,6 +105,7 @@ func loadGroupInfoGroups(ctx context.Context, query *GroupQuery, nodes []*GroupI
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Groups = []*Group{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(groupinfo.GroupsColumn), fks...))
 	}))

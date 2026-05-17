@@ -69,6 +69,31 @@ func QueryFileTypeFiles(c *FileTypeClient, _m *FileType) *FileQuery {
 	return query
 }
 
+// QueryFileTypeFilesFromQuery returns a FileQuery that traverses the "files" edge
+// of every FileType matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileTypeQuery).QueryFiles method, hoisted to root so it
+// can reference the cross-package FileQuery type.
+func QueryFileTypeFilesFromQuery(q *FileTypeQuery) *FileQuery {
+	query := NewFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(filetype.Table, filetype.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadFileTypeFiles performs the eager-load for the "files" edge. Body mirrors
 // the pre-PR6 *FileTypeQuery.loadFiles method, hoisted to root
 // so it can reference cross-package types directly.
@@ -80,6 +105,7 @@ func loadFileTypeFiles(ctx context.Context, query *FileQuery, nodes []*FileType)
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Files = []*File{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.File(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(filetype.FilesColumn), fks...))
 	}))

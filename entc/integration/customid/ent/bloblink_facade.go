@@ -13,6 +13,9 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -53,6 +56,31 @@ func WithBlobLinkBlob(q *BlobLinkQuery, opts ...func(*BlobQuery)) *BlobLinkQuery
 // QueryBlobLinkBlob returns a BlobQuery for the "blob" edge of a given BlobLink.
 func QueryBlobLinkBlob(c *BlobLinkClient, _m *BlobLink) *BlobQuery {
 	query := NewBlobClient(c.Config).Query()
+	return query
+}
+
+// QueryBlobLinkBlobFromQuery returns a BlobQuery that traverses the "blob" edge
+// of every BlobLink matched by q (chained-query form). Mirrors the pre-PR6
+// (*BlobLinkQuery).QueryBlob method, hoisted to root so it
+// can reference the cross-package BlobQuery type.
+func QueryBlobLinkBlobFromQuery(q *BlobLinkQuery) *BlobQuery {
+	query := NewBlobClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(bloblink.Table, bloblink.BlobColumn, selector),
+			sqlgraph.To(blob.Table, blob.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, bloblink.BlobTable, bloblink.BlobColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 
@@ -104,6 +132,31 @@ func WithBlobLinkLink(q *BlobLinkQuery, opts ...func(*BlobQuery)) *BlobLinkQuery
 // QueryBlobLinkLink returns a BlobQuery for the "link" edge of a given BlobLink.
 func QueryBlobLinkLink(c *BlobLinkClient, _m *BlobLink) *BlobQuery {
 	query := NewBlobClient(c.Config).Query()
+	return query
+}
+
+// QueryBlobLinkLinkFromQuery returns a BlobQuery that traverses the "link" edge
+// of every BlobLink matched by q (chained-query form). Mirrors the pre-PR6
+// (*BlobLinkQuery).QueryLink method, hoisted to root so it
+// can reference the cross-package BlobQuery type.
+func QueryBlobLinkLinkFromQuery(q *BlobLinkQuery) *BlobQuery {
+	query := NewBlobClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(bloblink.Table, bloblink.LinkColumn, selector),
+			sqlgraph.To(blob.Table, blob.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, bloblink.LinkTable, bloblink.LinkColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 

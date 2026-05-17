@@ -7,26 +7,26 @@
 package ent
 
 import (
-	"entgo.io/ent/entc/integration/gremlin/ent/task"
+	enttask "entgo.io/ent/entc/integration/gremlin/ent/task"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
 // while the underlying types live in the per-entity sub-package.
 type (
-	TaskClient     = task.TaskClient
-	TaskQuery      = task.TaskQuery
-	TaskMutation   = task.TaskMutation
-	TaskCreate     = task.TaskCreate
-	TaskCreateBulk = task.TaskCreateBulk
-	TaskUpdate     = task.TaskUpdate
-	TaskUpdateOne  = task.TaskUpdateOne
-	TaskDelete     = task.TaskDelete
-	TaskDeleteOne  = task.TaskDeleteOne
-	TaskGroupBy    = task.TaskGroupBy
-	TaskSelect     = task.TaskSelect
+	TaskClient     = enttask.TaskClient
+	TaskQuery      = enttask.TaskQuery
+	TaskMutation   = enttask.TaskMutation
+	TaskCreate     = enttask.TaskCreate
+	TaskCreateBulk = enttask.TaskCreateBulk
+	TaskUpdate     = enttask.TaskUpdate
+	TaskUpdateOne  = enttask.TaskUpdateOne
+	TaskDelete     = enttask.TaskDelete
+	TaskDeleteOne  = enttask.TaskDeleteOne
+	TaskGroupBy    = enttask.TaskGroupBy
+	TaskSelect     = enttask.TaskSelect
 )
 
 // Constructor aliases — the sub-package's New<X> stays the source of truth.
 var (
-	NewTaskClient = task.NewTaskClient
+	NewTaskClient = enttask.NewTaskClient
 )

@@ -71,6 +71,31 @@ func QueryIntSIDParent(c *IntSIDClient, _m *IntSID) *IntSIDQuery {
 	return query
 }
 
+// QueryIntSIDParentFromQuery returns a IntSIDQuery that traverses the "parent" edge
+// of every IntSID matched by q (chained-query form). Mirrors the pre-PR6
+// (*IntSIDQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package IntSIDQuery type.
+func QueryIntSIDParentFromQuery(q *IntSIDQuery) *IntSIDQuery {
+	query := NewIntSIDClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(intsid.Table, intsid.FieldID, selector),
+			sqlgraph.To(intsid.Table, intsid.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, intsid.ParentTable, intsid.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadIntSIDParent performs the eager-load for the "parent" edge. Body mirrors
 // the pre-PR6 *IntSIDQuery.loadParent method, hoisted to root
 // so it can reference cross-package types directly.
@@ -136,6 +161,31 @@ func QueryIntSIDChildren(c *IntSIDClient, _m *IntSID) *IntSIDQuery {
 	return query
 }
 
+// QueryIntSIDChildrenFromQuery returns a IntSIDQuery that traverses the "children" edge
+// of every IntSID matched by q (chained-query form). Mirrors the pre-PR6
+// (*IntSIDQuery).QueryChildren method, hoisted to root so it
+// can reference the cross-package IntSIDQuery type.
+func QueryIntSIDChildrenFromQuery(q *IntSIDQuery) *IntSIDQuery {
+	query := NewIntSIDClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(intsid.Table, intsid.FieldID, selector),
+			sqlgraph.To(intsid.Table, intsid.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, intsid.ChildrenTable, intsid.ChildrenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadIntSIDChildren performs the eager-load for the "children" edge. Body mirrors
 // the pre-PR6 *IntSIDQuery.loadChildren method, hoisted to root
 // so it can reference cross-package types directly.
@@ -147,6 +197,7 @@ func loadIntSIDChildren(ctx context.Context, query *IntSIDQuery, nodes []*IntSID
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Children = []*IntSID{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.IntSID(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(intsid.ChildrenColumn), fks...))
 	}))

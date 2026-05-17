@@ -71,6 +71,31 @@ func QueryGroupFiles(c *GroupClient, _m *Group) *FileQuery {
 	return query
 }
 
+// QueryGroupFilesFromQuery returns a FileQuery that traverses the "files" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryFiles method, hoisted to root so it
+// can reference the cross-package FileQuery type.
+func QueryGroupFilesFromQuery(q *GroupQuery) *FileQuery {
+	query := NewFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.FilesTable, group.FilesColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupFiles performs the eager-load for the "files" edge. Body mirrors
 // the pre-PR6 *GroupQuery.loadFiles method, hoisted to root
 // so it can reference cross-package types directly.
@@ -82,6 +107,7 @@ func loadGroupFiles(ctx context.Context, query *FileQuery, nodes []*Group) error
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Files = []*File{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.File(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(group.FilesColumn), fks...))
 	}))
@@ -132,6 +158,31 @@ func QueryGroupBlocked(c *GroupClient, _m *Group) *UserQuery {
 	return query
 }
 
+// QueryGroupBlockedFromQuery returns a UserQuery that traverses the "blocked" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryBlocked method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryGroupBlockedFromQuery(q *GroupQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.BlockedTable, group.BlockedColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupBlocked performs the eager-load for the "blocked" edge. Body mirrors
 // the pre-PR6 *GroupQuery.loadBlocked method, hoisted to root
 // so it can reference cross-package types directly.
@@ -143,6 +194,7 @@ func loadGroupBlocked(ctx context.Context, query *UserQuery, nodes []*Group) err
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Blocked = []*User{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.User(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(group.BlockedColumn), fks...))
 	}))
@@ -188,6 +240,31 @@ func QueryGroupUsers(c *GroupClient, _m *Group) *UserQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupUsersFromQuery returns a UserQuery that traverses the "users" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryUsers method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryGroupUsersFromQuery(q *GroupQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -253,6 +330,11 @@ func loadGroupUsers(ctx context.Context, query *UserQuery, nodes []*Group) error
 			kn.Edges.Users = append(kn.Edges.Users, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -280,6 +362,31 @@ func QueryGroupInfo(c *GroupClient, _m *Group) *GroupInfoQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupInfoFromQuery returns a GroupInfoQuery that traverses the "info" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryInfo method, hoisted to root so it
+// can reference the cross-package GroupInfoQuery type.
+func QueryGroupInfoFromQuery(q *GroupQuery) *GroupInfoQuery {
+	query := NewGroupInfoClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, group.InfoTable, group.InfoColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

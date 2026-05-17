@@ -105,6 +105,59 @@ func TestUserCreateDescriptorAssignGeneratedInt(t *testing.T) {
 	require.NoErrorf(t, err, "go test output:\n%s", out)
 }
 
+// TestGraph_Gen_AssignGeneratedInt64IDNoDuplicateCase verifies that when a
+// schema declares an explicit user-defined int64 id field, the rendered
+// AssignGenerated type switch contains exactly one "case int64:" clause.
+//
+// Without the int64-aware guard in the template, the generic numeric
+// fallback "case int64:" collides with the primary "case {{ $.ID.Type }}:"
+// (which is also int64), producing "duplicate case int64 in type switch".
+func TestGraph_Gen_AssignGeneratedInt64IDNoDuplicateCase(t *testing.T) {
+	mod := writeTempModule(t, "int64idregen")
+	target := filepath.Join(mod, "ent")
+
+	graph, err := NewGraph(&Config{
+		Package: "int64idregen/ent",
+		Target:  target,
+		Storage: drivers[0],
+	}, &load.Schema{
+		Name: "RiverJob",
+		Fields: []*load.Field{
+			// User-defined id of type int64 — same shape as the gemini
+			// consumer's riverjob entity that surfaced the bug.
+			{Name: "id", Info: &field.TypeInfo{Type: field.TypeInt64}},
+		},
+	})
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	queryPath := filepath.Join(target, "riverjob", "query.go")
+	content, err := os.ReadFile(queryPath)
+	require.NoError(t, err)
+	src := string(content)
+
+	// Locate the AssignGenerated body and count "case int64:" occurrences
+	// only within that switch statement (not the entire file).
+	idx := strings.Index(src, "AssignGenerated: func(n *RiverJob")
+	require.GreaterOrEqualf(t, idx, 0, "AssignGenerated body not found in %s:\n%s", queryPath, src)
+	tail := src[idx:]
+	end := strings.Index(tail, "\n\t\t},")
+	require.GreaterOrEqual(t, end, 0)
+	body := tail[:end]
+
+	got := strings.Count(body, "case int64:")
+	require.Equalf(t, 1, got,
+		"expected exactly one `case int64:` clause in AssignGenerated, got %d. Body:\n%s",
+		got, body)
+
+	// Belt-and-suspenders: the generated file must actually compile.
+	cmd := exec.Command("go", "build", "-mod=mod", "./...")
+	cmd.Dir = mod
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	out, err := cmd.CombinedOutput()
+	require.NoErrorf(t, err, "go build output:\n%s", out)
+}
+
 func TestGraph_Gen_SQLModifierDeleteBuilderHasModify(t *testing.T) {
 	mod := writeTempModule(t, "deletemodifierregen")
 	target := filepath.Join(mod, "ent")

@@ -72,6 +72,31 @@ func QueryAccountToken(c *AccountClient, _m *Account) *TokenQuery {
 	return query
 }
 
+// QueryAccountTokenFromQuery returns a TokenQuery that traverses the "token" edge
+// of every Account matched by q (chained-query form). Mirrors the pre-PR6
+// (*AccountQuery).QueryToken method, hoisted to root so it
+// can reference the cross-package TokenQuery type.
+func QueryAccountTokenFromQuery(q *AccountQuery) *TokenQuery {
+	query := NewTokenClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, selector),
+			sqlgraph.To(token.Table, token.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.TokenTable, account.TokenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadAccountToken performs the eager-load for the "token" edge. Body mirrors
 // the pre-PR6 *AccountQuery.loadToken method, hoisted to root
 // so it can reference cross-package types directly.
@@ -83,6 +108,7 @@ func loadAccountToken(ctx context.Context, query *TokenQuery, nodes []*Account) 
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Token = []*Token{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Token(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(account.TokenColumn), fks...))
 	}))

@@ -71,6 +71,31 @@ func QueryFileOwner(c *FileClient, _m *File) *UserQuery {
 	return query
 }
 
+// QueryFileOwnerFromQuery returns a UserQuery that traverses the "owner" edge
+// of every File matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileQuery).QueryOwner method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryFileOwnerFromQuery(q *FileQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.OwnerTable, file.OwnerColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadFileOwner performs the eager-load for the "owner" edge. Body mirrors
 // the pre-PR6 *FileQuery.loadOwner method, hoisted to root
 // so it can reference cross-package types directly.
@@ -131,6 +156,31 @@ func QueryFileType(c *FileClient, _m *File) *FileTypeQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFileTypeFromQuery returns a FileTypeQuery that traverses the "type" edge
+// of every File matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileQuery).QueryType method, hoisted to root so it
+// can reference the cross-package FileTypeQuery type.
+func QueryFileTypeFromQuery(q *FileQuery) *FileTypeQuery {
+	query := NewFileTypeClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(filetype.Table, filetype.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -201,6 +251,31 @@ func QueryFileField(c *FileClient, _m *File) *FieldTypeQuery {
 	return query
 }
 
+// QueryFileFieldFromQuery returns a FieldTypeQuery that traverses the "field" edge
+// of every File matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileQuery).QueryField method, hoisted to root so it
+// can reference the cross-package FieldTypeQuery type.
+func QueryFileFieldFromQuery(q *FileQuery) *FieldTypeQuery {
+	query := NewFieldTypeClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, file.FieldTable, file.FieldColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadFileField performs the eager-load for the "field" edge. Body mirrors
 // the pre-PR6 *FileQuery.loadField method, hoisted to root
 // so it can reference cross-package types directly.
@@ -212,6 +287,7 @@ func loadFileField(ctx context.Context, query *FieldTypeQuery, nodes []*File) er
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Field = []*FieldType{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(file.FieldColumn), fks...))
 	}))

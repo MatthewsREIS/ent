@@ -328,5 +328,10 @@ func loadUserFriends(ctx context.Context, query *UserQuery, nodes []*User) error
 			kn.Edges.Friends = append(kn.Edges.Friends, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }

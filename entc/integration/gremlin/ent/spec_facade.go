@@ -68,6 +68,31 @@ func QuerySpecCard(c *SpecClient, _m *Spec) *CardQuery {
 	return query
 }
 
+// QuerySpecCardFromQuery returns a CardQuery that traverses the "card" edge
+// of every Spec matched by q (chained-query form). Mirrors the pre-PR6
+// (*SpecQuery).QueryCard method, hoisted to root so it
+// can reference the cross-package CardQuery type.
+func QuerySpecCardFromQuery(q *SpecQuery) *CardQuery {
+	query := NewCardClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(spec.Table, spec.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadSpecCard performs the eager-load for the "card" edge. Body mirrors
 // the pre-PR6 *SpecQuery.loadCard method, hoisted to root
 // so it can reference cross-package types directly.
@@ -126,6 +151,11 @@ func loadSpecCard(ctx context.Context, query *CardQuery, nodes []*Spec) error {
 		}
 		for kn := range parents {
 			kn.Edges.Card = append(kn.Edges.Card, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
 		}
 	}
 	return nil

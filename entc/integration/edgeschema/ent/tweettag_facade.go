@@ -70,6 +70,31 @@ func QueryTweetTagTag(c *TweetTagClient, _m *TweetTag) *TagQuery {
 	return query
 }
 
+// QueryTweetTagTagFromQuery returns a TagQuery that traverses the "tag" edge
+// of every TweetTag matched by q (chained-query form). Mirrors the pre-PR6
+// (*TweetTagQuery).QueryTag method, hoisted to root so it
+// can reference the cross-package TagQuery type.
+func QueryTweetTagTagFromQuery(q *TweetTagQuery) *TagQuery {
+	query := NewTagClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tweettag.Table, tweettag.FieldID, selector),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tweettag.TagTable, tweettag.TagColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadTweetTagTag performs the eager-load for the "tag" edge. Body mirrors
 // the pre-PR6 *TweetTagQuery.loadTag method, hoisted to root
 // so it can reference cross-package types directly.
@@ -127,6 +152,31 @@ func QueryTweetTagTweet(c *TweetTagClient, _m *TweetTag) *TweetQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTweetTagTweetFromQuery returns a TweetQuery that traverses the "tweet" edge
+// of every TweetTag matched by q (chained-query form). Mirrors the pre-PR6
+// (*TweetTagQuery).QueryTweet method, hoisted to root so it
+// can reference the cross-package TweetQuery type.
+func QueryTweetTagTweetFromQuery(q *TweetTagQuery) *TweetQuery {
+	query := NewTweetClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tweettag.Table, tweettag.FieldID, selector),
+			sqlgraph.To(tweet.Table, tweet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, tweettag.TweetTable, tweettag.TweetColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

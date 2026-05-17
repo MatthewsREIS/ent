@@ -70,6 +70,31 @@ func QueryFileProcesses(c *FileClient, _m *File) *ProcessQuery {
 	return query
 }
 
+// QueryFileProcessesFromQuery returns a ProcessQuery that traverses the "processes" edge
+// of every File matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileQuery).QueryProcesses method, hoisted to root so it
+// can reference the cross-package ProcessQuery type.
+func QueryFileProcessesFromQuery(q *FileQuery) *ProcessQuery {
+	query := NewProcessClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(process.Table, process.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, file.ProcessesTable, file.ProcessesPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadFileProcesses performs the eager-load for the "processes" edge. Body mirrors
 // the pre-PR6 *FileQuery.loadProcesses method, hoisted to root
 // so it can reference cross-package types directly.
@@ -128,6 +153,11 @@ func loadFileProcesses(ctx context.Context, query *ProcessQuery, nodes []*File) 
 		}
 		for kn := range parents {
 			kn.Edges.Processes = append(kn.Edges.Processes, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
 		}
 	}
 	return nil

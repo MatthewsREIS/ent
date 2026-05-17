@@ -70,6 +70,31 @@ func QueryUserGroupUser(c *UserGroupClient, _m *UserGroup) *UserQuery {
 	return query
 }
 
+// QueryUserGroupUserFromQuery returns a UserQuery that traverses the "user" edge
+// of every UserGroup matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserGroupQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryUserGroupUserFromQuery(q *UserGroupQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroup.Table, usergroup.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usergroup.UserTable, usergroup.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserGroupUser performs the eager-load for the "user" edge. Body mirrors
 // the pre-PR6 *UserGroupQuery.loadUser method, hoisted to root
 // so it can reference cross-package types directly.
@@ -127,6 +152,31 @@ func QueryUserGroupGroup(c *UserGroupClient, _m *UserGroup) *GroupQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserGroupGroupFromQuery returns a GroupQuery that traverses the "group" edge
+// of every UserGroup matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserGroupQuery).QueryGroup method, hoisted to root so it
+// can reference the cross-package GroupQuery type.
+func QueryUserGroupGroupFromQuery(q *UserGroupQuery) *GroupQuery {
+	query := NewGroupClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroup.Table, usergroup.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usergroup.GroupTable, usergroup.GroupColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

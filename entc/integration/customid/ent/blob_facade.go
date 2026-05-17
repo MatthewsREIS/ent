@@ -72,6 +72,31 @@ func QueryBlobParent(c *BlobClient, _m *Blob) *BlobQuery {
 	return query
 }
 
+// QueryBlobParentFromQuery returns a BlobQuery that traverses the "parent" edge
+// of every Blob matched by q (chained-query form). Mirrors the pre-PR6
+// (*BlobQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package BlobQuery type.
+func QueryBlobParentFromQuery(q *BlobQuery) *BlobQuery {
+	query := NewBlobClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blob.Table, blob.FieldID, selector),
+			sqlgraph.To(blob.Table, blob.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, blob.ParentTable, blob.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadBlobParent performs the eager-load for the "parent" edge. Body mirrors
 // the pre-PR6 *BlobQuery.loadParent method, hoisted to root
 // so it can reference cross-package types directly.
@@ -137,6 +162,31 @@ func QueryBlobLinks(c *BlobClient, _m *Blob) *BlobQuery {
 	return query
 }
 
+// QueryBlobLinksFromQuery returns a BlobQuery that traverses the "links" edge
+// of every Blob matched by q (chained-query form). Mirrors the pre-PR6
+// (*BlobQuery).QueryLinks method, hoisted to root so it
+// can reference the cross-package BlobQuery type.
+func QueryBlobLinksFromQuery(q *BlobQuery) *BlobQuery {
+	query := NewBlobClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blob.Table, blob.FieldID, selector),
+			sqlgraph.To(blob.Table, blob.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, blob.LinksTable, blob.LinksPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadBlobLinks performs the eager-load for the "links" edge. Body mirrors
 // the pre-PR6 *BlobQuery.loadLinks method, hoisted to root
 // so it can reference cross-package types directly.
@@ -197,6 +247,11 @@ func loadBlobLinks(ctx context.Context, query *BlobQuery, nodes []*Blob) error {
 			kn.Edges.Links = append(kn.Edges.Links, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -229,6 +284,31 @@ func QueryBlobBlobLinks(c *BlobClient, _m *Blob) *BlobLinkQuery {
 	return query
 }
 
+// QueryBlobBlobLinksFromQuery returns a BlobLinkQuery that traverses the "blob_links" edge
+// of every Blob matched by q (chained-query form). Mirrors the pre-PR6
+// (*BlobQuery).QueryBlobLinks method, hoisted to root so it
+// can reference the cross-package BlobLinkQuery type.
+func QueryBlobBlobLinksFromQuery(q *BlobQuery) *BlobLinkQuery {
+	query := NewBlobLinkClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blob.Table, blob.FieldID, selector),
+			sqlgraph.To(bloblink.Table, bloblink.BlobColumn),
+			sqlgraph.Edge(sqlgraph.O2M, true, blob.BlobLinksTable, blob.BlobLinksColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadBlobBlobLinks performs the eager-load for the "blob_links" edge. Body mirrors
 // the pre-PR6 *BlobQuery.loadBlobLinks method, hoisted to root
 // so it can reference cross-package types directly.
@@ -240,6 +320,7 @@ func loadBlobBlobLinks(ctx context.Context, query *BlobLinkQuery, nodes []*Blob)
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.BlobLinks = []*BlobLink{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(bloblink.FieldBlobID)
 	}

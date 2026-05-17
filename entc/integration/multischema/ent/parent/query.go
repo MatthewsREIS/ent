@@ -163,22 +163,7 @@ func (_q *ParentQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of Parents.
 func (_q *ParentQuery) All(ctx context.Context) ([]*Parent, error) {
-	nodes, err := entbuilder.RunAll[[]*Parent](ctx, _q, _q.Ctx, ent.OpQueryAll, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*Parent, error) { return _q.sqlAll(ctx) })
-	if err != nil {
-		return nil, err
-	}
-	if len(nodes) == 0 {
-		return nodes, nil
-	}
-	// Dispatch any registered eager loaders. Callbacks were captured by
-	// the root facade's With<Entity><Edge> free functions and receive the
-	// parent slice for in-place edge assignment.
-	for _, loader := range _q.eagerLoaders {
-		if err := loader(ctx, nodes); err != nil {
-			return nil, err
-		}
-	}
-	return nodes, nil
+	return entbuilder.RunAll[[]*Parent](ctx, _q, _q.Ctx, ent.OpQueryAll, _q.QueryState.Inters, _q.prepareQuery, func(ctx context.Context) ([]*Parent, error) { return _q.sqlAll(ctx) })
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -337,6 +322,33 @@ func (_q *ParentQuery) prepareQuery(ctx context.Context) error {
 }
 
 func (_q *ParentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Parent, error) {
+	nodes, err := _q.Fetch(ctx, hooks...)
+	if err != nil {
+		return nil, err
+	}
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+	// Dispatch any registered eager loaders. Callbacks were captured by
+	// the root facade's With<Entity><Edge> free functions and receive the
+	// parent slice for in-place edge assignment. Dispatch lives in sqlAll
+	// (not All) so Only/First/IDs/etc. — which all call sqlAll — also
+	// fire registered loaders. Fetch is the no-dispatch alternative used
+	// by load helpers themselves to avoid recursion.
+	for _, loader := range _q.eagerLoaders {
+		if err := loader(ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// Fetch executes the SQL parent query only — no eager loading.
+// Exposed for the root facade's edge-loading helpers (Task 17), which
+// call Fetch on a sub-query to materialize neighbors during eager dispatch.
+// Called internally by sqlAll, which wraps Fetch with the eager-loader
+// dispatch loop.
+func (_q *ParentQuery) Fetch(ctx context.Context, hooks ...queryHook) ([]*Parent, error) {
 	var (
 		nodes       = []*Parent{}
 		_spec       = _q.querySpec()
@@ -372,18 +384,26 @@ func (_q *ParentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Paren
 	return nodes, nil
 }
 
-// Fetch executes the SQL parent query only — no eager loading.
-// Exposed for the root facade's edge-loading helpers (Task 17), which
-// call Fetch on a sub-query to materialize neighbors during eager dispatch.
-func (_q *ParentQuery) Fetch(ctx context.Context, hooks ...queryHook) ([]*Parent, error) {
-	return _q.sqlAll(ctx, hooks...)
-}
-
 // PrepareQuery is the exported counterpart of prepareQuery — used by
 // root facade eager-load helpers that build join predicates and need
 // to attach interceptors/hooks before executing the sub-query.
 func (_q *ParentQuery) PrepareQuery(ctx context.Context) error {
 	return _q.prepareQuery(ctx)
+}
+
+// SQLQuery is the exported counterpart of sqlQuery — used by root
+// facade chained-edge helpers (e.g., QueryXEdgeFromQuery) that need
+// this query's SQL selector to construct a SetNeighbors sub-step.
+func (_q *ParentQuery) SQLQuery(ctx context.Context) *sql.Selector {
+	return _q.sqlQuery(ctx)
+}
+
+// IncludeForeignKeys is a no-op for types with no unexported foreign-key
+// columns — every column is already in the SELECT. Emitted so root facade
+// load helpers can call it unconditionally without compile-time branching
+// on the loaded sibling's FK shape.
+func (_q *ParentQuery) IncludeForeignKeys(bool) *ParentQuery {
+	return _q
 }
 
 func (_q *ParentQuery) sqlCount(ctx context.Context) (int, error) {

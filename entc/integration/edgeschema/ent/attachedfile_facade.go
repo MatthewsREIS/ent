@@ -70,6 +70,31 @@ func QueryAttachedFileFi(c *AttachedFileClient, _m *AttachedFile) *FileQuery {
 	return query
 }
 
+// QueryAttachedFileFiFromQuery returns a FileQuery that traverses the "fi" edge
+// of every AttachedFile matched by q (chained-query form). Mirrors the pre-PR6
+// (*AttachedFileQuery).QueryFi method, hoisted to root so it
+// can reference the cross-package FileQuery type.
+func QueryAttachedFileFiFromQuery(q *AttachedFileQuery) *FileQuery {
+	query := NewFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.FiTable, attachedfile.FiColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadAttachedFileFi performs the eager-load for the "fi" edge. Body mirrors
 // the pre-PR6 *AttachedFileQuery.loadFi method, hoisted to root
 // so it can reference cross-package types directly.
@@ -127,6 +152,31 @@ func QueryAttachedFileProc(c *AttachedFileClient, _m *AttachedFile) *ProcessQuer
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAttachedFileProcFromQuery returns a ProcessQuery that traverses the "proc" edge
+// of every AttachedFile matched by q (chained-query form). Mirrors the pre-PR6
+// (*AttachedFileQuery).QueryProc method, hoisted to root so it
+// can reference the cross-package ProcessQuery type.
+func QueryAttachedFileProcFromQuery(q *AttachedFileQuery) *ProcessQuery {
+	query := NewProcessClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, selector),
+			sqlgraph.To(process.Table, process.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.ProcTable, attachedfile.ProcColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

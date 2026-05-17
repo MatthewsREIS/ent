@@ -590,7 +590,7 @@ var {{ lower $.Name }}CreateDescriptor = &entbuilder.CreateDescriptor[Config, {{
 			switch x := v.(type) {
 			case {{ $.ID.Type }}:
 				n.{{ $.ID.StructField }} = x
-			{{- if $.ID.Type.Numeric }}
+			{{- if and $.ID.Type.Numeric (ne $.ID.Type.String "int64") }}
 			case int64:
 				n.{{ $.ID.StructField }} = {{ $.ID.Type }}(x)
 			{{- end }}

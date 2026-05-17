@@ -13,6 +13,9 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -53,6 +56,31 @@ func WithRelationshipUser(q *RelationshipQuery, opts ...func(*UserQuery)) *Relat
 // QueryRelationshipUser returns a UserQuery for the "user" edge of a given Relationship.
 func QueryRelationshipUser(c *RelationshipClient, _m *Relationship) *UserQuery {
 	query := NewUserClient(c.Config).Query()
+	return query
+}
+
+// QueryRelationshipUserFromQuery returns a UserQuery that traverses the "user" edge
+// of every Relationship matched by q (chained-query form). Mirrors the pre-PR6
+// (*RelationshipQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryRelationshipUserFromQuery(q *RelationshipQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(relationship.Table, relationship.UserColumn, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, relationship.UserTable, relationship.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 
@@ -107,6 +135,31 @@ func QueryRelationshipRelative(c *RelationshipClient, _m *Relationship) *UserQue
 	return query
 }
 
+// QueryRelationshipRelativeFromQuery returns a UserQuery that traverses the "relative" edge
+// of every Relationship matched by q (chained-query form). Mirrors the pre-PR6
+// (*RelationshipQuery).QueryRelative method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryRelationshipRelativeFromQuery(q *RelationshipQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(relationship.Table, relationship.RelativeColumn, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, relationship.RelativeTable, relationship.RelativeColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadRelationshipRelative performs the eager-load for the "relative" edge. Body mirrors
 // the pre-PR6 *RelationshipQuery.loadRelative method, hoisted to root
 // so it can reference cross-package types directly.
@@ -155,6 +208,31 @@ func WithRelationshipInfo(q *RelationshipQuery, opts ...func(*RelationshipInfoQu
 // QueryRelationshipInfo returns a RelationshipInfoQuery for the "info" edge of a given Relationship.
 func QueryRelationshipInfo(c *RelationshipClient, _m *Relationship) *RelationshipInfoQuery {
 	query := NewRelationshipInfoClient(c.Config).Query()
+	return query
+}
+
+// QueryRelationshipInfoFromQuery returns a RelationshipInfoQuery that traverses the "info" edge
+// of every Relationship matched by q (chained-query form). Mirrors the pre-PR6
+// (*RelationshipQuery).QueryInfo method, hoisted to root so it
+// can reference the cross-package RelationshipInfoQuery type.
+func QueryRelationshipInfoFromQuery(q *RelationshipQuery) *RelationshipInfoQuery {
+	query := NewRelationshipInfoClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(relationship.Table, relationship.InfoColumn, selector),
+			sqlgraph.To(relationshipinfo.Table, relationshipinfo.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, relationship.InfoTable, relationship.InfoColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
 	return query
 }
 

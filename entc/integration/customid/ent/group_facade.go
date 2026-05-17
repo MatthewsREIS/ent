@@ -70,6 +70,31 @@ func QueryGroupUsers(c *GroupClient, _m *Group) *UserQuery {
 	return query
 }
 
+// QueryGroupUsersFromQuery returns a UserQuery that traverses the "users" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryUsers method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryGroupUsersFromQuery(q *GroupQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupUsers performs the eager-load for the "users" edge. Body mirrors
 // the pre-PR6 *GroupQuery.loadUsers method, hoisted to root
 // so it can reference cross-package types directly.
@@ -128,6 +153,11 @@ func loadGroupUsers(ctx context.Context, query *UserQuery, nodes []*Group) error
 		}
 		for kn := range parents {
 			kn.Edges.Users = append(kn.Edges.Users, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
 		}
 	}
 	return nil

@@ -71,6 +71,31 @@ func QueryNoteParent(c *NoteClient, _m *Note) *NoteQuery {
 	return query
 }
 
+// QueryNoteParentFromQuery returns a NoteQuery that traverses the "parent" edge
+// of every Note matched by q (chained-query form). Mirrors the pre-PR6
+// (*NoteQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package NoteQuery type.
+func QueryNoteParentFromQuery(q *NoteQuery) *NoteQuery {
+	query := NewNoteClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(note.Table, note.FieldID, selector),
+			sqlgraph.To(note.Table, note.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, note.ParentTable, note.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadNoteParent performs the eager-load for the "parent" edge. Body mirrors
 // the pre-PR6 *NoteQuery.loadParent method, hoisted to root
 // so it can reference cross-package types directly.
@@ -136,6 +161,31 @@ func QueryNoteChildren(c *NoteClient, _m *Note) *NoteQuery {
 	return query
 }
 
+// QueryNoteChildrenFromQuery returns a NoteQuery that traverses the "children" edge
+// of every Note matched by q (chained-query form). Mirrors the pre-PR6
+// (*NoteQuery).QueryChildren method, hoisted to root so it
+// can reference the cross-package NoteQuery type.
+func QueryNoteChildrenFromQuery(q *NoteQuery) *NoteQuery {
+	query := NewNoteClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(note.Table, note.FieldID, selector),
+			sqlgraph.To(note.Table, note.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, note.ChildrenTable, note.ChildrenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadNoteChildren performs the eager-load for the "children" edge. Body mirrors
 // the pre-PR6 *NoteQuery.loadChildren method, hoisted to root
 // so it can reference cross-package types directly.
@@ -147,6 +197,7 @@ func loadNoteChildren(ctx context.Context, query *NoteQuery, nodes []*Note) erro
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Children = []*Note{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Note(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(note.ChildrenColumn), fks...))
 	}))

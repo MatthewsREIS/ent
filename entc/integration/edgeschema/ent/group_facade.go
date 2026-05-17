@@ -74,6 +74,31 @@ func QueryGroupUsers(c *GroupClient, _m *Group) *UserQuery {
 	return query
 }
 
+// QueryGroupUsersFromQuery returns a UserQuery that traverses the "users" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryUsers method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryGroupUsersFromQuery(q *GroupQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupUsers performs the eager-load for the "users" edge. Body mirrors
 // the pre-PR6 *GroupQuery.loadUsers method, hoisted to root
 // so it can reference cross-package types directly.
@@ -134,6 +159,11 @@ func loadGroupUsers(ctx context.Context, query *UserQuery, nodes []*Group) error
 			kn.Edges.Users = append(kn.Edges.Users, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -161,6 +191,31 @@ func QueryGroupTags(c *GroupClient, _m *Group) *TagQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupTagsFromQuery returns a TagQuery that traverses the "tags" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryTags method, hoisted to root so it
+// can reference the cross-package TagQuery type.
+func QueryGroupTagsFromQuery(q *GroupQuery) *TagQuery {
+	query := NewTagClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.TagsTable, group.TagsPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -226,6 +281,11 @@ func loadGroupTags(ctx context.Context, query *TagQuery, nodes []*Group) error {
 			kn.Edges.Tags = append(kn.Edges.Tags, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -258,6 +318,31 @@ func QueryGroupJoinedUsers(c *GroupClient, _m *Group) *UserGroupQuery {
 	return query
 }
 
+// QueryGroupJoinedUsersFromQuery returns a UserGroupQuery that traverses the "joined_users" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryJoinedUsers method, hoisted to root so it
+// can reference the cross-package UserGroupQuery type.
+func QueryGroupJoinedUsersFromQuery(q *GroupQuery) *UserGroupQuery {
+	query := NewUserGroupClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(usergroup.Table, usergroup.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.JoinedUsersTable, group.JoinedUsersColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupJoinedUsers performs the eager-load for the "joined_users" edge. Body mirrors
 // the pre-PR6 *GroupQuery.loadJoinedUsers method, hoisted to root
 // so it can reference cross-package types directly.
@@ -269,6 +354,7 @@ func loadGroupJoinedUsers(ctx context.Context, query *UserGroupQuery, nodes []*G
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.JoinedUsers = []*UserGroup{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(usergroup.FieldGroupID)
 	}
@@ -319,6 +405,31 @@ func QueryGroupGroupTags(c *GroupClient, _m *Group) *GroupTagQuery {
 	return query
 }
 
+// QueryGroupGroupTagsFromQuery returns a GroupTagQuery that traverses the "group_tags" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryGroupTags method, hoisted to root so it
+// can reference the cross-package GroupTagQuery type.
+func QueryGroupGroupTagsFromQuery(q *GroupQuery) *GroupTagQuery {
+	query := NewGroupTagClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(grouptag.Table, grouptag.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, group.GroupTagsTable, group.GroupTagsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupGroupTags performs the eager-load for the "group_tags" edge. Body mirrors
 // the pre-PR6 *GroupQuery.loadGroupTags method, hoisted to root
 // so it can reference cross-package types directly.
@@ -330,6 +441,7 @@ func loadGroupGroupTags(ctx context.Context, query *GroupTagQuery, nodes []*Grou
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.GroupTags = []*GroupTag{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(grouptag.FieldGroupID)
 	}

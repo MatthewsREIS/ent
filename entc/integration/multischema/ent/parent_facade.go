@@ -70,6 +70,31 @@ func QueryParentChild(c *ParentClient, _m *Parent) *UserQuery {
 	return query
 }
 
+// QueryParentChildFromQuery returns a UserQuery that traverses the "child" edge
+// of every Parent matched by q (chained-query form). Mirrors the pre-PR6
+// (*ParentQuery).QueryChild method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryParentChildFromQuery(q *ParentQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parent.Table, parent.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, parent.ChildTable, parent.ChildColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadParentChild performs the eager-load for the "child" edge. Body mirrors
 // the pre-PR6 *ParentQuery.loadChild method, hoisted to root
 // so it can reference cross-package types directly.
@@ -130,6 +155,31 @@ func QueryParentParent(c *ParentClient, _m *Parent) *UserQuery {
 		step.Edge.Schema = schemaConfig.Parent
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParentParentFromQuery returns a UserQuery that traverses the "parent" edge
+// of every Parent matched by q (chained-query form). Mirrors the pre-PR6
+// (*ParentQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryParentParentFromQuery(q *ParentQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parent.Table, parent.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, parent.ParentTable, parent.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

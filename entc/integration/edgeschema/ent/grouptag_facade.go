@@ -70,6 +70,31 @@ func QueryGroupTagTag(c *GroupTagClient, _m *GroupTag) *TagQuery {
 	return query
 }
 
+// QueryGroupTagTagFromQuery returns a TagQuery that traverses the "tag" edge
+// of every GroupTag matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupTagQuery).QueryTag method, hoisted to root so it
+// can reference the cross-package TagQuery type.
+func QueryGroupTagTagFromQuery(q *GroupTagQuery) *TagQuery {
+	query := NewTagClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(grouptag.Table, grouptag.FieldID, selector),
+			sqlgraph.To(tag.Table, tag.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, grouptag.TagTable, grouptag.TagColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupTagTag performs the eager-load for the "tag" edge. Body mirrors
 // the pre-PR6 *GroupTagQuery.loadTag method, hoisted to root
 // so it can reference cross-package types directly.
@@ -127,6 +152,31 @@ func QueryGroupTagGroup(c *GroupTagClient, _m *GroupTag) *GroupQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupTagGroupFromQuery returns a GroupQuery that traverses the "group" edge
+// of every GroupTag matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupTagQuery).QueryGroup method, hoisted to root so it
+// can reference the cross-package GroupQuery type.
+func QueryGroupTagGroupFromQuery(q *GroupTagQuery) *GroupQuery {
+	query := NewGroupClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(grouptag.Table, grouptag.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, grouptag.GroupTable, grouptag.GroupColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

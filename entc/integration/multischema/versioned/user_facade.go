@@ -74,6 +74,31 @@ func QueryUserPets(c *UserClient, _m *User) *PetQuery {
 	return query
 }
 
+// QueryUserPetsFromQuery returns a PetQuery that traverses the "pets" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryPets method, hoisted to root so it
+// can reference the cross-package PetQuery type.
+func QueryUserPetsFromQuery(q *UserQuery) *PetQuery {
+	query := NewPetClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserPets performs the eager-load for the "pets" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadPets method, hoisted to root
 // so it can reference cross-package types directly.
@@ -85,6 +110,7 @@ func loadUserPets(ctx context.Context, query *PetQuery, nodes []*User) error {
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Pets = []*Pet{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(pet.FieldOwnerID)
 	}
@@ -138,6 +164,31 @@ func QueryUserGroups(c *UserClient, _m *User) *GroupQuery {
 	return query
 }
 
+// QueryUserGroupsFromQuery returns a GroupQuery that traverses the "groups" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryGroups method, hoisted to root so it
+// can reference the cross-package GroupQuery type.
+func QueryUserGroupsFromQuery(q *UserQuery) *GroupQuery {
+	query := NewGroupClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupsTable, user.GroupsPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserGroups performs the eager-load for the "groups" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadGroups method, hoisted to root
 // so it can reference cross-package types directly.
@@ -152,6 +203,7 @@ func loadUserGroups(ctx context.Context, query *GroupQuery, nodes []*User) error
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.GroupsTable)
+		joinT.Schema(query.Config.SchemaConfig().GroupUsers)
 		s.Join(joinT).On(s.C(group.FieldID), joinT.C(user.GroupsPrimaryKey[0]))
 		s.Where(sql.InValues(joinT.C(user.GroupsPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
@@ -198,6 +250,11 @@ func loadUserGroups(ctx context.Context, query *GroupQuery, nodes []*User) error
 			kn.Edges.Groups = append(kn.Edges.Groups, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -233,6 +290,31 @@ func QueryUserFriends(c *UserClient, _m *User) *UserQuery {
 	return query
 }
 
+// QueryUserFriendsFromQuery returns a UserQuery that traverses the "friends" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryFriends method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryUserFriendsFromQuery(q *UserQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserFriends performs the eager-load for the "friends" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadFriends method, hoisted to root
 // so it can reference cross-package types directly.
@@ -247,6 +329,7 @@ func loadUserFriends(ctx context.Context, query *UserQuery, nodes []*User) error
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.FriendsTable)
+		joinT.Schema(query.Config.SchemaConfig().Friendship)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FriendsPrimaryKey[1]))
 		s.Where(sql.InValues(joinT.C(user.FriendsPrimaryKey[0]), edgeIDs...))
 		columns := s.SelectedColumns()
@@ -293,6 +376,11 @@ func loadUserFriends(ctx context.Context, query *UserQuery, nodes []*User) error
 			kn.Edges.Friends = append(kn.Edges.Friends, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -328,6 +416,31 @@ func QueryUserFollowers(c *UserClient, _m *User) *UserQuery {
 	return query
 }
 
+// QueryUserFollowersFromQuery returns a UserQuery that traverses the "followers" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryFollowers method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryUserFollowersFromQuery(q *UserQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserFollowers performs the eager-load for the "followers" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadFollowers method, hoisted to root
 // so it can reference cross-package types directly.
@@ -342,6 +455,7 @@ func loadUserFollowers(ctx context.Context, query *UserQuery, nodes []*User) err
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.FollowersTable)
+		joinT.Schema(query.Config.SchemaConfig().UserFollowing)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FollowersPrimaryKey[0]))
 		s.Where(sql.InValues(joinT.C(user.FollowersPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
@@ -388,6 +502,11 @@ func loadUserFollowers(ctx context.Context, query *UserQuery, nodes []*User) err
 			kn.Edges.Followers = append(kn.Edges.Followers, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -423,6 +542,31 @@ func QueryUserFollowing(c *UserClient, _m *User) *UserQuery {
 	return query
 }
 
+// QueryUserFollowingFromQuery returns a UserQuery that traverses the "following" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryFollowing method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryUserFollowingFromQuery(q *UserQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserFollowing performs the eager-load for the "following" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadFollowing method, hoisted to root
 // so it can reference cross-package types directly.
@@ -437,6 +581,7 @@ func loadUserFollowing(ctx context.Context, query *UserQuery, nodes []*User) err
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.FollowingTable)
+		joinT.Schema(query.Config.SchemaConfig().UserFollowing)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FollowingPrimaryKey[1]))
 		s.Where(sql.InValues(joinT.C(user.FollowingPrimaryKey[0]), edgeIDs...))
 		columns := s.SelectedColumns()
@@ -483,6 +628,11 @@ func loadUserFollowing(ctx context.Context, query *UserQuery, nodes []*User) err
 			kn.Edges.Following = append(kn.Edges.Following, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -518,6 +668,31 @@ func QueryUserFriendships(c *UserClient, _m *User) *FriendshipQuery {
 	return query
 }
 
+// QueryUserFriendshipsFromQuery returns a FriendshipQuery that traverses the "friendships" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryFriendships method, hoisted to root so it
+// can reference the cross-package FriendshipQuery type.
+func QueryUserFriendshipsFromQuery(q *UserQuery) *FriendshipQuery {
+	query := NewFriendshipClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(friendship.Table, friendship.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.FriendshipsTable, user.FriendshipsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserFriendships performs the eager-load for the "friendships" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadFriendships method, hoisted to root
 // so it can reference cross-package types directly.
@@ -529,6 +704,7 @@ func loadUserFriendships(ctx context.Context, query *FriendshipQuery, nodes []*U
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Friendships = []*Friendship{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(friendship.FieldUserID)
 	}

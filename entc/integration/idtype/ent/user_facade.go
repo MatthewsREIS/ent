@@ -242,6 +242,11 @@ func loadUserFollowers(ctx context.Context, query *UserQuery, nodes []*User) err
 			kn.Edges.Followers = append(kn.Edges.Followers, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -357,6 +362,11 @@ func loadUserFollowing(ctx context.Context, query *UserQuery, nodes []*User) err
 		}
 		for kn := range parents {
 			kn.Edges.Following = append(kn.Edges.Following, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
 		}
 	}
 	return nil

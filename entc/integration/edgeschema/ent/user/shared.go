@@ -160,10 +160,14 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 
 // schemaGraph holds this entity's schema for entql predicate evaluation.
 // Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// (Type name only — cross-entity field/column metadata is not accessible
-// from a leaf sub-package). The stubs are sufficient for entql.HasEdge /
-// HasEdgeWith dispatch on the join table; cross-edge field predicates
-// against sibling entities are out of scope at the sub-package boundary.
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
 var schemaGraph = func() *sqlgraph.Schema {
 	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 10)}
 	graph.Nodes[0] = &sqlgraph.Node{
@@ -180,15 +184,186 @@ var schemaGraph = func() *sqlgraph.Schema {
 			FieldName: {Type: field.TypeString, Column: FieldName},
 		},
 	}
-	graph.Nodes[1] = &sqlgraph.Node{Type: "Group"}
-	graph.Nodes[2] = &sqlgraph.Node{Type: "Tweet"}
-	graph.Nodes[3] = &sqlgraph.Node{Type: "Role"}
-	graph.Nodes[4] = &sqlgraph.Node{Type: "UserGroup"}
-	graph.Nodes[5] = &sqlgraph.Node{Type: "Friendship"}
-	graph.Nodes[6] = &sqlgraph.Node{Type: "Relationship"}
-	graph.Nodes[7] = &sqlgraph.Node{Type: "TweetLike"}
-	graph.Nodes[8] = &sqlgraph.Node{Type: "UserTweet"}
-	graph.Nodes[9] = &sqlgraph.Node{Type: "RoleUser"}
+	graph.Nodes[1] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "groups",
+			Columns: []string{
+				"id",
+				"name",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Group",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"name": {Type: field.TypeString, Column: "name"},
+		},
+	}
+	graph.Nodes[2] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "tweets",
+			Columns: []string{
+				"id",
+				"text",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Tweet",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"text": {Type: field.TypeString, Column: "text"},
+		},
+	}
+	graph.Nodes[3] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "roles",
+			Columns: []string{
+				"id",
+				"name",
+				"created_at",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Role",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"name":       {Type: field.TypeString, Column: "name"},
+			"created_at": {Type: field.TypeTime, Column: "created_at"},
+		},
+	}
+	graph.Nodes[4] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "user_groups",
+			Columns: []string{
+				"id",
+				"joined_at",
+				"user_id",
+				"group_id",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "UserGroup",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"joined_at": {Type: field.TypeTime, Column: "joined_at"},
+			"user_id":   {Type: field.TypeInt, Column: "user_id"},
+			"group_id":  {Type: field.TypeInt, Column: "group_id"},
+		},
+	}
+	graph.Nodes[5] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "friendships",
+			Columns: []string{
+				"id",
+				"weight",
+				"created_at",
+				"user_id",
+				"friend_id",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Friendship",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"weight":     {Type: field.TypeInt, Column: "weight"},
+			"created_at": {Type: field.TypeTime, Column: "created_at"},
+			"user_id":    {Type: field.TypeInt, Column: "user_id"},
+			"friend_id":  {Type: field.TypeInt, Column: "friend_id"},
+		},
+	}
+	graph.Nodes[6] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "relationships",
+			Columns: []string{
+				"weight",
+				"user_id",
+				"relative_id",
+				"info_id",
+			},
+			CompositeID: []*sqlgraph.FieldSpec{
+				{Type: field.TypeInt, Column: "user_id"},
+				{Type: field.TypeInt, Column: "relative_id"},
+			},
+		},
+		Type: "Relationship",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"weight":      {Type: field.TypeInt, Column: "weight"},
+			"user_id":     {Type: field.TypeInt, Column: "user_id"},
+			"relative_id": {Type: field.TypeInt, Column: "relative_id"},
+			"info_id":     {Type: field.TypeInt, Column: "info_id"},
+		},
+	}
+	graph.Nodes[7] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "tweet_likes",
+			Columns: []string{
+				"liked_at",
+				"user_id",
+				"tweet_id",
+			},
+			CompositeID: []*sqlgraph.FieldSpec{
+				{Type: field.TypeInt, Column: "user_id"},
+				{Type: field.TypeInt, Column: "tweet_id"},
+			},
+		},
+		Type: "TweetLike",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"liked_at": {Type: field.TypeTime, Column: "liked_at"},
+			"user_id":  {Type: field.TypeInt, Column: "user_id"},
+			"tweet_id": {Type: field.TypeInt, Column: "tweet_id"},
+		},
+	}
+	graph.Nodes[8] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "user_tweets",
+			Columns: []string{
+				"id",
+				"created_at",
+				"user_id",
+				"tweet_id",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "UserTweet",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"created_at": {Type: field.TypeTime, Column: "created_at"},
+			"user_id":    {Type: field.TypeInt, Column: "user_id"},
+			"tweet_id":   {Type: field.TypeInt, Column: "tweet_id"},
+		},
+	}
+	graph.Nodes[9] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "role_users",
+			Columns: []string{
+				"created_at",
+				"role_id",
+				"user_id",
+			},
+			CompositeID: []*sqlgraph.FieldSpec{
+				{Type: field.TypeInt, Column: "user_id"},
+				{Type: field.TypeInt, Column: "role_id"},
+			},
+		},
+		Type: "RoleUser",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"created_at": {Type: field.TypeTime, Column: "created_at"},
+			"role_id":    {Type: field.TypeInt, Column: "role_id"},
+			"user_id":    {Type: field.TypeInt, Column: "user_id"},
+		},
+	}
 	graph.MustAddE(
 		"groups",
 		&sqlgraph.EdgeSpec{

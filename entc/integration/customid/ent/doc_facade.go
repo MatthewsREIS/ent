@@ -71,6 +71,31 @@ func QueryDocParent(c *DocClient, _m *Doc) *DocQuery {
 	return query
 }
 
+// QueryDocParentFromQuery returns a DocQuery that traverses the "parent" edge
+// of every Doc matched by q (chained-query form). Mirrors the pre-PR6
+// (*DocQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package DocQuery type.
+func QueryDocParentFromQuery(q *DocQuery) *DocQuery {
+	query := NewDocClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, selector),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, doc.ParentTable, doc.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadDocParent performs the eager-load for the "parent" edge. Body mirrors
 // the pre-PR6 *DocQuery.loadParent method, hoisted to root
 // so it can reference cross-package types directly.
@@ -136,6 +161,31 @@ func QueryDocChildren(c *DocClient, _m *Doc) *DocQuery {
 	return query
 }
 
+// QueryDocChildrenFromQuery returns a DocQuery that traverses the "children" edge
+// of every Doc matched by q (chained-query form). Mirrors the pre-PR6
+// (*DocQuery).QueryChildren method, hoisted to root so it
+// can reference the cross-package DocQuery type.
+func QueryDocChildrenFromQuery(q *DocQuery) *DocQuery {
+	query := NewDocClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, selector),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, doc.ChildrenTable, doc.ChildrenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadDocChildren performs the eager-load for the "children" edge. Body mirrors
 // the pre-PR6 *DocQuery.loadChildren method, hoisted to root
 // so it can reference cross-package types directly.
@@ -147,6 +197,7 @@ func loadDocChildren(ctx context.Context, query *DocQuery, nodes []*Doc) error {
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Children = []*Doc{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Doc(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(doc.ChildrenColumn), fks...))
 	}))
@@ -192,6 +243,31 @@ func QueryDocRelated(c *DocClient, _m *Doc) *DocQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDocRelatedFromQuery returns a DocQuery that traverses the "related" edge
+// of every Doc matched by q (chained-query form). Mirrors the pre-PR6
+// (*DocQuery).QueryRelated method, hoisted to root so it
+// can reference the cross-package DocQuery type.
+func QueryDocRelatedFromQuery(q *DocQuery) *DocQuery {
+	query := NewDocClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, selector),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, doc.RelatedTable, doc.RelatedPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -255,6 +331,11 @@ func loadDocRelated(ctx context.Context, query *DocQuery, nodes []*Doc) error {
 		}
 		for kn := range parents {
 			kn.Edges.Related = append(kn.Edges.Related, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
 		}
 	}
 	return nil

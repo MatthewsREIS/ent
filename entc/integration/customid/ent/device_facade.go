@@ -72,6 +72,31 @@ func QueryDeviceActiveSession(c *DeviceClient, _m *Device) *SessionQuery {
 	return query
 }
 
+// QueryDeviceActiveSessionFromQuery returns a SessionQuery that traverses the "active_session" edge
+// of every Device matched by q (chained-query form). Mirrors the pre-PR6
+// (*DeviceQuery).QueryActiveSession method, hoisted to root so it
+// can reference the cross-package SessionQuery type.
+func QueryDeviceActiveSessionFromQuery(q *DeviceQuery) *SessionQuery {
+	query := NewSessionClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(device.Table, device.FieldID, selector),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, device.ActiveSessionTable, device.ActiveSessionColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadDeviceActiveSession performs the eager-load for the "active_session" edge. Body mirrors
 // the pre-PR6 *DeviceQuery.loadActiveSession method, hoisted to root
 // so it can reference cross-package types directly.
@@ -137,6 +162,31 @@ func QueryDeviceSessions(c *DeviceClient, _m *Device) *SessionQuery {
 	return query
 }
 
+// QueryDeviceSessionsFromQuery returns a SessionQuery that traverses the "sessions" edge
+// of every Device matched by q (chained-query form). Mirrors the pre-PR6
+// (*DeviceQuery).QuerySessions method, hoisted to root so it
+// can reference the cross-package SessionQuery type.
+func QueryDeviceSessionsFromQuery(q *DeviceQuery) *SessionQuery {
+	query := NewSessionClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(device.Table, device.FieldID, selector),
+			sqlgraph.To(session.Table, session.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, device.SessionsTable, device.SessionsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadDeviceSessions performs the eager-load for the "sessions" edge. Body mirrors
 // the pre-PR6 *DeviceQuery.loadSessions method, hoisted to root
 // so it can reference cross-package types directly.
@@ -148,6 +198,7 @@ func loadDeviceSessions(ctx context.Context, query *SessionQuery, nodes []*Devic
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Sessions = []*Session{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Session(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(device.SessionsColumn), fks...))
 	}))

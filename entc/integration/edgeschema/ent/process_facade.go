@@ -72,6 +72,31 @@ func QueryProcessFiles(c *ProcessClient, _m *Process) *FileQuery {
 	return query
 }
 
+// QueryProcessFilesFromQuery returns a FileQuery that traverses the "files" edge
+// of every Process matched by q (chained-query form). Mirrors the pre-PR6
+// (*ProcessQuery).QueryFiles method, hoisted to root so it
+// can reference the cross-package FileQuery type.
+func QueryProcessFilesFromQuery(q *ProcessQuery) *FileQuery {
+	query := NewFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(process.Table, process.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, process.FilesTable, process.FilesPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadProcessFiles performs the eager-load for the "files" edge. Body mirrors
 // the pre-PR6 *ProcessQuery.loadFiles method, hoisted to root
 // so it can reference cross-package types directly.
@@ -132,6 +157,11 @@ func loadProcessFiles(ctx context.Context, query *FileQuery, nodes []*Process) e
 			kn.Edges.Files = append(kn.Edges.Files, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -164,6 +194,31 @@ func QueryProcessAttachedFiles(c *ProcessClient, _m *Process) *AttachedFileQuery
 	return query
 }
 
+// QueryProcessAttachedFilesFromQuery returns a AttachedFileQuery that traverses the "attached_files" edge
+// of every Process matched by q (chained-query form). Mirrors the pre-PR6
+// (*ProcessQuery).QueryAttachedFiles method, hoisted to root so it
+// can reference the cross-package AttachedFileQuery type.
+func QueryProcessAttachedFilesFromQuery(q *ProcessQuery) *AttachedFileQuery {
+	query := NewAttachedFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(process.Table, process.FieldID, selector),
+			sqlgraph.To(attachedfile.Table, attachedfile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, process.AttachedFilesTable, process.AttachedFilesColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadProcessAttachedFiles performs the eager-load for the "attached_files" edge. Body mirrors
 // the pre-PR6 *ProcessQuery.loadAttachedFiles method, hoisted to root
 // so it can reference cross-package types directly.
@@ -175,6 +230,7 @@ func loadProcessAttachedFiles(ctx context.Context, query *AttachedFileQuery, nod
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.AttachedFiles = []*AttachedFile{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(attachedfile.FieldProcID)
 	}
