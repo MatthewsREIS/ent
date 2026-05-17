@@ -23,17 +23,15 @@ type {{ $builder }} struct {
 	Config
 	{{- if eq $.Config.Storage.Name "sql" }}
 	entbuilder.QueryState[predicate.{{ $.Name }}]
-	order []{{ $.Package }}.OrderOption
+	order []{{ $.PackageQualifier }}OrderOption
 	{{- else }}
 	ctx			*QueryContext
-	order		[]{{ $.Package }}.OrderOption
+	order		[]{{ $.PackageQualifier }}OrderOption
 	inters		[]Interceptor
 	predicates 	[]predicate.{{ $.Name }}
 	{{- end }}
-	{{- /* Eager loading fields. */}}
-	{{- range $e := $.Edges }}
-		{{ $e.EagerLoadField }} *{{ $e.Type.QueryName }}
-	{{- end }}
+	{{- /* Opaque eager loaders keyed by edge name. Cross-entity edge wiring lives in the root facade. */}}
+	eagerLoaders map[string]func(context.Context, []*{{ $.Name }}) error
 	{{- /* Additional fields to add to the builder. */}}
 	{{- $tmpl := printf "dialect/%s/query/fields" $.Storage }}
 	{{- if hasTemplate $tmpl }}
@@ -44,6 +42,22 @@ type {{ $builder }} struct {
 	{{ $.Storage }} {{ $.Storage.Builder }}
 	path func(context.Context) ({{ $.Storage.Builder }}, error)
 	{{- end }}
+}
+
+// StoreEager registers an eager-load callback for the given edge name.
+// Exposed for the root facade's With<Entity><Edge> free functions.
+func ({{ $receiver }} *{{ $builder }}) StoreEager(name string, loader func(context.Context, []*{{ $.Name }}) error) *{{ $builder }} {
+	if {{ $receiver }}.eagerLoaders == nil {
+		{{ $receiver }}.eagerLoaders = make(map[string]func(context.Context, []*{{ $.Name }}) error)
+	}
+	{{ $receiver }}.eagerLoaders[name] = loader
+	return {{ $receiver }}
+}
+
+// EagerLoaders returns the registered eager-load callbacks (read-only).
+// Used by the sub-package's All() (Task 13) and by root facade utilities.
+func ({{ $receiver }} *{{ $builder }}) EagerLoaders() map[string]func(context.Context, []*{{ $.Name }}) error {
+	return {{ $receiver }}.eagerLoaders
 }
 
 // Where adds a new predicate for the {{ $builder }} builder.
@@ -92,44 +106,24 @@ func ({{ $receiver }} *{{ $builder }}) Unique(unique bool) *{{ $builder }} {
 }
 
 // Order specifies how the records should be ordered.
-func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.Package }}.OrderOption) *{{ $builder }} {
+func ({{ $receiver }} *{{ $builder }}) Order(o ...{{ $.PackageQualifier }}OrderOption) *{{ $builder }} {
 	{{ $receiver }}.order = append({{ $receiver }}.order, o...)
 	return {{ $receiver }}
 }
-
-{{/* this code has similarity with edge queries in client.tmpl */}}
-{{ range $e := $.Edges }}
-	{{ $edge_builder := print $e.Type.QueryName }}
-	// Query{{ pascal $e.Name }} chains the current query on the "{{ $e.Name }}" edge.
-	func ({{ $receiver }} *{{ $builder }}) Query{{ pascal $e.Name }}() *{{ $edge_builder }} {
-		query := (&{{ $e.Type.ClientName }}{Config: {{ $receiver }}.Config}).Query()
-		query.{{ if eq $.Config.Storage.Name "sql" }}Path{{ else }}path{{ end }} = func(ctx context.Context) (fromU {{ $.Storage.Builder }}, err error) {
-			if err := {{ $receiver }}.prepareQuery(ctx); err != nil {
-				return nil, err
-			}
-			{{- with extend $ "Receiver" $receiver "Edge" $e "Ident" "fromU" -}}
-				{{ $tmpl := printf "dialect/%s/query/path" $.Storage }}
-				{{- xtemplate $tmpl . }}
-			{{- end -}}
-			return fromU, nil
-		}
-		return query
-	}
-{{ end }}
 
 // First returns the first {{ $.Name }} entity from the query.
 // Returns a *NotFoundError when no {{ $.Name }} was found.
 func ({{ $receiver }} *{{ $builder }}) First(ctx context.Context) (*{{ $.Name }}, error) {
 	{{- if eq $.Config.Storage.Name "sql" }}
 	{{ $receiver }}.Limit(1)
-	return entbuilder.RunFirst[*{{ $.Name }}, []*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryFirst, {{ $.Package }}.Label, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
+	return entbuilder.RunFirst[*{{ $.Name }}, []*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryFirst, {{ $.PackageQualifier }}Label, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} })
 	{{- else }}
 	nodes, err := {{ $receiver }}.Limit(1).All(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{Label: {{ $.Package }}.Label}
+		return nil, &NotFoundError{Label: {{ $.PackageQualifier }}Label}
 	}
 	return nodes[0], nil
 	{{- end }}
@@ -153,7 +147,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 			return
 		}
 		if len(ids) == 0 {
-			err = &NotFoundError{Label: {{ $.Package }}.Label}
+			err = &NotFoundError{Label: {{ $.PackageQualifier }}Label}
 			return
 		}
 		return ids[0], nil
@@ -175,7 +169,7 @@ func ({{ $receiver }} *{{ $builder }}) FirstX(ctx context.Context) *{{ $.Name }}
 func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }}, error) {
 	{{- if eq $.Config.Storage.Name "sql" }}
 	{{ $receiver }}.Limit(2)
-	return entbuilder.RunOnly[*{{ $.Name }}, []*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryOnly, {{ $.Package }}.Label, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
+	return entbuilder.RunOnly[*{{ $.Name }}, []*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryOnly, {{ $.PackageQualifier }}Label, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) }, func(label string) error { return &NotFoundError{Label: label} }, func(label string) error { return &NotSingularError{Label: label} })
 	{{- else }}
 	nodes, err := {{ $receiver }}.Limit(2).All(setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryOnly))
 	if err != nil {
@@ -185,9 +179,9 @@ func ({{ $receiver }} *{{ $builder }}) Only(ctx context.Context) (*{{ $.Name }},
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{Label: {{ $.Package }}.Label}
+		return nil, &NotFoundError{Label: {{ $.PackageQualifier }}Label}
 	default:
-		return nil, &NotSingularError{Label: {{ $.Package }}.Label}
+		return nil, &NotSingularError{Label: {{ $.PackageQualifier }}Label}
 	}
 	{{- end }}
 }
@@ -214,9 +208,9 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 		case 1:
 			id = ids[0]
 		case 0:
-			err = &NotFoundError{Label: {{ $.Package }}.Label}
+			err = &NotFoundError{Label: {{ $.PackageQualifier }}Label}
 		default:
-			err = &NotSingularError{Label: {{ $.Package }}.Label}
+			err = &NotSingularError{Label: {{ $.PackageQualifier }}Label}
 		}
 		return
 	}
@@ -269,7 +263,7 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 		}
 		ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryIDs)
 		{{- end }}
-		if err = {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
+		if err = {{ $receiver }}.Select({{ $.PackageQualifier }}FieldID).Scan(ctx, &ids); err != nil {
 			return nil, err
 		}
 		return ids, nil
@@ -339,16 +333,14 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		Config: 	{{ $receiver }}.Config,
 		{{- if eq $.Config.Storage.Name "sql" }}
 		QueryState: *{{ $receiver }}.QueryState.Clone(),
-		order:      append([]{{ $.Package }}.OrderOption{}, {{ $receiver }}.order...),
+		order:      append([]{{ $.PackageQualifier }}OrderOption{}, {{ $receiver }}.order...),
 		{{- else }}
 		ctx: 		{{ $receiver }}.ctx.Clone(),
-		order: 		append([]{{ $.Package }}.OrderOption{}, {{ $receiver }}.order...),
+		order: 		append([]{{ $.PackageQualifier }}OrderOption{}, {{ $receiver }}.order...),
 		inters: 	append([]Interceptor{}, {{ $receiver }}.inters...),
 		predicates: append([]predicate.{{ $.Name }}{}, {{ $receiver }}.predicates...),
 		{{- end }}
-		{{- range $e := $.Edges }}
-			{{ $e.EagerLoadField }}: {{ $receiver }}.{{ $e.EagerLoadField }}.Clone(),
-		{{- end }}
+		eagerLoaders: cloneEagerLoaders{{ $.Name }}({{ $receiver }}.eagerLoaders),
 		{{- if ne $.Config.Storage.Name "sql" }}
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
@@ -359,21 +351,6 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		{{- end }}
 	}
 }
-
-{{- range $e := $.Edges }}
-	{{ $ebuilder := $e.Type.QueryName }}
-	{{ $func := print "With" $e.StructField }}
-	// {{ $func }} tells the query-builder to eager-load the nodes that are connected to
-	// the "{{ $e.Name }}" edge. The optional arguments are used to configure the query builder of the edge.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
-		query := (&{{ $e.Type.ClientName }}{Config: {{ $receiver }}.Config}).Query()
-		for _, opt := range opts {
-			opt(query)
-		}
-		{{ $receiver }}.{{ $e.EagerLoadField }} = query
-		return {{ $receiver }}
-	}
-{{- end }}
 
 {{ $groupBuilder := pascal $.Name | printf "%sGroupBy" }}
 
@@ -390,7 +367,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 //	}
 //
 //	client.{{ pascal $.Name }}.Query().
-//		GroupBy({{ $.Package }}.{{ $f.Constant }}).
+//		GroupBy({{ $.PackageQualifier }}{{ $f.Constant }}).
 //		Aggregate({{ $pkg }}.Count()).
 //		Scan(ctx, &v)
 //
@@ -405,7 +382,7 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 	grbuild := &{{ $groupBuilder }}{build: {{ $receiver }}}
 	grbuild.flds = &{{ $receiver }}.ctx.Fields
 	{{- end }}
-	grbuild.label = {{ $.Package }}.Label
+	grbuild.label = {{ $.PackageQualifier }}Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
@@ -424,7 +401,7 @@ func ({{ $receiver }} *{{ $builder }}) GroupBy(field string, fields ...string) *
 //	}
 //
 //	client.{{ pascal $.Name }}.Query().
-//		Select({{ $.Package }}.{{ $f.Constant }}).
+//		Select({{ $.PackageQualifier }}{{ $f.Constant }}).
 //		Scan(ctx, &v)
 //
 {{- end }}
@@ -432,12 +409,12 @@ func ({{ $receiver }} *{{ $builder }}) Select(fields ...string) *{{ $selectBuild
 	{{- if eq $.Config.Storage.Name "sql" }}
 	{{ $receiver }}.Ctx.Fields = append({{ $receiver }}.Ctx.Fields, fields...)
 	sbuild := &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
-	sbuild.label = {{ $.Package }}.Label
+	sbuild.label = {{ $.PackageQualifier }}Label
 	sbuild.flds, sbuild.scan = &{{ $receiver }}.Ctx.Fields, sbuild.Scan
 	{{- else }}
 	{{ $receiver }}.ctx.Fields = append({{ $receiver }}.ctx.Fields, fields...)
 	sbuild := &{{ $selectBuilder }}{ {{ $builder }}: {{ $receiver }} }
-	sbuild.label = {{ $.Package }}.Label
+	sbuild.label = {{ $.PackageQualifier }}Label
 	sbuild.flds, sbuild.scan = &{{ $receiver }}.ctx.Fields, sbuild.Scan
 	{{- end }}
 	return sbuild
@@ -484,10 +461,10 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 	}
 	{{- end }}
 	{{- if $.NumPolicy }}
-		if {{ $.Package }}.Policy == nil {
-			return errors.New("{{ $pkg }}: uninitialized {{ $.Package }}.Policy (forgotten import {{ $pkg }}/runtime?)")
+		if {{ $.PackageQualifier }}Policy == nil {
+			return errors.New("{{ $pkg }}: uninitialized {{ $.PackageQualifier }}Policy (forgotten import {{ $pkg }}/runtime?)")
 		}
-		if err := {{ $.Package }}.Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
+		if err := {{ $.PackageQualifier }}Policy.EvalQuery(ctx, {{ $receiver }}); err != nil {
 			return err
 		}
 	{{- end }}
@@ -588,10 +565,10 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v a
 
 // {{ lower $.Name }}CreateDescriptor holds the metadata and callbacks for constructing a {{ $.Name }} entity.
 var {{ lower $.Name }}CreateDescriptor = &entbuilder.CreateDescriptor[Config, {{ $.Name }}, *{{ $.MutationName }}]{
-	Table:   {{ $.Package }}.Table,
+	Table:   {{ $.PackageQualifier }}Table,
 	NewNode: func(c Config) *{{ $.Name }} { return &{{ $.Name }}{Config: c} },
 	ID: &entbuilder.IDDescriptor[Config, {{ $.Name }}, *{{ $.MutationName }}]{
-		Column:      {{ $.Package }}.{{ $.ID.Constant }},
+		Column:      {{ $.PackageQualifier }}{{ $.ID.Constant }},
 		Type:        field.{{ $.ID.Type.ConstName }},
 		UserDefined: {{ $.ID.UserDefined }},
 		{{- if $.ID.UserDefined }}
@@ -639,5 +616,18 @@ var {{ lower $.Name }}CreateDescriptor = &entbuilder.CreateDescriptor[Config, {{
 	},
 }
 {{- end }}
+
+// cloneEagerLoaders{{ $.Name }} returns a shallow copy of the eager-loaders map.
+// The closures themselves are shared between original and clone.
+func cloneEagerLoaders{{ $.Name }}(in map[string]func(context.Context, []*{{ $.Name }}) error) map[string]func(context.Context, []*{{ $.Name }}) error {
+	if in == nil {
+		return nil
+	}
+	out := make(map[string]func(context.Context, []*{{ $.Name }}) error, len(in))
+	for k, v := range in {
+		out[k] = v
+	}
+	return out
+}
 
 {{ end }}
