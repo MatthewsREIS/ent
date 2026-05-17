@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/goods"
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
+	"entgo.io/ent/entc/integration/ent/internal"
 	"entgo.io/ent/entc/integration/ent/item"
 	"entgo.io/ent/entc/integration/ent/license"
 	"entgo.io/ent/entc/integration/ent/node"
@@ -27,7 +28,6 @@ import (
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
@@ -739,6 +739,5 @@ var schemaGraph = func() *sqlgraph.Schema {
 
 // predicateAdder wraps the AddPredicate method.
 // All update, update-one and query builders implement this interface.
-type predicateAdder interface {
-	AddPredicate(func(s *sql.Selector))
-}
+// Aliased to internal so root and sub-package converge on the same interface.
+type predicateAdder = internal.PredicateAdder

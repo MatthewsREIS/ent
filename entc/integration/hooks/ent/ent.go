@@ -15,7 +15,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/hooks/ent/card"
 	"entgo.io/ent/entc/integration/hooks/ent/internal"
 	"entgo.io/ent/entc/integration/hooks/ent/pet"
@@ -113,7 +112,7 @@ func Desc(fields ...string) func(*sql.Selector) {
 }
 
 // AggregateFunc applies an aggregation step on the group-by traversal/selector.
-type AggregateFunc func(*sql.Selector) string
+type AggregateFunc = internal.AggregateFunc
 
 // As is a pseudo aggregation function for renaming another other functions with custom names. For example:
 //
@@ -239,208 +238,10 @@ func IsConstraintError(err error) bool {
 	return errors.As(err, &e)
 }
 
-// selector embedded by the different Select/GroupBy builders.
-type selector struct {
-	label string
-	flds  *[]string
-	fns   []AggregateFunc
-	scan  func(context.Context, any) error
-}
-
-// ScanX is like Scan, but panics if an error occurs.
-func (s *selector) ScanX(ctx context.Context, v any) {
-	if err := s.scan(ctx, v); err != nil {
-		panic(err)
-	}
-}
-
-// Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (s *selector) Strings(ctx context.Context) ([]string, error) {
-	if len(*s.flds) > 1 {
-		return nil, errors.New("ent: Strings is not achievable when selecting more than 1 field")
-	}
-	var v []string
-	if err := s.scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// StringsX is like Strings, but panics if an error occurs.
-func (s *selector) StringsX(ctx context.Context) []string {
-	v, err := s.Strings(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// String returns a single string from a selector. It is only allowed when selecting one field.
-func (s *selector) String(ctx context.Context) (_ string, err error) {
-	var v []string
-	if v, err = s.Strings(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{Label: s.label}
-	default:
-		err = fmt.Errorf("ent: Strings returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// StringX is like String, but panics if an error occurs.
-func (s *selector) StringX(ctx context.Context) string {
-	v, err := s.String(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (s *selector) Ints(ctx context.Context) ([]int, error) {
-	if len(*s.flds) > 1 {
-		return nil, errors.New("ent: Ints is not achievable when selecting more than 1 field")
-	}
-	var v []int
-	if err := s.scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// IntsX is like Ints, but panics if an error occurs.
-func (s *selector) IntsX(ctx context.Context) []int {
-	v, err := s.Ints(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Int returns a single int from a selector. It is only allowed when selecting one field.
-func (s *selector) Int(ctx context.Context) (_ int, err error) {
-	var v []int
-	if v, err = s.Ints(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{Label: s.label}
-	default:
-		err = fmt.Errorf("ent: Ints returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// IntX is like Int, but panics if an error occurs.
-func (s *selector) IntX(ctx context.Context) int {
-	v, err := s.Int(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (s *selector) Float64s(ctx context.Context) ([]float64, error) {
-	if len(*s.flds) > 1 {
-		return nil, errors.New("ent: Float64s is not achievable when selecting more than 1 field")
-	}
-	var v []float64
-	if err := s.scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// Float64sX is like Float64s, but panics if an error occurs.
-func (s *selector) Float64sX(ctx context.Context) []float64 {
-	v, err := s.Float64s(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (s *selector) Float64(ctx context.Context) (_ float64, err error) {
-	var v []float64
-	if v, err = s.Float64s(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{Label: s.label}
-	default:
-		err = fmt.Errorf("ent: Float64s returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// Float64X is like Float64, but panics if an error occurs.
-func (s *selector) Float64X(ctx context.Context) float64 {
-	v, err := s.Float64(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (s *selector) Bools(ctx context.Context) ([]bool, error) {
-	if len(*s.flds) > 1 {
-		return nil, errors.New("ent: Bools is not achievable when selecting more than 1 field")
-	}
-	var v []bool
-	if err := s.scan(ctx, &v); err != nil {
-		return nil, err
-	}
-	return v, nil
-}
-
-// BoolsX is like Bools, but panics if an error occurs.
-func (s *selector) BoolsX(ctx context.Context) []bool {
-	v, err := s.Bools(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
-// Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (s *selector) Bool(ctx context.Context) (_ bool, err error) {
-	var v []bool
-	if v, err = s.Bools(ctx); err != nil {
-		return
-	}
-	switch len(v) {
-	case 1:
-		return v[0], nil
-	case 0:
-		err = &NotFoundError{Label: s.label}
-	default:
-		err = fmt.Errorf("ent: Bools returned %d results when one was expected", len(v))
-	}
-	return
-}
-
-// BoolX is like Bool, but panics if an error occurs.
-func (s *selector) BoolX(ctx context.Context) bool {
-	v, err := s.Bool(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
+// selector is the embedded type used by the different Select/GroupBy builders.
+// It aliases internal.Selector — exported fields let both root and per-entity
+// sub-package builders assign Label/Flds/Fns/Scan via the embed.
+type selector = internal.Selector
 
 // WithHooks invokes the builder operation with the given hooks, if any.
 func WithHooks[V Value, M any, PM interface {
@@ -450,14 +251,8 @@ func WithHooks[V Value, M any, PM interface {
 	return internal.WithHooks[V, M, PM](ctx, exec, mutation, hooks)
 }
 
-// setContextOp returns a new context with the given QueryContext attached (including its op) in case it does not exist.
-func setContextOp(ctx context.Context, qc *QueryContext, op string) context.Context {
-	if ent.QueryFromContext(ctx) == nil {
-		qc.Op = op
-		ctx = ent.NewQueryContext(ctx, qc)
-	}
-	return ctx
-}
+// setContextOp aliases the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
 
 func querierAll[V Value, Q interface {
 	sqlAll(context.Context, ...queryHook) (V, error)
@@ -483,19 +278,10 @@ func querierCount[Q interface {
 	})
 }
 
-func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (v V, err error) {
-	for i := len(inters) - 1; i >= 0; i-- {
-		qr = inters[i].Intercept(qr)
-	}
-	rv, err := qr.Query(ctx, q)
-	if err != nil {
-		return v, err
-	}
-	vt, ok := rv.(V)
-	if !ok {
-		return v, fmt.Errorf("unexpected type %T returned from %T. expected type: %T", vt, q, v)
-	}
-	return vt, nil
+// withInterceptors wraps internal.WithInterceptors. Generic functions can't be
+// assigned to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
 }
 
 func scanWithInterceptors[Q1 ent.Query, Q2 interface {
@@ -533,4 +319,5 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 }
 
 // queryHook describes an internal hook for the different sqlAll methods.
-type queryHook func(context.Context, *sqlgraph.QuerySpec)
+// Aliased to internal so root and sub-package converge on the same signature.
+type queryHook = internal.QueryHook

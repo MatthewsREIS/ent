@@ -128,7 +128,7 @@ func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
 				Value: string(buf),
 			}
 			var ids []int
-			ids, err = c.Pet.QueryOwner(n).
+			ids, err = QueryPetOwner(c.Pet, n).
 				Select(user.FieldID).
 				Ints(ctx)
 			if err != nil {
@@ -163,7 +163,7 @@ func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
 				Value: string(buf),
 			}
 			var ids []int
-			ids, err = c.User.QueryPets(n).
+			ids, err = QueryUserPets(c.User, n).
 				Select(pet.FieldID).
 				Ints(ctx)
 			if err != nil {
@@ -174,7 +174,7 @@ func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
 				Type: "Pet",
 				Name: "Pets",
 			}
-			ids, err = c.User.QueryFriends(n).
+			ids, err = QueryUserFriends(c.User, n).
 				Select(user.FieldID).
 				Ints(ctx)
 			if err != nil {

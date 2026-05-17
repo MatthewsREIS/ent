@@ -8,6 +8,10 @@ package zoo
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+
+	"entgo.io/ent"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/internal"
 )
@@ -60,11 +64,92 @@ func WithHooks[V Value, M any, PM interface {
 type Zoo = internal.Zoo
 type Zoos = internal.Zoos
 
-// Mutation type aliases and constructors from internal.
-type ZooMutation = internal.ZooMutation
-type ZooMutationOption = internal.ZooMutationOption
+// Error-check function aliases for the shared helpers in the internal package.
+var (
+	IsValidationError = internal.IsValidationError
+	IsNotFound        = internal.IsNotFound
+	MaskNotFound      = internal.MaskNotFound
+	IsNotSingular     = internal.IsNotSingular
+	IsNotLoaded       = internal.IsNotLoaded
+	IsConstraintError = internal.IsConstraintError
+)
 
-var NewZooMutation = internal.NewZooMutation
-var WithZooID = internal.WithZooID
-var WithZoo = internal.WithZoo
-var WithZooIDsFunc = internal.WithZooIDsFunc
+// setContextOp is an alias for the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
+
+// withInterceptors is a wrapper around internal.WithInterceptors so callers
+// can use the conventional lowercase name. Generic functions can't be assigned
+// to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
+}
+
+// Type aliases for sql-specific shared helpers.
+type (
+	selector      = internal.Selector
+	AggregateFunc = internal.AggregateFunc
+	queryHook     = internal.QueryHook
+)
+
+// querierAll / querierCount have generic constraints that bind to local
+// sqlAll/sqlCount methods (whose identity is package-local because the
+// method name is unexported) — so they must be emitted per-sub-package.
+func querierAll[V Value, Q interface {
+	sqlAll(context.Context, ...queryHook) (V, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlAll(ctx)
+	})
+}
+
+func querierCount[Q interface {
+	sqlCount(context.Context) (int, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlCount(ctx)
+	})
+}
+
+// scanWithInterceptors's Q2 constraint references the unexported sqlScan
+// method, whose identity is package-local — must stay per-sub-package.
+func scanWithInterceptors[Q1 ent.Query, Q2 interface {
+	sqlScan(context.Context, Q1, any) error
+}](ctx context.Context, rootQuery Q1, selectOrGroup Q2, inters []Interceptor, v any) error {
+	rv := reflect.ValueOf(v)
+	var qr Querier = QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q1)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		if err := selectOrGroup.sqlScan(ctx, query, v); err != nil {
+			return nil, err
+		}
+		if k := rv.Kind(); k == reflect.Pointer && rv.Elem().CanInterface() {
+			return rv.Elem().Interface(), nil
+		}
+		return v, nil
+	})
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	vv, err := qr.Query(ctx, rootQuery)
+	if err != nil {
+		return err
+	}
+	switch rv2 := reflect.ValueOf(vv); {
+	case rv.IsNil(), rv2.IsNil(), rv.Kind() != reflect.Pointer:
+	case rv.Type() == rv2.Type():
+		rv.Elem().Set(rv2.Elem())
+	case rv.Elem().Type() == rv2.Type():
+		rv.Elem().Set(rv2)
+	}
+	return nil
+}

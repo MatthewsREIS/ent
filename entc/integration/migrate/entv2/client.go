@@ -184,23 +184,23 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *BlogMutation:
-		return c.Blog.mutate(ctx, m)
+		return c.Blog.Mutate(ctx, m)
 	case *CarMutation:
-		return c.Car.mutate(ctx, m)
+		return c.Car.Mutate(ctx, m)
 	case *ConversionMutation:
-		return c.Conversion.mutate(ctx, m)
+		return c.Conversion.Mutate(ctx, m)
 	case *CustomTypeMutation:
-		return c.CustomType.mutate(ctx, m)
+		return c.CustomType.Mutate(ctx, m)
 	case *GroupMutation:
-		return c.Group.mutate(ctx, m)
+		return c.Group.Mutate(ctx, m)
 	case *MediaMutation:
-		return c.Media.mutate(ctx, m)
+		return c.Media.Mutate(ctx, m)
 	case *PetMutation:
-		return c.Pet.mutate(ctx, m)
+		return c.Pet.Mutate(ctx, m)
 	case *UserMutation:
-		return c.User.mutate(ctx, m)
+		return c.User.Mutate(ctx, m)
 	case *ZooMutation:
-		return c.Zoo.mutate(ctx, m)
+		return c.Zoo.Mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("entv2: unknown mutation type %T", m)
 	}

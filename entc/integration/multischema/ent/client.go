@@ -167,15 +167,15 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *FriendshipMutation:
-		return c.Friendship.mutate(ctx, m)
+		return c.Friendship.Mutate(ctx, m)
 	case *GroupMutation:
-		return c.Group.mutate(ctx, m)
+		return c.Group.Mutate(ctx, m)
 	case *ParentMutation:
-		return c.Parent.mutate(ctx, m)
+		return c.Parent.Mutate(ctx, m)
 	case *PetMutation:
-		return c.Pet.mutate(ctx, m)
+		return c.Pet.Mutate(ctx, m)
 	case *UserMutation:
-		return c.User.mutate(ctx, m)
+		return c.User.Mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}

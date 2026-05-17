@@ -8,6 +8,12 @@ package team
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/privacy/ent/internal"
 )
@@ -61,11 +67,144 @@ type Team = internal.Team
 type TeamEdges = internal.TeamEdges
 type Teams = internal.Teams
 
-// Mutation type aliases and constructors from internal.
-type TeamMutation = internal.TeamMutation
-type TeamMutationOption = internal.TeamMutationOption
+// Error-check function aliases for the shared helpers in the internal package.
+var (
+	IsValidationError = internal.IsValidationError
+	IsNotFound        = internal.IsNotFound
+	MaskNotFound      = internal.MaskNotFound
+	IsNotSingular     = internal.IsNotSingular
+	IsNotLoaded       = internal.IsNotLoaded
+	IsConstraintError = internal.IsConstraintError
+)
 
-var NewTeamMutation = internal.NewTeamMutation
-var WithTeamID = internal.WithTeamID
-var WithTeam = internal.WithTeam
-var WithTeamIDsFunc = internal.WithTeamIDsFunc
+// setContextOp is an alias for the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
+
+// withInterceptors is a wrapper around internal.WithInterceptors so callers
+// can use the conventional lowercase name. Generic functions can't be assigned
+// to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
+}
+
+// Type aliases for sql-specific shared helpers.
+type (
+	selector       = internal.Selector
+	AggregateFunc  = internal.AggregateFunc
+	queryHook      = internal.QueryHook
+	predicateAdder = internal.PredicateAdder
+)
+
+// querierAll / querierCount have generic constraints that bind to local
+// sqlAll/sqlCount methods (whose identity is package-local because the
+// method name is unexported) — so they must be emitted per-sub-package.
+func querierAll[V Value, Q interface {
+	sqlAll(context.Context, ...queryHook) (V, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlAll(ctx)
+	})
+}
+
+func querierCount[Q interface {
+	sqlCount(context.Context) (int, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlCount(ctx)
+	})
+}
+
+// scanWithInterceptors's Q2 constraint references the unexported sqlScan
+// method, whose identity is package-local — must stay per-sub-package.
+func scanWithInterceptors[Q1 ent.Query, Q2 interface {
+	sqlScan(context.Context, Q1, any) error
+}](ctx context.Context, rootQuery Q1, selectOrGroup Q2, inters []Interceptor, v any) error {
+	rv := reflect.ValueOf(v)
+	var qr Querier = QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q1)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		if err := selectOrGroup.sqlScan(ctx, query, v); err != nil {
+			return nil, err
+		}
+		if k := rv.Kind(); k == reflect.Pointer && rv.Elem().CanInterface() {
+			return rv.Elem().Interface(), nil
+		}
+		return v, nil
+	})
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	vv, err := qr.Query(ctx, rootQuery)
+	if err != nil {
+		return err
+	}
+	switch rv2 := reflect.ValueOf(vv); {
+	case rv.IsNil(), rv2.IsNil(), rv.Kind() != reflect.Pointer:
+	case rv.Type() == rv2.Type():
+		rv.Elem().Set(rv2.Elem())
+	case rv.Elem().Type() == rv2.Type():
+		rv.Elem().Set(rv2)
+	}
+	return nil
+}
+
+// schemaGraph holds this entity's schema for entql predicate evaluation.
+// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
+// (Type name only — cross-entity field/column metadata is not accessible
+// from a leaf sub-package). The stubs are sufficient for entql.HasEdge /
+// HasEdgeWith dispatch on the join table; cross-edge field predicates
+// against sibling entities are out of scope at the sub-package boundary.
+var schemaGraph = func() *sqlgraph.Schema {
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 3)}
+	graph.Nodes[0] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   Table,
+			Columns: Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: FieldID,
+			},
+		},
+		Type: "Team",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			FieldName: {Type: field.TypeString, Column: FieldName},
+		},
+	}
+	graph.Nodes[1] = &sqlgraph.Node{Type: "Task"}
+	graph.Nodes[2] = &sqlgraph.Node{Type: "User"}
+	graph.MustAddE(
+		"tasks",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   TasksTable,
+			Columns: TasksPrimaryKey,
+			Bidi:    false,
+		},
+		"Team",
+		"Task",
+	)
+	graph.MustAddE(
+		"users",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   UsersTable,
+			Columns: UsersPrimaryKey,
+			Bidi:    false,
+		},
+		"Team",
+		"User",
+	)
+	return graph
+}()
