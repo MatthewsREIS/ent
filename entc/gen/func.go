@@ -286,6 +286,17 @@ func (t *typeScope) BuilderImports() []struct{ Alias, Path string } {
 	return t.Type.BuilderImports()
 }
 
+// SiblingImports returns sibling entity package imports needed by the
+// template. When InSubPackage is set, returns nil — sub-packages MUST NOT
+// import sibling entity packages (PR 6 moved all cross-entity logic to
+// the root facade file). At root, delegates to Type.SiblingImports().
+func (t *typeScope) SiblingImports() []struct{ Alias, Path string } {
+	if t.Scope["InSubPackage"] == true {
+		return nil
+	}
+	return t.Type.SiblingImports()
+}
+
 // graphScope wraps the Graph object with extended scope.
 type graphScope struct {
 	*Graph
