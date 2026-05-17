@@ -5,9 +5,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"os"
 	"path/filepath"
@@ -248,14 +250,19 @@ func stringLiteral(expr ast.Expr) (string, bool) {
 	return strings.Trim(bl.Value, `"`), true
 }
 
+// exprToString renders an AST expression back to its Go source form using
+// go/printer. This handles all expression node kinds uniformly — including
+// MapType, ArrayType, StarExpr, FuncType, InterfaceType, StructType,
+// IndexExpr, IndexListExpr — so complex generic type arguments inside
+// reflect.TypeFor[<T>]() (e.g. map[string]any, []uuid.UUID, *pkg.T) round-trip
+// correctly. Returns "" for a nil expression or on a printer error.
 func exprToString(expr ast.Expr) string {
-	switch e := expr.(type) {
-	case *ast.Ident:
-		return e.Name
-	case *ast.SelectorExpr:
-		return exprToString(e.X) + "." + e.Sel.Name
-	case *ast.BasicLit:
-		return e.Value
+	if expr == nil {
+		return ""
 	}
-	return ""
+	var buf bytes.Buffer
+	if err := printer.Fprint(&buf, token.NewFileSet(), expr); err != nil {
+		return ""
+	}
+	return buf.String()
 }
