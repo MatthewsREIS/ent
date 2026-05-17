@@ -18,7 +18,9 @@ import (
 	"time"
 
 	"{{ $.Config.Package }}/predicate"
+	{{- if not $.Scope.InSubPackage }}
 	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
+	{{- end }}
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -73,7 +75,7 @@ func (f *{{ $filter }}) Where(p entql.P) {
 	{{- end }}
 	// WhereID applies the entql {{ $type }} predicate on the id field.
 	func (f *{{ $filter }}) WhereID(p entql.{{ $iface }}) {
-		f.Where(p.Field({{ $n.Package }}.{{ $n.ID.Constant }}))
+		f.Where(p.Field({{ $n.PackageQualifier }}{{ $n.ID.Constant }}))
 	}
 {{- end }}
 
@@ -86,7 +88,7 @@ func (f *{{ $filter }}) Where(p entql.P) {
 	{{- end }}
 	// Where{{ $f.StructField }} applies the entql {{ $type }} predicate on the {{ $f.Name }} field.
 	func (f *{{ $filter }}) Where{{ $f.StructField }}(p entql.{{ $iface }}) {
-		f.Where(p.Field({{ $n.Package }}.{{ $f.Constant }}))
+		f.Where(p.Field({{ $n.PackageQualifier }}{{ $f.Constant }}))
 	}
 {{ end }}
 
