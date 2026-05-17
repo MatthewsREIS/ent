@@ -359,15 +359,34 @@ func lookupEdgeDesc(ed *EntityDesc, edge string) (EdgeDesc, bool) {
 // underscore before any uppercase letter that follows a lowercase
 // letter (or a digit), then lowercases the result. Sequences of
 // uppercase letters (e.g. "IDs") are treated as a single token.
+//
+// Digits are also separated from adjacent letters when the user is
+// likely to have declared the field with the digit as its own token
+// (e.g. "Installment1PayStatus" → "installment_1_pay_status"): an
+// underscore is inserted between a letter and a following digit, and
+// between a digit and a following letter, unless one already exists.
+// This matches the user-declared schema convention exposed in
+// descriptor keys.
 func pascalToSnake(s string) string {
 	var b strings.Builder
 	for i, r := range s {
-		if i > 0 && isUpper(r) {
+		if i > 0 {
 			prev := rune(s[i-1])
-			if isLower(prev) || isDigit(prev) {
+			switch {
+			case isUpper(r):
+				if isLower(prev) || isDigit(prev) {
+					b.WriteByte('_')
+				} else if isUpper(prev) && i+1 < len(s) && isLower(rune(s[i+1])) {
+					b.WriteByte('_')
+				}
+			case isDigit(r) && (isLower(prev) || isUpper(prev)):
 				b.WriteByte('_')
-			} else if isUpper(prev) && i+1 < len(s) && isLower(rune(s[i+1])) {
-				b.WriteByte('_')
+			case (isLower(r) || isUpper(r)) && isDigit(prev):
+				// Avoid doubling: digit→upper is already handled above via
+				// the isUpper branch on this iteration's r.
+				if isLower(r) {
+					b.WriteByte('_')
+				}
 			}
 		}
 		b.WriteRune(toLower(r))

@@ -81,6 +81,21 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 					matched = true
 					break
 				}
+				// SetXID with no matching edge "<x>" — could be a typed
+				// field setter for an "<x>_id" column (consumer schemas
+				// frequently define raw FK columns without a declared
+				// edge). Fall back to a field lookup and reclassify.
+				if action == "setEdge" {
+					fieldName := fieldOrEdge + "_id"
+					if f, ok := ed.Fields[fieldName]; ok {
+						fd = f
+						fieldOrEdge = fieldName
+						action = "set"
+						isEdge = false
+						matched = true
+						break
+					}
+				}
 			} else {
 				if f, ok := ed.Fields[fieldOrEdge]; ok {
 					fd = f
@@ -174,25 +189,25 @@ func matchMutationCall(name string) (entity, action, fieldOrEdge string, isEdge 
 	switch {
 	case strings.HasPrefix(name, "Set") && strings.HasSuffix(name, "ID") && len(name) > 5:
 		// SetTeamID etc. → unique-edge set
-		return "", "setEdge", lcFirst(strings.TrimSuffix(strings.TrimPrefix(name, "Set"), "ID")), true
+		return "", "setEdge", pascalToSnake(strings.TrimSuffix(strings.TrimPrefix(name, "Set"), "ID")), true
 	case strings.HasPrefix(name, "Add") && strings.HasSuffix(name, "IDs"):
-		return "", "addIDs", lcPlural(strings.TrimSuffix(strings.TrimPrefix(name, "Add"), "IDs")), true
+		return "", "addIDs", pluralizeSnake(pascalToSnake(strings.TrimSuffix(strings.TrimPrefix(name, "Add"), "IDs"))), true
 	case strings.HasPrefix(name, "Remove") && strings.HasSuffix(name, "IDs"):
-		return "", "rmIDs", lcPlural(strings.TrimSuffix(strings.TrimPrefix(name, "Remove"), "IDs")), true
+		return "", "rmIDs", pluralizeSnake(pascalToSnake(strings.TrimSuffix(strings.TrimPrefix(name, "Remove"), "IDs"))), true
 	case strings.HasPrefix(name, "Set"):
-		return "", "set", lcFirst(strings.TrimPrefix(name, "Set")), false
+		return "", "set", pascalToSnake(strings.TrimPrefix(name, "Set")), false
 	case strings.HasPrefix(name, "Old"):
-		return "", "old", lcFirst(strings.TrimPrefix(name, "Old")), false
+		return "", "old", pascalToSnake(strings.TrimPrefix(name, "Old")), false
 	case strings.HasPrefix(name, "Reset"):
-		return "", "reset", lcFirst(strings.TrimPrefix(name, "Reset")), false
+		return "", "reset", pascalToSnake(strings.TrimPrefix(name, "Reset")), false
 	case strings.HasPrefix(name, "Clear"):
-		return "", "clear", lcFirst(strings.TrimPrefix(name, "Clear")), false
+		return "", "clear", pascalToSnake(strings.TrimPrefix(name, "Clear")), false
 	case strings.HasSuffix(name, "Cleared"):
-		return "", "cleared", lcFirst(strings.TrimSuffix(name, "Cleared")), false
+		return "", "cleared", pascalToSnake(strings.TrimSuffix(name, "Cleared")), false
 	case strings.HasSuffix(name, "IDs"):
-		return "", "ids", lcPlural(strings.TrimSuffix(name, "IDs")), true
+		return "", "ids", pluralizeSnake(pascalToSnake(strings.TrimSuffix(name, "IDs"))), true
 	case strings.HasSuffix(name, "ID"):
-		return "", "edgeID", lcFirst(strings.TrimSuffix(name, "ID")), true
+		return "", "edgeID", pascalToSnake(strings.TrimSuffix(name, "ID")), true
 	case name == "Where":
 		// m.Where(ps...) → m.WhereP(ps...) — handled by a separate rewriter
 		// rule below; signal "skip" by returning empty fieldOrEdge.
@@ -200,7 +215,7 @@ func matchMutationCall(name string) (entity, action, fieldOrEdge string, isEdge 
 	default:
 		// Plain getter (single field) — covered by leaving entity empty;
 		// the caller filters to known field names from descriptors.
-		return "", "get", lcFirst(name), false
+		return "", "get", pascalToSnake(name), false
 	}
 }
 
@@ -211,16 +226,15 @@ func lcFirst(s string) string {
 	return strings.ToLower(s[:1]) + s[1:]
 }
 
-func lcPlural(s string) string {
-	// Method "AddTeamIDs" → trim "Add"/"IDs" → "Team" (singular). Ent edge
-	// names are usually lowercase plural ("teams"), so append "s" if missing.
-	// Deviation from plan: plan's lcPlural was a stub that only lowercased
-	// the first letter, which causes the descriptor lookup to miss the edge.
-	out := lcFirst(s)
-	if out != "" && !strings.HasSuffix(out, "s") {
-		out += "s"
+// pluralizeSnake appends "s" to a snake_case name unless it already ends
+// in "s". Used for edge names derived from method shapes like AddTeamIDs
+// (snake "team" → "teams") and AddWrikeFolderIDs ("wrike_folder" →
+// "wrike_folders").
+func pluralizeSnake(s string) string {
+	if s != "" && !strings.HasSuffix(s, "s") {
+		s += "s"
 	}
-	return out
+	return s
 }
 
 // rewriteCall builds the new call AST. Returns nil if rewrite doesn't apply.
