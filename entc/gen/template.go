@@ -62,8 +62,10 @@ var (
 			},
 		},
 		{
+			// PR 6: views also need shared.go for the Config / Hook / Interceptor /
+			// selector / AggregateFunc aliases that sub-package client.go + query.go
+			// reference. Mutation aliases (mutation_type.tmpl) still gate on notView.
 			Name: "shared",
-			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/shared.go", t.PackageDir())
 			},
@@ -161,11 +163,11 @@ var (
 			SubPackage: true,
 		},
 		{
+			// PR 6: facade emits for views too — they need Client/Query/Filter
+			// aliases so root code can reference *ent.CleanUserClient. Edge
+			// free functions skip per IsView checks inside the template body.
 			Name:   "facade/type",
-			Cond:   notView,
 			Format: pkgf("%s_facade.go"),
-			// SubPackage: false — emits at root with cross-entity aliases
-			// and free functions (PR 6).
 		},
 	}
 	// GraphTemplates holds the templates applied on the graph.

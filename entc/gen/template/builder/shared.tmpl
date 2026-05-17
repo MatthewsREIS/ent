@@ -26,12 +26,9 @@ import (
 	{{- end }}
 
 	"entgo.io/ent"
-	{{- if eq $.Storage.Name "sql" }}
-	"entgo.io/ent/dialect/sql"
+	{{- if and (eq $.Storage.Name "sql") ($.Config.FeatureEnabled "entql") }}
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	{{- if $.Config.FeatureEnabled "entql" }}
 	"entgo.io/ent/schema/field"
-	{{- end }}
 	{{- end }}
 
 	"{{ $.Config.Package }}/internal"
@@ -122,47 +119,13 @@ type (
 	{{- end }}
 )
 
-// checkColumn validates a column for this sub-package's single table.
-// Sub-packages only ever query their own table, so a strict single-table
-// check is sufficient (root uses a multi-table sql.ColumnCheck).
-func checkColumn(_, c string) error {
-	if !ValidColumn(c) {
-		return fmt.Errorf("ent: invalid column %q for table %s", c, Table)
-	}
-	return nil
-}
-
-// As is a pseudo aggregation function for renaming another other functions with custom names.
-func As(fn AggregateFunc, end string) AggregateFunc {
-	return func(s *sql.Selector) string {
-		return sql.As(fn(s), end)
-	}
-}
-
-// Count applies the "count" aggregation function on each group.
-func Count() AggregateFunc {
-	return func(s *sql.Selector) string {
-		return sql.Count("*")
-	}
-}
-
-{{ range $name, $withField := aggregate }}
-	{{- $fn := pascal $name }}
-	{{- if ne $fn "Count" }}
-	// {{ $fn }} applies the {{ quote $name }} aggregation function on {{ if $withField }}the given field of {{ end }}each group.
-	func {{ $fn }}({{ if $withField }}field string{{ end }}) AggregateFunc {
-		return func(s *sql.Selector) string {
-			{{- if $withField }}
-			if err := checkColumn(s.TableName(), field); err != nil {
-				s.AddError(&ValidationError{Name: field, Err: fmt.Errorf("ent: %w", err)})
-				return ""
-			}
-			{{- end }}
-			return sql.{{ if eq $fn "Mean" }}Avg{{ else }}{{ $fn }}{{ end }}({{ if $withField }}s.C(field){{ else }}"*"{{ end }})
-		}
-	}
-	{{- end }}
-{{ end }}
+{{- /* Aggregator builders (As/Count/Max/Min/Mean/Sum) intentionally NOT emitted
+       in sub-package scope: (a) consumer code calls them as ent.X via the root
+       facade (AggregateFunc is aliased so the type flows through), (b) the
+       builder names collide with where-predicates for fields that happen to be
+       named "count"/"max"/"min" etc. (e.g., customid/Blob.Count predicate).
+       checkColumn is also root-only — sub-package consumers go through Aggregate
+       on builders, not raw checkColumn calls. */}}
 
 // querierAll / querierCount have generic constraints that bind to local
 // sqlAll/sqlCount methods (whose identity is package-local because the

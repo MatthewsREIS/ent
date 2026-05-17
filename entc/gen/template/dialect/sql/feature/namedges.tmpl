@@ -53,8 +53,14 @@ in the LICENSE file in the root directory of this source tree.
     {{- end }}
 {{ end }}
 
+{{- /* PR 6: namedges sub-package emit deferred. WithNamed<Edge> registers a
+       cross-entity sibling-typed map field — incompatible with sub-package
+       leaf invariant. The fields/methods/dispatch-loop emit only at root
+       for now. Sub-package consumers wanting named-edges in PR 6 should
+       route through the root facade's With<Entity><Edge> + a future
+       WithNamed<Entity><Edge> free-function pair (follow-up). */}}
 {{- define "dialect/sql/query/fields/additional/namedges" }}
-    {{- if $.FeatureEnabled "namedges" }}
+    {{- if and ($.FeatureEnabled "namedges") (not $.Scope.InSubPackage) }}
         {{- range $e := $.Edges }}
             {{- if not $e.Unique }}
                 {{ $e.EagerLoadNamedField }} map[string]*{{ $e.Type.QueryName }}
@@ -64,7 +70,7 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 
 {{ define "dialect/sql/query/additional/namedges" }}
-    {{- if $.FeatureEnabled "namedges" }}
+    {{- if and ($.FeatureEnabled "namedges") (not $.Scope.InSubPackage) }}
         {{ $builder := $.QueryName }}
         {{ $receiver := $.QueryReceiver }}
         {{- range $e := $.Edges }}
@@ -91,7 +97,7 @@ in the LICENSE file in the root directory of this source tree.
 
 {{/* Process nodes before they are returned and resolve named-edges. */}}
 {{- define "dialect/sql/query/all/nodes/namedges" }}
-    {{- if $.FeatureEnabled "namedges" }}
+    {{- if and ($.FeatureEnabled "namedges") (not $.Scope.InSubPackage) }}
         {{- $builder := pascal $.Scope.Builder }}
         {{- $receiver := $.Scope.Receiver }}
         {{- range $e := $.Edges }}

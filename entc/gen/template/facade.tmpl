@@ -17,19 +17,19 @@ in the LICENSE file in the root directory of this source tree.
 {{ $pkg := $.Package }}
 
 import (
-	"context"
 	{{- if $n.Edges }}
+	"context"
 	"database/sql/driver"
 	"fmt"
 	{{- end }}
 
-	"{{ $.Config.Package }}/{{ $.PackageDir }}"
+	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
 	{{- if $n.Edges }}
 	"{{ $.Config.Package }}/predicate"
 	{{- $imported := dict $.PackageDir true }}
 	{{- range $e := $n.Edges }}
 	{{- if not (hasKey $imported $e.Type.PackageDir) }}
-	"{{ $.Config.Package }}/{{ $e.Type.PackageDir }}"
+	{{ $e.Type.PackageAlias }} "{{ $.Config.Package }}/{{ $e.Type.PackageDir }}"
 	{{- $imported = set $imported $e.Type.PackageDir true }}
 	{{- end }}
 	{{- end }}
@@ -45,37 +45,37 @@ import (
 // Type aliases — public consumer-facing names continue resolving here
 // while the underlying types live in the per-entity sub-package.
 type (
-	{{ $client }}              = {{ $.PackageDir }}.{{ $client }}
-	{{ $n.QueryName }}         = {{ $.PackageDir }}.{{ $n.QueryName }}
+	{{ $client }}              = {{ $.Package }}.{{ $client }}
+	{{ $n.QueryName }}         = {{ $.Package }}.{{ $n.QueryName }}
 	{{- if not $n.IsView }}
-	{{ $n.MutationName }}      = {{ $.PackageDir }}.{{ $n.MutationName }}
-	{{ $n.CreateName }}        = {{ $.PackageDir }}.{{ $n.CreateName }}
-	{{ $n.CreateBulkName }}    = {{ $.PackageDir }}.{{ $n.CreateBulkName }}
+	{{ $n.MutationName }}      = {{ $.Package }}.{{ $n.MutationName }}
+	{{ $n.CreateName }}        = {{ $.Package }}.{{ $n.CreateName }}
+	{{ $n.CreateBulkName }}    = {{ $.Package }}.{{ $n.CreateBulkName }}
 	{{- $noUpdate := $n.FeatureEnabled "no-update" }}
 	{{- if hasKey $n.Annotations "ReadOnly" }}{{ $noUpdate = true }}{{ end }}
 	{{- if not $noUpdate }}
-	{{ $n.UpdateName }}        = {{ $.PackageDir }}.{{ $n.UpdateName }}
-	{{ $n.UpdateOneName }}     = {{ $.PackageDir }}.{{ $n.UpdateOneName }}
+	{{ $n.UpdateName }}        = {{ $.Package }}.{{ $n.UpdateName }}
+	{{ $n.UpdateOneName }}     = {{ $.Package }}.{{ $n.UpdateOneName }}
 	{{- end }}
 	{{- $noDelete := $n.FeatureEnabled "no-delete" }}
 	{{- if hasKey $n.Annotations "ReadOnly" }}{{ $noDelete = true }}{{ end }}
 	{{- if not $noDelete }}
-	{{ $n.DeleteName }}        = {{ $.PackageDir }}.{{ $n.DeleteName }}
-	{{ $n.DeleteOneName }}     = {{ $.PackageDir }}.{{ $n.DeleteOneName }}
+	{{ $n.DeleteName }}        = {{ $.Package }}.{{ $n.DeleteName }}
+	{{ $n.DeleteOneName }}     = {{ $.Package }}.{{ $n.DeleteOneName }}
 	{{- end }}
 	{{- end }}
-	{{ pascal $n.Name }}GroupBy  = {{ $.PackageDir }}.{{ pascal $n.Name }}GroupBy
-	{{ pascal $n.Name }}Select   = {{ $.PackageDir }}.{{ pascal $n.Name }}Select
+	{{ pascal $n.Name }}GroupBy  = {{ $.Package }}.{{ pascal $n.Name }}GroupBy
+	{{ pascal $n.Name }}Select   = {{ $.Package }}.{{ pascal $n.Name }}Select
 	{{- if $n.FeatureEnabled "entql" }}
-	{{ $n.FilterName }}        = {{ $.PackageDir }}.{{ $n.FilterName }}
+	{{ $n.FilterName }}        = {{ $.Package }}.{{ $n.FilterName }}
 	{{- end }}
 )
 
 // Constructor aliases — the sub-package's New<X> stays the source of truth.
 var (
-	New{{ $client }} = {{ $.PackageDir }}.New{{ $client }}
+	New{{ $client }} = {{ $.Package }}.New{{ $client }}
 	{{- if and (not $n.IsView) ($n.FeatureEnabled "entql") }}
-	New{{ $n.FilterName }}ForMutation = {{ $.PackageDir }}.New{{ $n.FilterName }}ForMutation
+	New{{ $n.FilterName }}ForMutation = {{ $.Package }}.New{{ $n.FilterName }}ForMutation
 	{{- end }}
 )
 
@@ -189,11 +189,21 @@ func {{ $lfunc }}(ctx context.Context, query *{{ $edgeQuery }}, nodes []*{{ $n.N
 		for i := range nodes {
 			{{- $fk := $e.ForeignKey }}
 			{{- if $fk.Field.Nillable }}
+				{{- if eq (pascal $fk.StructField) $fk.StructField }}
+				if nodes[i].{{ $fk.StructField }} == nil {
+					continue
+				}
+				{{- else }}
 				if nodes[i].Get{{ pascal $fk.StructField }}() == nil {
 					continue
 				}
+				{{- end }}
 			{{- end }}
+			{{- if eq (pascal $fk.StructField) $fk.StructField }}
+			fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].{{ $fk.StructField }}
+			{{- else }}
 			fk := {{ if $fk.Field.Nillable }}*{{ end }}nodes[i].Get{{ pascal $fk.StructField }}()
+			{{- end }}
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
@@ -245,7 +255,11 @@ func {{ $lfunc }}(ctx context.Context, query *{{ $edgeQuery }}, nodes []*{{ $n.N
 		}
 		for _, n := range neighbors {
 			{{- $fk := $e.ForeignKey }}
+			{{- if eq (pascal $fk.StructField) $fk.StructField }}
+			fk := n.{{ $fk.StructField }}
+			{{- else }}
 			fk := n.Get{{ pascal $fk.StructField }}()
+			{{- end }}
 			{{- if $fk.Field.Nillable }}
 				if fk == nil {
 					return fmt.Errorf(`foreign-key "{{ $fk.Field.Name }}" is nil for node %v`, n.ID)
