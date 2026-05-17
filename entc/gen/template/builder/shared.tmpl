@@ -76,16 +76,7 @@ type {{ $.Name }}Edges = internal.{{ $.Name }}Edges
 {{- end }}
 type {{ plural $.Name }} = internal.{{ plural $.Name }}
 
-// Mutation type aliases and constructors from internal.
-type {{ $.MutationName }} = internal.{{ $.MutationName }}
-type {{ $.MutationName }}Option = internal.{{ $.MutationName }}Option
-
-var New{{ $.MutationName }} = internal.New{{ $.MutationName }}
-{{- with $.HasOneFieldID }}
-var With{{ $.Name }}ID = internal.With{{ $.Name }}ID
-var With{{ $.Name }} = internal.With{{ $.Name }}
-var With{{ $.Name }}IDsFunc = internal.With{{ $.Name }}IDsFunc
-{{- end }}
+{{- /* Mutation aliases moved to mutation_type.tmpl (PR 6 sub-package owner). */}}
 
 {{- if eq $.Storage.Name "gremlin" }}
 
