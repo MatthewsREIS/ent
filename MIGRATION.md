@@ -48,9 +48,11 @@ Sub-packages are part of the codegen-reduction epic. Splitting per-entity code i
 2. Run the migration tool against your consumer source tree:
    ```bash
    go run entgo.io/ent/cmd/ent-codegen-migrate \
-       -descriptors ./internal/ent/internal \
-       ./internal/  ./pkg/...
+       -descriptors ./internal/ent/gen/internal \
+       -gen-package <full-import-path-of-your-generated-package> \
+       ./internal/ ./pkg/...
    ```
+   Replace `<full-import-path-of-your-generated-package>` with the canonical module path of the directory holding the regenerated ent code — e.g. `github.com/your-org/your-svc/internal/ent/gen`. The tool uses this to qualify the emitted facade calls (`ent.Query<X><Y>FromQuery(...)`) with whatever local alias each consumer file binds the gen package to. If a file imports the gen package as `gen`, the emitted call is `gen.Query...`; if it aliases to `myent`, it becomes `myent.Query...`. Without the flag the tool can't distinguish your generated package from upstream `entgo.io/ent` and may emit calls that fail to compile.
 3. Verify the build:
    ```bash
    go build ./...
@@ -68,8 +70,9 @@ git checkout -- ./internal ./pkg
 
 # 2. Re-run the now-fixed tool (idempotent; safe on a clean tree)
 go run entgo.io/ent/cmd/ent-codegen-migrate \
-    -descriptors ./internal/ent/internal \
-    ./internal/  ./pkg/...
+    -descriptors ./internal/ent/gen/internal \
+    -gen-package <full-import-path-of-your-generated-package> \
+    ./internal/ ./pkg/...
 
 # 3. Verify
 go build ./...
@@ -146,18 +149,20 @@ func myHook(next ent.Mutator) ent.Mutator {
 
 ### Automated migration tool
 
-`ent-codegen-migrate` (at `cmd/ent-codegen-migrate`) rewrites call sites mechanically. The `-descriptors` flag points at the consumer's regenerated `internal/` package so the tool can learn field types and edge cardinalities from the descriptor literals.
+`ent-codegen-migrate` (at `cmd/ent-codegen-migrate`) rewrites call sites mechanically. The `-descriptors` flag points at the consumer's regenerated `internal/` package so the tool can learn field types and edge cardinalities from the descriptor literals. The `-gen-package` flag carries the full import path of the consumer's generated ent package so the edge-method pass can qualify emitted facade calls with each file's actual local alias (see PR 6 section above).
 
 ```bash
 # Dry-run: print which files would change (no writes)
 go run entgo.io/ent/cmd/ent-codegen-migrate \
     -descriptors ./path/to/your/ent/gen/internal \
+    -gen-package <full-import-path-of-your-generated-package> \
     -dry-run \
     ./path/to/your/source/...
 
 # Apply rewrites in-place
 go run entgo.io/ent/cmd/ent-codegen-migrate \
     -descriptors ./path/to/your/ent/gen/internal \
+    -gen-package <full-import-path-of-your-generated-package> \
     ./path/to/your/source/...
 ```
 
