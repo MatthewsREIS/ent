@@ -1,4 +1,7 @@
-// entc/internal/subpackage_imports_test.go
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
 package internal
 
 import (
@@ -18,11 +21,11 @@ import (
 // sub-packages as leaves in the dependency graph so Go's parallel
 // compiler can shard the per-entity work.
 func TestSubPackageNoSiblingImports(t *testing.T) {
-	skipFixtures := map[string]bool{
-		"gremlin":     true, // doesn't use sub-package layout
-		"edgeschema":  true, // pre-existing sibling import (PR 3-5 edge-schema split), out of PR 6 scope
-		"customid":    true, // M2M-through-edge sibling import (bloblink.ThroughDefaults) — same root cause as edgeschema
-		"multischema": true, // M2M-through-edge sibling import (friendship.ThroughDefaults, parent.ThroughDefaults) — same root cause as edgeschema
+	skipFixtures := map[string]string{
+		"gremlin":     "gremlin templates aren't part of PR 6; pre-existing sibling imports remain",
+		"edgeschema":  "M2M-through-edge sibling imports (PR 3-5 edge-schema split), out of PR 6 scope",
+		"customid":    "M2M-through-edge sibling import (bloblink.ThroughDefaults), same root cause as edgeschema",
+		"multischema": "M2M-through-edge sibling imports (friendship/parent.ThroughDefaults), same root cause as edgeschema",
 	}
 
 	fixturesRoot := filepath.Join("..", "integration")
@@ -39,8 +42,8 @@ func TestSubPackageNoSiblingImports(t *testing.T) {
 			continue
 		}
 		t.Run(e.Name(), func(t *testing.T) {
-			if skipFixtures[e.Name()] {
-				t.Skipf("out of PR 6 scope: pre-existing sibling import (M2M-through-edge / PR 3-5 split)")
+			if reason, ok := skipFixtures[e.Name()]; ok {
+				t.Skipf("out of PR 6 scope: %s", reason)
 				return
 			}
 			assertSubPackagesLeaf(t, entDir, e.Name())
@@ -100,7 +103,8 @@ func assertSubPackagesLeaf(t *testing.T, entDir, fixtureName string) {
 					}
 				}
 				// Forbid: import of the root ent package.
-				if strings.HasSuffix(p, "/ent") && !strings.Contains(p, "entgo.io/ent") {
+				fixtureRoot := "entgo.io/ent/entc/integration/" + fixtureName + "/ent"
+				if p == fixtureRoot {
 					t.Errorf("%s: imports root ent package %q — sub-packages must be leaves", path, p)
 				}
 			}
