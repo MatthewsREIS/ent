@@ -32,14 +32,14 @@ func New{{ $client }}(c Config) *{{ $client }} {
 
 {{- if not $n.IsView }}
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `{{ $n.Package }}.Hooks(f(g(h())))`.
+// A call to `Use(f, g, h)` equals to `{{ $n.PackageQualifier }}Hooks(f(g(h())))`.
 func (c *{{ $client }}) Use(hooks ...Hook) {
 	c.Config.Hooks.{{ $n.Name }} = append(c.Config.Hooks.{{ $n.Name }}, hooks...)
 }
 {{- end }}
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `{{ $n.Package }}.Intercept(f(g(h())))`.
+// A call to `Intercept(f, g, h)` equals to `{{ $n.PackageQualifier }}Intercept(f(g(h())))`.
 func (c *{{ $client }}) Intercept(interceptors ...Interceptor) {
 	c.Config.Inters.{{ $n.Name }} = append(c.Config.Inters.{{ $n.Name }}, interceptors...)
 }
@@ -138,7 +138,7 @@ func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
 	// DeleteOneID returns a builder for deleting the given entity by its id.
 	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $q }}{{ $n.DeleteOneName }} {
 		mutation := New{{ $n.MutationName }}(c.Config, OpDeleteOne, With{{ $n.Name }}ID(id, nil))
-		mutation.WhereP({{ $n.Package }}.ID(id))
+		mutation.WhereP({{ $n.PackageQualifier }}ID(id))
 		return {{ $q }}New{{ $n.DeleteOneName }}({{ $q }}New{{ $n.DeleteName }}(c.Config, c.Hooks(), mutation))
 	}
 {{ end }}
@@ -169,7 +169,7 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 {{ with $n.HasOneFieldID }}
 	// Get returns a {{ $n.Name }} entity by its id.
 	func (c *{{ $client }}) Get(ctx context.Context, id {{ $n.ID.Type }}) (*{{ $n.Name }}, error) {
-		return c.Query().Where({{ $n.Package }}.ID(id)).Only(ctx)
+		return c.Query().Where({{ $n.PackageQualifier }}ID(id)).Only(ctx)
 	}
 
 	// GetX is like Get, but panics if an error occurs.
@@ -182,37 +182,12 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	}
 {{ end }}
 
-{{ range $e := $n.Edges }}
-{{ $builder := $e.Type.QueryName }}
-{{ $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
-{{ $func := print "Query" (pascal $e.Name) }}
-// Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
-func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
-	{{- if $n.HasOneFieldID }}
-		query := (&{{ $e.Type.ClientName }}{Config: c.Config}).Query()
-		query.{{ if eq $.Storage.Name "sql" }}Path{{ else }}path{{ end }} = func(context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
-			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
-				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
-				{{- xtemplate $tmpl . -}}
-			{{- end -}}
-			return fromV, nil
-		}
-		return query
-	{{- else }}
-		{{- /* For edge schema, we use the predicate-based approach. */}}
-		return c.Query().
-			Where({{ range $id := $n.EdgeSchema.ID }}{{ $n.Package }}.{{ $id.StructField }}({{ $arg }}.{{ $id.StructField }}),{{ end }}).
-			{{ $func }}()
-	{{- end }}
-}
-{{ end }}
-
 {{- if not $n.IsView }}
 // Hooks returns the client hooks.
 func (c *{{ $client }}) Hooks() []Hook {
 	{{- if or $n.NumHooks $n.NumPolicy }}
 		hooks := c.Config.Hooks.{{ $n.Name }}
-		return append(hooks[:len(hooks):len(hooks)], {{ $n.Package }}.Hooks[:]...)
+		return append(hooks[:len(hooks):len(hooks)], {{ $n.PackageQualifier }}Hooks[:]...)
 	{{- else }}
 		return c.Config.Hooks.{{ $n.Name }}
 	{{- end }}
@@ -223,7 +198,7 @@ func (c *{{ $client }}) Hooks() []Hook {
 func (c *{{ $client }}) Interceptors() []Interceptor {
 	{{- if $n.NumInterceptors }}
 		inters := c.Config.Inters.{{ $n.Name }}
-		return append(inters[:len(inters):len(inters)], {{ $n.Package }}.Interceptors[:]...)
+		return append(inters[:len(inters):len(inters)], {{ $n.PackageQualifier }}Interceptors[:]...)
 	{{- else }}
 		return c.Config.Inters.{{ $n.Name }}
 	{{- end }}
