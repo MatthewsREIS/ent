@@ -58,7 +58,7 @@ func Indexes(t *testing.T, client *ent.Client) {
 	err = client.User.UpdateOne(a8m).AddFileIDs(f4.ID, f5.ID).Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsConstraintError(err))
-	require.Zero(client.User.QueryFiles(a8m).CountX(ctx))
+	require.Zero(ent.QueryUserFiles(client.User, a8m).CountX(ctx))
 
 	t.Log("edge indexes should applied on the edge sub-graph")
 	nati := client.User.Create().SetName("nati").SetAge(18).AddFileIDs(f5.ID).SaveX(ctx)
@@ -68,6 +68,6 @@ func Indexes(t *testing.T, client *ent.Client) {
 	err = client.User.UpdateOne(a8m).AddFileIDs(f4.ID).Exec(ctx)
 	require.NoError(err)
 
-	require.Equal(1, client.User.QueryFiles(a8m).CountX(ctx))
-	require.Equal(1, client.User.QueryFiles(nati).CountX(ctx))
+	require.Equal(1, ent.QueryUserFiles(client.User, a8m).CountX(ctx))
+	require.Equal(1, ent.QueryUserFiles(client.User, nati).CountX(ctx))
 }

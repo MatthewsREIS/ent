@@ -694,12 +694,12 @@ func TestSoftDelete(t *testing.T) {
 	require.Len(t, n2c, 4)
 
 	// Edge traversals.
-	require.False(t, client.User.QueryPets(a8m).ExistX(ctx), "interceptors should be applied on edge traversals")
-	require.False(t, client.User.Query().QueryPets().ExistX(ctx))
-	require.Equal(t, 3, client.User.QueryPets(a8m).CountX(schema.SkipSoftDelete(ctx)))
+	require.False(t, ent.QueryUserPets(client.User, a8m).ExistX(ctx), "interceptors should be applied on edge traversals")
+	require.False(t, ent.QueryUserPetsFromQuery(client.User.Query()).ExistX(ctx))
+	require.Equal(t, 3, ent.QueryUserPets(client.User, a8m).CountX(schema.SkipSoftDelete(ctx)))
 
 	// Eager-loading edges.
-	a8m = client.User.Query().WithPets().OnlyX(ctx)
+	a8m = ent.WithUserPets(client.User.Query()).OnlyX(ctx)
 	require.Empty(t, a8m.Edges.Pets)
 }
 
@@ -713,7 +713,7 @@ func TestTraverseUnique(t *testing.T) {
 		client.Pet.Create().SetName("a").SetOwnerID(a8m.ID),
 		client.Pet.Create().SetName("b").SetOwnerID(a8m.ID),
 	).ExecX(ctx)
-	require.Equal(t, 1, client.Pet.Query().QueryOwner().CountX(ctx))
+	require.Equal(t, 1, ent.QueryPetOwnerFromQuery(client.Pet.Query()).CountX(ctx))
 
 	// Disable unique traversal using interceptors.
 	client.User.Intercept(
@@ -726,8 +726,8 @@ func TestTraverseUnique(t *testing.T) {
 		}),
 	)
 	// The JOIN with pets will return the same owner twice, one for each pet.
-	require.Equal(t, 2, client.Pet.Query().QueryOwner().CountX(ctx))
-	require.Equal(t, 1, client.Pet.Query().QueryOwner().Unique(true).CountX(ctx))
+	require.Equal(t, 2, ent.QueryPetOwnerFromQuery(client.Pet.Query()).CountX(ctx))
+	require.Equal(t, 1, ent.QueryPetOwnerFromQuery(client.Pet.Query()).Unique(true).CountX(ctx))
 }
 
 // The following example demonstrates how to write interceptors that
@@ -775,7 +775,7 @@ func TestTypedTraverser(t *testing.T) {
 	).ExecX(ctx)
 
 	// Get all pets of all users.
-	if n := client.User.Query().QueryPets().CountX(ctx); n != 3 {
+	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 3 {
 		t.Errorf("got %d pets, want 3", n)
 	}
 
@@ -788,7 +788,7 @@ func TestTypedTraverser(t *testing.T) {
 	)
 
 	// Only pets of active users are returned.
-	if n := client.User.Query().QueryPets().CountX(ctx); n != 2 {
+	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 2 {
 		t.Errorf("got %d pets, want 2", n)
 	}
 }
@@ -820,7 +820,7 @@ func TestFilterTraverseFunc(t *testing.T) {
 		client.Pet.Create().SetName("c").SetOwnerID(nat.ID),
 	).ExecX(ctx)
 	// Get all pets of all users.
-	if n := client.User.Query().QueryPets().CountX(ctx); n != 3 {
+	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 3 {
 		t.Errorf("got %d pets, want 3", n)
 	}
 
@@ -832,7 +832,7 @@ func TestFilterTraverseFunc(t *testing.T) {
 		}),
 	)
 	// Only pets of active users are returned.
-	if n := client.User.Query().QueryPets().CountX(ctx); n != 2 {
+	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 2 {
 		t.Errorf("got %d pets, want 2", n)
 	}
 }
