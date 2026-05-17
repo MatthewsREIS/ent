@@ -1,7 +1,7 @@
 # ent codegen reduction — epic design
 
-**Status:** In progress (6 of 7 PRs complete as of 2026-05-16)
-**Date:** 2026-05-15 (created); progress tracker updated 2026-05-16
+**Status:** Complete (7 of 7 PRs complete as of 2026-05-17). Consumer-scale bench deferred — see PR 6 row.
+**Date:** 2026-05-15 (created); progress tracker updated 2026-05-17
 **Worktree:** `.claude/worktrees/wiggly-singing-pancake` on branch `worktree-wiggly-singing-pancake`
 **Stack tool:** git-spice (deferred — all commits stay local until end-of-epic per [[feedback-no-prs-until-end-of-epic]])
 
@@ -15,9 +15,39 @@
 | 3 | predicate collapse | ✅ complete | `docs/superpowers/plans/2026-05-16-codegen-epic-pr3-predicate-collapse.md` | `077a968ac` … `e1ff5131a` |
 | 4 | generic builders | ✅ complete | `docs/superpowers/plans/2026-05-16-codegen-epic-pr4-generic-builders.md` | `b582f7c2b` … `5abd2073d` |
 | 5 | mutation collapse (biggest LOC pull, ~355K) | ✅ complete | `docs/superpowers/plans/2026-05-16-codegen-epic-pr5-mutation-collapse.md` | `6bdc7d5ab` … `7b9242f8a` |
-| 6 | per-entity packages (biggest compile-time win) | ⏳ next | not yet written | — |
+| 6 | per-entity packages (biggest compile-time win) | ✅ complete (consumer bench deferred) | `docs/superpowers/plans/2026-05-16-codegen-epic-pr6-per-entity-packages.md` | `bea9d6310` … `54104bc50` |
 
 **Branch state:** all commits live on `worktree-wiggly-singing-pancake`. `master` is at `origin/master` (`7e9d99b1435d541286a773ca128be1a1931d6cc8`), untouched. No upstream configured; no PRs opened. To resume in a new session, see §11.
+
+## 0.1 PR 6 outcomes (2026-05-17)
+
+PR 6 landed 42 commits between `bea9d6310` and `54104bc50` on `worktree-wiggly-singing-pancake`. Per-entity sub-package codegen is in; the `entc/integration` suite is green for every non-deferred fixture. The `gremlin`, `edgeschema`, `customid`, and `multischema` fixtures are out of PR 6 scope due to pre-existing edge-schema split issues from PRs 3-5.
+
+### Fixture-scale bench (in-repo)
+
+| Fixture | LOC Δ | build_wall Δ | build_peak_rss Δ |
+|---|---|---|---|
+| privacy | +6.4% | +2% | **−23%** |
+| hooks | +6.0% | +5% | **−14%** |
+| edgeschema | +7.2% | −3% | **−46%** |
+
+LOC overhead is expected — the sub-package layout adds per-entity boilerplate, so at low entity counts (3-12 entities per fixture) the overhead dominates. The headline win at fixture scale is build_peak_rss reduction (14-46%), arising from Go's compiler holding less per-package state. Wall-time wins are predicted to manifest at consumer scale (134+ entities) due to parallel compilation across sub-packages. See `internal/bench/pr6.jsonl` and `internal/bench/README.md`.
+
+### Consumer-scale bench: deferred
+
+The `cmd/ent-codegen-migrate` tool was hardened during PR 6 (commits `43c17e57`, `f49124510`, `5de8a3cde`, `5afdfec5`, `5094ea0b`, `772dad995`) to handle multi-word entity names, snake_case fields, `*Query` receivers, complex field-type exprs, and per-file alias resolution. The tool now successfully migrates the gemini consumer's hand-written source.
+
+Two follow-ups outside PR 6 scope still block the end-to-end consumer bench:
+
+1. **Migration tool — `.With<Edge>()` syntactic fallback.** When the schema package itself can't be type-loaded (because it references the soon-to-be-replaced gen API), chained `q.WithEdge()` calls in schema hooks need the same syntactic chain-walker fallback that `5de8a3cde` added for `Query<Edge>`.
+2. **External — `entgo.io/contrib/entgql`.** `gql_collection_*.go` defines methods on `*<Entity>Query` types that now live in sub-packages. Needs sub-package awareness in the contrib gqlgen plugin. Outside this repo.
+
+PR 6 correctness is independently proven via the `entc/integration` fixture suite; consumer-scale wall-time validation is gated on the above follow-ups landing.
+
+### Codegen bugs caught during PR 6 work
+
+- `a6485efd` — `AssignGenerated` template emitted a duplicate `case int64:` for any schema using `field.Int64("id")`. Surfaced during consumer bench; regression test added.
+- `21fddc740` — `cleanOldNodes` stub-clobbered active `<entity>_facade.go` files because the new facade path matched `deletedTypeTemplates`; survived only because `assets.format()` ran after the stub loop. Guard added.
 
 ## 1. Problem
 
