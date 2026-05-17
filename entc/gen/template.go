@@ -114,15 +114,17 @@ var (
 			SubPackage: true,
 		},
 		{
-			Name:   "client/type",
-			Format: pkgf("%s_client.go"),
+			Name:       "client/type",
+			Format:     subpkgf("client.go"),
+			SubPackage: true,
 		},
 		{
 			Name:   "query",
-			Format: pkgf("%s_query.go"),
+			Format: subpkgf("query.go"),
 			ExtendPatterns: []string{
 				"dialect/*/query/fields/additional/*",
 			},
+			SubPackage: true,
 		},
 		{
 			Name:   "model",
@@ -145,16 +147,25 @@ var (
 			},
 		},
 		{
-			Name:   "mutation/type",
-			Cond:   notView,
-			Format: pkgf("%s_mutation.go"),
+			Name:       "mutation/type",
+			Cond:       notView,
+			Format:     subpkgf("mutation.go"),
+			SubPackage: true,
 		},
 		{
 			Name: "dialect/sql/entql/type",
 			Cond: func(t *Type) bool {
 				return t.featureEnabled(FeatureEntQL)
 			},
-			Format: pkgf("%s_entql.go"),
+			Format:     subpkgf("entql.go"),
+			SubPackage: true,
+		},
+		{
+			Name:   "facade/type",
+			Cond:   notView,
+			Format: pkgf("%s_facade.go"),
+			// SubPackage: false — emits at root with cross-entity aliases
+			// and free functions (PR 6).
 		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
@@ -249,6 +260,11 @@ var (
 		"%s_update.go",
 		"%s_delete.go",
 		"%s/client.go",
+		// PR 6: old root files replaced by sub-package equivalents.
+		"%s_client.go",
+		"%s_query.go",
+		"%s_mutation.go",
+		"%s_entql.go",
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
@@ -523,6 +539,14 @@ func (d *Dependency) defaultName() (string, error) {
 
 func pkgf(s string) func(t *Type) string {
 	return func(t *Type) string { return fmt.Sprintf(s, t.PackageDir()) }
+}
+
+// subpkgf builds a Format function for a per-entity sub-package file.
+// The output path is "<PackageDir>/<file>" — e.g. "task/query.go" — and
+// is paired with SubPackage: true so graph.go wraps the type in a
+// typeScope{InSubPackage: true} for template execution.
+func subpkgf(file string) func(t *Type) string {
+	return func(t *Type) string { return t.PackageDir() + "/" + file }
 }
 
 // match reports if the given name matches the extended pattern.
