@@ -24,6 +24,33 @@ in the LICENSE file in the root directory of this source tree.
 {{ $receiver := $.Scope.Receiver }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
+	nodes, err := {{ $receiver }}.Fetch(ctx, hooks...)
+	if err != nil {
+		return nil, err
+	}
+	if len(nodes) == 0 {
+		return nodes, nil
+	}
+	// Dispatch any registered eager loaders. Callbacks were captured by
+	// the root facade's With<Entity><Edge> free functions and receive the
+	// parent slice for in-place edge assignment. Dispatch lives in sqlAll
+	// (not All) so Only/First/IDs/etc. — which all call sqlAll — also
+	// fire registered loaders. Fetch is the no-dispatch alternative used
+	// by load helpers themselves to avoid recursion.
+	for _, loader := range {{ $receiver }}.eagerLoaders {
+		if err := loader(ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
+	return nodes, nil
+}
+
+// Fetch executes the SQL parent query only — no eager loading.
+// Exposed for the root facade's edge-loading helpers (Task 17), which
+// call Fetch on a sub-query to materialize neighbors during eager dispatch.
+// Called internally by sqlAll, which wraps Fetch with the eager-loader
+// dispatch loop.
+func ({{ $receiver }} *{{ $builder }}) Fetch(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
 	var (
 		nodes = []*{{ $.Name }}{}
 		{{- with $.UnexportedForeignKeys }}
@@ -85,19 +112,38 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 	return nodes, nil
 }
 
-// Fetch executes the SQL parent query only — no eager loading.
-// Exposed for the root facade's edge-loading helpers (Task 17), which
-// call Fetch on a sub-query to materialize neighbors during eager dispatch.
-func ({{ $receiver }} *{{ $builder }}) Fetch(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
-	return {{ $receiver }}.sqlAll(ctx, hooks...)
-}
-
 // PrepareQuery is the exported counterpart of prepareQuery — used by
 // root facade eager-load helpers that build join predicates and need
 // to attach interceptors/hooks before executing the sub-query.
 func ({{ $receiver }} *{{ $builder }}) PrepareQuery(ctx context.Context) error {
 	return {{ $receiver }}.prepareQuery(ctx)
 }
+
+// SQLQuery is the exported counterpart of sqlQuery — used by root
+// facade chained-edge helpers (e.g., QueryXEdgeFromQuery) that need
+// this query's SQL selector to construct a SetNeighbors sub-step.
+func ({{ $receiver }} *{{ $builder }}) SQLQuery(ctx context.Context) *sql.Selector {
+	return {{ $receiver }}.sqlQuery(ctx)
+}
+
+{{- with $.UnexportedForeignKeys }}
+// IncludeForeignKeys toggles the inclusion of foreign-key columns in this
+// query's SELECT. Used by root facade eager-load helpers (load<N><Edge>)
+// when the loaded sibling type owns the FK — equivalent to the pre-PR6
+// `query.withFKs = true` access inside the load method.
+func ({{ $receiver }} *{{ $builder }}) IncludeForeignKeys(b bool) *{{ $builder }} {
+	{{ $receiver }}.withFKs = b
+	return {{ $receiver }}
+}
+{{- else }}
+// IncludeForeignKeys is a no-op for types with no unexported foreign-key
+// columns — every column is already in the SELECT. Emitted so root facade
+// load helpers can call it unconditionally without compile-time branching
+// on the loaded sibling's FK shape.
+func ({{ $receiver }} *{{ $builder }}) IncludeForeignKeys(bool) *{{ $builder }} {
+	return {{ $receiver }}
+}
+{{- end }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlCount(ctx context.Context) (int, error) {
 	_spec := {{ $receiver }}.querySpec()

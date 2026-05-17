@@ -230,22 +230,9 @@ func ({{ $receiver }} *{{ $builder }}) OnlyX(ctx context.Context) *{{ $.Name }} 
 // All executes the query and returns a list of {{ plural $.Name }}.
 func ({{ $receiver }} *{{ $builder }}) All(ctx context.Context) ([]*{{ $.Name }}, error) {
 	{{- if eq $.Config.Storage.Name "sql" }}
-	nodes, err := entbuilder.RunAll[[]*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryAll, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) })
-	if err != nil {
-		return nil, err
-	}
-	if len(nodes) == 0 {
-		return nodes, nil
-	}
-	// Dispatch any registered eager loaders. Callbacks were captured by
-	// the root facade's With<Entity><Edge> free functions and receive the
-	// parent slice for in-place edge assignment.
-	for _, loader := range {{ $receiver }}.eagerLoaders {
-		if err := loader(ctx, nodes); err != nil {
-			return nil, err
-		}
-	}
-	return nodes, nil
+	{{- /* sqlAll wraps Fetch with the eager-loader dispatch, so All/Only/
+	       First/IDs all see eager-loaded edges via the shared sqlAll path. */}}
+	return entbuilder.RunAll[[]*{{ $.Name }}](ctx, {{ $receiver }}, {{ $receiver }}.Ctx, ent.OpQueryAll, {{ $receiver }}.QueryState.Inters, {{ $receiver }}.prepareQuery, func(ctx context.Context) ([]*{{ $.Name }}, error) { return {{ $receiver }}.sqlAll(ctx) })
 	{{- else }}
 	ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryAll)
 	if err := {{ $receiver }}.prepareQuery(ctx); err != nil {

@@ -53,75 +53,14 @@ in the LICENSE file in the root directory of this source tree.
     {{- end }}
 {{ end }}
 
-{{- /* PR 6: namedges sub-package emit deferred. WithNamed<Edge> registers a
-       cross-entity sibling-typed map field — incompatible with sub-package
-       leaf invariant. The fields/methods/dispatch-loop emit only at root
-       for now. Sub-package consumers wanting named-edges in PR 6 should
-       route through the root facade's With<Entity><Edge> + a future
-       WithNamed<Entity><Edge> free-function pair (follow-up). */}}
-{{- define "dialect/sql/query/fields/additional/namedges" }}
-    {{- if and ($.FeatureEnabled "namedges") (not $.Scope.InSubPackage) }}
-        {{- range $e := $.Edges }}
-            {{- if not $e.Unique }}
-                {{ $e.EagerLoadNamedField }} map[string]*{{ $e.Type.QueryName }}
-            {{- end }}
-        {{- end }}
-    {{- end }}
-{{- end }}
-
-{{ define "dialect/sql/query/additional/namedges" }}
-    {{- if and ($.FeatureEnabled "namedges") (not $.Scope.InSubPackage) }}
-        {{ $builder := $.QueryName }}
-        {{ $receiver := $.QueryReceiver }}
-        {{- range $e := $.Edges }}
-            {{- if not $e.Unique }}
-                {{ $ebuilder := $e.Type.QueryName }}
-                {{ $func := print "WithNamed" $e.StructField }}
-                // {{ $func }} tells the query-builder to eager-load the nodes that are connected to the "{{ $e.Name }}"
-                // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-                func ({{ $receiver }} *{{ $builder }}) {{ $func }}(name string, opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
-                    query := (&{{ $e.Type.ClientName }}{Config: {{ $receiver }}.Config}).Query()
-                    for _, opt := range opts {
-                        opt(query)
-                    }
-                    if {{ $receiver }}.{{ $e.EagerLoadNamedField }} == nil {
-                        {{ $receiver }}.{{ $e.EagerLoadNamedField }} = make(map[string]*{{ $e.Type.QueryName }})
-                    }
-                    {{ $receiver }}.{{ $e.EagerLoadNamedField }}[name] = query
-                    return {{ $receiver }}
-                }
-            {{- end }}
-        {{- end }}
-    {{- end }}
-{{ end }}
-
-{{/* Process nodes before they are returned and resolve named-edges. */}}
-{{- define "dialect/sql/query/all/nodes/namedges" }}
-    {{- if and ($.FeatureEnabled "namedges") (not $.Scope.InSubPackage) }}
-        {{- $builder := pascal $.Scope.Builder }}
-        {{- $receiver := $.Scope.Receiver }}
-        {{- range $e := $.Edges }}
-            {{- if not $e.Unique }}
-                for name, query := range {{ $receiver }}.{{ $e.EagerLoadNamedField }} {
-					if err := {{ $receiver }}.load{{ $e.StructField }}(ctx, query, nodes,
-						func(n *{{ $.Name }}) { n.AppendNamed{{ $e.StructField }}(name) },
-						{{- if and ($.FeatureEnabled "bidiedges") $e.Ref $e.Ref.Unique }}
-							func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){
-								n.AppendNamed{{ $e.StructField }}(name, e)
-								{{- $idx := $e.Ref.Index }}
-								{{- /* Set only in case this type was not loaded explicitly (without custom options). */}}
-								if !e.Edges.IsLoaded({{ $idx }}) {
-									e.Edges.{{ $e.Ref.StructField }} = n
-								}
-							}); err != nil {
-						{{- else }}
-							{{- /* Keep it one-liner if there is not inverse-condition. */}}
-							func(n *{{ $.Name }}, e *{{ $e.Type.Name }}){ n.AppendNamed{{ $e.StructField }}(name, e) }); err != nil {
-						{{- end }}
-                        return nil, err
-                    }
-                }
-            {{- end }}
-        {{- end }}
-    {{- end }}
-{{- end }}
+{{- /* PR 6: namedges sub-package field + WithNamed<Edge> *method* both
+       deferred — the field type is *<Sibling>Query and the dispatch loop
+       references load<Edge>(query, ...), both of which would force a sibling
+       import inside the leaf sub-package. Instead, named-edge eager-loading
+       is provided as a root-facade WithNamed<Entity><Edge> free function
+       (emitted in facade.tmpl) that uses the sub-package's StoreEager hook
+       — keyed on "<edge>:<name>" — to register a per-name loader closure
+       that populates AppendNamed<Edge> on each parent at exec time. */}}
+{{- define "dialect/sql/query/fields/additional/namedges" }}{{- end }}
+{{ define "dialect/sql/query/additional/namedges" }}{{- end }}
+{{- define "dialect/sql/query/all/nodes/namedges" }}{{- end }}
