@@ -71,6 +71,31 @@ func QueryCardOwner(c *CardClient, _m *Card) *UserQuery {
 	return query
 }
 
+// QueryCardOwnerFromQuery returns a UserQuery that traverses the "owner" edge
+// of every Card matched by q (chained-query form). Mirrors the pre-PR6
+// (*CardQuery).QueryOwner method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryCardOwnerFromQuery(q *CardQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(card.Table, card.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, card.OwnerTable, card.OwnerColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadCardOwner performs the eager-load for the "owner" edge. Body mirrors
 // the pre-PR6 *CardQuery.loadOwner method, hoisted to root
 // so it can reference cross-package types directly.
@@ -102,6 +127,9 @@ func loadCardOwner(ctx context.Context, query *UserQuery, nodes []*Card) error {
 		}
 		for i := range parents {
 			parents[i].Edges.Owner = n
+			if !n.Edges.IsLoaded(0) {
+				n.Edges.Card = parents[i]
+			}
 		}
 	}
 	return nil
@@ -119,6 +147,21 @@ func WithCardSpec(q *CardQuery, opts ...func(*SpecQuery)) *CardQuery {
 	})
 }
 
+// WithNamedCardSpec registers a named eager-loader for the "spec" edge on a
+// CardQuery. Multiple names accumulate; each loads independently and
+// is retrievable via Card.NamedSpec(name). Replaces the
+// pre-PR6 (*CardQuery).WithNamedSpec method, hoisted to root
+// so the named-loader map can hold the cross-package SpecQuery type.
+func WithNamedCardSpec(q *CardQuery, name string, opts ...func(*SpecQuery)) *CardQuery {
+	sub := NewSpecClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("spec:"+name, func(ctx context.Context, parents []*Card) error {
+		return loadNamedCardSpec(ctx, sub, parents, name)
+	})
+}
+
 // QueryCardSpec returns a SpecQuery for the "spec" edge of a given Card.
 func QueryCardSpec(c *CardClient, _m *Card) *SpecQuery {
 	query := NewSpecClient(c.Config).Query()
@@ -131,6 +174,31 @@ func QueryCardSpec(c *CardClient, _m *Card) *SpecQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCardSpecFromQuery returns a SpecQuery that traverses the "spec" edge
+// of every Card matched by q (chained-query form). Mirrors the pre-PR6
+// (*CardQuery).QuerySpec method, hoisted to root so it
+// can reference the cross-package SpecQuery type.
+func QueryCardSpecFromQuery(q *CardQuery) *SpecQuery {
+	query := NewSpecClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(card.Table, card.FieldID, selector),
+			sqlgraph.To(spec.Table, spec.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, card.SpecTable, card.SpecPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -194,6 +262,84 @@ func loadCardSpec(ctx context.Context, query *SpecQuery, nodes []*Card) error {
 		}
 		for kn := range parents {
 			kn.Edges.Spec = append(kn.Edges.Spec, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// loadNamedCardSpec is the named-edge variant of loadCardSpec. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedSpec(name, ...) bucket instead of the default
+// Edges.Spec slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedCardSpec(ctx context.Context, query *SpecQuery, nodes []*Card, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedSpec(name)
+	}
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Card)
+	nids := make(map[int]map[*Card]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(card.SpecTable)
+		s.Join(joinT).On(s.C(spec.FieldID), joinT.C(card.SpecPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(card.SpecPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(card.SpecPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.PrepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Card]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Spec](ctx, query, qr, query.QueryState.Inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		parents, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "spec" node returned %v`, n.ID)
+		}
+		for kn := range parents {
+			kn.AppendNamedSpec(name, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
 		}
 	}
 	return nil

@@ -53,6 +53,21 @@ func WithSpecCard(q *SpecQuery, opts ...func(*CardQuery)) *SpecQuery {
 	})
 }
 
+// WithNamedSpecCard registers a named eager-loader for the "card" edge on a
+// SpecQuery. Multiple names accumulate; each loads independently and
+// is retrievable via Spec.NamedCard(name). Replaces the
+// pre-PR6 (*SpecQuery).WithNamedCard method, hoisted to root
+// so the named-loader map can hold the cross-package CardQuery type.
+func WithNamedSpecCard(q *SpecQuery, name string, opts ...func(*CardQuery)) *SpecQuery {
+	sub := NewCardClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("card:"+name, func(ctx context.Context, parents []*Spec) error {
+		return loadNamedSpecCard(ctx, sub, parents, name)
+	})
+}
+
 // QuerySpecCard returns a CardQuery for the "card" edge of a given Spec.
 func QuerySpecCard(c *SpecClient, _m *Spec) *CardQuery {
 	query := NewCardClient(c.Config).Query()
@@ -65,6 +80,31 @@ func QuerySpecCard(c *SpecClient, _m *Spec) *CardQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySpecCardFromQuery returns a CardQuery that traverses the "card" edge
+// of every Spec matched by q (chained-query form). Mirrors the pre-PR6
+// (*SpecQuery).QueryCard method, hoisted to root so it
+// can reference the cross-package CardQuery type.
+func QuerySpecCardFromQuery(q *SpecQuery) *CardQuery {
+	query := NewCardClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(spec.Table, spec.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -128,6 +168,84 @@ func loadSpecCard(ctx context.Context, query *CardQuery, nodes []*Spec) error {
 		}
 		for kn := range parents {
 			kn.Edges.Card = append(kn.Edges.Card, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// loadNamedSpecCard is the named-edge variant of loadSpecCard. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedCard(name, ...) bucket instead of the default
+// Edges.Card slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedSpecCard(ctx context.Context, query *CardQuery, nodes []*Spec, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedCard(name)
+	}
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Spec)
+	nids := make(map[int]map[*Spec]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(spec.CardTable)
+		s.Join(joinT).On(s.C(card.FieldID), joinT.C(spec.CardPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(spec.CardPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(spec.CardPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.PrepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Spec]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Card](ctx, query, qr, query.QueryState.Inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		parents, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "card" node returned %v`, n.ID)
+		}
+		for kn := range parents {
+			kn.AppendNamedCard(name, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
 		}
 	}
 	return nil

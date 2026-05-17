@@ -70,6 +70,31 @@ func QueryPostAuthor(c *PostClient, _m *Post) *UserQuery {
 	return query
 }
 
+// QueryPostAuthorFromQuery returns a UserQuery that traverses the "author" edge
+// of every Post matched by q (chained-query form). Mirrors the pre-PR6
+// (*PostQuery).QueryAuthor method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryPostAuthorFromQuery(q *PostQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, post.AuthorTable, post.AuthorColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadPostAuthor performs the eager-load for the "author" edge. Body mirrors
 // the pre-PR6 *PostQuery.loadAuthor method, hoisted to root
 // so it can reference cross-package types directly.
@@ -132,6 +157,31 @@ func QueryPostComments(c *PostClient, _m *Post) *CommentQuery {
 	return query
 }
 
+// QueryPostCommentsFromQuery returns a CommentQuery that traverses the "comments" edge
+// of every Post matched by q (chained-query form). Mirrors the pre-PR6
+// (*PostQuery).QueryComments method, hoisted to root so it
+// can reference the cross-package CommentQuery type.
+func QueryPostCommentsFromQuery(q *PostQuery) *CommentQuery {
+	query := NewCommentClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, selector),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, post.CommentsTable, post.CommentsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadPostComments performs the eager-load for the "comments" edge. Body mirrors
 // the pre-PR6 *PostQuery.loadComments method, hoisted to root
 // so it can reference cross-package types directly.
@@ -143,6 +193,7 @@ func loadPostComments(ctx context.Context, query *CommentQuery, nodes []*Post) e
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Comments = []*Comment{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(comment.FieldPostID)
 	}

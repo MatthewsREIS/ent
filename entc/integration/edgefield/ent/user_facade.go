@@ -56,6 +56,21 @@ func WithUserPets(q *UserQuery, opts ...func(*PetQuery)) *UserQuery {
 	})
 }
 
+// WithNamedUserPets registers a named eager-loader for the "pets" edge on a
+// UserQuery. Multiple names accumulate; each loads independently and
+// is retrievable via User.NamedPets(name). Replaces the
+// pre-PR6 (*UserQuery).WithNamedPets method, hoisted to root
+// so the named-loader map can hold the cross-package PetQuery type.
+func WithNamedUserPets(q *UserQuery, name string, opts ...func(*PetQuery)) *UserQuery {
+	sub := NewPetClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("pets:"+name, func(ctx context.Context, parents []*User) error {
+		return loadNamedUserPets(ctx, sub, parents, name)
+	})
+}
+
 // QueryUserPets returns a PetQuery for the "pets" edge of a given User.
 func QueryUserPets(c *UserClient, _m *User) *PetQuery {
 	query := NewPetClient(c.Config).Query()
@@ -73,6 +88,31 @@ func QueryUserPets(c *UserClient, _m *User) *PetQuery {
 	return query
 }
 
+// QueryUserPetsFromQuery returns a PetQuery that traverses the "pets" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryPets method, hoisted to root so it
+// can reference the cross-package PetQuery type.
+func QueryUserPetsFromQuery(q *UserQuery) *PetQuery {
+	query := NewPetClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserPets performs the eager-load for the "pets" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadPets method, hoisted to root
 // so it can reference cross-package types directly.
@@ -84,6 +124,7 @@ func loadUserPets(ctx context.Context, query *PetQuery, nodes []*User) error {
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Pets = []*Pet{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(pet.FieldOwnerID)
 	}
@@ -101,6 +142,44 @@ func loadUserPets(ctx context.Context, query *PetQuery, nodes []*User) error {
 			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
 		}
 		node.Edges.Pets = append(node.Edges.Pets, n)
+	}
+	return nil
+}
+
+// loadNamedUserPets is the named-edge variant of loadUserPets. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedPets(name, ...) bucket instead of the default
+// Edges.Pets slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedUserPets(ctx context.Context, query *PetQuery, nodes []*User, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedPets(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	if len(query.Ctx.Fields) > 0 {
+		query.Ctx.AppendFieldOnce(pet.FieldOwnerID)
+	}
+	query.Where(predicate.Pet(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.OwnerID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+		}
+		node.AppendNamedPets(name, n)
 	}
 	return nil
 }
@@ -129,6 +208,31 @@ func QueryUserParent(c *UserClient, _m *User) *UserQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserParentFromQuery returns a UserQuery that traverses the "parent" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryUserParentFromQuery(q *UserQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -179,6 +283,21 @@ func WithUserChildren(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
 	})
 }
 
+// WithNamedUserChildren registers a named eager-loader for the "children" edge on a
+// UserQuery. Multiple names accumulate; each loads independently and
+// is retrievable via User.NamedChildren(name). Replaces the
+// pre-PR6 (*UserQuery).WithNamedChildren method, hoisted to root
+// so the named-loader map can hold the cross-package UserQuery type.
+func WithNamedUserChildren(q *UserQuery, name string, opts ...func(*UserQuery)) *UserQuery {
+	sub := NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("children:"+name, func(ctx context.Context, parents []*User) error {
+		return loadNamedUserChildren(ctx, sub, parents, name)
+	})
+}
+
 // QueryUserChildren returns a UserQuery for the "children" edge of a given User.
 func QueryUserChildren(c *UserClient, _m *User) *UserQuery {
 	query := NewUserClient(c.Config).Query()
@@ -196,6 +315,31 @@ func QueryUserChildren(c *UserClient, _m *User) *UserQuery {
 	return query
 }
 
+// QueryUserChildrenFromQuery returns a UserQuery that traverses the "children" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryChildren method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryUserChildrenFromQuery(q *UserQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserChildren performs the eager-load for the "children" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadChildren method, hoisted to root
 // so it can reference cross-package types directly.
@@ -207,6 +351,7 @@ func loadUserChildren(ctx context.Context, query *UserQuery, nodes []*User) erro
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Children = []*User{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(user.FieldParentID)
 	}
@@ -224,6 +369,44 @@ func loadUserChildren(ctx context.Context, query *UserQuery, nodes []*User) erro
 			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
 		}
 		node.Edges.Children = append(node.Edges.Children, n)
+	}
+	return nil
+}
+
+// loadNamedUserChildren is the named-edge variant of loadUserChildren. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedChildren(name, ...) bucket instead of the default
+// Edges.Children slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedUserChildren(ctx context.Context, query *UserQuery, nodes []*User, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedChildren(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	if len(query.Ctx.Fields) > 0 {
+		query.Ctx.AppendFieldOnce(user.FieldParentID)
+	}
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.ChildrenColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ParentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+		}
+		node.AppendNamedChildren(name, n)
 	}
 	return nil
 }
@@ -252,6 +435,31 @@ func QueryUserSpouse(c *UserClient, _m *User) *UserQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserSpouseFromQuery returns a UserQuery that traverses the "spouse" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QuerySpouse method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryUserSpouseFromQuery(q *UserQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -319,6 +527,31 @@ func QueryUserCard(c *UserClient, _m *User) *CardQuery {
 	return query
 }
 
+// QueryUserCardFromQuery returns a CardQuery that traverses the "card" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryCard method, hoisted to root so it
+// can reference the cross-package CardQuery type.
+func QueryUserCardFromQuery(q *UserQuery) *CardQuery {
+	query := NewCardClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserCard performs the eager-load for the "card" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadCard method, hoisted to root
 // so it can reference cross-package types directly.
@@ -329,6 +562,7 @@ func loadUserCard(ctx context.Context, query *CardQuery, nodes []*User) error {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(card.FieldOwnerID)
 	}
@@ -379,6 +613,31 @@ func QueryUserMetadata(c *UserClient, _m *User) *MetadataQuery {
 	return query
 }
 
+// QueryUserMetadataFromQuery returns a MetadataQuery that traverses the "metadata" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryMetadata method, hoisted to root so it
+// can reference the cross-package MetadataQuery type.
+func QueryUserMetadataFromQuery(q *UserQuery) *MetadataQuery {
+	query := NewMetadataClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.MetadataTable, user.MetadataColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserMetadata performs the eager-load for the "metadata" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadMetadata method, hoisted to root
 // so it can reference cross-package types directly.
@@ -389,6 +648,7 @@ func loadUserMetadata(ctx context.Context, query *MetadataQuery, nodes []*User) 
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Metadata(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.MetadataColumn), fks...))
 	}))
@@ -419,6 +679,21 @@ func WithUserInfo(q *UserQuery, opts ...func(*InfoQuery)) *UserQuery {
 	})
 }
 
+// WithNamedUserInfo registers a named eager-loader for the "info" edge on a
+// UserQuery. Multiple names accumulate; each loads independently and
+// is retrievable via User.NamedInfo(name). Replaces the
+// pre-PR6 (*UserQuery).WithNamedInfo method, hoisted to root
+// so the named-loader map can hold the cross-package InfoQuery type.
+func WithNamedUserInfo(q *UserQuery, name string, opts ...func(*InfoQuery)) *UserQuery {
+	sub := NewInfoClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("info:"+name, func(ctx context.Context, parents []*User) error {
+		return loadNamedUserInfo(ctx, sub, parents, name)
+	})
+}
+
 // QueryUserInfo returns a InfoQuery for the "info" edge of a given User.
 func QueryUserInfo(c *UserClient, _m *User) *InfoQuery {
 	query := NewInfoClient(c.Config).Query()
@@ -436,6 +711,31 @@ func QueryUserInfo(c *UserClient, _m *User) *InfoQuery {
 	return query
 }
 
+// QueryUserInfoFromQuery returns a InfoQuery that traverses the "info" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryInfo method, hoisted to root so it
+// can reference the cross-package InfoQuery type.
+func QueryUserInfoFromQuery(q *UserQuery) *InfoQuery {
+	query := NewInfoClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(info.Table, info.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.InfoTable, user.InfoColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserInfo performs the eager-load for the "info" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadInfo method, hoisted to root
 // so it can reference cross-package types directly.
@@ -447,6 +747,7 @@ func loadUserInfo(ctx context.Context, query *InfoQuery, nodes []*User) error {
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Info = []*Info{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Info(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.InfoColumn), fks...))
 	}))
@@ -465,6 +766,41 @@ func loadUserInfo(ctx context.Context, query *InfoQuery, nodes []*User) error {
 	return nil
 }
 
+// loadNamedUserInfo is the named-edge variant of loadUserInfo. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedInfo(name, ...) bucket instead of the default
+// Edges.Info slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedUserInfo(ctx context.Context, query *InfoQuery, nodes []*User, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedInfo(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	query.Where(predicate.Info(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.InfoColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "id" returned %v for node %v`, fk, n.ID)
+		}
+		node.AppendNamedInfo(name, n)
+	}
+	return nil
+}
+
 // WithUserRentals eager-loads the "rentals" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserRentals(q *UserQuery, opts ...func(*RentalQuery)) *UserQuery {
@@ -474,6 +810,21 @@ func WithUserRentals(q *UserQuery, opts ...func(*RentalQuery)) *UserQuery {
 	}
 	return q.StoreEager("rentals", func(ctx context.Context, parents []*User) error {
 		return loadUserRentals(ctx, sub, parents)
+	})
+}
+
+// WithNamedUserRentals registers a named eager-loader for the "rentals" edge on a
+// UserQuery. Multiple names accumulate; each loads independently and
+// is retrievable via User.NamedRentals(name). Replaces the
+// pre-PR6 (*UserQuery).WithNamedRentals method, hoisted to root
+// so the named-loader map can hold the cross-package RentalQuery type.
+func WithNamedUserRentals(q *UserQuery, name string, opts ...func(*RentalQuery)) *UserQuery {
+	sub := NewRentalClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("rentals:"+name, func(ctx context.Context, parents []*User) error {
+		return loadNamedUserRentals(ctx, sub, parents, name)
 	})
 }
 
@@ -494,6 +845,31 @@ func QueryUserRentals(c *UserClient, _m *User) *RentalQuery {
 	return query
 }
 
+// QueryUserRentalsFromQuery returns a RentalQuery that traverses the "rentals" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryRentals method, hoisted to root so it
+// can reference the cross-package RentalQuery type.
+func QueryUserRentalsFromQuery(q *UserQuery) *RentalQuery {
+	query := NewRentalClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(rental.Table, rental.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RentalsTable, user.RentalsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserRentals performs the eager-load for the "rentals" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadRentals method, hoisted to root
 // so it can reference cross-package types directly.
@@ -505,6 +881,7 @@ func loadUserRentals(ctx context.Context, query *RentalQuery, nodes []*User) err
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Rentals = []*Rental{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(rental.FieldUserID)
 	}
@@ -522,6 +899,44 @@ func loadUserRentals(ctx context.Context, query *RentalQuery, nodes []*User) err
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
 		}
 		node.Edges.Rentals = append(node.Edges.Rentals, n)
+	}
+	return nil
+}
+
+// loadNamedUserRentals is the named-edge variant of loadUserRentals. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedRentals(name, ...) bucket instead of the default
+// Edges.Rentals slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedUserRentals(ctx context.Context, query *RentalQuery, nodes []*User, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedRentals(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	if len(query.Ctx.Fields) > 0 {
+		query.Ctx.AppendFieldOnce(rental.FieldUserID)
+	}
+	query.Where(predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.RentalsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.UserID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		node.AppendNamedRentals(name, n)
 	}
 	return nil
 }

@@ -69,6 +69,31 @@ func QueryBlogAdmins(c *BlogClient, _m *Blog) *UserQuery {
 	return query
 }
 
+// QueryBlogAdminsFromQuery returns a UserQuery that traverses the "admins" edge
+// of every Blog matched by q (chained-query form). Mirrors the pre-PR6
+// (*BlogQuery).QueryAdmins method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryBlogAdminsFromQuery(q *BlogQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(blog.Table, blog.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, blog.AdminsTable, blog.AdminsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadBlogAdmins performs the eager-load for the "admins" edge. Body mirrors
 // the pre-PR6 *BlogQuery.loadAdmins method, hoisted to root
 // so it can reference cross-package types directly.
@@ -80,6 +105,7 @@ func loadBlogAdmins(ctx context.Context, query *UserQuery, nodes []*Blog) error 
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Admins = []*User{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.User(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(blog.AdminsColumn), fks...))
 	}))

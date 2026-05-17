@@ -67,6 +67,31 @@ func QueryCommentPost(c *CommentClient, _m *Comment) *PostQuery {
 	return query
 }
 
+// QueryCommentPostFromQuery returns a PostQuery that traverses the "post" edge
+// of every Comment matched by q (chained-query form). Mirrors the pre-PR6
+// (*CommentQuery).QueryPost method, hoisted to root so it
+// can reference the cross-package PostQuery type.
+func QueryCommentPostFromQuery(q *CommentQuery) *PostQuery {
+	query := NewPostClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(post.Table, post.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.PostTable, comment.PostColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadCommentPost performs the eager-load for the "post" edge. Body mirrors
 // the pre-PR6 *CommentQuery.loadPost method, hoisted to root
 // so it can reference cross-package types directly.

@@ -71,6 +71,31 @@ func QueryTeamTasks(c *TeamClient, _m *Team) *TaskQuery {
 	return query
 }
 
+// QueryTeamTasksFromQuery returns a TaskQuery that traverses the "tasks" edge
+// of every Team matched by q (chained-query form). Mirrors the pre-PR6
+// (*TeamQuery).QueryTasks method, hoisted to root so it
+// can reference the cross-package TaskQuery type.
+func QueryTeamTasksFromQuery(q *TeamQuery) *TaskQuery {
+	query := NewTaskClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, selector),
+			sqlgraph.To(task.Table, task.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, team.TasksTable, team.TasksPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadTeamTasks performs the eager-load for the "tasks" edge. Body mirrors
 // the pre-PR6 *TeamQuery.loadTasks method, hoisted to root
 // so it can reference cross-package types directly.
@@ -158,6 +183,31 @@ func QueryTeamUsers(c *TeamClient, _m *Team) *UserQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTeamUsersFromQuery returns a UserQuery that traverses the "users" edge
+// of every Team matched by q (chained-query form). Mirrors the pre-PR6
+// (*TeamQuery).QueryUsers method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryTeamUsersFromQuery(q *TeamQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, team.UsersTable, team.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

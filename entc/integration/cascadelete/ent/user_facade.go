@@ -69,6 +69,31 @@ func QueryUserPosts(c *UserClient, _m *User) *PostQuery {
 	return query
 }
 
+// QueryUserPostsFromQuery returns a PostQuery that traverses the "posts" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryPosts method, hoisted to root so it
+// can reference the cross-package PostQuery type.
+func QueryUserPostsFromQuery(q *UserQuery) *PostQuery {
+	query := NewPostClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(post.Table, post.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PostsTable, user.PostsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserPosts performs the eager-load for the "posts" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadPosts method, hoisted to root
 // so it can reference cross-package types directly.
@@ -80,6 +105,7 @@ func loadUserPosts(ctx context.Context, query *PostQuery, nodes []*User) error {
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Posts = []*Post{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(post.FieldAuthorID)
 	}

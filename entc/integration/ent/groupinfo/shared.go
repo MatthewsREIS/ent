@@ -160,10 +160,14 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 
 // schemaGraph holds this entity's schema for entql predicate evaluation.
 // Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// (Type name only — cross-entity field/column metadata is not accessible
-// from a leaf sub-package). The stubs are sufficient for entql.HasEdge /
-// HasEdgeWith dispatch on the join table; cross-edge field predicates
-// against sibling entities are out of scope at the sub-package boundary.
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
 var schemaGraph = func() *sqlgraph.Schema {
 	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 2)}
 	graph.Nodes[0] = &sqlgraph.Node{
@@ -181,7 +185,31 @@ var schemaGraph = func() *sqlgraph.Schema {
 			FieldMaxUsers: {Type: field.TypeInt, Column: FieldMaxUsers},
 		},
 	}
-	graph.Nodes[1] = &sqlgraph.Node{Type: "Group"}
+	graph.Nodes[1] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "groups",
+			Columns: []string{
+				"id",
+				"active",
+				"expire",
+				"type",
+				"max_users",
+				"name",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Group",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"active":    {Type: field.TypeBool, Column: "active"},
+			"expire":    {Type: field.TypeTime, Column: "expire"},
+			"type":      {Type: field.TypeString, Column: "type"},
+			"max_users": {Type: field.TypeInt, Column: "max_users"},
+			"name":      {Type: field.TypeString, Column: "name"},
+		},
+	}
 	graph.MustAddE(
 		"groups",
 		&sqlgraph.EdgeSpec{

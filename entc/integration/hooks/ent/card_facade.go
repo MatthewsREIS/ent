@@ -67,6 +67,31 @@ func QueryCardOwner(c *CardClient, _m *Card) *UserQuery {
 	return query
 }
 
+// QueryCardOwnerFromQuery returns a UserQuery that traverses the "owner" edge
+// of every Card matched by q (chained-query form). Mirrors the pre-PR6
+// (*CardQuery).QueryOwner method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryCardOwnerFromQuery(q *CardQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(card.Table, card.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, card.OwnerTable, card.OwnerColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadCardOwner performs the eager-load for the "owner" edge. Body mirrors
 // the pre-PR6 *CardQuery.loadOwner method, hoisted to root
 // so it can reference cross-package types directly.

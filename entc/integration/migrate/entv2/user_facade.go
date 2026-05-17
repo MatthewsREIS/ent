@@ -70,6 +70,31 @@ func QueryUserCar(c *UserClient, _m *User) *CarQuery {
 	return query
 }
 
+// QueryUserCarFromQuery returns a CarQuery that traverses the "car" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryCar method, hoisted to root so it
+// can reference the cross-package CarQuery type.
+func QueryUserCarFromQuery(q *UserQuery) *CarQuery {
+	query := NewCarClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(car.Table, car.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CarTable, user.CarColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserCar performs the eager-load for the "car" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadCar method, hoisted to root
 // so it can reference cross-package types directly.
@@ -81,6 +106,7 @@ func loadUserCar(ctx context.Context, query *CarQuery, nodes []*User) error {
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Car = []*Car{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Car(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.CarColumn), fks...))
 	}))
@@ -131,6 +157,31 @@ func QueryUserPets(c *UserClient, _m *User) *PetQuery {
 	return query
 }
 
+// QueryUserPetsFromQuery returns a PetQuery that traverses the "pets" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryPets method, hoisted to root so it
+// can reference the cross-package PetQuery type.
+func QueryUserPetsFromQuery(q *UserQuery) *PetQuery {
+	query := NewPetClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.PetsTable, user.PetsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserPets performs the eager-load for the "pets" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadPets method, hoisted to root
 // so it can reference cross-package types directly.
@@ -141,6 +192,7 @@ func loadUserPets(ctx context.Context, query *PetQuery, nodes []*User) error {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Pet(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
 	}))
@@ -186,6 +238,31 @@ func QueryUserFriends(c *UserClient, _m *User) *UserQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserFriendsFromQuery returns a UserQuery that traverses the "friends" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryFriends method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryUserFriendsFromQuery(q *UserQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

@@ -68,6 +68,31 @@ func QueryNodePrev(c *NodeClient, _m *Node) *NodeQuery {
 	return query
 }
 
+// QueryNodePrevFromQuery returns a NodeQuery that traverses the "prev" edge
+// of every Node matched by q (chained-query form). Mirrors the pre-PR6
+// (*NodeQuery).QueryPrev method, hoisted to root so it
+// can reference the cross-package NodeQuery type.
+func QueryNodePrevFromQuery(q *NodeQuery) *NodeQuery {
+	query := NewNodeClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, selector),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadNodePrev performs the eager-load for the "prev" edge. Body mirrors
 // the pre-PR6 *NodeQuery.loadPrev method, hoisted to root
 // so it can reference cross-package types directly.
@@ -130,6 +155,31 @@ func QueryNodeNext(c *NodeClient, _m *Node) *NodeQuery {
 	return query
 }
 
+// QueryNodeNextFromQuery returns a NodeQuery that traverses the "next" edge
+// of every Node matched by q (chained-query form). Mirrors the pre-PR6
+// (*NodeQuery).QueryNext method, hoisted to root so it
+// can reference the cross-package NodeQuery type.
+func QueryNodeNextFromQuery(q *NodeQuery) *NodeQuery {
+	query := NewNodeClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, selector),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadNodeNext performs the eager-load for the "next" edge. Body mirrors
 // the pre-PR6 *NodeQuery.loadNext method, hoisted to root
 // so it can reference cross-package types directly.
@@ -140,6 +190,7 @@ func loadNodeNext(ctx context.Context, query *NodeQuery, nodes []*Node) error {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(node.FieldPrevID)
 	}

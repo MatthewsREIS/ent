@@ -67,6 +67,31 @@ func QueryPetOwner(c *PetClient, _m *Pet) *UserQuery {
 	return query
 }
 
+// QueryPetOwnerFromQuery returns a UserQuery that traverses the "owner" edge
+// of every Pet matched by q (chained-query form). Mirrors the pre-PR6
+// (*PetQuery).QueryOwner method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryPetOwnerFromQuery(q *PetQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadPetOwner performs the eager-load for the "owner" edge. Body mirrors
 // the pre-PR6 *PetQuery.loadOwner method, hoisted to root
 // so it can reference cross-package types directly.

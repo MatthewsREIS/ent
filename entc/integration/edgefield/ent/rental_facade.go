@@ -69,6 +69,31 @@ func QueryRentalUser(c *RentalClient, _m *Rental) *UserQuery {
 	return query
 }
 
+// QueryRentalUserFromQuery returns a UserQuery that traverses the "user" edge
+// of every Rental matched by q (chained-query form). Mirrors the pre-PR6
+// (*RentalQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryRentalUserFromQuery(q *RentalQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rental.Table, rental.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rental.UserTable, rental.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadRentalUser performs the eager-load for the "user" edge. Body mirrors
 // the pre-PR6 *RentalQuery.loadUser method, hoisted to root
 // so it can reference cross-package types directly.
@@ -126,6 +151,31 @@ func QueryRentalCar(c *RentalClient, _m *Rental) *CarQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRentalCarFromQuery returns a CarQuery that traverses the "car" edge
+// of every Rental matched by q (chained-query form). Mirrors the pre-PR6
+// (*RentalQuery).QueryCar method, hoisted to root so it
+// can reference the cross-package CarQuery type.
+func QueryRentalCarFromQuery(q *RentalQuery) *CarQuery {
+	query := NewCarClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rental.Table, rental.FieldID, selector),
+			sqlgraph.To(car.Table, car.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rental.CarTable, rental.CarColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

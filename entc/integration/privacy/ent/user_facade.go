@@ -72,6 +72,31 @@ func QueryUserTeams(c *UserClient, _m *User) *TeamQuery {
 	return query
 }
 
+// QueryUserTeamsFromQuery returns a TeamQuery that traverses the "teams" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryTeams method, hoisted to root so it
+// can reference the cross-package TeamQuery type.
+func QueryUserTeamsFromQuery(q *UserQuery) *TeamQuery {
+	query := NewTeamClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.TeamsTable, user.TeamsPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserTeams performs the eager-load for the "teams" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadTeams method, hoisted to root
 // so it can reference cross-package types directly.
@@ -164,6 +189,31 @@ func QueryUserTasks(c *UserClient, _m *User) *TaskQuery {
 	return query
 }
 
+// QueryUserTasksFromQuery returns a TaskQuery that traverses the "tasks" edge
+// of every User matched by q (chained-query form). Mirrors the pre-PR6
+// (*UserQuery).QueryTasks method, hoisted to root so it
+// can reference the cross-package TaskQuery type.
+func QueryUserTasksFromQuery(q *UserQuery) *TaskQuery {
+	query := NewTaskClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(task.Table, task.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.TasksTable, user.TasksColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadUserTasks performs the eager-load for the "tasks" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadTasks method, hoisted to root
 // so it can reference cross-package types directly.
@@ -175,6 +225,7 @@ func loadUserTasks(ctx context.Context, query *TaskQuery, nodes []*User) error {
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Tasks = []*Task{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Task(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(user.TasksColumn), fks...))
 	}))

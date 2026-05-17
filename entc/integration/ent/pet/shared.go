@@ -160,10 +160,14 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 
 // schemaGraph holds this entity's schema for entql predicate evaluation.
 // Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// (Type name only — cross-entity field/column metadata is not accessible
-// from a leaf sub-package). The stubs are sufficient for entql.HasEdge /
-// HasEdgeWith dispatch on the join table; cross-edge field predicates
-// against sibling entities are out of scope at the sub-package boundary.
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
 var schemaGraph = func() *sqlgraph.Schema {
 	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 2)}
 	graph.Nodes[0] = &sqlgraph.Node{
@@ -185,7 +189,45 @@ var schemaGraph = func() *sqlgraph.Schema {
 			FieldOptionalTime: {Type: field.TypeTime, Column: FieldOptionalTime},
 		},
 	}
-	graph.Nodes[1] = &sqlgraph.Node{Type: "User"}
+	graph.Nodes[1] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "users",
+			Columns: []string{
+				"id",
+				"optional_int",
+				"age",
+				"name",
+				"last",
+				"nickname",
+				"address",
+				"phone",
+				"password",
+				"role",
+				"employment",
+				"sso_cert",
+				"files_count",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "User",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"optional_int": {Type: field.TypeInt, Column: "optional_int"},
+			"age":          {Type: field.TypeInt, Column: "age"},
+			"name":         {Type: field.TypeString, Column: "name"},
+			"last":         {Type: field.TypeString, Column: "last"},
+			"nickname":     {Type: field.TypeString, Column: "nickname"},
+			"address":      {Type: field.TypeString, Column: "address"},
+			"phone":        {Type: field.TypeString, Column: "phone"},
+			"password":     {Type: field.TypeString, Column: "password"},
+			"role":         {Type: field.TypeEnum, Column: "role"},
+			"employment":   {Type: field.TypeEnum, Column: "employment"},
+			"sso_cert":     {Type: field.TypeString, Column: "sso_cert"},
+			"files_count":  {Type: field.TypeInt, Column: "files_count"},
+		},
+	}
 	graph.MustAddE(
 		"team",
 		&sqlgraph.EdgeSpec{

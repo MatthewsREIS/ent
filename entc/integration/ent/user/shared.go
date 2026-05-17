@@ -160,10 +160,14 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 
 // schemaGraph holds this entity's schema for entql predicate evaluation.
 // Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// (Type name only — cross-entity field/column metadata is not accessible
-// from a leaf sub-package). The stubs are sufficient for entql.HasEdge /
-// HasEdgeWith dispatch on the join table; cross-edge field predicates
-// against sibling entities are out of scope at the sub-package boundary.
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
 var schemaGraph = func() *sqlgraph.Schema {
 	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 5)}
 	graph.Nodes[0] = &sqlgraph.Node{
@@ -191,10 +195,114 @@ var schemaGraph = func() *sqlgraph.Schema {
 			FieldFilesCount:  {Type: field.TypeInt, Column: FieldFilesCount},
 		},
 	}
-	graph.Nodes[1] = &sqlgraph.Node{Type: "Card"}
-	graph.Nodes[2] = &sqlgraph.Node{Type: "Pet"}
-	graph.Nodes[3] = &sqlgraph.Node{Type: "File"}
-	graph.Nodes[4] = &sqlgraph.Node{Type: "Group"}
+	graph.Nodes[1] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "cards",
+			Columns: []string{
+				"id",
+				"create_time",
+				"update_time",
+				"balance",
+				"number",
+				"name",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Card",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"create_time": {Type: field.TypeTime, Column: "create_time"},
+			"update_time": {Type: field.TypeTime, Column: "update_time"},
+			"balance":     {Type: field.TypeFloat64, Column: "balance"},
+			"number":      {Type: field.TypeString, Column: "number"},
+			"name":        {Type: field.TypeString, Column: "name"},
+		},
+	}
+	graph.Nodes[2] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "pet",
+			Columns: []string{
+				"id",
+				"age",
+				"name",
+				"uuid",
+				"nickname",
+				"trained",
+				"optional_time",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Pet",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"age":           {Type: field.TypeFloat64, Column: "age"},
+			"name":          {Type: field.TypeString, Column: "name"},
+			"uuid":          {Type: field.TypeUUID, Column: "uuid"},
+			"nickname":      {Type: field.TypeString, Column: "nickname"},
+			"trained":       {Type: field.TypeBool, Column: "trained"},
+			"optional_time": {Type: field.TypeTime, Column: "optional_time"},
+		},
+	}
+	graph.Nodes[3] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "files",
+			Columns: []string{
+				"id",
+				"set_id",
+				"fsize",
+				"name",
+				"user",
+				"group",
+				"op",
+				"field_id",
+				"create_time",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "File",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"set_id":      {Type: field.TypeInt, Column: "set_id"},
+			"fsize":       {Type: field.TypeInt, Column: "fsize"},
+			"name":        {Type: field.TypeString, Column: "name"},
+			"user":        {Type: field.TypeString, Column: "user"},
+			"group":       {Type: field.TypeString, Column: "group"},
+			"op":          {Type: field.TypeBool, Column: "op"},
+			"field_id":    {Type: field.TypeInt, Column: "field_id"},
+			"create_time": {Type: field.TypeTime, Column: "create_time"},
+		},
+	}
+	graph.Nodes[4] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "groups",
+			Columns: []string{
+				"id",
+				"active",
+				"expire",
+				"type",
+				"max_users",
+				"name",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Group",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"active":    {Type: field.TypeBool, Column: "active"},
+			"expire":    {Type: field.TypeTime, Column: "expire"},
+			"type":      {Type: field.TypeString, Column: "type"},
+			"max_users": {Type: field.TypeInt, Column: "max_users"},
+			"name":      {Type: field.TypeString, Column: "name"},
+		},
+	}
 	graph.MustAddE(
 		"card",
 		&sqlgraph.EdgeSpec{

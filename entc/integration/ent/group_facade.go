@@ -56,6 +56,21 @@ func WithGroupFiles(q *GroupQuery, opts ...func(*FileQuery)) *GroupQuery {
 	})
 }
 
+// WithNamedGroupFiles registers a named eager-loader for the "files" edge on a
+// GroupQuery. Multiple names accumulate; each loads independently and
+// is retrievable via Group.NamedFiles(name). Replaces the
+// pre-PR6 (*GroupQuery).WithNamedFiles method, hoisted to root
+// so the named-loader map can hold the cross-package FileQuery type.
+func WithNamedGroupFiles(q *GroupQuery, name string, opts ...func(*FileQuery)) *GroupQuery {
+	sub := NewFileClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("files:"+name, func(ctx context.Context, parents []*Group) error {
+		return loadNamedGroupFiles(ctx, sub, parents, name)
+	})
+}
+
 // QueryGroupFiles returns a FileQuery for the "files" edge of a given Group.
 func QueryGroupFiles(c *GroupClient, _m *Group) *FileQuery {
 	query := NewFileClient(c.Config).Query()
@@ -73,6 +88,31 @@ func QueryGroupFiles(c *GroupClient, _m *Group) *FileQuery {
 	return query
 }
 
+// QueryGroupFilesFromQuery returns a FileQuery that traverses the "files" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryFiles method, hoisted to root so it
+// can reference the cross-package FileQuery type.
+func QueryGroupFilesFromQuery(q *GroupQuery) *FileQuery {
+	query := NewFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.FilesTable, group.FilesColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupFiles performs the eager-load for the "files" edge. Body mirrors
 // the pre-PR6 *GroupQuery.loadFiles method, hoisted to root
 // so it can reference cross-package types directly.
@@ -84,6 +124,7 @@ func loadGroupFiles(ctx context.Context, query *FileQuery, nodes []*Group) error
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Files = []*File{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.File(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(group.FilesColumn), fks...))
 	}))
@@ -105,6 +146,44 @@ func loadGroupFiles(ctx context.Context, query *FileQuery, nodes []*Group) error
 	return nil
 }
 
+// loadNamedGroupFiles is the named-edge variant of loadGroupFiles. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedFiles(name, ...) bucket instead of the default
+// Edges.Files slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedGroupFiles(ctx context.Context, query *FileQuery, nodes []*Group, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedFiles(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Group)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	query.Where(predicate.File(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(group.FilesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetGroupFiles()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "group_files" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "group_files" returned %v for node %v`, *fk, n.ID)
+		}
+		node.AppendNamedFiles(name, n)
+	}
+	return nil
+}
+
 // WithGroupBlocked eager-loads the "blocked" edge on a GroupQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupBlocked(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
@@ -114,6 +193,21 @@ func WithGroupBlocked(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
 	}
 	return q.StoreEager("blocked", func(ctx context.Context, parents []*Group) error {
 		return loadGroupBlocked(ctx, sub, parents)
+	})
+}
+
+// WithNamedGroupBlocked registers a named eager-loader for the "blocked" edge on a
+// GroupQuery. Multiple names accumulate; each loads independently and
+// is retrievable via Group.NamedBlocked(name). Replaces the
+// pre-PR6 (*GroupQuery).WithNamedBlocked method, hoisted to root
+// so the named-loader map can hold the cross-package UserQuery type.
+func WithNamedGroupBlocked(q *GroupQuery, name string, opts ...func(*UserQuery)) *GroupQuery {
+	sub := NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("blocked:"+name, func(ctx context.Context, parents []*Group) error {
+		return loadNamedGroupBlocked(ctx, sub, parents, name)
 	})
 }
 
@@ -134,6 +228,31 @@ func QueryGroupBlocked(c *GroupClient, _m *Group) *UserQuery {
 	return query
 }
 
+// QueryGroupBlockedFromQuery returns a UserQuery that traverses the "blocked" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryBlocked method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryGroupBlockedFromQuery(q *GroupQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, group.BlockedTable, group.BlockedColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupBlocked performs the eager-load for the "blocked" edge. Body mirrors
 // the pre-PR6 *GroupQuery.loadBlocked method, hoisted to root
 // so it can reference cross-package types directly.
@@ -145,6 +264,7 @@ func loadGroupBlocked(ctx context.Context, query *UserQuery, nodes []*Group) err
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Blocked = []*User{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.User(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(group.BlockedColumn), fks...))
 	}))
@@ -166,6 +286,44 @@ func loadGroupBlocked(ctx context.Context, query *UserQuery, nodes []*Group) err
 	return nil
 }
 
+// loadNamedGroupBlocked is the named-edge variant of loadGroupBlocked. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedBlocked(name, ...) bucket instead of the default
+// Edges.Blocked slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedGroupBlocked(ctx context.Context, query *UserQuery, nodes []*Group, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedBlocked(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Group)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(group.BlockedColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetGroupBlocked()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "group_blocked" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "group_blocked" returned %v for node %v`, *fk, n.ID)
+		}
+		node.AppendNamedBlocked(name, n)
+	}
+	return nil
+}
+
 // WithGroupUsers eager-loads the "users" edge on a GroupQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupUsers(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
@@ -175,6 +333,21 @@ func WithGroupUsers(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
 	}
 	return q.StoreEager("users", func(ctx context.Context, parents []*Group) error {
 		return loadGroupUsers(ctx, sub, parents)
+	})
+}
+
+// WithNamedGroupUsers registers a named eager-loader for the "users" edge on a
+// GroupQuery. Multiple names accumulate; each loads independently and
+// is retrievable via Group.NamedUsers(name). Replaces the
+// pre-PR6 (*GroupQuery).WithNamedUsers method, hoisted to root
+// so the named-loader map can hold the cross-package UserQuery type.
+func WithNamedGroupUsers(q *GroupQuery, name string, opts ...func(*UserQuery)) *GroupQuery {
+	sub := NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("users:"+name, func(ctx context.Context, parents []*Group) error {
+		return loadNamedGroupUsers(ctx, sub, parents, name)
 	})
 }
 
@@ -190,6 +363,31 @@ func QueryGroupUsers(c *GroupClient, _m *Group) *UserQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupUsersFromQuery returns a UserQuery that traverses the "users" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryUsers method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryGroupUsersFromQuery(q *GroupQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, group.UsersTable, group.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -255,6 +453,84 @@ func loadGroupUsers(ctx context.Context, query *UserQuery, nodes []*Group) error
 			kn.Edges.Users = append(kn.Edges.Users, n)
 		}
 	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// loadNamedGroupUsers is the named-edge variant of loadGroupUsers. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedUsers(name, ...) bucket instead of the default
+// Edges.Users slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedGroupUsers(ctx context.Context, query *UserQuery, nodes []*Group, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedUsers(name)
+	}
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Group)
+	nids := make(map[int]map[*Group]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(group.UsersTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(group.UsersPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.PrepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Group]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.QueryState.Inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		parents, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
+		}
+		for kn := range parents {
+			kn.AppendNamedUsers(name, n)
+		}
+	}
+	for _, loader := range query.EagerLoaders() {
+		if err := loader(ctx, neighbors); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -282,6 +558,31 @@ func QueryGroupInfo(c *GroupClient, _m *Group) *GroupInfoQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupInfoFromQuery returns a GroupInfoQuery that traverses the "info" edge
+// of every Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupQuery).QueryInfo method, hoisted to root so it
+// can reference the cross-package GroupInfoQuery type.
+func QueryGroupInfoFromQuery(q *GroupQuery) *GroupInfoQuery {
+	query := NewGroupInfoClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(groupinfo.Table, groupinfo.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, group.InfoTable, group.InfoColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

@@ -54,6 +54,21 @@ func WithGroupInfoGroups(q *GroupInfoQuery, opts ...func(*GroupQuery)) *GroupInf
 	})
 }
 
+// WithNamedGroupInfoGroups registers a named eager-loader for the "groups" edge on a
+// GroupInfoQuery. Multiple names accumulate; each loads independently and
+// is retrievable via GroupInfo.NamedGroups(name). Replaces the
+// pre-PR6 (*GroupInfoQuery).WithNamedGroups method, hoisted to root
+// so the named-loader map can hold the cross-package GroupQuery type.
+func WithNamedGroupInfoGroups(q *GroupInfoQuery, name string, opts ...func(*GroupQuery)) *GroupInfoQuery {
+	sub := NewGroupClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("groups:"+name, func(ctx context.Context, parents []*GroupInfo) error {
+		return loadNamedGroupInfoGroups(ctx, sub, parents, name)
+	})
+}
+
 // QueryGroupInfoGroups returns a GroupQuery for the "groups" edge of a given GroupInfo.
 func QueryGroupInfoGroups(c *GroupInfoClient, _m *GroupInfo) *GroupQuery {
 	query := NewGroupClient(c.Config).Query()
@@ -71,6 +86,31 @@ func QueryGroupInfoGroups(c *GroupInfoClient, _m *GroupInfo) *GroupQuery {
 	return query
 }
 
+// QueryGroupInfoGroupsFromQuery returns a GroupQuery that traverses the "groups" edge
+// of every GroupInfo matched by q (chained-query form). Mirrors the pre-PR6
+// (*GroupInfoQuery).QueryGroups method, hoisted to root so it
+// can reference the cross-package GroupQuery type.
+func QueryGroupInfoGroupsFromQuery(q *GroupInfoQuery) *GroupQuery {
+	query := NewGroupClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadGroupInfoGroups performs the eager-load for the "groups" edge. Body mirrors
 // the pre-PR6 *GroupInfoQuery.loadGroups method, hoisted to root
 // so it can reference cross-package types directly.
@@ -82,6 +122,7 @@ func loadGroupInfoGroups(ctx context.Context, query *GroupQuery, nodes []*GroupI
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Groups = []*Group{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.Group(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(groupinfo.GroupsColumn), fks...))
 	}))
@@ -99,6 +140,47 @@ func loadGroupInfoGroups(ctx context.Context, query *GroupQuery, nodes []*GroupI
 			return fmt.Errorf(`unexpected referenced foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
 		}
 		node.Edges.Groups = append(node.Edges.Groups, n)
+		if !n.Edges.IsLoaded(3) {
+			n.Edges.Info = node
+		}
+	}
+	return nil
+}
+
+// loadNamedGroupInfoGroups is the named-edge variant of loadGroupInfoGroups. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedGroups(name, ...) bucket instead of the default
+// Edges.Groups slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedGroupInfoGroups(ctx context.Context, query *GroupQuery, nodes []*GroupInfo, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedGroups(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*GroupInfo)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	query.Where(predicate.Group(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(groupinfo.GroupsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetGroupInfo()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
+		}
+		node.AppendNamedGroups(name, n)
 	}
 	return nil
 }

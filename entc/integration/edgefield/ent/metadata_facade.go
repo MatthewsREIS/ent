@@ -69,6 +69,31 @@ func QueryMetadataUser(c *MetadataClient, _m *Metadata) *UserQuery {
 	return query
 }
 
+// QueryMetadataUserFromQuery returns a UserQuery that traverses the "user" edge
+// of every Metadata matched by q (chained-query form). Mirrors the pre-PR6
+// (*MetadataQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryMetadataUserFromQuery(q *MetadataQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(metadata.Table, metadata.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, metadata.UserTable, metadata.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadMetadataUser performs the eager-load for the "user" edge. Body mirrors
 // the pre-PR6 *MetadataQuery.loadUser method, hoisted to root
 // so it can reference cross-package types directly.
@@ -114,6 +139,21 @@ func WithMetadataChildren(q *MetadataQuery, opts ...func(*MetadataQuery)) *Metad
 	})
 }
 
+// WithNamedMetadataChildren registers a named eager-loader for the "children" edge on a
+// MetadataQuery. Multiple names accumulate; each loads independently and
+// is retrievable via Metadata.NamedChildren(name). Replaces the
+// pre-PR6 (*MetadataQuery).WithNamedChildren method, hoisted to root
+// so the named-loader map can hold the cross-package MetadataQuery type.
+func WithNamedMetadataChildren(q *MetadataQuery, name string, opts ...func(*MetadataQuery)) *MetadataQuery {
+	sub := NewMetadataClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("children:"+name, func(ctx context.Context, parents []*Metadata) error {
+		return loadNamedMetadataChildren(ctx, sub, parents, name)
+	})
+}
+
 // QueryMetadataChildren returns a MetadataQuery for the "children" edge of a given Metadata.
 func QueryMetadataChildren(c *MetadataClient, _m *Metadata) *MetadataQuery {
 	query := NewMetadataClient(c.Config).Query()
@@ -131,6 +171,31 @@ func QueryMetadataChildren(c *MetadataClient, _m *Metadata) *MetadataQuery {
 	return query
 }
 
+// QueryMetadataChildrenFromQuery returns a MetadataQuery that traverses the "children" edge
+// of every Metadata matched by q (chained-query form). Mirrors the pre-PR6
+// (*MetadataQuery).QueryChildren method, hoisted to root so it
+// can reference the cross-package MetadataQuery type.
+func QueryMetadataChildrenFromQuery(q *MetadataQuery) *MetadataQuery {
+	query := NewMetadataClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(metadata.Table, metadata.FieldID, selector),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, metadata.ChildrenTable, metadata.ChildrenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadMetadataChildren performs the eager-load for the "children" edge. Body mirrors
 // the pre-PR6 *MetadataQuery.loadChildren method, hoisted to root
 // so it can reference cross-package types directly.
@@ -142,6 +207,7 @@ func loadMetadataChildren(ctx context.Context, query *MetadataQuery, nodes []*Me
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Children = []*Metadata{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(metadata.FieldParentID)
 	}
@@ -159,6 +225,44 @@ func loadMetadataChildren(ctx context.Context, query *MetadataQuery, nodes []*Me
 			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
 		}
 		node.Edges.Children = append(node.Edges.Children, n)
+	}
+	return nil
+}
+
+// loadNamedMetadataChildren is the named-edge variant of loadMetadataChildren. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedChildren(name, ...) bucket instead of the default
+// Edges.Children slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedMetadataChildren(ctx context.Context, query *MetadataQuery, nodes []*Metadata, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedChildren(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Metadata)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	if len(query.Ctx.Fields) > 0 {
+		query.Ctx.AppendFieldOnce(metadata.FieldParentID)
+	}
+	query.Where(predicate.Metadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(metadata.ChildrenColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ParentID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
+		}
+		node.AppendNamedChildren(name, n)
 	}
 	return nil
 }
@@ -187,6 +291,31 @@ func QueryMetadataParent(c *MetadataClient, _m *Metadata) *MetadataQuery {
 		)
 		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
 
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMetadataParentFromQuery returns a MetadataQuery that traverses the "parent" edge
+// of every Metadata matched by q (chained-query form). Mirrors the pre-PR6
+// (*MetadataQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package MetadataQuery type.
+func QueryMetadataParentFromQuery(q *MetadataQuery) *MetadataQuery {
+	query := NewMetadataClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(metadata.Table, metadata.FieldID, selector),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, metadata.ParentTable, metadata.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
 		return fromV, nil
 	}
 	return query

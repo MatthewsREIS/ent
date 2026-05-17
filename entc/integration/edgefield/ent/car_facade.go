@@ -53,6 +53,21 @@ func WithCarRentals(q *CarQuery, opts ...func(*RentalQuery)) *CarQuery {
 	})
 }
 
+// WithNamedCarRentals registers a named eager-loader for the "rentals" edge on a
+// CarQuery. Multiple names accumulate; each loads independently and
+// is retrievable via Car.NamedRentals(name). Replaces the
+// pre-PR6 (*CarQuery).WithNamedRentals method, hoisted to root
+// so the named-loader map can hold the cross-package RentalQuery type.
+func WithNamedCarRentals(q *CarQuery, name string, opts ...func(*RentalQuery)) *CarQuery {
+	sub := NewRentalClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("rentals:"+name, func(ctx context.Context, parents []*Car) error {
+		return loadNamedCarRentals(ctx, sub, parents, name)
+	})
+}
+
 // QueryCarRentals returns a RentalQuery for the "rentals" edge of a given Car.
 func QueryCarRentals(c *CarClient, _m *Car) *RentalQuery {
 	query := NewRentalClient(c.Config).Query()
@@ -70,6 +85,31 @@ func QueryCarRentals(c *CarClient, _m *Car) *RentalQuery {
 	return query
 }
 
+// QueryCarRentalsFromQuery returns a RentalQuery that traverses the "rentals" edge
+// of every Car matched by q (chained-query form). Mirrors the pre-PR6
+// (*CarQuery).QueryRentals method, hoisted to root so it
+// can reference the cross-package RentalQuery type.
+func QueryCarRentalsFromQuery(q *CarQuery) *RentalQuery {
+	query := NewRentalClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(car.Table, car.FieldID, selector),
+			sqlgraph.To(rental.Table, rental.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, car.RentalsTable, car.RentalsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadCarRentals performs the eager-load for the "rentals" edge. Body mirrors
 // the pre-PR6 *CarQuery.loadRentals method, hoisted to root
 // so it can reference cross-package types directly.
@@ -81,6 +121,7 @@ func loadCarRentals(ctx context.Context, query *RentalQuery, nodes []*Car) error
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Rentals = []*Rental{}
 	}
+	query.IncludeForeignKeys(true)
 	if len(query.Ctx.Fields) > 0 {
 		query.Ctx.AppendFieldOnce(rental.FieldCarID)
 	}
@@ -98,6 +139,44 @@ func loadCarRentals(ctx context.Context, query *RentalQuery, nodes []*Car) error
 			return fmt.Errorf(`unexpected referenced foreign-key "car_id" returned %v for node %v`, fk, n.ID)
 		}
 		node.Edges.Rentals = append(node.Edges.Rentals, n)
+	}
+	return nil
+}
+
+// loadNamedCarRentals is the named-edge variant of loadCarRentals. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedRentals(name, ...) bucket instead of the default
+// Edges.Rentals slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedCarRentals(ctx context.Context, query *RentalQuery, nodes []*Car, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedRentals(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Car)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	if len(query.Ctx.Fields) > 0 {
+		query.Ctx.AppendFieldOnce(rental.FieldCarID)
+	}
+	query.Where(predicate.Rental(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(car.RentalsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CarID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "car_id" returned %v for node %v`, fk, n.ID)
+		}
+		node.AppendNamedRentals(name, n)
 	}
 	return nil
 }

@@ -73,6 +73,31 @@ func QueryFileOwner(c *FileClient, _m *File) *UserQuery {
 	return query
 }
 
+// QueryFileOwnerFromQuery returns a UserQuery that traverses the "owner" edge
+// of every File matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileQuery).QueryOwner method, hoisted to root so it
+// can reference the cross-package UserQuery type.
+func QueryFileOwnerFromQuery(q *FileQuery) *UserQuery {
+	query := NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.OwnerTable, file.OwnerColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadFileOwner performs the eager-load for the "owner" edge. Body mirrors
 // the pre-PR6 *FileQuery.loadOwner method, hoisted to root
 // so it can reference cross-package types directly.
@@ -138,6 +163,31 @@ func QueryFileType(c *FileClient, _m *File) *FileTypeQuery {
 	return query
 }
 
+// QueryFileTypeFromQuery returns a FileTypeQuery that traverses the "type" edge
+// of every File matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileQuery).QueryType method, hoisted to root so it
+// can reference the cross-package FileTypeQuery type.
+func QueryFileTypeFromQuery(q *FileQuery) *FileTypeQuery {
+	query := NewFileTypeClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(filetype.Table, filetype.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, file.TypeTable, file.TypeColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadFileType performs the eager-load for the "type" edge. Body mirrors
 // the pre-PR6 *FileQuery.loadType method, hoisted to root
 // so it can reference cross-package types directly.
@@ -186,6 +236,21 @@ func WithFileField(q *FileQuery, opts ...func(*FieldTypeQuery)) *FileQuery {
 	})
 }
 
+// WithNamedFileField registers a named eager-loader for the "field" edge on a
+// FileQuery. Multiple names accumulate; each loads independently and
+// is retrievable via File.NamedField(name). Replaces the
+// pre-PR6 (*FileQuery).WithNamedField method, hoisted to root
+// so the named-loader map can hold the cross-package FieldTypeQuery type.
+func WithNamedFileField(q *FileQuery, name string, opts ...func(*FieldTypeQuery)) *FileQuery {
+	sub := NewFieldTypeClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("field:"+name, func(ctx context.Context, parents []*File) error {
+		return loadNamedFileField(ctx, sub, parents, name)
+	})
+}
+
 // QueryFileField returns a FieldTypeQuery for the "field" edge of a given File.
 func QueryFileField(c *FileClient, _m *File) *FieldTypeQuery {
 	query := NewFieldTypeClient(c.Config).Query()
@@ -203,6 +268,31 @@ func QueryFileField(c *FileClient, _m *File) *FieldTypeQuery {
 	return query
 }
 
+// QueryFileFieldFromQuery returns a FieldTypeQuery that traverses the "field" edge
+// of every File matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileQuery).QueryField method, hoisted to root so it
+// can reference the cross-package FieldTypeQuery type.
+func QueryFileFieldFromQuery(q *FileQuery) *FieldTypeQuery {
+	query := NewFieldTypeClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(fieldtype.Table, fieldtype.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, file.FieldTable, file.FieldColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadFileField performs the eager-load for the "field" edge. Body mirrors
 // the pre-PR6 *FileQuery.loadField method, hoisted to root
 // so it can reference cross-package types directly.
@@ -214,6 +304,7 @@ func loadFileField(ctx context.Context, query *FieldTypeQuery, nodes []*File) er
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Field = []*FieldType{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.FieldType(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(file.FieldColumn), fks...))
 	}))
@@ -231,6 +322,44 @@ func loadFileField(ctx context.Context, query *FieldTypeQuery, nodes []*File) er
 			return fmt.Errorf(`unexpected referenced foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
 		}
 		node.Edges.Field = append(node.Edges.Field, n)
+	}
+	return nil
+}
+
+// loadNamedFileField is the named-edge variant of loadFileField. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedField(name, ...) bucket instead of the default
+// Edges.Field slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedFileField(ctx context.Context, query *FieldTypeQuery, nodes []*File, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedField(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*File)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	query.Where(predicate.FieldType(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(file.FieldColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetFileField()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
+		}
+		node.AppendNamedField(name, n)
 	}
 	return nil
 }

@@ -54,6 +54,21 @@ func WithFileTypeFiles(q *FileTypeQuery, opts ...func(*FileQuery)) *FileTypeQuer
 	})
 }
 
+// WithNamedFileTypeFiles registers a named eager-loader for the "files" edge on a
+// FileTypeQuery. Multiple names accumulate; each loads independently and
+// is retrievable via FileType.NamedFiles(name). Replaces the
+// pre-PR6 (*FileTypeQuery).WithNamedFiles method, hoisted to root
+// so the named-loader map can hold the cross-package FileQuery type.
+func WithNamedFileTypeFiles(q *FileTypeQuery, name string, opts ...func(*FileQuery)) *FileTypeQuery {
+	sub := NewFileClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("files:"+name, func(ctx context.Context, parents []*FileType) error {
+		return loadNamedFileTypeFiles(ctx, sub, parents, name)
+	})
+}
+
 // QueryFileTypeFiles returns a FileQuery for the "files" edge of a given FileType.
 func QueryFileTypeFiles(c *FileTypeClient, _m *FileType) *FileQuery {
 	query := NewFileClient(c.Config).Query()
@@ -71,6 +86,31 @@ func QueryFileTypeFiles(c *FileTypeClient, _m *FileType) *FileQuery {
 	return query
 }
 
+// QueryFileTypeFilesFromQuery returns a FileQuery that traverses the "files" edge
+// of every FileType matched by q (chained-query form). Mirrors the pre-PR6
+// (*FileTypeQuery).QueryFiles method, hoisted to root so it
+// can reference the cross-package FileQuery type.
+func QueryFileTypeFilesFromQuery(q *FileTypeQuery) *FileQuery {
+	query := NewFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(filetype.Table, filetype.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // loadFileTypeFiles performs the eager-load for the "files" edge. Body mirrors
 // the pre-PR6 *FileTypeQuery.loadFiles method, hoisted to root
 // so it can reference cross-package types directly.
@@ -82,6 +122,7 @@ func loadFileTypeFiles(ctx context.Context, query *FileQuery, nodes []*FileType)
 		nodeids[nodes[i].ID] = nodes[i]
 		nodes[i].Edges.Files = []*File{}
 	}
+	query.IncludeForeignKeys(true)
 	query.Where(predicate.File(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(filetype.FilesColumn), fks...))
 	}))
@@ -99,6 +140,47 @@ func loadFileTypeFiles(ctx context.Context, query *FileQuery, nodes []*FileType)
 			return fmt.Errorf(`unexpected referenced foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
 		}
 		node.Edges.Files = append(node.Edges.Files, n)
+		if !n.Edges.IsLoaded(1) {
+			n.Edges.Type = node
+		}
+	}
+	return nil
+}
+
+// loadNamedFileTypeFiles is the named-edge variant of loadFileTypeFiles. It runs the same
+// neighbor-fetch logic but appends each result to the parent's
+// AppendNamedFiles(name, ...) bucket instead of the default
+// Edges.Files slice. Each call seeds an empty bucket for the
+// name so consumers can distinguish "loaded with zero rows" from "never
+// loaded".
+func loadNamedFileTypeFiles(ctx context.Context, query *FileQuery, nodes []*FileType, name string) error {
+	for _, node := range nodes {
+		node.AppendNamedFiles(name)
+	}
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*FileType)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.IncludeForeignKeys(true)
+	query.Where(predicate.File(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(filetype.FilesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.GetFileTypeFiles()
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
+		}
+		node.AppendNamedFiles(name, n)
 	}
 	return nil
 }

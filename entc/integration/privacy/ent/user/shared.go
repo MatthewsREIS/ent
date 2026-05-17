@@ -160,10 +160,14 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 
 // schemaGraph holds this entity's schema for entql predicate evaluation.
 // Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// (Type name only — cross-entity field/column metadata is not accessible
-// from a leaf sub-package). The stubs are sufficient for entql.HasEdge /
-// HasEdgeWith dispatch on the join table; cross-edge field predicates
-// against sibling entities are out of scope at the sub-package boundary.
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
 var schemaGraph = func() *sqlgraph.Schema {
 	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 3)}
 	graph.Nodes[0] = &sqlgraph.Node{
@@ -181,8 +185,46 @@ var schemaGraph = func() *sqlgraph.Schema {
 			FieldAge:  {Type: field.TypeUint, Column: FieldAge},
 		},
 	}
-	graph.Nodes[1] = &sqlgraph.Node{Type: "Team"}
-	graph.Nodes[2] = &sqlgraph.Node{Type: "Task"}
+	graph.Nodes[1] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "teams",
+			Columns: []string{
+				"id",
+				"name",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Team",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"name": {Type: field.TypeString, Column: "name"},
+		},
+	}
+	graph.Nodes[2] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "tasks",
+			Columns: []string{
+				"id",
+				"title",
+				"description",
+				"status",
+				"uuid",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Task",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"title":       {Type: field.TypeString, Column: "title"},
+			"description": {Type: field.TypeString, Column: "description"},
+			"status":      {Type: field.TypeEnum, Column: "status"},
+			"uuid":        {Type: field.TypeUUID, Column: "uuid"},
+		},
+	}
 	graph.MustAddE(
 		"teams",
 		&sqlgraph.EdgeSpec{
