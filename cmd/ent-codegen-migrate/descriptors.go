@@ -24,6 +24,7 @@ type FieldDesc struct {
 type EdgeDesc struct {
 	Cardinality  string // "O2OUnique" / "O2M" / "M2O" / "M2M" as in entbuilder.Cardinality
 	TargetIDType string
+	Target       string // target entity name (e.g. "Marketing"). Optional — descriptors that predate this field leave it empty.
 }
 
 // EntityDesc bundles fields and edges for one entity.
@@ -214,6 +215,10 @@ func parseEdgeMap(expr ast.Expr) map[string]EdgeDesc {
 			case "TargetIDType":
 				if idx, ok := extractTypeForArg(ikv.Value); ok {
 					ed.TargetIDType = idx
+				}
+			case "Target":
+				if s, ok := stringLiteral(ikv.Value); ok {
+					ed.Target = s
 				}
 			}
 		}

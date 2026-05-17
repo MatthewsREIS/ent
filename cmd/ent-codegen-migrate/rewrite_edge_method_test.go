@@ -49,6 +49,62 @@ func use(c *TaskClient, t *Task) *TeamQuery { return c.QueryTeams(t) }
 	require.NotContains(t, out, "c.QueryTeams(t)")
 }
 
+func TestRewriteEdgeMethod_QueryEdgeFromQuery(t *testing.T) {
+	descs := Descriptors{
+		"Proposal": &EntityDesc{
+			Name:  "Proposal",
+			Edges: map[string]EdgeDesc{"marketing": {Cardinality: "entbuilder.O2M", TargetIDType: "int", Target: "Marketing"}},
+		},
+	}
+	src := `package x
+type ProposalQuery struct{}
+type MarketingQuery struct{}
+func (q *ProposalQuery) QueryMarketing() *MarketingQuery { return &MarketingQuery{} }
+func use(q *ProposalQuery) *MarketingQuery { return q.QueryMarketing() }
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs)
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.QueryProposalMarketingFromQuery(q)")
+	require.NotContains(t, out, "q.QueryMarketing()")
+}
+
+// TestRewriteEdgeMethod_QueryEdgeFromQuery_Chained covers the real consumer
+// shape: gen.FromContext(ctx).Proposal.Query().Where(...).QueryMarketing()
+// where cross-package types prevent go/types resolution. The syntactic
+// chain walker must recognise the *<Entity>Query receiver via the
+// .<Entity>.Query() prefix and rewrite to the FromQuery facade variant.
+func TestRewriteEdgeMethod_QueryEdgeFromQuery_Chained(t *testing.T) {
+	descs := Descriptors{
+		"Proposal": &EntityDesc{
+			Name:  "Proposal",
+			Edges: map[string]EdgeDesc{"marketing": {Cardinality: "entbuilder.O2OUnique", TargetIDType: "uuid.UUID", Target: "Marketing"}},
+		},
+		"Marketing": &EntityDesc{
+			Name:  "Marketing",
+			Edges: map[string]EdgeDesc{"wrike_project": {Cardinality: "entbuilder.O2OUnique", TargetIDType: "uuid.UUID", Target: "WrikeProject"}},
+		},
+		"WrikeProject": &EntityDesc{Name: "WrikeProject"},
+	}
+	src := `package x
+import "external/proposal"
+import "external/gen"
+import "context"
+func use(ctx context.Context, id int) {
+	_, _ = gen.FromContext(ctx).Proposal.Query().
+		Where(proposal.ID(id)).
+		QueryMarketing().
+		QueryWrikeProject().
+		IDs(ctx)
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs)
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.QueryProposalMarketingFromQuery(gen.FromContext(ctx).Proposal.Query().\n\t\tWhere(proposal.ID(id)))")
+	require.Contains(t, out, "ent.QueryMarketingWrikeProjectFromQuery(ent.QueryProposalMarketingFromQuery(")
+	require.NotContains(t, out, "QueryMarketing()")
+	require.NotContains(t, out, "QueryWrikeProject()")
+}
+
 func TestRewriteEdgeMethod_Idempotent(t *testing.T) {
 	descs := Descriptors{
 		"Task": &EntityDesc{
