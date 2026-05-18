@@ -223,9 +223,10 @@ The user instruction is **bench numbers gate everything** — improvements witho
 
 1. **B-1 (ent core: facade edge bodies → `gen/edges/`).** Smallest atomic ent-only change. Re-run consumer bench, measure build wall + RSS delta. Required improvement to proceed: any measurable build-wall reduction (even 5%) confirms the architectural direction.
 2. **B-2 (entgql contrib: pagination + node per-entity).** No cross-entity risk; smaller change. Re-bench.
-3. **B-3 (entgql contrib: where_input + mutation_input + gqledges + gqlcollections siblings).** Larger change; produces the bulk of the build-wall win.
-4. **F (entbuilder edge helpers + facade.tmpl one-liners).** LOC + slight generate-time win.
-5. **N (nibbles).** If time permits.
+3. **B-3 (entgql contrib: where_input + mutation_input + gqledges + gqlcollections siblings).** Larger change; produces the bulk of the build-wall win. Re-bench.
+4. **Decision point.** Compare measured B totals against §6 predictions. If build wall hits the §6 range and the user accepts the LOC outcome (B is LOC-neutral, so total LOC stays at ~1.57M minus N), ship the epic. Otherwise proceed to F as the recovery lever.
+5. **F (entbuilder edge helpers + facade.tmpl one-liners).** Deferred contingency — held in reserve as the LOC recovery lever (the only in-scope lever that actually shrinks LOC) and as insurance if any B sub-lever underperforms. **Not skipped**; sequenced after the architectural changes prove out so we measure B's contribution cleanly first.
+6. **N (nibbles).** Run independently of the B/F decision when there's time — pure cleanup with negligible behavior risk.
 
 Re-bench after each step using the existing `/tmp/bench-pr6-post-uncapped.sh` script and diff against `/var/tmp/bench-pr6/post-pr06-uncapped-20260518-040049.txt`.
 
