@@ -11,6 +11,7 @@ import (
 	"reflect"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -536,4 +537,15 @@ func (m *Mutation[T, I]) AddPredicate(p func(*sql.Selector)) {
 // MutationPredicates returns the predicates registered on the mutation.
 func (m *Mutation[T, I]) MutationPredicates() []func(*sql.Selector) {
 	return m.predicates
+}
+
+// Driver returns the dialect driver from the per-package Config, or nil if
+// Config does not expose one. Consumers (e.g. soft-delete hooks) assert on
+// `interface{ Driver() dialect.Driver }` to obtain the driver when no client
+// is in context; this method satisfies that interface for *Mutation[T, I].
+func (m *Mutation[T, I]) Driver() dialect.Driver {
+	if d, ok := m.Config.(interface{ Driver() dialect.Driver }); ok {
+		return d.Driver()
+	}
+	return nil
 }
