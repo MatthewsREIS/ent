@@ -521,7 +521,13 @@ func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
 			target = filepath.Join(cfg.Target, "internal/schema.go")
 		}
 		if rErr := (&internal.Snapshot{Path: target, Config: cfg}).Restore(); rErr == nil {
-			return nil
+			// Snapshot.Restore() ran the full codegen (graph.Gen()) — the
+			// caller must NOT attempt to re-load. Return errRecovered so
+			// generate() short-circuits the post-mayRecover retry path.
+			// (Returning nil silently dropped the recovery: generate()
+			// fell through to a second LoadGraph that re-hit the same
+			// schema compile error and panicked.)
+			return errRecovered
 		}
 		// Snapshot restore failed (file missing, malformed, or schema stale).
 		// Fall through to bootstrap.

@@ -151,7 +151,18 @@ func StageStrippedSchema(srcDir string) (string, error) {
 		_ = os.RemoveAll(dst)
 		return "", err
 	}
-	return dst, nil
+	// packages.Load distinguishes import paths from filesystem paths by the
+	// presence of "./" / "../" / "/". MkdirTemp returns a path joined onto
+	// its dir argument, so if srcDir was "./src/ent/schema" the result is
+	// "src/ent/ent-bootstrap-XXXX" — which packages.Load then treats as an
+	// import path and tries to resolve under GOROOT/src. Return an absolute
+	// path so packages.Load resolves it as a filesystem dir unambiguously.
+	abs, err := filepath.Abs(dst)
+	if err != nil {
+		_ = os.RemoveAll(dst)
+		return "", fmt.Errorf("bootstrap: abs path: %w", err)
+	}
+	return abs, nil
 }
 
 func stripAndCopyTree(src, dst string) error {
