@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
@@ -49,7 +49,7 @@ func WithRelationshipUser(q *RelationshipQuery, opts ...func(*UserQuery)) *Relat
 		opt(sub)
 	}
 	return q.StoreEager("user", func(ctx context.Context, parents []*Relationship) error {
-		return loadRelationshipUser(ctx, sub, parents)
+		return edges.LoadRelationshipUser(ctx, sub, parents)
 	})
 }
 
@@ -84,39 +84,6 @@ func QueryRelationshipUserFromQuery(q *RelationshipQuery) *UserQuery {
 	return query
 }
 
-// loadRelationshipUser performs the eager-load for the "user" edge. Body mirrors
-// the pre-PR6 *RelationshipQuery.loadUser method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRelationshipUser(ctx context.Context, query *UserQuery, nodes []*Relationship) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Relationship)
-	for i := range nodes {
-		fk := nodes[i].UserID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.User = n
-		}
-	}
-	return nil
-}
-
 // WithRelationshipRelative eager-loads the "relative" edge on a RelationshipQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithRelationshipRelative(q *RelationshipQuery, opts ...func(*UserQuery)) *RelationshipQuery {
@@ -125,7 +92,7 @@ func WithRelationshipRelative(q *RelationshipQuery, opts ...func(*UserQuery)) *R
 		opt(sub)
 	}
 	return q.StoreEager("relative", func(ctx context.Context, parents []*Relationship) error {
-		return loadRelationshipRelative(ctx, sub, parents)
+		return edges.LoadRelationshipRelative(ctx, sub, parents)
 	})
 }
 
@@ -160,39 +127,6 @@ func QueryRelationshipRelativeFromQuery(q *RelationshipQuery) *UserQuery {
 	return query
 }
 
-// loadRelationshipRelative performs the eager-load for the "relative" edge. Body mirrors
-// the pre-PR6 *RelationshipQuery.loadRelative method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRelationshipRelative(ctx context.Context, query *UserQuery, nodes []*Relationship) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Relationship)
-	for i := range nodes {
-		fk := nodes[i].RelativeID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "relative_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Relative = n
-		}
-	}
-	return nil
-}
-
 // WithRelationshipInfo eager-loads the "info" edge on a RelationshipQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithRelationshipInfo(q *RelationshipQuery, opts ...func(*RelationshipInfoQuery)) *RelationshipQuery {
@@ -201,7 +135,7 @@ func WithRelationshipInfo(q *RelationshipQuery, opts ...func(*RelationshipInfoQu
 		opt(sub)
 	}
 	return q.StoreEager("info", func(ctx context.Context, parents []*Relationship) error {
-		return loadRelationshipInfo(ctx, sub, parents)
+		return edges.LoadRelationshipInfo(ctx, sub, parents)
 	})
 }
 
@@ -234,37 +168,4 @@ func QueryRelationshipInfoFromQuery(q *RelationshipQuery) *RelationshipInfoQuery
 		return fromV, nil
 	}
 	return query
-}
-
-// loadRelationshipInfo performs the eager-load for the "info" edge. Body mirrors
-// the pre-PR6 *RelationshipQuery.loadInfo method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRelationshipInfo(ctx context.Context, query *RelationshipInfoQuery, nodes []*Relationship) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Relationship)
-	for i := range nodes {
-		fk := nodes[i].InfoID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(relationshipinfo.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "info_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Info = n
-		}
-	}
-	return nil
 }

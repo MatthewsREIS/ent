@@ -59,7 +59,7 @@ func assertSubPackagesLeaf(t *testing.T, entDir, fixtureName string) {
 	shared := map[string]bool{
 		"internal": true, "predicate": true, "runtime": true, "migrate": true,
 		"hook": true, "enttest": true, "schema": true, "intercept": true,
-		"privacy": true,
+		"privacy": true, "edges": true,
 	}
 	entries, err := os.ReadDir(entDir)
 	require.NoError(t, err)

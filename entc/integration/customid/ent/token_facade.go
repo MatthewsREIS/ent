@@ -8,11 +8,10 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/customid/ent/account"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/token"
-	"entgo.io/ent/entc/integration/customid/sid"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -49,7 +48,7 @@ func WithTokenAccount(q *TokenQuery, opts ...func(*AccountQuery)) *TokenQuery {
 		opt(sub)
 	}
 	return q.StoreEager("account", func(ctx context.Context, parents []*Token) error {
-		return loadTokenAccount(ctx, sub, parents)
+		return edges.LoadTokenAccount(ctx, sub, parents)
 	})
 }
 
@@ -93,40 +92,4 @@ func QueryTokenAccountFromQuery(q *TokenQuery) *AccountQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadTokenAccount performs the eager-load for the "account" edge. Body mirrors
-// the pre-PR6 *TokenQuery.loadAccount method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTokenAccount(ctx context.Context, query *AccountQuery, nodes []*Token) error {
-	ids := make([]sid.ID, 0, len(nodes))
-	nodeids := make(map[sid.ID][]*Token)
-	for i := range nodes {
-		if nodes[i].GetAccountToken() == nil {
-			continue
-		}
-		fk := *nodes[i].GetAccountToken()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(account.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "account_token" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Account = n
-		}
-	}
-	return nil
 }

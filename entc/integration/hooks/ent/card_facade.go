@@ -8,9 +8,9 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/edges"
 	"entgo.io/ent/entc/integration/hooks/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -46,7 +46,7 @@ func WithCardOwner(q *CardQuery, opts ...func(*UserQuery)) *CardQuery {
 		opt(sub)
 	}
 	return q.StoreEager("owner", func(ctx context.Context, parents []*Card) error {
-		return loadCardOwner(ctx, sub, parents)
+		return edges.LoadCardOwner(ctx, sub, parents)
 	})
 }
 
@@ -90,40 +90,4 @@ func QueryCardOwnerFromQuery(q *CardQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadCardOwner performs the eager-load for the "owner" edge. Body mirrors
-// the pre-PR6 *CardQuery.loadOwner method, hoisted to root
-// so it can reference cross-package types directly.
-func loadCardOwner(ctx context.Context, query *UserQuery, nodes []*Card) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Card)
-	for i := range nodes {
-		if nodes[i].GetUserCards() == nil {
-			continue
-		}
-		fk := *nodes[i].GetUserCards()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_cards" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Owner = n
-		}
-	}
-	return nil
 }

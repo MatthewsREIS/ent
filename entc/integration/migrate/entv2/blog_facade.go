@@ -8,11 +8,9 @@ package entv2
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/entc/integration/migrate/entv2/edges"
 	"entgo.io/ent/entc/integration/migrate/entv2/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -48,7 +46,7 @@ func WithBlogAdmins(q *BlogQuery, opts ...func(*UserQuery)) *BlogQuery {
 		opt(sub)
 	}
 	return q.StoreEager("admins", func(ctx context.Context, parents []*Blog) error {
-		return loadBlogAdmins(ctx, sub, parents)
+		return edges.LoadBlogAdmins(ctx, sub, parents)
 	})
 }
 
@@ -92,37 +90,4 @@ func QueryBlogAdminsFromQuery(q *BlogQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadBlogAdmins performs the eager-load for the "admins" edge. Body mirrors
-// the pre-PR6 *BlogQuery.loadAdmins method, hoisted to root
-// so it can reference cross-package types directly.
-func loadBlogAdmins(ctx context.Context, query *UserQuery, nodes []*Blog) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Blog)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Admins = []*User{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(blog.AdminsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetBlogAdmins()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "blog_admins" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "blog_admins" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Admins = append(node.Edges.Admins, n)
-	}
-	return nil
 }

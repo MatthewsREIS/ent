@@ -8,10 +8,9 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 
 	"entgo.io/ent/dialect/sql"
@@ -47,7 +46,7 @@ func WithSpecCard(q *SpecQuery, opts ...func(*CardQuery)) *SpecQuery {
 		opt(sub)
 	}
 	return q.StoreEager("card", func(ctx context.Context, parents []*Spec) error {
-		return loadSpecCard(ctx, sub, parents)
+		return edges.LoadSpecCard(ctx, sub, parents)
 	})
 }
 
@@ -91,72 +90,4 @@ func QuerySpecCardFromQuery(q *SpecQuery) *CardQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadSpecCard performs the eager-load for the "card" edge. Body mirrors
-// the pre-PR6 *SpecQuery.loadCard method, hoisted to root
-// so it can reference cross-package types directly.
-func loadSpecCard(ctx context.Context, query *CardQuery, nodes []*Spec) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[string]*Spec)
-	nids := make(map[string]map[*Spec]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Card = []*Card{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(spec.CardTable)
-		s.Join(joinT).On(s.C(card.FieldID), joinT.C(spec.CardPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(spec.CardPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(spec.CardPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := values[0].(*sql.NullInt64).String
-				inValue := values[1].(*sql.NullInt64).String
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Spec]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Card](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "card" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Card = append(kn.Edges.Card, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
 }

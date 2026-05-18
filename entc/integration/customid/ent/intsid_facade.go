@@ -8,12 +8,9 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/sid"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -50,7 +47,7 @@ func WithIntSIDParent(q *IntSIDQuery, opts ...func(*IntSIDQuery)) *IntSIDQuery {
 		opt(sub)
 	}
 	return q.StoreEager("parent", func(ctx context.Context, parents []*IntSID) error {
-		return loadIntSIDParent(ctx, sub, parents)
+		return edges.LoadIntSIDParent(ctx, sub, parents)
 	})
 }
 
@@ -96,42 +93,6 @@ func QueryIntSIDParentFromQuery(q *IntSIDQuery) *IntSIDQuery {
 	return query
 }
 
-// loadIntSIDParent performs the eager-load for the "parent" edge. Body mirrors
-// the pre-PR6 *IntSIDQuery.loadParent method, hoisted to root
-// so it can reference cross-package types directly.
-func loadIntSIDParent(ctx context.Context, query *IntSIDQuery, nodes []*IntSID) error {
-	ids := make([]sid.ID, 0, len(nodes))
-	nodeids := make(map[sid.ID][]*IntSID)
-	for i := range nodes {
-		if nodes[i].GetIntSidParent() == nil {
-			continue
-		}
-		fk := *nodes[i].GetIntSidParent()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(intsid.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "int_sid_parent" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Parent = n
-		}
-	}
-	return nil
-}
-
 // WithIntSIDChildren eager-loads the "children" edge on a IntSIDQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithIntSIDChildren(q *IntSIDQuery, opts ...func(*IntSIDQuery)) *IntSIDQuery {
@@ -140,7 +101,7 @@ func WithIntSIDChildren(q *IntSIDQuery, opts ...func(*IntSIDQuery)) *IntSIDQuery
 		opt(sub)
 	}
 	return q.StoreEager("children", func(ctx context.Context, parents []*IntSID) error {
-		return loadIntSIDChildren(ctx, sub, parents)
+		return edges.LoadIntSIDChildren(ctx, sub, parents)
 	})
 }
 
@@ -184,37 +145,4 @@ func QueryIntSIDChildrenFromQuery(q *IntSIDQuery) *IntSIDQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadIntSIDChildren performs the eager-load for the "children" edge. Body mirrors
-// the pre-PR6 *IntSIDQuery.loadChildren method, hoisted to root
-// so it can reference cross-package types directly.
-func loadIntSIDChildren(ctx context.Context, query *IntSIDQuery, nodes []*IntSID) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[sid.ID]*IntSID)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Children = []*IntSID{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.IntSID(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(intsid.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetIntSidParent()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "int_sid_parent" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "int_sid_parent" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Children = append(node.Edges.Children, n)
-	}
-	return nil
 }

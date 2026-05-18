@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,7 +49,7 @@ func WithPetOwner(q *PetQuery, opts ...func(*UserQuery)) *PetQuery {
 		opt(sub)
 	}
 	return q.StoreEager("owner", func(ctx context.Context, parents []*Pet) error {
-		return loadPetOwner(ctx, sub, parents)
+		return edges.LoadPetOwner(ctx, sub, parents)
 	})
 }
 
@@ -97,42 +95,6 @@ func QueryPetOwnerFromQuery(q *PetQuery) *UserQuery {
 	return query
 }
 
-// loadPetOwner performs the eager-load for the "owner" edge. Body mirrors
-// the pre-PR6 *PetQuery.loadOwner method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPetOwner(ctx context.Context, query *UserQuery, nodes []*Pet) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Pet)
-	for i := range nodes {
-		if nodes[i].GetUserPets() == nil {
-			continue
-		}
-		fk := *nodes[i].GetUserPets()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Owner = n
-		}
-	}
-	return nil
-}
-
 // WithPetCars eager-loads the "cars" edge on a PetQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithPetCars(q *PetQuery, opts ...func(*CarQuery)) *PetQuery {
@@ -141,7 +103,7 @@ func WithPetCars(q *PetQuery, opts ...func(*CarQuery)) *PetQuery {
 		opt(sub)
 	}
 	return q.StoreEager("cars", func(ctx context.Context, parents []*Pet) error {
-		return loadPetCars(ctx, sub, parents)
+		return edges.LoadPetCars(ctx, sub, parents)
 	})
 }
 
@@ -187,39 +149,6 @@ func QueryPetCarsFromQuery(q *PetQuery) *CarQuery {
 	return query
 }
 
-// loadPetCars performs the eager-load for the "cars" edge. Body mirrors
-// the pre-PR6 *PetQuery.loadCars method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPetCars(ctx context.Context, query *CarQuery, nodes []*Pet) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*Pet)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Cars = []*Car{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Car(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(pet.CarsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetPetCars()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "pet_cars" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "pet_cars" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Cars = append(node.Edges.Cars, n)
-	}
-	return nil
-}
-
 // WithPetFriends eager-loads the "friends" edge on a PetQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithPetFriends(q *PetQuery, opts ...func(*PetQuery)) *PetQuery {
@@ -228,7 +157,7 @@ func WithPetFriends(q *PetQuery, opts ...func(*PetQuery)) *PetQuery {
 		opt(sub)
 	}
 	return q.StoreEager("friends", func(ctx context.Context, parents []*Pet) error {
-		return loadPetFriends(ctx, sub, parents)
+		return edges.LoadPetFriends(ctx, sub, parents)
 	})
 }
 
@@ -274,74 +203,6 @@ func QueryPetFriendsFromQuery(q *PetQuery) *PetQuery {
 	return query
 }
 
-// loadPetFriends performs the eager-load for the "friends" edge. Body mirrors
-// the pre-PR6 *PetQuery.loadFriends method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPetFriends(ctx context.Context, query *PetQuery, nodes []*Pet) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[string]*Pet)
-	nids := make(map[string]map[*Pet]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Friends = []*Pet{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(pet.FriendsTable)
-		s.Join(joinT).On(s.C(pet.FieldID), joinT.C(pet.FriendsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(pet.FriendsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(pet.FriendsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullString)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := values[0].(*sql.NullString).String
-				inValue := values[1].(*sql.NullString).String
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Pet]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Pet](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Friends = append(kn.Edges.Friends, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithPetBestFriend eager-loads the "best_friend" edge on a PetQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithPetBestFriend(q *PetQuery, opts ...func(*PetQuery)) *PetQuery {
@@ -350,7 +211,7 @@ func WithPetBestFriend(q *PetQuery, opts ...func(*PetQuery)) *PetQuery {
 		opt(sub)
 	}
 	return q.StoreEager("best_friend", func(ctx context.Context, parents []*Pet) error {
-		return loadPetBestFriend(ctx, sub, parents)
+		return edges.LoadPetBestFriend(ctx, sub, parents)
 	})
 }
 
@@ -394,40 +255,4 @@ func QueryPetBestFriendFromQuery(q *PetQuery) *PetQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadPetBestFriend performs the eager-load for the "best_friend" edge. Body mirrors
-// the pre-PR6 *PetQuery.loadBestFriend method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPetBestFriend(ctx context.Context, query *PetQuery, nodes []*Pet) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Pet)
-	for i := range nodes {
-		if nodes[i].GetPetBestFriend() == nil {
-			continue
-		}
-		fk := *nodes[i].GetPetBestFriend()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(pet.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "pet_best_friend" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.BestFriend = n
-		}
-	}
-	return nil
 }

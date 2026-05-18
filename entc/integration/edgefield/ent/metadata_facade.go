@@ -8,11 +8,9 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -48,7 +46,7 @@ func WithMetadataUser(q *MetadataQuery, opts ...func(*UserQuery)) *MetadataQuery
 		opt(sub)
 	}
 	return q.StoreEager("user", func(ctx context.Context, parents []*Metadata) error {
-		return loadMetadataUser(ctx, sub, parents)
+		return edges.LoadMetadataUser(ctx, sub, parents)
 	})
 }
 
@@ -94,39 +92,6 @@ func QueryMetadataUserFromQuery(q *MetadataQuery) *UserQuery {
 	return query
 }
 
-// loadMetadataUser performs the eager-load for the "user" edge. Body mirrors
-// the pre-PR6 *MetadataQuery.loadUser method, hoisted to root
-// so it can reference cross-package types directly.
-func loadMetadataUser(ctx context.Context, query *UserQuery, nodes []*Metadata) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Metadata)
-	for i := range nodes {
-		fk := nodes[i].ID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.User = n
-		}
-	}
-	return nil
-}
-
 // WithMetadataChildren eager-loads the "children" edge on a MetadataQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithMetadataChildren(q *MetadataQuery, opts ...func(*MetadataQuery)) *MetadataQuery {
@@ -135,7 +100,7 @@ func WithMetadataChildren(q *MetadataQuery, opts ...func(*MetadataQuery)) *Metad
 		opt(sub)
 	}
 	return q.StoreEager("children", func(ctx context.Context, parents []*Metadata) error {
-		return loadMetadataChildren(ctx, sub, parents)
+		return edges.LoadMetadataChildren(ctx, sub, parents)
 	})
 }
 
@@ -150,7 +115,7 @@ func WithNamedMetadataChildren(q *MetadataQuery, name string, opts ...func(*Meta
 		opt(sub)
 	}
 	return q.StoreEager("children:"+name, func(ctx context.Context, parents []*Metadata) error {
-		return loadNamedMetadataChildren(ctx, sub, parents, name)
+		return edges.LoadNamedMetadataChildren(ctx, sub, parents, name)
 	})
 }
 
@@ -196,77 +161,6 @@ func QueryMetadataChildrenFromQuery(q *MetadataQuery) *MetadataQuery {
 	return query
 }
 
-// loadMetadataChildren performs the eager-load for the "children" edge. Body mirrors
-// the pre-PR6 *MetadataQuery.loadChildren method, hoisted to root
-// so it can reference cross-package types directly.
-func loadMetadataChildren(ctx context.Context, query *MetadataQuery, nodes []*Metadata) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Metadata)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Children = []*Metadata{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(metadata.FieldParentID)
-	}
-	query.Where(predicate.Metadata(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(metadata.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ParentID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Children = append(node.Edges.Children, n)
-	}
-	return nil
-}
-
-// loadNamedMetadataChildren is the named-edge variant of loadMetadataChildren. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedChildren(name, ...) bucket instead of the default
-// Edges.Children slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedMetadataChildren(ctx context.Context, query *MetadataQuery, nodes []*Metadata, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedChildren(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Metadata)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(metadata.FieldParentID)
-	}
-	query.Where(predicate.Metadata(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(metadata.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ParentID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.AppendNamedChildren(name, n)
-	}
-	return nil
-}
-
 // WithMetadataParent eager-loads the "parent" edge on a MetadataQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithMetadataParent(q *MetadataQuery, opts ...func(*MetadataQuery)) *MetadataQuery {
@@ -275,7 +169,7 @@ func WithMetadataParent(q *MetadataQuery, opts ...func(*MetadataQuery)) *Metadat
 		opt(sub)
 	}
 	return q.StoreEager("parent", func(ctx context.Context, parents []*Metadata) error {
-		return loadMetadataParent(ctx, sub, parents)
+		return edges.LoadMetadataParent(ctx, sub, parents)
 	})
 }
 
@@ -319,37 +213,4 @@ func QueryMetadataParentFromQuery(q *MetadataQuery) *MetadataQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadMetadataParent performs the eager-load for the "parent" edge. Body mirrors
-// the pre-PR6 *MetadataQuery.loadParent method, hoisted to root
-// so it can reference cross-package types directly.
-func loadMetadataParent(ctx context.Context, query *MetadataQuery, nodes []*Metadata) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Metadata)
-	for i := range nodes {
-		fk := nodes[i].ParentID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(metadata.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Parent = n
-		}
-	}
-	return nil
 }

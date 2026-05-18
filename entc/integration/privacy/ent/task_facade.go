@@ -8,9 +8,8 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/privacy/ent/edges"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
@@ -51,7 +50,7 @@ func WithTaskTeams(q *TaskQuery, opts ...func(*TeamQuery)) *TaskQuery {
 		opt(sub)
 	}
 	return q.StoreEager("teams", func(ctx context.Context, parents []*Task) error {
-		return loadTaskTeams(ctx, sub, parents)
+		return edges.LoadTaskTeams(ctx, sub, parents)
 	})
 }
 
@@ -97,74 +96,6 @@ func QueryTaskTeamsFromQuery(q *TaskQuery) *TeamQuery {
 	return query
 }
 
-// loadTaskTeams performs the eager-load for the "teams" edge. Body mirrors
-// the pre-PR6 *TaskQuery.loadTeams method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTaskTeams(ctx context.Context, query *TeamQuery, nodes []*Task) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Task)
-	nids := make(map[int]map[*Task]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Teams = []*Team{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(task.TeamsTable)
-		s.Join(joinT).On(s.C(team.FieldID), joinT.C(task.TeamsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(task.TeamsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(task.TeamsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Task]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Team](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "teams" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Teams = append(kn.Edges.Teams, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithTaskOwner eager-loads the "owner" edge on a TaskQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithTaskOwner(q *TaskQuery, opts ...func(*UserQuery)) *TaskQuery {
@@ -173,7 +104,7 @@ func WithTaskOwner(q *TaskQuery, opts ...func(*UserQuery)) *TaskQuery {
 		opt(sub)
 	}
 	return q.StoreEager("owner", func(ctx context.Context, parents []*Task) error {
-		return loadTaskOwner(ctx, sub, parents)
+		return edges.LoadTaskOwner(ctx, sub, parents)
 	})
 }
 
@@ -217,40 +148,4 @@ func QueryTaskOwnerFromQuery(q *TaskQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadTaskOwner performs the eager-load for the "owner" edge. Body mirrors
-// the pre-PR6 *TaskQuery.loadOwner method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTaskOwner(ctx context.Context, query *UserQuery, nodes []*Task) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Task)
-	for i := range nodes {
-		if nodes[i].GetUserTasks() == nil {
-			continue
-		}
-		fk := *nodes[i].GetUserTasks()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_tasks" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Owner = n
-		}
-	}
-	return nil
 }

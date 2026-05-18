@@ -8,9 +8,8 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/privacy/ent/edges"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
@@ -50,7 +49,7 @@ func WithTeamTasks(q *TeamQuery, opts ...func(*TaskQuery)) *TeamQuery {
 		opt(sub)
 	}
 	return q.StoreEager("tasks", func(ctx context.Context, parents []*Team) error {
-		return loadTeamTasks(ctx, sub, parents)
+		return edges.LoadTeamTasks(ctx, sub, parents)
 	})
 }
 
@@ -96,74 +95,6 @@ func QueryTeamTasksFromQuery(q *TeamQuery) *TaskQuery {
 	return query
 }
 
-// loadTeamTasks performs the eager-load for the "tasks" edge. Body mirrors
-// the pre-PR6 *TeamQuery.loadTasks method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTeamTasks(ctx context.Context, query *TaskQuery, nodes []*Team) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Team)
-	nids := make(map[int]map[*Team]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Tasks = []*Task{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(team.TasksTable)
-		s.Join(joinT).On(s.C(task.FieldID), joinT.C(team.TasksPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(team.TasksPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(team.TasksPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Team]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Task](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "tasks" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Tasks = append(kn.Edges.Tasks, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithTeamUsers eager-loads the "users" edge on a TeamQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithTeamUsers(q *TeamQuery, opts ...func(*UserQuery)) *TeamQuery {
@@ -172,7 +103,7 @@ func WithTeamUsers(q *TeamQuery, opts ...func(*UserQuery)) *TeamQuery {
 		opt(sub)
 	}
 	return q.StoreEager("users", func(ctx context.Context, parents []*Team) error {
-		return loadTeamUsers(ctx, sub, parents)
+		return edges.LoadTeamUsers(ctx, sub, parents)
 	})
 }
 
@@ -216,72 +147,4 @@ func QueryTeamUsersFromQuery(q *TeamQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadTeamUsers performs the eager-load for the "users" edge. Body mirrors
-// the pre-PR6 *TeamQuery.loadUsers method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTeamUsers(ctx context.Context, query *UserQuery, nodes []*Team) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Team)
-	nids := make(map[int]map[*Team]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Users = []*User{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(team.UsersTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(team.UsersPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(team.UsersPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(team.UsersPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Team]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Users = append(kn.Edges.Users, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
 }

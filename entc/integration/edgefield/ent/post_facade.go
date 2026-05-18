@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 
@@ -46,7 +46,7 @@ func WithPostAuthor(q *PostQuery, opts ...func(*UserQuery)) *PostQuery {
 		opt(sub)
 	}
 	return q.StoreEager("author", func(ctx context.Context, parents []*Post) error {
-		return loadPostAuthor(ctx, sub, parents)
+		return edges.LoadPostAuthor(ctx, sub, parents)
 	})
 }
 
@@ -90,40 +90,4 @@ func QueryPostAuthorFromQuery(q *PostQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadPostAuthor performs the eager-load for the "author" edge. Body mirrors
-// the pre-PR6 *PostQuery.loadAuthor method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPostAuthor(ctx context.Context, query *UserQuery, nodes []*Post) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Post)
-	for i := range nodes {
-		if nodes[i].AuthorID == nil {
-			continue
-		}
-		fk := *nodes[i].AuthorID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "author_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Author = n
-		}
-	}
-	return nil
 }

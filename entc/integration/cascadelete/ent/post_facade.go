@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
+	"entgo.io/ent/entc/integration/cascadelete/ent/edges"
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
-	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -49,7 +47,7 @@ func WithPostAuthor(q *PostQuery, opts ...func(*UserQuery)) *PostQuery {
 		opt(sub)
 	}
 	return q.StoreEager("author", func(ctx context.Context, parents []*Post) error {
-		return loadPostAuthor(ctx, sub, parents)
+		return edges.LoadPostAuthor(ctx, sub, parents)
 	})
 }
 
@@ -95,39 +93,6 @@ func QueryPostAuthorFromQuery(q *PostQuery) *UserQuery {
 	return query
 }
 
-// loadPostAuthor performs the eager-load for the "author" edge. Body mirrors
-// the pre-PR6 *PostQuery.loadAuthor method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPostAuthor(ctx context.Context, query *UserQuery, nodes []*Post) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Post)
-	for i := range nodes {
-		fk := nodes[i].AuthorID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "author_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Author = n
-		}
-	}
-	return nil
-}
-
 // WithPostComments eager-loads the "comments" edge on a PostQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithPostComments(q *PostQuery, opts ...func(*CommentQuery)) *PostQuery {
@@ -136,7 +101,7 @@ func WithPostComments(q *PostQuery, opts ...func(*CommentQuery)) *PostQuery {
 		opt(sub)
 	}
 	return q.StoreEager("comments", func(ctx context.Context, parents []*Post) error {
-		return loadPostComments(ctx, sub, parents)
+		return edges.LoadPostComments(ctx, sub, parents)
 	})
 }
 
@@ -180,37 +145,4 @@ func QueryPostCommentsFromQuery(q *PostQuery) *CommentQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadPostComments performs the eager-load for the "comments" edge. Body mirrors
-// the pre-PR6 *PostQuery.loadComments method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPostComments(ctx context.Context, query *CommentQuery, nodes []*Post) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Post)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Comments = []*Comment{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(comment.FieldPostID)
-	}
-	query.Where(predicate.Comment(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(post.CommentsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.PostID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "post_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Comments = append(node.Edges.Comments, n)
-	}
-	return nil
 }

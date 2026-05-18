@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -48,7 +46,7 @@ func WithGroupInfoGroups(q *GroupInfoQuery, opts ...func(*GroupQuery)) *GroupInf
 		opt(sub)
 	}
 	return q.StoreEager("groups", func(ctx context.Context, parents []*GroupInfo) error {
-		return loadGroupInfoGroups(ctx, sub, parents)
+		return edges.LoadGroupInfoGroups(ctx, sub, parents)
 	})
 }
 
@@ -92,37 +90,4 @@ func QueryGroupInfoGroupsFromQuery(q *GroupInfoQuery) *GroupQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadGroupInfoGroups performs the eager-load for the "groups" edge. Body mirrors
-// the pre-PR6 *GroupInfoQuery.loadGroups method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupInfoGroups(ctx context.Context, query *GroupQuery, nodes []*GroupInfo) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*GroupInfo)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Groups = []*Group{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(groupinfo.GroupsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetGroupInfo()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Groups = append(node.Edges.Groups, n)
-	}
-	return nil
 }

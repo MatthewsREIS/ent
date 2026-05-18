@@ -8,10 +8,9 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/customid/ent/device"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 
 	"entgo.io/ent/dialect/sql"
@@ -49,7 +48,7 @@ func WithSessionDevice(q *SessionQuery, opts ...func(*DeviceQuery)) *SessionQuer
 		opt(sub)
 	}
 	return q.StoreEager("device", func(ctx context.Context, parents []*Session) error {
-		return loadSessionDevice(ctx, sub, parents)
+		return edges.LoadSessionDevice(ctx, sub, parents)
 	})
 }
 
@@ -93,40 +92,4 @@ func QuerySessionDeviceFromQuery(q *SessionQuery) *DeviceQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadSessionDevice performs the eager-load for the "device" edge. Body mirrors
-// the pre-PR6 *SessionQuery.loadDevice method, hoisted to root
-// so it can reference cross-package types directly.
-func loadSessionDevice(ctx context.Context, query *DeviceQuery, nodes []*Session) error {
-	ids := make([]schema.ID, 0, len(nodes))
-	nodeids := make(map[schema.ID][]*Session)
-	for i := range nodes {
-		if nodes[i].GetDeviceSessions() == nil {
-			continue
-		}
-		fk := *nodes[i].GetDeviceSessions()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(device.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "device_sessions" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Device = n
-		}
-	}
-	return nil
 }

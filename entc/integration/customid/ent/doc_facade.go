@@ -8,12 +8,9 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/customid/ent/doc"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -50,7 +47,7 @@ func WithDocParent(q *DocQuery, opts ...func(*DocQuery)) *DocQuery {
 		opt(sub)
 	}
 	return q.StoreEager("parent", func(ctx context.Context, parents []*Doc) error {
-		return loadDocParent(ctx, sub, parents)
+		return edges.LoadDocParent(ctx, sub, parents)
 	})
 }
 
@@ -96,42 +93,6 @@ func QueryDocParentFromQuery(q *DocQuery) *DocQuery {
 	return query
 }
 
-// loadDocParent performs the eager-load for the "parent" edge. Body mirrors
-// the pre-PR6 *DocQuery.loadParent method, hoisted to root
-// so it can reference cross-package types directly.
-func loadDocParent(ctx context.Context, query *DocQuery, nodes []*Doc) error {
-	ids := make([]schema.DocID, 0, len(nodes))
-	nodeids := make(map[schema.DocID][]*Doc)
-	for i := range nodes {
-		if nodes[i].GetDocChildren() == nil {
-			continue
-		}
-		fk := *nodes[i].GetDocChildren()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(doc.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "doc_children" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Parent = n
-		}
-	}
-	return nil
-}
-
 // WithDocChildren eager-loads the "children" edge on a DocQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithDocChildren(q *DocQuery, opts ...func(*DocQuery)) *DocQuery {
@@ -140,7 +101,7 @@ func WithDocChildren(q *DocQuery, opts ...func(*DocQuery)) *DocQuery {
 		opt(sub)
 	}
 	return q.StoreEager("children", func(ctx context.Context, parents []*Doc) error {
-		return loadDocChildren(ctx, sub, parents)
+		return edges.LoadDocChildren(ctx, sub, parents)
 	})
 }
 
@@ -186,39 +147,6 @@ func QueryDocChildrenFromQuery(q *DocQuery) *DocQuery {
 	return query
 }
 
-// loadDocChildren performs the eager-load for the "children" edge. Body mirrors
-// the pre-PR6 *DocQuery.loadChildren method, hoisted to root
-// so it can reference cross-package types directly.
-func loadDocChildren(ctx context.Context, query *DocQuery, nodes []*Doc) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[schema.DocID]*Doc)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Children = []*Doc{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Doc(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(doc.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetDocChildren()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "doc_children" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "doc_children" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Children = append(node.Edges.Children, n)
-	}
-	return nil
-}
-
 // WithDocRelated eager-loads the "related" edge on a DocQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithDocRelated(q *DocQuery, opts ...func(*DocQuery)) *DocQuery {
@@ -227,7 +155,7 @@ func WithDocRelated(q *DocQuery, opts ...func(*DocQuery)) *DocQuery {
 		opt(sub)
 	}
 	return q.StoreEager("related", func(ctx context.Context, parents []*Doc) error {
-		return loadDocRelated(ctx, sub, parents)
+		return edges.LoadDocRelated(ctx, sub, parents)
 	})
 }
 
@@ -271,72 +199,4 @@ func QueryDocRelatedFromQuery(q *DocQuery) *DocQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadDocRelated performs the eager-load for the "related" edge. Body mirrors
-// the pre-PR6 *DocQuery.loadRelated method, hoisted to root
-// so it can reference cross-package types directly.
-func loadDocRelated(ctx context.Context, query *DocQuery, nodes []*Doc) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[schema.DocID]*Doc)
-	nids := make(map[schema.DocID]map[*Doc]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Related = []*Doc{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(doc.RelatedTable)
-		s.Join(joinT).On(s.C(doc.FieldID), joinT.C(doc.RelatedPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(doc.RelatedPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(doc.RelatedPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(schema.DocID)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := *values[0].(*schema.DocID)
-				inValue := *values[1].(*schema.DocID)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Doc]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Doc](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "related" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Related = append(kn.Edges.Related, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
 }

@@ -8,13 +8,11 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
-	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -52,7 +50,7 @@ func WithGroupFiles(q *GroupQuery, opts ...func(*FileQuery)) *GroupQuery {
 		opt(sub)
 	}
 	return q.StoreEager("files", func(ctx context.Context, parents []*Group) error {
-		return loadGroupFiles(ctx, sub, parents)
+		return edges.LoadGroupFiles(ctx, sub, parents)
 	})
 }
 
@@ -67,7 +65,7 @@ func WithNamedGroupFiles(q *GroupQuery, name string, opts ...func(*FileQuery)) *
 		opt(sub)
 	}
 	return q.StoreEager("files:"+name, func(ctx context.Context, parents []*Group) error {
-		return loadNamedGroupFiles(ctx, sub, parents, name)
+		return edges.LoadNamedGroupFiles(ctx, sub, parents, name)
 	})
 }
 
@@ -113,77 +111,6 @@ func QueryGroupFilesFromQuery(q *GroupQuery) *FileQuery {
 	return query
 }
 
-// loadGroupFiles performs the eager-load for the "files" edge. Body mirrors
-// the pre-PR6 *GroupQuery.loadFiles method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupFiles(ctx context.Context, query *FileQuery, nodes []*Group) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Group)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Files = []*File{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(group.FilesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetGroupFiles()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "group_files" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_files" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Files = append(node.Edges.Files, n)
-	}
-	return nil
-}
-
-// loadNamedGroupFiles is the named-edge variant of loadGroupFiles. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedFiles(name, ...) bucket instead of the default
-// Edges.Files slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedGroupFiles(ctx context.Context, query *FileQuery, nodes []*Group, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedFiles(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Group)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(group.FilesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetGroupFiles()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "group_files" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_files" returned %v for node %v`, *fk, n.ID)
-		}
-		node.AppendNamedFiles(name, n)
-	}
-	return nil
-}
-
 // WithGroupBlocked eager-loads the "blocked" edge on a GroupQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupBlocked(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
@@ -192,7 +119,7 @@ func WithGroupBlocked(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
 		opt(sub)
 	}
 	return q.StoreEager("blocked", func(ctx context.Context, parents []*Group) error {
-		return loadGroupBlocked(ctx, sub, parents)
+		return edges.LoadGroupBlocked(ctx, sub, parents)
 	})
 }
 
@@ -207,7 +134,7 @@ func WithNamedGroupBlocked(q *GroupQuery, name string, opts ...func(*UserQuery))
 		opt(sub)
 	}
 	return q.StoreEager("blocked:"+name, func(ctx context.Context, parents []*Group) error {
-		return loadNamedGroupBlocked(ctx, sub, parents, name)
+		return edges.LoadNamedGroupBlocked(ctx, sub, parents, name)
 	})
 }
 
@@ -253,77 +180,6 @@ func QueryGroupBlockedFromQuery(q *GroupQuery) *UserQuery {
 	return query
 }
 
-// loadGroupBlocked performs the eager-load for the "blocked" edge. Body mirrors
-// the pre-PR6 *GroupQuery.loadBlocked method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupBlocked(ctx context.Context, query *UserQuery, nodes []*Group) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Group)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Blocked = []*User{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(group.BlockedColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetGroupBlocked()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "group_blocked" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_blocked" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Blocked = append(node.Edges.Blocked, n)
-	}
-	return nil
-}
-
-// loadNamedGroupBlocked is the named-edge variant of loadGroupBlocked. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedBlocked(name, ...) bucket instead of the default
-// Edges.Blocked slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedGroupBlocked(ctx context.Context, query *UserQuery, nodes []*Group, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedBlocked(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Group)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(group.BlockedColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetGroupBlocked()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "group_blocked" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_blocked" returned %v for node %v`, *fk, n.ID)
-		}
-		node.AppendNamedBlocked(name, n)
-	}
-	return nil
-}
-
 // WithGroupUsers eager-loads the "users" edge on a GroupQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupUsers(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
@@ -332,7 +188,7 @@ func WithGroupUsers(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
 		opt(sub)
 	}
 	return q.StoreEager("users", func(ctx context.Context, parents []*Group) error {
-		return loadGroupUsers(ctx, sub, parents)
+		return edges.LoadGroupUsers(ctx, sub, parents)
 	})
 }
 
@@ -347,7 +203,7 @@ func WithNamedGroupUsers(q *GroupQuery, name string, opts ...func(*UserQuery)) *
 		opt(sub)
 	}
 	return q.StoreEager("users:"+name, func(ctx context.Context, parents []*Group) error {
-		return loadNamedGroupUsers(ctx, sub, parents, name)
+		return edges.LoadNamedGroupUsers(ctx, sub, parents, name)
 	})
 }
 
@@ -393,147 +249,6 @@ func QueryGroupUsersFromQuery(q *GroupQuery) *UserQuery {
 	return query
 }
 
-// loadGroupUsers performs the eager-load for the "users" edge. Body mirrors
-// the pre-PR6 *GroupQuery.loadUsers method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupUsers(ctx context.Context, query *UserQuery, nodes []*Group) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Group)
-	nids := make(map[int]map[*Group]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Users = []*User{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(group.UsersTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(group.UsersPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Group]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Users = append(kn.Edges.Users, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// loadNamedGroupUsers is the named-edge variant of loadGroupUsers. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedUsers(name, ...) bucket instead of the default
-// Edges.Users slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedGroupUsers(ctx context.Context, query *UserQuery, nodes []*Group, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedUsers(name)
-	}
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Group)
-	nids := make(map[int]map[*Group]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(group.UsersTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(group.UsersPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Group]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.AppendNamedUsers(name, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithGroupInfo eager-loads the "info" edge on a GroupQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupInfo(q *GroupQuery, opts ...func(*GroupInfoQuery)) *GroupQuery {
@@ -542,7 +257,7 @@ func WithGroupInfo(q *GroupQuery, opts ...func(*GroupInfoQuery)) *GroupQuery {
 		opt(sub)
 	}
 	return q.StoreEager("info", func(ctx context.Context, parents []*Group) error {
-		return loadGroupInfo(ctx, sub, parents)
+		return edges.LoadGroupInfo(ctx, sub, parents)
 	})
 }
 
@@ -586,40 +301,4 @@ func QueryGroupInfoFromQuery(q *GroupQuery) *GroupInfoQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadGroupInfo performs the eager-load for the "info" edge. Body mirrors
-// the pre-PR6 *GroupQuery.loadInfo method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupInfo(ctx context.Context, query *GroupInfoQuery, nodes []*Group) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Group)
-	for i := range nodes {
-		if nodes[i].GetGroupInfo() == nil {
-			continue
-		}
-		fk := *nodes[i].GetGroupInfo()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(groupinfo.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_info" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Info = n
-		}
-	}
-	return nil
 }

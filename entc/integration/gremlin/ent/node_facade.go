@@ -8,11 +8,9 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -47,7 +45,7 @@ func WithNodePrev(q *NodeQuery, opts ...func(*NodeQuery)) *NodeQuery {
 		opt(sub)
 	}
 	return q.StoreEager("prev", func(ctx context.Context, parents []*Node) error {
-		return loadNodePrev(ctx, sub, parents)
+		return edges.LoadNodePrev(ctx, sub, parents)
 	})
 }
 
@@ -93,42 +91,6 @@ func QueryNodePrevFromQuery(q *NodeQuery) *NodeQuery {
 	return query
 }
 
-// loadNodePrev performs the eager-load for the "prev" edge. Body mirrors
-// the pre-PR6 *NodeQuery.loadPrev method, hoisted to root
-// so it can reference cross-package types directly.
-func loadNodePrev(ctx context.Context, query *NodeQuery, nodes []*Node) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Node)
-	for i := range nodes {
-		if nodes[i].GetNodeNext() == nil {
-			continue
-		}
-		fk := *nodes[i].GetNodeNext()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(node.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "node_next" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Prev = n
-		}
-	}
-	return nil
-}
-
 // WithNodeNext eager-loads the "next" edge on a NodeQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithNodeNext(q *NodeQuery, opts ...func(*NodeQuery)) *NodeQuery {
@@ -137,7 +99,7 @@ func WithNodeNext(q *NodeQuery, opts ...func(*NodeQuery)) *NodeQuery {
 		opt(sub)
 	}
 	return q.StoreEager("next", func(ctx context.Context, parents []*Node) error {
-		return loadNodeNext(ctx, sub, parents)
+		return edges.LoadNodeNext(ctx, sub, parents)
 	})
 }
 
@@ -181,36 +143,4 @@ func QueryNodeNextFromQuery(q *NodeQuery) *NodeQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadNodeNext performs the eager-load for the "next" edge. Body mirrors
-// the pre-PR6 *NodeQuery.loadNext method, hoisted to root
-// so it can reference cross-package types directly.
-func loadNodeNext(ctx context.Context, query *NodeQuery, nodes []*Node) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*Node)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Node(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(node.NextColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetNodeNext()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "node_next" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "node_next" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Next = n
-	}
-	return nil
 }

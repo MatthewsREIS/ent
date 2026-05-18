@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/hooks/ent/card"
+	"entgo.io/ent/entc/integration/hooks/ent/edges"
 	"entgo.io/ent/entc/integration/hooks/ent/pet"
-	"entgo.io/ent/entc/integration/hooks/ent/predicate"
 	"entgo.io/ent/entc/integration/hooks/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -49,7 +47,7 @@ func WithUserCards(q *UserQuery, opts ...func(*CardQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("cards", func(ctx context.Context, parents []*User) error {
-		return loadUserCards(ctx, sub, parents)
+		return edges.LoadUserCards(ctx, sub, parents)
 	})
 }
 
@@ -95,39 +93,6 @@ func QueryUserCardsFromQuery(q *UserQuery) *CardQuery {
 	return query
 }
 
-// loadUserCards performs the eager-load for the "cards" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadCards method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserCards(ctx context.Context, query *CardQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Cards = []*Card{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.CardsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetUserCards()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_cards" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_cards" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Cards = append(node.Edges.Cards, n)
-	}
-	return nil
-}
-
 // WithUserPets eager-loads the "pets" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserPets(q *UserQuery, opts ...func(*PetQuery)) *UserQuery {
@@ -136,7 +101,7 @@ func WithUserPets(q *UserQuery, opts ...func(*PetQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("pets", func(ctx context.Context, parents []*User) error {
-		return loadUserPets(ctx, sub, parents)
+		return edges.LoadUserPets(ctx, sub, parents)
 	})
 }
 
@@ -182,39 +147,6 @@ func QueryUserPetsFromQuery(q *UserQuery) *PetQuery {
 	return query
 }
 
-// loadUserPets performs the eager-load for the "pets" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadPets method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserPets(ctx context.Context, query *PetQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Pets = []*Pet{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Pet(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetUserPets()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_pets" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_pets" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Pets = append(node.Edges.Pets, n)
-	}
-	return nil
-}
-
 // WithUserFriends eager-loads the "friends" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserFriends(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
@@ -223,7 +155,7 @@ func WithUserFriends(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("friends", func(ctx context.Context, parents []*User) error {
-		return loadUserFriends(ctx, sub, parents)
+		return edges.LoadUserFriends(ctx, sub, parents)
 	})
 }
 
@@ -269,74 +201,6 @@ func QueryUserFriendsFromQuery(q *UserQuery) *UserQuery {
 	return query
 }
 
-// loadUserFriends performs the eager-load for the "friends" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadFriends method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserFriends(ctx context.Context, query *UserQuery, nodes []*User) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*User)
-	nids := make(map[int]map[*User]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Friends = []*User{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(user.FriendsTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FriendsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(user.FriendsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.FriendsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "friends" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Friends = append(kn.Edges.Friends, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithUserBestFriend eager-loads the "best_friend" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserBestFriend(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
@@ -345,7 +209,7 @@ func WithUserBestFriend(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("best_friend", func(ctx context.Context, parents []*User) error {
-		return loadUserBestFriend(ctx, sub, parents)
+		return edges.LoadUserBestFriend(ctx, sub, parents)
 	})
 }
 
@@ -389,40 +253,4 @@ func QueryUserBestFriendFromQuery(q *UserQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadUserBestFriend performs the eager-load for the "best_friend" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadBestFriend method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserBestFriend(ctx context.Context, query *UserQuery, nodes []*User) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*User)
-	for i := range nodes {
-		if nodes[i].GetUserBestFriend() == nil {
-			continue
-		}
-		fk := *nodes[i].GetUserBestFriend()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_best_friend" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.BestFriend = n
-		}
-	}
-	return nil
 }

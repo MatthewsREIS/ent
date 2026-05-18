@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/multischema/ent/edges"
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
 
@@ -46,7 +46,7 @@ func WithFriendshipUser(q *FriendshipQuery, opts ...func(*UserQuery)) *Friendshi
 		opt(sub)
 	}
 	return q.StoreEager("user", func(ctx context.Context, parents []*Friendship) error {
-		return loadFriendshipUser(ctx, sub, parents)
+		return edges.LoadFriendshipUser(ctx, sub, parents)
 	})
 }
 
@@ -95,39 +95,6 @@ func QueryFriendshipUserFromQuery(q *FriendshipQuery) *UserQuery {
 	return query
 }
 
-// loadFriendshipUser performs the eager-load for the "user" edge. Body mirrors
-// the pre-PR6 *FriendshipQuery.loadUser method, hoisted to root
-// so it can reference cross-package types directly.
-func loadFriendshipUser(ctx context.Context, query *UserQuery, nodes []*Friendship) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Friendship)
-	for i := range nodes {
-		fk := nodes[i].UserID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.User = n
-		}
-	}
-	return nil
-}
-
 // WithFriendshipFriend eager-loads the "friend" edge on a FriendshipQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithFriendshipFriend(q *FriendshipQuery, opts ...func(*UserQuery)) *FriendshipQuery {
@@ -136,7 +103,7 @@ func WithFriendshipFriend(q *FriendshipQuery, opts ...func(*UserQuery)) *Friends
 		opt(sub)
 	}
 	return q.StoreEager("friend", func(ctx context.Context, parents []*Friendship) error {
-		return loadFriendshipFriend(ctx, sub, parents)
+		return edges.LoadFriendshipFriend(ctx, sub, parents)
 	})
 }
 
@@ -183,37 +150,4 @@ func QueryFriendshipFriendFromQuery(q *FriendshipQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadFriendshipFriend performs the eager-load for the "friend" edge. Body mirrors
-// the pre-PR6 *FriendshipQuery.loadFriend method, hoisted to root
-// so it can reference cross-package types directly.
-func loadFriendshipFriend(ctx context.Context, query *UserQuery, nodes []*Friendship) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Friendship)
-	for i := range nodes {
-		fk := nodes[i].FriendID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "friend_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Friend = n
-		}
-	}
-	return nil
 }

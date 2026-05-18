@@ -8,12 +8,9 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/note"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -50,7 +47,7 @@ func WithNoteParent(q *NoteQuery, opts ...func(*NoteQuery)) *NoteQuery {
 		opt(sub)
 	}
 	return q.StoreEager("parent", func(ctx context.Context, parents []*Note) error {
-		return loadNoteParent(ctx, sub, parents)
+		return edges.LoadNoteParent(ctx, sub, parents)
 	})
 }
 
@@ -96,42 +93,6 @@ func QueryNoteParentFromQuery(q *NoteQuery) *NoteQuery {
 	return query
 }
 
-// loadNoteParent performs the eager-load for the "parent" edge. Body mirrors
-// the pre-PR6 *NoteQuery.loadParent method, hoisted to root
-// so it can reference cross-package types directly.
-func loadNoteParent(ctx context.Context, query *NoteQuery, nodes []*Note) error {
-	ids := make([]schema.NoteID, 0, len(nodes))
-	nodeids := make(map[schema.NoteID][]*Note)
-	for i := range nodes {
-		if nodes[i].GetNoteChildren() == nil {
-			continue
-		}
-		fk := *nodes[i].GetNoteChildren()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(note.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "note_children" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Parent = n
-		}
-	}
-	return nil
-}
-
 // WithNoteChildren eager-loads the "children" edge on a NoteQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithNoteChildren(q *NoteQuery, opts ...func(*NoteQuery)) *NoteQuery {
@@ -140,7 +101,7 @@ func WithNoteChildren(q *NoteQuery, opts ...func(*NoteQuery)) *NoteQuery {
 		opt(sub)
 	}
 	return q.StoreEager("children", func(ctx context.Context, parents []*Note) error {
-		return loadNoteChildren(ctx, sub, parents)
+		return edges.LoadNoteChildren(ctx, sub, parents)
 	})
 }
 
@@ -184,37 +145,4 @@ func QueryNoteChildrenFromQuery(q *NoteQuery) *NoteQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadNoteChildren performs the eager-load for the "children" edge. Body mirrors
-// the pre-PR6 *NoteQuery.loadChildren method, hoisted to root
-// so it can reference cross-package types directly.
-func loadNoteChildren(ctx context.Context, query *NoteQuery, nodes []*Note) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[schema.NoteID]*Note)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Children = []*Note{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Note(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(note.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetNoteChildren()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "note_children" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "note_children" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Children = append(node.Edges.Children, n)
-	}
-	return nil
 }

@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 
@@ -46,7 +46,7 @@ func WithInfoUser(q *InfoQuery, opts ...func(*UserQuery)) *InfoQuery {
 		opt(sub)
 	}
 	return q.StoreEager("user", func(ctx context.Context, parents []*Info) error {
-		return loadInfoUser(ctx, sub, parents)
+		return edges.LoadInfoUser(ctx, sub, parents)
 	})
 }
 
@@ -90,37 +90,4 @@ func QueryInfoUserFromQuery(q *InfoQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadInfoUser performs the eager-load for the "user" edge. Body mirrors
-// the pre-PR6 *InfoQuery.loadUser method, hoisted to root
-// so it can reference cross-package types directly.
-func loadInfoUser(ctx context.Context, query *UserQuery, nodes []*Info) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Info)
-	for i := range nodes {
-		fk := nodes[i].ID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.User = n
-		}
-	}
-	return nil
 }

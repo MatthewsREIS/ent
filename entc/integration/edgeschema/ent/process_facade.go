@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
 
 	"entgo.io/ent/dialect/sql"
@@ -51,7 +49,7 @@ func WithProcessFiles(q *ProcessQuery, opts ...func(*FileQuery)) *ProcessQuery {
 		opt(sub)
 	}
 	return q.StoreEager("files", func(ctx context.Context, parents []*Process) error {
-		return loadProcessFiles(ctx, sub, parents)
+		return edges.LoadProcessFiles(ctx, sub, parents)
 	})
 }
 
@@ -97,74 +95,6 @@ func QueryProcessFilesFromQuery(q *ProcessQuery) *FileQuery {
 	return query
 }
 
-// loadProcessFiles performs the eager-load for the "files" edge. Body mirrors
-// the pre-PR6 *ProcessQuery.loadFiles method, hoisted to root
-// so it can reference cross-package types directly.
-func loadProcessFiles(ctx context.Context, query *FileQuery, nodes []*Process) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Process)
-	nids := make(map[int]map[*Process]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Files = []*File{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(process.FilesTable)
-		s.Join(joinT).On(s.C(file.FieldID), joinT.C(process.FilesPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(process.FilesPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(process.FilesPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Process]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*File](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "files" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Files = append(kn.Edges.Files, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithProcessAttachedFiles eager-loads the "attached_files" edge on a ProcessQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithProcessAttachedFiles(q *ProcessQuery, opts ...func(*AttachedFileQuery)) *ProcessQuery {
@@ -173,7 +103,7 @@ func WithProcessAttachedFiles(q *ProcessQuery, opts ...func(*AttachedFileQuery))
 		opt(sub)
 	}
 	return q.StoreEager("attached_files", func(ctx context.Context, parents []*Process) error {
-		return loadProcessAttachedFiles(ctx, sub, parents)
+		return edges.LoadProcessAttachedFiles(ctx, sub, parents)
 	})
 }
 
@@ -217,37 +147,4 @@ func QueryProcessAttachedFilesFromQuery(q *ProcessQuery) *AttachedFileQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadProcessAttachedFiles performs the eager-load for the "attached_files" edge. Body mirrors
-// the pre-PR6 *ProcessQuery.loadAttachedFiles method, hoisted to root
-// so it can reference cross-package types directly.
-func loadProcessAttachedFiles(ctx context.Context, query *AttachedFileQuery, nodes []*Process) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Process)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.AttachedFiles = []*AttachedFile{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(attachedfile.FieldProcID)
-	}
-	query.Where(predicate.AttachedFile(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(process.AttachedFilesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ProcID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "proc_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.AttachedFiles = append(node.Edges.AttachedFiles, n)
-	}
-	return nil
 }

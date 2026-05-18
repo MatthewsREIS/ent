@@ -8,9 +8,9 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
+	"entgo.io/ent/entc/integration/cascadelete/ent/edges"
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
 
 	"entgo.io/ent/dialect/sql"
@@ -46,7 +46,7 @@ func WithCommentPost(q *CommentQuery, opts ...func(*PostQuery)) *CommentQuery {
 		opt(sub)
 	}
 	return q.StoreEager("post", func(ctx context.Context, parents []*Comment) error {
-		return loadCommentPost(ctx, sub, parents)
+		return edges.LoadCommentPost(ctx, sub, parents)
 	})
 }
 
@@ -90,37 +90,4 @@ func QueryCommentPostFromQuery(q *CommentQuery) *PostQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadCommentPost performs the eager-load for the "post" edge. Body mirrors
-// the pre-PR6 *CommentQuery.loadPost method, hoisted to root
-// so it can reference cross-package types directly.
-func loadCommentPost(ctx context.Context, query *PostQuery, nodes []*Comment) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Comment)
-	for i := range nodes {
-		fk := nodes[i].PostID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(post.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "post_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Post = n
-		}
-	}
-	return nil
 }

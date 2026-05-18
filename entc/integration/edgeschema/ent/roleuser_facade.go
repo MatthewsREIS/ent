@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
@@ -49,7 +49,7 @@ func WithRoleUserRole(q *RoleUserQuery, opts ...func(*RoleQuery)) *RoleUserQuery
 		opt(sub)
 	}
 	return q.StoreEager("role", func(ctx context.Context, parents []*RoleUser) error {
-		return loadRoleUserRole(ctx, sub, parents)
+		return edges.LoadRoleUserRole(ctx, sub, parents)
 	})
 }
 
@@ -84,39 +84,6 @@ func QueryRoleUserRoleFromQuery(q *RoleUserQuery) *RoleQuery {
 	return query
 }
 
-// loadRoleUserRole performs the eager-load for the "role" edge. Body mirrors
-// the pre-PR6 *RoleUserQuery.loadRole method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRoleUserRole(ctx context.Context, query *RoleQuery, nodes []*RoleUser) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*RoleUser)
-	for i := range nodes {
-		fk := nodes[i].RoleID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(role.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "role_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Role = n
-		}
-	}
-	return nil
-}
-
 // WithRoleUserUser eager-loads the "user" edge on a RoleUserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithRoleUserUser(q *RoleUserQuery, opts ...func(*UserQuery)) *RoleUserQuery {
@@ -125,7 +92,7 @@ func WithRoleUserUser(q *RoleUserQuery, opts ...func(*UserQuery)) *RoleUserQuery
 		opt(sub)
 	}
 	return q.StoreEager("user", func(ctx context.Context, parents []*RoleUser) error {
-		return loadRoleUserUser(ctx, sub, parents)
+		return edges.LoadRoleUserUser(ctx, sub, parents)
 	})
 }
 
@@ -158,37 +125,4 @@ func QueryRoleUserUserFromQuery(q *RoleUserQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadRoleUserUser performs the eager-load for the "user" edge. Body mirrors
-// the pre-PR6 *RoleUserQuery.loadUser method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRoleUserUser(ctx context.Context, query *UserQuery, nodes []*RoleUser) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*RoleUser)
-	for i := range nodes {
-		fk := nodes[i].UserID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.User = n
-		}
-	}
-	return nil
 }

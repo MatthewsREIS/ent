@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/pet"
 	"entgo.io/ent/entc/integration/ent/user"
 
@@ -48,7 +48,7 @@ func WithPetTeam(q *PetQuery, opts ...func(*UserQuery)) *PetQuery {
 		opt(sub)
 	}
 	return q.StoreEager("team", func(ctx context.Context, parents []*Pet) error {
-		return loadPetTeam(ctx, sub, parents)
+		return edges.LoadPetTeam(ctx, sub, parents)
 	})
 }
 
@@ -94,45 +94,6 @@ func QueryPetTeamFromQuery(q *PetQuery) *UserQuery {
 	return query
 }
 
-// loadPetTeam performs the eager-load for the "team" edge. Body mirrors
-// the pre-PR6 *PetQuery.loadTeam method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPetTeam(ctx context.Context, query *UserQuery, nodes []*Pet) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Pet)
-	for i := range nodes {
-		if nodes[i].GetUserTeam() == nil {
-			continue
-		}
-		fk := *nodes[i].GetUserTeam()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_team" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Team = n
-			if !n.Edges.IsLoaded(7) {
-				n.Edges.Team = parents[i]
-			}
-		}
-	}
-	return nil
-}
-
 // WithPetOwner eager-loads the "owner" edge on a PetQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithPetOwner(q *PetQuery, opts ...func(*UserQuery)) *PetQuery {
@@ -141,7 +102,7 @@ func WithPetOwner(q *PetQuery, opts ...func(*UserQuery)) *PetQuery {
 		opt(sub)
 	}
 	return q.StoreEager("owner", func(ctx context.Context, parents []*Pet) error {
-		return loadPetOwner(ctx, sub, parents)
+		return edges.LoadPetOwner(ctx, sub, parents)
 	})
 }
 
@@ -185,40 +146,4 @@ func QueryPetOwnerFromQuery(q *PetQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadPetOwner performs the eager-load for the "owner" edge. Body mirrors
-// the pre-PR6 *PetQuery.loadOwner method, hoisted to root
-// so it can reference cross-package types directly.
-func loadPetOwner(ctx context.Context, query *UserQuery, nodes []*Pet) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Pet)
-	for i := range nodes {
-		if nodes[i].GetUserPets() == nil {
-			continue
-		}
-		fk := *nodes[i].GetUserPets()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_pets" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Owner = n
-		}
-	}
-	return nil
 }

@@ -229,15 +229,15 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	// PR 6: the M2M load (and the joinT.Schema hook on it) moved out of
-	// user_query.go into the root facade's loadUserGroups in
-	// user_facade.go. The sub-query parameter there is named `query`,
-	// so the hook emits query.Config.SchemaConfig() (Config is shared
-	// across builders in a client).
-	userFacade, err := os.ReadFile(filepath.Join(target, "user_facade.go"))
+	// PR 6 / Task 4: the M2M load (and the joinT.Schema hook on it) moved
+	// from user_query.go → user_facade.go (PR 6) and then into the dedicated
+	// edges package as edges/user.go (Task 4). The sub-query parameter is
+	// named `query`, so the hook emits query.Config.SchemaConfig() (Config is
+	// shared across builders in a client).
+	userEdges, err := os.ReadFile(filepath.Join(target, "edges", "user.go"))
 	require.NoError(t, err)
-	require.Contains(t, string(userFacade), "joinT.Schema(query.Config.SchemaConfig().UserGroups)")
-	require.NotContains(t, string(userFacade), "edge.Schema = query.Config.SchemaConfig().UserGroups")
+	require.Contains(t, string(userEdges), "joinT.Schema(query.Config.SchemaConfig().UserGroups)")
+	require.NotContains(t, string(userEdges), "edge.Schema = query.Config.SchemaConfig().UserGroups")
 
 	groupUpdate, err := os.ReadFile(filepath.Join(target, "group", "update.go"))
 	require.NoError(t, err)

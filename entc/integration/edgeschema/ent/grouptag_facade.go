@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
@@ -49,7 +49,7 @@ func WithGroupTagTag(q *GroupTagQuery, opts ...func(*TagQuery)) *GroupTagQuery {
 		opt(sub)
 	}
 	return q.StoreEager("tag", func(ctx context.Context, parents []*GroupTag) error {
-		return loadGroupTagTag(ctx, sub, parents)
+		return edges.LoadGroupTagTag(ctx, sub, parents)
 	})
 }
 
@@ -95,39 +95,6 @@ func QueryGroupTagTagFromQuery(q *GroupTagQuery) *TagQuery {
 	return query
 }
 
-// loadGroupTagTag performs the eager-load for the "tag" edge. Body mirrors
-// the pre-PR6 *GroupTagQuery.loadTag method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupTagTag(ctx context.Context, query *TagQuery, nodes []*GroupTag) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*GroupTag)
-	for i := range nodes {
-		fk := nodes[i].TagID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(tag.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Tag = n
-		}
-	}
-	return nil
-}
-
 // WithGroupTagGroup eager-loads the "group" edge on a GroupTagQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupTagGroup(q *GroupTagQuery, opts ...func(*GroupQuery)) *GroupTagQuery {
@@ -136,7 +103,7 @@ func WithGroupTagGroup(q *GroupTagQuery, opts ...func(*GroupQuery)) *GroupTagQue
 		opt(sub)
 	}
 	return q.StoreEager("group", func(ctx context.Context, parents []*GroupTag) error {
-		return loadGroupTagGroup(ctx, sub, parents)
+		return edges.LoadGroupTagGroup(ctx, sub, parents)
 	})
 }
 
@@ -180,37 +147,4 @@ func QueryGroupTagGroupFromQuery(q *GroupTagQuery) *GroupQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadGroupTagGroup performs the eager-load for the "group" edge. Body mirrors
-// the pre-PR6 *GroupTagQuery.loadGroup method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupTagGroup(ctx context.Context, query *GroupQuery, nodes []*GroupTag) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*GroupTag)
-	for i := range nodes {
-		fk := nodes[i].GroupID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(group.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "group_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Group = n
-		}
-	}
-	return nil
 }

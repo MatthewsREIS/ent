@@ -8,13 +8,11 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -50,7 +48,7 @@ func WithFileOwner(q *FileQuery, opts ...func(*UserQuery)) *FileQuery {
 		opt(sub)
 	}
 	return q.StoreEager("owner", func(ctx context.Context, parents []*File) error {
-		return loadFileOwner(ctx, sub, parents)
+		return edges.LoadFileOwner(ctx, sub, parents)
 	})
 }
 
@@ -96,42 +94,6 @@ func QueryFileOwnerFromQuery(q *FileQuery) *UserQuery {
 	return query
 }
 
-// loadFileOwner performs the eager-load for the "owner" edge. Body mirrors
-// the pre-PR6 *FileQuery.loadOwner method, hoisted to root
-// so it can reference cross-package types directly.
-func loadFileOwner(ctx context.Context, query *UserQuery, nodes []*File) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*File)
-	for i := range nodes {
-		if nodes[i].GetUserFiles() == nil {
-			continue
-		}
-		fk := *nodes[i].GetUserFiles()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_files" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Owner = n
-		}
-	}
-	return nil
-}
-
 // WithFileType eager-loads the "type" edge on a FileQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithFileType(q *FileQuery, opts ...func(*FileTypeQuery)) *FileQuery {
@@ -140,7 +102,7 @@ func WithFileType(q *FileQuery, opts ...func(*FileTypeQuery)) *FileQuery {
 		opt(sub)
 	}
 	return q.StoreEager("type", func(ctx context.Context, parents []*File) error {
-		return loadFileType(ctx, sub, parents)
+		return edges.LoadFileType(ctx, sub, parents)
 	})
 }
 
@@ -186,42 +148,6 @@ func QueryFileTypeFromQuery(q *FileQuery) *FileTypeQuery {
 	return query
 }
 
-// loadFileType performs the eager-load for the "type" edge. Body mirrors
-// the pre-PR6 *FileQuery.loadType method, hoisted to root
-// so it can reference cross-package types directly.
-func loadFileType(ctx context.Context, query *FileTypeQuery, nodes []*File) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*File)
-	for i := range nodes {
-		if nodes[i].GetFileTypeFiles() == nil {
-			continue
-		}
-		fk := *nodes[i].GetFileTypeFiles()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(filetype.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "file_type_files" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Type = n
-		}
-	}
-	return nil
-}
-
 // WithFileField eager-loads the "field" edge on a FileQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithFileField(q *FileQuery, opts ...func(*FieldTypeQuery)) *FileQuery {
@@ -230,7 +156,7 @@ func WithFileField(q *FileQuery, opts ...func(*FieldTypeQuery)) *FileQuery {
 		opt(sub)
 	}
 	return q.StoreEager("field", func(ctx context.Context, parents []*File) error {
-		return loadFileField(ctx, sub, parents)
+		return edges.LoadFileField(ctx, sub, parents)
 	})
 }
 
@@ -274,37 +200,4 @@ func QueryFileFieldFromQuery(q *FileQuery) *FieldTypeQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadFileField performs the eager-load for the "field" edge. Body mirrors
-// the pre-PR6 *FileQuery.loadField method, hoisted to root
-// so it can reference cross-package types directly.
-func loadFileField(ctx context.Context, query *FieldTypeQuery, nodes []*File) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*File)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Field = []*FieldType{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.FieldType(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(file.FieldColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetFileField()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "file_field" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "file_field" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Field = append(node.Edges.Field, n)
-	}
-	return nil
 }

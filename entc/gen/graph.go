@@ -269,6 +269,13 @@ func generate(g *Graph) error {
 		assets.addDir(filepath.Join(g.Config.Target, n.PackageDir()))
 		for _, tmpl := range Templates {
 			if tmpl.Cond != nil && !tmpl.Cond(n) {
+				// When a conditional template is skipped (e.g. edges/type when
+				// a node has no edges), remove any previously-generated output
+				// file so the package doesn't reference stale symbols.
+				stale := filepath.Join(g.Config.Target, tmpl.Format(n))
+				if err := os.Remove(stale); err != nil && !os.IsNotExist(err) {
+					log.Printf("remove stale conditional file %s: %s\n", stale, err)
+				}
 				continue
 			}
 			b := bytes.NewBuffer(nil)

@@ -8,10 +8,8 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
-	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/entc/integration/privacy/ent/edges"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
@@ -51,7 +49,7 @@ func WithUserTeams(q *UserQuery, opts ...func(*TeamQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("teams", func(ctx context.Context, parents []*User) error {
-		return loadUserTeams(ctx, sub, parents)
+		return edges.LoadUserTeams(ctx, sub, parents)
 	})
 }
 
@@ -97,74 +95,6 @@ func QueryUserTeamsFromQuery(q *UserQuery) *TeamQuery {
 	return query
 }
 
-// loadUserTeams performs the eager-load for the "teams" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadTeams method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserTeams(ctx context.Context, query *TeamQuery, nodes []*User) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*User)
-	nids := make(map[int]map[*User]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Teams = []*Team{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(user.TeamsTable)
-		s.Join(joinT).On(s.C(team.FieldID), joinT.C(user.TeamsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(user.TeamsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.TeamsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Team](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "teams" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Teams = append(kn.Edges.Teams, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithUserTasks eager-loads the "tasks" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserTasks(q *UserQuery, opts ...func(*TaskQuery)) *UserQuery {
@@ -173,7 +103,7 @@ func WithUserTasks(q *UserQuery, opts ...func(*TaskQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("tasks", func(ctx context.Context, parents []*User) error {
-		return loadUserTasks(ctx, sub, parents)
+		return edges.LoadUserTasks(ctx, sub, parents)
 	})
 }
 
@@ -217,37 +147,4 @@ func QueryUserTasksFromQuery(q *UserQuery) *TaskQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadUserTasks performs the eager-load for the "tasks" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadTasks method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserTasks(ctx context.Context, query *TaskQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Tasks = []*Task{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Task(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.TasksColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetUserTasks()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_tasks" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_tasks" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Tasks = append(node.Edges.Tasks, n)
-	}
-	return nil
 }

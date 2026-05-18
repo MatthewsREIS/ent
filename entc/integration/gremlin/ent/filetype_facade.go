@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
-	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -33,6 +31,8 @@ type (
 	FileTypeDeleteOne  = filetype.FileTypeDeleteOne
 	FileTypeGroupBy    = filetype.FileTypeGroupBy
 	FileTypeSelect     = filetype.FileTypeSelect
+	FileTypeType       = filetype.Type
+	FileTypeState      = filetype.State
 )
 
 // Constructor aliases — the sub-package's New<X> stays the source of truth.
@@ -48,7 +48,7 @@ func WithFileTypeFiles(q *FileTypeQuery, opts ...func(*FileQuery)) *FileTypeQuer
 		opt(sub)
 	}
 	return q.StoreEager("files", func(ctx context.Context, parents []*FileType) error {
-		return loadFileTypeFiles(ctx, sub, parents)
+		return edges.LoadFileTypeFiles(ctx, sub, parents)
 	})
 }
 
@@ -92,37 +92,4 @@ func QueryFileTypeFilesFromQuery(q *FileTypeQuery) *FileQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadFileTypeFiles performs the eager-load for the "files" edge. Body mirrors
-// the pre-PR6 *FileTypeQuery.loadFiles method, hoisted to root
-// so it can reference cross-package types directly.
-func loadFileTypeFiles(ctx context.Context, query *FileQuery, nodes []*FileType) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[string]*FileType)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Files = []*File{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(filetype.FilesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetFileTypeFiles()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Files = append(node.Edges.Files, n)
-	}
-	return nil
 }

@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/file"
 	"entgo.io/ent/entc/integration/ent/filetype"
-	"entgo.io/ent/entc/integration/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -34,6 +32,8 @@ type (
 	FileTypeGroupBy    = filetype.FileTypeGroupBy
 	FileTypeSelect     = filetype.FileTypeSelect
 	FileTypeFilter     = filetype.FileTypeFilter
+	FileTypeType       = filetype.Type
+	FileTypeState      = filetype.State
 )
 
 // Constructor aliases — the sub-package's New<X> stays the source of truth.
@@ -50,7 +50,7 @@ func WithFileTypeFiles(q *FileTypeQuery, opts ...func(*FileQuery)) *FileTypeQuer
 		opt(sub)
 	}
 	return q.StoreEager("files", func(ctx context.Context, parents []*FileType) error {
-		return loadFileTypeFiles(ctx, sub, parents)
+		return edges.LoadFileTypeFiles(ctx, sub, parents)
 	})
 }
 
@@ -65,7 +65,7 @@ func WithNamedFileTypeFiles(q *FileTypeQuery, name string, opts ...func(*FileQue
 		opt(sub)
 	}
 	return q.StoreEager("files:"+name, func(ctx context.Context, parents []*FileType) error {
-		return loadNamedFileTypeFiles(ctx, sub, parents, name)
+		return edges.LoadNamedFileTypeFiles(ctx, sub, parents, name)
 	})
 }
 
@@ -109,78 +109,4 @@ func QueryFileTypeFilesFromQuery(q *FileTypeQuery) *FileQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadFileTypeFiles performs the eager-load for the "files" edge. Body mirrors
-// the pre-PR6 *FileTypeQuery.loadFiles method, hoisted to root
-// so it can reference cross-package types directly.
-func loadFileTypeFiles(ctx context.Context, query *FileQuery, nodes []*FileType) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*FileType)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Files = []*File{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(filetype.FilesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetFileTypeFiles()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Files = append(node.Edges.Files, n)
-		if !n.Edges.IsLoaded(1) {
-			n.Edges.Type = node
-		}
-	}
-	return nil
-}
-
-// loadNamedFileTypeFiles is the named-edge variant of loadFileTypeFiles. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedFiles(name, ...) bucket instead of the default
-// Edges.Files slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedFileTypeFiles(ctx context.Context, query *FileQuery, nodes []*FileType, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedFiles(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*FileType)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.File(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(filetype.FilesColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetFileTypeFiles()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "file_type_files" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "file_type_files" returned %v for node %v`, *fk, n.ID)
-		}
-		node.AppendNamedFiles(name, n)
-	}
-	return nil
 }

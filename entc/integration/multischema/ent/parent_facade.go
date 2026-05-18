@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/multischema/ent/edges"
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
 
@@ -46,7 +46,7 @@ func WithParentChild(q *ParentQuery, opts ...func(*UserQuery)) *ParentQuery {
 		opt(sub)
 	}
 	return q.StoreEager("child", func(ctx context.Context, parents []*Parent) error {
-		return loadParentChild(ctx, sub, parents)
+		return edges.LoadParentChild(ctx, sub, parents)
 	})
 }
 
@@ -95,39 +95,6 @@ func QueryParentChildFromQuery(q *ParentQuery) *UserQuery {
 	return query
 }
 
-// loadParentChild performs the eager-load for the "child" edge. Body mirrors
-// the pre-PR6 *ParentQuery.loadChild method, hoisted to root
-// so it can reference cross-package types directly.
-func loadParentChild(ctx context.Context, query *UserQuery, nodes []*Parent) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Parent)
-	for i := range nodes {
-		fk := nodes[i].UserID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Child = n
-		}
-	}
-	return nil
-}
-
 // WithParentParent eager-loads the "parent" edge on a ParentQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithParentParent(q *ParentQuery, opts ...func(*UserQuery)) *ParentQuery {
@@ -136,7 +103,7 @@ func WithParentParent(q *ParentQuery, opts ...func(*UserQuery)) *ParentQuery {
 		opt(sub)
 	}
 	return q.StoreEager("parent", func(ctx context.Context, parents []*Parent) error {
-		return loadParentParent(ctx, sub, parents)
+		return edges.LoadParentParent(ctx, sub, parents)
 	})
 }
 
@@ -183,37 +150,4 @@ func QueryParentParentFromQuery(q *ParentQuery) *UserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadParentParent performs the eager-load for the "parent" edge. Body mirrors
-// the pre-PR6 *ParentQuery.loadParent method, hoisted to root
-// so it can reference cross-package types directly.
-func loadParentParent(ctx context.Context, query *UserQuery, nodes []*Parent) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Parent)
-	for i := range nodes {
-		fk := nodes[i].ParentID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Parent = n
-		}
-	}
-	return nil
 }

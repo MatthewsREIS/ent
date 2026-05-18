@@ -8,9 +8,9 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
 
@@ -49,7 +49,7 @@ func WithAttachedFileFi(q *AttachedFileQuery, opts ...func(*FileQuery)) *Attache
 		opt(sub)
 	}
 	return q.StoreEager("fi", func(ctx context.Context, parents []*AttachedFile) error {
-		return loadAttachedFileFi(ctx, sub, parents)
+		return edges.LoadAttachedFileFi(ctx, sub, parents)
 	})
 }
 
@@ -95,39 +95,6 @@ func QueryAttachedFileFiFromQuery(q *AttachedFileQuery) *FileQuery {
 	return query
 }
 
-// loadAttachedFileFi performs the eager-load for the "fi" edge. Body mirrors
-// the pre-PR6 *AttachedFileQuery.loadFi method, hoisted to root
-// so it can reference cross-package types directly.
-func loadAttachedFileFi(ctx context.Context, query *FileQuery, nodes []*AttachedFile) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*AttachedFile)
-	for i := range nodes {
-		fk := nodes[i].FID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(file.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "f_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Fi = n
-		}
-	}
-	return nil
-}
-
 // WithAttachedFileProc eager-loads the "proc" edge on a AttachedFileQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithAttachedFileProc(q *AttachedFileQuery, opts ...func(*ProcessQuery)) *AttachedFileQuery {
@@ -136,7 +103,7 @@ func WithAttachedFileProc(q *AttachedFileQuery, opts ...func(*ProcessQuery)) *At
 		opt(sub)
 	}
 	return q.StoreEager("proc", func(ctx context.Context, parents []*AttachedFile) error {
-		return loadAttachedFileProc(ctx, sub, parents)
+		return edges.LoadAttachedFileProc(ctx, sub, parents)
 	})
 }
 
@@ -180,37 +147,4 @@ func QueryAttachedFileProcFromQuery(q *AttachedFileQuery) *ProcessQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadAttachedFileProc performs the eager-load for the "proc" edge. Body mirrors
-// the pre-PR6 *AttachedFileQuery.loadProc method, hoisted to root
-// so it can reference cross-package types directly.
-func loadAttachedFileProc(ctx context.Context, query *ProcessQuery, nodes []*AttachedFile) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*AttachedFile)
-	for i := range nodes {
-		fk := nodes[i].ProcID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(process.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "proc_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Proc = n
-		}
-	}
-	return nil
 }

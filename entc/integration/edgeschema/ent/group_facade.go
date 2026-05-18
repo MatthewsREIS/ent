@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
@@ -53,7 +51,7 @@ func WithGroupUsers(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
 		opt(sub)
 	}
 	return q.StoreEager("users", func(ctx context.Context, parents []*Group) error {
-		return loadGroupUsers(ctx, sub, parents)
+		return edges.LoadGroupUsers(ctx, sub, parents)
 	})
 }
 
@@ -99,74 +97,6 @@ func QueryGroupUsersFromQuery(q *GroupQuery) *UserQuery {
 	return query
 }
 
-// loadGroupUsers performs the eager-load for the "users" edge. Body mirrors
-// the pre-PR6 *GroupQuery.loadUsers method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupUsers(ctx context.Context, query *UserQuery, nodes []*Group) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Group)
-	nids := make(map[int]map[*Group]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Users = []*User{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(group.UsersTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(group.UsersPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(group.UsersPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(group.UsersPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Group]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Users = append(kn.Edges.Users, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithGroupTags eager-loads the "tags" edge on a GroupQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupTags(q *GroupQuery, opts ...func(*TagQuery)) *GroupQuery {
@@ -175,7 +105,7 @@ func WithGroupTags(q *GroupQuery, opts ...func(*TagQuery)) *GroupQuery {
 		opt(sub)
 	}
 	return q.StoreEager("tags", func(ctx context.Context, parents []*Group) error {
-		return loadGroupTags(ctx, sub, parents)
+		return edges.LoadGroupTags(ctx, sub, parents)
 	})
 }
 
@@ -221,74 +151,6 @@ func QueryGroupTagsFromQuery(q *GroupQuery) *TagQuery {
 	return query
 }
 
-// loadGroupTags performs the eager-load for the "tags" edge. Body mirrors
-// the pre-PR6 *GroupQuery.loadTags method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupTags(ctx context.Context, query *TagQuery, nodes []*Group) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Group)
-	nids := make(map[int]map[*Group]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Tags = []*Tag{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(group.TagsTable)
-		s.Join(joinT).On(s.C(tag.FieldID), joinT.C(group.TagsPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(group.TagsPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(group.TagsPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Group]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Tag](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "tags" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Tags = append(kn.Edges.Tags, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithGroupJoinedUsers eager-loads the "joined_users" edge on a GroupQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupJoinedUsers(q *GroupQuery, opts ...func(*UserGroupQuery)) *GroupQuery {
@@ -297,7 +159,7 @@ func WithGroupJoinedUsers(q *GroupQuery, opts ...func(*UserGroupQuery)) *GroupQu
 		opt(sub)
 	}
 	return q.StoreEager("joined_users", func(ctx context.Context, parents []*Group) error {
-		return loadGroupJoinedUsers(ctx, sub, parents)
+		return edges.LoadGroupJoinedUsers(ctx, sub, parents)
 	})
 }
 
@@ -343,39 +205,6 @@ func QueryGroupJoinedUsersFromQuery(q *GroupQuery) *UserGroupQuery {
 	return query
 }
 
-// loadGroupJoinedUsers performs the eager-load for the "joined_users" edge. Body mirrors
-// the pre-PR6 *GroupQuery.loadJoinedUsers method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupJoinedUsers(ctx context.Context, query *UserGroupQuery, nodes []*Group) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Group)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.JoinedUsers = []*UserGroup{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(usergroup.FieldGroupID)
-	}
-	query.Where(predicate.UserGroup(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(group.JoinedUsersColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GroupID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.JoinedUsers = append(node.Edges.JoinedUsers, n)
-	}
-	return nil
-}
-
 // WithGroupGroupTags eager-loads the "group_tags" edge on a GroupQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithGroupGroupTags(q *GroupQuery, opts ...func(*GroupTagQuery)) *GroupQuery {
@@ -384,7 +213,7 @@ func WithGroupGroupTags(q *GroupQuery, opts ...func(*GroupTagQuery)) *GroupQuery
 		opt(sub)
 	}
 	return q.StoreEager("group_tags", func(ctx context.Context, parents []*Group) error {
-		return loadGroupGroupTags(ctx, sub, parents)
+		return edges.LoadGroupGroupTags(ctx, sub, parents)
 	})
 }
 
@@ -428,37 +257,4 @@ func QueryGroupGroupTagsFromQuery(q *GroupQuery) *GroupTagQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadGroupGroupTags performs the eager-load for the "group_tags" edge. Body mirrors
-// the pre-PR6 *GroupQuery.loadGroupTags method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupGroupTags(ctx context.Context, query *GroupTagQuery, nodes []*Group) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Group)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.GroupTags = []*GroupTag{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(grouptag.FieldGroupID)
-	}
-	query.Where(predicate.GroupTag(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(group.GroupTagsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GroupID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.GroupTags = append(node.Edges.GroupTags, n)
-	}
-	return nil
 }

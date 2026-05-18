@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
-	"entgo.io/ent/entc/integration/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -50,7 +48,7 @@ func WithGroupInfoGroups(q *GroupInfoQuery, opts ...func(*GroupQuery)) *GroupInf
 		opt(sub)
 	}
 	return q.StoreEager("groups", func(ctx context.Context, parents []*GroupInfo) error {
-		return loadGroupInfoGroups(ctx, sub, parents)
+		return edges.LoadGroupInfoGroups(ctx, sub, parents)
 	})
 }
 
@@ -65,7 +63,7 @@ func WithNamedGroupInfoGroups(q *GroupInfoQuery, name string, opts ...func(*Grou
 		opt(sub)
 	}
 	return q.StoreEager("groups:"+name, func(ctx context.Context, parents []*GroupInfo) error {
-		return loadNamedGroupInfoGroups(ctx, sub, parents, name)
+		return edges.LoadNamedGroupInfoGroups(ctx, sub, parents, name)
 	})
 }
 
@@ -109,78 +107,4 @@ func QueryGroupInfoGroupsFromQuery(q *GroupInfoQuery) *GroupQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadGroupInfoGroups performs the eager-load for the "groups" edge. Body mirrors
-// the pre-PR6 *GroupInfoQuery.loadGroups method, hoisted to root
-// so it can reference cross-package types directly.
-func loadGroupInfoGroups(ctx context.Context, query *GroupQuery, nodes []*GroupInfo) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*GroupInfo)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Groups = []*Group{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(groupinfo.GroupsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetGroupInfo()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
-		}
-		node.Edges.Groups = append(node.Edges.Groups, n)
-		if !n.Edges.IsLoaded(3) {
-			n.Edges.Info = node
-		}
-	}
-	return nil
-}
-
-// loadNamedGroupInfoGroups is the named-edge variant of loadGroupInfoGroups. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedGroups(name, ...) bucket instead of the default
-// Edges.Groups slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedGroupInfoGroups(ctx context.Context, query *GroupQuery, nodes []*GroupInfo, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedGroups(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*GroupInfo)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Group(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(groupinfo.GroupsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.GetGroupInfo()
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "group_info" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "group_info" returned %v for node %v`, *fk, n.ID)
-		}
-		node.AppendNamedGroups(name, n)
-	}
-	return nil
 }

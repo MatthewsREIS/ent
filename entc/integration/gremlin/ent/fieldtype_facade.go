@@ -24,6 +24,7 @@ type (
 	FieldTypeDeleteOne  = fieldtype.FieldTypeDeleteOne
 	FieldTypeGroupBy    = fieldtype.FieldTypeGroupBy
 	FieldTypeSelect     = fieldtype.FieldTypeSelect
+	FieldTypeState      = fieldtype.State
 )
 
 // Constructor aliases — the sub-package's New<X> stays the source of truth.

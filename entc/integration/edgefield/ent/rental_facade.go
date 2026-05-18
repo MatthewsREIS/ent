@@ -8,12 +8,11 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
-	"github.com/google/uuid"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -48,7 +47,7 @@ func WithRentalUser(q *RentalQuery, opts ...func(*UserQuery)) *RentalQuery {
 		opt(sub)
 	}
 	return q.StoreEager("user", func(ctx context.Context, parents []*Rental) error {
-		return loadRentalUser(ctx, sub, parents)
+		return edges.LoadRentalUser(ctx, sub, parents)
 	})
 }
 
@@ -94,39 +93,6 @@ func QueryRentalUserFromQuery(q *RentalQuery) *UserQuery {
 	return query
 }
 
-// loadRentalUser performs the eager-load for the "user" edge. Body mirrors
-// the pre-PR6 *RentalQuery.loadUser method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRentalUser(ctx context.Context, query *UserQuery, nodes []*Rental) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Rental)
-	for i := range nodes {
-		fk := nodes[i].UserID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.User = n
-		}
-	}
-	return nil
-}
-
 // WithRentalCar eager-loads the "car" edge on a RentalQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithRentalCar(q *RentalQuery, opts ...func(*CarQuery)) *RentalQuery {
@@ -135,7 +101,7 @@ func WithRentalCar(q *RentalQuery, opts ...func(*CarQuery)) *RentalQuery {
 		opt(sub)
 	}
 	return q.StoreEager("car", func(ctx context.Context, parents []*Rental) error {
-		return loadRentalCar(ctx, sub, parents)
+		return edges.LoadRentalCar(ctx, sub, parents)
 	})
 }
 
@@ -179,37 +145,4 @@ func QueryRentalCarFromQuery(q *RentalQuery) *CarQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadRentalCar performs the eager-load for the "car" edge. Body mirrors
-// the pre-PR6 *RentalQuery.loadCar method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRentalCar(ctx context.Context, query *CarQuery, nodes []*Rental) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*Rental)
-	for i := range nodes {
-		fk := nodes[i].CarID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(car.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "car_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Car = n
-		}
-	}
-	return nil
 }

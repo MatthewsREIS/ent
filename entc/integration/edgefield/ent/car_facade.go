@@ -8,13 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
-	"github.com/google/uuid"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -49,7 +46,7 @@ func WithCarRentals(q *CarQuery, opts ...func(*RentalQuery)) *CarQuery {
 		opt(sub)
 	}
 	return q.StoreEager("rentals", func(ctx context.Context, parents []*Car) error {
-		return loadCarRentals(ctx, sub, parents)
+		return edges.LoadCarRentals(ctx, sub, parents)
 	})
 }
 
@@ -64,7 +61,7 @@ func WithNamedCarRentals(q *CarQuery, name string, opts ...func(*RentalQuery)) *
 		opt(sub)
 	}
 	return q.StoreEager("rentals:"+name, func(ctx context.Context, parents []*Car) error {
-		return loadNamedCarRentals(ctx, sub, parents, name)
+		return edges.LoadNamedCarRentals(ctx, sub, parents, name)
 	})
 }
 
@@ -108,75 +105,4 @@ func QueryCarRentalsFromQuery(q *CarQuery) *RentalQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadCarRentals performs the eager-load for the "rentals" edge. Body mirrors
-// the pre-PR6 *CarQuery.loadRentals method, hoisted to root
-// so it can reference cross-package types directly.
-func loadCarRentals(ctx context.Context, query *RentalQuery, nodes []*Car) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Car)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Rentals = []*Rental{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(rental.FieldCarID)
-	}
-	query.Where(predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(car.RentalsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.CarID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "car_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Rentals = append(node.Edges.Rentals, n)
-	}
-	return nil
-}
-
-// loadNamedCarRentals is the named-edge variant of loadCarRentals. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedRentals(name, ...) bucket instead of the default
-// Edges.Rentals slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedCarRentals(ctx context.Context, query *RentalQuery, nodes []*Car, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedRentals(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Car)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(rental.FieldCarID)
-	}
-	query.Where(predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(car.RentalsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.CarID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "car_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.AppendNamedRentals(name, n)
-	}
-	return nil
 }

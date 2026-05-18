@@ -253,6 +253,21 @@ var (
 			},
 		},
 		{
+			// edges/shared emits the package-level type aliases and
+			// withInterceptors helper used by all per-entity edges/<T>.go files.
+			// Skipped when no node has edges (nothing would import this package).
+			Name:   "edges/shared",
+			Format: "edges/edges.go",
+			Skip: func(g *Graph) bool {
+				for _, n := range g.Nodes {
+					if len(n.Edges) > 0 {
+						return false
+					}
+				}
+				return true
+			},
+		},
+		{
 			Name:   "runtime/ent",
 			Format: "runtime.go",
 		},

@@ -8,12 +8,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
@@ -53,7 +51,7 @@ func WithTagTweets(q *TagQuery, opts ...func(*TweetQuery)) *TagQuery {
 		opt(sub)
 	}
 	return q.StoreEager("tweets", func(ctx context.Context, parents []*Tag) error {
-		return loadTagTweets(ctx, sub, parents)
+		return edges.LoadTagTweets(ctx, sub, parents)
 	})
 }
 
@@ -99,74 +97,6 @@ func QueryTagTweetsFromQuery(q *TagQuery) *TweetQuery {
 	return query
 }
 
-// loadTagTweets performs the eager-load for the "tweets" edge. Body mirrors
-// the pre-PR6 *TagQuery.loadTweets method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTagTweets(ctx context.Context, query *TweetQuery, nodes []*Tag) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Tag)
-	nids := make(map[int]map[*Tag]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Tweets = []*Tweet{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(tag.TweetsTable)
-		s.Join(joinT).On(s.C(tweet.FieldID), joinT.C(tag.TweetsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(tag.TweetsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(tag.TweetsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Tag]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Tweet](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "tweets" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Tweets = append(kn.Edges.Tweets, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithTagGroups eager-loads the "groups" edge on a TagQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithTagGroups(q *TagQuery, opts ...func(*GroupQuery)) *TagQuery {
@@ -175,7 +105,7 @@ func WithTagGroups(q *TagQuery, opts ...func(*GroupQuery)) *TagQuery {
 		opt(sub)
 	}
 	return q.StoreEager("groups", func(ctx context.Context, parents []*Tag) error {
-		return loadTagGroups(ctx, sub, parents)
+		return edges.LoadTagGroups(ctx, sub, parents)
 	})
 }
 
@@ -221,74 +151,6 @@ func QueryTagGroupsFromQuery(q *TagQuery) *GroupQuery {
 	return query
 }
 
-// loadTagGroups performs the eager-load for the "groups" edge. Body mirrors
-// the pre-PR6 *TagQuery.loadGroups method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTagGroups(ctx context.Context, query *GroupQuery, nodes []*Tag) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Tag)
-	nids := make(map[int]map[*Tag]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.Groups = []*Group{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(tag.GroupsTable)
-		s.Join(joinT).On(s.C(group.FieldID), joinT.C(tag.GroupsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(tag.GroupsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(tag.GroupsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Tag]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Group](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "groups" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.Groups = append(kn.Edges.Groups, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithTagTweetTags eager-loads the "tweet_tags" edge on a TagQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithTagTweetTags(q *TagQuery, opts ...func(*TweetTagQuery)) *TagQuery {
@@ -297,7 +159,7 @@ func WithTagTweetTags(q *TagQuery, opts ...func(*TweetTagQuery)) *TagQuery {
 		opt(sub)
 	}
 	return q.StoreEager("tweet_tags", func(ctx context.Context, parents []*Tag) error {
-		return loadTagTweetTags(ctx, sub, parents)
+		return edges.LoadTagTweetTags(ctx, sub, parents)
 	})
 }
 
@@ -343,39 +205,6 @@ func QueryTagTweetTagsFromQuery(q *TagQuery) *TweetTagQuery {
 	return query
 }
 
-// loadTagTweetTags performs the eager-load for the "tweet_tags" edge. Body mirrors
-// the pre-PR6 *TagQuery.loadTweetTags method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTagTweetTags(ctx context.Context, query *TweetTagQuery, nodes []*Tag) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Tag)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.TweetTags = []*TweetTag{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(tweettag.FieldTagID)
-	}
-	query.Where(predicate.TweetTag(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(tag.TweetTagsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.TagID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "tag_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.TweetTags = append(node.Edges.TweetTags, n)
-	}
-	return nil
-}
-
 // WithTagGroupTags eager-loads the "group_tags" edge on a TagQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithTagGroupTags(q *TagQuery, opts ...func(*GroupTagQuery)) *TagQuery {
@@ -384,7 +213,7 @@ func WithTagGroupTags(q *TagQuery, opts ...func(*GroupTagQuery)) *TagQuery {
 		opt(sub)
 	}
 	return q.StoreEager("group_tags", func(ctx context.Context, parents []*Tag) error {
-		return loadTagGroupTags(ctx, sub, parents)
+		return edges.LoadTagGroupTags(ctx, sub, parents)
 	})
 }
 
@@ -428,37 +257,4 @@ func QueryTagGroupTagsFromQuery(q *TagQuery) *GroupTagQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadTagGroupTags performs the eager-load for the "group_tags" edge. Body mirrors
-// the pre-PR6 *TagQuery.loadGroupTags method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTagGroupTags(ctx context.Context, query *GroupTagQuery, nodes []*Tag) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Tag)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.GroupTags = []*GroupTag{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(grouptag.FieldTagID)
-	}
-	query.Where(predicate.GroupTag(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(tag.GroupTagsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.TagID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "tag_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.GroupTags = append(node.Edges.GroupTags, n)
-	}
-	return nil
 }

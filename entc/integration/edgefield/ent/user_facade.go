@@ -8,14 +8,12 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/card"
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 	"entgo.io/ent/entc/integration/edgefield/ent/pet"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 
@@ -52,7 +50,7 @@ func WithUserPets(q *UserQuery, opts ...func(*PetQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("pets", func(ctx context.Context, parents []*User) error {
-		return loadUserPets(ctx, sub, parents)
+		return edges.LoadUserPets(ctx, sub, parents)
 	})
 }
 
@@ -67,7 +65,7 @@ func WithNamedUserPets(q *UserQuery, name string, opts ...func(*PetQuery)) *User
 		opt(sub)
 	}
 	return q.StoreEager("pets:"+name, func(ctx context.Context, parents []*User) error {
-		return loadNamedUserPets(ctx, sub, parents, name)
+		return edges.LoadNamedUserPets(ctx, sub, parents, name)
 	})
 }
 
@@ -113,77 +111,6 @@ func QueryUserPetsFromQuery(q *UserQuery) *PetQuery {
 	return query
 }
 
-// loadUserPets performs the eager-load for the "pets" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadPets method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserPets(ctx context.Context, query *PetQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Pets = []*Pet{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(pet.FieldOwnerID)
-	}
-	query.Where(predicate.Pet(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.OwnerID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Pets = append(node.Edges.Pets, n)
-	}
-	return nil
-}
-
-// loadNamedUserPets is the named-edge variant of loadUserPets. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedPets(name, ...) bucket instead of the default
-// Edges.Pets slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedUserPets(ctx context.Context, query *PetQuery, nodes []*User, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedPets(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(pet.FieldOwnerID)
-	}
-	query.Where(predicate.Pet(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.PetsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.OwnerID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.AppendNamedPets(name, n)
-	}
-	return nil
-}
-
 // WithUserParent eager-loads the "parent" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserParent(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
@@ -192,7 +119,7 @@ func WithUserParent(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("parent", func(ctx context.Context, parents []*User) error {
-		return loadUserParent(ctx, sub, parents)
+		return edges.LoadUserParent(ctx, sub, parents)
 	})
 }
 
@@ -238,39 +165,6 @@ func QueryUserParentFromQuery(q *UserQuery) *UserQuery {
 	return query
 }
 
-// loadUserParent performs the eager-load for the "parent" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadParent method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserParent(ctx context.Context, query *UserQuery, nodes []*User) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*User)
-	for i := range nodes {
-		fk := nodes[i].ParentID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "parent_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Parent = n
-		}
-	}
-	return nil
-}
-
 // WithUserChildren eager-loads the "children" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserChildren(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
@@ -279,7 +173,7 @@ func WithUserChildren(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("children", func(ctx context.Context, parents []*User) error {
-		return loadUserChildren(ctx, sub, parents)
+		return edges.LoadUserChildren(ctx, sub, parents)
 	})
 }
 
@@ -294,7 +188,7 @@ func WithNamedUserChildren(q *UserQuery, name string, opts ...func(*UserQuery)) 
 		opt(sub)
 	}
 	return q.StoreEager("children:"+name, func(ctx context.Context, parents []*User) error {
-		return loadNamedUserChildren(ctx, sub, parents, name)
+		return edges.LoadNamedUserChildren(ctx, sub, parents, name)
 	})
 }
 
@@ -340,77 +234,6 @@ func QueryUserChildrenFromQuery(q *UserQuery) *UserQuery {
 	return query
 }
 
-// loadUserChildren performs the eager-load for the "children" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadChildren method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserChildren(ctx context.Context, query *UserQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Children = []*User{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(user.FieldParentID)
-	}
-	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ParentID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Children = append(node.Edges.Children, n)
-	}
-	return nil
-}
-
-// loadNamedUserChildren is the named-edge variant of loadUserChildren. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedChildren(name, ...) bucket instead of the default
-// Edges.Children slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedUserChildren(ctx context.Context, query *UserQuery, nodes []*User, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedChildren(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(user.FieldParentID)
-	}
-	query.Where(predicate.User(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.ChildrenColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ParentID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "parent_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.AppendNamedChildren(name, n)
-	}
-	return nil
-}
-
 // WithUserSpouse eager-loads the "spouse" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserSpouse(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
@@ -419,7 +242,7 @@ func WithUserSpouse(q *UserQuery, opts ...func(*UserQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("spouse", func(ctx context.Context, parents []*User) error {
-		return loadUserSpouse(ctx, sub, parents)
+		return edges.LoadUserSpouse(ctx, sub, parents)
 	})
 }
 
@@ -465,39 +288,6 @@ func QueryUserSpouseFromQuery(q *UserQuery) *UserQuery {
 	return query
 }
 
-// loadUserSpouse performs the eager-load for the "spouse" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadSpouse method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserSpouse(ctx context.Context, query *UserQuery, nodes []*User) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*User)
-	for i := range nodes {
-		fk := nodes[i].SpouseID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(user.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "spouse_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Spouse = n
-		}
-	}
-	return nil
-}
-
 // WithUserCard eager-loads the "card" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserCard(q *UserQuery, opts ...func(*CardQuery)) *UserQuery {
@@ -506,7 +296,7 @@ func WithUserCard(q *UserQuery, opts ...func(*CardQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("card", func(ctx context.Context, parents []*User) error {
-		return loadUserCard(ctx, sub, parents)
+		return edges.LoadUserCard(ctx, sub, parents)
 	})
 }
 
@@ -552,38 +342,6 @@ func QueryUserCardFromQuery(q *UserQuery) *CardQuery {
 	return query
 }
 
-// loadUserCard performs the eager-load for the "card" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadCard method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserCard(ctx context.Context, query *CardQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(card.FieldOwnerID)
-	}
-	query.Where(predicate.Card(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.CardColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.OwnerID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Card = n
-	}
-	return nil
-}
-
 // WithUserMetadata eager-loads the "metadata" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserMetadata(q *UserQuery, opts ...func(*MetadataQuery)) *UserQuery {
@@ -592,7 +350,7 @@ func WithUserMetadata(q *UserQuery, opts ...func(*MetadataQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("metadata", func(ctx context.Context, parents []*User) error {
-		return loadUserMetadata(ctx, sub, parents)
+		return edges.LoadUserMetadata(ctx, sub, parents)
 	})
 }
 
@@ -638,35 +396,6 @@ func QueryUserMetadataFromQuery(q *UserQuery) *MetadataQuery {
 	return query
 }
 
-// loadUserMetadata performs the eager-load for the "metadata" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadMetadata method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserMetadata(ctx context.Context, query *MetadataQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Metadata(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.MetadataColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Metadata = n
-	}
-	return nil
-}
-
 // WithUserInfo eager-loads the "info" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserInfo(q *UserQuery, opts ...func(*InfoQuery)) *UserQuery {
@@ -675,7 +404,7 @@ func WithUserInfo(q *UserQuery, opts ...func(*InfoQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("info", func(ctx context.Context, parents []*User) error {
-		return loadUserInfo(ctx, sub, parents)
+		return edges.LoadUserInfo(ctx, sub, parents)
 	})
 }
 
@@ -690,7 +419,7 @@ func WithNamedUserInfo(q *UserQuery, name string, opts ...func(*InfoQuery)) *Use
 		opt(sub)
 	}
 	return q.StoreEager("info:"+name, func(ctx context.Context, parents []*User) error {
-		return loadNamedUserInfo(ctx, sub, parents, name)
+		return edges.LoadNamedUserInfo(ctx, sub, parents, name)
 	})
 }
 
@@ -736,71 +465,6 @@ func QueryUserInfoFromQuery(q *UserQuery) *InfoQuery {
 	return query
 }
 
-// loadUserInfo performs the eager-load for the "info" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadInfo method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserInfo(ctx context.Context, query *InfoQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Info = []*Info{}
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Info(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.InfoColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Info = append(node.Edges.Info, n)
-	}
-	return nil
-}
-
-// loadNamedUserInfo is the named-edge variant of loadUserInfo. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedInfo(name, ...) bucket instead of the default
-// Edges.Info slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedUserInfo(ctx context.Context, query *InfoQuery, nodes []*User, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedInfo(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	query.Where(predicate.Info(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.InfoColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.ID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "id" returned %v for node %v`, fk, n.ID)
-		}
-		node.AppendNamedInfo(name, n)
-	}
-	return nil
-}
-
 // WithUserRentals eager-loads the "rentals" edge on a UserQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithUserRentals(q *UserQuery, opts ...func(*RentalQuery)) *UserQuery {
@@ -809,7 +473,7 @@ func WithUserRentals(q *UserQuery, opts ...func(*RentalQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("rentals", func(ctx context.Context, parents []*User) error {
-		return loadUserRentals(ctx, sub, parents)
+		return edges.LoadUserRentals(ctx, sub, parents)
 	})
 }
 
@@ -824,7 +488,7 @@ func WithNamedUserRentals(q *UserQuery, name string, opts ...func(*RentalQuery))
 		opt(sub)
 	}
 	return q.StoreEager("rentals:"+name, func(ctx context.Context, parents []*User) error {
-		return loadNamedUserRentals(ctx, sub, parents, name)
+		return edges.LoadNamedUserRentals(ctx, sub, parents, name)
 	})
 }
 
@@ -868,75 +532,4 @@ func QueryUserRentalsFromQuery(q *UserQuery) *RentalQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadUserRentals performs the eager-load for the "rentals" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadRentals method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserRentals(ctx context.Context, query *RentalQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Rentals = []*Rental{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(rental.FieldUserID)
-	}
-	query.Where(predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.RentalsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UserID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Rentals = append(node.Edges.Rentals, n)
-	}
-	return nil
-}
-
-// loadNamedUserRentals is the named-edge variant of loadUserRentals. It runs the same
-// neighbor-fetch logic but appends each result to the parent's
-// AppendNamedRentals(name, ...) bucket instead of the default
-// Edges.Rentals slice. Each call seeds an empty bucket for the
-// name so consumers can distinguish "loaded with zero rows" from "never
-// loaded".
-func loadNamedUserRentals(ctx context.Context, query *RentalQuery, nodes []*User, name string) error {
-	for _, node := range nodes {
-		node.AppendNamedRentals(name)
-	}
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(rental.FieldUserID)
-	}
-	query.Where(predicate.Rental(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.RentalsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.UserID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.AppendNamedRentals(name, n)
-	}
-	return nil
 }

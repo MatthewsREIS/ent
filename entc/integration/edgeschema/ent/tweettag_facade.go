@@ -8,8 +8,8 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
@@ -49,7 +49,7 @@ func WithTweetTagTag(q *TweetTagQuery, opts ...func(*TagQuery)) *TweetTagQuery {
 		opt(sub)
 	}
 	return q.StoreEager("tag", func(ctx context.Context, parents []*TweetTag) error {
-		return loadTweetTagTag(ctx, sub, parents)
+		return edges.LoadTweetTagTag(ctx, sub, parents)
 	})
 }
 
@@ -95,39 +95,6 @@ func QueryTweetTagTagFromQuery(q *TweetTagQuery) *TagQuery {
 	return query
 }
 
-// loadTweetTagTag performs the eager-load for the "tag" edge. Body mirrors
-// the pre-PR6 *TweetTagQuery.loadTag method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTweetTagTag(ctx context.Context, query *TagQuery, nodes []*TweetTag) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*TweetTag)
-	for i := range nodes {
-		fk := nodes[i].TagID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(tag.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tag_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Tag = n
-		}
-	}
-	return nil
-}
-
 // WithTweetTagTweet eager-loads the "tweet" edge on a TweetTagQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithTweetTagTweet(q *TweetTagQuery, opts ...func(*TweetQuery)) *TweetTagQuery {
@@ -136,7 +103,7 @@ func WithTweetTagTweet(q *TweetTagQuery, opts ...func(*TweetQuery)) *TweetTagQue
 		opt(sub)
 	}
 	return q.StoreEager("tweet", func(ctx context.Context, parents []*TweetTag) error {
-		return loadTweetTagTweet(ctx, sub, parents)
+		return edges.LoadTweetTagTweet(ctx, sub, parents)
 	})
 }
 
@@ -180,37 +147,4 @@ func QueryTweetTagTweetFromQuery(q *TweetTagQuery) *TweetQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadTweetTagTweet performs the eager-load for the "tweet" edge. Body mirrors
-// the pre-PR6 *TweetTagQuery.loadTweet method, hoisted to root
-// so it can reference cross-package types directly.
-func loadTweetTagTweet(ctx context.Context, query *TweetQuery, nodes []*TweetTag) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*TweetTag)
-	for i := range nodes {
-		fk := nodes[i].TweetID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(tweet.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "tweet_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Tweet = n
-		}
-	}
-	return nil
 }

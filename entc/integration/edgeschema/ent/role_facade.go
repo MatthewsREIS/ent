@@ -8,10 +8,8 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
@@ -51,7 +49,7 @@ func WithRoleUser(q *RoleQuery, opts ...func(*UserQuery)) *RoleQuery {
 		opt(sub)
 	}
 	return q.StoreEager("user", func(ctx context.Context, parents []*Role) error {
-		return loadRoleUser(ctx, sub, parents)
+		return edges.LoadRoleUser(ctx, sub, parents)
 	})
 }
 
@@ -97,74 +95,6 @@ func QueryRoleUserFromQuery(q *RoleQuery) *UserQuery {
 	return query
 }
 
-// loadRoleUser performs the eager-load for the "user" edge. Body mirrors
-// the pre-PR6 *RoleQuery.loadUser method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRoleUser(ctx context.Context, query *UserQuery, nodes []*Role) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Role)
-	nids := make(map[int]map[*Role]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		node.Edges.User = []*User{}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(role.UserTable)
-		s.Join(joinT).On(s.C(user.FieldID), joinT.C(role.UserPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(role.UserPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(role.UserPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.PrepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Role]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.QueryState.Inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "user" node returned %v`, n.ID)
-		}
-		for kn := range parents {
-			kn.Edges.User = append(kn.Edges.User, n)
-		}
-	}
-	for _, loader := range query.EagerLoaders() {
-		if err := loader(ctx, neighbors); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // WithRoleRolesUsers eager-loads the "roles_users" edge on a RoleQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithRoleRolesUsers(q *RoleQuery, opts ...func(*RoleUserQuery)) *RoleQuery {
@@ -173,7 +103,7 @@ func WithRoleRolesUsers(q *RoleQuery, opts ...func(*RoleUserQuery)) *RoleQuery {
 		opt(sub)
 	}
 	return q.StoreEager("roles_users", func(ctx context.Context, parents []*Role) error {
-		return loadRoleRolesUsers(ctx, sub, parents)
+		return edges.LoadRoleRolesUsers(ctx, sub, parents)
 	})
 }
 
@@ -217,37 +147,4 @@ func QueryRoleRolesUsersFromQuery(q *RoleQuery) *RoleUserQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadRoleRolesUsers performs the eager-load for the "roles_users" edge. Body mirrors
-// the pre-PR6 *RoleQuery.loadRolesUsers method, hoisted to root
-// so it can reference cross-package types directly.
-func loadRoleRolesUsers(ctx context.Context, query *RoleUserQuery, nodes []*Role) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Role)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.RolesUsers = []*RoleUser{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(roleuser.FieldRoleID)
-	}
-	query.Where(predicate.RoleUser(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(role.RolesUsersColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.RoleID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "role_id" returned %v for node %v`, fk, n)
-		}
-		node.Edges.RolesUsers = append(node.Edges.RolesUsers, n)
-	}
-	return nil
 }

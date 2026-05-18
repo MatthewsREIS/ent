@@ -8,9 +8,9 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 
 	"entgo.io/ent/dialect/sql"
@@ -48,7 +48,7 @@ func WithCarOwner(q *CarQuery, opts ...func(*PetQuery)) *CarQuery {
 		opt(sub)
 	}
 	return q.StoreEager("owner", func(ctx context.Context, parents []*Car) error {
-		return loadCarOwner(ctx, sub, parents)
+		return edges.LoadCarOwner(ctx, sub, parents)
 	})
 }
 
@@ -92,40 +92,4 @@ func QueryCarOwnerFromQuery(q *CarQuery) *PetQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadCarOwner performs the eager-load for the "owner" edge. Body mirrors
-// the pre-PR6 *CarQuery.loadOwner method, hoisted to root
-// so it can reference cross-package types directly.
-func loadCarOwner(ctx context.Context, query *PetQuery, nodes []*Car) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Car)
-	for i := range nodes {
-		if nodes[i].GetPetCars() == nil {
-			continue
-		}
-		fk := *nodes[i].GetPetCars()
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(pet.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "pet_cars" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Owner = n
-		}
-	}
-	return nil
 }

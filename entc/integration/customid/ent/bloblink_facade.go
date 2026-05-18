@@ -8,11 +8,10 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/entc/integration/customid/ent/blob"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
-	"github.com/google/uuid"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -49,7 +48,7 @@ func WithBlobLinkBlob(q *BlobLinkQuery, opts ...func(*BlobQuery)) *BlobLinkQuery
 		opt(sub)
 	}
 	return q.StoreEager("blob", func(ctx context.Context, parents []*BlobLink) error {
-		return loadBlobLinkBlob(ctx, sub, parents)
+		return edges.LoadBlobLinkBlob(ctx, sub, parents)
 	})
 }
 
@@ -84,39 +83,6 @@ func QueryBlobLinkBlobFromQuery(q *BlobLinkQuery) *BlobQuery {
 	return query
 }
 
-// loadBlobLinkBlob performs the eager-load for the "blob" edge. Body mirrors
-// the pre-PR6 *BlobLinkQuery.loadBlob method, hoisted to root
-// so it can reference cross-package types directly.
-func loadBlobLinkBlob(ctx context.Context, query *BlobQuery, nodes []*BlobLink) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*BlobLink)
-	for i := range nodes {
-		fk := nodes[i].BlobID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(blob.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "blob_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Blob = n
-		}
-	}
-	return nil
-}
-
 // WithBlobLinkLink eager-loads the "link" edge on a BlobLinkQuery. The
 // optional arguments configure the sibling sub-query before storage.
 func WithBlobLinkLink(q *BlobLinkQuery, opts ...func(*BlobQuery)) *BlobLinkQuery {
@@ -125,7 +91,7 @@ func WithBlobLinkLink(q *BlobLinkQuery, opts ...func(*BlobQuery)) *BlobLinkQuery
 		opt(sub)
 	}
 	return q.StoreEager("link", func(ctx context.Context, parents []*BlobLink) error {
-		return loadBlobLinkLink(ctx, sub, parents)
+		return edges.LoadBlobLinkLink(ctx, sub, parents)
 	})
 }
 
@@ -158,37 +124,4 @@ func QueryBlobLinkLinkFromQuery(q *BlobLinkQuery) *BlobQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadBlobLinkLink performs the eager-load for the "link" edge. Body mirrors
-// the pre-PR6 *BlobLinkQuery.loadLink method, hoisted to root
-// so it can reference cross-package types directly.
-func loadBlobLinkLink(ctx context.Context, query *BlobQuery, nodes []*BlobLink) error {
-	ids := make([]uuid.UUID, 0, len(nodes))
-	nodeids := make(map[uuid.UUID][]*BlobLink)
-	for i := range nodes {
-		fk := nodes[i].LinkID
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(blob.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		parents, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "link_id" returned %v`, n.ID)
-		}
-		for i := range parents {
-			parents[i].Edges.Link = n
-		}
-	}
-	return nil
 }

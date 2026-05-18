@@ -8,11 +8,9 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
-	"fmt"
 
+	"entgo.io/ent/entc/integration/cascadelete/ent/edges"
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
-	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
 
 	"entgo.io/ent/dialect/sql"
@@ -48,7 +46,7 @@ func WithUserPosts(q *UserQuery, opts ...func(*PostQuery)) *UserQuery {
 		opt(sub)
 	}
 	return q.StoreEager("posts", func(ctx context.Context, parents []*User) error {
-		return loadUserPosts(ctx, sub, parents)
+		return edges.LoadUserPosts(ctx, sub, parents)
 	})
 }
 
@@ -92,37 +90,4 @@ func QueryUserPostsFromQuery(q *UserQuery) *PostQuery {
 		return fromV, nil
 	}
 	return query
-}
-
-// loadUserPosts performs the eager-load for the "posts" edge. Body mirrors
-// the pre-PR6 *UserQuery.loadPosts method, hoisted to root
-// so it can reference cross-package types directly.
-func loadUserPosts(ctx context.Context, query *PostQuery, nodes []*User) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*User)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		nodes[i].Edges.Posts = []*Post{}
-	}
-	query.IncludeForeignKeys(true)
-	if len(query.Ctx.Fields) > 0 {
-		query.Ctx.AppendFieldOnce(post.FieldAuthorID)
-	}
-	query.Where(predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.PostsColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.AuthorID
-		node, ok := nodeids[fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "author_id" returned %v for node %v`, fk, n.ID)
-		}
-		node.Edges.Posts = append(node.Edges.Posts, n)
-	}
-	return nil
 }
