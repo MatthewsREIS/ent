@@ -34,6 +34,7 @@ type (
 	TaskGroupBy    = task.TaskGroupBy
 	TaskSelect     = task.TaskSelect
 	TaskFilter     = task.TaskFilter
+	TaskStatus     = task.Status
 )
 
 // Constructor aliases — the sub-package's New<X> stays the source of truth.
