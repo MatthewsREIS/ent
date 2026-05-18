@@ -266,12 +266,18 @@ type typeScope struct {
 	Scope map[any]any
 }
 
-// PackageQualifier returns the package qualifier. When InSubPackage is set in
-// scope (the template generates code inside the entity's own sub-package), it
-// returns "" since symbols are accessed unqualified. Otherwise delegates to Type.
+// PackageQualifier returns the package qualifier. When InSubPackage is set,
+// returns "" (sub-package templates reference their own types directly). When
+// InEdgesPackage is set, returns "<package>." so edges/<entity>.go (which
+// lives in gen/edges/, not gen/<entity>/) qualifies references to the
+// current entity's types through the entity sub-package.
+// Otherwise delegates to Type.PackageQualifier().
 func (t *typeScope) PackageQualifier() string {
 	if t.Scope["InSubPackage"] == true {
 		return ""
+	}
+	if t.Scope["InEdgesPackage"] == true {
+		return t.Type.Package() + "."
 	}
 	return t.Type.PackageQualifier()
 }
