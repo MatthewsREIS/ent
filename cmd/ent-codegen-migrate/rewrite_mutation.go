@@ -12,8 +12,11 @@ import (
 	"go/token"
 	"strings"
 
+	"github.com/go-openapi/inflect"
 	"golang.org/x/tools/go/ast/astutil"
 )
+
+var pluralRules = inflect.NewDefaultRuleset()
 
 // RewriteMutationSource parses src, applies mutation API rewrites, and
 // returns the rewritten source. Used directly by tests; production callers
@@ -96,6 +99,20 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 						break
 					}
 				}
+				// <X>ID getter: schemas frequently expose a raw FK column
+				// as field "<x>_id" rather than declaring an edge. Reclassify
+				// as a plain field getter so we emit GetField[T](...).
+				if action == "edgeID" {
+					fieldName := fieldOrEdge + "_id"
+					if f, ok := ed.Fields[fieldName]; ok {
+						fd = f
+						fieldOrEdge = fieldName
+						action = "get"
+						isEdge = false
+						matched = true
+						break
+					}
+				}
 			} else {
 				if f, ok := ed.Fields[fieldOrEdge]; ok {
 					fd = f
@@ -104,6 +121,18 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 				}
 				// "cleared" is ambiguous: also look in edges.
 				if action == "cleared" {
+					if e, ok := ed.Edges[fieldOrEdge]; ok {
+						edgeD = e
+						isEdge = true
+						matched = true
+						break
+					}
+				}
+				// Clear<X>() also targets edges (e.g. ClearProperties on
+				// an edge named "properties"). The generic mutation API
+				// for edges is ClearEdge("<name>"); the "clear" case in
+				// rewriteCall dispatches on edgeD to pick the right method.
+				if action == "clear" {
 					if e, ok := ed.Edges[fieldOrEdge]; ok {
 						edgeD = e
 						isEdge = true
@@ -192,6 +221,12 @@ func matchMutationCall(name string) (entity, action, fieldOrEdge string, isEdge 
 		return "", "setEdge", pascalToSnake(strings.TrimSuffix(strings.TrimPrefix(name, "Set"), "ID")), true
 	case strings.HasPrefix(name, "Add") && strings.HasSuffix(name, "IDs"):
 		return "", "addIDs", pluralizeSnake(pascalToSnake(strings.TrimSuffix(strings.TrimPrefix(name, "Add"), "IDs"))), true
+	case strings.HasPrefix(name, "Removed") && strings.HasSuffix(name, "IDs"):
+		// Removed<Edge>IDs() → returns IDs removed from <Edge> (no args).
+		// Distinct from Remove<Edge>IDs(ids...) which mutates the edge.
+		// Place this case BEFORE the Remove<Edge>IDs(...) one because
+		// "Removed" has "Remove" as a prefix and the switch is order-sensitive.
+		return "", "removedIDs", pluralizeSnake(pascalToSnake(strings.TrimSuffix(strings.TrimPrefix(name, "Removed"), "IDs"))), true
 	case strings.HasPrefix(name, "Remove") && strings.HasSuffix(name, "IDs"):
 		return "", "rmIDs", pluralizeSnake(pascalToSnake(strings.TrimSuffix(strings.TrimPrefix(name, "Remove"), "IDs"))), true
 	case strings.HasPrefix(name, "Set"):
@@ -226,15 +261,17 @@ func lcFirst(s string) string {
 	return strings.ToLower(s[:1]) + s[1:]
 }
 
-// pluralizeSnake appends "s" to a snake_case name unless it already ends
-// in "s". Used for edge names derived from method shapes like AddTeamIDs
-// (snake "team" → "teams") and AddWrikeFolderIDs ("wrike_folder" →
-// "wrike_folders").
+// pluralizeSnake pluralizes a snake_case name using the same inflect
+// ruleset that entc/gen uses, so the inverted edge name matches the
+// schema's declared edge key (e.g. "property" → "properties",
+// "wrike_folder" → "wrike_folders"). The previous naive
+// "append 's' unless ends in s" form mishandled English plurals like
+// y→ies and broke lookups for edges such as Properties.
 func pluralizeSnake(s string) string {
-	if s != "" && !strings.HasSuffix(s, "s") {
-		s += "s"
+	if s == "" {
+		return s
 	}
-	return s
+	return pluralRules.Pluralize(s)
 }
 
 // rewriteCall builds the new call AST. Returns nil if rewrite doesn't apply.
@@ -272,8 +309,14 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 			Args: []ast.Expr{strLit(name)},
 		}, false
 	case "clear":
+		// Edges: ClearEdge("<name>"); fields: ClearField("<name>"). EdgeDesc
+		// is populated only when the descriptor lookup matched an edge.
+		method := "ClearField"
+		if edgeD.TargetIDType != "" || edgeD.Cardinality != "" {
+			method = "ClearEdge"
+		}
 		return &ast.CallExpr{
-			Fun:  &ast.SelectorExpr{X: recv, Sel: ast.NewIdent("ClearField")},
+			Fun:  &ast.SelectorExpr{X: recv, Sel: ast.NewIdent(method)},
 			Args: []ast.Expr{strLit(name)},
 		}, false
 	case "cleared":
@@ -330,6 +373,14 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 			},
 			Args: []ast.Expr{recv, strLit(name)},
 		}, true
+	case "removedIDs":
+		// m.Removed<Edge>IDs() → m.RemovedEdgeIDs("<edge>"). Returns []any;
+		// callers wanting a typed slice should iterate and type-assert
+		// (no typed helper exists for the removed-IDs view).
+		return &ast.CallExpr{
+			Fun:  &ast.SelectorExpr{X: recv, Sel: ast.NewIdent("RemovedEdgeIDs")},
+			Args: []ast.Expr{strLit(name)},
+		}, false
 	case "where":
 		// m.Where(ps...) → m.WhereP(ps...) (typed predicate.X is now func(*sql.Selector))
 		return &ast.CallExpr{

@@ -78,8 +78,19 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors, genImportP
 		methodName := sel.Sel.Name
 
 		if edge, ok := strings.CutPrefix(methodName, "With"); ok && edge != "" {
-			if entity, matched := matchEdgeReceiver(r, call, descs, "Query", edge); matched {
-				newArgs := append([]ast.Expr{sel.X}, call.Args...)
+			// Peel a trailing .Select(...) off the receiver chain. Pre-PR-6
+			// code sometimes did `q.Select(FieldID).WithFoo(...)` as a
+			// column-projection hint; that "worked" because Select still
+			// fired the eager-load on a fresh sub-query. Post-PR-6 the With
+			// facade expects *<Entity>Query and rejects *<Entity>Select, so
+			// the only mechanical fix that preserves the eager-load is to
+			// drop the Select — main rows then load with all columns, but
+			// callers consuming the result only read Edges (the projection
+			// was on the wrong table to begin with).
+			peeledRecv, droppedSelect := peelTrailingSelect(sel.X)
+			recvForMatch := peeledRecv
+			if entity, matched := matchEdgeReceiver(r, callWithReceiver(call, recvForMatch), descs, "Query", edge); matched {
+				newArgs := append([]ast.Expr{recvForMatch}, call.Args...)
 				emit(c, &ast.CallExpr{
 					Fun: &ast.SelectorExpr{
 						X:   ast.NewIdent(alias),
@@ -87,15 +98,16 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors, genImportP
 					},
 					Args: newArgs,
 				})
+				_ = droppedSelect
 				return true
 			}
 			// Syntactic fallback for cross-package consumers where go/types
 			// can't resolve the receiver. Walk the call chain to infer the
 			// entity from the *<Entity>Query (or *<Entity>Select) receiver,
 			// then verify the edge exists before emitting.
-			if entity, ok := inferQueryReceiverEntityInFile(sel.X, r.File, descs, alias); ok {
+			if entity, ok := inferQueryReceiverEntityInFile(recvForMatch, r.File, descs, alias); ok {
 				if edgeDescLookup(descs[entity], edge) {
-					newArgs := append([]ast.Expr{sel.X}, call.Args...)
+					newArgs := append([]ast.Expr{recvForMatch}, call.Args...)
 					emit(c, &ast.CallExpr{
 						Fun: &ast.SelectorExpr{
 							X:   ast.NewIdent(alias),
@@ -103,6 +115,7 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors, genImportP
 						},
 						Args: newArgs,
 					})
+					_ = droppedSelect
 					return true
 				}
 			}
@@ -247,8 +260,14 @@ func inferQueryReceiverEntityInFile(expr ast.Expr, file *ast.File, descs Descrip
 		// <alias>.Query<Parent><Edge>FromQuery(...) — rewritten form produced by
 		// a prior post-order pass on an inner chain segment. Return the
 		// edge's target entity (== Y in Query<X><Y>FromQuery → returns *<Y>Query).
+		// Also recognise <alias>.With<Parent><Edge>(...) — its return type is the
+		// receiver entity (the parent), which is what callers chaining a further
+		// .WithFoo() on the result need to identify.
 		if x, ok := sel.X.(*ast.Ident); ok && x.Name == genAlias {
 			if entity, found := entityFromFacadeName(sel.Sel.Name, descs); found {
+				return entity, true
+			}
+			if entity, found := entityFromWithFacadeName(sel.Sel.Name, descs); found {
 				return entity, true
 			}
 		}
@@ -438,6 +457,103 @@ func entityFromFacadeName(name string, descs Descriptors) (string, bool) {
 		}
 		if _, present := descs[edesc.Target]; present {
 			return edesc.Target, true
+		}
+	}
+	return "", false
+}
+
+// peelTrailingSelect strips a trailing `.Select(...)` call from a receiver
+// chain so the With facade rewrite can apply. Pre-PR-6 the expression
+// `q.Select(FieldID).WithFoo(...)` typechecked because eager-loads fired on
+// a fresh sub-query; post-PR-6 the With facade takes *<Entity>Query and
+// can't accept *<Entity>Select. The mechanical fix that preserves the
+// eager-load is to drop the Select — the column projection on the main
+// rows is lost, but callers consuming the result usually read .Edges (the
+// projection didn't restrict edge loads anyway).
+//
+// Returns the inner expression and true when a Select was peeled, the
+// original expression and false otherwise. Only handles a Select call as
+// the IMMEDIATE outermost segment of the receiver chain — the rare
+// `q.Where(...).Select(...)` pattern is left untouched (caller can manually
+// reorder).
+func peelTrailingSelect(expr ast.Expr) (ast.Expr, bool) {
+	call, ok := expr.(*ast.CallExpr)
+	if !ok {
+		return expr, false
+	}
+	sel, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return expr, false
+	}
+	if sel.Sel.Name != "Select" {
+		return expr, false
+	}
+	return sel.X, true
+}
+
+// callWithReceiver clones call replacing its receiver (the X of the
+// SelectorExpr in Fun) with newRecv. Used so receiver-type lookups can
+// see the post-peel receiver without permanently mutating the AST until
+// the caller confirms the rewrite applies.
+func callWithReceiver(call *ast.CallExpr, newRecv ast.Expr) *ast.CallExpr {
+	origSel, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return call
+	}
+	clonedSel := &ast.SelectorExpr{X: newRecv, Sel: origSel.Sel}
+	return &ast.CallExpr{
+		Fun:    clonedSel,
+		Lparen: call.Lparen,
+		Args:   call.Args,
+		Rparen: call.Rparen,
+	}
+}
+
+// entityFromWithFacadeName parses a `With<Parent><Edge>` facade name (as
+// emitted by ent's root facade.tmpl) and returns the parent entity name.
+// `gen.With<Parent><Edge>(q, ...)` returns *<Parent>Query (the receiver
+// entity is preserved across With chains, unlike Query<X><Y>FromQuery
+// which returns the edge's target).
+//
+// Used by the syntactic chain walker so a chain like
+//
+//	gen.WithBoxFolderProposal(q).WithListing(...).WithEscrow(...).Only(ctx)
+//
+// can be recognised: each chained .With<Edge> sees a receiver of the
+// preceding facade's parent entity (here, BoxFolder), and the rewriter
+// can emit a separate gen.WithBoxFoolder<Edge>(...) call for each link.
+func entityFromWithFacadeName(name string, descs Descriptors) (string, bool) {
+	rest, ok := strings.CutPrefix(name, "With")
+	if !ok {
+		return "", false
+	}
+	if strings.HasPrefix(rest, "Named") {
+		// WithNamed<Parent><Edge> follows the same return-type rule. Strip
+		// the Named prefix so the parent-prefix scan below works.
+		rest = strings.TrimPrefix(rest, "Named")
+	}
+	// Greedy: try the longest parent prefix first so e.g. "WrikeProject"
+	// doesn't get split as parent="Wrike", edge="Project" if both happen
+	// to exist as entities.
+	type candidate struct{ parent, edge string }
+	var candidates []candidate
+	for ent := range descs {
+		if strings.HasPrefix(rest, ent) && len(rest) > len(ent) {
+			candidates = append(candidates, candidate{parent: ent, edge: rest[len(ent):]})
+		}
+	}
+	for i := 1; i < len(candidates); i++ {
+		for j := i; j > 0 && len(candidates[j].parent) > len(candidates[j-1].parent); j-- {
+			candidates[j], candidates[j-1] = candidates[j-1], candidates[j]
+		}
+	}
+	for _, c := range candidates {
+		ed, ok := descs[c.parent]
+		if !ok {
+			continue
+		}
+		if _, ok := lookupEdgeDesc(ed, c.edge); ok {
+			return c.parent, true
 		}
 	}
 	return "", false

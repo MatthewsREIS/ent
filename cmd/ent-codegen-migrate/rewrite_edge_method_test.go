@@ -284,9 +284,10 @@ func use(ctx context.Context) {
 }
 
 // TestRewriteEdgeMethod_WithEdge_AfterSelect covers the real consumer shape:
-// q.Clone().Select(...).WithThread(...).All(ctx) where after .Select(...)
-// the receiver becomes *<Entity>Select (not *<Entity>Query), which the chain
-// walker must recognise as still belonging to the same entity.
+// q.Clone().Select(...).WithThread(...).All(ctx). Post-PR-6 the With facade
+// takes *<Entity>Query and rejects *<Entity>Select, so the rewriter must
+// peel the trailing Select off the receiver chain before emitting the
+// facade call (column projection is lost — see peelTrailingSelect docs).
 func TestRewriteEdgeMethod_WithEdge_AfterSelect(t *testing.T) {
 	descs := Descriptors{
 		"ChatterMessage": &EntityDesc{
@@ -314,9 +315,11 @@ func use(ctx context.Context) {
 `
 	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
-	require.Contains(t, out, "ent.WithChatterMessageThread(q.Clone().",
-		"WithThread after Select must be rewritten to WithChatterMessageThread facade with correct chain receiver")
+	require.Contains(t, out, "ent.WithChatterMessageThread(q.Clone(),",
+		"WithThread after Select must be rewritten to WithChatterMessageThread facade with the Select peeled off")
 	require.NotContains(t, out, ".WithThread(", "original WithThread call must not remain")
+	require.NotContains(t, out, ".Select(chattermessage.FieldID)",
+		"trailing Select must be dropped — *<Entity>Select can't satisfy *<Entity>Query receiver")
 }
 
 // TestRewriteEdgeMethod_WithEdge_AfterSelect_TypeAssertion covers the real
@@ -326,7 +329,8 @@ func use(ctx context.Context) {
 //
 // The chain walker must resolve the bare ident "query" through its
 // type-assertion RHS to extract the entity name (ChatterMessage) and
-// rewrite the subsequent WithThread call.
+// rewrite the subsequent WithThread call. The trailing Select is peeled
+// (see TestRewriteEdgeMethod_WithEdge_AfterSelect for why).
 func TestRewriteEdgeMethod_WithEdge_AfterSelect_TypeAssertion(t *testing.T) {
 	descs := Descriptors{
 		"ChatterMessage": &EntityDesc{
@@ -358,9 +362,11 @@ func use(ctx context.Context, q any) error {
 `
 	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
 	require.NoError(t, err)
-	require.Contains(t, out, "ent.WithChatterMessageThread(query.Clone().",
-		"WithThread after type-assertion must be rewritten with correct chain receiver")
+	require.Contains(t, out, "ent.WithChatterMessageThread(query.Clone(),",
+		"WithThread after type-assertion must be rewritten with the Select peeled")
 	require.NotContains(t, out, ".WithThread(", "original WithThread call must not remain")
+	require.NotContains(t, out, ".Select(chattermessage.FieldID)",
+		"trailing Select must be dropped")
 }
 
 // TestRewriteEdgeMethod_WithEdge_TypeAssertion_NoCommaOk covers the
