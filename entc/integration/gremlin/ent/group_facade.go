@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 )
 
@@ -30,3 +31,39 @@ type (
 var (
 	NewGroupClient = group.NewGroupClient
 )
+
+// WithGroupFiles forwards to edges.WithGroupFiles — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupFiles = edges.WithGroupFiles
+
+// QueryGroupFiles forwards to edges.QueryGroupFiles.
+var QueryGroupFiles = edges.QueryGroupFiles
+
+// QueryGroupFilesFromQuery forwards to edges.QueryGroupFilesFromQuery.
+var QueryGroupFilesFromQuery = edges.QueryGroupFilesFromQuery
+
+// WithGroupBlocked forwards to edges.WithGroupBlocked — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupBlocked = edges.WithGroupBlocked
+
+// QueryGroupBlocked forwards to edges.QueryGroupBlocked.
+var QueryGroupBlocked = edges.QueryGroupBlocked
+
+// QueryGroupBlockedFromQuery forwards to edges.QueryGroupBlockedFromQuery.
+var QueryGroupBlockedFromQuery = edges.QueryGroupBlockedFromQuery
+
+// WithGroupUsers forwards to edges.WithGroupUsers — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupUsers = edges.WithGroupUsers
+
+// QueryGroupUsers forwards to edges.QueryGroupUsers.
+var QueryGroupUsers = edges.QueryGroupUsers
+
+// QueryGroupUsersFromQuery forwards to edges.QueryGroupUsersFromQuery.
+var QueryGroupUsersFromQuery = edges.QueryGroupUsersFromQuery
+
+// WithGroupInfo forwards to edges.WithGroupInfo — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupInfo = edges.WithGroupInfo
+
+// QueryGroupInfo forwards to edges.QueryGroupInfo.
+var QueryGroupInfo = edges.QueryGroupInfo
+
+// QueryGroupInfoFromQuery forwards to edges.QueryGroupInfoFromQuery.
+var QueryGroupInfoFromQuery = edges.QueryGroupInfoFromQuery

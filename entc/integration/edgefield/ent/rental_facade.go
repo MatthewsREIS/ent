@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/rental"
 )
 
@@ -30,3 +31,21 @@ type (
 var (
 	NewRentalClient = rental.NewRentalClient
 )
+
+// WithRentalUser forwards to edges.WithRentalUser — body hoisted to gen/edges/rental.go for build parallelism.
+var WithRentalUser = edges.WithRentalUser
+
+// QueryRentalUser forwards to edges.QueryRentalUser.
+var QueryRentalUser = edges.QueryRentalUser
+
+// QueryRentalUserFromQuery forwards to edges.QueryRentalUserFromQuery.
+var QueryRentalUserFromQuery = edges.QueryRentalUserFromQuery
+
+// WithRentalCar forwards to edges.WithRentalCar — body hoisted to gen/edges/rental.go for build parallelism.
+var WithRentalCar = edges.WithRentalCar
+
+// QueryRentalCar forwards to edges.QueryRentalCar.
+var QueryRentalCar = edges.QueryRentalCar
+
+// QueryRentalCarFromQuery forwards to edges.QueryRentalCarFromQuery.
+var QueryRentalCarFromQuery = edges.QueryRentalCarFromQuery

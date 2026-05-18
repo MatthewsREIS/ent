@@ -15,7 +15,12 @@ in the LICENSE file in the root directory of this source tree.
 {{ $client := $n.ClientName }}
 
 import (
+	{{- if $n.Edges }}
 	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
+	"{{ $.Config.Package }}/edges"
+	{{- else }}
+	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
+	{{- end }}
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -71,8 +76,26 @@ var (
 
 {{- /* Cross-entity edge wiring. Edge function bodies (With, WithNamed, Query,
        QueryFromQuery) now live in gen/edges/<entity>.go (edges.tmpl).
-       Task 6 will fill this loop with var forwarders: var WithX = edges.WithX. */}}
+       Forwarders below redirect the root-package API to the edges sub-package. */}}
 {{- range $e := $n.Edges }}
+{{ $func := print "With" $n.Name $e.StructField }}
+{{ $qfunc := print "Query" $n.Name $e.StructField }}
+{{ $qqfunc := print "Query" $n.Name $e.StructField "FromQuery" }}
+
+// {{ $func }} forwards to edges.{{ $func }} — body hoisted to gen/edges/{{ $n.Package }}.go for build parallelism.
+var {{ $func }} = edges.{{ $func }}
+
+{{- if and ($.FeatureEnabled "namedges") (not $e.Unique) }}
+{{ $nfunc := print "WithNamed" $n.Name $e.StructField }}
+// {{ $nfunc }} forwards to edges.{{ $nfunc }}.
+var {{ $nfunc }} = edges.{{ $nfunc }}
+{{- end }}
+
+// {{ $qfunc }} forwards to edges.{{ $qfunc }}.
+var {{ $qfunc }} = edges.{{ $qfunc }}
+
+// {{ $qqfunc }} forwards to edges.{{ $qqfunc }}.
+var {{ $qqfunc }} = edges.{{ $qqfunc }}
 {{- end }}
 
 {{ end }}

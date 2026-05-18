@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewTweetTagClient            = tweettag.NewTweetTagClient
 	NewTweetTagFilterForMutation = tweettag.NewTweetTagFilterForMutation
 )
+
+// WithTweetTagTag forwards to edges.WithTweetTagTag — body hoisted to gen/edges/tweettag.go for build parallelism.
+var WithTweetTagTag = edges.WithTweetTagTag
+
+// QueryTweetTagTag forwards to edges.QueryTweetTagTag.
+var QueryTweetTagTag = edges.QueryTweetTagTag
+
+// QueryTweetTagTagFromQuery forwards to edges.QueryTweetTagTagFromQuery.
+var QueryTweetTagTagFromQuery = edges.QueryTweetTagTagFromQuery
+
+// WithTweetTagTweet forwards to edges.WithTweetTagTweet — body hoisted to gen/edges/tweettag.go for build parallelism.
+var WithTweetTagTweet = edges.WithTweetTagTweet
+
+// QueryTweetTagTweet forwards to edges.QueryTweetTagTweet.
+var QueryTweetTagTweet = edges.QueryTweetTagTweet
+
+// QueryTweetTagTweetFromQuery forwards to edges.QueryTweetTagTweetFromQuery.
+var QueryTweetTagTweetFromQuery = edges.QueryTweetTagTweetFromQuery

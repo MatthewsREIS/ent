@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/file"
 )
 
@@ -32,3 +33,33 @@ var (
 	NewFileClient            = file.NewFileClient
 	NewFileFilterForMutation = file.NewFileFilterForMutation
 )
+
+// WithFileOwner forwards to edges.WithFileOwner — body hoisted to gen/edges/file.go for build parallelism.
+var WithFileOwner = edges.WithFileOwner
+
+// QueryFileOwner forwards to edges.QueryFileOwner.
+var QueryFileOwner = edges.QueryFileOwner
+
+// QueryFileOwnerFromQuery forwards to edges.QueryFileOwnerFromQuery.
+var QueryFileOwnerFromQuery = edges.QueryFileOwnerFromQuery
+
+// WithFileType forwards to edges.WithFileType — body hoisted to gen/edges/file.go for build parallelism.
+var WithFileType = edges.WithFileType
+
+// QueryFileType forwards to edges.QueryFileType.
+var QueryFileType = edges.QueryFileType
+
+// QueryFileTypeFromQuery forwards to edges.QueryFileTypeFromQuery.
+var QueryFileTypeFromQuery = edges.QueryFileTypeFromQuery
+
+// WithFileField forwards to edges.WithFileField — body hoisted to gen/edges/file.go for build parallelism.
+var WithFileField = edges.WithFileField
+
+// WithNamedFileField forwards to edges.WithNamedFileField.
+var WithNamedFileField = edges.WithNamedFileField
+
+// QueryFileField forwards to edges.QueryFileField.
+var QueryFileField = edges.QueryFileField
+
+// QueryFileFieldFromQuery forwards to edges.QueryFileFieldFromQuery.
+var QueryFileFieldFromQuery = edges.QueryFileFieldFromQuery

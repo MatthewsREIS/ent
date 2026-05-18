@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 )
 
@@ -32,3 +33,39 @@ var (
 	NewPetClient            = pet.NewPetClient
 	NewPetFilterForMutation = pet.NewPetFilterForMutation
 )
+
+// WithPetOwner forwards to edges.WithPetOwner — body hoisted to gen/edges/pet.go for build parallelism.
+var WithPetOwner = edges.WithPetOwner
+
+// QueryPetOwner forwards to edges.QueryPetOwner.
+var QueryPetOwner = edges.QueryPetOwner
+
+// QueryPetOwnerFromQuery forwards to edges.QueryPetOwnerFromQuery.
+var QueryPetOwnerFromQuery = edges.QueryPetOwnerFromQuery
+
+// WithPetCars forwards to edges.WithPetCars — body hoisted to gen/edges/pet.go for build parallelism.
+var WithPetCars = edges.WithPetCars
+
+// QueryPetCars forwards to edges.QueryPetCars.
+var QueryPetCars = edges.QueryPetCars
+
+// QueryPetCarsFromQuery forwards to edges.QueryPetCarsFromQuery.
+var QueryPetCarsFromQuery = edges.QueryPetCarsFromQuery
+
+// WithPetFriends forwards to edges.WithPetFriends — body hoisted to gen/edges/pet.go for build parallelism.
+var WithPetFriends = edges.WithPetFriends
+
+// QueryPetFriends forwards to edges.QueryPetFriends.
+var QueryPetFriends = edges.QueryPetFriends
+
+// QueryPetFriendsFromQuery forwards to edges.QueryPetFriendsFromQuery.
+var QueryPetFriendsFromQuery = edges.QueryPetFriendsFromQuery
+
+// WithPetBestFriend forwards to edges.WithPetBestFriend — body hoisted to gen/edges/pet.go for build parallelism.
+var WithPetBestFriend = edges.WithPetBestFriend
+
+// QueryPetBestFriend forwards to edges.QueryPetBestFriend.
+var QueryPetBestFriend = edges.QueryPetBestFriend
+
+// QueryPetBestFriendFromQuery forwards to edges.QueryPetBestFriendFromQuery.
+var QueryPetBestFriendFromQuery = edges.QueryPetBestFriendFromQuery

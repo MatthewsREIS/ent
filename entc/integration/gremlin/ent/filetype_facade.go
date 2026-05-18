@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 )
 
@@ -32,3 +33,12 @@ type (
 var (
 	NewFileTypeClient = filetype.NewFileTypeClient
 )
+
+// WithFileTypeFiles forwards to edges.WithFileTypeFiles — body hoisted to gen/edges/filetype.go for build parallelism.
+var WithFileTypeFiles = edges.WithFileTypeFiles
+
+// QueryFileTypeFiles forwards to edges.QueryFileTypeFiles.
+var QueryFileTypeFiles = edges.QueryFileTypeFiles
+
+// QueryFileTypeFilesFromQuery forwards to edges.QueryFileTypeFilesFromQuery.
+var QueryFileTypeFilesFromQuery = edges.QueryFileTypeFilesFromQuery

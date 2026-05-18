@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 )
 
@@ -32,3 +33,39 @@ var (
 	NewGroupClient            = group.NewGroupClient
 	NewGroupFilterForMutation = group.NewGroupFilterForMutation
 )
+
+// WithGroupUsers forwards to edges.WithGroupUsers — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupUsers = edges.WithGroupUsers
+
+// QueryGroupUsers forwards to edges.QueryGroupUsers.
+var QueryGroupUsers = edges.QueryGroupUsers
+
+// QueryGroupUsersFromQuery forwards to edges.QueryGroupUsersFromQuery.
+var QueryGroupUsersFromQuery = edges.QueryGroupUsersFromQuery
+
+// WithGroupTags forwards to edges.WithGroupTags — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupTags = edges.WithGroupTags
+
+// QueryGroupTags forwards to edges.QueryGroupTags.
+var QueryGroupTags = edges.QueryGroupTags
+
+// QueryGroupTagsFromQuery forwards to edges.QueryGroupTagsFromQuery.
+var QueryGroupTagsFromQuery = edges.QueryGroupTagsFromQuery
+
+// WithGroupJoinedUsers forwards to edges.WithGroupJoinedUsers — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupJoinedUsers = edges.WithGroupJoinedUsers
+
+// QueryGroupJoinedUsers forwards to edges.QueryGroupJoinedUsers.
+var QueryGroupJoinedUsers = edges.QueryGroupJoinedUsers
+
+// QueryGroupJoinedUsersFromQuery forwards to edges.QueryGroupJoinedUsersFromQuery.
+var QueryGroupJoinedUsersFromQuery = edges.QueryGroupJoinedUsersFromQuery
+
+// WithGroupGroupTags forwards to edges.WithGroupGroupTags — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupGroupTags = edges.WithGroupGroupTags
+
+// QueryGroupGroupTags forwards to edges.QueryGroupGroupTags.
+var QueryGroupGroupTags = edges.QueryGroupGroupTags
+
+// QueryGroupGroupTagsFromQuery forwards to edges.QueryGroupGroupTagsFromQuery.
+var QueryGroupGroupTagsFromQuery = edges.QueryGroupGroupTagsFromQuery

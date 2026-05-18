@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
 )
 
@@ -30,3 +31,12 @@ type (
 var (
 	NewPostClient = post.NewPostClient
 )
+
+// WithPostAuthor forwards to edges.WithPostAuthor — body hoisted to gen/edges/post.go for build parallelism.
+var WithPostAuthor = edges.WithPostAuthor
+
+// QueryPostAuthor forwards to edges.QueryPostAuthor.
+var QueryPostAuthor = edges.QueryPostAuthor
+
+// QueryPostAuthorFromQuery forwards to edges.QueryPostAuthorFromQuery.
+var QueryPostAuthorFromQuery = edges.QueryPostAuthorFromQuery

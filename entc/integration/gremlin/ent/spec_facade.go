@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 )
 
@@ -30,3 +31,12 @@ type (
 var (
 	NewSpecClient = spec.NewSpecClient
 )
+
+// WithSpecCard forwards to edges.WithSpecCard — body hoisted to gen/edges/spec.go for build parallelism.
+var WithSpecCard = edges.WithSpecCard
+
+// QuerySpecCard forwards to edges.QuerySpecCard.
+var QuerySpecCard = edges.QuerySpecCard
+
+// QuerySpecCardFromQuery forwards to edges.QuerySpecCardFromQuery.
+var QuerySpecCardFromQuery = edges.QuerySpecCardFromQuery

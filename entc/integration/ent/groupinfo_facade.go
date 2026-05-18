@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
 )
 
@@ -32,3 +33,15 @@ var (
 	NewGroupInfoClient            = groupinfo.NewGroupInfoClient
 	NewGroupInfoFilterForMutation = groupinfo.NewGroupInfoFilterForMutation
 )
+
+// WithGroupInfoGroups forwards to edges.WithGroupInfoGroups — body hoisted to gen/edges/groupinfo.go for build parallelism.
+var WithGroupInfoGroups = edges.WithGroupInfoGroups
+
+// WithNamedGroupInfoGroups forwards to edges.WithNamedGroupInfoGroups.
+var WithNamedGroupInfoGroups = edges.WithNamedGroupInfoGroups
+
+// QueryGroupInfoGroups forwards to edges.QueryGroupInfoGroups.
+var QueryGroupInfoGroups = edges.QueryGroupInfoGroups
+
+// QueryGroupInfoGroupsFromQuery forwards to edges.QueryGroupInfoGroupsFromQuery.
+var QueryGroupInfoGroupsFromQuery = edges.QueryGroupInfoGroupsFromQuery

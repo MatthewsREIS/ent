@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/idtype/ent/edges"
 	"entgo.io/ent/entc/integration/idtype/ent/user"
 )
 
@@ -30,3 +31,30 @@ type (
 var (
 	NewUserClient = user.NewUserClient
 )
+
+// WithUserSpouse forwards to edges.WithUserSpouse — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserSpouse = edges.WithUserSpouse
+
+// QueryUserSpouse forwards to edges.QueryUserSpouse.
+var QueryUserSpouse = edges.QueryUserSpouse
+
+// QueryUserSpouseFromQuery forwards to edges.QueryUserSpouseFromQuery.
+var QueryUserSpouseFromQuery = edges.QueryUserSpouseFromQuery
+
+// WithUserFollowers forwards to edges.WithUserFollowers — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFollowers = edges.WithUserFollowers
+
+// QueryUserFollowers forwards to edges.QueryUserFollowers.
+var QueryUserFollowers = edges.QueryUserFollowers
+
+// QueryUserFollowersFromQuery forwards to edges.QueryUserFollowersFromQuery.
+var QueryUserFollowersFromQuery = edges.QueryUserFollowersFromQuery
+
+// WithUserFollowing forwards to edges.WithUserFollowing — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFollowing = edges.WithUserFollowing
+
+// QueryUserFollowing forwards to edges.QueryUserFollowing.
+var QueryUserFollowing = edges.QueryUserFollowing
+
+// QueryUserFollowingFromQuery forwards to edges.QueryUserFollowingFromQuery.
+var QueryUserFollowingFromQuery = edges.QueryUserFollowingFromQuery

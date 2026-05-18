@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/groupinfo"
 )
 
@@ -30,3 +31,12 @@ type (
 var (
 	NewGroupInfoClient = groupinfo.NewGroupInfoClient
 )
+
+// WithGroupInfoGroups forwards to edges.WithGroupInfoGroups — body hoisted to gen/edges/groupinfo.go for build parallelism.
+var WithGroupInfoGroups = edges.WithGroupInfoGroups
+
+// QueryGroupInfoGroups forwards to edges.QueryGroupInfoGroups.
+var QueryGroupInfoGroups = edges.QueryGroupInfoGroups
+
+// QueryGroupInfoGroupsFromQuery forwards to edges.QueryGroupInfoGroupsFromQuery.
+var QueryGroupInfoGroupsFromQuery = edges.QueryGroupInfoGroupsFromQuery

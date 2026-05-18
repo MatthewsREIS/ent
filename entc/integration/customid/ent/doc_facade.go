@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -32,3 +33,30 @@ var (
 	NewDocClient            = doc.NewDocClient
 	NewDocFilterForMutation = doc.NewDocFilterForMutation
 )
+
+// WithDocParent forwards to edges.WithDocParent — body hoisted to gen/edges/doc.go for build parallelism.
+var WithDocParent = edges.WithDocParent
+
+// QueryDocParent forwards to edges.QueryDocParent.
+var QueryDocParent = edges.QueryDocParent
+
+// QueryDocParentFromQuery forwards to edges.QueryDocParentFromQuery.
+var QueryDocParentFromQuery = edges.QueryDocParentFromQuery
+
+// WithDocChildren forwards to edges.WithDocChildren — body hoisted to gen/edges/doc.go for build parallelism.
+var WithDocChildren = edges.WithDocChildren
+
+// QueryDocChildren forwards to edges.QueryDocChildren.
+var QueryDocChildren = edges.QueryDocChildren
+
+// QueryDocChildrenFromQuery forwards to edges.QueryDocChildrenFromQuery.
+var QueryDocChildrenFromQuery = edges.QueryDocChildrenFromQuery
+
+// WithDocRelated forwards to edges.WithDocRelated — body hoisted to gen/edges/doc.go for build parallelism.
+var WithDocRelated = edges.WithDocRelated
+
+// QueryDocRelated forwards to edges.QueryDocRelated.
+var QueryDocRelated = edges.QueryDocRelated
+
+// QueryDocRelatedFromQuery forwards to edges.QueryDocRelatedFromQuery.
+var QueryDocRelatedFromQuery = edges.QueryDocRelatedFromQuery

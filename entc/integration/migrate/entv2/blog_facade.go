@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"entgo.io/ent/entc/integration/migrate/entv2/blog"
+	"entgo.io/ent/entc/integration/migrate/entv2/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -30,3 +31,12 @@ type (
 var (
 	NewBlogClient = blog.NewBlogClient
 )
+
+// WithBlogAdmins forwards to edges.WithBlogAdmins — body hoisted to gen/edges/blog.go for build parallelism.
+var WithBlogAdmins = edges.WithBlogAdmins
+
+// QueryBlogAdmins forwards to edges.QueryBlogAdmins.
+var QueryBlogAdmins = edges.QueryBlogAdmins
+
+// QueryBlogAdminsFromQuery forwards to edges.QueryBlogAdminsFromQuery.
+var QueryBlogAdminsFromQuery = edges.QueryBlogAdminsFromQuery

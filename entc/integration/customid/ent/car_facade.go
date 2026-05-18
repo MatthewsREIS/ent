@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/customid/ent/car"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -32,3 +33,12 @@ var (
 	NewCarClient            = car.NewCarClient
 	NewCarFilterForMutation = car.NewCarFilterForMutation
 )
+
+// WithCarOwner forwards to edges.WithCarOwner — body hoisted to gen/edges/car.go for build parallelism.
+var WithCarOwner = edges.WithCarOwner
+
+// QueryCarOwner forwards to edges.QueryCarOwner.
+var QueryCarOwner = edges.QueryCarOwner
+
+// QueryCarOwnerFromQuery forwards to edges.QueryCarOwnerFromQuery.
+var QueryCarOwnerFromQuery = edges.QueryCarOwnerFromQuery

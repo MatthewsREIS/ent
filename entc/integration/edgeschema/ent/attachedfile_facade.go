@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -32,3 +33,21 @@ var (
 	NewAttachedFileClient            = attachedfile.NewAttachedFileClient
 	NewAttachedFileFilterForMutation = attachedfile.NewAttachedFileFilterForMutation
 )
+
+// WithAttachedFileFi forwards to edges.WithAttachedFileFi — body hoisted to gen/edges/attachedfile.go for build parallelism.
+var WithAttachedFileFi = edges.WithAttachedFileFi
+
+// QueryAttachedFileFi forwards to edges.QueryAttachedFileFi.
+var QueryAttachedFileFi = edges.QueryAttachedFileFi
+
+// QueryAttachedFileFiFromQuery forwards to edges.QueryAttachedFileFiFromQuery.
+var QueryAttachedFileFiFromQuery = edges.QueryAttachedFileFiFromQuery
+
+// WithAttachedFileProc forwards to edges.WithAttachedFileProc — body hoisted to gen/edges/attachedfile.go for build parallelism.
+var WithAttachedFileProc = edges.WithAttachedFileProc
+
+// QueryAttachedFileProc forwards to edges.QueryAttachedFileProc.
+var QueryAttachedFileProc = edges.QueryAttachedFileProc
+
+// QueryAttachedFileProcFromQuery forwards to edges.QueryAttachedFileProcFromQuery.
+var QueryAttachedFileProcFromQuery = edges.QueryAttachedFileProcFromQuery

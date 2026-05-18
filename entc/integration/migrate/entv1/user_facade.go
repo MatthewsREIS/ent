@@ -7,6 +7,7 @@
 package entv1
 
 import (
+	"entgo.io/ent/entc/integration/migrate/entv1/edges"
 	"entgo.io/ent/entc/integration/migrate/entv1/user"
 )
 
@@ -31,3 +32,39 @@ type (
 var (
 	NewUserClient = user.NewUserClient
 )
+
+// WithUserParent forwards to edges.WithUserParent — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserParent = edges.WithUserParent
+
+// QueryUserParent forwards to edges.QueryUserParent.
+var QueryUserParent = edges.QueryUserParent
+
+// QueryUserParentFromQuery forwards to edges.QueryUserParentFromQuery.
+var QueryUserParentFromQuery = edges.QueryUserParentFromQuery
+
+// WithUserChildren forwards to edges.WithUserChildren — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserChildren = edges.WithUserChildren
+
+// QueryUserChildren forwards to edges.QueryUserChildren.
+var QueryUserChildren = edges.QueryUserChildren
+
+// QueryUserChildrenFromQuery forwards to edges.QueryUserChildrenFromQuery.
+var QueryUserChildrenFromQuery = edges.QueryUserChildrenFromQuery
+
+// WithUserSpouse forwards to edges.WithUserSpouse — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserSpouse = edges.WithUserSpouse
+
+// QueryUserSpouse forwards to edges.QueryUserSpouse.
+var QueryUserSpouse = edges.QueryUserSpouse
+
+// QueryUserSpouseFromQuery forwards to edges.QueryUserSpouseFromQuery.
+var QueryUserSpouseFromQuery = edges.QueryUserSpouseFromQuery
+
+// WithUserCar forwards to edges.WithUserCar — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserCar = edges.WithUserCar
+
+// QueryUserCar forwards to edges.QueryUserCar.
+var QueryUserCar = edges.QueryUserCar
+
+// QueryUserCarFromQuery forwards to edges.QueryUserCarFromQuery.
+var QueryUserCarFromQuery = edges.QueryUserCarFromQuery

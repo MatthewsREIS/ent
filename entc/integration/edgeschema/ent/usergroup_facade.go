@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewUserGroupClient            = usergroup.NewUserGroupClient
 	NewUserGroupFilterForMutation = usergroup.NewUserGroupFilterForMutation
 )
+
+// WithUserGroupUser forwards to edges.WithUserGroupUser — body hoisted to gen/edges/usergroup.go for build parallelism.
+var WithUserGroupUser = edges.WithUserGroupUser
+
+// QueryUserGroupUser forwards to edges.QueryUserGroupUser.
+var QueryUserGroupUser = edges.QueryUserGroupUser
+
+// QueryUserGroupUserFromQuery forwards to edges.QueryUserGroupUserFromQuery.
+var QueryUserGroupUserFromQuery = edges.QueryUserGroupUserFromQuery
+
+// WithUserGroupGroup forwards to edges.WithUserGroupGroup — body hoisted to gen/edges/usergroup.go for build parallelism.
+var WithUserGroupGroup = edges.WithUserGroupGroup
+
+// QueryUserGroupGroup forwards to edges.QueryUserGroupGroup.
+var QueryUserGroupGroup = edges.QueryUserGroupGroup
+
+// QueryUserGroupGroupFromQuery forwards to edges.QueryUserGroupGroupFromQuery.
+var QueryUserGroupGroupFromQuery = edges.QueryUserGroupGroupFromQuery

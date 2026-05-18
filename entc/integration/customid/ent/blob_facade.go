@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/customid/ent/blob"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -32,3 +33,30 @@ var (
 	NewBlobClient            = blob.NewBlobClient
 	NewBlobFilterForMutation = blob.NewBlobFilterForMutation
 )
+
+// WithBlobParent forwards to edges.WithBlobParent — body hoisted to gen/edges/blob.go for build parallelism.
+var WithBlobParent = edges.WithBlobParent
+
+// QueryBlobParent forwards to edges.QueryBlobParent.
+var QueryBlobParent = edges.QueryBlobParent
+
+// QueryBlobParentFromQuery forwards to edges.QueryBlobParentFromQuery.
+var QueryBlobParentFromQuery = edges.QueryBlobParentFromQuery
+
+// WithBlobLinks forwards to edges.WithBlobLinks — body hoisted to gen/edges/blob.go for build parallelism.
+var WithBlobLinks = edges.WithBlobLinks
+
+// QueryBlobLinks forwards to edges.QueryBlobLinks.
+var QueryBlobLinks = edges.QueryBlobLinks
+
+// QueryBlobLinksFromQuery forwards to edges.QueryBlobLinksFromQuery.
+var QueryBlobLinksFromQuery = edges.QueryBlobLinksFromQuery
+
+// WithBlobBlobLinks forwards to edges.WithBlobBlobLinks — body hoisted to gen/edges/blob.go for build parallelism.
+var WithBlobBlobLinks = edges.WithBlobBlobLinks
+
+// QueryBlobBlobLinks forwards to edges.QueryBlobBlobLinks.
+var QueryBlobBlobLinks = edges.QueryBlobBlobLinks
+
+// QueryBlobBlobLinksFromQuery forwards to edges.QueryBlobBlobLinksFromQuery.
+var QueryBlobBlobLinksFromQuery = edges.QueryBlobBlobLinksFromQuery

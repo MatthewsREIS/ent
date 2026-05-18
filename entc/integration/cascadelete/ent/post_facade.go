@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/cascadelete/ent/edges"
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
 )
 
@@ -30,3 +31,21 @@ type (
 var (
 	NewPostClient = post.NewPostClient
 )
+
+// WithPostAuthor forwards to edges.WithPostAuthor — body hoisted to gen/edges/post.go for build parallelism.
+var WithPostAuthor = edges.WithPostAuthor
+
+// QueryPostAuthor forwards to edges.QueryPostAuthor.
+var QueryPostAuthor = edges.QueryPostAuthor
+
+// QueryPostAuthorFromQuery forwards to edges.QueryPostAuthorFromQuery.
+var QueryPostAuthorFromQuery = edges.QueryPostAuthorFromQuery
+
+// WithPostComments forwards to edges.WithPostComments — body hoisted to gen/edges/post.go for build parallelism.
+var WithPostComments = edges.WithPostComments
+
+// QueryPostComments forwards to edges.QueryPostComments.
+var QueryPostComments = edges.QueryPostComments
+
+// QueryPostCommentsFromQuery forwards to edges.QueryPostCommentsFromQuery.
+var QueryPostCommentsFromQuery = edges.QueryPostCommentsFromQuery

@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 )
 
@@ -30,3 +31,12 @@ type (
 var (
 	NewInfoClient = info.NewInfoClient
 )
+
+// WithInfoUser forwards to edges.WithInfoUser — body hoisted to gen/edges/info.go for build parallelism.
+var WithInfoUser = edges.WithInfoUser
+
+// QueryInfoUser forwards to edges.QueryInfoUser.
+var QueryInfoUser = edges.QueryInfoUser
+
+// QueryInfoUserFromQuery forwards to edges.QueryInfoUserFromQuery.
+var QueryInfoUserFromQuery = edges.QueryInfoUserFromQuery

@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/grouptag"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewGroupTagClient            = grouptag.NewGroupTagClient
 	NewGroupTagFilterForMutation = grouptag.NewGroupTagFilterForMutation
 )
+
+// WithGroupTagTag forwards to edges.WithGroupTagTag — body hoisted to gen/edges/grouptag.go for build parallelism.
+var WithGroupTagTag = edges.WithGroupTagTag
+
+// QueryGroupTagTag forwards to edges.QueryGroupTagTag.
+var QueryGroupTagTag = edges.QueryGroupTagTag
+
+// QueryGroupTagTagFromQuery forwards to edges.QueryGroupTagTagFromQuery.
+var QueryGroupTagTagFromQuery = edges.QueryGroupTagTagFromQuery
+
+// WithGroupTagGroup forwards to edges.WithGroupTagGroup — body hoisted to gen/edges/grouptag.go for build parallelism.
+var WithGroupTagGroup = edges.WithGroupTagGroup
+
+// QueryGroupTagGroup forwards to edges.QueryGroupTagGroup.
+var QueryGroupTagGroup = edges.QueryGroupTagGroup
+
+// QueryGroupTagGroupFromQuery forwards to edges.QueryGroupTagGroupFromQuery.
+var QueryGroupTagGroupFromQuery = edges.QueryGroupTagGroupFromQuery

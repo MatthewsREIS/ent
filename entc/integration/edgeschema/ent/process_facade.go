@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewProcessClient            = process.NewProcessClient
 	NewProcessFilterForMutation = process.NewProcessFilterForMutation
 )
+
+// WithProcessFiles forwards to edges.WithProcessFiles — body hoisted to gen/edges/process.go for build parallelism.
+var WithProcessFiles = edges.WithProcessFiles
+
+// QueryProcessFiles forwards to edges.QueryProcessFiles.
+var QueryProcessFiles = edges.QueryProcessFiles
+
+// QueryProcessFilesFromQuery forwards to edges.QueryProcessFilesFromQuery.
+var QueryProcessFilesFromQuery = edges.QueryProcessFilesFromQuery
+
+// WithProcessAttachedFiles forwards to edges.WithProcessAttachedFiles — body hoisted to gen/edges/process.go for build parallelism.
+var WithProcessAttachedFiles = edges.WithProcessAttachedFiles
+
+// QueryProcessAttachedFiles forwards to edges.QueryProcessAttachedFiles.
+var QueryProcessAttachedFiles = edges.QueryProcessAttachedFiles
+
+// QueryProcessAttachedFilesFromQuery forwards to edges.QueryProcessAttachedFilesFromQuery.
+var QueryProcessAttachedFilesFromQuery = edges.QueryProcessAttachedFilesFromQuery

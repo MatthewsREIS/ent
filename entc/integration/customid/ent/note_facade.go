@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/note"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewNoteClient            = note.NewNoteClient
 	NewNoteFilterForMutation = note.NewNoteFilterForMutation
 )
+
+// WithNoteParent forwards to edges.WithNoteParent — body hoisted to gen/edges/note.go for build parallelism.
+var WithNoteParent = edges.WithNoteParent
+
+// QueryNoteParent forwards to edges.QueryNoteParent.
+var QueryNoteParent = edges.QueryNoteParent
+
+// QueryNoteParentFromQuery forwards to edges.QueryNoteParentFromQuery.
+var QueryNoteParentFromQuery = edges.QueryNoteParentFromQuery
+
+// WithNoteChildren forwards to edges.WithNoteChildren — body hoisted to gen/edges/note.go for build parallelism.
+var WithNoteChildren = edges.WithNoteChildren
+
+// QueryNoteChildren forwards to edges.QueryNoteChildren.
+var QueryNoteChildren = edges.QueryNoteChildren
+
+// QueryNoteChildrenFromQuery forwards to edges.QueryNoteChildrenFromQuery.
+var QueryNoteChildrenFromQuery = edges.QueryNoteChildrenFromQuery

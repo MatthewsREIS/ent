@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
+	"entgo.io/ent/entc/integration/cascadelete/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -30,3 +31,12 @@ type (
 var (
 	NewCommentClient = comment.NewCommentClient
 )
+
+// WithCommentPost forwards to edges.WithCommentPost — body hoisted to gen/edges/comment.go for build parallelism.
+var WithCommentPost = edges.WithCommentPost
+
+// QueryCommentPost forwards to edges.QueryCommentPost.
+var QueryCommentPost = edges.QueryCommentPost
+
+// QueryCommentPostFromQuery forwards to edges.QueryCommentPostFromQuery.
+var QueryCommentPostFromQuery = edges.QueryCommentPostFromQuery

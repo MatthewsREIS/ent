@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewIntSIDClient            = intsid.NewIntSIDClient
 	NewIntSIDFilterForMutation = intsid.NewIntSIDFilterForMutation
 )
+
+// WithIntSIDParent forwards to edges.WithIntSIDParent — body hoisted to gen/edges/intsid.go for build parallelism.
+var WithIntSIDParent = edges.WithIntSIDParent
+
+// QueryIntSIDParent forwards to edges.QueryIntSIDParent.
+var QueryIntSIDParent = edges.QueryIntSIDParent
+
+// QueryIntSIDParentFromQuery forwards to edges.QueryIntSIDParentFromQuery.
+var QueryIntSIDParentFromQuery = edges.QueryIntSIDParentFromQuery
+
+// WithIntSIDChildren forwards to edges.WithIntSIDChildren — body hoisted to gen/edges/intsid.go for build parallelism.
+var WithIntSIDChildren = edges.WithIntSIDChildren
+
+// QueryIntSIDChildren forwards to edges.QueryIntSIDChildren.
+var QueryIntSIDChildren = edges.QueryIntSIDChildren
+
+// QueryIntSIDChildrenFromQuery forwards to edges.QueryIntSIDChildrenFromQuery.
+var QueryIntSIDChildrenFromQuery = edges.QueryIntSIDChildrenFromQuery

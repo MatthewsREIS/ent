@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/customid/ent/device"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -32,3 +33,21 @@ var (
 	NewDeviceClient            = device.NewDeviceClient
 	NewDeviceFilterForMutation = device.NewDeviceFilterForMutation
 )
+
+// WithDeviceActiveSession forwards to edges.WithDeviceActiveSession — body hoisted to gen/edges/device.go for build parallelism.
+var WithDeviceActiveSession = edges.WithDeviceActiveSession
+
+// QueryDeviceActiveSession forwards to edges.QueryDeviceActiveSession.
+var QueryDeviceActiveSession = edges.QueryDeviceActiveSession
+
+// QueryDeviceActiveSessionFromQuery forwards to edges.QueryDeviceActiveSessionFromQuery.
+var QueryDeviceActiveSessionFromQuery = edges.QueryDeviceActiveSessionFromQuery
+
+// WithDeviceSessions forwards to edges.WithDeviceSessions — body hoisted to gen/edges/device.go for build parallelism.
+var WithDeviceSessions = edges.WithDeviceSessions
+
+// QueryDeviceSessions forwards to edges.QueryDeviceSessions.
+var QueryDeviceSessions = edges.QueryDeviceSessions
+
+// QueryDeviceSessionsFromQuery forwards to edges.QueryDeviceSessionsFromQuery.
+var QueryDeviceSessionsFromQuery = edges.QueryDeviceSessionsFromQuery

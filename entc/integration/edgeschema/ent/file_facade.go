@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 )
 
@@ -32,3 +33,12 @@ var (
 	NewFileClient            = file.NewFileClient
 	NewFileFilterForMutation = file.NewFileFilterForMutation
 )
+
+// WithFileProcesses forwards to edges.WithFileProcesses — body hoisted to gen/edges/file.go for build parallelism.
+var WithFileProcesses = edges.WithFileProcesses
+
+// QueryFileProcesses forwards to edges.QueryFileProcesses.
+var QueryFileProcesses = edges.QueryFileProcesses
+
+// QueryFileProcessesFromQuery forwards to edges.QueryFileProcessesFromQuery.
+var QueryFileProcessesFromQuery = edges.QueryFileProcessesFromQuery

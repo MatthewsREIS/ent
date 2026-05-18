@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
 )
 
@@ -30,3 +31,30 @@ type (
 var (
 	NewFileClient = file.NewFileClient
 )
+
+// WithFileOwner forwards to edges.WithFileOwner — body hoisted to gen/edges/file.go for build parallelism.
+var WithFileOwner = edges.WithFileOwner
+
+// QueryFileOwner forwards to edges.QueryFileOwner.
+var QueryFileOwner = edges.QueryFileOwner
+
+// QueryFileOwnerFromQuery forwards to edges.QueryFileOwnerFromQuery.
+var QueryFileOwnerFromQuery = edges.QueryFileOwnerFromQuery
+
+// WithFileType forwards to edges.WithFileType — body hoisted to gen/edges/file.go for build parallelism.
+var WithFileType = edges.WithFileType
+
+// QueryFileType forwards to edges.QueryFileType.
+var QueryFileType = edges.QueryFileType
+
+// QueryFileTypeFromQuery forwards to edges.QueryFileTypeFromQuery.
+var QueryFileTypeFromQuery = edges.QueryFileTypeFromQuery
+
+// WithFileField forwards to edges.WithFileField — body hoisted to gen/edges/file.go for build parallelism.
+var WithFileField = edges.WithFileField
+
+// QueryFileField forwards to edges.QueryFileField.
+var QueryFileField = edges.QueryFileField
+
+// QueryFileFieldFromQuery forwards to edges.QueryFileFieldFromQuery.
+var QueryFileFieldFromQuery = edges.QueryFileFieldFromQuery

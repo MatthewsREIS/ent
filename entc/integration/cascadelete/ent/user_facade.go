@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/cascadelete/ent/edges"
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
 )
 
@@ -30,3 +31,12 @@ type (
 var (
 	NewUserClient = user.NewUserClient
 )
+
+// WithUserPosts forwards to edges.WithUserPosts — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserPosts = edges.WithUserPosts
+
+// QueryUserPosts forwards to edges.QueryUserPosts.
+var QueryUserPosts = edges.QueryUserPosts
+
+// QueryUserPostsFromQuery forwards to edges.QueryUserPostsFromQuery.
+var QueryUserPostsFromQuery = edges.QueryUserPostsFromQuery

@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/user"
 )
 
@@ -34,3 +35,123 @@ var (
 	NewUserClient            = user.NewUserClient
 	NewUserFilterForMutation = user.NewUserFilterForMutation
 )
+
+// WithUserCard forwards to edges.WithUserCard — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserCard = edges.WithUserCard
+
+// QueryUserCard forwards to edges.QueryUserCard.
+var QueryUserCard = edges.QueryUserCard
+
+// QueryUserCardFromQuery forwards to edges.QueryUserCardFromQuery.
+var QueryUserCardFromQuery = edges.QueryUserCardFromQuery
+
+// WithUserPets forwards to edges.WithUserPets — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserPets = edges.WithUserPets
+
+// WithNamedUserPets forwards to edges.WithNamedUserPets.
+var WithNamedUserPets = edges.WithNamedUserPets
+
+// QueryUserPets forwards to edges.QueryUserPets.
+var QueryUserPets = edges.QueryUserPets
+
+// QueryUserPetsFromQuery forwards to edges.QueryUserPetsFromQuery.
+var QueryUserPetsFromQuery = edges.QueryUserPetsFromQuery
+
+// WithUserFiles forwards to edges.WithUserFiles — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFiles = edges.WithUserFiles
+
+// WithNamedUserFiles forwards to edges.WithNamedUserFiles.
+var WithNamedUserFiles = edges.WithNamedUserFiles
+
+// QueryUserFiles forwards to edges.QueryUserFiles.
+var QueryUserFiles = edges.QueryUserFiles
+
+// QueryUserFilesFromQuery forwards to edges.QueryUserFilesFromQuery.
+var QueryUserFilesFromQuery = edges.QueryUserFilesFromQuery
+
+// WithUserGroups forwards to edges.WithUserGroups — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserGroups = edges.WithUserGroups
+
+// WithNamedUserGroups forwards to edges.WithNamedUserGroups.
+var WithNamedUserGroups = edges.WithNamedUserGroups
+
+// QueryUserGroups forwards to edges.QueryUserGroups.
+var QueryUserGroups = edges.QueryUserGroups
+
+// QueryUserGroupsFromQuery forwards to edges.QueryUserGroupsFromQuery.
+var QueryUserGroupsFromQuery = edges.QueryUserGroupsFromQuery
+
+// WithUserFriends forwards to edges.WithUserFriends — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFriends = edges.WithUserFriends
+
+// WithNamedUserFriends forwards to edges.WithNamedUserFriends.
+var WithNamedUserFriends = edges.WithNamedUserFriends
+
+// QueryUserFriends forwards to edges.QueryUserFriends.
+var QueryUserFriends = edges.QueryUserFriends
+
+// QueryUserFriendsFromQuery forwards to edges.QueryUserFriendsFromQuery.
+var QueryUserFriendsFromQuery = edges.QueryUserFriendsFromQuery
+
+// WithUserFollowers forwards to edges.WithUserFollowers — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFollowers = edges.WithUserFollowers
+
+// WithNamedUserFollowers forwards to edges.WithNamedUserFollowers.
+var WithNamedUserFollowers = edges.WithNamedUserFollowers
+
+// QueryUserFollowers forwards to edges.QueryUserFollowers.
+var QueryUserFollowers = edges.QueryUserFollowers
+
+// QueryUserFollowersFromQuery forwards to edges.QueryUserFollowersFromQuery.
+var QueryUserFollowersFromQuery = edges.QueryUserFollowersFromQuery
+
+// WithUserFollowing forwards to edges.WithUserFollowing — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFollowing = edges.WithUserFollowing
+
+// WithNamedUserFollowing forwards to edges.WithNamedUserFollowing.
+var WithNamedUserFollowing = edges.WithNamedUserFollowing
+
+// QueryUserFollowing forwards to edges.QueryUserFollowing.
+var QueryUserFollowing = edges.QueryUserFollowing
+
+// QueryUserFollowingFromQuery forwards to edges.QueryUserFollowingFromQuery.
+var QueryUserFollowingFromQuery = edges.QueryUserFollowingFromQuery
+
+// WithUserTeam forwards to edges.WithUserTeam — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserTeam = edges.WithUserTeam
+
+// QueryUserTeam forwards to edges.QueryUserTeam.
+var QueryUserTeam = edges.QueryUserTeam
+
+// QueryUserTeamFromQuery forwards to edges.QueryUserTeamFromQuery.
+var QueryUserTeamFromQuery = edges.QueryUserTeamFromQuery
+
+// WithUserSpouse forwards to edges.WithUserSpouse — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserSpouse = edges.WithUserSpouse
+
+// QueryUserSpouse forwards to edges.QueryUserSpouse.
+var QueryUserSpouse = edges.QueryUserSpouse
+
+// QueryUserSpouseFromQuery forwards to edges.QueryUserSpouseFromQuery.
+var QueryUserSpouseFromQuery = edges.QueryUserSpouseFromQuery
+
+// WithUserChildren forwards to edges.WithUserChildren — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserChildren = edges.WithUserChildren
+
+// WithNamedUserChildren forwards to edges.WithNamedUserChildren.
+var WithNamedUserChildren = edges.WithNamedUserChildren
+
+// QueryUserChildren forwards to edges.QueryUserChildren.
+var QueryUserChildren = edges.QueryUserChildren
+
+// QueryUserChildrenFromQuery forwards to edges.QueryUserChildrenFromQuery.
+var QueryUserChildrenFromQuery = edges.QueryUserChildrenFromQuery
+
+// WithUserParent forwards to edges.WithUserParent — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserParent = edges.WithUserParent
+
+// QueryUserParent forwards to edges.QueryUserParent.
+var QueryUserParent = edges.QueryUserParent
+
+// QueryUserParentFromQuery forwards to edges.QueryUserParentFromQuery.
+var QueryUserParentFromQuery = edges.QueryUserParentFromQuery

@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/filetype"
 )
 
@@ -34,3 +35,15 @@ var (
 	NewFileTypeClient            = filetype.NewFileTypeClient
 	NewFileTypeFilterForMutation = filetype.NewFileTypeFilterForMutation
 )
+
+// WithFileTypeFiles forwards to edges.WithFileTypeFiles — body hoisted to gen/edges/filetype.go for build parallelism.
+var WithFileTypeFiles = edges.WithFileTypeFiles
+
+// WithNamedFileTypeFiles forwards to edges.WithNamedFileTypeFiles.
+var WithNamedFileTypeFiles = edges.WithNamedFileTypeFiles
+
+// QueryFileTypeFiles forwards to edges.QueryFileTypeFiles.
+var QueryFileTypeFiles = edges.QueryFileTypeFiles
+
+// QueryFileTypeFilesFromQuery forwards to edges.QueryFileTypeFilesFromQuery.
+var QueryFileTypeFilesFromQuery = edges.QueryFileTypeFilesFromQuery

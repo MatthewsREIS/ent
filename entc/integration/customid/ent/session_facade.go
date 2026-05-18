@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 )
 
@@ -32,3 +33,12 @@ var (
 	NewSessionClient            = session.NewSessionClient
 	NewSessionFilterForMutation = session.NewSessionFilterForMutation
 )
+
+// WithSessionDevice forwards to edges.WithSessionDevice — body hoisted to gen/edges/session.go for build parallelism.
+var WithSessionDevice = edges.WithSessionDevice
+
+// QuerySessionDevice forwards to edges.QuerySessionDevice.
+var QuerySessionDevice = edges.QuerySessionDevice
+
+// QuerySessionDeviceFromQuery forwards to edges.QuerySessionDeviceFromQuery.
+var QuerySessionDeviceFromQuery = edges.QuerySessionDeviceFromQuery

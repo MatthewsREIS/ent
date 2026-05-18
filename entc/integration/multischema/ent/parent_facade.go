@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/multischema/ent/edges"
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
 )
 
@@ -30,3 +31,21 @@ type (
 var (
 	NewParentClient = parent.NewParentClient
 )
+
+// WithParentChild forwards to edges.WithParentChild — body hoisted to gen/edges/parent.go for build parallelism.
+var WithParentChild = edges.WithParentChild
+
+// QueryParentChild forwards to edges.QueryParentChild.
+var QueryParentChild = edges.QueryParentChild
+
+// QueryParentChildFromQuery forwards to edges.QueryParentChildFromQuery.
+var QueryParentChildFromQuery = edges.QueryParentChildFromQuery
+
+// WithParentParent forwards to edges.WithParentParent — body hoisted to gen/edges/parent.go for build parallelism.
+var WithParentParent = edges.WithParentParent
+
+// QueryParentParent forwards to edges.QueryParentParent.
+var QueryParentParent = edges.QueryParentParent
+
+// QueryParentParentFromQuery forwards to edges.QueryParentParentFromQuery.
+var QueryParentParentFromQuery = edges.QueryParentParentFromQuery

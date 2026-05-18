@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tag"
 )
 
@@ -32,3 +33,39 @@ var (
 	NewTagClient            = tag.NewTagClient
 	NewTagFilterForMutation = tag.NewTagFilterForMutation
 )
+
+// WithTagTweets forwards to edges.WithTagTweets — body hoisted to gen/edges/tag.go for build parallelism.
+var WithTagTweets = edges.WithTagTweets
+
+// QueryTagTweets forwards to edges.QueryTagTweets.
+var QueryTagTweets = edges.QueryTagTweets
+
+// QueryTagTweetsFromQuery forwards to edges.QueryTagTweetsFromQuery.
+var QueryTagTweetsFromQuery = edges.QueryTagTweetsFromQuery
+
+// WithTagGroups forwards to edges.WithTagGroups — body hoisted to gen/edges/tag.go for build parallelism.
+var WithTagGroups = edges.WithTagGroups
+
+// QueryTagGroups forwards to edges.QueryTagGroups.
+var QueryTagGroups = edges.QueryTagGroups
+
+// QueryTagGroupsFromQuery forwards to edges.QueryTagGroupsFromQuery.
+var QueryTagGroupsFromQuery = edges.QueryTagGroupsFromQuery
+
+// WithTagTweetTags forwards to edges.WithTagTweetTags — body hoisted to gen/edges/tag.go for build parallelism.
+var WithTagTweetTags = edges.WithTagTweetTags
+
+// QueryTagTweetTags forwards to edges.QueryTagTweetTags.
+var QueryTagTweetTags = edges.QueryTagTweetTags
+
+// QueryTagTweetTagsFromQuery forwards to edges.QueryTagTweetTagsFromQuery.
+var QueryTagTweetTagsFromQuery = edges.QueryTagTweetTagsFromQuery
+
+// WithTagGroupTags forwards to edges.WithTagGroupTags — body hoisted to gen/edges/tag.go for build parallelism.
+var WithTagGroupTags = edges.WithTagGroupTags
+
+// QueryTagGroupTags forwards to edges.QueryTagGroupTags.
+var QueryTagGroupTags = edges.QueryTagGroupTags
+
+// QueryTagGroupTagsFromQuery forwards to edges.QueryTagGroupTagsFromQuery.
+var QueryTagGroupTagsFromQuery = edges.QueryTagGroupTagsFromQuery

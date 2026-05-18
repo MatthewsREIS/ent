@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/friendship"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewFriendshipClient            = friendship.NewFriendshipClient
 	NewFriendshipFilterForMutation = friendship.NewFriendshipFilterForMutation
 )
+
+// WithFriendshipUser forwards to edges.WithFriendshipUser — body hoisted to gen/edges/friendship.go for build parallelism.
+var WithFriendshipUser = edges.WithFriendshipUser
+
+// QueryFriendshipUser forwards to edges.QueryFriendshipUser.
+var QueryFriendshipUser = edges.QueryFriendshipUser
+
+// QueryFriendshipUserFromQuery forwards to edges.QueryFriendshipUserFromQuery.
+var QueryFriendshipUserFromQuery = edges.QueryFriendshipUserFromQuery
+
+// WithFriendshipFriend forwards to edges.WithFriendshipFriend — body hoisted to gen/edges/friendship.go for build parallelism.
+var WithFriendshipFriend = edges.WithFriendshipFriend
+
+// QueryFriendshipFriend forwards to edges.QueryFriendshipFriend.
+var QueryFriendshipFriend = edges.QueryFriendshipFriend
+
+// QueryFriendshipFriendFromQuery forwards to edges.QueryFriendshipFriendFromQuery.
+var QueryFriendshipFriendFromQuery = edges.QueryFriendshipFriendFromQuery

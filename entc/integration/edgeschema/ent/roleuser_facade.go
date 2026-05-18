@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewRoleUserClient            = roleuser.NewRoleUserClient
 	NewRoleUserFilterForMutation = roleuser.NewRoleUserFilterForMutation
 )
+
+// WithRoleUserRole forwards to edges.WithRoleUserRole — body hoisted to gen/edges/roleuser.go for build parallelism.
+var WithRoleUserRole = edges.WithRoleUserRole
+
+// QueryRoleUserRole forwards to edges.QueryRoleUserRole.
+var QueryRoleUserRole = edges.QueryRoleUserRole
+
+// QueryRoleUserRoleFromQuery forwards to edges.QueryRoleUserRoleFromQuery.
+var QueryRoleUserRoleFromQuery = edges.QueryRoleUserRoleFromQuery
+
+// WithRoleUserUser forwards to edges.WithRoleUserUser — body hoisted to gen/edges/roleuser.go for build parallelism.
+var WithRoleUserUser = edges.WithRoleUserUser
+
+// QueryRoleUserUser forwards to edges.QueryRoleUserUser.
+var QueryRoleUserUser = edges.QueryRoleUserUser
+
+// QueryRoleUserUserFromQuery forwards to edges.QueryRoleUserUserFromQuery.
+var QueryRoleUserUserFromQuery = edges.QueryRoleUserUserFromQuery

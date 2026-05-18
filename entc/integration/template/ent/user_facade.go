@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/template/ent/edges"
 	"entgo.io/ent/entc/integration/template/ent/user"
 )
 
@@ -30,3 +31,21 @@ type (
 var (
 	NewUserClient = user.NewUserClient
 )
+
+// WithUserPets forwards to edges.WithUserPets — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserPets = edges.WithUserPets
+
+// QueryUserPets forwards to edges.QueryUserPets.
+var QueryUserPets = edges.QueryUserPets
+
+// QueryUserPetsFromQuery forwards to edges.QueryUserPetsFromQuery.
+var QueryUserPetsFromQuery = edges.QueryUserPetsFromQuery
+
+// WithUserFriends forwards to edges.WithUserFriends — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFriends = edges.WithUserFriends
+
+// QueryUserFriends forwards to edges.QueryUserFriends.
+var QueryUserFriends = edges.QueryUserFriends
+
+// QueryUserFriendsFromQuery forwards to edges.QueryUserFriendsFromQuery.
+var QueryUserFriendsFromQuery = edges.QueryUserFriendsFromQuery

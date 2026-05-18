@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/ent/card"
+	"entgo.io/ent/entc/integration/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -32,3 +33,24 @@ var (
 	NewCardClient            = card.NewCardClient
 	NewCardFilterForMutation = card.NewCardFilterForMutation
 )
+
+// WithCardOwner forwards to edges.WithCardOwner — body hoisted to gen/edges/card.go for build parallelism.
+var WithCardOwner = edges.WithCardOwner
+
+// QueryCardOwner forwards to edges.QueryCardOwner.
+var QueryCardOwner = edges.QueryCardOwner
+
+// QueryCardOwnerFromQuery forwards to edges.QueryCardOwnerFromQuery.
+var QueryCardOwnerFromQuery = edges.QueryCardOwnerFromQuery
+
+// WithCardSpec forwards to edges.WithCardSpec — body hoisted to gen/edges/card.go for build parallelism.
+var WithCardSpec = edges.WithCardSpec
+
+// WithNamedCardSpec forwards to edges.WithNamedCardSpec.
+var WithNamedCardSpec = edges.WithNamedCardSpec
+
+// QueryCardSpec forwards to edges.QueryCardSpec.
+var QueryCardSpec = edges.QueryCardSpec
+
+// QueryCardSpecFromQuery forwards to edges.QueryCardSpecFromQuery.
+var QueryCardSpecFromQuery = edges.QueryCardSpecFromQuery

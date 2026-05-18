@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/edgefield/ent/car"
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -30,3 +31,15 @@ type (
 var (
 	NewCarClient = car.NewCarClient
 )
+
+// WithCarRentals forwards to edges.WithCarRentals — body hoisted to gen/edges/car.go for build parallelism.
+var WithCarRentals = edges.WithCarRentals
+
+// WithNamedCarRentals forwards to edges.WithNamedCarRentals.
+var WithNamedCarRentals = edges.WithNamedCarRentals
+
+// QueryCarRentals forwards to edges.QueryCarRentals.
+var QueryCarRentals = edges.QueryCarRentals
+
+// QueryCarRentalsFromQuery forwards to edges.QueryCarRentalsFromQuery.
+var QueryCarRentalsFromQuery = edges.QueryCarRentalsFromQuery

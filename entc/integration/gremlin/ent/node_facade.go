@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/node"
 )
 
@@ -30,3 +31,21 @@ type (
 var (
 	NewNodeClient = node.NewNodeClient
 )
+
+// WithNodePrev forwards to edges.WithNodePrev — body hoisted to gen/edges/node.go for build parallelism.
+var WithNodePrev = edges.WithNodePrev
+
+// QueryNodePrev forwards to edges.QueryNodePrev.
+var QueryNodePrev = edges.QueryNodePrev
+
+// QueryNodePrevFromQuery forwards to edges.QueryNodePrevFromQuery.
+var QueryNodePrevFromQuery = edges.QueryNodePrevFromQuery
+
+// WithNodeNext forwards to edges.WithNodeNext — body hoisted to gen/edges/node.go for build parallelism.
+var WithNodeNext = edges.WithNodeNext
+
+// QueryNodeNext forwards to edges.QueryNodeNext.
+var QueryNodeNext = edges.QueryNodeNext
+
+// QueryNodeNextFromQuery forwards to edges.QueryNodeNextFromQuery.
+var QueryNodeNextFromQuery = edges.QueryNodeNextFromQuery

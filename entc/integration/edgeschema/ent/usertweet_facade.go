@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewUserTweetClient            = usertweet.NewUserTweetClient
 	NewUserTweetFilterForMutation = usertweet.NewUserTweetFilterForMutation
 )
+
+// WithUserTweetUser forwards to edges.WithUserTweetUser — body hoisted to gen/edges/usertweet.go for build parallelism.
+var WithUserTweetUser = edges.WithUserTweetUser
+
+// QueryUserTweetUser forwards to edges.QueryUserTweetUser.
+var QueryUserTweetUser = edges.QueryUserTweetUser
+
+// QueryUserTweetUserFromQuery forwards to edges.QueryUserTweetUserFromQuery.
+var QueryUserTweetUserFromQuery = edges.QueryUserTweetUserFromQuery
+
+// WithUserTweetTweet forwards to edges.WithUserTweetTweet — body hoisted to gen/edges/usertweet.go for build parallelism.
+var WithUserTweetTweet = edges.WithUserTweetTweet
+
+// QueryUserTweetTweet forwards to edges.QueryUserTweetTweet.
+var QueryUserTweetTweet = edges.QueryUserTweetTweet
+
+// QueryUserTweetTweetFromQuery forwards to edges.QueryUserTweetTweetFromQuery.
+var QueryUserTweetTweetFromQuery = edges.QueryUserTweetTweetFromQuery

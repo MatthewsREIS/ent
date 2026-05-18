@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -30,3 +31,21 @@ type (
 var (
 	NewCardClient = card.NewCardClient
 )
+
+// WithCardOwner forwards to edges.WithCardOwner — body hoisted to gen/edges/card.go for build parallelism.
+var WithCardOwner = edges.WithCardOwner
+
+// QueryCardOwner forwards to edges.QueryCardOwner.
+var QueryCardOwner = edges.QueryCardOwner
+
+// QueryCardOwnerFromQuery forwards to edges.QueryCardOwnerFromQuery.
+var QueryCardOwnerFromQuery = edges.QueryCardOwnerFromQuery
+
+// WithCardSpec forwards to edges.WithCardSpec — body hoisted to gen/edges/card.go for build parallelism.
+var WithCardSpec = edges.WithCardSpec
+
+// QueryCardSpec forwards to edges.QueryCardSpec.
+var QueryCardSpec = edges.QueryCardSpec
+
+// QueryCardSpecFromQuery forwards to edges.QueryCardSpecFromQuery.
+var QueryCardSpecFromQuery = edges.QueryCardSpecFromQuery

@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/group"
 )
 
@@ -32,3 +33,12 @@ var (
 	NewGroupClient            = group.NewGroupClient
 	NewGroupFilterForMutation = group.NewGroupFilterForMutation
 )
+
+// WithGroupUsers forwards to edges.WithGroupUsers — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupUsers = edges.WithGroupUsers
+
+// QueryGroupUsers forwards to edges.QueryGroupUsers.
+var QueryGroupUsers = edges.QueryGroupUsers
+
+// QueryGroupUsersFromQuery forwards to edges.QueryGroupUsersFromQuery.
+var QueryGroupUsersFromQuery = edges.QueryGroupUsersFromQuery

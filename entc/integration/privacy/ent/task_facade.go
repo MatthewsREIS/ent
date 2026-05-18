@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/privacy/ent/edges"
 	"entgo.io/ent/entc/integration/privacy/ent/task"
 )
 
@@ -33,3 +34,21 @@ var (
 	NewTaskClient            = task.NewTaskClient
 	NewTaskFilterForMutation = task.NewTaskFilterForMutation
 )
+
+// WithTaskTeams forwards to edges.WithTaskTeams — body hoisted to gen/edges/task.go for build parallelism.
+var WithTaskTeams = edges.WithTaskTeams
+
+// QueryTaskTeams forwards to edges.QueryTaskTeams.
+var QueryTaskTeams = edges.QueryTaskTeams
+
+// QueryTaskTeamsFromQuery forwards to edges.QueryTaskTeamsFromQuery.
+var QueryTaskTeamsFromQuery = edges.QueryTaskTeamsFromQuery
+
+// WithTaskOwner forwards to edges.WithTaskOwner — body hoisted to gen/edges/task.go for build parallelism.
+var WithTaskOwner = edges.WithTaskOwner
+
+// QueryTaskOwner forwards to edges.QueryTaskOwner.
+var QueryTaskOwner = edges.QueryTaskOwner
+
+// QueryTaskOwnerFromQuery forwards to edges.QueryTaskOwnerFromQuery.
+var QueryTaskOwnerFromQuery = edges.QueryTaskOwnerFromQuery

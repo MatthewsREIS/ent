@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 )
 
@@ -32,3 +33,57 @@ var (
 	NewTweetClient            = tweet.NewTweetClient
 	NewTweetFilterForMutation = tweet.NewTweetFilterForMutation
 )
+
+// WithTweetLikedUsers forwards to edges.WithTweetLikedUsers — body hoisted to gen/edges/tweet.go for build parallelism.
+var WithTweetLikedUsers = edges.WithTweetLikedUsers
+
+// QueryTweetLikedUsers forwards to edges.QueryTweetLikedUsers.
+var QueryTweetLikedUsers = edges.QueryTweetLikedUsers
+
+// QueryTweetLikedUsersFromQuery forwards to edges.QueryTweetLikedUsersFromQuery.
+var QueryTweetLikedUsersFromQuery = edges.QueryTweetLikedUsersFromQuery
+
+// WithTweetUser forwards to edges.WithTweetUser — body hoisted to gen/edges/tweet.go for build parallelism.
+var WithTweetUser = edges.WithTweetUser
+
+// QueryTweetUser forwards to edges.QueryTweetUser.
+var QueryTweetUser = edges.QueryTweetUser
+
+// QueryTweetUserFromQuery forwards to edges.QueryTweetUserFromQuery.
+var QueryTweetUserFromQuery = edges.QueryTweetUserFromQuery
+
+// WithTweetTags forwards to edges.WithTweetTags — body hoisted to gen/edges/tweet.go for build parallelism.
+var WithTweetTags = edges.WithTweetTags
+
+// QueryTweetTags forwards to edges.QueryTweetTags.
+var QueryTweetTags = edges.QueryTweetTags
+
+// QueryTweetTagsFromQuery forwards to edges.QueryTweetTagsFromQuery.
+var QueryTweetTagsFromQuery = edges.QueryTweetTagsFromQuery
+
+// WithTweetLikes forwards to edges.WithTweetLikes — body hoisted to gen/edges/tweet.go for build parallelism.
+var WithTweetLikes = edges.WithTweetLikes
+
+// QueryTweetLikes forwards to edges.QueryTweetLikes.
+var QueryTweetLikes = edges.QueryTweetLikes
+
+// QueryTweetLikesFromQuery forwards to edges.QueryTweetLikesFromQuery.
+var QueryTweetLikesFromQuery = edges.QueryTweetLikesFromQuery
+
+// WithTweetTweetUser forwards to edges.WithTweetTweetUser — body hoisted to gen/edges/tweet.go for build parallelism.
+var WithTweetTweetUser = edges.WithTweetTweetUser
+
+// QueryTweetTweetUser forwards to edges.QueryTweetTweetUser.
+var QueryTweetTweetUser = edges.QueryTweetTweetUser
+
+// QueryTweetTweetUserFromQuery forwards to edges.QueryTweetTweetUserFromQuery.
+var QueryTweetTweetUserFromQuery = edges.QueryTweetTweetUserFromQuery
+
+// WithTweetTweetTags forwards to edges.WithTweetTweetTags — body hoisted to gen/edges/tweet.go for build parallelism.
+var WithTweetTweetTags = edges.WithTweetTweetTags
+
+// QueryTweetTweetTags forwards to edges.QueryTweetTweetTags.
+var QueryTweetTweetTags = edges.QueryTweetTweetTags
+
+// QueryTweetTweetTagsFromQuery forwards to edges.QueryTweetTweetTagsFromQuery.
+var QueryTweetTweetTagsFromQuery = edges.QueryTweetTweetTagsFromQuery

@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/multischema/ent/edges"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 )
 
@@ -30,3 +31,12 @@ type (
 var (
 	NewGroupClient = group.NewGroupClient
 )
+
+// WithGroupUsers forwards to edges.WithGroupUsers — body hoisted to gen/edges/group.go for build parallelism.
+var WithGroupUsers = edges.WithGroupUsers
+
+// QueryGroupUsers forwards to edges.QueryGroupUsers.
+var QueryGroupUsers = edges.QueryGroupUsers
+
+// QueryGroupUsersFromQuery forwards to edges.QueryGroupUsersFromQuery.
+var QueryGroupUsersFromQuery = edges.QueryGroupUsersFromQuery

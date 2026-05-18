@@ -8,6 +8,7 @@ package entv2
 
 import (
 	"entgo.io/ent/entc/integration/migrate/entv2/car"
+	"entgo.io/ent/entc/integration/migrate/entv2/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -30,3 +31,12 @@ type (
 var (
 	NewCarClient = car.NewCarClient
 )
+
+// WithCarOwner forwards to edges.WithCarOwner — body hoisted to gen/edges/car.go for build parallelism.
+var WithCarOwner = edges.WithCarOwner
+
+// QueryCarOwner forwards to edges.QueryCarOwner.
+var QueryCarOwner = edges.QueryCarOwner
+
+// QueryCarOwnerFromQuery forwards to edges.QueryCarOwnerFromQuery.
+var QueryCarOwnerFromQuery = edges.QueryCarOwnerFromQuery

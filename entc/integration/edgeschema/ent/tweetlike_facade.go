@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewTweetLikeClient            = tweetlike.NewTweetLikeClient
 	NewTweetLikeFilterForMutation = tweetlike.NewTweetLikeFilterForMutation
 )
+
+// WithTweetLikeTweet forwards to edges.WithTweetLikeTweet — body hoisted to gen/edges/tweetlike.go for build parallelism.
+var WithTweetLikeTweet = edges.WithTweetLikeTweet
+
+// QueryTweetLikeTweet forwards to edges.QueryTweetLikeTweet.
+var QueryTweetLikeTweet = edges.QueryTweetLikeTweet
+
+// QueryTweetLikeTweetFromQuery forwards to edges.QueryTweetLikeTweetFromQuery.
+var QueryTweetLikeTweetFromQuery = edges.QueryTweetLikeTweetFromQuery
+
+// WithTweetLikeUser forwards to edges.WithTweetLikeUser — body hoisted to gen/edges/tweetlike.go for build parallelism.
+var WithTweetLikeUser = edges.WithTweetLikeUser
+
+// QueryTweetLikeUser forwards to edges.QueryTweetLikeUser.
+var QueryTweetLikeUser = edges.QueryTweetLikeUser
+
+// QueryTweetLikeUserFromQuery forwards to edges.QueryTweetLikeUserFromQuery.
+var QueryTweetLikeUserFromQuery = edges.QueryTweetLikeUserFromQuery

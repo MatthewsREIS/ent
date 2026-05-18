@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/privacy/ent/edges"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
 )
 
@@ -32,3 +33,21 @@ var (
 	NewUserClient            = user.NewUserClient
 	NewUserFilterForMutation = user.NewUserFilterForMutation
 )
+
+// WithUserTeams forwards to edges.WithUserTeams — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserTeams = edges.WithUserTeams
+
+// QueryUserTeams forwards to edges.QueryUserTeams.
+var QueryUserTeams = edges.QueryUserTeams
+
+// QueryUserTeamsFromQuery forwards to edges.QueryUserTeamsFromQuery.
+var QueryUserTeamsFromQuery = edges.QueryUserTeamsFromQuery
+
+// WithUserTasks forwards to edges.WithUserTasks — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserTasks = edges.WithUserTasks
+
+// QueryUserTasks forwards to edges.QueryUserTasks.
+var QueryUserTasks = edges.QueryUserTasks
+
+// QueryUserTasksFromQuery forwards to edges.QueryUserTasksFromQuery.
+var QueryUserTasksFromQuery = edges.QueryUserTasksFromQuery

@@ -7,6 +7,7 @@
 package versioned
 
 import (
+	"entgo.io/ent/entc/integration/multischema/versioned/edges"
 	"entgo.io/ent/entc/integration/multischema/versioned/user"
 )
 
@@ -30,3 +31,57 @@ type (
 var (
 	NewUserClient = user.NewUserClient
 )
+
+// WithUserPets forwards to edges.WithUserPets — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserPets = edges.WithUserPets
+
+// QueryUserPets forwards to edges.QueryUserPets.
+var QueryUserPets = edges.QueryUserPets
+
+// QueryUserPetsFromQuery forwards to edges.QueryUserPetsFromQuery.
+var QueryUserPetsFromQuery = edges.QueryUserPetsFromQuery
+
+// WithUserGroups forwards to edges.WithUserGroups — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserGroups = edges.WithUserGroups
+
+// QueryUserGroups forwards to edges.QueryUserGroups.
+var QueryUserGroups = edges.QueryUserGroups
+
+// QueryUserGroupsFromQuery forwards to edges.QueryUserGroupsFromQuery.
+var QueryUserGroupsFromQuery = edges.QueryUserGroupsFromQuery
+
+// WithUserFriends forwards to edges.WithUserFriends — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFriends = edges.WithUserFriends
+
+// QueryUserFriends forwards to edges.QueryUserFriends.
+var QueryUserFriends = edges.QueryUserFriends
+
+// QueryUserFriendsFromQuery forwards to edges.QueryUserFriendsFromQuery.
+var QueryUserFriendsFromQuery = edges.QueryUserFriendsFromQuery
+
+// WithUserFollowers forwards to edges.WithUserFollowers — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFollowers = edges.WithUserFollowers
+
+// QueryUserFollowers forwards to edges.QueryUserFollowers.
+var QueryUserFollowers = edges.QueryUserFollowers
+
+// QueryUserFollowersFromQuery forwards to edges.QueryUserFollowersFromQuery.
+var QueryUserFollowersFromQuery = edges.QueryUserFollowersFromQuery
+
+// WithUserFollowing forwards to edges.WithUserFollowing — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFollowing = edges.WithUserFollowing
+
+// QueryUserFollowing forwards to edges.QueryUserFollowing.
+var QueryUserFollowing = edges.QueryUserFollowing
+
+// QueryUserFollowingFromQuery forwards to edges.QueryUserFollowingFromQuery.
+var QueryUserFollowingFromQuery = edges.QueryUserFollowingFromQuery
+
+// WithUserFriendships forwards to edges.WithUserFriendships — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserFriendships = edges.WithUserFriendships
+
+// QueryUserFriendships forwards to edges.QueryUserFriendships.
+var QueryUserFriendships = edges.QueryUserFriendships
+
+// QueryUserFriendshipsFromQuery forwards to edges.QueryUserFriendshipsFromQuery.
+var QueryUserFriendshipsFromQuery = edges.QueryUserFriendshipsFromQuery

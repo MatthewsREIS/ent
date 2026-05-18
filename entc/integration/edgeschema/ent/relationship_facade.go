@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 )
 
@@ -32,3 +33,30 @@ var (
 	NewRelationshipClient            = relationship.NewRelationshipClient
 	NewRelationshipFilterForMutation = relationship.NewRelationshipFilterForMutation
 )
+
+// WithRelationshipUser forwards to edges.WithRelationshipUser — body hoisted to gen/edges/relationship.go for build parallelism.
+var WithRelationshipUser = edges.WithRelationshipUser
+
+// QueryRelationshipUser forwards to edges.QueryRelationshipUser.
+var QueryRelationshipUser = edges.QueryRelationshipUser
+
+// QueryRelationshipUserFromQuery forwards to edges.QueryRelationshipUserFromQuery.
+var QueryRelationshipUserFromQuery = edges.QueryRelationshipUserFromQuery
+
+// WithRelationshipRelative forwards to edges.WithRelationshipRelative — body hoisted to gen/edges/relationship.go for build parallelism.
+var WithRelationshipRelative = edges.WithRelationshipRelative
+
+// QueryRelationshipRelative forwards to edges.QueryRelationshipRelative.
+var QueryRelationshipRelative = edges.QueryRelationshipRelative
+
+// QueryRelationshipRelativeFromQuery forwards to edges.QueryRelationshipRelativeFromQuery.
+var QueryRelationshipRelativeFromQuery = edges.QueryRelationshipRelativeFromQuery
+
+// WithRelationshipInfo forwards to edges.WithRelationshipInfo — body hoisted to gen/edges/relationship.go for build parallelism.
+var WithRelationshipInfo = edges.WithRelationshipInfo
+
+// QueryRelationshipInfo forwards to edges.QueryRelationshipInfo.
+var QueryRelationshipInfo = edges.QueryRelationshipInfo
+
+// QueryRelationshipInfoFromQuery forwards to edges.QueryRelationshipInfoFromQuery.
+var QueryRelationshipInfoFromQuery = edges.QueryRelationshipInfoFromQuery

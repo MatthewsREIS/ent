@@ -7,6 +7,7 @@
 package entv2
 
 import (
+	"entgo.io/ent/entc/integration/migrate/entv2/edges"
 	"entgo.io/ent/entc/integration/migrate/entv2/pet"
 )
 
@@ -30,3 +31,12 @@ type (
 var (
 	NewPetClient = pet.NewPetClient
 )
+
+// WithPetOwner forwards to edges.WithPetOwner — body hoisted to gen/edges/pet.go for build parallelism.
+var WithPetOwner = edges.WithPetOwner
+
+// QueryPetOwner forwards to edges.QueryPetOwner.
+var QueryPetOwner = edges.QueryPetOwner
+
+// QueryPetOwnerFromQuery forwards to edges.QueryPetOwnerFromQuery.
+var QueryPetOwnerFromQuery = edges.QueryPetOwnerFromQuery

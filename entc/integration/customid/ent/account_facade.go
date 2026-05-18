@@ -8,6 +8,7 @@ package ent
 
 import (
 	"entgo.io/ent/entc/integration/customid/ent/account"
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -32,3 +33,12 @@ var (
 	NewAccountClient            = account.NewAccountClient
 	NewAccountFilterForMutation = account.NewAccountFilterForMutation
 )
+
+// WithAccountToken forwards to edges.WithAccountToken — body hoisted to gen/edges/account.go for build parallelism.
+var WithAccountToken = edges.WithAccountToken
+
+// QueryAccountToken forwards to edges.QueryAccountToken.
+var QueryAccountToken = edges.QueryAccountToken
+
+// QueryAccountTokenFromQuery forwards to edges.QueryAccountTokenFromQuery.
+var QueryAccountTokenFromQuery = edges.QueryAccountTokenFromQuery

@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 )
 
@@ -32,3 +33,12 @@ var (
 	NewTokenClient            = token.NewTokenClient
 	NewTokenFilterForMutation = token.NewTokenFilterForMutation
 )
+
+// WithTokenAccount forwards to edges.WithTokenAccount — body hoisted to gen/edges/token.go for build parallelism.
+var WithTokenAccount = edges.WithTokenAccount
+
+// QueryTokenAccount forwards to edges.QueryTokenAccount.
+var QueryTokenAccount = edges.QueryTokenAccount
+
+// QueryTokenAccountFromQuery forwards to edges.QueryTokenAccountFromQuery.
+var QueryTokenAccountFromQuery = edges.QueryTokenAccountFromQuery

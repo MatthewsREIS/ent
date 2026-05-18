@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/user"
 )
 
@@ -32,3 +33,39 @@ var (
 	NewUserClient            = user.NewUserClient
 	NewUserFilterForMutation = user.NewUserFilterForMutation
 )
+
+// WithUserGroups forwards to edges.WithUserGroups — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserGroups = edges.WithUserGroups
+
+// QueryUserGroups forwards to edges.QueryUserGroups.
+var QueryUserGroups = edges.QueryUserGroups
+
+// QueryUserGroupsFromQuery forwards to edges.QueryUserGroupsFromQuery.
+var QueryUserGroupsFromQuery = edges.QueryUserGroupsFromQuery
+
+// WithUserParent forwards to edges.WithUserParent — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserParent = edges.WithUserParent
+
+// QueryUserParent forwards to edges.QueryUserParent.
+var QueryUserParent = edges.QueryUserParent
+
+// QueryUserParentFromQuery forwards to edges.QueryUserParentFromQuery.
+var QueryUserParentFromQuery = edges.QueryUserParentFromQuery
+
+// WithUserChildren forwards to edges.WithUserChildren — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserChildren = edges.WithUserChildren
+
+// QueryUserChildren forwards to edges.QueryUserChildren.
+var QueryUserChildren = edges.QueryUserChildren
+
+// QueryUserChildrenFromQuery forwards to edges.QueryUserChildrenFromQuery.
+var QueryUserChildrenFromQuery = edges.QueryUserChildrenFromQuery
+
+// WithUserPets forwards to edges.WithUserPets — body hoisted to gen/edges/user.go for build parallelism.
+var WithUserPets = edges.WithUserPets
+
+// QueryUserPets forwards to edges.QueryUserPets.
+var QueryUserPets = edges.QueryUserPets
+
+// QueryUserPetsFromQuery forwards to edges.QueryUserPetsFromQuery.
+var QueryUserPetsFromQuery = edges.QueryUserPetsFromQuery

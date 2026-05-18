@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/gremlin/ent/edges"
 	"entgo.io/ent/entc/integration/gremlin/ent/pet"
 )
 
@@ -30,3 +31,21 @@ type (
 var (
 	NewPetClient = pet.NewPetClient
 )
+
+// WithPetTeam forwards to edges.WithPetTeam — body hoisted to gen/edges/pet.go for build parallelism.
+var WithPetTeam = edges.WithPetTeam
+
+// QueryPetTeam forwards to edges.QueryPetTeam.
+var QueryPetTeam = edges.QueryPetTeam
+
+// QueryPetTeamFromQuery forwards to edges.QueryPetTeamFromQuery.
+var QueryPetTeamFromQuery = edges.QueryPetTeamFromQuery
+
+// WithPetOwner forwards to edges.WithPetOwner — body hoisted to gen/edges/pet.go for build parallelism.
+var WithPetOwner = edges.WithPetOwner
+
+// QueryPetOwner forwards to edges.QueryPetOwner.
+var QueryPetOwner = edges.QueryPetOwner
+
+// QueryPetOwnerFromQuery forwards to edges.QueryPetOwnerFromQuery.
+var QueryPetOwnerFromQuery = edges.QueryPetOwnerFromQuery

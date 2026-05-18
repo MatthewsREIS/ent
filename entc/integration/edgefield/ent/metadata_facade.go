@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/edgefield/ent/edges"
 	"entgo.io/ent/entc/integration/edgefield/ent/metadata"
 )
 
@@ -30,3 +31,33 @@ type (
 var (
 	NewMetadataClient = metadata.NewMetadataClient
 )
+
+// WithMetadataUser forwards to edges.WithMetadataUser — body hoisted to gen/edges/metadata.go for build parallelism.
+var WithMetadataUser = edges.WithMetadataUser
+
+// QueryMetadataUser forwards to edges.QueryMetadataUser.
+var QueryMetadataUser = edges.QueryMetadataUser
+
+// QueryMetadataUserFromQuery forwards to edges.QueryMetadataUserFromQuery.
+var QueryMetadataUserFromQuery = edges.QueryMetadataUserFromQuery
+
+// WithMetadataChildren forwards to edges.WithMetadataChildren — body hoisted to gen/edges/metadata.go for build parallelism.
+var WithMetadataChildren = edges.WithMetadataChildren
+
+// WithNamedMetadataChildren forwards to edges.WithNamedMetadataChildren.
+var WithNamedMetadataChildren = edges.WithNamedMetadataChildren
+
+// QueryMetadataChildren forwards to edges.QueryMetadataChildren.
+var QueryMetadataChildren = edges.QueryMetadataChildren
+
+// QueryMetadataChildrenFromQuery forwards to edges.QueryMetadataChildrenFromQuery.
+var QueryMetadataChildrenFromQuery = edges.QueryMetadataChildrenFromQuery
+
+// WithMetadataParent forwards to edges.WithMetadataParent — body hoisted to gen/edges/metadata.go for build parallelism.
+var WithMetadataParent = edges.WithMetadataParent
+
+// QueryMetadataParent forwards to edges.QueryMetadataParent.
+var QueryMetadataParent = edges.QueryMetadataParent
+
+// QueryMetadataParentFromQuery forwards to edges.QueryMetadataParentFromQuery.
+var QueryMetadataParentFromQuery = edges.QueryMetadataParentFromQuery

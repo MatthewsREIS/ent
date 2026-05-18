@@ -7,6 +7,7 @@
 package ent
 
 import (
+	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/spec"
 )
 
@@ -32,3 +33,15 @@ var (
 	NewSpecClient            = spec.NewSpecClient
 	NewSpecFilterForMutation = spec.NewSpecFilterForMutation
 )
+
+// WithSpecCard forwards to edges.WithSpecCard — body hoisted to gen/edges/spec.go for build parallelism.
+var WithSpecCard = edges.WithSpecCard
+
+// WithNamedSpecCard forwards to edges.WithNamedSpecCard.
+var WithNamedSpecCard = edges.WithNamedSpecCard
+
+// QuerySpecCard forwards to edges.QuerySpecCard.
+var QuerySpecCard = edges.QuerySpecCard
+
+// QuerySpecCardFromQuery forwards to edges.QuerySpecCardFromQuery.
+var QuerySpecCardFromQuery = edges.QuerySpecCardFromQuery
