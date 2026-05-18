@@ -69,6 +69,20 @@ type (
 	{{- if $n.FeatureEnabled "entql" }}
 	{{ $n.FilterName }}        = {{ $.Package }}.{{ $n.FilterName }}
 	{{- end }}
+	{{- /* Enum-field aliases — the sub-package re-exports each enum as
+	       <FieldStructField> (e.g. propertylist.ReadyToCall), but consumer
+	       schema/hook code historically referenced the fully-qualified
+	       <NodeName><FieldStructField> form (e.g. PropertyListReadyToCall)
+	       which used to live in the monolithic root pkg. Re-export them
+	       here so consumers don't need a per-call import + qualifier
+	       change. Skip fields with custom GoType — those resolve via their
+	       declared package already. */}}
+	{{- range $f := $n.EnumFields }}
+	{{- if not $f.HasGoType }}
+	{{- $enum := trimPackage $f.Type.String $.Package }}
+	{{ $n.Name }}{{ $enum }} = {{ $.Package }}.{{ $enum }}
+	{{- end }}
+	{{- end }}
 )
 
 // Constructor aliases — the sub-package's New<X> stays the source of truth.
