@@ -7,14 +7,7 @@
 package ent
 
 import (
-	"context"
-
-	"entgo.io/ent/entc/integration/ent/card"
-	"entgo.io/ent/entc/integration/ent/edges"
 	"entgo.io/ent/entc/integration/ent/spec"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -39,72 +32,3 @@ var (
 	NewSpecClient            = spec.NewSpecClient
 	NewSpecFilterForMutation = spec.NewSpecFilterForMutation
 )
-
-// WithSpecCard eager-loads the "card" edge on a SpecQuery. The
-// optional arguments configure the sibling sub-query before storage.
-func WithSpecCard(q *SpecQuery, opts ...func(*CardQuery)) *SpecQuery {
-	sub := NewCardClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("card", func(ctx context.Context, parents []*Spec) error {
-		return edges.LoadSpecCard(ctx, sub, parents)
-	})
-}
-
-// WithNamedSpecCard registers a named eager-loader for the "card" edge on a
-// SpecQuery. Multiple names accumulate; each loads independently and
-// is retrievable via Spec.NamedCard(name). Replaces the
-// pre-PR6 (*SpecQuery).WithNamedCard method, hoisted to root
-// so the named-loader map can hold the cross-package CardQuery type.
-func WithNamedSpecCard(q *SpecQuery, name string, opts ...func(*CardQuery)) *SpecQuery {
-	sub := NewCardClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("card:"+name, func(ctx context.Context, parents []*Spec) error {
-		return edges.LoadNamedSpecCard(ctx, sub, parents, name)
-	})
-}
-
-// QuerySpecCard returns a CardQuery for the "card" edge of a given Spec.
-func QuerySpecCard(c *SpecClient, _m *Spec) *CardQuery {
-	query := NewCardClient(c.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(spec.Table, spec.FieldID, id),
-			sqlgraph.To(card.Table, card.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
-
-		return fromV, nil
-	}
-	return query
-}
-
-// QuerySpecCardFromQuery returns a CardQuery that traverses the "card" edge
-// of every Spec matched by q (chained-query form). Mirrors the pre-PR6
-// (*SpecQuery).QueryCard method, hoisted to root so it
-// can reference the cross-package CardQuery type.
-func QuerySpecCardFromQuery(q *SpecQuery) *CardQuery {
-	query := NewCardClient(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(spec.Table, spec.FieldID, selector),
-			sqlgraph.To(card.Table, card.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}

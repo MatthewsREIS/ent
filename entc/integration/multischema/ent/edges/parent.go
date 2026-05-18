@@ -12,6 +12,9 @@ import (
 
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadParentChild performs the eager-load for the "child" edge. Body mirrors
@@ -47,6 +50,63 @@ func LoadParentChild(ctx context.Context, query *user.UserQuery, nodes []*parent
 	return nil
 }
 
+// WithParentChild eager-loads the "child" edge on a parent.ParentQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithParentChild(q *parent.ParentQuery, opts ...func(*user.UserQuery)) *parent.ParentQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("child", func(ctx context.Context, parents []*parent.Parent) error {
+		return LoadParentChild(ctx, sub, parents)
+	})
+}
+
+// QueryParentChild returns a user.UserQuery for the "child" edge of a given parent.Parent.
+func QueryParentChild(c *parent.ParentClient, _m *parent.Parent) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parent.Table, parent.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, parent.ChildTable, parent.ChildColumn),
+		)
+		schemaConfig := _m.Config.SchemaConfig()
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParentChildFromQuery returns a user.UserQuery that traverses the "child" edge
+// of every parent.Parent matched by q (chained-query form). Mirrors the pre-PR6
+// (*parent.ParentQuery).QueryChild method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryParentChildFromQuery(q *parent.ParentQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parent.Table, parent.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, parent.ChildTable, parent.ChildColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadParentParent performs the eager-load for the "parent" edge. Body mirrors
 // the pre-PR6 *ParentQuery.loadParent method, hoisted to root
 // so it can reference cross-package types directly.
@@ -78,4 +138,61 @@ func LoadParentParent(ctx context.Context, query *user.UserQuery, nodes []*paren
 		}
 	}
 	return nil
+}
+
+// WithParentParent eager-loads the "parent" edge on a parent.ParentQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithParentParent(q *parent.ParentQuery, opts ...func(*user.UserQuery)) *parent.ParentQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("parent", func(ctx context.Context, parents []*parent.Parent) error {
+		return LoadParentParent(ctx, sub, parents)
+	})
+}
+
+// QueryParentParent returns a user.UserQuery for the "parent" edge of a given parent.Parent.
+func QueryParentParent(c *parent.ParentClient, _m *parent.Parent) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parent.Table, parent.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, parent.ParentTable, parent.ParentColumn),
+		)
+		schemaConfig := _m.Config.SchemaConfig()
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParentParentFromQuery returns a user.UserQuery that traverses the "parent" edge
+// of every parent.Parent matched by q (chained-query form). Mirrors the pre-PR6
+// (*parent.ParentQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryParentParentFromQuery(q *parent.ParentQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parent.Table, parent.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, parent.ParentTable, parent.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

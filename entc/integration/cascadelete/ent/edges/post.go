@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/cascadelete/ent/user"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadPostAuthor performs the eager-load for the "author" edge. Body mirrors
@@ -52,6 +53,60 @@ func LoadPostAuthor(ctx context.Context, query *user.UserQuery, nodes []*post.Po
 	return nil
 }
 
+// WithPostAuthor eager-loads the "author" edge on a post.PostQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithPostAuthor(q *post.PostQuery, opts ...func(*user.UserQuery)) *post.PostQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("author", func(ctx context.Context, parents []*post.Post) error {
+		return LoadPostAuthor(ctx, sub, parents)
+	})
+}
+
+// QueryPostAuthor returns a user.UserQuery for the "author" edge of a given post.Post.
+func QueryPostAuthor(c *post.PostClient, _m *post.Post) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, post.AuthorTable, post.AuthorColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPostAuthorFromQuery returns a user.UserQuery that traverses the "author" edge
+// of every post.Post matched by q (chained-query form). Mirrors the pre-PR6
+// (*post.PostQuery).QueryAuthor method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryPostAuthorFromQuery(q *post.PostQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, post.AuthorTable, post.AuthorColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadPostComments performs the eager-load for the "comments" edge. Body mirrors
 // the pre-PR6 *PostQuery.loadComments method, hoisted to root
 // so it can reference cross-package types directly.
@@ -83,4 +138,58 @@ func LoadPostComments(ctx context.Context, query *comment.CommentQuery, nodes []
 		node.Edges.Comments = append(node.Edges.Comments, n)
 	}
 	return nil
+}
+
+// WithPostComments eager-loads the "comments" edge on a post.PostQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithPostComments(q *post.PostQuery, opts ...func(*comment.CommentQuery)) *post.PostQuery {
+	sub := comment.NewCommentClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("comments", func(ctx context.Context, parents []*post.Post) error {
+		return LoadPostComments(ctx, sub, parents)
+	})
+}
+
+// QueryPostComments returns a comment.CommentQuery for the "comments" edge of a given post.Post.
+func QueryPostComments(c *post.PostClient, _m *post.Post) *comment.CommentQuery {
+	query := comment.NewCommentClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, id),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, post.CommentsTable, post.CommentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPostCommentsFromQuery returns a comment.CommentQuery that traverses the "comments" edge
+// of every post.Post matched by q (chained-query form). Mirrors the pre-PR6
+// (*post.PostQuery).QueryComments method, hoisted to root so it
+// can reference the cross-package comment.CommentQuery type.
+func QueryPostCommentsFromQuery(q *post.PostQuery) *comment.CommentQuery {
+	query := comment.NewCommentClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, selector),
+			sqlgraph.To(comment.Table, comment.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, post.CommentsTable, post.CommentsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

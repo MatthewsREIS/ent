@@ -7,14 +7,7 @@
 package versioned
 
 import (
-	"context"
-
-	"entgo.io/ent/entc/integration/multischema/versioned/edges"
 	"entgo.io/ent/entc/integration/multischema/versioned/group"
-	"entgo.io/ent/entc/integration/multischema/versioned/user"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -37,60 +30,3 @@ type (
 var (
 	NewGroupClient = group.NewGroupClient
 )
-
-// WithGroupUsers eager-loads the "users" edge on a GroupQuery. The
-// optional arguments configure the sibling sub-query before storage.
-func WithGroupUsers(q *GroupQuery, opts ...func(*UserQuery)) *GroupQuery {
-	sub := NewUserClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("users", func(ctx context.Context, parents []*Group) error {
-		return edges.LoadGroupUsers(ctx, sub, parents)
-	})
-}
-
-// QueryGroupUsers returns a UserQuery for the "users" edge of a given Group.
-func QueryGroupUsers(c *GroupClient, _m *Group) *UserQuery {
-	query := NewUserClient(c.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(group.Table, group.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
-		)
-		schemaConfig := _m.Config.SchemaConfig()
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.GroupUsers
-		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
-
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryGroupUsersFromQuery returns a UserQuery that traverses the "users" edge
-// of every Group matched by q (chained-query form). Mirrors the pre-PR6
-// (*GroupQuery).QueryUsers method, hoisted to root so it
-// can reference the cross-package UserQuery type.
-func QueryGroupUsersFromQuery(q *GroupQuery) *UserQuery {
-	query := NewUserClient(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(group.Table, group.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}

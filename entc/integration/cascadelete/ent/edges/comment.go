@@ -12,6 +12,9 @@ import (
 
 	"entgo.io/ent/entc/integration/cascadelete/ent/comment"
 	"entgo.io/ent/entc/integration/cascadelete/ent/post"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadCommentPost performs the eager-load for the "post" edge. Body mirrors
@@ -45,4 +48,58 @@ func LoadCommentPost(ctx context.Context, query *post.PostQuery, nodes []*commen
 		}
 	}
 	return nil
+}
+
+// WithCommentPost eager-loads the "post" edge on a comment.CommentQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithCommentPost(q *comment.CommentQuery, opts ...func(*post.PostQuery)) *comment.CommentQuery {
+	sub := post.NewPostClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("post", func(ctx context.Context, parents []*comment.Comment) error {
+		return LoadCommentPost(ctx, sub, parents)
+	})
+}
+
+// QueryCommentPost returns a post.PostQuery for the "post" edge of a given comment.Comment.
+func QueryCommentPost(c *comment.CommentClient, _m *comment.Comment) *post.PostQuery {
+	query := post.NewPostClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, id),
+			sqlgraph.To(post.Table, post.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.PostTable, comment.PostColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCommentPostFromQuery returns a post.PostQuery that traverses the "post" edge
+// of every comment.Comment matched by q (chained-query form). Mirrors the pre-PR6
+// (*comment.CommentQuery).QueryPost method, hoisted to root so it
+// can reference the cross-package post.PostQuery type.
+func QueryCommentPostFromQuery(q *comment.CommentQuery) *post.PostQuery {
+	query := post.NewPostClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(comment.Table, comment.FieldID, selector),
+			sqlgraph.To(post.Table, post.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, comment.PostTable, comment.PostColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

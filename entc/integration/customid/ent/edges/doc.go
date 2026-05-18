@@ -55,6 +55,60 @@ func LoadDocParent(ctx context.Context, query *doc.DocQuery, nodes []*doc.Doc) e
 	return nil
 }
 
+// WithDocParent eager-loads the "parent" edge on a doc.DocQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithDocParent(q *doc.DocQuery, opts ...func(*doc.DocQuery)) *doc.DocQuery {
+	sub := doc.NewDocClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("parent", func(ctx context.Context, parents []*doc.Doc) error {
+		return LoadDocParent(ctx, sub, parents)
+	})
+}
+
+// QueryDocParent returns a doc.DocQuery for the "parent" edge of a given doc.Doc.
+func QueryDocParent(c *doc.DocClient, _m *doc.Doc) *doc.DocQuery {
+	query := doc.NewDocClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, id),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, doc.ParentTable, doc.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDocParentFromQuery returns a doc.DocQuery that traverses the "parent" edge
+// of every doc.Doc matched by q (chained-query form). Mirrors the pre-PR6
+// (*doc.DocQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package doc.DocQuery type.
+func QueryDocParentFromQuery(q *doc.DocQuery) *doc.DocQuery {
+	query := doc.NewDocClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, selector),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, doc.ParentTable, doc.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadDocChildren performs the eager-load for the "children" edge. Body mirrors
 // the pre-PR6 *DocQuery.loadChildren method, hoisted to root
 // so it can reference cross-package types directly.
@@ -86,6 +140,60 @@ func LoadDocChildren(ctx context.Context, query *doc.DocQuery, nodes []*doc.Doc)
 		node.Edges.Children = append(node.Edges.Children, n)
 	}
 	return nil
+}
+
+// WithDocChildren eager-loads the "children" edge on a doc.DocQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithDocChildren(q *doc.DocQuery, opts ...func(*doc.DocQuery)) *doc.DocQuery {
+	sub := doc.NewDocClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("children", func(ctx context.Context, parents []*doc.Doc) error {
+		return LoadDocChildren(ctx, sub, parents)
+	})
+}
+
+// QueryDocChildren returns a doc.DocQuery for the "children" edge of a given doc.Doc.
+func QueryDocChildren(c *doc.DocClient, _m *doc.Doc) *doc.DocQuery {
+	query := doc.NewDocClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, id),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, doc.ChildrenTable, doc.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDocChildrenFromQuery returns a doc.DocQuery that traverses the "children" edge
+// of every doc.Doc matched by q (chained-query form). Mirrors the pre-PR6
+// (*doc.DocQuery).QueryChildren method, hoisted to root so it
+// can reference the cross-package doc.DocQuery type.
+func QueryDocChildrenFromQuery(q *doc.DocQuery) *doc.DocQuery {
+	query := doc.NewDocClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, selector),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, doc.ChildrenTable, doc.ChildrenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // LoadDocRelated performs the eager-load for the "related" edge. Body mirrors
@@ -154,4 +262,58 @@ func LoadDocRelated(ctx context.Context, query *doc.DocQuery, nodes []*doc.Doc) 
 		}
 	}
 	return nil
+}
+
+// WithDocRelated eager-loads the "related" edge on a doc.DocQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithDocRelated(q *doc.DocQuery, opts ...func(*doc.DocQuery)) *doc.DocQuery {
+	sub := doc.NewDocClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("related", func(ctx context.Context, parents []*doc.Doc) error {
+		return LoadDocRelated(ctx, sub, parents)
+	})
+}
+
+// QueryDocRelated returns a doc.DocQuery for the "related" edge of a given doc.Doc.
+func QueryDocRelated(c *doc.DocClient, _m *doc.Doc) *doc.DocQuery {
+	query := doc.NewDocClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, id),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, doc.RelatedTable, doc.RelatedPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDocRelatedFromQuery returns a doc.DocQuery that traverses the "related" edge
+// of every doc.Doc matched by q (chained-query form). Mirrors the pre-PR6
+// (*doc.DocQuery).QueryRelated method, hoisted to root so it
+// can reference the cross-package doc.DocQuery type.
+func QueryDocRelatedFromQuery(q *doc.DocQuery) *doc.DocQuery {
+	query := doc.NewDocClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(doc.Table, doc.FieldID, selector),
+			sqlgraph.To(doc.Table, doc.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, doc.RelatedTable, doc.RelatedPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadFileTypeFiles performs the eager-load for the "files" edge. Body mirrors
@@ -49,4 +50,58 @@ func LoadFileTypeFiles(ctx context.Context, query *file.FileQuery, nodes []*file
 		node.Edges.Files = append(node.Edges.Files, n)
 	}
 	return nil
+}
+
+// WithFileTypeFiles eager-loads the "files" edge on a filetype.FileTypeQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithFileTypeFiles(q *filetype.FileTypeQuery, opts ...func(*file.FileQuery)) *filetype.FileTypeQuery {
+	sub := file.NewFileClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("files", func(ctx context.Context, parents []*filetype.FileType) error {
+		return LoadFileTypeFiles(ctx, sub, parents)
+	})
+}
+
+// QueryFileTypeFiles returns a file.FileQuery for the "files" edge of a given filetype.FileType.
+func QueryFileTypeFiles(c *filetype.FileTypeClient, _m *filetype.FileType) *file.FileQuery {
+	query := file.NewFileClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(filetype.Table, filetype.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFileTypeFilesFromQuery returns a file.FileQuery that traverses the "files" edge
+// of every filetype.FileType matched by q (chained-query form). Mirrors the pre-PR6
+// (*filetype.FileTypeQuery).QueryFiles method, hoisted to root so it
+// can reference the cross-package file.FileQuery type.
+func QueryFileTypeFilesFromQuery(q *filetype.FileTypeQuery) *file.FileQuery {
+	query := file.NewFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(filetype.Table, filetype.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, filetype.FilesTable, filetype.FilesColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

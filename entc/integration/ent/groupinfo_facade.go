@@ -7,14 +7,7 @@
 package ent
 
 import (
-	"context"
-
-	"entgo.io/ent/entc/integration/ent/edges"
-	"entgo.io/ent/entc/integration/ent/group"
 	"entgo.io/ent/entc/integration/ent/groupinfo"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -39,72 +32,3 @@ var (
 	NewGroupInfoClient            = groupinfo.NewGroupInfoClient
 	NewGroupInfoFilterForMutation = groupinfo.NewGroupInfoFilterForMutation
 )
-
-// WithGroupInfoGroups eager-loads the "groups" edge on a GroupInfoQuery. The
-// optional arguments configure the sibling sub-query before storage.
-func WithGroupInfoGroups(q *GroupInfoQuery, opts ...func(*GroupQuery)) *GroupInfoQuery {
-	sub := NewGroupClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("groups", func(ctx context.Context, parents []*GroupInfo) error {
-		return edges.LoadGroupInfoGroups(ctx, sub, parents)
-	})
-}
-
-// WithNamedGroupInfoGroups registers a named eager-loader for the "groups" edge on a
-// GroupInfoQuery. Multiple names accumulate; each loads independently and
-// is retrievable via GroupInfo.NamedGroups(name). Replaces the
-// pre-PR6 (*GroupInfoQuery).WithNamedGroups method, hoisted to root
-// so the named-loader map can hold the cross-package GroupQuery type.
-func WithNamedGroupInfoGroups(q *GroupInfoQuery, name string, opts ...func(*GroupQuery)) *GroupInfoQuery {
-	sub := NewGroupClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("groups:"+name, func(ctx context.Context, parents []*GroupInfo) error {
-		return edges.LoadNamedGroupInfoGroups(ctx, sub, parents, name)
-	})
-}
-
-// QueryGroupInfoGroups returns a GroupQuery for the "groups" edge of a given GroupInfo.
-func QueryGroupInfoGroups(c *GroupInfoClient, _m *GroupInfo) *GroupQuery {
-	query := NewGroupClient(c.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, id),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
-
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryGroupInfoGroupsFromQuery returns a GroupQuery that traverses the "groups" edge
-// of every GroupInfo matched by q (chained-query form). Mirrors the pre-PR6
-// (*GroupInfoQuery).QueryGroups method, hoisted to root so it
-// can reference the cross-package GroupQuery type.
-func QueryGroupInfoGroupsFromQuery(q *GroupInfoQuery) *GroupQuery {
-	query := NewGroupClient(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(groupinfo.Table, groupinfo.FieldID, selector),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, groupinfo.GroupsTable, groupinfo.GroupsColumn),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}

@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadCarRentals performs the eager-load for the "rentals" edge. Body mirrors
@@ -88,4 +89,73 @@ func LoadNamedCarRentals(ctx context.Context, query *rental.RentalQuery, nodes [
 		node.AppendNamedRentals(name, n)
 	}
 	return nil
+}
+
+// WithCarRentals eager-loads the "rentals" edge on a car.CarQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithCarRentals(q *car.CarQuery, opts ...func(*rental.RentalQuery)) *car.CarQuery {
+	sub := rental.NewRentalClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("rentals", func(ctx context.Context, parents []*car.Car) error {
+		return LoadCarRentals(ctx, sub, parents)
+	})
+}
+
+// WithNamedCarRentals registers a named eager-loader for the "rentals" edge on a
+// car.CarQuery. Multiple names accumulate; each loads independently and
+// is retrievable via Car.NamedRentals(name). Replaces the
+// pre-PR6 (*car.CarQuery).WithNamedRentals method, hoisted to root
+// so the named-loader map can hold the cross-package rental.RentalQuery type.
+func WithNamedCarRentals(q *car.CarQuery, name string, opts ...func(*rental.RentalQuery)) *car.CarQuery {
+	sub := rental.NewRentalClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("rentals:"+name, func(ctx context.Context, parents []*car.Car) error {
+		return LoadNamedCarRentals(ctx, sub, parents, name)
+	})
+}
+
+// QueryCarRentals returns a rental.RentalQuery for the "rentals" edge of a given car.Car.
+func QueryCarRentals(c *car.CarClient, _m *car.Car) *rental.RentalQuery {
+	query := rental.NewRentalClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(car.Table, car.FieldID, id),
+			sqlgraph.To(rental.Table, rental.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, car.RentalsTable, car.RentalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCarRentalsFromQuery returns a rental.RentalQuery that traverses the "rentals" edge
+// of every car.Car matched by q (chained-query form). Mirrors the pre-PR6
+// (*car.CarQuery).QueryRentals method, hoisted to root so it
+// can reference the cross-package rental.RentalQuery type.
+func QueryCarRentalsFromQuery(q *car.CarQuery) *rental.RentalQuery {
+	query := rental.NewRentalClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(car.Table, car.FieldID, selector),
+			sqlgraph.To(rental.Table, rental.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, car.RentalsTable, car.RentalsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

@@ -85,3 +85,57 @@ func LoadSpecCard(ctx context.Context, query *card.CardQuery, nodes []*spec.Spec
 	}
 	return nil
 }
+
+// WithSpecCard eager-loads the "card" edge on a spec.SpecQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithSpecCard(q *spec.SpecQuery, opts ...func(*card.CardQuery)) *spec.SpecQuery {
+	sub := card.NewCardClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("card", func(ctx context.Context, parents []*spec.Spec) error {
+		return LoadSpecCard(ctx, sub, parents)
+	})
+}
+
+// QuerySpecCard returns a card.CardQuery for the "card" edge of a given spec.Spec.
+func QuerySpecCard(c *spec.SpecClient, _m *spec.Spec) *card.CardQuery {
+	query := card.NewCardClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(spec.Table, spec.FieldID, id),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySpecCardFromQuery returns a card.CardQuery that traverses the "card" edge
+// of every spec.Spec matched by q (chained-query form). Mirrors the pre-PR6
+// (*spec.SpecQuery).QueryCard method, hoisted to root so it
+// can reference the cross-package card.CardQuery type.
+func QuerySpecCardFromQuery(q *spec.SpecQuery) *card.CardQuery {
+	query := card.NewCardClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(spec.Table, spec.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}

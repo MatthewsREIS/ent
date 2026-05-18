@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadUserPets performs the eager-load for the "pets" edge. Body mirrors
@@ -93,6 +94,75 @@ func LoadNamedUserPets(ctx context.Context, query *pet.PetQuery, nodes []*user.U
 	return nil
 }
 
+// WithUserPets eager-loads the "pets" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserPets(q *user.UserQuery, opts ...func(*pet.PetQuery)) *user.UserQuery {
+	sub := pet.NewPetClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("pets", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserPets(ctx, sub, parents)
+	})
+}
+
+// WithNamedUserPets registers a named eager-loader for the "pets" edge on a
+// user.UserQuery. Multiple names accumulate; each loads independently and
+// is retrievable via User.NamedPets(name). Replaces the
+// pre-PR6 (*user.UserQuery).WithNamedPets method, hoisted to root
+// so the named-loader map can hold the cross-package pet.PetQuery type.
+func WithNamedUserPets(q *user.UserQuery, name string, opts ...func(*pet.PetQuery)) *user.UserQuery {
+	sub := pet.NewPetClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("pets:"+name, func(ctx context.Context, parents []*user.User) error {
+		return LoadNamedUserPets(ctx, sub, parents, name)
+	})
+}
+
+// QueryUserPets returns a pet.PetQuery for the "pets" edge of a given user.User.
+func QueryUserPets(c *user.UserClient, _m *user.User) *pet.PetQuery {
+	query := pet.NewPetClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserPetsFromQuery returns a pet.PetQuery that traverses the "pets" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryPets method, hoisted to root so it
+// can reference the cross-package pet.PetQuery type.
+func QueryUserPetsFromQuery(q *user.UserQuery) *pet.PetQuery {
+	query := pet.NewPetClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadUserParent performs the eager-load for the "parent" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadParent method, hoisted to root
 // so it can reference cross-package types directly.
@@ -124,6 +194,60 @@ func LoadUserParent(ctx context.Context, query *user.UserQuery, nodes []*user.Us
 		}
 	}
 	return nil
+}
+
+// WithUserParent eager-loads the "parent" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserParent(q *user.UserQuery, opts ...func(*user.UserQuery)) *user.UserQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("parent", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserParent(ctx, sub, parents)
+	})
+}
+
+// QueryUserParent returns a user.UserQuery for the "parent" edge of a given user.User.
+func QueryUserParent(c *user.UserClient, _m *user.User) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserParentFromQuery returns a user.UserQuery that traverses the "parent" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryParent method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryUserParentFromQuery(q *user.UserQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.ParentTable, user.ParentColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // LoadUserChildren performs the eager-load for the "children" edge. Body mirrors
@@ -197,6 +321,75 @@ func LoadNamedUserChildren(ctx context.Context, query *user.UserQuery, nodes []*
 	return nil
 }
 
+// WithUserChildren eager-loads the "children" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserChildren(q *user.UserQuery, opts ...func(*user.UserQuery)) *user.UserQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("children", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserChildren(ctx, sub, parents)
+	})
+}
+
+// WithNamedUserChildren registers a named eager-loader for the "children" edge on a
+// user.UserQuery. Multiple names accumulate; each loads independently and
+// is retrievable via User.NamedChildren(name). Replaces the
+// pre-PR6 (*user.UserQuery).WithNamedChildren method, hoisted to root
+// so the named-loader map can hold the cross-package user.UserQuery type.
+func WithNamedUserChildren(q *user.UserQuery, name string, opts ...func(*user.UserQuery)) *user.UserQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("children:"+name, func(ctx context.Context, parents []*user.User) error {
+		return LoadNamedUserChildren(ctx, sub, parents, name)
+	})
+}
+
+// QueryUserChildren returns a user.UserQuery for the "children" edge of a given user.User.
+func QueryUserChildren(c *user.UserClient, _m *user.User) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserChildrenFromQuery returns a user.UserQuery that traverses the "children" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryChildren method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryUserChildrenFromQuery(q *user.UserQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ChildrenTable, user.ChildrenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadUserSpouse performs the eager-load for the "spouse" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadSpouse method, hoisted to root
 // so it can reference cross-package types directly.
@@ -228,6 +421,60 @@ func LoadUserSpouse(ctx context.Context, query *user.UserQuery, nodes []*user.Us
 		}
 	}
 	return nil
+}
+
+// WithUserSpouse eager-loads the "spouse" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserSpouse(q *user.UserQuery, opts ...func(*user.UserQuery)) *user.UserQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("spouse", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserSpouse(ctx, sub, parents)
+	})
+}
+
+// QueryUserSpouse returns a user.UserQuery for the "spouse" edge of a given user.User.
+func QueryUserSpouse(c *user.UserClient, _m *user.User) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserSpouseFromQuery returns a user.UserQuery that traverses the "spouse" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QuerySpouse method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryUserSpouseFromQuery(q *user.UserQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // LoadUserCard performs the eager-load for the "card" edge. Body mirrors
@@ -262,6 +509,60 @@ func LoadUserCard(ctx context.Context, query *card.CardQuery, nodes []*user.User
 	return nil
 }
 
+// WithUserCard eager-loads the "card" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserCard(q *user.UserQuery, opts ...func(*card.CardQuery)) *user.UserQuery {
+	sub := card.NewCardClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("card", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserCard(ctx, sub, parents)
+	})
+}
+
+// QueryUserCard returns a card.CardQuery for the "card" edge of a given user.User.
+func QueryUserCard(c *user.UserClient, _m *user.User) *card.CardQuery {
+	query := card.NewCardClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserCardFromQuery returns a card.CardQuery that traverses the "card" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryCard method, hoisted to root so it
+// can reference the cross-package card.CardQuery type.
+func QueryUserCardFromQuery(q *user.UserQuery) *card.CardQuery {
+	query := card.NewCardClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(card.Table, card.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.CardTable, user.CardColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadUserMetadata performs the eager-load for the "metadata" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadMetadata method, hoisted to root
 // so it can reference cross-package types directly.
@@ -289,6 +590,60 @@ func LoadUserMetadata(ctx context.Context, query *metadata.MetadataQuery, nodes 
 		node.Edges.Metadata = n
 	}
 	return nil
+}
+
+// WithUserMetadata eager-loads the "metadata" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserMetadata(q *user.UserQuery, opts ...func(*metadata.MetadataQuery)) *user.UserQuery {
+	sub := metadata.NewMetadataClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("metadata", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserMetadata(ctx, sub, parents)
+	})
+}
+
+// QueryUserMetadata returns a metadata.MetadataQuery for the "metadata" edge of a given user.User.
+func QueryUserMetadata(c *user.UserClient, _m *user.User) *metadata.MetadataQuery {
+	query := metadata.NewMetadataClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.MetadataTable, user.MetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserMetadataFromQuery returns a metadata.MetadataQuery that traverses the "metadata" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryMetadata method, hoisted to root so it
+// can reference the cross-package metadata.MetadataQuery type.
+func QueryUserMetadataFromQuery(q *user.UserQuery) *metadata.MetadataQuery {
+	query := metadata.NewMetadataClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(metadata.Table, metadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.MetadataTable, user.MetadataColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // LoadUserInfo performs the eager-load for the "info" edge. Body mirrors
@@ -354,6 +709,75 @@ func LoadNamedUserInfo(ctx context.Context, query *info.InfoQuery, nodes []*user
 		node.AppendNamedInfo(name, n)
 	}
 	return nil
+}
+
+// WithUserInfo eager-loads the "info" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserInfo(q *user.UserQuery, opts ...func(*info.InfoQuery)) *user.UserQuery {
+	sub := info.NewInfoClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("info", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserInfo(ctx, sub, parents)
+	})
+}
+
+// WithNamedUserInfo registers a named eager-loader for the "info" edge on a
+// user.UserQuery. Multiple names accumulate; each loads independently and
+// is retrievable via User.NamedInfo(name). Replaces the
+// pre-PR6 (*user.UserQuery).WithNamedInfo method, hoisted to root
+// so the named-loader map can hold the cross-package info.InfoQuery type.
+func WithNamedUserInfo(q *user.UserQuery, name string, opts ...func(*info.InfoQuery)) *user.UserQuery {
+	sub := info.NewInfoClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("info:"+name, func(ctx context.Context, parents []*user.User) error {
+		return LoadNamedUserInfo(ctx, sub, parents, name)
+	})
+}
+
+// QueryUserInfo returns a info.InfoQuery for the "info" edge of a given user.User.
+func QueryUserInfo(c *user.UserClient, _m *user.User) *info.InfoQuery {
+	query := info.NewInfoClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(info.Table, info.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.InfoTable, user.InfoColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserInfoFromQuery returns a info.InfoQuery that traverses the "info" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryInfo method, hoisted to root so it
+// can reference the cross-package info.InfoQuery type.
+func QueryUserInfoFromQuery(q *user.UserQuery) *info.InfoQuery {
+	query := info.NewInfoClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(info.Table, info.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.InfoTable, user.InfoColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // LoadUserRentals performs the eager-load for the "rentals" edge. Body mirrors
@@ -425,4 +849,73 @@ func LoadNamedUserRentals(ctx context.Context, query *rental.RentalQuery, nodes 
 		node.AppendNamedRentals(name, n)
 	}
 	return nil
+}
+
+// WithUserRentals eager-loads the "rentals" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserRentals(q *user.UserQuery, opts ...func(*rental.RentalQuery)) *user.UserQuery {
+	sub := rental.NewRentalClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("rentals", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserRentals(ctx, sub, parents)
+	})
+}
+
+// WithNamedUserRentals registers a named eager-loader for the "rentals" edge on a
+// user.UserQuery. Multiple names accumulate; each loads independently and
+// is retrievable via User.NamedRentals(name). Replaces the
+// pre-PR6 (*user.UserQuery).WithNamedRentals method, hoisted to root
+// so the named-loader map can hold the cross-package rental.RentalQuery type.
+func WithNamedUserRentals(q *user.UserQuery, name string, opts ...func(*rental.RentalQuery)) *user.UserQuery {
+	sub := rental.NewRentalClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("rentals:"+name, func(ctx context.Context, parents []*user.User) error {
+		return LoadNamedUserRentals(ctx, sub, parents, name)
+	})
+}
+
+// QueryUserRentals returns a rental.RentalQuery for the "rentals" edge of a given user.User.
+func QueryUserRentals(c *user.UserClient, _m *user.User) *rental.RentalQuery {
+	query := rental.NewRentalClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(rental.Table, rental.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RentalsTable, user.RentalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserRentalsFromQuery returns a rental.RentalQuery that traverses the "rentals" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryRentals method, hoisted to root so it
+// can reference the cross-package rental.RentalQuery type.
+func QueryUserRentalsFromQuery(q *user.UserQuery) *rental.RentalQuery {
+	query := rental.NewRentalClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(rental.Table, rental.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RentalsTable, user.RentalsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

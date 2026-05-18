@@ -12,6 +12,9 @@ import (
 
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadFriendshipUser performs the eager-load for the "user" edge. Body mirrors
@@ -47,6 +50,63 @@ func LoadFriendshipUser(ctx context.Context, query *user.UserQuery, nodes []*fri
 	return nil
 }
 
+// WithFriendshipUser eager-loads the "user" edge on a friendship.FriendshipQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithFriendshipUser(q *friendship.FriendshipQuery, opts ...func(*user.UserQuery)) *friendship.FriendshipQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("user", func(ctx context.Context, parents []*friendship.Friendship) error {
+		return LoadFriendshipUser(ctx, sub, parents)
+	})
+}
+
+// QueryFriendshipUser returns a user.UserQuery for the "user" edge of a given friendship.Friendship.
+func QueryFriendshipUser(c *friendship.FriendshipClient, _m *friendship.Friendship) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(friendship.Table, friendship.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, friendship.UserTable, friendship.UserColumn),
+		)
+		schemaConfig := _m.Config.SchemaConfig()
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Friendship
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFriendshipUserFromQuery returns a user.UserQuery that traverses the "user" edge
+// of every friendship.Friendship matched by q (chained-query form). Mirrors the pre-PR6
+// (*friendship.FriendshipQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryFriendshipUserFromQuery(q *friendship.FriendshipQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(friendship.Table, friendship.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, friendship.UserTable, friendship.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadFriendshipFriend performs the eager-load for the "friend" edge. Body mirrors
 // the pre-PR6 *FriendshipQuery.loadFriend method, hoisted to root
 // so it can reference cross-package types directly.
@@ -78,4 +138,61 @@ func LoadFriendshipFriend(ctx context.Context, query *user.UserQuery, nodes []*f
 		}
 	}
 	return nil
+}
+
+// WithFriendshipFriend eager-loads the "friend" edge on a friendship.FriendshipQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithFriendshipFriend(q *friendship.FriendshipQuery, opts ...func(*user.UserQuery)) *friendship.FriendshipQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("friend", func(ctx context.Context, parents []*friendship.Friendship) error {
+		return LoadFriendshipFriend(ctx, sub, parents)
+	})
+}
+
+// QueryFriendshipFriend returns a user.UserQuery for the "friend" edge of a given friendship.Friendship.
+func QueryFriendshipFriend(c *friendship.FriendshipClient, _m *friendship.Friendship) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(friendship.Table, friendship.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, friendship.FriendTable, friendship.FriendColumn),
+		)
+		schemaConfig := _m.Config.SchemaConfig()
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Friendship
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFriendshipFriendFromQuery returns a user.UserQuery that traverses the "friend" edge
+// of every friendship.Friendship matched by q (chained-query form). Mirrors the pre-PR6
+// (*friendship.FriendshipQuery).QueryFriend method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryFriendshipFriendFromQuery(q *friendship.FriendshipQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(friendship.Table, friendship.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, friendship.FriendTable, friendship.FriendColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

@@ -13,6 +13,9 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationship"
 	"entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadRelationshipUser performs the eager-load for the "user" edge. Body mirrors
@@ -48,6 +51,49 @@ func LoadRelationshipUser(ctx context.Context, query *user.UserQuery, nodes []*r
 	return nil
 }
 
+// WithRelationshipUser eager-loads the "user" edge on a relationship.RelationshipQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithRelationshipUser(q *relationship.RelationshipQuery, opts ...func(*user.UserQuery)) *relationship.RelationshipQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("user", func(ctx context.Context, parents []*relationship.Relationship) error {
+		return LoadRelationshipUser(ctx, sub, parents)
+	})
+}
+
+// QueryRelationshipUser returns a user.UserQuery for the "user" edge of a given relationship.Relationship.
+func QueryRelationshipUser(c *relationship.RelationshipClient, _m *relationship.Relationship) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	return query
+}
+
+// QueryRelationshipUserFromQuery returns a user.UserQuery that traverses the "user" edge
+// of every relationship.Relationship matched by q (chained-query form). Mirrors the pre-PR6
+// (*relationship.RelationshipQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryRelationshipUserFromQuery(q *relationship.RelationshipQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(relationship.Table, relationship.UserColumn, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, relationship.UserTable, relationship.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadRelationshipRelative performs the eager-load for the "relative" edge. Body mirrors
 // the pre-PR6 *RelationshipQuery.loadRelative method, hoisted to root
 // so it can reference cross-package types directly.
@@ -81,6 +127,49 @@ func LoadRelationshipRelative(ctx context.Context, query *user.UserQuery, nodes 
 	return nil
 }
 
+// WithRelationshipRelative eager-loads the "relative" edge on a relationship.RelationshipQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithRelationshipRelative(q *relationship.RelationshipQuery, opts ...func(*user.UserQuery)) *relationship.RelationshipQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("relative", func(ctx context.Context, parents []*relationship.Relationship) error {
+		return LoadRelationshipRelative(ctx, sub, parents)
+	})
+}
+
+// QueryRelationshipRelative returns a user.UserQuery for the "relative" edge of a given relationship.Relationship.
+func QueryRelationshipRelative(c *relationship.RelationshipClient, _m *relationship.Relationship) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	return query
+}
+
+// QueryRelationshipRelativeFromQuery returns a user.UserQuery that traverses the "relative" edge
+// of every relationship.Relationship matched by q (chained-query form). Mirrors the pre-PR6
+// (*relationship.RelationshipQuery).QueryRelative method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryRelationshipRelativeFromQuery(q *relationship.RelationshipQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(relationship.Table, relationship.RelativeColumn, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, relationship.RelativeTable, relationship.RelativeColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadRelationshipInfo performs the eager-load for the "info" edge. Body mirrors
 // the pre-PR6 *RelationshipQuery.loadInfo method, hoisted to root
 // so it can reference cross-package types directly.
@@ -112,4 +201,47 @@ func LoadRelationshipInfo(ctx context.Context, query *relationshipinfo.Relations
 		}
 	}
 	return nil
+}
+
+// WithRelationshipInfo eager-loads the "info" edge on a relationship.RelationshipQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithRelationshipInfo(q *relationship.RelationshipQuery, opts ...func(*relationshipinfo.RelationshipInfoQuery)) *relationship.RelationshipQuery {
+	sub := relationshipinfo.NewRelationshipInfoClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("info", func(ctx context.Context, parents []*relationship.Relationship) error {
+		return LoadRelationshipInfo(ctx, sub, parents)
+	})
+}
+
+// QueryRelationshipInfo returns a relationshipinfo.RelationshipInfoQuery for the "info" edge of a given relationship.Relationship.
+func QueryRelationshipInfo(c *relationship.RelationshipClient, _m *relationship.Relationship) *relationshipinfo.RelationshipInfoQuery {
+	query := relationshipinfo.NewRelationshipInfoClient(c.Config).Query()
+	return query
+}
+
+// QueryRelationshipInfoFromQuery returns a relationshipinfo.RelationshipInfoQuery that traverses the "info" edge
+// of every relationship.Relationship matched by q (chained-query form). Mirrors the pre-PR6
+// (*relationship.RelationshipQuery).QueryInfo method, hoisted to root so it
+// can reference the cross-package relationshipinfo.RelationshipInfoQuery type.
+func QueryRelationshipInfoFromQuery(q *relationship.RelationshipQuery) *relationshipinfo.RelationshipInfoQuery {
+	query := relationshipinfo.NewRelationshipInfoClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(relationship.Table, relationship.InfoColumn, selector),
+			sqlgraph.To(relationshipinfo.Table, relationshipinfo.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, relationship.InfoTable, relationship.InfoColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

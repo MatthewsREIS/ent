@@ -12,6 +12,9 @@ import (
 
 	"entgo.io/ent/entc/integration/edgefield/ent/card"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadCardOwner performs the eager-load for the "owner" edge. Body mirrors
@@ -45,4 +48,58 @@ func LoadCardOwner(ctx context.Context, query *user.UserQuery, nodes []*card.Car
 		}
 	}
 	return nil
+}
+
+// WithCardOwner eager-loads the "owner" edge on a card.CardQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithCardOwner(q *card.CardQuery, opts ...func(*user.UserQuery)) *card.CardQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("owner", func(ctx context.Context, parents []*card.Card) error {
+		return LoadCardOwner(ctx, sub, parents)
+	})
+}
+
+// QueryCardOwner returns a user.UserQuery for the "owner" edge of a given card.Card.
+func QueryCardOwner(c *card.CardClient, _m *card.Card) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(card.Table, card.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, card.OwnerTable, card.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCardOwnerFromQuery returns a user.UserQuery that traverses the "owner" edge
+// of every card.Card matched by q (chained-query form). Mirrors the pre-PR6
+// (*card.CardQuery).QueryOwner method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryCardOwnerFromQuery(q *card.CardQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(card.Table, card.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, card.OwnerTable, card.OwnerColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

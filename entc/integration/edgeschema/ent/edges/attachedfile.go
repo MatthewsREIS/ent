@@ -13,6 +13,9 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
 	"entgo.io/ent/entc/integration/edgeschema/ent/process"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadAttachedFileFi performs the eager-load for the "fi" edge. Body mirrors
@@ -48,6 +51,60 @@ func LoadAttachedFileFi(ctx context.Context, query *file.FileQuery, nodes []*att
 	return nil
 }
 
+// WithAttachedFileFi eager-loads the "fi" edge on a attachedfile.AttachedFileQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithAttachedFileFi(q *attachedfile.AttachedFileQuery, opts ...func(*file.FileQuery)) *attachedfile.AttachedFileQuery {
+	sub := file.NewFileClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("fi", func(ctx context.Context, parents []*attachedfile.AttachedFile) error {
+		return LoadAttachedFileFi(ctx, sub, parents)
+	})
+}
+
+// QueryAttachedFileFi returns a file.FileQuery for the "fi" edge of a given attachedfile.AttachedFile.
+func QueryAttachedFileFi(c *attachedfile.AttachedFileClient, _m *attachedfile.AttachedFile) *file.FileQuery {
+	query := file.NewFileClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, id),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.FiTable, attachedfile.FiColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAttachedFileFiFromQuery returns a file.FileQuery that traverses the "fi" edge
+// of every attachedfile.AttachedFile matched by q (chained-query form). Mirrors the pre-PR6
+// (*attachedfile.AttachedFileQuery).QueryFi method, hoisted to root so it
+// can reference the cross-package file.FileQuery type.
+func QueryAttachedFileFiFromQuery(q *attachedfile.AttachedFileQuery) *file.FileQuery {
+	query := file.NewFileClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.FiTable, attachedfile.FiColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadAttachedFileProc performs the eager-load for the "proc" edge. Body mirrors
 // the pre-PR6 *AttachedFileQuery.loadProc method, hoisted to root
 // so it can reference cross-package types directly.
@@ -79,4 +136,58 @@ func LoadAttachedFileProc(ctx context.Context, query *process.ProcessQuery, node
 		}
 	}
 	return nil
+}
+
+// WithAttachedFileProc eager-loads the "proc" edge on a attachedfile.AttachedFileQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithAttachedFileProc(q *attachedfile.AttachedFileQuery, opts ...func(*process.ProcessQuery)) *attachedfile.AttachedFileQuery {
+	sub := process.NewProcessClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("proc", func(ctx context.Context, parents []*attachedfile.AttachedFile) error {
+		return LoadAttachedFileProc(ctx, sub, parents)
+	})
+}
+
+// QueryAttachedFileProc returns a process.ProcessQuery for the "proc" edge of a given attachedfile.AttachedFile.
+func QueryAttachedFileProc(c *attachedfile.AttachedFileClient, _m *attachedfile.AttachedFile) *process.ProcessQuery {
+	query := process.NewProcessClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, id),
+			sqlgraph.To(process.Table, process.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.ProcTable, attachedfile.ProcColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAttachedFileProcFromQuery returns a process.ProcessQuery that traverses the "proc" edge
+// of every attachedfile.AttachedFile matched by q (chained-query form). Mirrors the pre-PR6
+// (*attachedfile.AttachedFileQuery).QueryProc method, hoisted to root so it
+// can reference the cross-package process.ProcessQuery type.
+func QueryAttachedFileProcFromQuery(q *attachedfile.AttachedFileQuery) *process.ProcessQuery {
+	query := process.NewProcessClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(attachedfile.Table, attachedfile.FieldID, selector),
+			sqlgraph.To(process.Table, process.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.ProcTable, attachedfile.ProcColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

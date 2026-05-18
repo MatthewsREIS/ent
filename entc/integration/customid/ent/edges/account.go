@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/sid"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadAccountToken performs the eager-load for the "token" edge. Body mirrors
@@ -50,4 +51,58 @@ func LoadAccountToken(ctx context.Context, query *token.TokenQuery, nodes []*acc
 		node.Edges.Token = append(node.Edges.Token, n)
 	}
 	return nil
+}
+
+// WithAccountToken eager-loads the "token" edge on a account.AccountQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithAccountToken(q *account.AccountQuery, opts ...func(*token.TokenQuery)) *account.AccountQuery {
+	sub := token.NewTokenClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("token", func(ctx context.Context, parents []*account.Account) error {
+		return LoadAccountToken(ctx, sub, parents)
+	})
+}
+
+// QueryAccountToken returns a token.TokenQuery for the "token" edge of a given account.Account.
+func QueryAccountToken(c *account.AccountClient, _m *account.Account) *token.TokenQuery {
+	query := token.NewTokenClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, id),
+			sqlgraph.To(token.Table, token.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.TokenTable, account.TokenColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAccountTokenFromQuery returns a token.TokenQuery that traverses the "token" edge
+// of every account.Account matched by q (chained-query form). Mirrors the pre-PR6
+// (*account.AccountQuery).QueryToken method, hoisted to root so it
+// can reference the cross-package token.TokenQuery type.
+func QueryAccountTokenFromQuery(q *account.AccountQuery) *token.TokenQuery {
+	query := token.NewTokenClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(account.Table, account.FieldID, selector),
+			sqlgraph.To(token.Table, token.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, account.TokenTable, account.TokenColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

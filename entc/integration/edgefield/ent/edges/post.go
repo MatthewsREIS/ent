@@ -12,6 +12,9 @@ import (
 
 	"entgo.io/ent/entc/integration/edgefield/ent/post"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadPostAuthor performs the eager-load for the "author" edge. Body mirrors
@@ -48,4 +51,58 @@ func LoadPostAuthor(ctx context.Context, query *user.UserQuery, nodes []*post.Po
 		}
 	}
 	return nil
+}
+
+// WithPostAuthor eager-loads the "author" edge on a post.PostQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithPostAuthor(q *post.PostQuery, opts ...func(*user.UserQuery)) *post.PostQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("author", func(ctx context.Context, parents []*post.Post) error {
+		return LoadPostAuthor(ctx, sub, parents)
+	})
+}
+
+// QueryPostAuthor returns a user.UserQuery for the "author" edge of a given post.Post.
+func QueryPostAuthor(c *post.PostClient, _m *post.Post) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, post.AuthorTable, post.AuthorColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPostAuthorFromQuery returns a user.UserQuery that traverses the "author" edge
+// of every post.Post matched by q (chained-query form). Mirrors the pre-PR6
+// (*post.PostQuery).QueryAuthor method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryPostAuthorFromQuery(q *post.PostQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(post.Table, post.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, post.AuthorTable, post.AuthorColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

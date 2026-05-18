@@ -7,14 +7,7 @@
 package ent
 
 import (
-	"context"
-
-	"entgo.io/ent/entc/integration/template/ent/edges"
 	"entgo.io/ent/entc/integration/template/ent/pet"
-	"entgo.io/ent/entc/integration/template/ent/user"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -37,57 +30,3 @@ type (
 var (
 	NewPetClient = pet.NewPetClient
 )
-
-// WithPetOwner eager-loads the "owner" edge on a PetQuery. The
-// optional arguments configure the sibling sub-query before storage.
-func WithPetOwner(q *PetQuery, opts ...func(*UserQuery)) *PetQuery {
-	sub := NewUserClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("owner", func(ctx context.Context, parents []*Pet) error {
-		return edges.LoadPetOwner(ctx, sub, parents)
-	})
-}
-
-// QueryPetOwner returns a UserQuery for the "owner" edge of a given Pet.
-func QueryPetOwner(c *PetClient, _m *Pet) *UserQuery {
-	query := NewUserClient(c.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(pet.Table, pet.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
-
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPetOwnerFromQuery returns a UserQuery that traverses the "owner" edge
-// of every Pet matched by q (chained-query form). Mirrors the pre-PR6
-// (*PetQuery).QueryOwner method, hoisted to root so it
-// can reference the cross-package UserQuery type.
-func QueryPetOwnerFromQuery(q *PetQuery) *UserQuery {
-	query := NewUserClient(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(pet.Table, pet.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}

@@ -56,6 +56,60 @@ func LoadPetOwner(ctx context.Context, query *user.UserQuery, nodes []*pet.Pet) 
 	return nil
 }
 
+// WithPetOwner eager-loads the "owner" edge on a pet.PetQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithPetOwner(q *pet.PetQuery, opts ...func(*user.UserQuery)) *pet.PetQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("owner", func(ctx context.Context, parents []*pet.Pet) error {
+		return LoadPetOwner(ctx, sub, parents)
+	})
+}
+
+// QueryPetOwner returns a user.UserQuery for the "owner" edge of a given pet.Pet.
+func QueryPetOwner(c *pet.PetClient, _m *pet.Pet) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPetOwnerFromQuery returns a user.UserQuery that traverses the "owner" edge
+// of every pet.Pet matched by q (chained-query form). Mirrors the pre-PR6
+// (*pet.PetQuery).QueryOwner method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryPetOwnerFromQuery(q *pet.PetQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadPetCars performs the eager-load for the "cars" edge. Body mirrors
 // the pre-PR6 *PetQuery.loadCars method, hoisted to root
 // so it can reference cross-package types directly.
@@ -87,6 +141,60 @@ func LoadPetCars(ctx context.Context, query *car.CarQuery, nodes []*pet.Pet) err
 		node.Edges.Cars = append(node.Edges.Cars, n)
 	}
 	return nil
+}
+
+// WithPetCars eager-loads the "cars" edge on a pet.PetQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithPetCars(q *pet.PetQuery, opts ...func(*car.CarQuery)) *pet.PetQuery {
+	sub := car.NewCarClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("cars", func(ctx context.Context, parents []*pet.Pet) error {
+		return LoadPetCars(ctx, sub, parents)
+	})
+}
+
+// QueryPetCars returns a car.CarQuery for the "cars" edge of a given pet.Pet.
+func QueryPetCars(c *pet.PetClient, _m *pet.Pet) *car.CarQuery {
+	query := car.NewCarClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, id),
+			sqlgraph.To(car.Table, car.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, pet.CarsTable, pet.CarsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPetCarsFromQuery returns a car.CarQuery that traverses the "cars" edge
+// of every pet.Pet matched by q (chained-query form). Mirrors the pre-PR6
+// (*pet.PetQuery).QueryCars method, hoisted to root so it
+// can reference the cross-package car.CarQuery type.
+func QueryPetCarsFromQuery(q *pet.PetQuery) *car.CarQuery {
+	query := car.NewCarClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, selector),
+			sqlgraph.To(car.Table, car.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, pet.CarsTable, pet.CarsColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // LoadPetFriends performs the eager-load for the "friends" edge. Body mirrors
@@ -157,6 +265,60 @@ func LoadPetFriends(ctx context.Context, query *pet.PetQuery, nodes []*pet.Pet) 
 	return nil
 }
 
+// WithPetFriends eager-loads the "friends" edge on a pet.PetQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithPetFriends(q *pet.PetQuery, opts ...func(*pet.PetQuery)) *pet.PetQuery {
+	sub := pet.NewPetClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("friends", func(ctx context.Context, parents []*pet.Pet) error {
+		return LoadPetFriends(ctx, sub, parents)
+	})
+}
+
+// QueryPetFriends returns a pet.PetQuery for the "friends" edge of a given pet.Pet.
+func QueryPetFriends(c *pet.PetClient, _m *pet.Pet) *pet.PetQuery {
+	query := pet.NewPetClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, id),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, pet.FriendsTable, pet.FriendsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPetFriendsFromQuery returns a pet.PetQuery that traverses the "friends" edge
+// of every pet.Pet matched by q (chained-query form). Mirrors the pre-PR6
+// (*pet.PetQuery).QueryFriends method, hoisted to root so it
+// can reference the cross-package pet.PetQuery type.
+func QueryPetFriendsFromQuery(q *pet.PetQuery) *pet.PetQuery {
+	query := pet.NewPetClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, pet.FriendsTable, pet.FriendsPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadPetBestFriend performs the eager-load for the "best_friend" edge. Body mirrors
 // the pre-PR6 *PetQuery.loadBestFriend method, hoisted to root
 // so it can reference cross-package types directly.
@@ -191,4 +353,58 @@ func LoadPetBestFriend(ctx context.Context, query *pet.PetQuery, nodes []*pet.Pe
 		}
 	}
 	return nil
+}
+
+// WithPetBestFriend eager-loads the "best_friend" edge on a pet.PetQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithPetBestFriend(q *pet.PetQuery, opts ...func(*pet.PetQuery)) *pet.PetQuery {
+	sub := pet.NewPetClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("best_friend", func(ctx context.Context, parents []*pet.Pet) error {
+		return LoadPetBestFriend(ctx, sub, parents)
+	})
+}
+
+// QueryPetBestFriend returns a pet.PetQuery for the "best_friend" edge of a given pet.Pet.
+func QueryPetBestFriend(c *pet.PetClient, _m *pet.Pet) *pet.PetQuery {
+	query := pet.NewPetClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, id),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, pet.BestFriendTable, pet.BestFriendColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPetBestFriendFromQuery returns a pet.PetQuery that traverses the "best_friend" edge
+// of every pet.Pet matched by q (chained-query form). Mirrors the pre-PR6
+// (*pet.PetQuery).QueryBestFriend method, hoisted to root so it
+// can reference the cross-package pet.PetQuery type.
+func QueryPetBestFriendFromQuery(q *pet.PetQuery) *pet.PetQuery {
+	query := pet.NewPetClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pet.Table, pet.FieldID, selector),
+			sqlgraph.To(pet.Table, pet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, pet.BestFriendTable, pet.BestFriendColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

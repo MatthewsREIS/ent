@@ -437,6 +437,95 @@ func {{ $nlfunc }}(ctx context.Context, query *{{ $e.Type.Package }}.{{ $edgeQue
 	return nil
 }
 {{- end }}
+
+{{- /* With<Node><Edge> — eager-loads the "{{ $e.Name }}" edge on a {{ $n.QueryName }}.
+       Hoisted from facade.tmpl in Task 5; qualified for cross-package use. */}}
+{{ $func := print "With" $n.Name $e.StructField }}
+{{ $edgeClient := $e.Type.ClientName }}
+{{ $client := $n.ClientName }}
+
+// {{ $func }} eager-loads the "{{ $e.Name }}" edge on a {{ $n.Package }}.{{ $n.QueryName }}. The
+// optional arguments configure the sibling sub-query before storage.
+func {{ $func }}(q *{{ $n.Package }}.{{ $n.QueryName }}, opts ...func(*{{ $e.Type.Package }}.{{ $edgeQuery }})) *{{ $n.Package }}.{{ $n.QueryName }} {
+	sub := {{ $e.Type.Package }}.New{{ $edgeClient }}(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("{{ $e.Name }}", func(ctx context.Context, parents []*{{ $n.Package }}.{{ $n.Name }}) error {
+		return Load{{ $n.Name }}{{ $e.StructField }}(ctx, sub, parents)
+	})
+}
+
+{{- if and ($.FeatureEnabled "namedges") (not $e.Unique) }}
+{{ $nfunc := print "WithNamed" $n.Name $e.StructField }}
+
+// {{ $nfunc }} registers a named eager-loader for the "{{ $e.Name }}" edge on a
+// {{ $n.Package }}.{{ $n.QueryName }}. Multiple names accumulate; each loads independently and
+// is retrievable via {{ $n.Name }}.Named{{ $e.StructField }}(name). Replaces the
+// pre-PR6 (*{{ $n.Package }}.{{ $n.QueryName }}).WithNamed{{ $e.StructField }} method, hoisted to root
+// so the named-loader map can hold the cross-package {{ $e.Type.Package }}.{{ $edgeQuery }} type.
+func {{ $nfunc }}(q *{{ $n.Package }}.{{ $n.QueryName }}, name string, opts ...func(*{{ $e.Type.Package }}.{{ $edgeQuery }})) *{{ $n.Package }}.{{ $n.QueryName }} {
+	sub := {{ $e.Type.Package }}.New{{ $edgeClient }}(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("{{ $e.Name }}:"+name, func(ctx context.Context, parents []*{{ $n.Package }}.{{ $n.Name }}) error {
+		return LoadNamed{{ $n.Name }}{{ $e.StructField }}(ctx, sub, parents, name)
+	})
+}
+{{- end }}
+
+{{ $qfunc := print "Query" $n.Name $e.StructField }}
+{{ $rec := $n.Receiver }}{{ if eq $rec "c" }}{{ $rec = printf "%.2s" $n.Name | lower }}{{ end }}
+{{ $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
+
+// {{ $qfunc }} returns a {{ $e.Type.Package }}.{{ $edgeQuery }} for the "{{ $e.Name }}" edge of a given {{ $n.Package }}.{{ $n.Name }}.
+func {{ $qfunc }}(c *{{ $n.Package }}.{{ $client }}, {{ $arg }} *{{ $n.Package }}.{{ $n.Name }}) *{{ $e.Type.Package }}.{{ $edgeQuery }} {
+	query := {{ $e.Type.Package }}.New{{ $edgeClient }}(c.Config).Query()
+	{{- if $n.HasOneFieldID }}
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
+			{{- xtemplate "dialect/sql/query/from" . -}}
+		{{- end }}
+		return fromV, nil
+	}
+	{{- end }}
+	return query
+}
+
+{{ $qqfunc := print "Query" $n.Name $e.StructField "FromQuery" }}
+
+// {{ $qqfunc }} returns a {{ $e.Type.Package }}.{{ $edgeQuery }} that traverses the "{{ $e.Name }}" edge
+// of every {{ $n.Package }}.{{ $n.Name }} matched by q (chained-query form). Mirrors the pre-PR6
+// (*{{ $n.Package }}.{{ $n.QueryName }}).Query{{ $e.StructField }} method, hoisted to root so it
+// can reference the cross-package {{ $e.Type.Package }}.{{ $edgeQuery }} type.
+func {{ $qqfunc }}(q *{{ $n.Package }}.{{ $n.QueryName }}) *{{ $e.Type.Package }}.{{ $edgeQuery }} {
+	query := {{ $e.Type.Package }}.New{{ $edgeClient }}(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ if $n.HasCompositeID }}{{ $e.ColumnConstant }}{{ else }}{{ $n.ID.Constant }}{{ end }}, selector),
+			sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }}),
+			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
+				{{- if $e.M2M -}}
+					{{ $n.Package }}.{{ $e.PKConstant }}...
+				{{- else -}}
+					{{ $n.Package }}.{{ $e.ColumnConstant }}
+				{{- end -}}
+			),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 {{- end }}
 
 {{ end }}

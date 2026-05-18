@@ -85,3 +85,57 @@ func LoadFileProcesses(ctx context.Context, query *process.ProcessQuery, nodes [
 	}
 	return nil
 }
+
+// WithFileProcesses eager-loads the "processes" edge on a file.FileQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithFileProcesses(q *file.FileQuery, opts ...func(*process.ProcessQuery)) *file.FileQuery {
+	sub := process.NewProcessClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("processes", func(ctx context.Context, parents []*file.File) error {
+		return LoadFileProcesses(ctx, sub, parents)
+	})
+}
+
+// QueryFileProcesses returns a process.ProcessQuery for the "processes" edge of a given file.File.
+func QueryFileProcesses(c *file.FileClient, _m *file.File) *process.ProcessQuery {
+	query := process.NewProcessClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, id),
+			sqlgraph.To(process.Table, process.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, file.ProcessesTable, file.ProcessesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFileProcessesFromQuery returns a process.ProcessQuery that traverses the "processes" edge
+// of every file.File matched by q (chained-query form). Mirrors the pre-PR6
+// (*file.FileQuery).QueryProcesses method, hoisted to root so it
+// can reference the cross-package process.ProcessQuery type.
+func QueryFileProcessesFromQuery(q *file.FileQuery) *process.ProcessQuery {
+	query := process.NewProcessClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(file.Table, file.FieldID, selector),
+			sqlgraph.To(process.Table, process.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, file.ProcessesTable, file.ProcessesPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}

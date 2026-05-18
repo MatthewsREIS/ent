@@ -86,3 +86,60 @@ func LoadGroupUsers(ctx context.Context, query *user.UserQuery, nodes []*group.G
 	}
 	return nil
 }
+
+// WithGroupUsers eager-loads the "users" edge on a group.GroupQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithGroupUsers(q *group.GroupQuery, opts ...func(*user.UserQuery)) *group.GroupQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("users", func(ctx context.Context, parents []*group.Group) error {
+		return LoadGroupUsers(ctx, sub, parents)
+	})
+}
+
+// QueryGroupUsers returns a user.UserQuery for the "users" edge of a given group.Group.
+func QueryGroupUsers(c *group.GroupClient, _m *group.Group) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
+		)
+		schemaConfig := _m.Config.SchemaConfig()
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.GroupUsers
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGroupUsersFromQuery returns a user.UserQuery that traverses the "users" edge
+// of every group.Group matched by q (chained-query form). Mirrors the pre-PR6
+// (*group.GroupQuery).QueryUsers method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryGroupUsersFromQuery(q *group.GroupQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(group.Table, group.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, group.UsersTable, group.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}

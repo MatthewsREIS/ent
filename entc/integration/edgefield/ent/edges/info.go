@@ -12,6 +12,9 @@ import (
 
 	"entgo.io/ent/entc/integration/edgefield/ent/info"
 	"entgo.io/ent/entc/integration/edgefield/ent/user"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadInfoUser performs the eager-load for the "user" edge. Body mirrors
@@ -45,4 +48,58 @@ func LoadInfoUser(ctx context.Context, query *user.UserQuery, nodes []*info.Info
 		}
 	}
 	return nil
+}
+
+// WithInfoUser eager-loads the "user" edge on a info.InfoQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithInfoUser(q *info.InfoQuery, opts ...func(*user.UserQuery)) *info.InfoQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("user", func(ctx context.Context, parents []*info.Info) error {
+		return LoadInfoUser(ctx, sub, parents)
+	})
+}
+
+// QueryInfoUser returns a user.UserQuery for the "user" edge of a given info.Info.
+func QueryInfoUser(c *info.InfoClient, _m *info.Info) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(info.Table, info.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, info.UserTable, info.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInfoUserFromQuery returns a user.UserQuery that traverses the "user" edge
+// of every info.Info matched by q (chained-query form). Mirrors the pre-PR6
+// (*info.InfoQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryInfoUserFromQuery(q *info.InfoQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(info.Table, info.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, info.UserTable, info.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

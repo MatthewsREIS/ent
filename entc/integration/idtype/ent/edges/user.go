@@ -53,6 +53,60 @@ func LoadUserSpouse(ctx context.Context, query *user.UserQuery, nodes []*user.Us
 	return nil
 }
 
+// WithUserSpouse eager-loads the "spouse" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserSpouse(q *user.UserQuery, opts ...func(*user.UserQuery)) *user.UserQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("spouse", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserSpouse(ctx, sub, parents)
+	})
+}
+
+// QueryUserSpouse returns a user.UserQuery for the "spouse" edge of a given user.User.
+func QueryUserSpouse(c *user.UserClient, _m *user.User) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserSpouseFromQuery returns a user.UserQuery that traverses the "spouse" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QuerySpouse method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryUserSpouseFromQuery(q *user.UserQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.SpouseTable, user.SpouseColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadUserFollowers performs the eager-load for the "followers" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadFollowers method, hoisted to root
 // so it can reference cross-package types directly.
@@ -121,6 +175,60 @@ func LoadUserFollowers(ctx context.Context, query *user.UserQuery, nodes []*user
 	return nil
 }
 
+// WithUserFollowers eager-loads the "followers" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserFollowers(q *user.UserQuery, opts ...func(*user.UserQuery)) *user.UserQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("followers", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserFollowers(ctx, sub, parents)
+	})
+}
+
+// QueryUserFollowers returns a user.UserQuery for the "followers" edge of a given user.User.
+func QueryUserFollowers(c *user.UserClient, _m *user.User) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserFollowersFromQuery returns a user.UserQuery that traverses the "followers" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryFollowers method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryUserFollowersFromQuery(q *user.UserQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadUserFollowing performs the eager-load for the "following" edge. Body mirrors
 // the pre-PR6 *UserQuery.loadFollowing method, hoisted to root
 // so it can reference cross-package types directly.
@@ -187,4 +295,58 @@ func LoadUserFollowing(ctx context.Context, query *user.UserQuery, nodes []*user
 		}
 	}
 	return nil
+}
+
+// WithUserFollowing eager-loads the "following" edge on a user.UserQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserFollowing(q *user.UserQuery, opts ...func(*user.UserQuery)) *user.UserQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("following", func(ctx context.Context, parents []*user.User) error {
+		return LoadUserFollowing(ctx, sub, parents)
+	})
+}
+
+// QueryUserFollowing returns a user.UserQuery for the "following" edge of a given user.User.
+func QueryUserFollowing(c *user.UserClient, _m *user.User) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserFollowingFromQuery returns a user.UserQuery that traverses the "following" edge
+// of every user.User matched by q (chained-query form). Mirrors the pre-PR6
+// (*user.UserQuery).QueryFollowing method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryUserFollowingFromQuery(q *user.UserQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

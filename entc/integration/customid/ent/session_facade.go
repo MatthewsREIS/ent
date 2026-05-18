@@ -7,14 +7,7 @@
 package ent
 
 import (
-	"context"
-
-	"entgo.io/ent/entc/integration/customid/ent/device"
-	"entgo.io/ent/entc/integration/customid/ent/edges"
 	"entgo.io/ent/entc/integration/customid/ent/session"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -39,57 +32,3 @@ var (
 	NewSessionClient            = session.NewSessionClient
 	NewSessionFilterForMutation = session.NewSessionFilterForMutation
 )
-
-// WithSessionDevice eager-loads the "device" edge on a SessionQuery. The
-// optional arguments configure the sibling sub-query before storage.
-func WithSessionDevice(q *SessionQuery, opts ...func(*DeviceQuery)) *SessionQuery {
-	sub := NewDeviceClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("device", func(ctx context.Context, parents []*Session) error {
-		return edges.LoadSessionDevice(ctx, sub, parents)
-	})
-}
-
-// QuerySessionDevice returns a DeviceQuery for the "device" edge of a given Session.
-func QuerySessionDevice(c *SessionClient, _m *Session) *DeviceQuery {
-	query := NewDeviceClient(c.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, id),
-			sqlgraph.To(device.Table, device.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, session.DeviceTable, session.DeviceColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
-
-		return fromV, nil
-	}
-	return query
-}
-
-// QuerySessionDeviceFromQuery returns a DeviceQuery that traverses the "device" edge
-// of every Session matched by q (chained-query form). Mirrors the pre-PR6
-// (*SessionQuery).QueryDevice method, hoisted to root so it
-// can reference the cross-package DeviceQuery type.
-func QuerySessionDeviceFromQuery(q *SessionQuery) *DeviceQuery {
-	query := NewDeviceClient(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(session.Table, session.FieldID, selector),
-			sqlgraph.To(device.Table, device.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, session.DeviceTable, session.DeviceColumn),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}

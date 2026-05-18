@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadNodePrev performs the eager-load for the "prev" edge. Body mirrors
@@ -53,6 +54,60 @@ func LoadNodePrev(ctx context.Context, query *node.NodeQuery, nodes []*node.Node
 	return nil
 }
 
+// WithNodePrev eager-loads the "prev" edge on a node.NodeQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithNodePrev(q *node.NodeQuery, opts ...func(*node.NodeQuery)) *node.NodeQuery {
+	sub := node.NewNodeClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("prev", func(ctx context.Context, parents []*node.Node) error {
+		return LoadNodePrev(ctx, sub, parents)
+	})
+}
+
+// QueryNodePrev returns a node.NodeQuery for the "prev" edge of a given node.Node.
+func QueryNodePrev(c *node.NodeClient, _m *node.Node) *node.NodeQuery {
+	query := node.NewNodeClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, id),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNodePrevFromQuery returns a node.NodeQuery that traverses the "prev" edge
+// of every node.Node matched by q (chained-query form). Mirrors the pre-PR6
+// (*node.NodeQuery).QueryPrev method, hoisted to root so it
+// can reference the cross-package node.NodeQuery type.
+func QueryNodePrevFromQuery(q *node.NodeQuery) *node.NodeQuery {
+	query := node.NewNodeClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, selector),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadNodeNext performs the eager-load for the "next" edge. Body mirrors
 // the pre-PR6 *NodeQuery.loadNext method, hoisted to root
 // so it can reference cross-package types directly.
@@ -83,4 +138,58 @@ func LoadNodeNext(ctx context.Context, query *node.NodeQuery, nodes []*node.Node
 		node.Edges.Next = n
 	}
 	return nil
+}
+
+// WithNodeNext eager-loads the "next" edge on a node.NodeQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithNodeNext(q *node.NodeQuery, opts ...func(*node.NodeQuery)) *node.NodeQuery {
+	sub := node.NewNodeClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("next", func(ctx context.Context, parents []*node.Node) error {
+		return LoadNodeNext(ctx, sub, parents)
+	})
+}
+
+// QueryNodeNext returns a node.NodeQuery for the "next" edge of a given node.Node.
+func QueryNodeNext(c *node.NodeClient, _m *node.Node) *node.NodeQuery {
+	query := node.NewNodeClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, id),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNodeNextFromQuery returns a node.NodeQuery that traverses the "next" edge
+// of every node.Node matched by q (chained-query form). Mirrors the pre-PR6
+// (*node.NodeQuery).QueryNext method, hoisted to root so it
+// can reference the cross-package node.NodeQuery type.
+func QueryNodeNextFromQuery(q *node.NodeQuery) *node.NodeQuery {
+	query := node.NewNodeClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(node.Table, node.FieldID, selector),
+			sqlgraph.To(node.Table, node.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

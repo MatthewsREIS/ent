@@ -13,6 +13,9 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/group"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadUserGroupUser performs the eager-load for the "user" edge. Body mirrors
@@ -48,6 +51,60 @@ func LoadUserGroupUser(ctx context.Context, query *user.UserQuery, nodes []*user
 	return nil
 }
 
+// WithUserGroupUser eager-loads the "user" edge on a usergroup.UserGroupQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserGroupUser(q *usergroup.UserGroupQuery, opts ...func(*user.UserQuery)) *usergroup.UserGroupQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("user", func(ctx context.Context, parents []*usergroup.UserGroup) error {
+		return LoadUserGroupUser(ctx, sub, parents)
+	})
+}
+
+// QueryUserGroupUser returns a user.UserQuery for the "user" edge of a given usergroup.UserGroup.
+func QueryUserGroupUser(c *usergroup.UserGroupClient, _m *usergroup.UserGroup) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroup.Table, usergroup.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usergroup.UserTable, usergroup.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserGroupUserFromQuery returns a user.UserQuery that traverses the "user" edge
+// of every usergroup.UserGroup matched by q (chained-query form). Mirrors the pre-PR6
+// (*usergroup.UserGroupQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryUserGroupUserFromQuery(q *usergroup.UserGroupQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroup.Table, usergroup.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usergroup.UserTable, usergroup.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadUserGroupGroup performs the eager-load for the "group" edge. Body mirrors
 // the pre-PR6 *UserGroupQuery.loadGroup method, hoisted to root
 // so it can reference cross-package types directly.
@@ -79,4 +136,58 @@ func LoadUserGroupGroup(ctx context.Context, query *group.GroupQuery, nodes []*u
 		}
 	}
 	return nil
+}
+
+// WithUserGroupGroup eager-loads the "group" edge on a usergroup.UserGroupQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserGroupGroup(q *usergroup.UserGroupQuery, opts ...func(*group.GroupQuery)) *usergroup.UserGroupQuery {
+	sub := group.NewGroupClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("group", func(ctx context.Context, parents []*usergroup.UserGroup) error {
+		return LoadUserGroupGroup(ctx, sub, parents)
+	})
+}
+
+// QueryUserGroupGroup returns a group.GroupQuery for the "group" edge of a given usergroup.UserGroup.
+func QueryUserGroupGroup(c *usergroup.UserGroupClient, _m *usergroup.UserGroup) *group.GroupQuery {
+	query := group.NewGroupClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroup.Table, usergroup.FieldID, id),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usergroup.GroupTable, usergroup.GroupColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserGroupGroupFromQuery returns a group.GroupQuery that traverses the "group" edge
+// of every usergroup.UserGroup matched by q (chained-query form). Mirrors the pre-PR6
+// (*usergroup.UserGroupQuery).QueryGroup method, hoisted to root so it
+// can reference the cross-package group.GroupQuery type.
+func QueryUserGroupGroupFromQuery(q *usergroup.UserGroupQuery) *group.GroupQuery {
+	query := group.NewGroupClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usergroup.Table, usergroup.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usergroup.GroupTable, usergroup.GroupColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

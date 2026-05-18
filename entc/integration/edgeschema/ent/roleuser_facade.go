@@ -7,15 +7,7 @@
 package ent
 
 import (
-	"context"
-
-	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
-	"entgo.io/ent/entc/integration/edgeschema/ent/role"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
-	"entgo.io/ent/entc/integration/edgeschema/ent/user"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -40,89 +32,3 @@ var (
 	NewRoleUserClient            = roleuser.NewRoleUserClient
 	NewRoleUserFilterForMutation = roleuser.NewRoleUserFilterForMutation
 )
-
-// WithRoleUserRole eager-loads the "role" edge on a RoleUserQuery. The
-// optional arguments configure the sibling sub-query before storage.
-func WithRoleUserRole(q *RoleUserQuery, opts ...func(*RoleQuery)) *RoleUserQuery {
-	sub := NewRoleClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("role", func(ctx context.Context, parents []*RoleUser) error {
-		return edges.LoadRoleUserRole(ctx, sub, parents)
-	})
-}
-
-// QueryRoleUserRole returns a RoleQuery for the "role" edge of a given RoleUser.
-func QueryRoleUserRole(c *RoleUserClient, _m *RoleUser) *RoleQuery {
-	query := NewRoleClient(c.Config).Query()
-	return query
-}
-
-// QueryRoleUserRoleFromQuery returns a RoleQuery that traverses the "role" edge
-// of every RoleUser matched by q (chained-query form). Mirrors the pre-PR6
-// (*RoleUserQuery).QueryRole method, hoisted to root so it
-// can reference the cross-package RoleQuery type.
-func QueryRoleUserRoleFromQuery(q *RoleUserQuery) *RoleQuery {
-	query := NewRoleClient(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(roleuser.Table, roleuser.RoleColumn, selector),
-			sqlgraph.To(role.Table, role.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, roleuser.RoleTable, roleuser.RoleColumn),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// WithRoleUserUser eager-loads the "user" edge on a RoleUserQuery. The
-// optional arguments configure the sibling sub-query before storage.
-func WithRoleUserUser(q *RoleUserQuery, opts ...func(*UserQuery)) *RoleUserQuery {
-	sub := NewUserClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("user", func(ctx context.Context, parents []*RoleUser) error {
-		return edges.LoadRoleUserUser(ctx, sub, parents)
-	})
-}
-
-// QueryRoleUserUser returns a UserQuery for the "user" edge of a given RoleUser.
-func QueryRoleUserUser(c *RoleUserClient, _m *RoleUser) *UserQuery {
-	query := NewUserClient(c.Config).Query()
-	return query
-}
-
-// QueryRoleUserUserFromQuery returns a UserQuery that traverses the "user" edge
-// of every RoleUser matched by q (chained-query form). Mirrors the pre-PR6
-// (*RoleUserQuery).QueryUser method, hoisted to root so it
-// can reference the cross-package UserQuery type.
-func QueryRoleUserUserFromQuery(q *RoleUserQuery) *UserQuery {
-	query := NewUserClient(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(roleuser.Table, roleuser.UserColumn, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, roleuser.UserTable, roleuser.UserColumn),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}

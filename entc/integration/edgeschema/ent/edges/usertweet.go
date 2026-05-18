@@ -13,6 +13,9 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweet"
 	"entgo.io/ent/entc/integration/edgeschema/ent/user"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // LoadUserTweetUser performs the eager-load for the "user" edge. Body mirrors
@@ -48,6 +51,60 @@ func LoadUserTweetUser(ctx context.Context, query *user.UserQuery, nodes []*user
 	return nil
 }
 
+// WithUserTweetUser eager-loads the "user" edge on a usertweet.UserTweetQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserTweetUser(q *usertweet.UserTweetQuery, opts ...func(*user.UserQuery)) *usertweet.UserTweetQuery {
+	sub := user.NewUserClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("user", func(ctx context.Context, parents []*usertweet.UserTweet) error {
+		return LoadUserTweetUser(ctx, sub, parents)
+	})
+}
+
+// QueryUserTweetUser returns a user.UserQuery for the "user" edge of a given usertweet.UserTweet.
+func QueryUserTweetUser(c *usertweet.UserTweetClient, _m *usertweet.UserTweet) *user.UserQuery {
+	query := user.NewUserClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usertweet.Table, usertweet.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usertweet.UserTable, usertweet.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserTweetUserFromQuery returns a user.UserQuery that traverses the "user" edge
+// of every usertweet.UserTweet matched by q (chained-query form). Mirrors the pre-PR6
+// (*usertweet.UserTweetQuery).QueryUser method, hoisted to root so it
+// can reference the cross-package user.UserQuery type.
+func QueryUserTweetUserFromQuery(q *usertweet.UserTweetQuery) *user.UserQuery {
+	query := user.NewUserClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usertweet.Table, usertweet.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usertweet.UserTable, usertweet.UserColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // LoadUserTweetTweet performs the eager-load for the "tweet" edge. Body mirrors
 // the pre-PR6 *UserTweetQuery.loadTweet method, hoisted to root
 // so it can reference cross-package types directly.
@@ -79,4 +136,58 @@ func LoadUserTweetTweet(ctx context.Context, query *tweet.TweetQuery, nodes []*u
 		}
 	}
 	return nil
+}
+
+// WithUserTweetTweet eager-loads the "tweet" edge on a usertweet.UserTweetQuery. The
+// optional arguments configure the sibling sub-query before storage.
+func WithUserTweetTweet(q *usertweet.UserTweetQuery, opts ...func(*tweet.TweetQuery)) *usertweet.UserTweetQuery {
+	sub := tweet.NewTweetClient(q.Config).Query()
+	for _, opt := range opts {
+		opt(sub)
+	}
+	return q.StoreEager("tweet", func(ctx context.Context, parents []*usertweet.UserTweet) error {
+		return LoadUserTweetTweet(ctx, sub, parents)
+	})
+}
+
+// QueryUserTweetTweet returns a tweet.TweetQuery for the "tweet" edge of a given usertweet.UserTweet.
+func QueryUserTweetTweet(c *usertweet.UserTweetClient, _m *usertweet.UserTweet) *tweet.TweetQuery {
+	query := tweet.NewTweetClient(c.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usertweet.Table, usertweet.FieldID, id),
+			sqlgraph.To(tweet.Table, tweet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usertweet.TweetTable, usertweet.TweetColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
+
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserTweetTweetFromQuery returns a tweet.TweetQuery that traverses the "tweet" edge
+// of every usertweet.UserTweet matched by q (chained-query form). Mirrors the pre-PR6
+// (*usertweet.UserTweetQuery).QueryTweet method, hoisted to root so it
+// can reference the cross-package tweet.TweetQuery type.
+func QueryUserTweetTweetFromQuery(q *usertweet.UserTweetQuery) *tweet.TweetQuery {
+	query := tweet.NewTweetClient(q.Config).Query()
+	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
+		if err := q.PrepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := q.SQLQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(usertweet.Table, usertweet.FieldID, selector),
+			sqlgraph.To(tweet.Table, tweet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, usertweet.TweetTable, usertweet.TweetColumn),
+		)
+		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }

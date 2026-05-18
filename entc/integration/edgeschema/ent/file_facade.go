@@ -7,14 +7,7 @@
 package ent
 
 import (
-	"context"
-
-	"entgo.io/ent/entc/integration/edgeschema/ent/edges"
 	"entgo.io/ent/entc/integration/edgeschema/ent/file"
-	"entgo.io/ent/entc/integration/edgeschema/ent/process"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -39,57 +32,3 @@ var (
 	NewFileClient            = file.NewFileClient
 	NewFileFilterForMutation = file.NewFileFilterForMutation
 )
-
-// WithFileProcesses eager-loads the "processes" edge on a FileQuery. The
-// optional arguments configure the sibling sub-query before storage.
-func WithFileProcesses(q *FileQuery, opts ...func(*ProcessQuery)) *FileQuery {
-	sub := NewProcessClient(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("processes", func(ctx context.Context, parents []*File) error {
-		return edges.LoadFileProcesses(ctx, sub, parents)
-	})
-}
-
-// QueryFileProcesses returns a ProcessQuery for the "processes" edge of a given File.
-func QueryFileProcesses(c *FileClient, _m *File) *ProcessQuery {
-	query := NewProcessClient(c.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(process.Table, process.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, file.ProcessesTable, file.ProcessesPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(_m.Drv.Dialect(), step)
-
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryFileProcessesFromQuery returns a ProcessQuery that traverses the "processes" edge
-// of every File matched by q (chained-query form). Mirrors the pre-PR6
-// (*FileQuery).QueryProcesses method, hoisted to root so it
-// can reference the cross-package ProcessQuery type.
-func QueryFileProcessesFromQuery(q *FileQuery) *ProcessQuery {
-	query := NewProcessClient(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, selector),
-			sqlgraph.To(process.Table, process.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, file.ProcessesTable, file.ProcessesPrimaryKey...),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}

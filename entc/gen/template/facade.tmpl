@@ -13,31 +13,9 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ $n := $ }}
 {{ $client := $n.ClientName }}
-{{ $rec := $n.Receiver }}{{ if eq $rec "c" }}{{ $rec = printf "%.2s" $n.Name | lower }}{{ end }}
-{{ $pkg := $.Package }}
 
 import (
-	{{- if $n.Edges }}
-	"context"
-	{{- end }}
-
 	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
-	{{- if $n.Edges }}
-	"{{ $.Config.Package }}/edges"
-	{{- $imported := dict $.PackageDir true }}
-	{{- range $e := $n.Edges }}
-	{{- if not (hasKey $imported $e.Type.PackageDir) }}
-	{{ $e.Type.PackageAlias }} "{{ $.Config.Package }}/{{ $e.Type.PackageDir }}"
-	{{- $imported = set $imported $e.Type.PackageDir true }}
-	{{- end }}
-	{{- end }}
-	{{- end }}
-
-	{{- if $n.Edges }}
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	{{- end }}
 )
 
 // Type aliases — public consumer-facing names continue resolving here
@@ -91,95 +69,10 @@ var (
 	{{- end }}
 )
 
-{{- /* Cross-entity edge wiring. Sub-package *Query / *Client are leaves;
-       all cross-entity references hoist here so the dependency graph
-       points root → sub-packages, never the reverse. */}}
+{{- /* Cross-entity edge wiring. Edge function bodies (With, WithNamed, Query,
+       QueryFromQuery) now live in gen/edges/<entity>.go (edges.tmpl).
+       Task 6 will fill this loop with var forwarders: var WithX = edges.WithX. */}}
 {{- range $e := $n.Edges }}
-{{ $edgeQuery := $e.Type.QueryName }}
-{{ $edgeClient := $e.Type.ClientName }}
-{{ $func := print "With" $n.Name $e.StructField }}
-
-// {{ $func }} eager-loads the "{{ $e.Name }}" edge on a {{ $n.QueryName }}. The
-// optional arguments configure the sibling sub-query before storage.
-func {{ $func }}(q *{{ $n.QueryName }}, opts ...func(*{{ $edgeQuery }})) *{{ $n.QueryName }} {
-	sub := New{{ $edgeClient }}(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("{{ $e.Name }}", func(ctx context.Context, parents []*{{ $n.Name }}) error {
-		return edges.Load{{ $n.Name }}{{ $e.StructField }}(ctx, sub, parents)
-	})
-}
-
-{{- if and ($.FeatureEnabled "namedges") (not $e.Unique) }}
-{{ $nfunc := print "WithNamed" $n.Name $e.StructField }}
-
-// {{ $nfunc }} registers a named eager-loader for the "{{ $e.Name }}" edge on a
-// {{ $n.QueryName }}. Multiple names accumulate; each loads independently and
-// is retrievable via {{ $n.Name }}.Named{{ $e.StructField }}(name). Replaces the
-// pre-PR6 (*{{ $n.QueryName }}).WithNamed{{ $e.StructField }} method, hoisted to root
-// so the named-loader map can hold the cross-package {{ $edgeQuery }} type.
-func {{ $nfunc }}(q *{{ $n.QueryName }}, name string, opts ...func(*{{ $edgeQuery }})) *{{ $n.QueryName }} {
-	sub := New{{ $edgeClient }}(q.Config).Query()
-	for _, opt := range opts {
-		opt(sub)
-	}
-	return q.StoreEager("{{ $e.Name }}:"+name, func(ctx context.Context, parents []*{{ $n.Name }}) error {
-		return edges.LoadNamed{{ $n.Name }}{{ $e.StructField }}(ctx, sub, parents, name)
-	})
-}
-{{- end }}
-
-{{ $qfunc := print "Query" $n.Name $e.StructField }}
-{{ $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
-
-// {{ $qfunc }} returns a {{ $edgeQuery }} for the "{{ $e.Name }}" edge of a given {{ $n.Name }}.
-func {{ $qfunc }}(c *{{ $client }}, {{ $arg }} *{{ $n.Name }}) *{{ $edgeQuery }} {
-	query := New{{ $edgeClient }}(c.Config).Query()
-	{{- if $n.HasOneFieldID }}
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
-			{{- xtemplate "dialect/sql/query/from" . -}}
-		{{- end }}
-		return fromV, nil
-	}
-	{{- end }}
-	return query
-}
-
-{{ $qqfunc := print "Query" $n.Name $e.StructField "FromQuery" }}
-
-// {{ $qqfunc }} returns a {{ $edgeQuery }} that traverses the "{{ $e.Name }}" edge
-// of every {{ $n.Name }} matched by q (chained-query form). Mirrors the pre-PR6
-// (*{{ $n.QueryName }}).Query{{ $e.StructField }} method, hoisted to root so it
-// can reference the cross-package {{ $edgeQuery }} type.
-func {{ $qqfunc }}(q *{{ $n.QueryName }}) *{{ $edgeQuery }} {
-	query := New{{ $edgeClient }}(q.Config).Query()
-	query.Path = func(ctx context.Context) (fromV *sql.Selector, err error) {
-		if err := q.PrepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := q.SQLQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From({{ $n.Package }}.Table, {{ $n.Package }}.{{ if $n.HasCompositeID }}{{ $e.ColumnConstant }}{{ else }}{{ $n.ID.Constant }}{{ end }}, selector),
-			sqlgraph.To({{ $e.Type.Package }}.Table, {{ $e.Type.Package }}.{{ if $e.Type.HasCompositeID }}{{ $e.Ref.ColumnConstant }}{{ else }}{{ $e.Type.ID.Constant }}{{ end }}),
-			sqlgraph.Edge(sqlgraph.{{ $e.Rel.Type }}, {{ $e.IsInverse }}, {{ $n.Package }}.{{ $e.TableConstant }},
-				{{- if $e.M2M -}}
-					{{ $n.Package }}.{{ $e.PKConstant }}...
-				{{- else -}}
-					{{ $n.Package }}.{{ $e.ColumnConstant }}
-				{{- end -}}
-			),
-		)
-		fromV = sqlgraph.SetNeighbors(q.Drv.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 {{- end }}
 
 {{ end }}
