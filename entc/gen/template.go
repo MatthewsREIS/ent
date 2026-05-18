@@ -169,6 +169,19 @@ var (
 			Name:   "facade/type",
 			Format: pkgf("%s_facade.go"),
 		},
+		{
+			// PR-7 lever B-1: per-edge load<Node><Edge>, loadNamed<Node><Edge>,
+			// With<Node><Edge>, WithNamed<Node><Edge>, Query<Node><Edge>, and
+			// Query<Node><Edge>FromQuery bodies emit into a single shared edges/
+			// package. The root facade keeps `var X = edges.X` one-line forwarders
+			// for the public function names. Flat dir layout (not SubPackage),
+			// mirrors internal/model and internal/mutation.
+			Name: "edges/type",
+			Cond: func(t *Type) bool { return len(t.Edges) > 0 },
+			Format: func(t *Type) string {
+				return fmt.Sprintf("edges/%s.go", t.PackageDir())
+			},
+		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
 	GraphTemplates = []GraphTemplate{

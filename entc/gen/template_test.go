@@ -46,3 +46,28 @@ func TestTemplates_FacadeRegistered(t *testing.T) {
 	}
 	t.Fatal("facade/type template not registered")
 }
+
+func TestTemplates_EdgesTypeRegistered(t *testing.T) {
+	ty := &Type{Name: "Task"}
+	want := "edges/task.go"
+	var got string
+	for _, tmpl := range Templates {
+		if tmpl.Name == "edges/type" {
+			got = tmpl.Format(ty)
+			break
+		}
+	}
+	require.Equal(t, want, got, "edges/type template must be registered with format edges/<package>.go")
+}
+
+func TestTemplates_EdgesTypeIsNotSubPackage(t *testing.T) {
+	// edges/type goes to a single shared edges/ dir, not per-entity sub-package.
+	// Should NOT have SubPackage: true (that's reserved for <entity>/file.go layouts).
+	for _, tmpl := range Templates {
+		if tmpl.Name == "edges/type" {
+			require.False(t, tmpl.SubPackage, "edges/type lives in a shared dir, must NOT be SubPackage")
+			return
+		}
+	}
+	t.Fatal("edges/type template not registered")
+}
