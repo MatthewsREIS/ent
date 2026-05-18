@@ -275,11 +275,16 @@ func generate(g *Graph) error {
 			var data any = n
 			if tmpl.SubPackage {
 				data = &typeScope{Type: n, Scope: map[any]any{"InSubPackage": true}}
+			} else if tmpl.Name == "edges/type" {
+				data = &typeScope{Type: n, Scope: map[any]any{"InEdgesPackage": true}}
 			}
 			if err := templates.ExecuteTemplate(b, tmpl.Name, data); err != nil {
 				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 			}
 			output := tmpl.Format(n)
+			if dir := filepath.Dir(output); dir != "." {
+				assets.addDir(filepath.Join(g.Config.Target, dir))
+			}
 			assets.add(filepath.Join(g.Config.Target, output), b.Bytes(), splitAssetMeta{
 				Template: tmpl.Name,
 				Output:   filepath.ToSlash(output),
