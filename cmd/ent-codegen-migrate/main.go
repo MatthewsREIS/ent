@@ -73,7 +73,8 @@ func main() {
 }
 
 // RewritePackage walks pkgPath for .go files and applies all rewriters in
-// canonical order: mutation → predicate → edge-method → typed-edge-accessor.
+// canonical order: mutation → predicate → edge-method → typed-edge-accessor
+// → collection-method.
 //
 // The genRoot argument is the absolute path of the generated package root
 // (the parent of the -descriptors internal/ directory). The walker skips
@@ -103,6 +104,9 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 	typedEdgePass := func(filename, src string, d Descriptors, _ string) (string, error) {
 		return RewriteTypedEdgeAccessorSource(filename, src, d)
 	}
+	collectionMethodPass := func(filename, src string, d Descriptors, gp string) (string, error) {
+		return RewriteCollectionMethodSource(filename, src, d, gp)
+	}
 	passes := []struct {
 		name string
 		fn   func(string, string, Descriptors, string) (string, error)
@@ -111,6 +115,7 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 		{"predicate", predicatePass},
 		{"edge-method", edgeMethodPass},
 		{"typed-edge-accessor", typedEdgePass},
+		{"collection-method", collectionMethodPass},
 	}
 	return filepath.WalkDir(pkgPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
