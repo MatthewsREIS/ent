@@ -485,19 +485,34 @@ func (m *Mutation[T, I]) ID() (I, bool) {
 }
 
 // IDs queries the database and returns entity IDs that match the mutation's
-// predicates. Only valid on Update/Delete operations.
-func (m *Mutation[T, I]) IDs(ctx context.Context) ([]any, error) {
+// predicates. Only valid on Update/Delete operations. Returns the strongly
+// typed ID slice ([]I) to match ID() (I, bool) — callers should not need a
+// per-element type assertion to use predicate helpers like X.IDIn(ids...).
+func (m *Mutation[T, I]) IDs(ctx context.Context) ([]I, error) {
 	switch {
 	case m.op.Is(ent.OpUpdateOne | ent.OpDeleteOne):
 		if id, ok := m.ID(); ok {
-			return []any{id}, nil
+			return []I{id}, nil
 		}
 		fallthrough
 	case m.op.Is(ent.OpUpdate | ent.OpDelete):
 		if m.idsFunc == nil {
 			return nil, fmt.Errorf("IDs is not allowed on %s operations without an IDsFunc", m.op)
 		}
-		return m.idsFunc(ctx, m.predicates...)
+		raw, err := m.idsFunc(ctx, m.predicates...)
+		if err != nil {
+			return nil, err
+		}
+		out := make([]I, len(raw))
+		for i, v := range raw {
+			id, ok := v.(I)
+			if !ok {
+				var z I
+				return nil, fmt.Errorf("IDs: idsFunc returned %T at index %d, expected %T", v, i, z)
+			}
+			out[i] = id
+		}
+		return out, nil
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}

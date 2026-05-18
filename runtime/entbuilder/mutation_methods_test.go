@@ -134,7 +134,7 @@ func TestMutation_IDs_UsesIDsFunc(t *testing.T) {
 	})
 	ids, err := m.IDs(context.Background())
 	require.NoError(t, err)
-	require.Equal(t, []any{1, 2, 3}, ids)
+	require.Equal(t, []int{1, 2, 3}, ids)
 }
 
 func TestMutation_WhereP(t *testing.T) {
