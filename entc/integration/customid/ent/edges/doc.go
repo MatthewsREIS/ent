@@ -221,17 +221,17 @@ func LoadDocRelated(ctx context.Context, query *doc.DocQuery, nodes []*doc.Doc) 
 		return err
 	}
 	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
+		return query.Fetch(ctx, func(_ context.Context, _qs *sqlgraph.QuerySpec) {
+			assign := _qs.Assign
+			values := _qs.ScanValues
+			_qs.ScanValues = func(columns []string) ([]any, error) {
 				values, err := values(columns[1:])
 				if err != nil {
 					return nil, err
 				}
 				return append([]any{new(schema.DocID)}, values...), nil
 			}
-			spec.Assign = func(columns []string, values []any) error {
+			_qs.Assign = func(columns []string, values []any) error {
 				outValue := *values[0].(*schema.DocID)
 				inValue := *values[1].(*schema.DocID)
 				if nids[inValue] == nil {

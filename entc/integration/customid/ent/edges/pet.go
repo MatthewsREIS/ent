@@ -222,17 +222,17 @@ func LoadPetFriends(ctx context.Context, query *pet.PetQuery, nodes []*pet.Pet) 
 		return err
 	}
 	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
+		return query.Fetch(ctx, func(_ context.Context, _qs *sqlgraph.QuerySpec) {
+			assign := _qs.Assign
+			values := _qs.ScanValues
+			_qs.ScanValues = func(columns []string) ([]any, error) {
 				values, err := values(columns[1:])
 				if err != nil {
 					return nil, err
 				}
 				return append([]any{new(sql.NullString)}, values...), nil
 			}
-			spec.Assign = func(columns []string, values []any) error {
+			_qs.Assign = func(columns []string, values []any) error {
 				outValue := values[0].(*sql.NullString).String
 				inValue := values[1].(*sql.NullString).String
 				if nids[inValue] == nil {

@@ -307,17 +307,17 @@ func LoadUserGroups(ctx context.Context, query *group.GroupQuery, nodes []*user.
 		return err
 	}
 	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
+		return query.Fetch(ctx, func(_ context.Context, _qs *sqlgraph.QuerySpec) {
+			assign := _qs.Assign
+			values := _qs.ScanValues
+			_qs.ScanValues = func(columns []string) ([]any, error) {
 				values, err := values(columns[1:])
 				if err != nil {
 					return nil, err
 				}
 				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			spec.Assign = func(columns []string, values []any) error {
+			_qs.Assign = func(columns []string, values []any) error {
 				outValue := values[0].(*sql.NullInt64).String
 				inValue := values[1].(*sql.NullInt64).String
 				if nids[inValue] == nil {
@@ -429,17 +429,17 @@ func LoadUserFriends(ctx context.Context, query *user.UserQuery, nodes []*user.U
 		return err
 	}
 	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
+		return query.Fetch(ctx, func(_ context.Context, _qs *sqlgraph.QuerySpec) {
+			assign := _qs.Assign
+			values := _qs.ScanValues
+			_qs.ScanValues = func(columns []string) ([]any, error) {
 				values, err := values(columns[1:])
 				if err != nil {
 					return nil, err
 				}
 				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			spec.Assign = func(columns []string, values []any) error {
+			_qs.Assign = func(columns []string, values []any) error {
 				outValue := values[0].(*sql.NullInt64).String
 				inValue := values[1].(*sql.NullInt64).String
 				if nids[inValue] == nil {
@@ -551,17 +551,17 @@ func LoadUserFollowers(ctx context.Context, query *user.UserQuery, nodes []*user
 		return err
 	}
 	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
+		return query.Fetch(ctx, func(_ context.Context, _qs *sqlgraph.QuerySpec) {
+			assign := _qs.Assign
+			values := _qs.ScanValues
+			_qs.ScanValues = func(columns []string) ([]any, error) {
 				values, err := values(columns[1:])
 				if err != nil {
 					return nil, err
 				}
 				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			spec.Assign = func(columns []string, values []any) error {
+			_qs.Assign = func(columns []string, values []any) error {
 				outValue := values[0].(*sql.NullInt64).String
 				inValue := values[1].(*sql.NullInt64).String
 				if nids[inValue] == nil {
@@ -673,17 +673,17 @@ func LoadUserFollowing(ctx context.Context, query *user.UserQuery, nodes []*user
 		return err
 	}
 	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
+		return query.Fetch(ctx, func(_ context.Context, _qs *sqlgraph.QuerySpec) {
+			assign := _qs.Assign
+			values := _qs.ScanValues
+			_qs.ScanValues = func(columns []string) ([]any, error) {
 				values, err := values(columns[1:])
 				if err != nil {
 					return nil, err
 				}
 				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			spec.Assign = func(columns []string, values []any) error {
+			_qs.Assign = func(columns []string, values []any) error {
 				outValue := values[0].(*sql.NullInt64).String
 				inValue := values[1].(*sql.NullInt64).String
 				if nids[inValue] == nil {
