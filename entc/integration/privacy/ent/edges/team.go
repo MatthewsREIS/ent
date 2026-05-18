@@ -44,17 +44,17 @@ func LoadTeamTasks(ctx context.Context, query *task.TaskQuery, nodes []*team.Tea
 		return err
 	}
 	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
+		return query.Fetch(ctx, func(_ context.Context, _qs *sqlgraph.QuerySpec) {
+			assign := _qs.Assign
+			values := _qs.ScanValues
+			_qs.ScanValues = func(columns []string) ([]any, error) {
 				values, err := values(columns[1:])
 				if err != nil {
 					return nil, err
 				}
 				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			spec.Assign = func(columns []string, values []any) error {
+			_qs.Assign = func(columns []string, values []any) error {
 				outValue := int(values[0].(*sql.NullInt64).Int64)
 				inValue := int(values[1].(*sql.NullInt64).Int64)
 				if nids[inValue] == nil {
@@ -166,17 +166,17 @@ func LoadTeamUsers(ctx context.Context, query *user.UserQuery, nodes []*team.Tea
 		return err
 	}
 	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.Fetch(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
+		return query.Fetch(ctx, func(_ context.Context, _qs *sqlgraph.QuerySpec) {
+			assign := _qs.Assign
+			values := _qs.ScanValues
+			_qs.ScanValues = func(columns []string) ([]any, error) {
 				values, err := values(columns[1:])
 				if err != nil {
 					return nil, err
 				}
 				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			spec.Assign = func(columns []string, values []any) error {
+			_qs.Assign = func(columns []string, values []any) error {
 				outValue := int(values[0].(*sql.NullInt64).Int64)
 				inValue := int(values[1].(*sql.NullInt64).Int64)
 				if nids[inValue] == nil {
