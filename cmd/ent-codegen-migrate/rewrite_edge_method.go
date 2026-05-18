@@ -132,6 +132,27 @@ func RewriteEdgeMethodSource(filename, src string, descs Descriptors, genImportP
 				})
 				return true
 			}
+			// Syntactic fallback for *<Entity>Client receivers (cross-package
+			// consumer files where the importer can't resolve types). Shape:
+			//   <expr>.<EntityName>.Query<EdgeName>(args...)
+			// sel.X is the SelectorExpr "<expr>.<EntityName>"; the inner
+			// Sel.Name is the EntityName slot of the typed-client field access
+			// (e.g. gen.FromContext(ctx).Escrow → "Escrow", client.UserReminder
+			// → "UserReminder"). Only rewrite when EntityName matches a known
+			// descriptor and the edge is declared on that entity.
+			if innerSel, ok := sel.X.(*ast.SelectorExpr); ok {
+				if ed, present := descs[innerSel.Sel.Name]; present && edgeDescLookup(ed, edge) {
+					newArgs := append([]ast.Expr{sel.X}, call.Args...)
+					emit(c, &ast.CallExpr{
+						Fun: &ast.SelectorExpr{
+							X:   ast.NewIdent(alias),
+							Sel: ast.NewIdent("Query" + innerSel.Sel.Name + edge),
+						},
+						Args: newArgs,
+					})
+					return true
+				}
+			}
 			// Receiver is *<Entity>Query — emit the FromQuery facade variant.
 			// Try go/types resolution first, then fall back to a syntactic
 			// chain walk for cross-package call sites where the importer
@@ -234,7 +255,7 @@ func inferQueryReceiverEntityInFile(expr ast.Expr, file *ast.File, descs Descrip
 		if file == nil {
 			return "", false
 		}
-		return inferEntityFromIdent(ident, file, descs)
+		return inferEntityFromIdent(ident, file, descs, genAlias)
 	}
 	call, ok := expr.(*ast.CallExpr)
 	if !ok {
@@ -315,7 +336,7 @@ func inferQueryReceiverEntityInFile(expr ast.Expr, file *ast.File, descs Descrip
 //
 // where the RHS composite literal's type name encodes the entity.
 // Returns ("", false) if no recognisable declaration is found.
-func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors) (string, bool) {
+func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors, genAlias string) (string, bool) {
 	want := ident.Name
 	var found string
 	ast.Inspect(file, func(n ast.Node) bool {
@@ -338,6 +359,15 @@ func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors) (
 			// composite literals, or q.(*<pkg>.<Entity>Query) type
 			// assertions (comma-ok and single-value forms) on the RHS.
 			if entity, ok := entityFromAssignedPtrType(assign.Rhs[i], descs); ok {
+				found = entity
+				return false
+			}
+			// Chain RHS: q := <something>.Query()... or
+			// q := gen.QueryXFromQuery(...).Limit().Order(...). Recurse
+			// into the chain walker so callers can resolve `q.WithEdge()`
+			// later in the same function. genAlias gates whether we follow
+			// the gen-package-prefixed FromQuery/With facade shapes.
+			if entity, ok := inferQueryReceiverEntityInFile(assign.Rhs[i], file, descs, genAlias); ok {
 				found = entity
 				return false
 			}
@@ -427,10 +457,11 @@ func entityFromFacadeName(name string, descs Descriptors) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	rest, ok = strings.CutSuffix(rest, "FromQuery")
-	if !ok {
-		return "", false
-	}
+	// Both call forms exist:
+	//   Query<Parent><Edge>FromQuery(q *<Parent>Query) *<Edge>Query
+	//   Query<Parent><Edge>(c *<Parent>Client, parent *<Parent>) *<Edge>Query
+	// Strip the optional FromQuery suffix so both shapes are recognised.
+	rest = strings.TrimSuffix(rest, "FromQuery")
 	// Greedy: try the longest parent prefix first so "WrikeProject" doesn't
 	// get split as parent="Wrike", edge="Project" if both happen to exist.
 	type candidate struct{ parent, edge string }

@@ -95,8 +95,8 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 	edgeMethodPass := func(filename, src string, d Descriptors, gp string) (string, error) {
 		return RewriteEdgeMethodSource(filename, src, d, gp)
 	}
-	mutationPass := func(filename, src string, d Descriptors, _ string) (string, error) {
-		return RewriteMutationSource(filename, src, d)
+	mutationPass := func(filename, src string, d Descriptors, gp string) (string, error) {
+		return RewriteMutationSource(filename, src, d, gp)
 	}
 	predicatePass := func(filename, src string, d Descriptors, _ string) (string, error) {
 		return RewritePredicateSource(filename, src, d)

@@ -321,6 +321,19 @@ func (r *Resolver) lookupVarTypeText(ident *ast.Ident) string {
 				return result
 			}
 		}
+		// Local short-var-decl with a type-assertion RHS:
+		//   mutation, ok := m.(*gen.EscrowMutation)
+		// The TypeAssertExpr's Type field is the explicit declared type.
+		// Schema-hook predicates and `hook.If` callbacks routinely receive
+		// the mutation as an interface and immediately type-assert it,
+		// so without this branch the migration tool can't resolve the
+		// receiver type for any call on the asserted variable.
+		if t := localTypeAssertVarType(enclosing, want); t != nil {
+			result = renderExpr(r.Fset, t)
+			if result != "" {
+				return result
+			}
+		}
 	}
 	// Top-level var declarations.
 	for _, decl := range r.File.Decls {
@@ -368,6 +381,42 @@ func paramType(fn ast.Node, name string) ast.Expr {
 		}
 	}
 	return nil
+}
+
+// localTypeAssertVarType scans fn for a short-var-decl whose LHS includes
+// name and whose RHS is a type assertion (single-value or comma-ok form),
+// returning the assertion's declared type expression. Returns nil when no
+// such declaration exists in fn or the asserted type is the empty `.(type)`
+// switch form. Walks INSIDE nested function literals so a mutation extracted
+// from a hook predicate's outer wrapper is still discoverable.
+func localTypeAssertVarType(fn ast.Node, name string) ast.Expr {
+	var found ast.Expr
+	ast.Inspect(fn, func(n ast.Node) bool {
+		if found != nil {
+			return false
+		}
+		assign, ok := n.(*ast.AssignStmt)
+		if !ok || assign.Tok != token.DEFINE {
+			return true
+		}
+		for i, lhs := range assign.Lhs {
+			ident, ok := lhs.(*ast.Ident)
+			if !ok || ident.Name != name {
+				continue
+			}
+			if i >= len(assign.Rhs) {
+				continue
+			}
+			ta, ok := assign.Rhs[i].(*ast.TypeAssertExpr)
+			if !ok || ta.Type == nil {
+				continue
+			}
+			found = ta.Type
+			return false
+		}
+		return true
+	})
+	return found
 }
 
 // renderExpr returns the source-text form of expr (e.g. "*pkg.Type").

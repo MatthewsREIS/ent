@@ -28,14 +28,17 @@ func TestIntegration_AllPassesAgainstEdgesFixture(t *testing.T) {
 	require.NoError(t, err)
 
 	out := string(before)
-	// Bridge RewriteEdgeMethodSource (which takes a genImportPath param)
-	// to the genPackage-less per-pass signature used by the other three
-	// rewriters. Empty path → "ent" alias fallback, matching the fixture.
+	// Bridge passes with extra parameters to the common three-arg signature
+	// the rest of the test still uses. Empty genImportPath → "ent" alias
+	// fallback, matching the fixture.
 	edgeMethod := func(filename, src string, d Descriptors) (string, error) {
 		return RewriteEdgeMethodSource(filename, src, d, "")
 	}
+	mutation := func(filename, src string, d Descriptors) (string, error) {
+		return RewriteMutationSource(filename, src, d, "")
+	}
 	for _, fn := range []func(string, string, Descriptors) (string, error){
-		RewriteMutationSource,
+		mutation,
 		RewritePredicateSource,
 		edgeMethod,
 		RewriteTypedEdgeAccessorSource,
@@ -60,7 +63,7 @@ func TestIntegration_RewritePrivacyFixtureHooks(t *testing.T) {
 	wantAfter, err := os.ReadFile(filepath.Join("testdata", "after", "hook.go.txt"))
 	require.NoError(t, err)
 
-	out, err := RewriteMutationSource("hook.go", string(before), descs)
+	out, err := RewriteMutationSource("hook.go", string(before), descs, "")
 	require.NoError(t, err)
 	out, err = RewritePredicateSource("hook.go", out, descs)
 	require.NoError(t, err)

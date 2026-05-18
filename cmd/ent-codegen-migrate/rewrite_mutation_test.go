@@ -23,7 +23,7 @@ type TaskMutation struct{}
 func (m *TaskMutation) SetTitle(s string) {}
 func hook(m *TaskMutation) { m.SetTitle("hi") }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, `m.SetField("title", "hi")`)
 	require.NotContains(t, out, "m.SetTitle(")
@@ -41,7 +41,7 @@ type TaskMutation struct{}
 func (m *TaskMutation) Title() (string, bool) { return "", false }
 func hook(m *TaskMutation) { v, ok := m.Title(); _ = v; _ = ok }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, `entbuilder.GetField[string](m, "title")`)
 }
@@ -58,7 +58,7 @@ type TaskMutation struct{}
 func (m *TaskMutation) AddTeamIDs(ids ...int) {}
 func hook(m *TaskMutation) { m.AddTeamIDs(1, 2, 3) }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, "AddEdgeIDs")
 	require.Contains(t, out, `"teams"`)
@@ -74,7 +74,7 @@ type TaskMutation struct{}
 func (m *TaskMutation) SetTitle(s string) {}
 func hook(m *TaskMutation) { fmt.Println("hi"); m.SetTitle("hi") }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, `fmt.Println`)
 	require.Contains(t, out, `m.SetField("title", "hi")`)
@@ -98,7 +98,7 @@ type SchemaField struct{}
 func (f *SchemaField) SetTitle(s string) *SchemaField { return f }
 func use(f *SchemaField) { f.SetTitle("hello") }
 `
-	out, err := RewriteMutationSource("schema.go", src, descs)
+	out, err := RewriteMutationSource("schema.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, `f.SetTitle("hello")`, "non-mutation receiver must be skipped")
 	require.NotContains(t, out, "SetField", "must not rewrite to mutation API on non-mutation receiver")
@@ -125,11 +125,11 @@ func hook(m *TaskMutation) {
 	m.AddTeamIDs(1, 2)
 }
 `
-	pass1, err := RewriteMutationSource("hook.go", src, descs)
+	pass1, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.NotEqual(t, src, pass1, "first pass must transform the source")
 
-	pass2, err := RewriteMutationSource("hook.go", pass1, descs)
+	pass2, err := RewriteMutationSource("hook.go", pass1, descs, "")
 	require.NoError(t, err)
 	require.Equal(t, pass1, pass2, "second pass must be a no-op (idempotent)")
 }
@@ -149,7 +149,7 @@ type WrikeProjectMutation struct{}
 func (m *WrikeProjectMutation) SetWrikeTitle(s string) {}
 func hook(m *WrikeProjectMutation) { m.SetWrikeTitle("foo") }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, `m.SetField("wrike_title", "foo")`)
 	require.NotContains(t, out, "m.SetWrikeTitle(")
@@ -170,7 +170,7 @@ type BoxFolderMutation struct{}
 func (m *BoxFolderMutation) SetFolderID(s string) {}
 func hook(m *BoxFolderMutation) { m.SetFolderID("xyz") }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, `m.SetField("folder_id", "xyz")`)
 	require.NotContains(t, out, "m.SetFolderID(")
@@ -193,7 +193,7 @@ type EscrowMutation struct{}
 func (m *EscrowMutation) SetInstallment1PayStatus(s string) {}
 func hook(m *EscrowMutation) { m.SetInstallment1PayStatus("PAID") }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, `m.SetField("installment_1_pay_status", "PAID")`)
 	require.NotContains(t, out, "m.SetInstallment1PayStatus(")
@@ -214,7 +214,7 @@ type TaskMutation struct{}
 func (m *TaskMutation) SetOwnerID(id int) {}
 func hook(m *TaskMutation) { m.SetOwnerID(42) }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.Contains(t, out, `m.SetEdgeID("owner", 42)`)
 	require.NotContains(t, out, "m.SetOwnerID(")
@@ -230,7 +230,7 @@ type TaskMutation struct{}
 func (m *TaskMutation) Title() (string, bool) { return "", false }
 func hook(m *TaskMutation) { _, _ = m.Title() }
 `
-	out, err := RewriteMutationSource("hook.go", src, descs)
+	out, err := RewriteMutationSource("hook.go", src, descs, "")
 	require.NoError(t, err)
 	require.True(t, strings.Contains(out, `"entgo.io/ent/runtime/entbuilder"`), "expected entbuilder import to be added; got:\n%s", out)
 }

@@ -31,13 +31,20 @@ var pluralRules = inflect.NewDefaultRuleset()
 // Idempotent: re-running on already-transformed code produces the same
 // output (the new SetField/GetField/EdgeIDAs call shapes don't match
 // matchMutationCall patterns).
-func RewriteMutationSource(filename, src string, descs Descriptors) (string, error) {
+func RewriteMutationSource(filename, src string, descs Descriptors, genImportPath string) (string, error) {
 	r, err := NewResolver(filename, src)
 	if err != nil {
 		return "", err
 	}
 	fset := r.Fset
 	file := r.File
+
+	// Resolve the local alias the file binds to the gen package. Used to
+	// qualify bare exported descriptor type names in emitted type arguments
+	// (e.g. EscrowStatus → gen.EscrowStatus). If genImportPath is empty or
+	// the file doesn't import it, alias stays "" and qualifyTypeName is a no-op
+	// — matches the legacy per-pass-test behaviour.
+	alias, _ := resolveGenAlias(r, genImportPath)
 
 	needsEntbuilder := false
 	astutil.Apply(file, func(c *astutil.Cursor) bool {
@@ -57,27 +64,35 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 		// *<pkg>.<Entity>Mutation for some Entity in descs. Schema-DSL
 		// receivers (EdgeBuilder, FieldBuilder, custom helpers) are
 		// skipped — this was the bug that corrupted consumer schema files.
-		if !isMutationReceiver(r, call, descs) {
+		recvEntity, ok := mutationReceiverEntity(r, call, descs)
+		if !ok {
 			return true
 		}
 		// "where" doesn't need descriptor lookup — it's a pure rename.
 		if action == "where" {
-			newCall, _ := rewriteCall(sel.X, action, "", FieldDesc{}, EdgeDesc{}, call.Args)
+			newCall, _ := rewriteCall(sel.X, action, "", alias, FieldDesc{}, EdgeDesc{}, call.Args)
 			if newCall != nil {
 				c.Replace(newCall)
 			}
 			return true
 		}
-		// Look up field/edge across all descriptors; first match wins.
-		// For "cleared" action the name may refer to either a field or an edge
-		// (e.g. m.OwnerCleared() where "owner" is an edge). Try both; if we
-		// match an edge, upgrade isEdge so rewriteCall uses EdgeCleared.
+		// Look up field/edge on the receiver's entity descriptor. Earlier
+		// versions of this loop iterated *all* descriptors and took the
+		// first match — Go's non-deterministic map iteration meant two
+		// entities sharing a field name (e.g. "status" on both Escrow and
+		// TloLog) emitted the wrong type argument. Constraining the lookup
+		// to recvEntity removes that ambiguity entirely.
+		// For "cleared" action the name may refer to either a field or an
+		// edge (e.g. m.OwnerCleared() where "owner" is an edge). Try both
+		// against the receiver entity; if we match an edge, upgrade isEdge
+		// so rewriteCall uses EdgeCleared.
 		var (
 			fd      FieldDesc
 			edgeD   EdgeDesc
 			matched bool
 		)
-		for _, ed := range descs {
+		descsForRecv := Descriptors{recvEntity: descs[recvEntity]}
+		for _, ed := range descsForRecv {
 			if isEdge {
 				if e, ok := ed.Edges[fieldOrEdge]; ok {
 					edgeD = e
@@ -145,7 +160,7 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 		if !matched {
 			return true
 		}
-		newCall, addImport := rewriteCall(sel.X, action, fieldOrEdge, fd, edgeD, call.Args)
+		newCall, addImport := rewriteCall(sel.X, action, fieldOrEdge, alias, fd, edgeD, call.Args)
 		if newCall == nil {
 			return true
 		}
@@ -165,23 +180,39 @@ func RewriteMutationSource(filename, src string, descs Descriptors) (string, err
 	return buf.String(), nil
 }
 
-// isMutationReceiver reports whether the receiver of call has a static
-// type matching any *<pkg>.<Entity>Mutation in descs. Returns false on
-// uncertain (no type info) — safer to skip than to corrupt.
-func isMutationReceiver(r *Resolver, call *ast.CallExpr, descs Descriptors) bool {
-	return r.ReceiverTypeMatchesPattern(call, func(typeName string) bool {
+// mutationReceiverEntity returns the entity name behind a *<pkg>.<Entity>Mutation
+// receiver in descs, plus true on match. Returns ("", false) when the receiver
+// type can't be resolved (no type info from go/types or AST fallback) OR when
+// the receiver doesn't end in "<Entity>Mutation" for any known entity. The
+// returned entity name lets callers constrain the subsequent field/edge lookup
+// to the receiver's entity, instead of scanning every descriptor and taking
+// the first map-iteration match — that was a latent bug that emitted the wrong
+// type argument when two entities defined the same field name (e.g. both
+// Escrow and TloLog have a "status" field).
+func mutationReceiverEntity(r *Resolver, call *ast.CallExpr, descs Descriptors) (string, bool) {
+	var match string
+	matched := r.ReceiverTypeMatchesPattern(call, func(typeName string) bool {
 		// typeName looks like "*x.TaskMutation" or "*example.com/foo.TaskMutation".
-		// Match the trailing "<Entity>Mutation" against descriptor keys.
 		if !strings.HasPrefix(typeName, "*") {
 			return false
 		}
+		// Prefer the longest entity-name suffix match so "AgentLicensingMutation"
+		// doesn't accidentally match a shorter entity "Licensing" if both exist.
+		var best string
 		for ent := range descs {
-			if strings.HasSuffix(typeName, "."+ent+"Mutation") {
-				return true
+			if strings.HasSuffix(typeName, "."+ent+"Mutation") || typeName == "*"+ent+"Mutation" {
+				if len(ent) > len(best) {
+					best = ent
+				}
 			}
+		}
+		if best != "" {
+			match = best
+			return true
 		}
 		return false
 	})
+	return match, matched
 }
 
 // matchMutationCall recognises method names like "SetTitle", "Title",
@@ -274,12 +305,39 @@ func pluralizeSnake(s string) string {
 	return pluralRules.Pluralize(s)
 }
 
+// qualifyTypeName prefixes a bare exported type name with the gen alias so
+// the emitted entbuilder.GetField[<T>] / EdgeIDAs[<T>] / etc. type argument
+// resolves in consumer files. Leaves built-in types (lowercase first letter),
+// already-qualified types (containing a dot), pointer/slice/map types
+// (containing *, [, or ]), and the empty string untouched.
+//
+// Descriptors store the raw type-arg text from reflect.TypeFor[<T>]() inside
+// the gen/internal package, where types like "EscrowStatus" are unqualified.
+// In consumer files those symbols live under the gen package alias, so the
+// bare name is undefined unless we qualify it.
+func qualifyTypeName(t, alias string) string {
+	if t == "" || alias == "" {
+		return t
+	}
+	if c := t[0]; c < 'A' || c > 'Z' {
+		return t
+	}
+	if strings.ContainsAny(t, "./[]*") {
+		return t
+	}
+	return alias + "." + t
+}
+
 // rewriteCall builds the new call AST. Returns nil if rewrite doesn't apply.
-// addImport indicates whether entbuilder import is required.
-func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDesc, args []ast.Expr) (newCall ast.Expr, addImport bool) {
+// addImport indicates whether entbuilder import is required. genAlias is the
+// local alias for the gen package in the consumer file (e.g. "gen") and is
+// used to qualify bare exported descriptor type names as type arguments.
+func rewriteCall(recv ast.Expr, action, name, genAlias string, fd FieldDesc, edgeD EdgeDesc, args []ast.Expr) (newCall ast.Expr, addImport bool) {
 	strLit := func(s string) *ast.BasicLit {
 		return &ast.BasicLit{Kind: token.STRING, Value: fmt.Sprintf("%q", s)}
 	}
+	fdType := qualifyTypeName(fd.Type, genAlias)
+	edgeTargetIDType := qualifyTypeName(edgeD.TargetIDType, genAlias)
 	switch action {
 	case "set":
 		return &ast.CallExpr{
@@ -290,7 +348,7 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 		return &ast.CallExpr{
 			Fun: &ast.IndexExpr{
 				X:     &ast.SelectorExpr{X: ast.NewIdent("entbuilder"), Sel: ast.NewIdent("GetField")},
-				Index: ast.NewIdent(fd.Type),
+				Index: ast.NewIdent(fdType),
 			},
 			Args: []ast.Expr{recv, strLit(name)},
 		}, true
@@ -299,7 +357,7 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 		return &ast.CallExpr{
 			Fun: &ast.IndexExpr{
 				X:     &ast.SelectorExpr{X: ast.NewIdent("entbuilder"), Sel: ast.NewIdent("OldFieldAs")},
-				Index: ast.NewIdent(fd.Type),
+				Index: ast.NewIdent(fdType),
 			},
 			Args: append(append([]ast.Expr{}, args...), recv, strLit(name)),
 		}, true
@@ -336,7 +394,7 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 			Args: append([]ast.Expr{strLit(name)}, &ast.CallExpr{
 				Fun: &ast.IndexExpr{
 					X:     &ast.SelectorExpr{X: ast.NewIdent("entbuilder"), Sel: ast.NewIdent("ToAny")},
-					Index: ast.NewIdent(edgeD.TargetIDType),
+					Index: ast.NewIdent(edgeTargetIDType),
 				},
 				Args: args,
 			}),
@@ -347,7 +405,7 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 			Args: append([]ast.Expr{strLit(name)}, &ast.CallExpr{
 				Fun: &ast.IndexExpr{
 					X:     &ast.SelectorExpr{X: ast.NewIdent("entbuilder"), Sel: ast.NewIdent("ToAny")},
-					Index: ast.NewIdent(edgeD.TargetIDType),
+					Index: ast.NewIdent(edgeTargetIDType),
 				},
 				Args: args,
 			}),
@@ -361,7 +419,7 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 		return &ast.CallExpr{
 			Fun: &ast.IndexExpr{
 				X:     &ast.SelectorExpr{X: ast.NewIdent("entbuilder"), Sel: ast.NewIdent("EdgeIDAs")},
-				Index: ast.NewIdent(edgeD.TargetIDType),
+				Index: ast.NewIdent(edgeTargetIDType),
 			},
 			Args: []ast.Expr{recv, strLit(name)},
 		}, true
@@ -369,7 +427,7 @@ func rewriteCall(recv ast.Expr, action, name string, fd FieldDesc, edgeD EdgeDes
 		return &ast.CallExpr{
 			Fun: &ast.IndexExpr{
 				X:     &ast.SelectorExpr{X: ast.NewIdent("entbuilder"), Sel: ast.NewIdent("EdgeIDsAs")},
-				Index: ast.NewIdent(edgeD.TargetIDType),
+				Index: ast.NewIdent(edgeTargetIDType),
 			},
 			Args: []ast.Expr{recv, strLit(name)},
 		}, true
