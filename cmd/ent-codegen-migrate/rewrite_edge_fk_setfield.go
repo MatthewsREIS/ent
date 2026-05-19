@@ -10,6 +10,7 @@ import (
 	"go/ast"
 	"go/printer"
 	"go/token"
+	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
@@ -42,15 +43,14 @@ import (
 //     no error — leaving the call site for manual review is safer than
 //     guessing wrong.
 //
-// Receiver gating is intentionally permissive: we don't gate on a specific
-// receiver type because consumer mixins receive `ent.Mutation` (an
-// interface), and the helpers we emit accept that interface directly.
-// The fk-column → edge mapping is the strong signal — schema authors
-// don't accidentally pick an "_id" suffix that collides with an edge FK
-// from another entity. Receivers that aren't mutations (e.g. a method
-// named SetField on an unrelated DSL helper) would still be rewritten,
-// but the emission compiles only against an ent.Mutation argument, so
-// such accidents surface at build time rather than at runtime.
+// Receiver gating: the rewrite fires only when the receiver of SetField /
+// Field is a known mutation type — either ent.Mutation (interface) or
+// *<Entity>Mutation (concrete). The schema DSL declares edges with
+// edge.To(...).Field("X_id"), so an unfiltered match would rewrite that
+// DSL chain into entbuilder.SetEdgeID(edgeBuilder, "X", ...) and corrupt
+// the schema package. Pattern-based filtering is the same approach the
+// existing rewrite_mutation pass takes for the schema-DSL false-positive
+// class of bugs.
 //
 // Idempotent: the rewritten shape is a top-level call on entbuilder, not
 // a method on m, so subsequent passes don't re-match it.
@@ -87,6 +87,9 @@ func RewriteEdgeFKSetFieldSource(filename, src string, descs Descriptors, _ stri
 			if !ok {
 				return true
 			}
+			if !isMutationReceiver(r, call, descs) {
+				return true
+			}
 			c.Replace(buildSetEdgeIDCall(sel.X, edge, call.Args[1]))
 			needsEntbuilder = true
 		case "Field":
@@ -100,6 +103,9 @@ func RewriteEdgeFKSetFieldSource(filename, src string, descs Descriptors, _ stri
 			}
 			edge, ok := fkToEdge[fk]
 			if !ok {
+				return true
+			}
+			if !isMutationReceiver(r, call, descs) {
 				return true
 			}
 			c.Replace(buildEdgeIDHelperCall(sel.X, edge))
@@ -117,6 +123,38 @@ func RewriteEdgeFKSetFieldSource(filename, src string, descs Descriptors, _ stri
 		return "", err
 	}
 	return buf.String(), nil
+}
+
+// isMutationReceiver reports whether call's receiver is statically typed as
+// either an ent.Mutation interface or a *<Entity>Mutation matching one of
+// the loaded descriptors. The pattern matches:
+//
+//   - "entgo.io/ent.Mutation" — qualified ent.Mutation interface (consumer
+//     mixins receive `m ent.Mutation` in MutateFunc callbacks)
+//   - "ent.Mutation"          — short rendering used by some type checkers
+//   - "*<pkg>.<Entity>Mutation" or "*<Entity>Mutation" where Entity is in descs
+//
+// False on anything else — including unresolved types and the schema DSL's
+// edge.To(...).Field("x_id") chain whose receiver is *assocBuilder, not a
+// mutation. False-on-uncertain matches the "safer to miss than corrupt"
+// convention every other pass follows.
+func isMutationReceiver(r *Resolver, call *ast.CallExpr, descs Descriptors) bool {
+	return r.ReceiverTypeMatchesPattern(call, func(typeName string) bool {
+		// ent.Mutation interface (qualified or short).
+		if typeName == "entgo.io/ent.Mutation" || typeName == "ent.Mutation" {
+			return true
+		}
+		// *<Entity>Mutation for a known entity.
+		if !strings.HasPrefix(typeName, "*") {
+			return false
+		}
+		for ent := range descs {
+			if strings.HasSuffix(typeName, "."+ent+"Mutation") || typeName == "*"+ent+"Mutation" {
+				return true
+			}
+		}
+		return false
+	})
 }
 
 // buildFKEdgeMap aggregates EdgeDesc.Field → edge-name across every entity

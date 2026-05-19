@@ -140,6 +140,30 @@ func hook(m ent.Mutation, id any) error { return m.SetField("owner_id", id) }
 	require.True(t, strings.Contains(pass2, "entbuilder.SetEdgeID"))
 }
 
+func TestRewriteEdgeFKSetField_SkipsSchemaDSLFalsePositive(t *testing.T) {
+	// Regression: edge.To(...).Field("owner_id") in a schema Edges() method
+	// must not be rewritten. The receiver is *assocBuilder, not a mutation.
+	// Before the receiver-type gate landed, the pass rewrote this DSL chain
+	// into entbuilder.SetEdgeID(edge.To(...), "owner", ...) and corrupted
+	// every schema file with a FK-backed edge.
+	descs := Descriptors{
+		"Account": &EntityDesc{
+			Name:  "Account",
+			Edges: map[string]EdgeDesc{"owner": {Field: "owner_id", Cardinality: "entbuilder.M2O", TargetIDType: "uuid.UUID"}},
+		},
+	}
+	src := `package x
+type assocBuilder struct{}
+func (b *assocBuilder) Field(s string) *assocBuilder { return b }
+func edgeTo() *assocBuilder { return &assocBuilder{} }
+func Edges() { edgeTo().Field("owner_id") }
+`
+	out, err := RewriteEdgeFKSetFieldSource("schema.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, `edgeTo().Field("owner_id")`)
+	require.NotContains(t, out, "entbuilder.EdgeID")
+}
+
 func TestRewriteEdgeFKSetField_PreservesNonStringLiteralCallsite(t *testing.T) {
 	// SetField with a non-literal field name (e.g. dynamic from a variable)
 	// can't be statically classified — leave it alone.
