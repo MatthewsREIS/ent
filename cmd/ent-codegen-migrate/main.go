@@ -52,6 +52,14 @@ func main() {
 		fmt.Fprintf(os.Stderr, "ent-codegen-migrate: load descriptors: %v\n", err)
 		os.Exit(1)
 	}
+	// Populate pkgImports with the (alias → import path) bindings observed
+	// in the descriptor source files. The add-missing-imports pass uses
+	// this map to resolve "uuid.UUID" / "time.Time" references introduced
+	// by earlier passes' type-arg emissions.
+	if err := LoadDescriptorImports(*descriptorsFlag); err != nil {
+		fmt.Fprintf(os.Stderr, "ent-codegen-migrate: load descriptor imports: %v\n", err)
+		os.Exit(1)
+	}
 
 	// The generated root is the parent of the -descriptors directory
 	// (i.e. the parent of the internal/ package). The walker skips this
@@ -74,7 +82,7 @@ func main() {
 
 // RewritePackage walks pkgPath for .go files and applies all rewriters in
 // canonical order: edge-fk-setfield → typed-setter → mutation → predicate
-// → edge-method → typed-edge-accessor → collection-method.
+// → edge-method → typed-edge-accessor → collection-method → add-missing-imports.
 //
 // The genRoot argument is the absolute path of the generated package root
 // (the parent of the -descriptors internal/ directory). The walker skips
@@ -113,6 +121,9 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 	typedSetterPass := func(filename, src string, d Descriptors, gp string) (string, error) {
 		return RewriteTypedSetterSource(filename, src, d, gp)
 	}
+	addMissingImportsPass := func(filename, src string, d Descriptors, gp string) (string, error) {
+		return RewriteAddMissingImportsSource(filename, src, d, gp)
+	}
 	passes := []struct {
 		name string
 		fn   func(string, string, Descriptors, string) (string, error)
@@ -133,6 +144,10 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 		{"edge-method", edgeMethodPass},
 		{"typed-edge-accessor", typedEdgePass},
 		{"collection-method", collectionMethodPass},
+		// add-missing-imports runs last so it sees every type-arg
+		// emitted by earlier passes (GetField[time.Time], EdgeIDAs[uuid.UUID])
+		// and adds the matching import when missing.
+		{"add-missing-imports", addMissingImportsPass},
 	}
 	return filepath.WalkDir(pkgPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
