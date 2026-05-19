@@ -329,13 +329,17 @@ func inferQueryReceiverEntityInFile(expr ast.Expr, file *ast.File, descs Descrip
 }
 
 // inferEntityFromIdent resolves a bare identifier to an entity name by
-// scanning the file AST for the identifier's short-var declaration.
-// Handles the common consumer pattern:
+// scanning the file AST for the identifier's short-var declaration or, if
+// it's a function parameter, the enclosing function's parameter list.
+// Handles the common consumer patterns:
 //
-//	q := &<genAlias>.<Entity>Query{}
+//	q := &<genAlias>.<Entity>Query{}                 // short-var decl
+//	func(q *<genAlias>.<Entity>Query) { q.WithFoo() } // funcLit param
+//	func F(q *<genAlias>.<Entity>Query) { ... }      // funcDecl param
 //
-// where the RHS composite literal's type name encodes the entity.
-// Returns ("", false) if no recognisable declaration is found.
+// where the type-expression's type name (StarExpr → SelectorExpr/Ident →
+// "<Entity>Query") encodes the entity. Returns ("", false) if no
+// recognisable declaration or parameter is found.
 func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors, genAlias string) (string, bool) {
 	want := ident.Name
 	var found string
@@ -377,7 +381,63 @@ func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors, g
 	if found != "" {
 		return found, true
 	}
+	// Fallback: the identifier may name a parameter of the enclosing
+	// FuncLit or FuncDecl (e.g.  `func(query *gen.PartyToTransactionQuery)`
+	// in a `With<X>` eager-load option callback). Walk the file looking
+	// for the nearest enclosing function whose param list binds `want`,
+	// then extract the entity from the param's declared type.
+	if entity, ok := entityFromEnclosingFuncParam(ident, file, descs); ok {
+		return entity, true
+	}
 	return "", false
+}
+
+// entityFromEnclosingFuncParam walks the file AST for the smallest FuncLit
+// or FuncDecl whose position range contains ident, looks up `ident.Name`
+// in its parameter list, and returns the entity inferred from the
+// parameter's type expression (`*<pkg>.<Entity>Query` /
+// `*<pkg>.<Entity>Select` / `*<pkg>.<Entity>Client`).
+//
+// Smallest enclosing function wins so a nested funcLit's param shadows an
+// outer FuncDecl's same-named param — matches Go's scoping rules.
+func entityFromEnclosingFuncParam(ident *ast.Ident, file *ast.File, descs Descriptors) (string, bool) {
+	var enclosing ast.Node
+	ast.Inspect(file, func(n ast.Node) bool {
+		if n == nil {
+			return false
+		}
+		if n.Pos() <= ident.Pos() && ident.End() <= n.End() {
+			switch n.(type) {
+			case *ast.FuncDecl, *ast.FuncLit:
+				// Overwrite with each deeper match so the smallest (most
+				// specific) enclosing function wins.
+				enclosing = n
+			}
+			return true
+		}
+		return false
+	})
+	if enclosing == nil {
+		return "", false
+	}
+	paramExpr := paramType(enclosing, ident.Name)
+	if paramExpr == nil {
+		return "", false
+	}
+	// Param type must be a pointer (`*<pkg>.<Entity>Query` shape). The
+	// SelectorExpr / Ident handling mirrors entityFromAssignedPtrType.
+	star, ok := paramExpr.(*ast.StarExpr)
+	if !ok {
+		return "", false
+	}
+	var typeName string
+	switch t := star.X.(type) {
+	case *ast.SelectorExpr:
+		typeName = t.Sel.Name
+	case *ast.Ident:
+		typeName = t.Name
+	}
+	return entityNameFromQueryTypeName(typeName, descs)
 }
 
 // entityFromAssignedPtrType extracts the entity name from two RHS expression

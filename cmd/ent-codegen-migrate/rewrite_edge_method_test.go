@@ -403,6 +403,101 @@ func use(ctx context.Context, q any) {
 	require.NotContains(t, out, "query.WithThread(", "original WithThread call must not remain")
 }
 
+// TestRewriteEdgeMethod_WithEdge_FuncLitParam covers the real consumer
+// shape inside a `WithFoo(func(query *gen.<Entity>Query) { query.Where(...).WithBar() })`
+// option callback. The chain walker must resolve the bare ident `query`
+// through the enclosing FuncLit's parameter list to extract the entity
+// name (PartyToTransaction) and rewrite the chained WithContact call.
+func TestRewriteEdgeMethod_WithEdge_FuncLitParam(t *testing.T) {
+	descs := Descriptors{
+		"PartyToTransaction": &EntityDesc{
+			Name: "PartyToTransaction",
+			Edges: map[string]EdgeDesc{
+				"contact": {Cardinality: "entbuilder.M2O", TargetIDType: "uuid.UUID", Target: "Contact"},
+			},
+		},
+		"Contact": &EntityDesc{Name: "Contact"},
+	}
+	src := `package x
+import "external/gen"
+import "external/partytotransaction"
+func use() {
+    cb := func(query *gen.PartyToTransactionQuery) {
+        query.
+            Where(partytotransaction.RoleEQ("BUYER")).
+            WithContact().
+            Order(partytotransaction.ByCreatedAt())
+    }
+    _ = cb
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.WithPartyToTransactionContact(query.\n\t\t\tWhere(partytotransaction.RoleEQ(\"BUYER\")))",
+		"WithContact on a funcLit-parameter receiver must be rewritten to WithPartyToTransactionContact facade")
+	require.NotContains(t, out, ".WithContact(", "original WithContact call must not remain")
+}
+
+// TestRewriteEdgeMethod_WithEdge_FuncDeclParam covers the receiver-as-
+// function-parameter case for a top-level FuncDecl (rather than a FuncLit).
+// The walker must climb to the enclosing FuncDecl, find the param named
+// `query`, and infer its entity from the declared `*gen.<Entity>Query` type.
+func TestRewriteEdgeMethod_WithEdge_FuncDeclParam(t *testing.T) {
+	descs := Descriptors{
+		"PartyToTransaction": &EntityDesc{
+			Name: "PartyToTransaction",
+			Edges: map[string]EdgeDesc{
+				"contact": {Cardinality: "entbuilder.M2O", TargetIDType: "uuid.UUID", Target: "Contact"},
+			},
+		},
+		"Contact": &EntityDesc{Name: "Contact"},
+	}
+	src := `package x
+import "external/gen"
+func use(query *gen.PartyToTransactionQuery) {
+    query.WithContact()
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.WithPartyToTransactionContact(query)",
+		"WithContact on a funcDecl-parameter receiver must be rewritten")
+	require.NotContains(t, out, "query.WithContact(", "original WithContact call must not remain")
+}
+
+// TestRewriteEdgeMethod_WithEdge_FuncLitParam_NestedShadowing verifies the
+// "smallest enclosing function wins" rule: an inner funcLit's parameter
+// shadows an outer FuncDecl's same-named parameter. The walker must
+// resolve `query` against the nearest enclosing function's params, not
+// the outermost one.
+func TestRewriteEdgeMethod_WithEdge_FuncLitParam_NestedShadowing(t *testing.T) {
+	descs := Descriptors{
+		"PartyToTransaction": &EntityDesc{
+			Name: "PartyToTransaction",
+			Edges: map[string]EdgeDesc{
+				"contact": {Cardinality: "entbuilder.M2O", TargetIDType: "uuid.UUID", Target: "Contact"},
+			},
+		},
+		"Contact":  &EntityDesc{Name: "Contact"},
+		"Marketing": &EntityDesc{Name: "Marketing"},
+	}
+	src := `package x
+import "external/gen"
+func use(query *gen.MarketingQuery) {
+    cb := func(query *gen.PartyToTransactionQuery) {
+        query.WithContact()
+    }
+    _ = cb
+}
+`
+	out, err := RewriteEdgeMethodSource("x.go", src, descs, "")
+	require.NoError(t, err)
+	require.Contains(t, out, "ent.WithPartyToTransactionContact(query)",
+		"inner funcLit param must shadow outer FuncDecl same-named param")
+	require.NotContains(t, out, "ent.WithMarketing",
+		"outer Marketing-typed `query` must NOT be used when inner shadows it")
+}
+
 // TestRewriteEdgeMethod_WithEdge_AfterSelect_NoMatchOnUnknownEdge verifies
 // that a .Select().WithFoo() chain where "foo" is NOT an edge on the
 // inferred entity is NOT rewritten. This guards the new Select-handling
