@@ -8,7 +8,13 @@
 
 **Tech Stack:** Go 1.25, ent codegen (`text/template`), entgql codegen extension (contrib), `cmd/ent-codegen-migrate` for consumer call-site rewrites, bench worktree at `/home/smoothbrain/dev/matthewsreis/worktrees/bench-pr6/service-api-go`, `cmd/bench-codegen` for fixture-scale measurement.
 
-**Per [[project-codegen-reduction-prs-opened]]:** PR A/B/C, contrib PR, consumer PR are already open against forks. This work stacks **on top of PR C** as a 4th git-spice branch `codegen-reduction-sibling-split` (ent) and a 2nd contrib branch `entgql-sibling-split`. Do NOT merge anything in the existing stack until B-4/B-5/B-6 are verified — they should land as follow-up PRs, not as amendments to the existing stack.
+**Per [[project-codegen-reduction-prs-opened]]:** PR A/B/C, contrib PR, consumer PR are already open against forks. This work continues the existing git-spice stack:
+
+- **ent** — new branch `codegen-reduction-sibling-split` stacked on `codegen-reduction-per-entity-and-post-bench` (PR C). Holds: scope helpers, template edits, **migrator updates** (cmd/ent-codegen-migrate), fixture regen.
+- **contrib** — new branch `entgql-sibling-split` stacked on `entgql-collection-subpkg`. Holds: entgql template edits + extension wiring.
+- **gemini consumer** — **REUSE the existing `codegen-reduction-consumer-migration` branch.** No new branch. The migrator output for B-4/5/6 adds one new commit on top of the existing 3 commits (`3e69e1088e`, `94f2f2a7ed`, `ae2dee5553`). PR #3902 gains this commit via a normal forward push. Do NOT branch off — the consumer PR stays single-threaded and grows incrementally.
+
+Do NOT merge anything in the existing stack until B-4/B-5/B-6 are verified — they should land as stacked follow-up PRs on `MatthewsREIS/ent` and `codelite7/contrib`, and as an in-place extension to `MatthewsREIS/gemini` #3902.
 
 **Per [[feedback-bench-build-memory-limits]]:** every `go build` / `go run entc.go` invocation in the bench worktree gets `GOMEMLIMIT=8GiB GOGC=25 GOMAXPROCS=4 -p 4`. Sweep variations only at the bench stage, not during iteration.
 
@@ -555,60 +561,351 @@ Similar split on contrib side for B-4 (whereinputs), B-6a (mutationinputs), B-6b
 
 ---
 
-## Phase E — Migrator updates + consumer migration
+## Phase E — Migrator updates (ent worktree, on `codegen-reduction-sibling-split` branch)
 
-### Task 11: Add migrator passes for the new import shapes
+Without migrator updates, the consumer migration becomes a manual sweep of ~hundreds of import statements and qualifier rewrites across 50K+ lines. With migrator updates, it's a single tool invocation that lands as one commit on the existing gemini branch.
+
+The migrator already handles the PR 6 per-entity entity package split. B-4/B-5/B-6 add an analogous *sibling* per-entity split. The new passes follow the same architecture as the existing entity-package passes — read the latest passes added during the migrator follow-up commits (`62efb1eb6` `03b7a3bd4` etc. on the current PR C branch) as the implementation reference.
+
+### Task 11: Inventory consumer call sites by sibling family
+
+Before writing migrator code, enumerate what shapes the migrator must handle. This avoids "write pass, find it missed a pattern, iterate" churn.
 
 **Files:**
-- Modify: `cmd/ent-codegen-migrate/passes/imports.go` (or whichever pass handles import-path rewrites)
+- Read-only: consumer code at `/home/smoothbrain/dev/matthewsreis/worktrees/bench-pr6/service-api-go/api-graphql/src`
 
-- [ ] **Step 1: Find the existing PR 6 import-rewrite pass**
+- [ ] **Step 1: For each sibling family, grep consumer code for current call-site shapes**
 
 ```bash
-grep -rn "package.*alias\|importPath\|RewriteImport" /var/home/smoothbrain/dev/matthewsreis/ent/.claude/worktrees/wiggly-singing-pancake/cmd/ent-codegen-migrate/ | head -10
+cd /home/smoothbrain/dev/matthewsreis/worktrees/bench-pr6/service-api-go
+for sib in whereinputs mutationinputs gqlcollections gqledges edges internal; do
+  echo "=== $sib (consumer usage) ==="
+  # Direct package qualifier usage
+  grep -rn "\b${sib}\." api-graphql/src --include="*.go" 2>/dev/null \
+    | grep -v "/gen/" \
+    | head -10
+  echo ""
+  # Import statements
+  grep -rn "\"[^\"]*gen/${sib}\"" api-graphql/src --include="*.go" 2>/dev/null \
+    | head -5
+  echo ""
+done > /tmp/sibling-consumer-usage.txt
+wc -l /tmp/sibling-consumer-usage.txt
 ```
 
-- [ ] **Step 2: Add a new pass that resolves sibling-subpkg references**
+Expected: a list of every consumer file importing or referencing each sibling family. The output guides which passes are needed.
 
-For each sibling family in `{whereinputs, mutationinputs, gqlcollections, gqledges, edges}`, when an identifier `<Entity><Suffix>` is referenced (e.g. `whereinputs.UserWhereInput`), rewrite to:
-- Import path: `<consumer-gen>/<family>/<entity>` (e.g. `.../gen/whereinputs/user`)
-- Qualifier: `<entity><family>.<Entity><Suffix>` (e.g. `userwhereinputs.UserWhereInput`)
-- Alternative: use the root facade re-export if available (`gen.UserWhereInput` works without changes — check this first; many call sites should already use it)
+- [ ] **Step 2: Categorize the call-site shapes**
 
-The migrator should prefer the facade re-export (no change needed) where possible, and only rewrite when the consumer explicitly imports the sibling subpkg.
+For each sibling family, write down which of these patterns appear:
+- (i) `gen.<Entity><Suffix>` (facade re-export) — **no migrator pass needed**, root facade handles it
+- (ii) `<family>.<Entity><Suffix>` (direct sibling-pkg qualifier) — **needs rewrite to `<entity><family>.<Entity><Suffix>`**
+- (iii) Bare identifier inside the entity's own package — **no rewrite needed**
+- (iv) Selector in struct field type / function signature / return type — same as (ii), needs rewrite
 
-- [ ] **Step 3: Add a unit test for the new pass**
+Record the count of each pattern per family. If pattern (i) dominates and (ii) is rare, the migrator work is small. If (ii) is common, every consumer file with that family's import needs touching.
+
+- [ ] **Step 3: Save the inventory**
+
+```bash
+cp /tmp/sibling-consumer-usage.txt /var/home/smoothbrain/dev/matthewsreis/ent/.claude/worktrees/wiggly-singing-pancake/docs/superpowers/specs/2026-05-18-codegen-reduction-b4b5b6-consumer-inventory.md
+cd /var/home/smoothbrain/dev/matthewsreis/ent/.claude/worktrees/wiggly-singing-pancake
+git add docs/superpowers/specs/2026-05-18-codegen-reduction-b4b5b6-consumer-inventory.md
+git commit -m "spec(codegen): B-4/5/6 consumer call-site inventory"
+```
+
+### Task 12: Add the `siblingPackageImport` migrator pass
+
+**Files:**
+- Test: `cmd/ent-codegen-migrate/passes/sibling_package_import_test.go` (new)
+- Create: `cmd/ent-codegen-migrate/passes/sibling_package_import.go` (new)
+- Modify: `cmd/ent-codegen-migrate/passes/passes.go` (or wherever the pass registry lives — check existing pass file naming first)
+
+- [ ] **Step 1: Find the existing PR 6 import-rewrite pass for reference**
+
+```bash
+cd /var/home/smoothbrain/dev/matthewsreis/ent/.claude/worktrees/wiggly-singing-pancake
+ls cmd/ent-codegen-migrate/
+grep -rln "RewriteImport\|importPath\|alias" cmd/ent-codegen-migrate/ | head
+```
+
+Read the closest analog (the per-entity-package import pass from PR 6) and use its structure as the template for the new sibling pass.
+
+- [ ] **Step 2: Write the unit-test scaffolding**
+
+Create `cmd/ent-codegen-migrate/passes/sibling_package_import_test.go`:
 
 ```go
-func TestSiblingSubpackageRewrite(t *testing.T) {
+package passes_test
+
+import (
+    "testing"
+
+    "github.com/stretchr/testify/require"
+    "<module-root>/cmd/ent-codegen-migrate/passes"
+)
+
+// Each test asserts the migrator rewrites a specific sibling-pkg call-site shape
+// from the flat-package layout (pre B-4/5/6) to the per-entity-subpkg layout.
+//
+// The cases cover all 6 sibling families plus the "use facade re-export" preference.
+
+func TestSiblingPackageImport_WhereInputDirectQualifier(t *testing.T) {
     src := `package main
+
+import (
+    "example.com/gen/whereinputs"
+)
+
+func use() *whereinputs.UserWhereInput {
+    return &whereinputs.UserWhereInput{}
+}
+`
+    want := `package main
+
+import (
+    userwhereinputs "example.com/gen/whereinputs/user"
+)
+
+func use() *userwhereinputs.UserWhereInput {
+    return &userwhereinputs.UserWhereInput{}
+}
+`
+    got, err := passes.SiblingPackageImport(src, passes.SiblingConfig{
+        GenPackage: "example.com/gen",
+        Families:   []string{"whereinputs", "mutationinputs", "gqlcollections", "gqledges", "edges"},
+    })
+    require.NoError(t, err)
+    require.Equal(t, want, got)
+}
+
+func TestSiblingPackageImport_FacadeReExportLeftAlone(t *testing.T) {
+    // gen.UserWhereInput is the facade re-export — pass MUST NOT rewrite to userwhereinputs.UserWhereInput.
+    src := `package main
+
+import "example.com/gen"
+
+func use() *gen.UserWhereInput {
+    return &gen.UserWhereInput{}
+}
+`
+    got, err := passes.SiblingPackageImport(src, passes.SiblingConfig{
+        GenPackage: "example.com/gen",
+        Families:   []string{"whereinputs"},
+    })
+    require.NoError(t, err)
+    require.Equal(t, src, got)
+}
+
+func TestSiblingPackageImport_MutationInputDirect(t *testing.T) {
+    src := `package main
+
+import "example.com/gen/mutationinputs"
+
+var _ = mutationinputs.CreatePropertyInput{}
+`
+    want := `package main
+
+import propertymutationinputs "example.com/gen/mutationinputs/property"
+
+var _ = propertymutationinputs.CreatePropertyInput{}
+`
+    got, err := passes.SiblingPackageImport(src, passes.SiblingConfig{
+        GenPackage: "example.com/gen",
+        Families:   []string{"mutationinputs"},
+    })
+    require.NoError(t, err)
+    require.Equal(t, want, got)
+}
+
+func TestSiblingPackageImport_MultipleEntitiesSameFile(t *testing.T) {
+    // A consumer file referencing multiple entities through one sibling family
+    // gets one import per touched entity.
+    src := `package main
+
 import "example.com/gen/whereinputs"
-var _ = whereinputs.UserWhereInput{}
+
+func f(u *whereinputs.UserWhereInput, p *whereinputs.PropertyWhereInput) {}
 `
-    expected := `package main
-import userwhereinputs "example.com/gen/whereinputs/user"
-var _ = userwhereinputs.UserWhereInput{}
+    want := `package main
+
+import (
+    propertywhereinputs "example.com/gen/whereinputs/property"
+    userwhereinputs "example.com/gen/whereinputs/user"
+)
+
+func f(u *userwhereinputs.UserWhereInput, p *propertywhereinputs.PropertyWhereInput) {}
 `
-    // ... apply pass, assert
+    got, err := passes.SiblingPackageImport(src, passes.SiblingConfig{
+        GenPackage: "example.com/gen",
+        Families:   []string{"whereinputs"},
+    })
+    require.NoError(t, err)
+    require.Equal(t, want, got)
+}
+
+func TestSiblingPackageImport_EdgesAccessor(t *testing.T) {
+    // edges/<entity>/ holds the WithX / QueryX helpers
+    src := `package main
+
+import "example.com/gen/edges"
+
+func f(q *UserQuery) { edges.WithUserCreatedBy(q) }
+`
+    want := `package main
+
+import useredges "example.com/gen/edges/user"
+
+func f(q *UserQuery) { useredges.WithUserCreatedBy(q) }
+`
+    got, err := passes.SiblingPackageImport(src, passes.SiblingConfig{
+        GenPackage: "example.com/gen",
+        Families:   []string{"edges"},
+    })
+    require.NoError(t, err)
+    require.Equal(t, want, got)
+}
+
+func TestSiblingPackageImport_InternalModelType(t *testing.T) {
+    // internal/<entity>/ holds the entity-specific model
+    src := `package main
+
+import "example.com/gen/internal"
+
+var _ internal.UserModel
+`
+    want := `package main
+
+import userinternal "example.com/gen/internal/user"
+
+var _ userinternal.UserModel
+`
+    got, err := passes.SiblingPackageImport(src, passes.SiblingConfig{
+        GenPackage: "example.com/gen",
+        Families:   []string{"internal"},
+    })
+    require.NoError(t, err)
+    require.Equal(t, want, got)
 }
 ```
 
-- [ ] **Step 4: Run migrator tests**
+- [ ] **Step 3: Run tests to verify they fail**
+
+```bash
+go test ./cmd/ent-codegen-migrate/passes/ -run TestSiblingPackageImport -v
+```
+
+Expected: FAIL — `passes.SiblingPackageImport` doesn't exist yet.
+
+- [ ] **Step 4: Implement the pass**
+
+Create `cmd/ent-codegen-migrate/passes/sibling_package_import.go`:
+
+The pass uses `go/ast` + `astutil` (same as existing migrator passes). Algorithm:
+1. Parse the input source.
+2. Walk imports; identify any whose path matches `<GenPackage>/<family>` for `family` in `Config.Families`.
+3. For each such import, scan the AST for SelectorExprs `<family>.<Ident>`.
+4. For each unique selector identifier, determine the entity it belongs to (the first lowercase prefix of the camelCase identifier name, e.g. `UserWhereInput` → `user`, `CreatePropertyInput` → `property`).
+5. Replace each selector's `X` (the package qualifier) with `<entity><family>` and add an import `<entity><family> "<GenPackage>/<family>/<entity>"`.
+6. Remove the now-unused flat-family import if no remaining references.
+7. Skip identifiers that resolve via the root facade (`gen.UserWhereInput`) — those are handled by `gen` package re-exports.
+8. Use `go/printer` with `Mode: printer.UseSpaces|printer.TabIndent` and tabwidth 8 to match Go's default formatting (matches the existing migrator's output format).
+
+Edge case to handle explicitly: if an identifier doesn't have a clear lowercase-prefix-derived entity (e.g. `SharedConfig`), leave it on the flat-family import — those are cross-cutting types that stay in the parent facade.
+
+Reference the existing migrator passes for the AST manipulation idioms — the per-entity-package import pass from PR 6 has the exact import-add + selector-rewrite pattern this needs.
+
+- [ ] **Step 5: Run tests to verify they pass**
+
+```bash
+go test ./cmd/ent-codegen-migrate/passes/ -run TestSiblingPackageImport -v
+```
+
+Expected: PASS for all 6 cases.
+
+- [ ] **Step 6: Register the pass in the migrator pipeline**
+
+Find the existing pass registration (where PR 6 passes are listed) and add the new `SiblingPackageImport` pass after the per-entity-package pass and before the formatter:
+
+```bash
+grep -rn "RewritePackage\|passes\.\|Run.*pass" cmd/ent-codegen-migrate/ | head -10
+```
+
+Register the new pass in the same slice / registry.
+
+- [ ] **Step 7: Run all migrator tests + integration tests**
 
 ```bash
 go test ./cmd/ent-codegen-migrate/... -count=1
 ```
 
-Expected: new test passes; existing tests still pass.
+Expected: existing tests still pass (no regressions), new sibling-pkg tests pass.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add cmd/ent-codegen-migrate/
-git commit -m "feat(ent-codegen-migrate): sibling-subpackage per-entity import rewrite pass"
+git add cmd/ent-codegen-migrate/passes/sibling_package_import.go cmd/ent-codegen-migrate/passes/sibling_package_import_test.go cmd/ent-codegen-migrate/passes/passes.go
+git commit -m "feat(ent-codegen-migrate): siblingPackageImport pass for B-4/5/6"
 ```
 
-### Task 12: Push ent + contrib branches + bump consumer pseudo-versions
+### Task 13: Add migrator integration test against a real consumer-style fixture
+
+The unit tests in Task 12 cover individual selector shapes. The integration test exercises the pass end-to-end on a multi-file fixture that resembles consumer code.
+
+**Files:**
+- Create: `cmd/ent-codegen-migrate/testdata/sibling_subpkg/before/...` (representative input fixture)
+- Create: `cmd/ent-codegen-migrate/testdata/sibling_subpkg/after/...` (expected output)
+- Modify: `cmd/ent-codegen-migrate/integration_test.go` (add `TestRewritePackage_SiblingSubpkg` to the test matrix)
+
+- [ ] **Step 1: Find the existing integration-test fixture pattern**
+
+```bash
+ls cmd/ent-codegen-migrate/testdata/ 2>/dev/null
+grep -rn "TestRewritePackage" cmd/ent-codegen-migrate/ | head -5
+```
+
+- [ ] **Step 2: Build a 3-file fixture covering each family**
+
+Mirror the structure of the existing PR 6 fixtures. Include:
+- A file using `whereinputs.<Entity>WhereInput` in struct fields
+- A file using `mutationinputs.Create<Entity>Input` in function args
+- A file using `edges.With<Entity><Other>` in chained calls
+- A file using both flat-family and facade-re-export styles (facade calls must NOT be rewritten)
+
+- [ ] **Step 3: Run the integration test to verify it fails (before/after don't match)**
+
+```bash
+go test ./cmd/ent-codegen-migrate/ -run TestRewritePackage_SiblingSubpkg -v
+```
+
+Expected: FAIL — the integration test is set up correctly but the pass isn't connected to the integration runner.
+
+- [ ] **Step 4: Connect the pass to the integration runner**
+
+If the integration runner already runs all registered passes (likely, given PR 6's structure), no extra wiring is needed — just verify the test now passes after Task 12 Step 6's registration.
+
+- [ ] **Step 5: Run again**
+
+```bash
+go test ./cmd/ent-codegen-migrate/ -run TestRewritePackage_SiblingSubpkg -v
+```
+
+Expected: PASS.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add cmd/ent-codegen-migrate/testdata/sibling_subpkg/ cmd/ent-codegen-migrate/integration_test.go
+git commit -m "test(ent-codegen-migrate): integration test for sibling-subpkg rewrite"
+```
+
+---
+
+## Phase F — Consumer migration (gemini worktree, extends existing `codegen-reduction-consumer-migration` branch)
+
+The existing `codegen-reduction-consumer-migration` branch on `MatthewsREIS/gemini` is at `ae2dee5553` (3 commits, PR #3902 open). This phase adds **one new commit** to it via a normal forward push. No branch creation, no force-push.
+
+### Task 14: Push ent + contrib branches + bump consumer pseudo-versions
 
 **Files:**
 - Modify: consumer `go.mod` / `go.sum`
@@ -620,7 +917,7 @@ cd /var/home/smoothbrain/dev/matthewsreis/contrib/.claude/worktrees/entgql-colle
 git push -u origin entgql-sibling-split
 ```
 
-- [ ] **Step 2: Push ent branch**
+- [ ] **Step 2: Push ent branch (includes migrator updates)**
 
 ```bash
 cd /var/home/smoothbrain/dev/matthewsreis/ent/.claude/worktrees/wiggly-singing-pancake
@@ -640,63 +937,129 @@ echo "ent:     v0.0.0-${ENT_TS}-${ENT_SHORT}"
 echo "contrib: v0.0.0-${CONTRIB_TS}-${CONTRIB_SHORT}"
 ```
 
-- [ ] **Step 4: Update consumer go.mod replaces**
+- [ ] **Step 4: Confirm consumer is on the existing branch**
 
 ```bash
 cd /home/smoothbrain/dev/matthewsreis/worktrees/bench-pr6/service-api-go
+git status
+git branch --show-current
+```
+
+Expected: branch is `codegen-reduction-consumer-migration`, HEAD at `ae2dee5553`, working tree clean (no local-path overrides).
+
+If the working tree shows local-path replaces in `go.mod`/`go.sum` (from a prior dev session), discard them with `git checkout -- go.mod go.sum` first.
+
+- [ ] **Step 5: Update consumer go.mod replaces (in-place on existing branch)**
+
+```bash
 go mod edit \
   -replace="entgo.io/ent=github.com/MatthewsREIS/ent@v0.0.0-${ENT_TS}-${ENT_SHORT}" \
   -replace="entgo.io/contrib=github.com/codelite7/contrib@v0.0.0-${CONTRIB_TS}-${CONTRIB_SHORT}"
-go mod tidy
+GOMEMLIMIT=8GiB GOGC=25 GOMAXPROCS=4 go mod tidy
 ```
 
-- [ ] **Step 5: Regen consumer ent + run migrator**
+### Task 15: Run regen + migrator against consumer (output commits to existing branch)
+
+**Files:** all consumer `*_gen.go` and call-site `*.go` files
+
+- [ ] **Step 1: Regenerate consumer ent**
 
 ```bash
-GOMEMLIMIT=8GiB GOGC=25 GOMAXPROCS=4 go run ./api-graphql/src/cmd/ent_codegen.go  # or equivalent regen entry
+cd /home/smoothbrain/dev/matthewsreis/worktrees/bench-pr6/service-api-go
+GOMEMLIMIT=8GiB GOGC=25 GOMAXPROCS=4 GOMAXPROCS=4 go run ./api-graphql/src/cmd/ent_codegen.go
+```
+
+(Adjust the actual regen entry-point path if different — read the consumer's existing regen invocation from `Taskfile.yml` or similar.)
+
+Expected: per-entity sibling subpackages now exist on disk (`api-graphql/src/ent/gen/whereinputs/escrow/`, etc.).
+
+- [ ] **Step 2: Run the migrator against the consumer source tree**
+
+```bash
 GOMEMLIMIT=8GiB go run /var/home/smoothbrain/dev/matthewsreis/ent/.claude/worktrees/wiggly-singing-pancake/cmd/ent-codegen-migrate/ \
   -gen-package ./api-graphql/src/ent/gen \
-  -consumer-root ./api-graphql/src
+  -consumer-root ./api-graphql/src \
+  -passes siblingPackageImport
 ```
 
-Expected: migrator emits a diff applying the sibling-subpackage rewrites where consumer code didn't already use the facade.
+Adjust flag names to match the migrator's actual CLI (read the existing migrator usage from prior consumer-migration commits' messages, e.g. `3e69e1088e`). If the migrator runs all registered passes by default, the `-passes` flag may not be needed.
 
-- [ ] **Step 6: Build consumer**
+Expected: migrator emits a non-empty diff. The diff size depends on the consumer inventory from Phase E Task 11: if pattern (i) (facade re-export) dominated, the diff is small; if pattern (ii) (direct sibling-pkg qualifier) was common, the diff is larger.
+
+- [ ] **Step 3: Build the consumer (cold first to catch the structural issue, then warm to confirm)**
 
 ```bash
-GOMEMLIMIT=8GiB GOGC=25 GOMAXPROCS=4 go build -p 4 ./api-graphql/...
+go clean -cache 2>/dev/null || true
+GOMEMLIMIT=8GiB GOGC=25 GOMAXPROCS=4 go build -p 4 -a ./api-graphql/...
 ```
 
-Expected: exit 0. If it fails, iterate Phase C / Task 11 fixes and re-run from Step 5.
+Expected: exit 0.
 
-- [ ] **Step 7: Run unit tests**
+Common failure modes and fixes:
+- **Undefined `whereinputs.<X>`**: the migrator missed a call site. Either the identifier didn't match the entity-name heuristic, or the pass needs an additional pattern. Add a unit test reproducing the missed pattern in Phase E Task 12, fix the pass, re-run from Step 2.
+- **Import cycle through the gen tree**: the per-entity sibling subpkg's import set conflicts with PR 6's per-entity entity packages. The pass added an import that already exists transitively. Rework the import resolution.
+- **`gen.<X>` undefined**: a facade re-export went missing during the template work. Re-do Phase C Task 9 (root `facade.tmpl` re-exports) to cover the missing identifier.
+
+If failures aren't tractable from the migrator side, escalate — the pass may need a redesign, or the template work in Phase C may need re-thinking.
+
+- [ ] **Step 4: Run consumer unit tests**
 
 ```bash
 cd /home/smoothbrain/dev/matthewsreis/worktrees/bench-pr6/service-api-go/api-graphql
 task test-unit
 ```
 
-Expected: same 2200 tests pass, ≤17 skipped, 0 failures (matches the existing PR C consumer migration result).
+Expected: matches PR C baseline (2200 tests, 17 skipped, 0 failures). Any new failures → regression — bisect against the migrator pass and the template edits.
 
-- [ ] **Step 8: Commit consumer changes**
+- [ ] **Step 5: Commit migrator output to the existing consumer branch**
 
 ```bash
 cd /home/smoothbrain/dev/matthewsreis/worktrees/bench-pr6/service-api-go
 git add go.mod go.sum api-graphql/src/ent/gen api-graphql/src
-git commit -m "feat(ent): B-4/B-5/B-6 per-entity sibling subpackage migration"
+git commit -m "$(cat <<'COMMIT'
+feat(ent): B-4/B-5/B-6 sibling-subpackage migration
+
+Per-entity sibling subpackages (whereinputs/, mutationinputs/, gqlcollections/,
+gqledges/, edges/, internal/) — call sites rewritten by cmd/ent-codegen-migrate
+siblingPackageImport pass. go.mod replaces bumped to PR D HEAD on
+MatthewsREIS/ent + entgql-sibling-split on codelite7/contrib.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+COMMIT
+)"
 ```
 
-- [ ] **Step 9: Push consumer branch**
+- [ ] **Step 6: Push to existing branch (forward push, no force)**
 
 ```bash
 git push origin codegen-reduction-consumer-migration
 ```
 
+Expected: push succeeds. `MatthewsREIS/gemini` PR #3902 picks up the new commit automatically — no PR description update needed (the existing description already covers the scope; the new commit just extends the migration).
+
+### Task 16: Update existing consumer PR description with B-4/5/6 note
+
+**Files:** none — `gh pr edit` only
+
+- [ ] **Step 1: Append B-4/5/6 context to PR #3902 body**
+
+```bash
+gh pr view 3902 --repo MatthewsREIS/gemini --json body --jq .body > /tmp/pr-3902-body.md
+# Manually append a "## B-4/B-5/B-6 follow-up" section noting the 4th commit, then:
+gh pr edit 3902 --repo MatthewsREIS/gemini --body-file /tmp/pr-3902-body.md
+```
+
+The new section should note:
+- B-4/B-5/B-6 sibling-subpackage migration added as commit 4 on this branch (`<sha>`)
+- Migrator pass that generated it: `siblingPackageImport` (added on `MatthewsREIS/ent` PR D)
+- ent + contrib pseudo-versions bumped to PR D HEAD + `entgql-sibling-split` HEAD
+- Bench delta vs PR C baseline: <fill in from Phase G Task 17>
+
 ---
 
-## Phase F — Bench + sign-off
+## Phase G — Bench + sign-off
 
-### Task 13: Cold bench on current host (same-host comparison vs PR C baseline)
+### Task 17: Cold bench on current host (same-host comparison vs PR C baseline)
 
 **Files:** bench artifacts only
 
@@ -779,7 +1142,7 @@ git add internal/bench/  # if any new jsonl was emitted
 git commit -m "bench(internal/bench): B-4/B-5/B-6 measurement vs PR C baseline" || echo "no bench changes"
 ```
 
-### Task 14: Open the follow-up PRs (stacked)
+### Task 18: Open the follow-up PRs for ent + contrib (consumer PR already extended in Phase F Task 16)
 
 **Files:** none — git operations only.
 
@@ -789,11 +1152,11 @@ git commit -m "bench(internal/bench): B-4/B-5/B-6 measurement vs PR C baseline" 
 cd /var/home/smoothbrain/dev/matthewsreis/ent/.claude/worktrees/wiggly-singing-pancake
 git checkout codegen-reduction-sibling-split
 git spice branch submit --no-draft \
-  --title "codegen-reduction PR D: per-entity sibling subpackages (B-4/5/6)" \
-  --body "<paste bench-led description with Δ wall + Δ RSS from Phase F Task 13>"
+  --title "codegen-reduction PR D: per-entity sibling subpackages + migrator pass (B-4/5/6)" \
+  --body "<paste bench-led description with Δ wall + Δ RSS from Phase G Task 17>"
 ```
 
-Expected: PR created on `MatthewsREIS/ent`, base = `codegen-reduction-per-entity-and-post-bench`.
+Expected: PR created on `MatthewsREIS/ent`, base = `codegen-reduction-per-entity-and-post-bench`. This PR includes the `siblingPackageImport` migrator pass alongside the template work.
 
 - [ ] **Step 2: Open contrib follow-up PR**
 
@@ -805,27 +1168,23 @@ gh pr create --repo codelite7/contrib --base entgql-collection-subpkg --head ent
   --body "<companion to ent PR D — bench-led description>"
 ```
 
-- [ ] **Step 3: Open consumer follow-up PR (or update existing)**
+- [ ] **Step 3: Consumer PR is already updated**
 
-If `MatthewsREIS/gemini` #3902 is still open and unmerged, add the new commit to it (it's the same branch). If it's been merged, open a new PR:
+Per Phase F Task 16, `MatthewsREIS/gemini` #3902 already has the B-4/5/6 commit on its existing branch (`codegen-reduction-consumer-migration`) and the PR description was extended. **No new gemini PR is opened.** The single consumer PR carries the full epic migration including all stack levers.
+
+If `MatthewsREIS/gemini` #3902 was merged before this work landed, fall back to opening a new PR against current `main`:
 
 ```bash
-# Option A: existing PR still open — push has already happened in Phase E Task 12 Step 9
-# Just edit the existing PR description to add the B-4/5/6 commit summary
-gh pr edit 3902 --repo MatthewsREIS/gemini --body "<updated body listing all commits including B-4/5/6>"
-
-# Option B: existing PR merged — open new PR against current main
 gh pr create --repo MatthewsREIS/gemini --base main --head codegen-reduction-consumer-migration \
   --title "codegen-reduction follow-up: B-4/B-5/B-6 sibling subpackage migration" \
   --body "<bench-led description>"
 ```
 
+But the expected path is the PR-stays-open case.
+
 - [ ] **Step 4: Update memory**
 
-```bash
-# Append PR URLs to project-codegen-reduction-prs-opened memory
-$EDITOR /home/smoothbrain/.claude/projects/-var-home-smoothbrain-dev-matthewsreis-ent/memory/project_codegen_reduction_prs_opened.md
-```
+Append PR URLs and outcomes to `project-codegen-reduction-prs-opened` memory. Note explicitly that the consumer PR is single-threaded (3 → 4 commits, same PR number) per the in-place extension policy in this plan's stack section.
 
 ---
 
