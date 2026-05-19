@@ -56,6 +56,24 @@ func EdgeIDAs[ID any, T any, I any](m *Mutation[T, I], edge string) (ID, bool) {
 	return id.(ID), true
 }
 
+// RemovedEdgeIDsAs returns the typed neighbor IDs marked as removed from
+// an edge. Pre-PR-6 the per-entity Mutation exposed Removed<Edge>IDs() with
+// the entity-specific ID type; post-PR-6 the generic RemovedEdgeIDs returns
+// []any, leaving consumers to iterate with a type assertion. This helper
+// supplies the typed slice in one call, matching the read-side EdgeIDsAs
+// shape.
+func RemovedEdgeIDsAs[ID any, T any, I any](m *Mutation[T, I], edge string) []ID {
+	ids := m.RemovedEdgeIDs(edge)
+	if ids == nil {
+		return nil
+	}
+	out := make([]ID, len(ids))
+	for i, id := range ids {
+		out[i] = id.(ID)
+	}
+	return out
+}
+
 // ToAny converts a typed slice to a slice of any. Used by generated code to
 // pass typed IDs through the string-keyed Mutation API.
 func ToAny[T any](xs []T) []any {

@@ -432,13 +432,17 @@ func rewriteCall(recv ast.Expr, action, name, genAlias string, fd FieldDesc, edg
 			Args: []ast.Expr{recv, strLit(name)},
 		}, true
 	case "removedIDs":
-		// m.Removed<Edge>IDs() → m.RemovedEdgeIDs("<edge>"). Returns []any;
-		// callers wanting a typed slice should iterate and type-assert
-		// (no typed helper exists for the removed-IDs view).
+		// m.Removed<Edge>IDs() → entbuilder.RemovedEdgeIDsAs[<ID>](m, "<edge>").
+		// Returns []ID with the edge's target ID type, matching the read-side
+		// EdgeIDsAs shape. The plain RemovedEdgeIDs([]any) form needs a per-id
+		// type assertion at every iteration; the typed wrapper does it once.
 		return &ast.CallExpr{
-			Fun:  &ast.SelectorExpr{X: recv, Sel: ast.NewIdent("RemovedEdgeIDs")},
-			Args: []ast.Expr{strLit(name)},
-		}, false
+			Fun: &ast.IndexExpr{
+				X:     &ast.SelectorExpr{X: ast.NewIdent("entbuilder"), Sel: ast.NewIdent("RemovedEdgeIDsAs")},
+				Index: ast.NewIdent(edgeTargetIDType),
+			},
+			Args: []ast.Expr{recv, strLit(name)},
+		}, true
 	case "where":
 		// m.Where(ps...) → m.WhereP(ps...) (typed predicate.X is now func(*sql.Selector))
 		return &ast.CallExpr{
