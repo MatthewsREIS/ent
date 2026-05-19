@@ -27,6 +27,12 @@ type EdgeDesc struct {
 	Cardinality  string // "O2OUnique" / "O2M" / "M2O" / "M2M" as in entbuilder.Cardinality
 	TargetIDType string
 	Target       string // target entity name (e.g. "Marketing"). Optional — descriptors that predate this field leave it empty.
+	// Field is the FK column name backing this edge as declared in the
+	// schema via `edge.To(...).Field("X_id")` or `edge.From(...).Field("X_id")`.
+	// Empty when the edge has no dedicated FK column (M2M, join-tables, or
+	// edges where the FK was not exposed as a field). Used by the edge-FK
+	// SetField rewriter to map `m.SetField("X_id", v)` → `m.SetEdgeID("X", v)`.
+	Field string
 }
 
 // EntityDesc bundles fields and edges for one entity.
@@ -221,6 +227,10 @@ func parseEdgeMap(expr ast.Expr) map[string]EdgeDesc {
 			case "Target":
 				if s, ok := stringLiteral(ikv.Value); ok {
 					ed.Target = s
+				}
+			case "Field":
+				if s, ok := stringLiteral(ikv.Value); ok {
+					ed.Field = s
 				}
 			}
 		}

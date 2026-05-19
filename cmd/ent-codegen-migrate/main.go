@@ -73,8 +73,8 @@ func main() {
 }
 
 // RewritePackage walks pkgPath for .go files and applies all rewriters in
-// canonical order: mutation → predicate → edge-method → typed-edge-accessor
-// → collection-method.
+// canonical order: edge-fk-setfield → typed-setter → mutation → predicate
+// → edge-method → typed-edge-accessor → collection-method.
 //
 // The genRoot argument is the absolute path of the generated package root
 // (the parent of the -descriptors internal/ directory). The walker skips
@@ -107,10 +107,27 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 	collectionMethodPass := func(filename, src string, d Descriptors, gp string) (string, error) {
 		return RewriteCollectionMethodSource(filename, src, d, gp)
 	}
+	edgeFKSetFieldPass := func(filename, src string, d Descriptors, gp string) (string, error) {
+		return RewriteEdgeFKSetFieldSource(filename, src, d, gp)
+	}
+	typedSetterPass := func(filename, src string, d Descriptors, gp string) (string, error) {
+		return RewriteTypedSetterSource(filename, src, d, gp)
+	}
 	passes := []struct {
 		name string
 		fn   func(string, string, Descriptors, string) (string, error)
 	}{
+		// edge-fk-setfield runs before mutation because it rewrites
+		// SetField / Field on ent.Mutation receivers using only the FK
+		// column → edge map. mutation rewrites Set<Field> / <Field>()
+		// shapes — disjoint from this pass — but ordering this first
+		// keeps the new rewrite's "interface-receiver" reasoning isolated.
+		{"edge-fk-setfield", edgeFKSetFieldPass},
+		// typed-setter rewrites the SetDeletedAt typed-setter pattern
+		// that mixin_base.go uses via an interface assertion. Runs early
+		// because it transforms an interface-assertion + call group; later
+		// passes that walk individual call sites are unaffected by it.
+		{"typed-setter", typedSetterPass},
 		{"mutation", mutationPass},
 		{"predicate", predicatePass},
 		{"edge-method", edgeMethodPass},
