@@ -48,6 +48,13 @@ type EdgeSpec struct {
 	Target       string
 	TargetIDType reflect.Type
 	Inverse      bool
+	// Field is the schema name of the foreign-key column that backs this
+	// edge, declared in the schema as `edge.To(...).Field("X_id")` or
+	// `edge.From(...).Ref(...).Field("X_id")`. Empty when the edge has no
+	// dedicated FK column (e.g. M2M relations or edges where the FK was
+	// not exposed as a field). Migration tools read this to rewrite
+	// `m.SetField("X_id", v)` to `m.SetEdgeID("X", v)`.
+	Field string
 }
 
 // Descriptor is the static, package-init-time descriptor for one entity.

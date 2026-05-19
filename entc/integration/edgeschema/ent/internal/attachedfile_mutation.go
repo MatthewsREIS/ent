@@ -39,11 +39,13 @@ var attachedfileDescriptor = &entbuilder.Descriptor{
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "File",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "f_id",
 		},
 		"proc": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "Process",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "proc_id",
 		},
 	}}
 

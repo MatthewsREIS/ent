@@ -34,11 +34,13 @@ var tweetlikeDescriptor = &entbuilder.Descriptor{
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "Tweet",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "tweet_id",
 		},
 		"user": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "user_id",
 		},
 	}}
 

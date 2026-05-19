@@ -51,6 +51,7 @@ var metadataDescriptor = &entbuilder.Descriptor{
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "Metadata",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "parent_id",
 		},
 	}}
 

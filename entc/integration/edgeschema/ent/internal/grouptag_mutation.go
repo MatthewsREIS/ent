@@ -33,11 +33,13 @@ var grouptagDescriptor = &entbuilder.Descriptor{
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "Tag",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "tag_id",
 		},
 		"group": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "Group",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "group_id",
 		},
 	}}
 

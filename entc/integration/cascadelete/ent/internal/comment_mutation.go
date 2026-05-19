@@ -39,6 +39,7 @@ var commentDescriptor = &entbuilder.Descriptor{
 			Target:       "Post",
 			TargetIDType: reflect.TypeFor[int](),
 			Inverse:      true,
+			Field:        "post_id",
 		},
 	}}
 

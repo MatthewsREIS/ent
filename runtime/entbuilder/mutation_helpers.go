@@ -4,7 +4,12 @@
 
 package entbuilder
 
-import "context"
+import (
+	"context"
+	"fmt"
+
+	"entgo.io/ent"
+)
 
 // GetField returns the typed value of a field on the mutation.
 // Returns the zero value and false if the field is unset.
@@ -59,4 +64,44 @@ func ToAny[T any](xs []T) []any {
 		out[i] = x
 	}
 	return out
+}
+
+// edgeSetter is the post-PR-6 generic-mutation interface for setting a
+// neighbor ID on a unique edge by name. Every *Mutation[T, I] satisfies it
+// (SetEdgeID is declared on the generic type), but ent.Mutation does not
+// include the method in its public interface — so consumer hooks that
+// receive an `ent.Mutation` need a typed bridge. SetEdgeID and EdgeID below
+// provide that bridge with a single clear failure path.
+type edgeSetter interface {
+	SetEdgeID(edge string, id any) error
+}
+
+type edgeGetter interface {
+	EdgeID(edge string) (any, bool)
+}
+
+// SetEdgeID sets the neighbor ID on a unique edge of m. m must satisfy the
+// post-PR-6 *Mutation[T, I] SetEdgeID method; consumers typically receive
+// m typed as ent.Mutation in hooks and previously called SetField with the
+// raw FK column name. Returns a wrapped error when m is not an *Mutation
+// (defensive — every generated entity mutation implements it).
+func SetEdgeID(m ent.Mutation, edge string, id any) error {
+	es, ok := m.(edgeSetter)
+	if !ok {
+		return fmt.Errorf("entbuilder: SetEdgeID: %T does not implement SetEdgeID(string, any) error", m)
+	}
+	return es.SetEdgeID(edge, id)
+}
+
+// EdgeID returns the neighbor ID on a unique edge of m. Mirrors SetEdgeID's
+// interface-bridge for the read path: lets consumer code that holds an
+// ent.Mutation read an edge's neighbor ID by name without per-entity casts.
+// Returns (nil, false) when the assertion fails so callers can fall back
+// the same way as if the edge were simply unset.
+func EdgeID(m ent.Mutation, edge string) (any, bool) {
+	eg, ok := m.(edgeGetter)
+	if !ok {
+		return nil, false
+	}
+	return eg.EdgeID(edge)
 }

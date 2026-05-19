@@ -34,16 +34,19 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "user_id",
 		},
 		"relative": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "relative_id",
 		},
 		"info": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "RelationshipInfo",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "info_id",
 		},
 	}}
 

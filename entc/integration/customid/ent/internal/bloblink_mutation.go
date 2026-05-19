@@ -36,11 +36,13 @@ var bloblinkDescriptor = &entbuilder.Descriptor{
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "Blob",
 			TargetIDType: reflect.TypeFor[uuid.UUID](),
+			Field:        "blob_id",
 		},
 		"link": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "Blob",
 			TargetIDType: reflect.TypeFor[uuid.UUID](),
+			Field:        "link_id",
 		},
 	}}
 

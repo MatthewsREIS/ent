@@ -39,6 +39,7 @@ var userDescriptor = &entbuilder.Descriptor{
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
 			Inverse:      true,
+			Field:        "parent_id",
 		},
 		"children": {
 			Cardinality:  entbuilder.O2M,
@@ -49,6 +50,7 @@ var userDescriptor = &entbuilder.Descriptor{
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "spouse_id",
 		},
 		"card": {
 			Cardinality:  entbuilder.O2OUnique,

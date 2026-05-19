@@ -39,6 +39,7 @@ var postDescriptor = &entbuilder.Descriptor{
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
 			Inverse:      true,
+			Field:        "author_id",
 		},
 		"comments": {
 			Cardinality:  entbuilder.O2M,

@@ -39,6 +39,7 @@ var petDescriptor = &entbuilder.Descriptor{
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
 			Inverse:      true,
+			Field:        "owner_id",
 		},
 	}}
 

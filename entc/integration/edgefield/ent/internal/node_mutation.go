@@ -40,6 +40,7 @@ var nodeDescriptor = &entbuilder.Descriptor{
 			Target:       "Node",
 			TargetIDType: reflect.TypeFor[int](),
 			Inverse:      true,
+			Field:        "prev_id",
 		},
 		"next": {
 			Cardinality:  entbuilder.O2OUnique,

@@ -34,11 +34,13 @@ var roleuserDescriptor = &entbuilder.Descriptor{
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "Role",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "role_id",
 		},
 		"user": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
+			Field:        "user_id",
 		},
 	}}
 

@@ -79,6 +79,9 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- if $e.Inverse }}
 			Inverse: true,
 			{{- end }}
+			{{- with $e.Field }}
+			Field: {{ .Name | printf "%q" }},
+			{{- end }}
 		},
 		{{- end }}
 	},
