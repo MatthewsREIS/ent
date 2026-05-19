@@ -532,14 +532,15 @@ func HasOwner() predicate.File {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.File(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasType applies the HasEdge predicate on the "type" edge.
@@ -555,14 +556,15 @@ func HasType() predicate.File {
 
 // HasTypeWith applies the HasEdge predicate on the "type" edge with a given conditions (other predicates).
 func HasTypeWith(preds ...predicate.FileType) predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := newTypeStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.File(
+		func(s *sql.Selector) {
+			step := newTypeStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasField applies the HasEdge predicate on the "field" edge.
@@ -578,14 +580,18 @@ func HasField() predicate.File {
 
 // HasFieldWith applies the HasEdge predicate on the "field" edge with a given conditions (other predicates).
 func HasFieldWith(preds ...predicate.FieldType) predicate.File {
-	return predicate.File(func(s *sql.Selector) {
-		step := newFieldStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.File(
+		func(s *sql.Selector) {
+			step := newFieldStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+				// Auto-filter soft-deleted rows — HasNeighborsWith subqueries bypass ent
+				// interceptors, so we must explicitly exclude soft-deleted records.
+				sql.FieldIsNull("deleted_at")(s)
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

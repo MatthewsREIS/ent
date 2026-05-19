@@ -139,17 +139,18 @@ func HasChild() predicate.Parent {
 
 // HasChildWith applies the HasEdge predicate on the "child" edge with a given conditions (other predicates).
 func HasChildWith(preds ...predicate.User) predicate.Parent {
-	return predicate.Parent(func(s *sql.Selector) {
-		step := newChildStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Parent
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Parent(
+		func(s *sql.Selector) {
+			step := newChildStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Parent
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasParent applies the HasEdge predicate on the "parent" edge.
@@ -168,17 +169,18 @@ func HasParent() predicate.Parent {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.User) predicate.Parent {
-	return predicate.Parent(func(s *sql.Selector) {
-		step := newParentStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Parent
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Parent(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Parent
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

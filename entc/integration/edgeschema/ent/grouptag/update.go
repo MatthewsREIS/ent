@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewGroupTagUpdate(c Config, hooks []Hook, mutation *GroupTagMutation) *Grou
 
 // Where appends a list predicates to the GroupTagUpdate builder.
 func (_u *GroupTagUpdate) Where(ps ...predicate.GroupTag) *GroupTagUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetTagID sets the "tag_id" field.
 func (_u *GroupTagUpdate) SetTagID(v int) *GroupTagUpdate {
-	_u.mutation.SetTagID(v)
+	_ = _u.mutation.SetEdgeID("tag", v)
 	return _u
 }
 
@@ -51,7 +52,7 @@ func (_u *GroupTagUpdate) SetNillableTagID(v *int) *GroupTagUpdate {
 
 // SetGroupID sets the "group_id" field.
 func (_u *GroupTagUpdate) SetGroupID(v int) *GroupTagUpdate {
-	_u.mutation.SetGroupID(v)
+	_ = _u.mutation.SetEdgeID("group", v)
 	return _u
 }
 
@@ -70,19 +71,19 @@ func (_u *GroupTagUpdate) Mutation() *GroupTagMutation {
 
 // ClearTag clears the "tag" edge to the Tag entity.
 func (_u *GroupTagUpdate) ClearTag() *GroupTagUpdate {
-	_u.mutation.ClearTag()
+	_ = _u.mutation.ClearEdge("tag")
 	return _u
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
 func (_u *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
-	_u.mutation.ClearGroup()
+	_ = _u.mutation.ClearEdge("group")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupTagUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GroupTagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -109,10 +110,10 @@ func (_u *GroupTagUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *GroupTagUpdate) check() error {
-	if _u.mutation.TagCleared() && len(_u.mutation.TagIDs()) > 0 {
+	if _u.mutation.EdgeCleared("tag") && len(_u.mutation.EdgeIDs("tag")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.tag"`)
 	}
-	if _u.mutation.GroupCleared() && len(_u.mutation.GroupIDs()) > 0 {
+	if _u.mutation.EdgeCleared("group") && len(_u.mutation.EdgeIDs("group")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.group"`)
 	}
 	return nil
@@ -130,7 +131,7 @@ func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.TagCleared() {
+	if _u.mutation.EdgeCleared("tag") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -143,7 +144,7 @@ func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TagIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tag"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -159,7 +160,7 @@ func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.GroupCleared() {
+	if _u.mutation.EdgeCleared("group") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -172,7 +173,7 @@ func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("group"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -215,7 +216,7 @@ func NewGroupTagUpdateOne(c Config, hooks []Hook, mutation *GroupTagMutation) *G
 
 // SetTagID sets the "tag_id" field.
 func (_u *GroupTagUpdateOne) SetTagID(v int) *GroupTagUpdateOne {
-	_u.mutation.SetTagID(v)
+	_ = _u.mutation.SetEdgeID("tag", v)
 	return _u
 }
 
@@ -229,7 +230,7 @@ func (_u *GroupTagUpdateOne) SetNillableTagID(v *int) *GroupTagUpdateOne {
 
 // SetGroupID sets the "group_id" field.
 func (_u *GroupTagUpdateOne) SetGroupID(v int) *GroupTagUpdateOne {
-	_u.mutation.SetGroupID(v)
+	_ = _u.mutation.SetEdgeID("group", v)
 	return _u
 }
 
@@ -248,19 +249,19 @@ func (_u *GroupTagUpdateOne) Mutation() *GroupTagMutation {
 
 // ClearTag clears the "tag" edge to the Tag entity.
 func (_u *GroupTagUpdateOne) ClearTag() *GroupTagUpdateOne {
-	_u.mutation.ClearTag()
+	_ = _u.mutation.ClearEdge("tag")
 	return _u
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
 func (_u *GroupTagUpdateOne) ClearGroup() *GroupTagUpdateOne {
-	_u.mutation.ClearGroup()
+	_ = _u.mutation.ClearEdge("group")
 	return _u
 }
 
 // Where appends a list predicates to the GroupTagUpdate builder.
 func (_u *GroupTagUpdateOne) Where(ps ...predicate.GroupTag) *GroupTagUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -273,7 +274,7 @@ func (_u *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagUpd
 
 // Save executes the query and returns the updated GroupTag entity.
 func (_u *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[GroupTag](ctx, &entbuilder.UpdateState[*GroupTagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -300,10 +301,10 @@ func (_u *GroupTagUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *GroupTagUpdateOne) check() error {
-	if _u.mutation.TagCleared() && len(_u.mutation.TagIDs()) > 0 {
+	if _u.mutation.EdgeCleared("tag") && len(_u.mutation.EdgeIDs("tag")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.tag"`)
 	}
-	if _u.mutation.GroupCleared() && len(_u.mutation.GroupIDs()) > 0 {
+	if _u.mutation.EdgeCleared("group") && len(_u.mutation.EdgeIDs("group")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.group"`)
 	}
 	return nil
@@ -338,7 +339,7 @@ func (_u *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, err 
 			}
 		}
 	}
-	if _u.mutation.TagCleared() {
+	if _u.mutation.EdgeCleared("tag") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -351,7 +352,7 @@ func (_u *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TagIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tag"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -367,7 +368,7 @@ func (_u *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.GroupCleared() {
+	if _u.mutation.EdgeCleared("group") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -380,7 +381,7 @@ func (_u *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("group"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

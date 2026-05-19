@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewRoleUserUpdate(c Config, hooks []Hook, mutation *RoleUserMutation) *Role
 
 // Where appends a list predicates to the RoleUserUpdate builder.
 func (_u *RoleUserUpdate) Where(ps ...predicate.RoleUser) *RoleUserUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *RoleUserUpdate) SetCreatedAt(v time.Time) *RoleUserUpdate {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -52,7 +53,7 @@ func (_u *RoleUserUpdate) SetNillableCreatedAt(v *time.Time) *RoleUserUpdate {
 
 // SetRoleID sets the "role_id" field.
 func (_u *RoleUserUpdate) SetRoleID(v int) *RoleUserUpdate {
-	_u.mutation.SetRoleID(v)
+	_ = _u.mutation.SetEdgeID("role", v)
 	return _u
 }
 
@@ -66,7 +67,7 @@ func (_u *RoleUserUpdate) SetNillableRoleID(v *int) *RoleUserUpdate {
 
 // SetUserID sets the "user_id" field.
 func (_u *RoleUserUpdate) SetUserID(v int) *RoleUserUpdate {
-	_u.mutation.SetUserID(v)
+	_ = _u.mutation.SetEdgeID("user", v)
 	return _u
 }
 
@@ -85,19 +86,19 @@ func (_u *RoleUserUpdate) Mutation() *RoleUserMutation {
 
 // ClearRole clears the "role" edge to the Role entity.
 func (_u *RoleUserUpdate) ClearRole() *RoleUserUpdate {
-	_u.mutation.ClearRole()
+	_ = _u.mutation.ClearEdge("role")
 	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *RoleUserUpdate) ClearUser() *RoleUserUpdate {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RoleUserUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RoleUserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -124,10 +125,10 @@ func (_u *RoleUserUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *RoleUserUpdate) check() error {
-	if _u.mutation.RoleCleared() && len(_u.mutation.RoleIDs()) > 0 {
+	if _u.mutation.EdgeCleared("role") && len(_u.mutation.EdgeIDs("role")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RoleUser.role"`)
 	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RoleUser.user"`)
 	}
 	return nil
@@ -145,10 +146,10 @@ func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.RoleCleared() {
+	if _u.mutation.EdgeCleared("role") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -161,7 +162,7 @@ func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RoleIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("role"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -177,7 +178,7 @@ func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -190,7 +191,7 @@ func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -233,7 +234,7 @@ func NewRoleUserUpdateOne(c Config, hooks []Hook, mutation *RoleUserMutation) *R
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *RoleUserUpdateOne) SetCreatedAt(v time.Time) *RoleUserUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -247,7 +248,7 @@ func (_u *RoleUserUpdateOne) SetNillableCreatedAt(v *time.Time) *RoleUserUpdateO
 
 // SetRoleID sets the "role_id" field.
 func (_u *RoleUserUpdateOne) SetRoleID(v int) *RoleUserUpdateOne {
-	_u.mutation.SetRoleID(v)
+	_ = _u.mutation.SetEdgeID("role", v)
 	return _u
 }
 
@@ -261,7 +262,7 @@ func (_u *RoleUserUpdateOne) SetNillableRoleID(v *int) *RoleUserUpdateOne {
 
 // SetUserID sets the "user_id" field.
 func (_u *RoleUserUpdateOne) SetUserID(v int) *RoleUserUpdateOne {
-	_u.mutation.SetUserID(v)
+	_ = _u.mutation.SetEdgeID("user", v)
 	return _u
 }
 
@@ -280,19 +281,19 @@ func (_u *RoleUserUpdateOne) Mutation() *RoleUserMutation {
 
 // ClearRole clears the "role" edge to the Role entity.
 func (_u *RoleUserUpdateOne) ClearRole() *RoleUserUpdateOne {
-	_u.mutation.ClearRole()
+	_ = _u.mutation.ClearEdge("role")
 	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *RoleUserUpdateOne) ClearUser() *RoleUserUpdateOne {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // Where appends a list predicates to the RoleUserUpdate builder.
 func (_u *RoleUserUpdateOne) Where(ps ...predicate.RoleUser) *RoleUserUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -305,7 +306,7 @@ func (_u *RoleUserUpdateOne) Select(field string, fields ...string) *RoleUserUpd
 
 // Save executes the query and returns the updated RoleUser entity.
 func (_u *RoleUserUpdateOne) Save(ctx context.Context) (*RoleUser, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[RoleUser](ctx, &entbuilder.UpdateState[*RoleUserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -332,10 +333,10 @@ func (_u *RoleUserUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *RoleUserUpdateOne) check() error {
-	if _u.mutation.RoleCleared() && len(_u.mutation.RoleIDs()) > 0 {
+	if _u.mutation.EdgeCleared("role") && len(_u.mutation.EdgeIDs("role")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RoleUser.role"`)
 	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "RoleUser.user"`)
 	}
 	return nil
@@ -346,15 +347,15 @@ func (_u *RoleUserUpdateOne) sqlSave(ctx context.Context) (_node *RoleUser, err 
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(FieldRoleID, field.TypeInt))
-	if id, ok := _u.mutation.UserID(); !ok {
+	if rawID, ok := _u.mutation.EdgeID("user"); !ok {
 		return nil, &ValidationError{Name: "user_id", Err: errors.New(`ent: missing "RoleUser.user_id" for update`)}
 	} else {
-		_spec.Node.CompositeID[0].Value = id
+		_spec.Node.CompositeID[0].Value = rawID.(int)
 	}
-	if id, ok := _u.mutation.RoleID(); !ok {
+	if rawID, ok := _u.mutation.EdgeID("role"); !ok {
 		return nil, &ValidationError{Name: "role_id", Err: errors.New(`ent: missing "RoleUser.role_id" for update`)}
 	} else {
-		_spec.Node.CompositeID[1].Value = id
+		_spec.Node.CompositeID[1].Value = rawID.(int)
 	}
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, len(fields))
@@ -372,10 +373,10 @@ func (_u *RoleUserUpdateOne) sqlSave(ctx context.Context) (_node *RoleUser, err 
 			}
 		}
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.RoleCleared() {
+	if _u.mutation.EdgeCleared("role") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -388,7 +389,7 @@ func (_u *RoleUserUpdateOne) sqlSave(ctx context.Context) (_node *RoleUser, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RoleIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("role"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -404,7 +405,7 @@ func (_u *RoleUserUpdateOne) sqlSave(ctx context.Context) (_node *RoleUser, err 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -417,7 +418,7 @@ func (_u *RoleUserUpdateOne) sqlSave(ctx context.Context) (_node *RoleUser, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

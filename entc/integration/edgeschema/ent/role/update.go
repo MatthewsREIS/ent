@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/roleuser"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,13 +34,13 @@ func NewRoleUpdate(c Config, hooks []Hook, mutation *RoleMutation) *RoleUpdate {
 
 // Where appends a list predicates to the RoleUpdate builder.
 func (_u *RoleUpdate) Where(ps ...predicate.Role) *RoleUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *RoleUpdate) SetName(v string) *RoleUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -53,7 +54,7 @@ func (_u *RoleUpdate) SetNillableName(v *string) *RoleUpdate {
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *RoleUpdate) SetCreatedAt(v time.Time) *RoleUpdate {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -67,7 +68,7 @@ func (_u *RoleUpdate) SetNillableCreatedAt(v *time.Time) *RoleUpdate {
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *RoleUpdate) AddUserIDs(ids ...int) *RoleUpdate {
-	_u.mutation.AddUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -78,19 +79,19 @@ func (_u *RoleUpdate) Mutation() *RoleMutation {
 
 // ClearUser clears all "user" edges to the User entity.
 func (_u *RoleUpdate) ClearUser() *RoleUpdate {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
 func (_u *RoleUpdate) RemoveUserIDs(ids ...int) *RoleUpdate {
-	_u.mutation.RemoveUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RoleUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RoleMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -124,13 +125,13 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -145,7 +146,7 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -163,7 +164,7 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -208,7 +209,7 @@ func NewRoleUpdateOne(c Config, hooks []Hook, mutation *RoleMutation) *RoleUpdat
 
 // SetName sets the "name" field.
 func (_u *RoleUpdateOne) SetName(v string) *RoleUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -222,7 +223,7 @@ func (_u *RoleUpdateOne) SetNillableName(v *string) *RoleUpdateOne {
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *RoleUpdateOne) SetCreatedAt(v time.Time) *RoleUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -236,7 +237,7 @@ func (_u *RoleUpdateOne) SetNillableCreatedAt(v *time.Time) *RoleUpdateOne {
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *RoleUpdateOne) AddUserIDs(ids ...int) *RoleUpdateOne {
-	_u.mutation.AddUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -247,19 +248,19 @@ func (_u *RoleUpdateOne) Mutation() *RoleMutation {
 
 // ClearUser clears all "user" edges to the User entity.
 func (_u *RoleUpdateOne) ClearUser() *RoleUpdateOne {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
 func (_u *RoleUpdateOne) RemoveUserIDs(ids ...int) *RoleUpdateOne {
-	_u.mutation.RemoveUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the RoleUpdate builder.
 func (_u *RoleUpdateOne) Where(ps ...predicate.Role) *RoleUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -272,7 +273,7 @@ func (_u *RoleUpdateOne) Select(field string, fields ...string) *RoleUpdateOne {
 
 // Save executes the query and returns the updated Role entity.
 func (_u *RoleUpdateOne) Save(ctx context.Context) (*Role, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Role](ctx, &entbuilder.UpdateState[*RoleMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -323,13 +324,13 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -344,7 +345,7 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -362,7 +363,7 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,

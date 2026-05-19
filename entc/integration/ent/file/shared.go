@@ -8,6 +8,12 @@ package file
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/internal"
 )
@@ -61,11 +67,370 @@ type File = internal.File
 type FileEdges = internal.FileEdges
 type Files = internal.Files
 
-// Mutation type aliases and constructors from internal.
-type FileMutation = internal.FileMutation
-type FileMutationOption = internal.FileMutationOption
+// Error-check function aliases for the shared helpers in the internal package.
+var (
+	IsValidationError = internal.IsValidationError
+	IsNotFound        = internal.IsNotFound
+	MaskNotFound      = internal.MaskNotFound
+	IsNotSingular     = internal.IsNotSingular
+	IsNotLoaded       = internal.IsNotLoaded
+	IsConstraintError = internal.IsConstraintError
+)
 
-var NewFileMutation = internal.NewFileMutation
-var WithFileID = internal.WithFileID
-var WithFile = internal.WithFile
-var WithFileIDsFunc = internal.WithFileIDsFunc
+// setContextOp is an alias for the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
+
+// withInterceptors is a wrapper around internal.WithInterceptors so callers
+// can use the conventional lowercase name. Generic functions can't be assigned
+// to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
+}
+
+// Type aliases for sql-specific shared helpers.
+type (
+	selector       = internal.Selector
+	AggregateFunc  = internal.AggregateFunc
+	queryHook      = internal.QueryHook
+	predicateAdder = internal.PredicateAdder
+)
+
+// querierAll / querierCount have generic constraints that bind to local
+// sqlAll/sqlCount methods (whose identity is package-local because the
+// method name is unexported) — so they must be emitted per-sub-package.
+func querierAll[V Value, Q interface {
+	sqlAll(context.Context, ...queryHook) (V, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlAll(ctx)
+	})
+}
+
+func querierCount[Q interface {
+	sqlCount(context.Context) (int, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlCount(ctx)
+	})
+}
+
+// scanWithInterceptors's Q2 constraint references the unexported sqlScan
+// method, whose identity is package-local — must stay per-sub-package.
+func scanWithInterceptors[Q1 ent.Query, Q2 interface {
+	sqlScan(context.Context, Q1, any) error
+}](ctx context.Context, rootQuery Q1, selectOrGroup Q2, inters []Interceptor, v any) error {
+	rv := reflect.ValueOf(v)
+	var qr Querier = QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q1)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		if err := selectOrGroup.sqlScan(ctx, query, v); err != nil {
+			return nil, err
+		}
+		if k := rv.Kind(); k == reflect.Pointer && rv.Elem().CanInterface() {
+			return rv.Elem().Interface(), nil
+		}
+		return v, nil
+	})
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	vv, err := qr.Query(ctx, rootQuery)
+	if err != nil {
+		return err
+	}
+	switch rv2 := reflect.ValueOf(vv); {
+	case rv.IsNil(), rv2.IsNil(), rv.Kind() != reflect.Pointer:
+	case rv.Type() == rv2.Type():
+		rv.Elem().Set(rv2.Elem())
+	case rv.Elem().Type() == rv2.Type():
+		rv.Elem().Set(rv2)
+	}
+	return nil
+}
+
+// schemaGraph holds this entity's schema for entql predicate evaluation.
+// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
+var schemaGraph = func() *sqlgraph.Schema {
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 4)}
+	graph.Nodes[0] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   Table,
+			Columns: Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: FieldID,
+			},
+		},
+		Type: "File",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			FieldSetID:      {Type: field.TypeInt, Column: FieldSetID},
+			FieldSize:       {Type: field.TypeInt, Column: FieldSize},
+			FieldName:       {Type: field.TypeString, Column: FieldName},
+			FieldUser:       {Type: field.TypeString, Column: FieldUser},
+			FieldGroup:      {Type: field.TypeString, Column: FieldGroup},
+			FieldOp:         {Type: field.TypeBool, Column: FieldOp},
+			FieldFieldID:    {Type: field.TypeInt, Column: FieldFieldID},
+			FieldCreateTime: {Type: field.TypeTime, Column: FieldCreateTime},
+		},
+	}
+	graph.Nodes[1] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "users",
+			Columns: []string{
+				"id",
+				"optional_int",
+				"age",
+				"name",
+				"last",
+				"nickname",
+				"address",
+				"phone",
+				"password",
+				"role",
+				"employment",
+				"sso_cert",
+				"files_count",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "User",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"optional_int": {Type: field.TypeInt, Column: "optional_int"},
+			"age":          {Type: field.TypeInt, Column: "age"},
+			"name":         {Type: field.TypeString, Column: "name"},
+			"last":         {Type: field.TypeString, Column: "last"},
+			"nickname":     {Type: field.TypeString, Column: "nickname"},
+			"address":      {Type: field.TypeString, Column: "address"},
+			"phone":        {Type: field.TypeString, Column: "phone"},
+			"password":     {Type: field.TypeString, Column: "password"},
+			"role":         {Type: field.TypeEnum, Column: "role"},
+			"employment":   {Type: field.TypeEnum, Column: "employment"},
+			"sso_cert":     {Type: field.TypeString, Column: "sso_cert"},
+			"files_count":  {Type: field.TypeInt, Column: "files_count"},
+		},
+	}
+	graph.Nodes[2] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "file_types",
+			Columns: []string{
+				"id",
+				"name",
+				"type",
+				"state",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "FileType",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"name":  {Type: field.TypeString, Column: "name"},
+			"type":  {Type: field.TypeEnum, Column: "type"},
+			"state": {Type: field.TypeEnum, Column: "state"},
+		},
+	}
+	graph.Nodes[3] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "field_types",
+			Columns: []string{
+				"id",
+				"int",
+				"int8",
+				"int16",
+				"int32",
+				"int64",
+				"optional_int",
+				"optional_int8",
+				"optional_int16",
+				"optional_int32",
+				"optional_int64",
+				"nillable_int",
+				"nillable_int8",
+				"nillable_int16",
+				"nillable_int32",
+				"nillable_int64",
+				"validate_optional_int32",
+				"optional_uint",
+				"optional_uint8",
+				"optional_uint16",
+				"optional_uint32",
+				"optional_uint64",
+				"state",
+				"optional_float",
+				"optional_float32",
+				"text",
+				"datetime",
+				"decimal",
+				"link_other",
+				"link_other_func",
+				"mac",
+				"string_array",
+				"password",
+				"string_scanner",
+				"duration",
+				"dir",
+				"ndir",
+				"str",
+				"null_str",
+				"link",
+				"null_link",
+				"active",
+				"null_active",
+				"deleted",
+				"deleted_at",
+				"raw_data",
+				"sensitive",
+				"ip",
+				"null_int64",
+				"schema_int",
+				"schema_int8",
+				"schema_int64",
+				"schema_float",
+				"schema_float32",
+				"null_float",
+				"role",
+				"priority",
+				"optional_uuid",
+				"nillable_uuid",
+				"strings",
+				"pair",
+				"nil_pair",
+				"vstring",
+				"triple",
+				"big_int",
+				"password_other",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "FieldType",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"int":                     {Type: field.TypeInt, Column: "int"},
+			"int8":                    {Type: field.TypeInt8, Column: "int8"},
+			"int16":                   {Type: field.TypeInt16, Column: "int16"},
+			"int32":                   {Type: field.TypeInt32, Column: "int32"},
+			"int64":                   {Type: field.TypeInt64, Column: "int64"},
+			"optional_int":            {Type: field.TypeInt, Column: "optional_int"},
+			"optional_int8":           {Type: field.TypeInt8, Column: "optional_int8"},
+			"optional_int16":          {Type: field.TypeInt16, Column: "optional_int16"},
+			"optional_int32":          {Type: field.TypeInt32, Column: "optional_int32"},
+			"optional_int64":          {Type: field.TypeInt64, Column: "optional_int64"},
+			"nillable_int":            {Type: field.TypeInt, Column: "nillable_int"},
+			"nillable_int8":           {Type: field.TypeInt8, Column: "nillable_int8"},
+			"nillable_int16":          {Type: field.TypeInt16, Column: "nillable_int16"},
+			"nillable_int32":          {Type: field.TypeInt32, Column: "nillable_int32"},
+			"nillable_int64":          {Type: field.TypeInt64, Column: "nillable_int64"},
+			"validate_optional_int32": {Type: field.TypeInt32, Column: "validate_optional_int32"},
+			"optional_uint":           {Type: field.TypeUint, Column: "optional_uint"},
+			"optional_uint8":          {Type: field.TypeUint8, Column: "optional_uint8"},
+			"optional_uint16":         {Type: field.TypeUint16, Column: "optional_uint16"},
+			"optional_uint32":         {Type: field.TypeUint32, Column: "optional_uint32"},
+			"optional_uint64":         {Type: field.TypeUint64, Column: "optional_uint64"},
+			"state":                   {Type: field.TypeEnum, Column: "state"},
+			"optional_float":          {Type: field.TypeFloat64, Column: "optional_float"},
+			"optional_float32":        {Type: field.TypeFloat32, Column: "optional_float32"},
+			"text":                    {Type: field.TypeString, Column: "text"},
+			"datetime":                {Type: field.TypeTime, Column: "datetime"},
+			"decimal":                 {Type: field.TypeFloat64, Column: "decimal"},
+			"link_other":              {Type: field.TypeOther, Column: "link_other"},
+			"link_other_func":         {Type: field.TypeOther, Column: "link_other_func"},
+			"mac":                     {Type: field.TypeString, Column: "mac"},
+			"string_array":            {Type: field.TypeOther, Column: "string_array"},
+			"password":                {Type: field.TypeString, Column: "password"},
+			"string_scanner":          {Type: field.TypeString, Column: "string_scanner"},
+			"duration":                {Type: field.TypeInt64, Column: "duration"},
+			"dir":                     {Type: field.TypeString, Column: "dir"},
+			"ndir":                    {Type: field.TypeString, Column: "ndir"},
+			"str":                     {Type: field.TypeString, Column: "str"},
+			"null_str":                {Type: field.TypeString, Column: "null_str"},
+			"link":                    {Type: field.TypeString, Column: "link"},
+			"null_link":               {Type: field.TypeString, Column: "null_link"},
+			"active":                  {Type: field.TypeBool, Column: "active"},
+			"null_active":             {Type: field.TypeBool, Column: "null_active"},
+			"deleted":                 {Type: field.TypeBool, Column: "deleted"},
+			"deleted_at":              {Type: field.TypeTime, Column: "deleted_at"},
+			"raw_data":                {Type: field.TypeBytes, Column: "raw_data"},
+			"sensitive":               {Type: field.TypeBytes, Column: "sensitive"},
+			"ip":                      {Type: field.TypeBytes, Column: "ip"},
+			"null_int64":              {Type: field.TypeInt, Column: "null_int64"},
+			"schema_int":              {Type: field.TypeInt, Column: "schema_int"},
+			"schema_int8":             {Type: field.TypeInt8, Column: "schema_int8"},
+			"schema_int64":            {Type: field.TypeInt64, Column: "schema_int64"},
+			"schema_float":            {Type: field.TypeFloat64, Column: "schema_float"},
+			"schema_float32":          {Type: field.TypeFloat32, Column: "schema_float32"},
+			"null_float":              {Type: field.TypeFloat64, Column: "null_float"},
+			"role":                    {Type: field.TypeEnum, Column: "role"},
+			"priority":                {Type: field.TypeEnum, Column: "priority"},
+			"optional_uuid":           {Type: field.TypeUUID, Column: "optional_uuid"},
+			"nillable_uuid":           {Type: field.TypeUUID, Column: "nillable_uuid"},
+			"strings":                 {Type: field.TypeJSON, Column: "strings"},
+			"pair":                    {Type: field.TypeBytes, Column: "pair"},
+			"nil_pair":                {Type: field.TypeBytes, Column: "nil_pair"},
+			"vstring":                 {Type: field.TypeString, Column: "vstring"},
+			"triple":                  {Type: field.TypeString, Column: "triple"},
+			"big_int":                 {Type: field.TypeInt, Column: "big_int"},
+			"password_other":          {Type: field.TypeOther, Column: "password_other"},
+		},
+	}
+	graph.MustAddE(
+		"owner",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   OwnerTable,
+			Columns: []string{OwnerColumn},
+			Bidi:    false,
+		},
+		"File",
+		"User",
+	)
+	graph.MustAddE(
+		"type",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   TypeTable,
+			Columns: []string{TypeColumn},
+			Bidi:    false,
+		},
+		"File",
+		"FileType",
+	)
+	graph.MustAddE(
+		"field",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   FieldTable,
+			Columns: []string{FieldColumn},
+			Bidi:    false,
+		},
+		"File",
+		"FieldType",
+	)
+	return graph
+}()

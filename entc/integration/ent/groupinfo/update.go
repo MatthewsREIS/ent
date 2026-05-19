@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewGroupInfoUpdate(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 
 // Where appends a list predicates to the GroupInfoUpdate builder.
 func (_u *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetDesc sets the "desc" field.
 func (_u *GroupInfoUpdate) SetDesc(v string) *GroupInfoUpdate {
-	_u.mutation.SetDesc(v)
+	_ = _u.mutation.SetField("desc", v)
 	return _u
 }
 
@@ -52,8 +53,8 @@ func (_u *GroupInfoUpdate) SetNillableDesc(v *string) *GroupInfoUpdate {
 
 // SetMaxUsers sets the "max_users" field.
 func (_u *GroupInfoUpdate) SetMaxUsers(v int) *GroupInfoUpdate {
-	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(v)
+	_ = _u.mutation.ResetField("max_users")
+	_ = _u.mutation.SetField("max_users", v)
 	return _u
 }
 
@@ -67,13 +68,13 @@ func (_u *GroupInfoUpdate) SetNillableMaxUsers(v *int) *GroupInfoUpdate {
 
 // AddMaxUsers adds value to the "max_users" field.
 func (_u *GroupInfoUpdate) AddMaxUsers(v int) *GroupInfoUpdate {
-	_u.mutation.AddMaxUsers(v)
+	_ = _u.mutation.AddField("max_users", v)
 	return _u
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *GroupInfoUpdate) AddGroupIDs(ids ...int) *GroupInfoUpdate {
-	_u.mutation.AddGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -84,19 +85,19 @@ func (_u *GroupInfoUpdate) Mutation() *GroupInfoMutation {
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
-	_u.mutation.ClearGroups()
+	_ = _u.mutation.ClearEdge("groups")
 	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *GroupInfoUpdate) RemoveGroupIDs(ids ...int) *GroupInfoUpdate {
-	_u.mutation.RemoveGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GroupInfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -136,16 +137,17 @@ func (_u *GroupInfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Desc(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "desc"); ok {
 		_spec.SetField(FieldDesc, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.MaxUsers(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "max_users"); ok {
 		_spec.SetField(FieldMaxUsers, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedMaxUsers(); ok {
+	if added, ok := _u.mutation.AddedField("max_users"); ok {
+		value := added.(int)
 		_spec.AddField(FieldMaxUsers, field.TypeInt, value)
 	}
-	if _u.mutation.GroupsCleared() {
+	if _u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -158,7 +160,7 @@ func (_u *GroupInfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("groups"); len(nodes) > 0 && !_u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -174,7 +176,7 @@ func (_u *GroupInfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -219,7 +221,7 @@ func NewGroupInfoUpdateOne(c Config, hooks []Hook, mutation *GroupInfoMutation) 
 
 // SetDesc sets the "desc" field.
 func (_u *GroupInfoUpdateOne) SetDesc(v string) *GroupInfoUpdateOne {
-	_u.mutation.SetDesc(v)
+	_ = _u.mutation.SetField("desc", v)
 	return _u
 }
 
@@ -233,8 +235,8 @@ func (_u *GroupInfoUpdateOne) SetNillableDesc(v *string) *GroupInfoUpdateOne {
 
 // SetMaxUsers sets the "max_users" field.
 func (_u *GroupInfoUpdateOne) SetMaxUsers(v int) *GroupInfoUpdateOne {
-	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(v)
+	_ = _u.mutation.ResetField("max_users")
+	_ = _u.mutation.SetField("max_users", v)
 	return _u
 }
 
@@ -248,13 +250,13 @@ func (_u *GroupInfoUpdateOne) SetNillableMaxUsers(v *int) *GroupInfoUpdateOne {
 
 // AddMaxUsers adds value to the "max_users" field.
 func (_u *GroupInfoUpdateOne) AddMaxUsers(v int) *GroupInfoUpdateOne {
-	_u.mutation.AddMaxUsers(v)
+	_ = _u.mutation.AddField("max_users", v)
 	return _u
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_u *GroupInfoUpdateOne) AddGroupIDs(ids ...int) *GroupInfoUpdateOne {
-	_u.mutation.AddGroupIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -265,19 +267,19 @@ func (_u *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
 
 // ClearGroups clears all "groups" edges to the Group entity.
 func (_u *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
-	_u.mutation.ClearGroups()
+	_ = _u.mutation.ClearEdge("groups")
 	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
 func (_u *GroupInfoUpdateOne) RemoveGroupIDs(ids ...int) *GroupInfoUpdateOne {
-	_u.mutation.RemoveGroupIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the GroupInfoUpdate builder.
 func (_u *GroupInfoUpdateOne) Where(ps ...predicate.GroupInfo) *GroupInfoUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -290,7 +292,7 @@ func (_u *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInfoU
 
 // Save executes the query and returns the updated GroupInfo entity.
 func (_u *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[GroupInfo](ctx, &entbuilder.UpdateState[*GroupInfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -347,16 +349,17 @@ func (_u *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, er
 			}
 		}
 	}
-	if value, ok := _u.mutation.Desc(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "desc"); ok {
 		_spec.SetField(FieldDesc, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.MaxUsers(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "max_users"); ok {
 		_spec.SetField(FieldMaxUsers, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedMaxUsers(); ok {
+	if added, ok := _u.mutation.AddedField("max_users"); ok {
+		value := added.(int)
 		_spec.AddField(FieldMaxUsers, field.TypeInt, value)
 	}
-	if _u.mutation.GroupsCleared() {
+	if _u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -369,7 +372,7 @@ func (_u *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("groups"); len(nodes) > 0 && !_u.mutation.EdgeCleared("groups") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -385,7 +388,7 @@ func (_u *GroupInfoUpdateOne) sqlSave(ctx context.Context) (_node *GroupInfo, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,

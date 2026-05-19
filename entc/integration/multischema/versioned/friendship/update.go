@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/versioned/internal"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -34,14 +35,14 @@ func NewFriendshipUpdate(c Config, hooks []Hook, mutation *FriendshipMutation) *
 
 // Where appends a list predicates to the FriendshipUpdate builder.
 func (_u *FriendshipUpdate) Where(ps ...predicate.Friendship) *FriendshipUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetWeight sets the "weight" field.
 func (_u *FriendshipUpdate) SetWeight(v int) *FriendshipUpdate {
-	_u.mutation.ResetWeight()
-	_u.mutation.SetWeight(v)
+	_ = _u.mutation.ResetField("weight")
+	_ = _u.mutation.SetField("weight", v)
 	return _u
 }
 
@@ -55,13 +56,13 @@ func (_u *FriendshipUpdate) SetNillableWeight(v *int) *FriendshipUpdate {
 
 // AddWeight adds value to the "weight" field.
 func (_u *FriendshipUpdate) AddWeight(v int) *FriendshipUpdate {
-	_u.mutation.AddWeight(v)
+	_ = _u.mutation.AddField("weight", v)
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *FriendshipUpdate) SetCreatedAt(v time.Time) *FriendshipUpdate {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -80,7 +81,7 @@ func (_u *FriendshipUpdate) Mutation() *FriendshipMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FriendshipUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*FriendshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -107,10 +108,10 @@ func (_u *FriendshipUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *FriendshipUpdate) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`versioned: clearing a required unique edge "Friendship.user"`)
 	}
-	if _u.mutation.FriendCleared() && len(_u.mutation.FriendIDs()) > 0 {
+	if _u.mutation.EdgeCleared("friend") && len(_u.mutation.EdgeIDs("friend")) > 0 {
 		return errors.New(`versioned: clearing a required unique edge "Friendship.friend"`)
 	}
 	return nil
@@ -134,13 +135,14 @@ func (_u *FriendshipUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Weight(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "weight"); ok {
 		_spec.SetField(FieldWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedWeight(); ok {
+	if added, ok := _u.mutation.AddedField("weight"); ok {
+		value := added.(int)
 		_spec.AddField(FieldWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
 	schemaConfig := _u.Config.SchemaConfig()
@@ -175,8 +177,8 @@ func NewFriendshipUpdateOne(c Config, hooks []Hook, mutation *FriendshipMutation
 
 // SetWeight sets the "weight" field.
 func (_u *FriendshipUpdateOne) SetWeight(v int) *FriendshipUpdateOne {
-	_u.mutation.ResetWeight()
-	_u.mutation.SetWeight(v)
+	_ = _u.mutation.ResetField("weight")
+	_ = _u.mutation.SetField("weight", v)
 	return _u
 }
 
@@ -190,13 +192,13 @@ func (_u *FriendshipUpdateOne) SetNillableWeight(v *int) *FriendshipUpdateOne {
 
 // AddWeight adds value to the "weight" field.
 func (_u *FriendshipUpdateOne) AddWeight(v int) *FriendshipUpdateOne {
-	_u.mutation.AddWeight(v)
+	_ = _u.mutation.AddField("weight", v)
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *FriendshipUpdateOne) SetCreatedAt(v time.Time) *FriendshipUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -215,7 +217,7 @@ func (_u *FriendshipUpdateOne) Mutation() *FriendshipMutation {
 
 // Where appends a list predicates to the FriendshipUpdate builder.
 func (_u *FriendshipUpdateOne) Where(ps ...predicate.Friendship) *FriendshipUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -228,7 +230,7 @@ func (_u *FriendshipUpdateOne) Select(field string, fields ...string) *Friendshi
 
 // Save executes the query and returns the updated Friendship entity.
 func (_u *FriendshipUpdateOne) Save(ctx context.Context) (*Friendship, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Friendship](ctx, &entbuilder.UpdateState[*FriendshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -255,10 +257,10 @@ func (_u *FriendshipUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *FriendshipUpdateOne) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`versioned: clearing a required unique edge "Friendship.user"`)
 	}
-	if _u.mutation.FriendCleared() && len(_u.mutation.FriendIDs()) > 0 {
+	if _u.mutation.EdgeCleared("friend") && len(_u.mutation.EdgeIDs("friend")) > 0 {
 		return errors.New(`versioned: clearing a required unique edge "Friendship.friend"`)
 	}
 	return nil
@@ -299,13 +301,14 @@ func (_u *FriendshipUpdateOne) sqlSave(ctx context.Context) (_node *Friendship, 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Weight(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "weight"); ok {
 		_spec.SetField(FieldWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedWeight(); ok {
+	if added, ok := _u.mutation.AddedField("weight"); ok {
+		value := added.(int)
 		_spec.AddField(FieldWeight, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
 	schemaConfig := _u.Config.SchemaConfig()

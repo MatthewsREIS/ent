@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewGoodsUpdate(c Config, hooks []Hook, mutation *GoodsMutation) *GoodsUpdat
 
 // Where appends a list predicates to the GoodsUpdate builder.
 func (_u *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -43,7 +44,7 @@ func (_u *GoodsUpdate) Mutation() *GoodsMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GoodsUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GoodsMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -117,7 +118,7 @@ func (_u *GoodsUpdateOne) Mutation() *GoodsMutation {
 
 // Where appends a list predicates to the GoodsUpdate builder.
 func (_u *GoodsUpdateOne) Where(ps ...predicate.Goods) *GoodsUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -130,7 +131,7 @@ func (_u *GoodsUpdateOne) Select(field string, fields ...string) *GoodsUpdateOne
 
 // Save executes the query and returns the updated Goods entity.
 func (_u *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Goods](ctx, &entbuilder.UpdateState[*GoodsMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -40,7 +40,7 @@ func TestEdgeField(t *testing.T) {
 	require.Equal(t, c1.ParentID, a8m.ID)
 	c2 := client.User.Create().SetParentID(a8m.ID).SaveX(ctx)
 	require.Equal(t, c2.ParentID, a8m.ID)
-	pid := client.User.QueryChildren(a8m).GroupBy(user.FieldParentID).IntX(ctx)
+	pid := ent.QueryUserChildren(client.User, a8m).GroupBy(user.FieldParentID).IntX(ctx)
 	require.Equal(t, pid, a8m.ID)
 	c3 := client.User.Create().SetParentID(c2.ID).SaveX(ctx)
 	require.Equal(t,
@@ -58,51 +58,51 @@ func TestEdgeField(t *testing.T) {
 	ps1 = client.Post.UpdateOne(ps1).SetAuthorID(a8m.ID).SaveX(ctx)
 	require.NotNil(t, ps1.AuthorID)
 	require.Equal(t, a8m.ID, *ps1.AuthorID)
-	ps1 = client.Post.Query().WithAuthor().OnlyX(ctx)
+	ps1 = ent.WithPostAuthor(client.Post.Query()).OnlyX(ctx)
 	require.NotNil(t, ps1.AuthorID)
 	require.Equal(t, a8m.ID, *ps1.AuthorID)
 	require.Equal(t, a8m.ID, ps1.Edges.Author.ID)
 
 	nati := client.User.Create().SetSpouseID(a8m.ID).SaveX(ctx)
 	require.Equal(t, nati.SpouseID, a8m.ID)
-	require.Equal(t, nati.ID, client.User.QuerySpouse(a8m).OnlyIDX(ctx))
+	require.Equal(t, nati.ID, ent.QueryUserSpouse(client.User, a8m).OnlyIDX(ctx))
 
 	visa := client.Card.Create().SetOwnerID(a8m.ID).SaveX(ctx)
 	require.Equal(t, a8m.ID, visa.OwnerID)
-	require.Equal(t, nati.ID, client.Card.QueryOwner(visa).QuerySpouse().OnlyIDX(ctx))
-	require.Equal(t, nati.ID, client.Card.Query().QueryOwner().QuerySpouse().OnlyIDX(ctx))
+	require.Equal(t, nati.ID, ent.QueryUserSpouseFromQuery(ent.QueryCardOwner(client.Card, visa)).OnlyIDX(ctx))
+	require.Equal(t, nati.ID, ent.QueryUserSpouseFromQuery(ent.QueryCardOwnerFromQuery(client.Card.Query())).OnlyIDX(ctx))
 
 	m1 := client.Metadata.Create().SetUserID(a8m.ID).SetAge(10).SaveX(ctx)
 	require.Equal(t, a8m.ID, m1.ID)
 	require.Equal(t, 10, m1.Age)
-	m1 = client.User.QueryMetadata(a8m).OnlyX(ctx)
+	m1 = ent.QueryUserMetadata(client.User, a8m).OnlyX(ctx)
 	require.Equal(t, a8m.ID, m1.ID)
-	require.Equal(t, a8m.ID, client.Metadata.QueryUser(m1).OnlyIDX(ctx))
+	require.Equal(t, a8m.ID, ent.QueryMetadataUser(client.Metadata, m1).OnlyIDX(ctx))
 	_, err = client.Metadata.Create().SetID(a8m.ID).SetAge(10).Save(ctx)
 	require.True(t, ent.IsConstraintError(err), "UNIQUE constraint failed: metadata.id")
 	err = client.Metadata.UpdateOne(m1).ClearUser().Exec(ctx)
 	require.Error(t, err, "clearing primary key is not allowed")
 
 	client.Info.Create().SetUserID(a8m.ID).SetContent(json.RawMessage("{}")).SaveX(ctx)
-	inf := client.User.QueryInfo(a8m).OnlyX(ctx)
+	inf := ent.QueryUserInfo(client.User, a8m).OnlyX(ctx)
 	require.Equal(t, a8m.ID, inf.ID)
 	_, err = client.Info.Create().SetID(a8m.ID).SetContent(json.RawMessage("10")).Save(ctx)
 	require.True(t, ent.IsConstraintError(err), "UNIQUE constraint failed: metadata.id")
 
-	require.NotZero(t, client.Pet.Query().QueryOwner().CountX(ctx))
+	require.NotZero(t, ent.QueryPetOwnerFromQuery(client.Pet.Query()).CountX(ctx))
 	client.Pet.Update().ClearOwnerID().ExecX(ctx)
-	require.Zero(t, client.Pet.Query().QueryOwner().CountX(ctx))
+	require.Zero(t, ent.QueryPetOwnerFromQuery(client.Pet.Query()).CountX(ctx))
 
 	require.False(t, client.Rental.Query().ExistX(ctx))
 	car1 := client.Car.Create().SetNumber("102030").SaveX(ctx)
 	car2 := client.Car.Create().SetNumber("102030").SaveX(ctx)
 	client.Rental.Create().SetUserID(a8m.ID).SetCarID(car1.ID).SaveX(ctx)
-	require.Equal(t, car1.ID, client.User.QueryRentals(a8m).QueryCar().OnlyIDX(ctx))
+	require.Equal(t, car1.ID, ent.QueryRentalCarFromQuery(ent.QueryUserRentals(client.User, a8m)).OnlyIDX(ctx))
 	dt, err := time.Parse(time.RFC3339, "1906-01-02T00:00:00+00:00")
 	require.NoError(t, err)
 	client.Rental.Create().SetUserID(a8m.ID).SetCarID(car2.ID).SetDate(dt).SaveX(ctx)
-	require.Equal(t, 2, client.User.QueryRentals(a8m).QueryCar().CountX(ctx))
-	require.Equal(t, car2.ID, client.User.QueryRentals(a8m).Where(rental.DateLTE(dt)).QueryCar().OnlyIDX(ctx))
+	require.Equal(t, 2, ent.QueryRentalCarFromQuery(ent.QueryUserRentals(client.User, a8m)).CountX(ctx))
+	require.Equal(t, car2.ID, ent.QueryRentalCarFromQuery(ent.QueryUserRentals(client.User, a8m).Where(rental.DateLTE(dt))).OnlyIDX(ctx))
 	_, err = client.Rental.Create().SetUserID(a8m.ID).SetCarID(car2.ID).SetDate(dt).Save(ctx)
 	require.Error(t, err)
 	require.True(t, ent.IsConstraintError(err))
@@ -113,7 +113,7 @@ func TestEdgeField(t *testing.T) {
 	}
 	head := client.Node.Query().Where(node.Not(node.HasPrev())).OnlyX(ctx)
 	for i := 0; i < 5; i++ {
-		curr = client.Node.QueryNext(head).OnlyX(ctx)
+		curr = ent.QueryNodeNext(client.Node, head).OnlyX(ctx)
 		require.Equal(t, head.Value+1, curr.Value)
 		head = curr
 	}
@@ -128,13 +128,11 @@ func TestNamedEdges(t *testing.T) {
 	u1 := client.User.Create().SaveX(ctx)
 	client.Pet.Create().SetOwnerID(u1.ID).SaveX(ctx)
 
-	u1 = client.User.Query().
-		WithPets(func(q *ent.PetQuery) {
-			q.Select(pet.FieldID)
-		}).
-		WithNamedPets("Named", func(q *ent.PetQuery) {
-			q.Select(pet.FieldID)
-		}).
+	u1 = ent.WithNamedUserPets(ent.WithUserPets(client.User.Query(), func(q *ent.PetQuery) {
+		q.Select(pet.FieldID)
+	}), "Named", func(q *ent.PetQuery) {
+		q.Select(pet.FieldID)
+	}).
 		OnlyX(ctx)
 	require.Len(t, u1.Edges.Pets, 1)
 	require.Equal(t, u1.Edges.Pets[0].OwnerID, u1.ID)

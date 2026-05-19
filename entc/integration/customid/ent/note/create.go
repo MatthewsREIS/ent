@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,7 +34,7 @@ func NewNoteCreate(c Config, hooks []Hook, mutation *NoteMutation) *NoteCreate {
 
 // SetText sets the "text" field.
 func (_c *NoteCreate) SetText(v string) *NoteCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
@@ -61,7 +62,7 @@ func (_c *NoteCreate) SetNillableID(v *schema.NoteID) *NoteCreate {
 
 // SetParentID sets the "parent" edge to the Note entity by ID.
 func (_c *NoteCreate) SetParentID(id schema.NoteID) *NoteCreate {
-	_c.mutation.SetParentID(id)
+	_ = _c.mutation.SetEdgeID("parent", id)
 	return _c
 }
 
@@ -75,7 +76,7 @@ func (_c *NoteCreate) SetNillableParentID(id *schema.NoteID) *NoteCreate {
 
 // AddChildIDs adds the "children" edge to the Note entity by IDs.
 func (_c *NoteCreate) AddChildIDs(ids ...schema.NoteID) *NoteCreate {
-	_c.mutation.AddChildIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -122,7 +123,7 @@ func (_c *NoteCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *NoteCreate) check() error {
-	if v, ok := _c.mutation.ID(); ok {
+	if v, ok := entbuilder.GetField[schema.NoteID](_c.mutation, "id"); ok {
 		if err := IDValidator(string(v)); err != nil {
 			return &ValidationError{Name: "id", Err: fmt.Errorf(`ent: validator failed for field "Note.id": %w`, err)}
 		}
@@ -148,7 +149,7 @@ func (_c *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
 			return nil, fmt.Errorf("unexpected Note.ID type: %T", _spec.ID.Value)
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -163,11 +164,11 @@ func (_c *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 		_node.Text = value
 	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[schema.NoteID](_c.mutation, "parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -183,7 +184,7 @@ func (_c *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[schema.NoteID](_c.mutation, "children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -432,7 +433,7 @@ func (_c *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

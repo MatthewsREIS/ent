@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,7 +30,7 @@ func NewParentCreate(c Config, hooks []Hook, mutation *ParentMutation) *ParentCr
 
 // SetByAdoption sets the "by_adoption" field.
 func (_c *ParentCreate) SetByAdoption(v bool) *ParentCreate {
-	_c.mutation.SetByAdoption(v)
+	_ = _c.mutation.SetField("by_adoption", v)
 	return _c
 }
 
@@ -43,19 +44,19 @@ func (_c *ParentCreate) SetNillableByAdoption(v *bool) *ParentCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *ParentCreate) SetUserID(v int) *ParentCreate {
-	_c.mutation.SetUserID(v)
+	_ = _c.mutation.SetEdgeID("child", v)
 	return _c
 }
 
 // SetParentID sets the "parent_id" field.
 func (_c *ParentCreate) SetParentID(v int) *ParentCreate {
-	_c.mutation.SetParentID(v)
+	_ = _c.mutation.SetEdgeID("parent", v)
 	return _c
 }
 
 // SetChildID sets the "child" edge to the User entity by ID.
 func (_c *ParentCreate) SetChildID(id int) *ParentCreate {
-	_c.mutation.SetChildID(id)
+	_ = _c.mutation.SetEdgeID("child", id)
 	return _c
 }
 
@@ -94,27 +95,21 @@ func (_c *ParentCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *ParentCreate) defaults() {
-	if _, ok := _c.mutation.ByAdoption(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "by_adoption"); !ok {
 		v := DefaultByAdoption
-		_c.mutation.SetByAdoption(v)
+		_ = _c.mutation.SetField("by_adoption", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *ParentCreate) check() error {
-	if _, ok := _c.mutation.ByAdoption(); !ok {
+	if _, ok := entbuilder.GetField[bool](_c.mutation, "by_adoption"); !ok {
 		return &ValidationError{Name: "by_adoption", Err: errors.New(`ent: missing required field "Parent.by_adoption"`)}
 	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", Err: errors.New(`ent: missing required field "Parent.user_id"`)}
-	}
-	if _, ok := _c.mutation.ParentID(); !ok {
-		return &ValidationError{Name: "parent_id", Err: errors.New(`ent: missing required field "Parent.parent_id"`)}
-	}
-	if len(_c.mutation.ChildIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("child")) == 0 {
 		return &ValidationError{Name: "child", Err: errors.New(`ent: missing required edge "Parent.child"`)}
 	}
-	if len(_c.mutation.ParentIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("parent")) == 0 {
 		return &ValidationError{Name: "parent", Err: errors.New(`ent: missing required edge "Parent.parent"`)}
 	}
 	return nil
@@ -133,7 +128,7 @@ func (_c *ParentCreate) sqlSave(ctx context.Context) (*Parent, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -145,11 +140,11 @@ func (_c *ParentCreate) createSpec() (*Parent, *sqlgraph.CreateSpec) {
 	)
 	schemaConfig := _c.Config.SchemaConfig()
 	_spec.Schema = schemaConfig.Parent
-	if value, ok := _c.mutation.ByAdoption(); ok {
+	if value, ok := entbuilder.GetField[bool](_c.mutation, "by_adoption"); ok {
 		_spec.SetField(FieldByAdoption, field.TypeBool, value)
 		_node.ByAdoption = value
 	}
-	if nodes := _c.mutation.ChildIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "child"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -167,7 +162,7 @@ func (_c *ParentCreate) createSpec() (*Parent, *sqlgraph.CreateSpec) {
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -252,11 +247,11 @@ func (_c *ParentCreateBulk) Save(ctx context.Context) ([]*Parent, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

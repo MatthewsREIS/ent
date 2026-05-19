@@ -1,3 +1,7 @@
 .omc/
 .beads/
 .sisyphus/
+.gocache/
+.gotmp/
+docs/superpowers/
+/ent-codegen-migrate

@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewUserTweetCreate(c Config, hooks []Hook, mutation *UserTweetMutation) *Us
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *UserTweetCreate) SetCreatedAt(v time.Time) *UserTweetCreate {
-	_c.mutation.SetCreatedAt(v)
+	_ = _c.mutation.SetField("created_at", v)
 	return _c
 }
 
@@ -46,13 +47,13 @@ func (_c *UserTweetCreate) SetNillableCreatedAt(v *time.Time) *UserTweetCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *UserTweetCreate) SetUserID(v int) *UserTweetCreate {
-	_c.mutation.SetUserID(v)
+	_ = _c.mutation.SetEdgeID("user", v)
 	return _c
 }
 
 // SetTweetID sets the "tweet_id" field.
 func (_c *UserTweetCreate) SetTweetID(v int) *UserTweetCreate {
-	_c.mutation.SetTweetID(v)
+	_ = _c.mutation.SetEdgeID("tweet", v)
 	return _c
 }
 
@@ -91,27 +92,21 @@ func (_c *UserTweetCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserTweetCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		v := DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+		_ = _c.mutation.SetField("created_at", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserTweetCreate) check() error {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		return &ValidationError{Name: "created_at", Err: errors.New(`ent: missing required field "UserTweet.created_at"`)}
 	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", Err: errors.New(`ent: missing required field "UserTweet.user_id"`)}
-	}
-	if _, ok := _c.mutation.TweetID(); !ok {
-		return &ValidationError{Name: "tweet_id", Err: errors.New(`ent: missing required field "UserTweet.tweet_id"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("user")) == 0 {
 		return &ValidationError{Name: "user", Err: errors.New(`ent: missing required edge "UserTweet.user"`)}
 	}
-	if len(_c.mutation.TweetIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("tweet")) == 0 {
 		return &ValidationError{Name: "tweet", Err: errors.New(`ent: missing required edge "UserTweet.tweet"`)}
 	}
 	return nil
@@ -130,7 +125,7 @@ func (_c *UserTweetCreate) sqlSave(ctx context.Context) (*UserTweet, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -141,11 +136,11 @@ func (_c *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -162,7 +157,7 @@ func (_c *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tweet"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -448,11 +443,11 @@ func (_c *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

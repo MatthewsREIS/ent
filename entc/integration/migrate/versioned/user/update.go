@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/versioned/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,14 +32,14 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetAge sets the "age" field.
 func (_u *UserUpdate) SetAge(v int32) *UserUpdate {
-	_u.mutation.ResetAge()
-	_u.mutation.SetAge(v)
+	_ = _u.mutation.ResetField("age")
+	_ = _u.mutation.SetField("age", v)
 	return _u
 }
 
@@ -52,13 +53,13 @@ func (_u *UserUpdate) SetNillableAge(v *int32) *UserUpdate {
 
 // AddAge adds value to the "age" field.
 func (_u *UserUpdate) AddAge(v int32) *UserUpdate {
-	_u.mutation.AddAge(v)
+	_ = _u.mutation.AddField("age", v)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -72,7 +73,7 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 
 // SetAddress sets the "address" field.
 func (_u *UserUpdate) SetAddress(v string) *UserUpdate {
-	_u.mutation.SetAddress(v)
+	_ = _u.mutation.SetField("address", v)
 	return _u
 }
 
@@ -86,7 +87,7 @@ func (_u *UserUpdate) SetNillableAddress(v *string) *UserUpdate {
 
 // ClearAddress clears the value of the "address" field.
 func (_u *UserUpdate) ClearAddress() *UserUpdate {
-	_u.mutation.ClearAddress()
+	_ = _u.mutation.ClearField("address")
 	return _u
 }
 
@@ -97,7 +98,7 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -124,7 +125,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`versioned: validator failed for field "User.name": %w`, err)}
 		}
@@ -144,19 +145,20 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[int32](_u.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.AddedAge(); ok {
+	if added, ok := _u.mutation.AddedField("age"); ok {
+		value := added.(int32)
 		_spec.AddField(FieldAge, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Address(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "address"); ok {
 		_spec.SetField(FieldAddress, field.TypeString, value)
 	}
-	if _u.mutation.AddressCleared() {
+	if _u.mutation.FieldCleared("address") {
 		_spec.ClearField(FieldAddress, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -186,8 +188,8 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetAge sets the "age" field.
 func (_u *UserUpdateOne) SetAge(v int32) *UserUpdateOne {
-	_u.mutation.ResetAge()
-	_u.mutation.SetAge(v)
+	_ = _u.mutation.ResetField("age")
+	_ = _u.mutation.SetField("age", v)
 	return _u
 }
 
@@ -201,13 +203,13 @@ func (_u *UserUpdateOne) SetNillableAge(v *int32) *UserUpdateOne {
 
 // AddAge adds value to the "age" field.
 func (_u *UserUpdateOne) AddAge(v int32) *UserUpdateOne {
-	_u.mutation.AddAge(v)
+	_ = _u.mutation.AddField("age", v)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -221,7 +223,7 @@ func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
 
 // SetAddress sets the "address" field.
 func (_u *UserUpdateOne) SetAddress(v string) *UserUpdateOne {
-	_u.mutation.SetAddress(v)
+	_ = _u.mutation.SetField("address", v)
 	return _u
 }
 
@@ -235,7 +237,7 @@ func (_u *UserUpdateOne) SetNillableAddress(v *string) *UserUpdateOne {
 
 // ClearAddress clears the value of the "address" field.
 func (_u *UserUpdateOne) ClearAddress() *UserUpdateOne {
-	_u.mutation.ClearAddress()
+	_ = _u.mutation.ClearField("address")
 	return _u
 }
 
@@ -246,7 +248,7 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -259,7 +261,7 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -286,7 +288,7 @@ func (_u *UserUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *UserUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`versioned: validator failed for field "User.name": %w`, err)}
 		}
@@ -323,19 +325,20 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Age(); ok {
+	if value, ok := entbuilder.GetField[int32](_u.mutation, "age"); ok {
 		_spec.SetField(FieldAge, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.AddedAge(); ok {
+	if added, ok := _u.mutation.AddedField("age"); ok {
+		value := added.(int32)
 		_spec.AddField(FieldAge, field.TypeInt32, value)
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Address(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "address"); ok {
 		_spec.SetField(FieldAddress, field.TypeString, value)
 	}
-	if _u.mutation.AddressCleared() {
+	if _u.mutation.FieldCleared("address") {
 		_spec.ClearField(FieldAddress, field.TypeString)
 	}
 	_node = &User{Config: _u.Config}

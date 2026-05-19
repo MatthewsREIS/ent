@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewTweetLikeUpdate(c Config, hooks []Hook, mutation *TweetLikeMutation) *Tw
 
 // Where appends a list predicates to the TweetLikeUpdate builder.
 func (_u *TweetLikeUpdate) Where(ps ...predicate.TweetLike) *TweetLikeUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetLikedAt sets the "liked_at" field.
 func (_u *TweetLikeUpdate) SetLikedAt(v time.Time) *TweetLikeUpdate {
-	_u.mutation.SetLikedAt(v)
+	_ = _u.mutation.SetField("liked_at", v)
 	return _u
 }
 
@@ -52,7 +53,7 @@ func (_u *TweetLikeUpdate) SetNillableLikedAt(v *time.Time) *TweetLikeUpdate {
 
 // SetUserID sets the "user_id" field.
 func (_u *TweetLikeUpdate) SetUserID(v int) *TweetLikeUpdate {
-	_u.mutation.SetUserID(v)
+	_ = _u.mutation.SetEdgeID("user", v)
 	return _u
 }
 
@@ -66,7 +67,7 @@ func (_u *TweetLikeUpdate) SetNillableUserID(v *int) *TweetLikeUpdate {
 
 // SetTweetID sets the "tweet_id" field.
 func (_u *TweetLikeUpdate) SetTweetID(v int) *TweetLikeUpdate {
-	_u.mutation.SetTweetID(v)
+	_ = _u.mutation.SetEdgeID("tweet", v)
 	return _u
 }
 
@@ -85,19 +86,19 @@ func (_u *TweetLikeUpdate) Mutation() *TweetLikeMutation {
 
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (_u *TweetLikeUpdate) ClearTweet() *TweetLikeUpdate {
-	_u.mutation.ClearTweet()
+	_ = _u.mutation.ClearEdge("tweet")
 	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *TweetLikeUpdate) ClearUser() *TweetLikeUpdate {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TweetLikeUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TweetLikeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -124,10 +125,10 @@ func (_u *TweetLikeUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *TweetLikeUpdate) check() error {
-	if _u.mutation.TweetCleared() && len(_u.mutation.TweetIDs()) > 0 {
+	if _u.mutation.EdgeCleared("tweet") && len(_u.mutation.EdgeIDs("tweet")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "TweetLike.tweet"`)
 	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "TweetLike.user"`)
 	}
 	return nil
@@ -145,10 +146,10 @@ func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.LikedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "liked_at"); ok {
 		_spec.SetField(FieldLikedAt, field.TypeTime, value)
 	}
-	if _u.mutation.TweetCleared() {
+	if _u.mutation.EdgeCleared("tweet") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -161,7 +162,7 @@ func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -177,7 +178,7 @@ func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -190,7 +191,7 @@ func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -233,7 +234,7 @@ func NewTweetLikeUpdateOne(c Config, hooks []Hook, mutation *TweetLikeMutation) 
 
 // SetLikedAt sets the "liked_at" field.
 func (_u *TweetLikeUpdateOne) SetLikedAt(v time.Time) *TweetLikeUpdateOne {
-	_u.mutation.SetLikedAt(v)
+	_ = _u.mutation.SetField("liked_at", v)
 	return _u
 }
 
@@ -247,7 +248,7 @@ func (_u *TweetLikeUpdateOne) SetNillableLikedAt(v *time.Time) *TweetLikeUpdateO
 
 // SetUserID sets the "user_id" field.
 func (_u *TweetLikeUpdateOne) SetUserID(v int) *TweetLikeUpdateOne {
-	_u.mutation.SetUserID(v)
+	_ = _u.mutation.SetEdgeID("user", v)
 	return _u
 }
 
@@ -261,7 +262,7 @@ func (_u *TweetLikeUpdateOne) SetNillableUserID(v *int) *TweetLikeUpdateOne {
 
 // SetTweetID sets the "tweet_id" field.
 func (_u *TweetLikeUpdateOne) SetTweetID(v int) *TweetLikeUpdateOne {
-	_u.mutation.SetTweetID(v)
+	_ = _u.mutation.SetEdgeID("tweet", v)
 	return _u
 }
 
@@ -280,19 +281,19 @@ func (_u *TweetLikeUpdateOne) Mutation() *TweetLikeMutation {
 
 // ClearTweet clears the "tweet" edge to the Tweet entity.
 func (_u *TweetLikeUpdateOne) ClearTweet() *TweetLikeUpdateOne {
-	_u.mutation.ClearTweet()
+	_ = _u.mutation.ClearEdge("tweet")
 	return _u
 }
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *TweetLikeUpdateOne) ClearUser() *TweetLikeUpdateOne {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // Where appends a list predicates to the TweetLikeUpdate builder.
 func (_u *TweetLikeUpdateOne) Where(ps ...predicate.TweetLike) *TweetLikeUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -305,7 +306,7 @@ func (_u *TweetLikeUpdateOne) Select(field string, fields ...string) *TweetLikeU
 
 // Save executes the query and returns the updated TweetLike entity.
 func (_u *TweetLikeUpdateOne) Save(ctx context.Context) (*TweetLike, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[TweetLike](ctx, &entbuilder.UpdateState[*TweetLikeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -332,10 +333,10 @@ func (_u *TweetLikeUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *TweetLikeUpdateOne) check() error {
-	if _u.mutation.TweetCleared() && len(_u.mutation.TweetIDs()) > 0 {
+	if _u.mutation.EdgeCleared("tweet") && len(_u.mutation.EdgeIDs("tweet")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "TweetLike.tweet"`)
 	}
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "TweetLike.user"`)
 	}
 	return nil
@@ -346,15 +347,15 @@ func (_u *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, er
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(FieldTweetID, field.TypeInt))
-	if id, ok := _u.mutation.UserID(); !ok {
+	if rawID, ok := _u.mutation.EdgeID("user"); !ok {
 		return nil, &ValidationError{Name: "user_id", Err: errors.New(`ent: missing "TweetLike.user_id" for update`)}
 	} else {
-		_spec.Node.CompositeID[0].Value = id
+		_spec.Node.CompositeID[0].Value = rawID.(int)
 	}
-	if id, ok := _u.mutation.TweetID(); !ok {
+	if rawID, ok := _u.mutation.EdgeID("tweet"); !ok {
 		return nil, &ValidationError{Name: "tweet_id", Err: errors.New(`ent: missing "TweetLike.tweet_id" for update`)}
 	} else {
-		_spec.Node.CompositeID[1].Value = id
+		_spec.Node.CompositeID[1].Value = rawID.(int)
 	}
 	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, len(fields))
@@ -372,10 +373,10 @@ func (_u *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, er
 			}
 		}
 	}
-	if value, ok := _u.mutation.LikedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "liked_at"); ok {
 		_spec.SetField(FieldLikedAt, field.TypeTime, value)
 	}
-	if _u.mutation.TweetCleared() {
+	if _u.mutation.EdgeCleared("tweet") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -388,7 +389,7 @@ func (_u *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -404,7 +405,7 @@ func (_u *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -417,7 +418,7 @@ func (_u *TweetLikeUpdateOne) sqlSave(ctx context.Context) (_node *TweetLike, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

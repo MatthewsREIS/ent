@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewCardCreate(c Config, hooks []Hook, mutation *CardMutation) *CardCreate {
 
 // SetCreateTime sets the "create_time" field.
 func (_c *CardCreate) SetCreateTime(v time.Time) *CardCreate {
-	_c.mutation.SetCreateTime(v)
+	_ = _c.mutation.SetField("create_time", v)
 	return _c
 }
 
@@ -46,7 +47,7 @@ func (_c *CardCreate) SetNillableCreateTime(v *time.Time) *CardCreate {
 
 // SetUpdateTime sets the "update_time" field.
 func (_c *CardCreate) SetUpdateTime(v time.Time) *CardCreate {
-	_c.mutation.SetUpdateTime(v)
+	_ = _c.mutation.SetField("update_time", v)
 	return _c
 }
 
@@ -60,7 +61,7 @@ func (_c *CardCreate) SetNillableUpdateTime(v *time.Time) *CardCreate {
 
 // SetBalance sets the "balance" field.
 func (_c *CardCreate) SetBalance(v float64) *CardCreate {
-	_c.mutation.SetBalance(v)
+	_ = _c.mutation.SetField("balance", v)
 	return _c
 }
 
@@ -74,13 +75,13 @@ func (_c *CardCreate) SetNillableBalance(v *float64) *CardCreate {
 
 // SetNumber sets the "number" field.
 func (_c *CardCreate) SetNumber(v string) *CardCreate {
-	_c.mutation.SetNumber(v)
+	_ = _c.mutation.SetField("number", v)
 	return _c
 }
 
 // SetName sets the "name" field.
 func (_c *CardCreate) SetName(v string) *CardCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
@@ -94,7 +95,7 @@ func (_c *CardCreate) SetNillableName(v *string) *CardCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *CardCreate) SetOwnerID(id int) *CardCreate {
-	_c.mutation.SetOwnerID(id)
+	_ = _c.mutation.SetEdgeID("owner", id)
 	return _c
 }
 
@@ -108,7 +109,7 @@ func (_c *CardCreate) SetNillableOwnerID(id *int) *CardCreate {
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (_c *CardCreate) AddSpecIDs(ids ...int) *CardCreate {
-	_c.mutation.AddSpecIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -147,40 +148,40 @@ func (_c *CardCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CardCreate) defaults() {
-	if _, ok := _c.mutation.CreateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); !ok {
 		v := DefaultCreateTime()
-		_c.mutation.SetCreateTime(v)
+		_ = _c.mutation.SetField("create_time", v)
 	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); !ok {
 		v := DefaultUpdateTime()
-		_c.mutation.SetUpdateTime(v)
+		_ = _c.mutation.SetField("update_time", v)
 	}
-	if _, ok := _c.mutation.Balance(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "balance"); !ok {
 		v := DefaultBalance
-		_c.mutation.SetBalance(v)
+		_ = _c.mutation.SetField("balance", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *CardCreate) check() error {
-	if _, ok := _c.mutation.CreateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); !ok {
 		return &ValidationError{Name: "create_time", Err: errors.New(`ent: missing required field "Card.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); !ok {
 		return &ValidationError{Name: "update_time", Err: errors.New(`ent: missing required field "Card.update_time"`)}
 	}
-	if _, ok := _c.mutation.Balance(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "balance"); !ok {
 		return &ValidationError{Name: "balance", Err: errors.New(`ent: missing required field "Card.balance"`)}
 	}
-	if _, ok := _c.mutation.Number(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "number"); !ok {
 		return &ValidationError{Name: "number", Err: errors.New(`ent: missing required field "Card.number"`)}
 	}
-	if v, ok := _c.mutation.Number(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "number"); ok {
 		if err := NumberValidator(v); err != nil {
 			return &ValidationError{Name: "number", Err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
@@ -201,7 +202,7 @@ func (_c *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -212,27 +213,27 @@ func (_c *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.CreateTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); ok {
 		_spec.SetField(FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
-	if value, ok := _c.mutation.UpdateTime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); ok {
 		_spec.SetField(FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
-	if value, ok := _c.mutation.Balance(); ok {
+	if value, ok := entbuilder.GetField[float64](_c.mutation, "balance"); ok {
 		_spec.SetField(FieldBalance, field.TypeFloat64, value)
 		_node.Balance = value
 	}
-	if value, ok := _c.mutation.Number(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "number"); ok {
 		_spec.SetField(FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := _c.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -248,7 +249,7 @@ func (_c *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.SpecIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "spec"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -375,10 +376,10 @@ func (u *CardUpsert) ClearName() *CardUpsert {
 func (u *CardUpsertOne) UpdateNewValues() *CardUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.CreateTime(); exists {
+		if _, exists := u.create.mutation.Field(FieldCreateTime); exists {
 			s.SetIgnore(FieldCreateTime)
 		}
-		if _, exists := u.create.mutation.Number(); exists {
+		if _, exists := u.create.mutation.Field(FieldNumber); exists {
 			s.SetIgnore(FieldNumber)
 		}
 	}))
@@ -557,11 +558,11 @@ func (_c *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})
@@ -654,10 +655,10 @@ func (u *CardUpsertBulk) UpdateNewValues() *CardUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
-			if _, exists := b.mutation.CreateTime(); exists {
+			if _, exists := b.mutation.Field(FieldCreateTime); exists {
 				s.SetIgnore(FieldCreateTime)
 			}
-			if _, exists := b.mutation.Number(); exists {
+			if _, exists := b.mutation.Field(FieldNumber); exists {
 				s.SetIgnore(FieldNumber)
 			}
 		}

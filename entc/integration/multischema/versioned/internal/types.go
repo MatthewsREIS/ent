@@ -14,6 +14,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -270,6 +272,256 @@ func WithHooks[V Value, M any, PM interface {
 // the Unwrap method on model entities.
 type DriverUnwrapper interface {
 	UnwrapDriver() dialect.Driver
+}
+
+// SetContextOp returns a new context with the given QueryContext attached
+// (including its op) if not already present. Shared between root and
+// per-entity sub-package builders.
+func SetContextOp(ctx context.Context, qc *QueryContext, op string) context.Context {
+	if ent.QueryFromContext(ctx) == nil {
+		qc.Op = op
+		ctx = ent.NewQueryContext(ctx, qc)
+	}
+	return ctx
+}
+
+// WithInterceptors invokes the query through the given interceptor chain.
+// Shared between root and per-entity sub-package builders.
+func WithInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (v V, err error) {
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	rv, err := qr.Query(ctx, q)
+	if err != nil {
+		return v, err
+	}
+	vt, ok := rv.(V)
+	if !ok {
+		return v, fmt.Errorf("unexpected type %T returned from %T. expected type: %T", vt, q, v)
+	}
+	return vt, nil
+}
+
+// AggregateFunc applies an aggregation step on the group-by traversal/selector.
+type AggregateFunc func(*sql.Selector) string
+
+// PredicateAdder wraps the AddPredicate method.
+// All update, update-one and query builders (root and per-entity sub-package)
+// implement this interface.
+type PredicateAdder interface {
+	AddPredicate(func(s *sql.Selector))
+}
+
+// QueryHook describes an internal hook for the different sqlAll methods.
+type QueryHook = func(context.Context, *sqlgraph.QuerySpec)
+
+// Selector embedded by the different Select/GroupBy builders.
+//
+// Fields are exported so both root and per-entity sub-package builders
+// (which receive Selector via a type alias) can assign and read them.
+// The scan-fn field is named ScanFn (not Scan) because the outer GroupBy
+// and Select types define their own Scan method — a same-named field would
+// be shadowed by the outer method and unassignable through the embed.
+type Selector struct {
+	Label  string
+	Flds   *[]string
+	Fns    []AggregateFunc
+	ScanFn func(context.Context, any) error
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (s *Selector) ScanX(ctx context.Context, v any) {
+	if err := s.ScanFn(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+// Strings returns list of strings from a Selector. It is only allowed when selecting one field.
+func (s *Selector) Strings(ctx context.Context) ([]string, error) {
+	if len(*s.Flds) > 1 {
+		return nil, errors.New("ent: Strings is not achievable when selecting more than 1 field")
+	}
+	var v []string
+	if err := s.ScanFn(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// StringsX is like Strings, but panics if an error occurs.
+func (s *Selector) StringsX(ctx context.Context) []string {
+	v, err := s.Strings(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// String returns a single string from a Selector. It is only allowed when selecting one field.
+func (s *Selector) String(ctx context.Context) (_ string, err error) {
+	var v []string
+	if v, err = s.Strings(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{Label: s.Label}
+	default:
+		err = fmt.Errorf("ent: Strings returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// StringX is like String, but panics if an error occurs.
+func (s *Selector) StringX(ctx context.Context) string {
+	v, err := s.String(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Ints returns list of ints from a Selector. It is only allowed when selecting one field.
+func (s *Selector) Ints(ctx context.Context) ([]int, error) {
+	if len(*s.Flds) > 1 {
+		return nil, errors.New("ent: Ints is not achievable when selecting more than 1 field")
+	}
+	var v []int
+	if err := s.ScanFn(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// IntsX is like Ints, but panics if an error occurs.
+func (s *Selector) IntsX(ctx context.Context) []int {
+	v, err := s.Ints(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Int returns a single int from a Selector. It is only allowed when selecting one field.
+func (s *Selector) Int(ctx context.Context) (_ int, err error) {
+	var v []int
+	if v, err = s.Ints(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{Label: s.Label}
+	default:
+		err = fmt.Errorf("ent: Ints returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// IntX is like Int, but panics if an error occurs.
+func (s *Selector) IntX(ctx context.Context) int {
+	v, err := s.Int(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64s returns list of float64s from a Selector. It is only allowed when selecting one field.
+func (s *Selector) Float64s(ctx context.Context) ([]float64, error) {
+	if len(*s.Flds) > 1 {
+		return nil, errors.New("ent: Float64s is not achievable when selecting more than 1 field")
+	}
+	var v []float64
+	if err := s.ScanFn(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// Float64sX is like Float64s, but panics if an error occurs.
+func (s *Selector) Float64sX(ctx context.Context) []float64 {
+	v, err := s.Float64s(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Float64 returns a single float64 from a Selector. It is only allowed when selecting one field.
+func (s *Selector) Float64(ctx context.Context) (_ float64, err error) {
+	var v []float64
+	if v, err = s.Float64s(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{Label: s.Label}
+	default:
+		err = fmt.Errorf("ent: Float64s returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// Float64X is like Float64, but panics if an error occurs.
+func (s *Selector) Float64X(ctx context.Context) float64 {
+	v, err := s.Float64(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bools returns list of bools from a Selector. It is only allowed when selecting one field.
+func (s *Selector) Bools(ctx context.Context) ([]bool, error) {
+	if len(*s.Flds) > 1 {
+		return nil, errors.New("ent: Bools is not achievable when selecting more than 1 field")
+	}
+	var v []bool
+	if err := s.ScanFn(ctx, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
+}
+
+// BoolsX is like Bools, but panics if an error occurs.
+func (s *Selector) BoolsX(ctx context.Context) []bool {
+	v, err := s.Bools(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Bool returns a single bool from a Selector. It is only allowed when selecting one field.
+func (s *Selector) Bool(ctx context.Context) (_ bool, err error) {
+	var v []bool
+	if v, err = s.Bools(ctx); err != nil {
+		return
+	}
+	switch len(v) {
+	case 1:
+		return v[0], nil
+	case 0:
+		err = &NotFoundError{Label: s.Label}
+	default:
+		err = fmt.Errorf("ent: Bools returned %d results when one was expected", len(v))
+	}
+	return
+}
+
+// BoolX is like Bool, but panics if an error occurs.
+func (s *Selector) BoolX(ctx context.Context) bool {
+	v, err := s.Bool(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return v
 }
 
 // Operation types.

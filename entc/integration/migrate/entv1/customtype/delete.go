@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,13 +30,13 @@ func NewCustomTypeDelete(c Config, hooks []Hook, mutation *CustomTypeMutation) *
 
 // Where appends a list predicates to the CustomTypeDelete builder.
 func (_d *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*CustomTypeMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -76,7 +77,7 @@ func NewCustomTypeDeleteOne(d *CustomTypeDelete) *CustomTypeDeleteOne {
 
 // Where appends a list predicates to the CustomTypeDelete builder.
 func (_d *CustomTypeDeleteOne) Where(ps ...predicate.CustomType) *CustomTypeDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

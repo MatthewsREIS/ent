@@ -89,27 +89,26 @@ func (VersionMixin) Hooks() []ent.Hook {
 }
 
 func VersionHook() ent.Hook {
-	type OldSetVersion interface {
-		SetVersion(int)
-		Version() (int, bool)
-		OldVersion(context.Context) (int, error)
-	}
 	return func(next ent.Mutator) ent.Mutator {
 		// A hook that validates the "version" field is incremented by 1 on each update.
 		// Note that this is just a dummy example, and it doesn't promise consistency in
 		// the database.
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			ver, ok := m.(OldSetVersion)
+			oldRaw, err := m.OldField(ctx, "version")
+			if err != nil {
+				return next.Mutate(ctx, m)
+			}
+			oldV, ok := oldRaw.(int)
 			if !ok {
 				return next.Mutate(ctx, m)
 			}
-			oldV, err := ver.OldVersion(ctx)
-			if err != nil {
-				return nil, err
-			}
-			curV, exists := ver.Version()
+			curRaw, exists := m.Field("version")
 			if !exists {
 				return nil, fmt.Errorf("version field is required in update mutation")
+			}
+			curV, ok := curRaw.(int)
+			if !ok {
+				return nil, fmt.Errorf("version field has unexpected type %T", curRaw)
 			}
 			if curV != oldV+1 {
 				return nil, fmt.Errorf("version field must be incremented by 1")

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,19 +30,19 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
-	_c.mutation.AddPetIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
-	_c.mutation.AddFriendIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -79,7 +80,7 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "User.name"`)}
 	}
 	return nil
@@ -98,7 +99,7 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -108,11 +109,11 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node = &User{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := _c.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "pets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -128,7 +129,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -200,11 +201,11 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

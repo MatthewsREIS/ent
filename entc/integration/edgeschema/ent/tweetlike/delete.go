@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TweetLikeDelete is the builder for deleting a TweetLike entity.
@@ -28,13 +29,13 @@ func NewTweetLikeDelete(c Config, hooks []Hook, mutation *TweetLikeMutation) *Tw
 
 // Where appends a list predicates to the TweetLikeDelete builder.
 func (_d *TweetLikeDelete) Where(ps ...predicate.TweetLike) *TweetLikeDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *TweetLikeDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*TweetLikeMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -75,7 +76,7 @@ func NewTweetLikeDeleteOne(d *TweetLikeDelete) *TweetLikeDeleteOne {
 
 // Where appends a list predicates to the TweetLikeDelete builder.
 func (_d *TweetLikeDeleteOne) Where(ps ...predicate.TweetLike) *TweetLikeDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,7 +29,7 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
@@ -42,7 +43,7 @@ func (_c *UserCreate) SetNillableName(v *string) *UserCreate {
 
 // SetLabel sets the "label" field.
 func (_c *UserCreate) SetLabel(v string) *UserCreate {
-	_c.mutation.SetLabel(v)
+	_ = _c.mutation.SetField("label", v)
 	return _c
 }
 
@@ -112,7 +113,7 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -126,11 +127,11 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Label(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "label"); ok {
 		_spec.SetField(FieldLabel, field.TypeString, value)
 		_node.Label = value
 	}
@@ -190,11 +191,11 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

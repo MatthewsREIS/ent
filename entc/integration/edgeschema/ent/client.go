@@ -226,39 +226,39 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *AttachedFileMutation:
-		return c.AttachedFile.mutate(ctx, m)
+		return c.AttachedFile.Mutate(ctx, m)
 	case *FileMutation:
-		return c.File.mutate(ctx, m)
+		return c.File.Mutate(ctx, m)
 	case *FriendshipMutation:
-		return c.Friendship.mutate(ctx, m)
+		return c.Friendship.Mutate(ctx, m)
 	case *GroupMutation:
-		return c.Group.mutate(ctx, m)
+		return c.Group.Mutate(ctx, m)
 	case *GroupTagMutation:
-		return c.GroupTag.mutate(ctx, m)
+		return c.GroupTag.Mutate(ctx, m)
 	case *ProcessMutation:
-		return c.Process.mutate(ctx, m)
+		return c.Process.Mutate(ctx, m)
 	case *RelationshipMutation:
-		return c.Relationship.mutate(ctx, m)
+		return c.Relationship.Mutate(ctx, m)
 	case *RelationshipInfoMutation:
-		return c.RelationshipInfo.mutate(ctx, m)
+		return c.RelationshipInfo.Mutate(ctx, m)
 	case *RoleMutation:
-		return c.Role.mutate(ctx, m)
+		return c.Role.Mutate(ctx, m)
 	case *RoleUserMutation:
-		return c.RoleUser.mutate(ctx, m)
+		return c.RoleUser.Mutate(ctx, m)
 	case *TagMutation:
-		return c.Tag.mutate(ctx, m)
+		return c.Tag.Mutate(ctx, m)
 	case *TweetMutation:
-		return c.Tweet.mutate(ctx, m)
+		return c.Tweet.Mutate(ctx, m)
 	case *TweetLikeMutation:
-		return c.TweetLike.mutate(ctx, m)
+		return c.TweetLike.Mutate(ctx, m)
 	case *TweetTagMutation:
-		return c.TweetTag.mutate(ctx, m)
+		return c.TweetTag.Mutate(ctx, m)
 	case *UserMutation:
-		return c.User.mutate(ctx, m)
+		return c.User.Mutate(ctx, m)
 	case *UserGroupMutation:
-		return c.UserGroup.mutate(ctx, m)
+		return c.UserGroup.Mutate(ctx, m)
 	case *UserTweetMutation:
-		return c.UserTweet.mutate(ctx, m)
+		return c.UserTweet.Mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,13 +30,13 @@ func NewTeamDelete(c Config, hooks []Hook, mutation *TeamMutation) *TeamDelete {
 
 // Where appends a list predicates to the TeamDelete builder.
 func (_d *TeamDelete) Where(ps ...predicate.Team) *TeamDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *TeamDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*TeamMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -76,7 +77,7 @@ func NewTeamDeleteOne(d *TeamDelete) *TeamDeleteOne {
 
 // Where appends a list predicates to the TeamDelete builder.
 func (_d *TeamDeleteOne) Where(ps ...predicate.Team) *TeamDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

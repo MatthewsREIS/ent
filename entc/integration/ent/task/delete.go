@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // TaskDelete is the builder for deleting a Task entity.
 type TaskDelete struct {
 	Config
-	hooks    []Hook
-	mutation *TaskMutation
+	hooks     []Hook
+	mutation  *TaskMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewTaskDelete returns a new TaskDelete initialized with the given config, hooks, and mutation.
@@ -29,13 +31,13 @@ func NewTaskDelete(c Config, hooks []Hook, mutation *TaskMutation) *TaskDelete {
 
 // Where appends a list predicates to the TaskDelete builder.
 func (_d *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *TaskDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*TaskMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -47,8 +49,15 @@ func (_d *TaskDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *TaskDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *TaskDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *TaskDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -76,7 +85,7 @@ func NewTaskDeleteOne(d *TaskDelete) *TaskDeleteOne {
 
 // Where appends a list predicates to the TaskDelete builder.
 func (_d *TaskDeleteOne) Where(ps ...predicate.Task) *TaskDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

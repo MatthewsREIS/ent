@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,7 +34,7 @@ func NewAccountCreate(c Config, hooks []Hook, mutation *AccountMutation) *Accoun
 
 // SetEmail sets the "email" field.
 func (_c *AccountCreate) SetEmail(v string) *AccountCreate {
-	_c.mutation.SetEmail(v)
+	_ = _c.mutation.SetField("email", v)
 	return _c
 }
 
@@ -53,7 +54,7 @@ func (_c *AccountCreate) SetNillableID(v *sid.ID) *AccountCreate {
 
 // AddTokenIDs adds the "token" edge to the Token entity by IDs.
 func (_c *AccountCreate) AddTokenIDs(ids ...sid.ID) *AccountCreate {
-	_c.mutation.AddTokenIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("token", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -100,10 +101,10 @@ func (_c *AccountCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *AccountCreate) check() error {
-	if _, ok := _c.mutation.Email(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "email"); !ok {
 		return &ValidationError{Name: "email", Err: errors.New(`ent: missing required field "Account.email"`)}
 	}
-	if v, ok := _c.mutation.Email(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "email"); ok {
 		if err := EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", Err: fmt.Errorf(`ent: validator failed for field "Account.email": %w`, err)}
 		}
@@ -129,7 +130,7 @@ func (_c *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -144,11 +145,11 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.Email(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "email"); ok {
 		_spec.SetField(FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
-	if nodes := _c.mutation.TokenIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[sid.ID](_c.mutation, "token"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -384,7 +385,7 @@ func (_c *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

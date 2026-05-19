@@ -9,9 +9,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "client/type" }}
 {{ $pkg := base $.Config.Package }}
 
-{{ template "header" $ }}
+{{ with extend $ "Package" $.Package }}
+	{{ template "header" . }}
+{{ end }}
 
-{{ with extend $ "Imports" $.SiblingImports }}
+{{ with extend $ "Imports" $.SiblingImports "CreateUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -32,14 +34,14 @@ func New{{ $client }}(c Config) *{{ $client }} {
 
 {{- if not $n.IsView }}
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `{{ $n.Package }}.Hooks(f(g(h())))`.
+// A call to `Use(f, g, h)` equals to `{{ $n.PackageQualifier }}Hooks(f(g(h())))`.
 func (c *{{ $client }}) Use(hooks ...Hook) {
 	c.Config.Hooks.{{ $n.Name }} = append(c.Config.Hooks.{{ $n.Name }}, hooks...)
 }
 {{- end }}
 
 // Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `{{ $n.Package }}.Intercept(f(g(h())))`.
+// A call to `Intercept(f, g, h)` equals to `{{ $n.PackageQualifier }}Intercept(f(g(h())))`.
 func (c *{{ $client }}) Intercept(interceptors ...Interceptor) {
 	c.Config.Inters.{{ $n.Name }} = append(c.Config.Inters.{{ $n.Name }}, interceptors...)
 }
@@ -72,6 +74,9 @@ func (c *{{ $client }}) MapCreateBulk(slice any, setFunc func(*{{ $q }}{{ $n.Cre
 	return {{ $q }}New{{ $n.CreateBulkName }}(c.Config, builders)
 }
 
+{{ $noUpdate := $n.FeatureEnabled "no-update" }}
+{{- if not $noUpdate }}{{- if hasKey $n.Annotations "ReadOnly" }}{{- $noUpdate = true }}{{- end }}{{- end }}
+{{- if not $noUpdate }}
 // Update returns an update builder for {{ $n.Name }}.
 func (c *{{ $client }}) Update() *{{ $q }}{{ $n.UpdateName }} {
 	{{- if $n.HasOneFieldID }}
@@ -91,7 +96,12 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.Upda
 	{{- else }}
 		mutation := New{{ $n.MutationName }}(c.Config, OpUpdateOne)
 		{{- range $id := $n.EdgeSchema.ID }}
-			mutation.{{ $id.MutationSet }}({{ $rec }}.{{ $id.StructField }})
+			{{- $edgeName := $id.EdgeName }}
+			{{- if $edgeName }}
+			_ = mutation.SetEdgeID({{ printf "%q" $edgeName }}, {{ $rec }}.{{ $id.StructField }})
+			{{- else }}
+			_ = mutation.SetField({{ printf "%q" $id.Name }}, {{ $rec }}.{{ $id.StructField }})
+			{{- end }}
 		{{- end }}
 	{{- end }}
 	return {{ $q }}New{{ $n.UpdateOneName }}(c.Config, c.Hooks(), mutation)
@@ -104,7 +114,11 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $q }}{{ $n.Upda
 		return {{ $q }}New{{ $n.UpdateOneName }}(c.Config, c.Hooks(), mutation)
 	}
 {{ end }}
+{{- end }}{{/* End of if not FeatureNoUpdate. */}}
 
+{{ $noDelete := $n.FeatureEnabled "no-delete" }}
+{{- if not $noDelete }}{{- if hasKey $n.Annotations "ReadOnly" }}{{- $noDelete = true }}{{- end }}{{- end }}
+{{- if not $noDelete }}
 // Delete returns a delete builder for {{ $n.Name }}.
 func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
 	{{- if $n.HasOneFieldID }}
@@ -126,18 +140,26 @@ func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
 	// DeleteOneID returns a builder for deleting the given entity by its id.
 	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $q }}{{ $n.DeleteOneName }} {
 		mutation := New{{ $n.MutationName }}(c.Config, OpDeleteOne, With{{ $n.Name }}ID(id, nil))
-		mutation.Where({{ $n.Package }}.ID(id))
+		mutation.WhereP({{ $n.PackageQualifier }}ID(id))
 		return {{ $q }}New{{ $n.DeleteOneName }}({{ $q }}New{{ $n.DeleteName }}(c.Config, c.Hooks(), mutation))
 	}
 {{ end }}
+{{- end }}{{/* End of if not FeatureNoDelete. */}}
 {{- end }} {{/* End of if not IsView. */}}
 
 // Query returns a query builder for {{ $n.Name }}.
 func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	return &{{ $n.QueryName }}{
 		Config: c.Config,
+		{{- if eq $.Storage.Name "sql" }}
+		QueryState: entbuilder.QueryState[predicate.{{ $n.Name }}]{
+			Ctx:    &QueryContext{Type: {{ $n.TypeName }} },
+			Inters: c.Interceptors(),
+		},
+		{{- else }}
 		ctx: &QueryContext{Type: {{ $n.TypeName }} },
 		inters: c.Interceptors(),
+		{{- end }}
 		{{- with $tmpls := matchTemplate (printf "dialect/%s/query/fields/init/*" $.Storage) }}
 			{{- range $tmpl := $tmpls }}
 				{{- xtemplate $tmpl $n }}
@@ -149,7 +171,7 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 {{ with $n.HasOneFieldID }}
 	// Get returns a {{ $n.Name }} entity by its id.
 	func (c *{{ $client }}) Get(ctx context.Context, id {{ $n.ID.Type }}) (*{{ $n.Name }}, error) {
-		return c.Query().Where({{ $n.Package }}.ID(id)).Only(ctx)
+		return c.Query().Where({{ $n.PackageQualifier }}ID(id)).Only(ctx)
 	}
 
 	// GetX is like Get, but panics if an error occurs.
@@ -162,37 +184,12 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 	}
 {{ end }}
 
-{{ range $e := $n.Edges }}
-{{ $builder := $e.Type.QueryName }}
-{{ $arg := $rec }}{{ if eq $arg "id" }}{{ $arg = "node" }}{{ end }}
-{{ $func := print "Query" (pascal $e.Name) }}
-// Query{{ pascal $e.Name }} queries the {{ $e.Name }} edge of a {{ $n.Name }}.
-func (c *{{ $client }}) {{ $func }}({{ $arg }} *{{ $n.Name }}) *{{ $builder }} {
-	{{- if $n.HasOneFieldID }}
-		query := (&{{ $e.Type.ClientName }}{Config: c.Config}).Query()
-		query.path = func(context.Context) (fromV {{ $.Storage.Builder }}, _ error) {
-			{{- with extend $n "Receiver" $arg "Edge" $e "Ident" "fromV" }}
-				{{ $tmpl := printf "dialect/%s/query/from" $.Storage }}
-				{{- xtemplate $tmpl . -}}
-			{{- end -}}
-			return fromV, nil
-		}
-		return query
-	{{- else }}
-		{{- /* For edge schema, we use the predicate-based approach. */}}
-		return c.Query().
-			Where({{ range $id := $n.EdgeSchema.ID }}{{ $n.Package }}.{{ $id.StructField }}({{ $arg }}.{{ $id.StructField }}),{{ end }}).
-			{{ $func }}()
-	{{- end }}
-}
-{{ end }}
-
 {{- if not $n.IsView }}
 // Hooks returns the client hooks.
 func (c *{{ $client }}) Hooks() []Hook {
 	{{- if or $n.NumHooks $n.NumPolicy }}
 		hooks := c.Config.Hooks.{{ $n.Name }}
-		return append(hooks[:len(hooks):len(hooks)], {{ $n.Package }}.Hooks[:]...)
+		return append(hooks[:len(hooks):len(hooks)], {{ $n.PackageQualifier }}Hooks[:]...)
 	{{- else }}
 		return c.Config.Hooks.{{ $n.Name }}
 	{{- end }}
@@ -203,14 +200,17 @@ func (c *{{ $client }}) Hooks() []Hook {
 func (c *{{ $client }}) Interceptors() []Interceptor {
 	{{- if $n.NumInterceptors }}
 		inters := c.Config.Inters.{{ $n.Name }}
-		return append(inters[:len(inters):len(inters)], {{ $n.Package }}.Interceptors[:]...)
+		return append(inters[:len(inters):len(inters)], {{ $n.PackageQualifier }}Interceptors[:]...)
 	{{- else }}
 		return c.Config.Inters.{{ $n.Name }}
 	{{- end }}
 }
 
 {{ if not $n.IsView }}
-func (c *{{ $client }}) mutate(ctx context.Context, m *{{ $n.MutationName }}) (Value, error) {
+// Mutate dispatches a mutation to the appropriate builder. Exported so
+// the root Client.Mutate switch can dispatch into the sub-package across
+// the package boundary (PR 6).
+func (c *{{ $client }}) Mutate(ctx context.Context, m *{{ $n.MutationName }}) (Value, error) {
 	switch m.Op() {
 	case OpCreate:
 		return {{ $q }}New{{ $n.CreateName }}(c.Config, c.Hooks(), m).Save(ctx)

@@ -161,14 +161,15 @@ func HasParent() predicate.Blob {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.Blob) predicate.Blob {
-	return predicate.Blob(func(s *sql.Selector) {
-		step := newParentStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Blob(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasLinks applies the HasEdge predicate on the "links" edge.
@@ -184,14 +185,15 @@ func HasLinks() predicate.Blob {
 
 // HasLinksWith applies the HasEdge predicate on the "links" edge with a given conditions (other predicates).
 func HasLinksWith(preds ...predicate.Blob) predicate.Blob {
-	return predicate.Blob(func(s *sql.Selector) {
-		step := newLinksStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Blob(
+		func(s *sql.Selector) {
+			step := newLinksStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasBlobLinks applies the HasEdge predicate on the "blob_links" edge.
@@ -207,14 +209,15 @@ func HasBlobLinks() predicate.Blob {
 
 // HasBlobLinksWith applies the HasEdge predicate on the "blob_links" edge with a given conditions (other predicates).
 func HasBlobLinksWith(preds ...predicate.BlobLink) predicate.Blob {
-	return predicate.Blob(func(s *sql.Selector) {
-		step := newBlobLinksStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Blob(
+		func(s *sql.Selector) {
+			step := newBlobLinksStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

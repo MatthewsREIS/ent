@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,7 +32,7 @@ func NewZooUpdate(c Config, hooks []Hook, mutation *ZooMutation) *ZooUpdate {
 
 // Where appends a list predicates to the ZooUpdate builder.
 func (_u *ZooUpdate) Where(ps ...predicate.Zoo) *ZooUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -42,7 +43,7 @@ func (_u *ZooUpdate) Mutation() *ZooMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ZooUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ZooMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -108,7 +109,7 @@ func (_u *ZooUpdateOne) Mutation() *ZooMutation {
 
 // Where appends a list predicates to the ZooUpdate builder.
 func (_u *ZooUpdateOne) Where(ps ...predicate.Zoo) *ZooUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -121,7 +122,7 @@ func (_u *ZooUpdateOne) Select(field string, fields ...string) *ZooUpdateOne {
 
 // Save executes the query and returns the updated Zoo entity.
 func (_u *ZooUpdateOne) Save(ctx context.Context) (*Zoo, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Zoo](ctx, &entbuilder.UpdateState[*ZooMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

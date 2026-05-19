@@ -167,14 +167,15 @@ func HasFi() predicate.AttachedFile {
 
 // HasFiWith applies the HasEdge predicate on the "fi" edge with a given conditions (other predicates).
 func HasFiWith(preds ...predicate.File) predicate.AttachedFile {
-	return predicate.AttachedFile(func(s *sql.Selector) {
-		step := newFiStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.AttachedFile(
+		func(s *sql.Selector) {
+			step := newFiStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasProc applies the HasEdge predicate on the "proc" edge.
@@ -190,14 +191,15 @@ func HasProc() predicate.AttachedFile {
 
 // HasProcWith applies the HasEdge predicate on the "proc" edge with a given conditions (other predicates).
 func HasProcWith(preds ...predicate.Process) predicate.AttachedFile {
-	return predicate.AttachedFile(func(s *sql.Selector) {
-		step := newProcStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.AttachedFile(
+		func(s *sql.Selector) {
+			step := newProcStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

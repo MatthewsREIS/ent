@@ -62,8 +62,10 @@ var (
 			},
 		},
 		{
+			// PR 6: views also need shared.go for the Config / Hook / Interceptor /
+			// selector / AggregateFunc aliases that sub-package client.go + query.go
+			// reference. Mutation aliases (mutation_type.tmpl) still gate on notView.
 			Name: "shared",
-			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/shared.go", t.PackageDir())
 			},
@@ -83,7 +85,15 @@ var (
 		},
 		{
 			Name: "update",
-			Cond: notView,
+			Cond: func(t *Type) bool {
+				if !notView(t) || t.featureEnabled(FeatureNoUpdate) {
+					return false
+				}
+				if _, ok := t.Annotations["ReadOnly"]; ok {
+					return false
+				}
+				return true
+			},
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/update.go", t.PackageDir())
 			},
@@ -91,22 +101,32 @@ var (
 		},
 		{
 			Name: "delete",
-			Cond: notView,
+			Cond: func(t *Type) bool {
+				if !notView(t) || t.featureEnabled(FeatureNoDelete) {
+					return false
+				}
+				if _, ok := t.Annotations["ReadOnly"]; ok {
+					return false
+				}
+				return true
+			},
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/delete.go", t.PackageDir())
 			},
 			SubPackage: true,
 		},
 		{
-			Name:   "client/type",
-			Format: pkgf("%s_client.go"),
+			Name:       "client/type",
+			Format:     subpkgf("client.go"),
+			SubPackage: true,
 		},
 		{
 			Name:   "query",
-			Format: pkgf("%s_query.go"),
+			Format: subpkgf("query.go"),
 			ExtendPatterns: []string{
 				"dialect/*/query/fields/additional/*",
 			},
+			SubPackage: true,
 		},
 		{
 			Name:   "model",
@@ -129,16 +149,38 @@ var (
 			},
 		},
 		{
-			Name:   "mutation/type",
-			Cond:   notView,
-			Format: pkgf("%s_mutation.go"),
+			Name:       "mutation/type",
+			Cond:       notView,
+			Format:     subpkgf("mutation.go"),
+			SubPackage: true,
 		},
 		{
 			Name: "dialect/sql/entql/type",
 			Cond: func(t *Type) bool {
 				return t.featureEnabled(FeatureEntQL)
 			},
-			Format: pkgf("%s_entql.go"),
+			Format:     subpkgf("entql.go"),
+			SubPackage: true,
+		},
+		{
+			// PR 6: facade emits for views too — they need Client/Query/Filter
+			// aliases so root code can reference *ent.CleanUserClient. Edge
+			// free functions skip per IsView checks inside the template body.
+			Name:   "facade/type",
+			Format: pkgf("%s_facade.go"),
+		},
+		{
+			// PR-7 lever B-1: per-edge load<Node><Edge>, loadNamed<Node><Edge>,
+			// With<Node><Edge>, WithNamed<Node><Edge>, Query<Node><Edge>, and
+			// Query<Node><Edge>FromQuery bodies emit into a single shared edges/
+			// package. The root facade keeps `var X = edges.X` one-line forwarders
+			// for the public function names. Flat dir layout (not SubPackage),
+			// mirrors internal/model and internal/mutation.
+			Name: "edges/type",
+			Cond: func(t *Type) bool { return len(t.Edges) > 0 },
+			Format: func(t *Type) string {
+				return fmt.Sprintf("edges/%s.go", t.PackageDir())
+			},
 		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
@@ -211,6 +253,21 @@ var (
 			},
 		},
 		{
+			// edges/shared emits the package-level type aliases and
+			// withInterceptors helper used by all per-entity edges/<T>.go files.
+			// Skipped when no node has edges (nothing would import this package).
+			Name:   "edges/shared",
+			Format: "edges/edges.go",
+			Skip: func(g *Graph) bool {
+				for _, n := range g.Nodes {
+					if len(n.Edges) > 0 {
+						return false
+					}
+				}
+				return true
+			},
+		},
+		{
 			Name:   "runtime/ent",
 			Format: "runtime.go",
 		},
@@ -233,6 +290,15 @@ var (
 		"%s_update.go",
 		"%s_delete.go",
 		"%s/client.go",
+		// PR 6: old root files replaced by sub-package equivalents.
+		"%s_client.go",
+		"%s_query.go",
+		"%s_mutation.go",
+		"%s_entql.go",
+		// PR 6: per-entity facade file at root; when an entity is dropped
+		// from the schema the facade must be cleaned up too, otherwise
+		// it leaves dangling references to deleted sub-package symbols.
+		"%s_facade.go",
 	}
 	// patterns for extending partial-templates (included by other templates).
 	partialPatterns = [...]string{
@@ -507,6 +573,14 @@ func (d *Dependency) defaultName() (string, error) {
 
 func pkgf(s string) func(t *Type) string {
 	return func(t *Type) string { return fmt.Sprintf(s, t.PackageDir()) }
+}
+
+// subpkgf builds a Format function for a per-entity sub-package file.
+// The output path is "<PackageDir>/<file>" — e.g. "task/query.go" — and
+// is paired with SubPackage: true so graph.go wraps the type in a
+// typeScope{InSubPackage: true} for template execution.
+func subpkgf(file string) func(t *Type) string {
+	return func(t *Type) string { return t.PackageDir() + "/" + file }
 }
 
 // match reports if the given name matches the extended pattern.

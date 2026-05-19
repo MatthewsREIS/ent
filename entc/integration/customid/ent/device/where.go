@@ -71,14 +71,15 @@ func HasActiveSession() predicate.Device {
 
 // HasActiveSessionWith applies the HasEdge predicate on the "active_session" edge with a given conditions (other predicates).
 func HasActiveSessionWith(preds ...predicate.Session) predicate.Device {
-	return predicate.Device(func(s *sql.Selector) {
-		step := newActiveSessionStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Device(
+		func(s *sql.Selector) {
+			step := newActiveSessionStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasSessions applies the HasEdge predicate on the "sessions" edge.
@@ -94,14 +95,15 @@ func HasSessions() predicate.Device {
 
 // HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
 func HasSessionsWith(preds ...predicate.Session) predicate.Device {
-	return predicate.Device(func(s *sql.Selector) {
-		step := newSessionsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Device(
+		func(s *sql.Selector) {
+			step := newSessionsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

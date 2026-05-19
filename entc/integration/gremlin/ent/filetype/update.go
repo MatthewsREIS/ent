@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FileTypeUpdate is the builder for updating FileType entities.
@@ -33,13 +34,13 @@ func NewFileTypeUpdate(c Config, hooks []Hook, mutation *FileTypeMutation) *File
 
 // Where appends a list predicates to the FileTypeUpdate builder.
 func (_u *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *FileTypeUpdate) SetName(v string) *FileTypeUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -53,7 +54,7 @@ func (_u *FileTypeUpdate) SetNillableName(v *string) *FileTypeUpdate {
 
 // SetType sets the "type" field.
 func (_u *FileTypeUpdate) SetType(v Type) *FileTypeUpdate {
-	_u.mutation.SetType(v)
+	_ = _u.mutation.SetField("type", v)
 	return _u
 }
 
@@ -67,7 +68,7 @@ func (_u *FileTypeUpdate) SetNillableType(v *Type) *FileTypeUpdate {
 
 // SetState sets the "state" field.
 func (_u *FileTypeUpdate) SetState(v State) *FileTypeUpdate {
-	_u.mutation.SetState(v)
+	_ = _u.mutation.SetField("state", v)
 	return _u
 }
 
@@ -81,7 +82,7 @@ func (_u *FileTypeUpdate) SetNillableState(v *State) *FileTypeUpdate {
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_u *FileTypeUpdate) AddFileIDs(ids ...string) *FileTypeUpdate {
-	_u.mutation.AddFileIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -92,13 +93,13 @@ func (_u *FileTypeUpdate) Mutation() *FileTypeMutation {
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
-	_u.mutation.ClearFiles()
+	_ = _u.mutation.ClearEdge("files")
 	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *FileTypeUpdate) RemoveFileIDs(ids ...string) *FileTypeUpdate {
-	_u.mutation.RemoveFileIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -131,12 +132,12 @@ func (_u *FileTypeUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *FileTypeUpdate) check() error {
-	if v, ok := _u.mutation.GetType(); ok {
+	if v, ok := entbuilder.GetField[Type](_u.mutation, "type"); ok {
 		if err := TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", Err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.State(); ok {
+	if v, ok := entbuilder.GetField[State](_u.mutation, "state"); ok {
 		if err := StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", Err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -230,7 +231,7 @@ func NewFileTypeUpdateOne(c Config, hooks []Hook, mutation *FileTypeMutation) *F
 
 // SetName sets the "name" field.
 func (_u *FileTypeUpdateOne) SetName(v string) *FileTypeUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -244,7 +245,7 @@ func (_u *FileTypeUpdateOne) SetNillableName(v *string) *FileTypeUpdateOne {
 
 // SetType sets the "type" field.
 func (_u *FileTypeUpdateOne) SetType(v Type) *FileTypeUpdateOne {
-	_u.mutation.SetType(v)
+	_ = _u.mutation.SetField("type", v)
 	return _u
 }
 
@@ -258,7 +259,7 @@ func (_u *FileTypeUpdateOne) SetNillableType(v *Type) *FileTypeUpdateOne {
 
 // SetState sets the "state" field.
 func (_u *FileTypeUpdateOne) SetState(v State) *FileTypeUpdateOne {
-	_u.mutation.SetState(v)
+	_ = _u.mutation.SetField("state", v)
 	return _u
 }
 
@@ -272,7 +273,7 @@ func (_u *FileTypeUpdateOne) SetNillableState(v *State) *FileTypeUpdateOne {
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_u *FileTypeUpdateOne) AddFileIDs(ids ...string) *FileTypeUpdateOne {
-	_u.mutation.AddFileIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -283,19 +284,19 @@ func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation {
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
-	_u.mutation.ClearFiles()
+	_ = _u.mutation.ClearEdge("files")
 	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *FileTypeUpdateOne) RemoveFileIDs(ids ...string) *FileTypeUpdateOne {
-	_u.mutation.RemoveFileIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.
 func (_u *FileTypeUpdateOne) Where(ps ...predicate.FileType) *FileTypeUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -335,12 +336,12 @@ func (_u *FileTypeUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *FileTypeUpdateOne) check() error {
-	if v, ok := _u.mutation.GetType(); ok {
+	if v, ok := entbuilder.GetField[Type](_u.mutation, "type"); ok {
 		if err := TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", Err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.State(); ok {
+	if v, ok := entbuilder.GetField[State](_u.mutation, "state"); ok {
 		if err := StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", Err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}

@@ -9,14 +9,18 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/entql/type" }}
 
 {{ $pkg := base $.Config.Package }}
-{{ template "header" $ }}
+{{ with extend $ "Package" $.Package }}
+	{{ template "header" . }}
+{{ end }}
 
 import (
 	"context"
 	"time"
 
 	"{{ $.Config.Package }}/predicate"
+	{{- if not $.Scope.InSubPackage }}
 	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
+	{{- end }}
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -32,7 +36,7 @@ import (
 
 // AddPredicate implements the predicateAdder interface.
 func ({{ $receiver }} *{{ $builder }}) AddPredicate(pred func(s *sql.Selector)) {
-	{{ $receiver }}.predicates = append({{ $receiver }}.predicates, pred)
+	{{ $receiver }}.Predicates = append({{ $receiver }}.Predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the {{ $builder }} builder.
@@ -43,7 +47,7 @@ func ({{ $receiver }} *{{ $builder }}) Filter() *{{ $filter }} {
 {{- if not $n.IsView }}
 		// New{{ $filter }}ForMutation creates a new {{ $filter }} for the given mutation.
 		func New{{ $filter }}ForMutation(m *{{ $mutation }}) *{{ $filter }} {
-			return &{{ $filter }}{Config: m.Config, predicateAdder: m}
+			return &{{ $filter }}{Config: m.Config.(Config), predicateAdder: m}
 		}
 {{- end }}
 
@@ -71,7 +75,7 @@ func (f *{{ $filter }}) Where(p entql.P) {
 	{{- end }}
 	// WhereID applies the entql {{ $type }} predicate on the id field.
 	func (f *{{ $filter }}) WhereID(p entql.{{ $iface }}) {
-		f.Where(p.Field({{ $n.Package }}.{{ $n.ID.Constant }}))
+		f.Where(p.Field({{ $n.PackageQualifier }}{{ $n.ID.Constant }}))
 	}
 {{- end }}
 
@@ -84,7 +88,7 @@ func (f *{{ $filter }}) Where(p entql.P) {
 	{{- end }}
 	// Where{{ $f.StructField }} applies the entql {{ $type }} predicate on the {{ $f.Name }} field.
 	func (f *{{ $filter }}) Where{{ $f.StructField }}(p entql.{{ $iface }}) {
-		f.Where(p.Field({{ $n.Package }}.{{ $f.Constant }}))
+		f.Where(p.Field({{ $n.PackageQualifier }}{{ $f.Constant }}))
 	}
 {{ end }}
 

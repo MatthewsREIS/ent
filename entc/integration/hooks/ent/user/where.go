@@ -335,14 +335,15 @@ func HasCards() predicate.User {
 
 // HasCardsWith applies the HasEdge predicate on the "cards" edge with a given conditions (other predicates).
 func HasCardsWith(preds ...predicate.Card) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newCardsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newCardsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasPets applies the HasEdge predicate on the "pets" edge.
@@ -358,14 +359,15 @@ func HasPets() predicate.User {
 
 // HasPetsWith applies the HasEdge predicate on the "pets" edge with a given conditions (other predicates).
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newPetsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newPetsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFriends applies the HasEdge predicate on the "friends" edge.
@@ -381,14 +383,15 @@ func HasFriends() predicate.User {
 
 // HasFriendsWith applies the HasEdge predicate on the "friends" edge with a given conditions (other predicates).
 func HasFriendsWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFriendsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFriendsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasBestFriend applies the HasEdge predicate on the "best_friend" edge.
@@ -404,14 +407,15 @@ func HasBestFriend() predicate.User {
 
 // HasBestFriendWith applies the HasEdge predicate on the "best_friend" edge with a given conditions (other predicates).
 func HasBestFriendWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newBestFriendStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newBestFriendStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -32,7 +33,7 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetOptionalInt sets the "optional_int" field.
 func (_c *UserCreate) SetOptionalInt(v int) *UserCreate {
-	_c.mutation.SetOptionalInt(v)
+	_ = _c.mutation.SetField("optional_int", v)
 	return _c
 }
 
@@ -46,19 +47,19 @@ func (_c *UserCreate) SetNillableOptionalInt(v *int) *UserCreate {
 
 // SetAge sets the "age" field.
 func (_c *UserCreate) SetAge(v int) *UserCreate {
-	_c.mutation.SetAge(v)
+	_ = _c.mutation.SetField("age", v)
 	return _c
 }
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // SetLast sets the "last" field.
 func (_c *UserCreate) SetLast(v string) *UserCreate {
-	_c.mutation.SetLast(v)
+	_ = _c.mutation.SetField("last", v)
 	return _c
 }
 
@@ -72,7 +73,7 @@ func (_c *UserCreate) SetNillableLast(v *string) *UserCreate {
 
 // SetNickname sets the "nickname" field.
 func (_c *UserCreate) SetNickname(v string) *UserCreate {
-	_c.mutation.SetNickname(v)
+	_ = _c.mutation.SetField("nickname", v)
 	return _c
 }
 
@@ -86,7 +87,7 @@ func (_c *UserCreate) SetNillableNickname(v *string) *UserCreate {
 
 // SetAddress sets the "address" field.
 func (_c *UserCreate) SetAddress(v string) *UserCreate {
-	_c.mutation.SetAddress(v)
+	_ = _c.mutation.SetField("address", v)
 	return _c
 }
 
@@ -100,7 +101,7 @@ func (_c *UserCreate) SetNillableAddress(v *string) *UserCreate {
 
 // SetPhone sets the "phone" field.
 func (_c *UserCreate) SetPhone(v string) *UserCreate {
-	_c.mutation.SetPhone(v)
+	_ = _c.mutation.SetField("phone", v)
 	return _c
 }
 
@@ -114,7 +115,7 @@ func (_c *UserCreate) SetNillablePhone(v *string) *UserCreate {
 
 // SetPassword sets the "password" field.
 func (_c *UserCreate) SetPassword(v string) *UserCreate {
-	_c.mutation.SetPassword(v)
+	_ = _c.mutation.SetField("password", v)
 	return _c
 }
 
@@ -128,7 +129,7 @@ func (_c *UserCreate) SetNillablePassword(v *string) *UserCreate {
 
 // SetRole sets the "role" field.
 func (_c *UserCreate) SetRole(v Role) *UserCreate {
-	_c.mutation.SetRole(v)
+	_ = _c.mutation.SetField("role", v)
 	return _c
 }
 
@@ -142,7 +143,7 @@ func (_c *UserCreate) SetNillableRole(v *Role) *UserCreate {
 
 // SetEmployment sets the "employment" field.
 func (_c *UserCreate) SetEmployment(v Employment) *UserCreate {
-	_c.mutation.SetEmployment(v)
+	_ = _c.mutation.SetField("employment", v)
 	return _c
 }
 
@@ -156,7 +157,7 @@ func (_c *UserCreate) SetNillableEmployment(v *Employment) *UserCreate {
 
 // SetSSOCert sets the "SSOCert" field.
 func (_c *UserCreate) SetSSOCert(v string) *UserCreate {
-	_c.mutation.SetSSOCert(v)
+	_ = _c.mutation.SetField("SSOCert", v)
 	return _c
 }
 
@@ -170,7 +171,7 @@ func (_c *UserCreate) SetNillableSSOCert(v *string) *UserCreate {
 
 // SetFilesCount sets the "files_count" field.
 func (_c *UserCreate) SetFilesCount(v int) *UserCreate {
-	_c.mutation.SetFilesCount(v)
+	_ = _c.mutation.SetField("files_count", v)
 	return _c
 }
 
@@ -184,7 +185,7 @@ func (_c *UserCreate) SetNillableFilesCount(v *int) *UserCreate {
 
 // SetCardID sets the "card" edge to the Card entity by ID.
 func (_c *UserCreate) SetCardID(id string) *UserCreate {
-	_c.mutation.SetCardID(id)
+	_ = _c.mutation.SetEdgeID("card", id)
 	return _c
 }
 
@@ -198,43 +199,43 @@ func (_c *UserCreate) SetNillableCardID(id *string) *UserCreate {
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (_c *UserCreate) AddPetIDs(ids ...string) *UserCreate {
-	_c.mutation.AddPetIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_c *UserCreate) AddFileIDs(ids ...string) *UserCreate {
-	_c.mutation.AddFileIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_c *UserCreate) AddGroupIDs(ids ...string) *UserCreate {
-	_c.mutation.AddGroupIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_c *UserCreate) AddFriendIDs(ids ...string) *UserCreate {
-	_c.mutation.AddFriendIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
 func (_c *UserCreate) AddFollowerIDs(ids ...string) *UserCreate {
-	_c.mutation.AddFollowerIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("followers", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFollowingIDs adds the "following" edge to the User entity by IDs.
 func (_c *UserCreate) AddFollowingIDs(ids ...string) *UserCreate {
-	_c.mutation.AddFollowingIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("following", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // SetTeamID sets the "team" edge to the Pet entity by ID.
 func (_c *UserCreate) SetTeamID(id string) *UserCreate {
-	_c.mutation.SetTeamID(id)
+	_ = _c.mutation.SetEdgeID("team", id)
 	return _c
 }
 
@@ -248,7 +249,7 @@ func (_c *UserCreate) SetNillableTeamID(id *string) *UserCreate {
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (_c *UserCreate) SetSpouseID(id string) *UserCreate {
-	_c.mutation.SetSpouseID(id)
+	_ = _c.mutation.SetEdgeID("spouse", id)
 	return _c
 }
 
@@ -262,13 +263,13 @@ func (_c *UserCreate) SetNillableSpouseID(id *string) *UserCreate {
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
 func (_c *UserCreate) AddChildIDs(ids ...string) *UserCreate {
-	_c.mutation.AddChildIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
 func (_c *UserCreate) SetParentID(id string) *UserCreate {
-	_c.mutation.SetParentID(id)
+	_ = _c.mutation.SetEdgeID("parent", id)
 	return _c
 }
 
@@ -315,52 +316,52 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.Last(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "last"); !ok {
 		v := DefaultLast
-		_c.mutation.SetLast(v)
+		_ = _c.mutation.SetField("last", v)
 	}
-	if _, ok := _c.mutation.Address(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "address"); !ok {
 		v := DefaultAddress()
-		_c.mutation.SetAddress(v)
+		_ = _c.mutation.SetField("address", v)
 	}
-	if _, ok := _c.mutation.Role(); !ok {
+	if _, ok := entbuilder.GetField[Role](_c.mutation, "role"); !ok {
 		v := DefaultRole
-		_c.mutation.SetRole(v)
+		_ = _c.mutation.SetField("role", v)
 	}
-	if _, ok := _c.mutation.Employment(); !ok {
+	if _, ok := entbuilder.GetField[Employment](_c.mutation, "employment"); !ok {
 		v := DefaultEmployment
-		_c.mutation.SetEmployment(v)
+		_ = _c.mutation.SetField("employment", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserCreate) check() error {
-	if v, ok := _c.mutation.OptionalInt(); ok {
+	if v, ok := entbuilder.GetField[int](_c.mutation, "optional_int"); ok {
 		if err := OptionalIntValidator(v); err != nil {
 			return &ValidationError{Name: "optional_int", Err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Age(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "age"); !ok {
 		return &ValidationError{Name: "age", Err: errors.New(`ent: missing required field "User.age"`)}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "User.name"`)}
 	}
-	if _, ok := _c.mutation.Last(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "last"); !ok {
 		return &ValidationError{Name: "last", Err: errors.New(`ent: missing required field "User.last"`)}
 	}
-	if _, ok := _c.mutation.Role(); !ok {
+	if _, ok := entbuilder.GetField[Role](_c.mutation, "role"); !ok {
 		return &ValidationError{Name: "role", Err: errors.New(`ent: missing required field "User.role"`)}
 	}
-	if v, ok := _c.mutation.Role(); ok {
+	if v, ok := entbuilder.GetField[Role](_c.mutation, "role"); ok {
 		if err := RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", Err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Employment(); !ok {
+	if _, ok := entbuilder.GetField[Employment](_c.mutation, "employment"); !ok {
 		return &ValidationError{Name: "employment", Err: errors.New(`ent: missing required field "User.employment"`)}
 	}
-	if v, ok := _c.mutation.Employment(); ok {
+	if v, ok := entbuilder.GetField[Employment](_c.mutation, "employment"); ok {
 		if err := EmploymentValidator(v); err != nil {
 			return &ValidationError{Name: "employment", Err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
 		}

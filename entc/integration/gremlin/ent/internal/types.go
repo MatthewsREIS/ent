@@ -299,6 +299,34 @@ type DriverUnwrapper interface {
 	UnwrapDriver() dialect.Driver
 }
 
+// SetContextOp returns a new context with the given QueryContext attached
+// (including its op) if not already present. Shared between root and
+// per-entity sub-package builders.
+func SetContextOp(ctx context.Context, qc *QueryContext, op string) context.Context {
+	if ent.QueryFromContext(ctx) == nil {
+		qc.Op = op
+		ctx = ent.NewQueryContext(ctx, qc)
+	}
+	return ctx
+}
+
+// WithInterceptors invokes the query through the given interceptor chain.
+// Shared between root and per-entity sub-package builders.
+func WithInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (v V, err error) {
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	rv, err := qr.Query(ctx, q)
+	if err != nil {
+		return v, err
+	}
+	vt, ok := rv.(V)
+	if !ok {
+		return v, fmt.Errorf("unexpected type %T returned from %T. expected type: %T", vt, q, v)
+	}
+	return vt, nil
+}
+
 // Operation types.
 const (
 	OpCreate    = ent.OpCreate

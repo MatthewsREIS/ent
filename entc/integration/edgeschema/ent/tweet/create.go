@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -35,37 +36,37 @@ func NewTweetCreate(c Config, hooks []Hook, mutation *TweetMutation) *TweetCreat
 
 // SetText sets the "text" field.
 func (_c *TweetCreate) SetText(v string) *TweetCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
 // AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
 func (_c *TweetCreate) AddLikedUserIDs(ids ...int) *TweetCreate {
-	_c.mutation.AddLikedUserIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("liked_users", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_c *TweetCreate) AddUserIDs(ids ...int) *TweetCreate {
-	_c.mutation.AddUserIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
 func (_c *TweetCreate) AddTagIDs(ids ...int) *TweetCreate {
-	_c.mutation.AddTagIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("tags", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
 func (_c *TweetCreate) AddTweetUserIDs(ids ...int) *TweetCreate {
-	_c.mutation.AddTweetUserIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("tweet_user", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (_c *TweetCreate) AddTweetTagIDs(ids ...uuid.UUID) *TweetCreate {
-	_c.mutation.AddTweetTagIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -103,7 +104,7 @@ func (_c *TweetCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *TweetCreate) check() error {
-	if _, ok := _c.mutation.Text(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "text"); !ok {
 		return &ValidationError{Name: "text", Err: errors.New(`ent: missing required field "Tweet.text"`)}
 	}
 	return nil
@@ -122,7 +123,7 @@ func (_c *TweetCreate) sqlSave(ctx context.Context) (*Tweet, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -133,11 +134,11 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 		_node.Text = value
 	}
-	if nodes := _c.mutation.LikedUsersIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "liked_users"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -155,7 +156,7 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -173,7 +174,7 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TagsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -194,7 +195,7 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TweetUserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tweet_user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -210,7 +211,7 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TweetTagsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "tweet_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -432,11 +433,11 @@ func (_c *TweetCreateBulk) Save(ctx context.Context) ([]*Tweet, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

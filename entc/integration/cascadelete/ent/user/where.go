@@ -140,14 +140,15 @@ func HasPosts() predicate.User {
 
 // HasPostsWith applies the HasEdge predicate on the "posts" edge with a given conditions (other predicates).
 func HasPostsWith(preds ...predicate.Post) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newPostsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newPostsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

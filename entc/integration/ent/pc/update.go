@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewPCUpdate(c Config, hooks []Hook, mutation *PCMutation) *PCUpdate {
 
 // Where appends a list predicates to the PCUpdate builder.
 func (_u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -43,7 +44,7 @@ func (_u *PCUpdate) Mutation() *PCMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PCUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*PCMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -117,7 +118,7 @@ func (_u *PCUpdateOne) Mutation() *PCMutation {
 
 // Where appends a list predicates to the PCUpdate builder.
 func (_u *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -130,7 +131,7 @@ func (_u *PCUpdateOne) Select(field string, fields ...string) *PCUpdateOne {
 
 // Save executes the query and returns the updated PC entity.
 func (_u *PCUpdateOne) Save(ctx context.Context) (*PC, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[PC](ctx, &entbuilder.UpdateState[*PCMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

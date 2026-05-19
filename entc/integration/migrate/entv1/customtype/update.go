@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewCustomTypeUpdate(c Config, hooks []Hook, mutation *CustomTypeMutation) *
 
 // Where appends a list predicates to the CustomTypeUpdate builder.
 func (_u *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetCustom sets the "custom" field.
 func (_u *CustomTypeUpdate) SetCustom(v string) *CustomTypeUpdate {
-	_u.mutation.SetCustom(v)
+	_ = _u.mutation.SetField("custom", v)
 	return _u
 }
 
@@ -51,7 +52,7 @@ func (_u *CustomTypeUpdate) SetNillableCustom(v *string) *CustomTypeUpdate {
 
 // ClearCustom clears the value of the "custom" field.
 func (_u *CustomTypeUpdate) ClearCustom() *CustomTypeUpdate {
-	_u.mutation.ClearCustom()
+	_ = _u.mutation.ClearField("custom")
 	return _u
 }
 
@@ -62,7 +63,7 @@ func (_u *CustomTypeUpdate) Mutation() *CustomTypeMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CustomTypeUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CustomTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -96,10 +97,10 @@ func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Custom(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "custom"); ok {
 		_spec.SetField(FieldCustom, field.TypeString, value)
 	}
-	if _u.mutation.CustomCleared() {
+	if _u.mutation.FieldCleared("custom") {
 		_spec.ClearField(FieldCustom, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -129,7 +130,7 @@ func NewCustomTypeUpdateOne(c Config, hooks []Hook, mutation *CustomTypeMutation
 
 // SetCustom sets the "custom" field.
 func (_u *CustomTypeUpdateOne) SetCustom(v string) *CustomTypeUpdateOne {
-	_u.mutation.SetCustom(v)
+	_ = _u.mutation.SetField("custom", v)
 	return _u
 }
 
@@ -143,7 +144,7 @@ func (_u *CustomTypeUpdateOne) SetNillableCustom(v *string) *CustomTypeUpdateOne
 
 // ClearCustom clears the value of the "custom" field.
 func (_u *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
-	_u.mutation.ClearCustom()
+	_ = _u.mutation.ClearField("custom")
 	return _u
 }
 
@@ -154,7 +155,7 @@ func (_u *CustomTypeUpdateOne) Mutation() *CustomTypeMutation {
 
 // Where appends a list predicates to the CustomTypeUpdate builder.
 func (_u *CustomTypeUpdateOne) Where(ps ...predicate.CustomType) *CustomTypeUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -167,7 +168,7 @@ func (_u *CustomTypeUpdateOne) Select(field string, fields ...string) *CustomTyp
 
 // Save executes the query and returns the updated CustomType entity.
 func (_u *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[CustomType](ctx, &entbuilder.UpdateState[*CustomTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -218,10 +219,10 @@ func (_u *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType, 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Custom(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "custom"); ok {
 		_spec.SetField(FieldCustom, field.TypeString, value)
 	}
-	if _u.mutation.CustomCleared() {
+	if _u.mutation.FieldCleared("custom") {
 		_spec.ClearField(FieldCustom, field.TypeString)
 	}
 	_node = &CustomType{Config: _u.Config}

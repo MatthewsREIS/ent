@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/role"
 	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -37,37 +38,37 @@ func NewFieldTypeCreate(c Config, hooks []Hook, mutation *FieldTypeMutation) *Fi
 
 // SetInt sets the "int" field.
 func (_c *FieldTypeCreate) SetInt(v int) *FieldTypeCreate {
-	_c.mutation.SetInt(v)
+	_ = _c.mutation.SetField("int", v)
 	return _c
 }
 
 // SetInt8 sets the "int8" field.
 func (_c *FieldTypeCreate) SetInt8(v int8) *FieldTypeCreate {
-	_c.mutation.SetInt8(v)
+	_ = _c.mutation.SetField("int8", v)
 	return _c
 }
 
 // SetInt16 sets the "int16" field.
 func (_c *FieldTypeCreate) SetInt16(v int16) *FieldTypeCreate {
-	_c.mutation.SetInt16(v)
+	_ = _c.mutation.SetField("int16", v)
 	return _c
 }
 
 // SetInt32 sets the "int32" field.
 func (_c *FieldTypeCreate) SetInt32(v int32) *FieldTypeCreate {
-	_c.mutation.SetInt32(v)
+	_ = _c.mutation.SetField("int32", v)
 	return _c
 }
 
 // SetInt64 sets the "int64" field.
 func (_c *FieldTypeCreate) SetInt64(v int64) *FieldTypeCreate {
-	_c.mutation.SetInt64(v)
+	_ = _c.mutation.SetField("int64", v)
 	return _c
 }
 
 // SetOptionalInt sets the "optional_int" field.
 func (_c *FieldTypeCreate) SetOptionalInt(v int) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt(v)
+	_ = _c.mutation.SetField("optional_int", v)
 	return _c
 }
 
@@ -81,7 +82,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt(v *int) *FieldTypeCreate {
 
 // SetOptionalInt8 sets the "optional_int8" field.
 func (_c *FieldTypeCreate) SetOptionalInt8(v int8) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt8(v)
+	_ = _c.mutation.SetField("optional_int8", v)
 	return _c
 }
 
@@ -95,7 +96,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt8(v *int8) *FieldTypeCreate {
 
 // SetOptionalInt16 sets the "optional_int16" field.
 func (_c *FieldTypeCreate) SetOptionalInt16(v int16) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt16(v)
+	_ = _c.mutation.SetField("optional_int16", v)
 	return _c
 }
 
@@ -109,7 +110,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt16(v *int16) *FieldTypeCreate {
 
 // SetOptionalInt32 sets the "optional_int32" field.
 func (_c *FieldTypeCreate) SetOptionalInt32(v int32) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt32(v)
+	_ = _c.mutation.SetField("optional_int32", v)
 	return _c
 }
 
@@ -123,7 +124,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt32(v *int32) *FieldTypeCreate {
 
 // SetOptionalInt64 sets the "optional_int64" field.
 func (_c *FieldTypeCreate) SetOptionalInt64(v int64) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt64(v)
+	_ = _c.mutation.SetField("optional_int64", v)
 	return _c
 }
 
@@ -137,7 +138,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalInt64(v *int64) *FieldTypeCreate {
 
 // SetNillableInt sets the "nillable_int" field.
 func (_c *FieldTypeCreate) SetNillableInt(v int) *FieldTypeCreate {
-	_c.mutation.SetNillableInt(v)
+	_ = _c.mutation.SetField("nillable_int", v)
 	return _c
 }
 
@@ -151,7 +152,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt(v *int) *FieldTypeCreate {
 
 // SetNillableInt8 sets the "nillable_int8" field.
 func (_c *FieldTypeCreate) SetNillableInt8(v int8) *FieldTypeCreate {
-	_c.mutation.SetNillableInt8(v)
+	_ = _c.mutation.SetField("nillable_int8", v)
 	return _c
 }
 
@@ -165,7 +166,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt8(v *int8) *FieldTypeCreate {
 
 // SetNillableInt16 sets the "nillable_int16" field.
 func (_c *FieldTypeCreate) SetNillableInt16(v int16) *FieldTypeCreate {
-	_c.mutation.SetNillableInt16(v)
+	_ = _c.mutation.SetField("nillable_int16", v)
 	return _c
 }
 
@@ -179,7 +180,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt16(v *int16) *FieldTypeCreate {
 
 // SetNillableInt32 sets the "nillable_int32" field.
 func (_c *FieldTypeCreate) SetNillableInt32(v int32) *FieldTypeCreate {
-	_c.mutation.SetNillableInt32(v)
+	_ = _c.mutation.SetField("nillable_int32", v)
 	return _c
 }
 
@@ -193,7 +194,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt32(v *int32) *FieldTypeCreate {
 
 // SetNillableInt64 sets the "nillable_int64" field.
 func (_c *FieldTypeCreate) SetNillableInt64(v int64) *FieldTypeCreate {
-	_c.mutation.SetNillableInt64(v)
+	_ = _c.mutation.SetField("nillable_int64", v)
 	return _c
 }
 
@@ -207,7 +208,7 @@ func (_c *FieldTypeCreate) SetNillableNillableInt64(v *int64) *FieldTypeCreate {
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
 func (_c *FieldTypeCreate) SetValidateOptionalInt32(v int32) *FieldTypeCreate {
-	_c.mutation.SetValidateOptionalInt32(v)
+	_ = _c.mutation.SetField("validate_optional_int32", v)
 	return _c
 }
 
@@ -221,7 +222,7 @@ func (_c *FieldTypeCreate) SetNillableValidateOptionalInt32(v *int32) *FieldType
 
 // SetOptionalUint sets the "optional_uint" field.
 func (_c *FieldTypeCreate) SetOptionalUint(v uint) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint(v)
+	_ = _c.mutation.SetField("optional_uint", v)
 	return _c
 }
 
@@ -235,7 +236,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint(v *uint) *FieldTypeCreate {
 
 // SetOptionalUint8 sets the "optional_uint8" field.
 func (_c *FieldTypeCreate) SetOptionalUint8(v uint8) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint8(v)
+	_ = _c.mutation.SetField("optional_uint8", v)
 	return _c
 }
 
@@ -249,7 +250,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint8(v *uint8) *FieldTypeCreate {
 
 // SetOptionalUint16 sets the "optional_uint16" field.
 func (_c *FieldTypeCreate) SetOptionalUint16(v uint16) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint16(v)
+	_ = _c.mutation.SetField("optional_uint16", v)
 	return _c
 }
 
@@ -263,7 +264,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint16(v *uint16) *FieldTypeCreate
 
 // SetOptionalUint32 sets the "optional_uint32" field.
 func (_c *FieldTypeCreate) SetOptionalUint32(v uint32) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint32(v)
+	_ = _c.mutation.SetField("optional_uint32", v)
 	return _c
 }
 
@@ -277,7 +278,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint32(v *uint32) *FieldTypeCreate
 
 // SetOptionalUint64 sets the "optional_uint64" field.
 func (_c *FieldTypeCreate) SetOptionalUint64(v uint64) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint64(v)
+	_ = _c.mutation.SetField("optional_uint64", v)
 	return _c
 }
 
@@ -291,7 +292,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUint64(v *uint64) *FieldTypeCreate
 
 // SetState sets the "state" field.
 func (_c *FieldTypeCreate) SetState(v State) *FieldTypeCreate {
-	_c.mutation.SetState(v)
+	_ = _c.mutation.SetField("state", v)
 	return _c
 }
 
@@ -305,7 +306,7 @@ func (_c *FieldTypeCreate) SetNillableState(v *State) *FieldTypeCreate {
 
 // SetOptionalFloat sets the "optional_float" field.
 func (_c *FieldTypeCreate) SetOptionalFloat(v float64) *FieldTypeCreate {
-	_c.mutation.SetOptionalFloat(v)
+	_ = _c.mutation.SetField("optional_float", v)
 	return _c
 }
 
@@ -319,7 +320,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalFloat(v *float64) *FieldTypeCreate
 
 // SetOptionalFloat32 sets the "optional_float32" field.
 func (_c *FieldTypeCreate) SetOptionalFloat32(v float32) *FieldTypeCreate {
-	_c.mutation.SetOptionalFloat32(v)
+	_ = _c.mutation.SetField("optional_float32", v)
 	return _c
 }
 
@@ -333,7 +334,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalFloat32(v *float32) *FieldTypeCrea
 
 // SetText sets the "text" field.
 func (_c *FieldTypeCreate) SetText(v string) *FieldTypeCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
@@ -347,7 +348,7 @@ func (_c *FieldTypeCreate) SetNillableText(v *string) *FieldTypeCreate {
 
 // SetDatetime sets the "datetime" field.
 func (_c *FieldTypeCreate) SetDatetime(v time.Time) *FieldTypeCreate {
-	_c.mutation.SetDatetime(v)
+	_ = _c.mutation.SetField("datetime", v)
 	return _c
 }
 
@@ -361,7 +362,7 @@ func (_c *FieldTypeCreate) SetNillableDatetime(v *time.Time) *FieldTypeCreate {
 
 // SetDecimal sets the "decimal" field.
 func (_c *FieldTypeCreate) SetDecimal(v float64) *FieldTypeCreate {
-	_c.mutation.SetDecimal(v)
+	_ = _c.mutation.SetField("decimal", v)
 	return _c
 }
 
@@ -375,19 +376,19 @@ func (_c *FieldTypeCreate) SetNillableDecimal(v *float64) *FieldTypeCreate {
 
 // SetLinkOther sets the "link_other" field.
 func (_c *FieldTypeCreate) SetLinkOther(v *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLinkOther(v)
+	_ = _c.mutation.SetField("link_other", v)
 	return _c
 }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
 func (_c *FieldTypeCreate) SetLinkOtherFunc(v *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLinkOtherFunc(v)
+	_ = _c.mutation.SetField("link_other_func", v)
 	return _c
 }
 
 // SetMAC sets the "mac" field.
 func (_c *FieldTypeCreate) SetMAC(v schema.MAC) *FieldTypeCreate {
-	_c.mutation.SetMAC(v)
+	_ = _c.mutation.SetField("mac", v)
 	return _c
 }
 
@@ -401,13 +402,13 @@ func (_c *FieldTypeCreate) SetNillableMAC(v *schema.MAC) *FieldTypeCreate {
 
 // SetStringArray sets the "string_array" field.
 func (_c *FieldTypeCreate) SetStringArray(v schema.Strings) *FieldTypeCreate {
-	_c.mutation.SetStringArray(v)
+	_ = _c.mutation.SetField("string_array", v)
 	return _c
 }
 
 // SetPassword sets the "password" field.
 func (_c *FieldTypeCreate) SetPassword(v string) *FieldTypeCreate {
-	_c.mutation.SetPassword(v)
+	_ = _c.mutation.SetField("password", v)
 	return _c
 }
 
@@ -421,7 +422,7 @@ func (_c *FieldTypeCreate) SetNillablePassword(v *string) *FieldTypeCreate {
 
 // SetStringScanner sets the "string_scanner" field.
 func (_c *FieldTypeCreate) SetStringScanner(v schema.StringScanner) *FieldTypeCreate {
-	_c.mutation.SetStringScanner(v)
+	_ = _c.mutation.SetField("string_scanner", v)
 	return _c
 }
 
@@ -435,7 +436,7 @@ func (_c *FieldTypeCreate) SetNillableStringScanner(v *schema.StringScanner) *Fi
 
 // SetDuration sets the "duration" field.
 func (_c *FieldTypeCreate) SetDuration(v time.Duration) *FieldTypeCreate {
-	_c.mutation.SetDuration(v)
+	_ = _c.mutation.SetField("duration", v)
 	return _c
 }
 
@@ -449,7 +450,7 @@ func (_c *FieldTypeCreate) SetNillableDuration(v *time.Duration) *FieldTypeCreat
 
 // SetDir sets the "dir" field.
 func (_c *FieldTypeCreate) SetDir(v http.Dir) *FieldTypeCreate {
-	_c.mutation.SetDir(v)
+	_ = _c.mutation.SetField("dir", v)
 	return _c
 }
 
@@ -463,7 +464,7 @@ func (_c *FieldTypeCreate) SetNillableDir(v *http.Dir) *FieldTypeCreate {
 
 // SetNdir sets the "ndir" field.
 func (_c *FieldTypeCreate) SetNdir(v http.Dir) *FieldTypeCreate {
-	_c.mutation.SetNdir(v)
+	_ = _c.mutation.SetField("ndir", v)
 	return _c
 }
 
@@ -477,7 +478,7 @@ func (_c *FieldTypeCreate) SetNillableNdir(v *http.Dir) *FieldTypeCreate {
 
 // SetStr sets the "str" field.
 func (_c *FieldTypeCreate) SetStr(v sql.NullString) *FieldTypeCreate {
-	_c.mutation.SetStr(v)
+	_ = _c.mutation.SetField("str", v)
 	return _c
 }
 
@@ -491,13 +492,13 @@ func (_c *FieldTypeCreate) SetNillableStr(v *sql.NullString) *FieldTypeCreate {
 
 // SetNullStr sets the "null_str" field.
 func (_c *FieldTypeCreate) SetNullStr(v *sql.NullString) *FieldTypeCreate {
-	_c.mutation.SetNullStr(v)
+	_ = _c.mutation.SetField("null_str", v)
 	return _c
 }
 
 // SetLink sets the "link" field.
 func (_c *FieldTypeCreate) SetLink(v schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLink(v)
+	_ = _c.mutation.SetField("link", v)
 	return _c
 }
 
@@ -511,13 +512,13 @@ func (_c *FieldTypeCreate) SetNillableLink(v *schema.Link) *FieldTypeCreate {
 
 // SetNullLink sets the "null_link" field.
 func (_c *FieldTypeCreate) SetNullLink(v *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetNullLink(v)
+	_ = _c.mutation.SetField("null_link", v)
 	return _c
 }
 
 // SetActive sets the "active" field.
 func (_c *FieldTypeCreate) SetActive(v schema.Status) *FieldTypeCreate {
-	_c.mutation.SetActive(v)
+	_ = _c.mutation.SetField("active", v)
 	return _c
 }
 
@@ -531,7 +532,7 @@ func (_c *FieldTypeCreate) SetNillableActive(v *schema.Status) *FieldTypeCreate 
 
 // SetNullActive sets the "null_active" field.
 func (_c *FieldTypeCreate) SetNullActive(v schema.Status) *FieldTypeCreate {
-	_c.mutation.SetNullActive(v)
+	_ = _c.mutation.SetField("null_active", v)
 	return _c
 }
 
@@ -545,43 +546,43 @@ func (_c *FieldTypeCreate) SetNillableNullActive(v *schema.Status) *FieldTypeCre
 
 // SetDeleted sets the "deleted" field.
 func (_c *FieldTypeCreate) SetDeleted(v *sql.NullBool) *FieldTypeCreate {
-	_c.mutation.SetDeleted(v)
+	_ = _c.mutation.SetField("deleted", v)
 	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
 func (_c *FieldTypeCreate) SetDeletedAt(v *sql.NullTime) *FieldTypeCreate {
-	_c.mutation.SetDeletedAt(v)
+	_ = _c.mutation.SetField("deleted_at", v)
 	return _c
 }
 
 // SetRawData sets the "raw_data" field.
 func (_c *FieldTypeCreate) SetRawData(v []byte) *FieldTypeCreate {
-	_c.mutation.SetRawData(v)
+	_ = _c.mutation.SetField("raw_data", v)
 	return _c
 }
 
 // SetSensitive sets the "sensitive" field.
 func (_c *FieldTypeCreate) SetSensitive(v []byte) *FieldTypeCreate {
-	_c.mutation.SetSensitive(v)
+	_ = _c.mutation.SetField("sensitive", v)
 	return _c
 }
 
 // SetIP sets the "ip" field.
 func (_c *FieldTypeCreate) SetIP(v net.IP) *FieldTypeCreate {
-	_c.mutation.SetIP(v)
+	_ = _c.mutation.SetField("ip", v)
 	return _c
 }
 
 // SetNullInt64 sets the "null_int64" field.
 func (_c *FieldTypeCreate) SetNullInt64(v *sql.NullInt64) *FieldTypeCreate {
-	_c.mutation.SetNullInt64(v)
+	_ = _c.mutation.SetField("null_int64", v)
 	return _c
 }
 
 // SetSchemaInt sets the "schema_int" field.
 func (_c *FieldTypeCreate) SetSchemaInt(v schema.Int) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt(v)
+	_ = _c.mutation.SetField("schema_int", v)
 	return _c
 }
 
@@ -595,7 +596,7 @@ func (_c *FieldTypeCreate) SetNillableSchemaInt(v *schema.Int) *FieldTypeCreate 
 
 // SetSchemaInt8 sets the "schema_int8" field.
 func (_c *FieldTypeCreate) SetSchemaInt8(v schema.Int8) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt8(v)
+	_ = _c.mutation.SetField("schema_int8", v)
 	return _c
 }
 
@@ -609,7 +610,7 @@ func (_c *FieldTypeCreate) SetNillableSchemaInt8(v *schema.Int8) *FieldTypeCreat
 
 // SetSchemaInt64 sets the "schema_int64" field.
 func (_c *FieldTypeCreate) SetSchemaInt64(v schema.Int64) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt64(v)
+	_ = _c.mutation.SetField("schema_int64", v)
 	return _c
 }
 
@@ -623,7 +624,7 @@ func (_c *FieldTypeCreate) SetNillableSchemaInt64(v *schema.Int64) *FieldTypeCre
 
 // SetSchemaFloat sets the "schema_float" field.
 func (_c *FieldTypeCreate) SetSchemaFloat(v schema.Float64) *FieldTypeCreate {
-	_c.mutation.SetSchemaFloat(v)
+	_ = _c.mutation.SetField("schema_float", v)
 	return _c
 }
 
@@ -637,7 +638,7 @@ func (_c *FieldTypeCreate) SetNillableSchemaFloat(v *schema.Float64) *FieldTypeC
 
 // SetSchemaFloat32 sets the "schema_float32" field.
 func (_c *FieldTypeCreate) SetSchemaFloat32(v schema.Float32) *FieldTypeCreate {
-	_c.mutation.SetSchemaFloat32(v)
+	_ = _c.mutation.SetField("schema_float32", v)
 	return _c
 }
 
@@ -651,13 +652,13 @@ func (_c *FieldTypeCreate) SetNillableSchemaFloat32(v *schema.Float32) *FieldTyp
 
 // SetNullFloat sets the "null_float" field.
 func (_c *FieldTypeCreate) SetNullFloat(v *sql.NullFloat64) *FieldTypeCreate {
-	_c.mutation.SetNullFloat(v)
+	_ = _c.mutation.SetField("null_float", v)
 	return _c
 }
 
 // SetRole sets the "role" field.
 func (_c *FieldTypeCreate) SetRole(v role.Role) *FieldTypeCreate {
-	_c.mutation.SetRole(v)
+	_ = _c.mutation.SetField("role", v)
 	return _c
 }
 
@@ -671,7 +672,7 @@ func (_c *FieldTypeCreate) SetNillableRole(v *role.Role) *FieldTypeCreate {
 
 // SetPriority sets the "priority" field.
 func (_c *FieldTypeCreate) SetPriority(v role.Priority) *FieldTypeCreate {
-	_c.mutation.SetPriority(v)
+	_ = _c.mutation.SetField("priority", v)
 	return _c
 }
 
@@ -685,7 +686,7 @@ func (_c *FieldTypeCreate) SetNillablePriority(v *role.Priority) *FieldTypeCreat
 
 // SetOptionalUUID sets the "optional_uuid" field.
 func (_c *FieldTypeCreate) SetOptionalUUID(v uuid.UUID) *FieldTypeCreate {
-	_c.mutation.SetOptionalUUID(v)
+	_ = _c.mutation.SetField("optional_uuid", v)
 	return _c
 }
 
@@ -699,7 +700,7 @@ func (_c *FieldTypeCreate) SetNillableOptionalUUID(v *uuid.UUID) *FieldTypeCreat
 
 // SetNillableUUID sets the "nillable_uuid" field.
 func (_c *FieldTypeCreate) SetNillableUUID(v uuid.UUID) *FieldTypeCreate {
-	_c.mutation.SetNillableUUID(v)
+	_ = _c.mutation.SetField("nillable_uuid", v)
 	return _c
 }
 
@@ -713,13 +714,13 @@ func (_c *FieldTypeCreate) SetNillableNillableUUID(v *uuid.UUID) *FieldTypeCreat
 
 // SetStrings sets the "strings" field.
 func (_c *FieldTypeCreate) SetStrings(v []string) *FieldTypeCreate {
-	_c.mutation.SetStrings(v)
+	_ = _c.mutation.SetField("strings", v)
 	return _c
 }
 
 // SetPair sets the "pair" field.
 func (_c *FieldTypeCreate) SetPair(v schema.Pair) *FieldTypeCreate {
-	_c.mutation.SetPair(v)
+	_ = _c.mutation.SetField("pair", v)
 	return _c
 }
 
@@ -733,13 +734,13 @@ func (_c *FieldTypeCreate) SetNillablePair(v *schema.Pair) *FieldTypeCreate {
 
 // SetNilPair sets the "nil_pair" field.
 func (_c *FieldTypeCreate) SetNilPair(v *schema.Pair) *FieldTypeCreate {
-	_c.mutation.SetNilPair(v)
+	_ = _c.mutation.SetField("nil_pair", v)
 	return _c
 }
 
 // SetVstring sets the "vstring" field.
 func (_c *FieldTypeCreate) SetVstring(v schema.VString) *FieldTypeCreate {
-	_c.mutation.SetVstring(v)
+	_ = _c.mutation.SetField("vstring", v)
 	return _c
 }
 
@@ -753,7 +754,7 @@ func (_c *FieldTypeCreate) SetNillableVstring(v *schema.VString) *FieldTypeCreat
 
 // SetTriple sets the "triple" field.
 func (_c *FieldTypeCreate) SetTriple(v schema.Triple) *FieldTypeCreate {
-	_c.mutation.SetTriple(v)
+	_ = _c.mutation.SetField("triple", v)
 	return _c
 }
 
@@ -767,7 +768,7 @@ func (_c *FieldTypeCreate) SetNillableTriple(v *schema.Triple) *FieldTypeCreate 
 
 // SetBigInt sets the "big_int" field.
 func (_c *FieldTypeCreate) SetBigInt(v schema.BigInt) *FieldTypeCreate {
-	_c.mutation.SetBigInt(v)
+	_ = _c.mutation.SetField("big_int", v)
 	return _c
 }
 
@@ -781,7 +782,7 @@ func (_c *FieldTypeCreate) SetNillableBigInt(v *schema.BigInt) *FieldTypeCreate 
 
 // SetPasswordOther sets the "password_other" field.
 func (_c *FieldTypeCreate) SetPasswordOther(v schema.Password) *FieldTypeCreate {
-	_c.mutation.SetPasswordOther(v)
+	_ = _c.mutation.SetField("password_other", v)
 	return _c
 }
 
@@ -828,127 +829,127 @@ func (_c *FieldTypeCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *FieldTypeCreate) defaults() {
-	if _, ok := _c.mutation.LinkOther(); !ok {
+	if _, ok := entbuilder.GetField[*schema.Link](_c.mutation, "link_other"); !ok {
 		v := DefaultLinkOther
-		_c.mutation.SetLinkOther(v)
+		_ = _c.mutation.SetField("link_other", v)
 	}
-	if _, ok := _c.mutation.LinkOtherFunc(); !ok {
+	if _, ok := entbuilder.GetField[*schema.Link](_c.mutation, "link_other_func"); !ok {
 		v := DefaultLinkOtherFunc()
-		_c.mutation.SetLinkOtherFunc(v)
+		_ = _c.mutation.SetField("link_other_func", v)
 	}
-	if _, ok := _c.mutation.Dir(); !ok {
+	if _, ok := entbuilder.GetField[http.Dir](_c.mutation, "dir"); !ok {
 		v := DefaultDir()
-		_c.mutation.SetDir(v)
+		_ = _c.mutation.SetField("dir", v)
 	}
-	if _, ok := _c.mutation.Str(); !ok {
+	if _, ok := entbuilder.GetField[sql.NullString](_c.mutation, "str"); !ok {
 		v := DefaultStr()
-		_c.mutation.SetStr(v)
+		_ = _c.mutation.SetField("str", v)
 	}
-	if _, ok := _c.mutation.NullStr(); !ok {
+	if _, ok := entbuilder.GetField[*sql.NullString](_c.mutation, "null_str"); !ok {
 		v := DefaultNullStr()
-		_c.mutation.SetNullStr(v)
+		_ = _c.mutation.SetField("null_str", v)
 	}
-	if _, ok := _c.mutation.DeletedAt(); !ok {
+	if _, ok := entbuilder.GetField[*sql.NullTime](_c.mutation, "deleted_at"); !ok {
 		v := DefaultDeletedAt()
-		_c.mutation.SetDeletedAt(v)
+		_ = _c.mutation.SetField("deleted_at", v)
 	}
-	if _, ok := _c.mutation.IP(); !ok {
+	if _, ok := entbuilder.GetField[net.IP](_c.mutation, "ip"); !ok {
 		v := DefaultIP()
-		_c.mutation.SetIP(v)
+		_ = _c.mutation.SetField("ip", v)
 	}
-	if _, ok := _c.mutation.Role(); !ok {
+	if _, ok := entbuilder.GetField[role.Role](_c.mutation, "role"); !ok {
 		v := DefaultRole
-		_c.mutation.SetRole(v)
+		_ = _c.mutation.SetField("role", v)
 	}
-	if _, ok := _c.mutation.Pair(); !ok {
+	if _, ok := entbuilder.GetField[schema.Pair](_c.mutation, "pair"); !ok {
 		v := DefaultPair()
-		_c.mutation.SetPair(v)
+		_ = _c.mutation.SetField("pair", v)
 	}
-	if _, ok := _c.mutation.Vstring(); !ok {
+	if _, ok := entbuilder.GetField[schema.VString](_c.mutation, "vstring"); !ok {
 		v := DefaultVstring()
-		_c.mutation.SetVstring(v)
+		_ = _c.mutation.SetField("vstring", v)
 	}
-	if _, ok := _c.mutation.Triple(); !ok {
+	if _, ok := entbuilder.GetField[schema.Triple](_c.mutation, "triple"); !ok {
 		v := DefaultTriple()
-		_c.mutation.SetTriple(v)
+		_ = _c.mutation.SetField("triple", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *FieldTypeCreate) check() error {
-	if _, ok := _c.mutation.Int(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "int"); !ok {
 		return &ValidationError{Name: "int", Err: errors.New(`ent: missing required field "FieldType.int"`)}
 	}
-	if _, ok := _c.mutation.Int8(); !ok {
+	if _, ok := entbuilder.GetField[int8](_c.mutation, "int8"); !ok {
 		return &ValidationError{Name: "int8", Err: errors.New(`ent: missing required field "FieldType.int8"`)}
 	}
-	if _, ok := _c.mutation.Int16(); !ok {
+	if _, ok := entbuilder.GetField[int16](_c.mutation, "int16"); !ok {
 		return &ValidationError{Name: "int16", Err: errors.New(`ent: missing required field "FieldType.int16"`)}
 	}
-	if _, ok := _c.mutation.Int32(); !ok {
+	if _, ok := entbuilder.GetField[int32](_c.mutation, "int32"); !ok {
 		return &ValidationError{Name: "int32", Err: errors.New(`ent: missing required field "FieldType.int32"`)}
 	}
-	if _, ok := _c.mutation.Int64(); !ok {
+	if _, ok := entbuilder.GetField[int64](_c.mutation, "int64"); !ok {
 		return &ValidationError{Name: "int64", Err: errors.New(`ent: missing required field "FieldType.int64"`)}
 	}
-	if v, ok := _c.mutation.ValidateOptionalInt32(); ok {
+	if v, ok := entbuilder.GetField[int32](_c.mutation, "validate_optional_int32"); ok {
 		if err := ValidateOptionalInt32Validator(v); err != nil {
 			return &ValidationError{Name: "validate_optional_int32", Err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.State(); ok {
+	if v, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
 		if err := StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", Err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.MAC(); ok {
+	if v, ok := entbuilder.GetField[schema.MAC](_c.mutation, "mac"); ok {
 		if err := MACValidator(v.String()); err != nil {
 			return &ValidationError{Name: "mac", Err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Dir(); !ok {
+	if _, ok := entbuilder.GetField[http.Dir](_c.mutation, "dir"); !ok {
 		return &ValidationError{Name: "dir", Err: errors.New(`ent: missing required field "FieldType.dir"`)}
 	}
-	if v, ok := _c.mutation.Ndir(); ok {
+	if v, ok := entbuilder.GetField[http.Dir](_c.mutation, "ndir"); ok {
 		if err := NdirValidator(string(v)); err != nil {
 			return &ValidationError{Name: "ndir", Err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Link(); ok {
+	if v, ok := entbuilder.GetField[schema.Link](_c.mutation, "link"); ok {
 		if err := LinkValidator(v.String()); err != nil {
 			return &ValidationError{Name: "link", Err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.RawData(); ok {
+	if v, ok := entbuilder.GetField[[]byte](_c.mutation, "raw_data"); ok {
 		if err := RawDataValidator(v); err != nil {
 			return &ValidationError{Name: "raw_data", Err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.IP(); ok {
+	if v, ok := entbuilder.GetField[net.IP](_c.mutation, "ip"); ok {
 		if err := IPValidator([]byte(v)); err != nil {
 			return &ValidationError{Name: "ip", Err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Role(); !ok {
+	if _, ok := entbuilder.GetField[role.Role](_c.mutation, "role"); !ok {
 		return &ValidationError{Name: "role", Err: errors.New(`ent: missing required field "FieldType.role"`)}
 	}
-	if v, ok := _c.mutation.Role(); ok {
+	if v, ok := entbuilder.GetField[role.Role](_c.mutation, "role"); ok {
 		if err := RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", Err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Priority(); ok {
+	if v, ok := entbuilder.GetField[role.Priority](_c.mutation, "priority"); ok {
 		if err := PriorityValidator(v); err != nil {
 			return &ValidationError{Name: "priority", Err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Pair(); !ok {
+	if _, ok := entbuilder.GetField[schema.Pair](_c.mutation, "pair"); !ok {
 		return &ValidationError{Name: "pair", Err: errors.New(`ent: missing required field "FieldType.pair"`)}
 	}
-	if _, ok := _c.mutation.Vstring(); !ok {
+	if _, ok := entbuilder.GetField[schema.VString](_c.mutation, "vstring"); !ok {
 		return &ValidationError{Name: "vstring", Err: errors.New(`ent: missing required field "FieldType.vstring"`)}
 	}
-	if _, ok := _c.mutation.Triple(); !ok {
+	if _, ok := entbuilder.GetField[schema.Triple](_c.mutation, "triple"); !ok {
 		return &ValidationError{Name: "triple", Err: errors.New(`ent: missing required field "FieldType.triple"`)}
 	}
 	return nil
@@ -967,7 +968,7 @@ func (_c *FieldTypeCreate) sqlSave(ctx context.Context) (*FieldType, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -978,263 +979,263 @@ func (_c *FieldTypeCreate) createSpec() (*FieldType, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Int(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "int"); ok {
 		_spec.SetField(FieldInt, field.TypeInt, value)
 		_node.Int = value
 	}
-	if value, ok := _c.mutation.Int8(); ok {
+	if value, ok := entbuilder.GetField[int8](_c.mutation, "int8"); ok {
 		_spec.SetField(FieldInt8, field.TypeInt8, value)
 		_node.Int8 = value
 	}
-	if value, ok := _c.mutation.Int16(); ok {
+	if value, ok := entbuilder.GetField[int16](_c.mutation, "int16"); ok {
 		_spec.SetField(FieldInt16, field.TypeInt16, value)
 		_node.Int16 = value
 	}
-	if value, ok := _c.mutation.Int32(); ok {
+	if value, ok := entbuilder.GetField[int32](_c.mutation, "int32"); ok {
 		_spec.SetField(FieldInt32, field.TypeInt32, value)
 		_node.Int32 = value
 	}
-	if value, ok := _c.mutation.Int64(); ok {
+	if value, ok := entbuilder.GetField[int64](_c.mutation, "int64"); ok {
 		_spec.SetField(FieldInt64, field.TypeInt64, value)
 		_node.Int64 = value
 	}
-	if value, ok := _c.mutation.OptionalInt(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "optional_int"); ok {
 		_spec.SetField(FieldOptionalInt, field.TypeInt, value)
 		_node.OptionalInt = value
 	}
-	if value, ok := _c.mutation.OptionalInt8(); ok {
+	if value, ok := entbuilder.GetField[int8](_c.mutation, "optional_int8"); ok {
 		_spec.SetField(FieldOptionalInt8, field.TypeInt8, value)
 		_node.OptionalInt8 = value
 	}
-	if value, ok := _c.mutation.OptionalInt16(); ok {
+	if value, ok := entbuilder.GetField[int16](_c.mutation, "optional_int16"); ok {
 		_spec.SetField(FieldOptionalInt16, field.TypeInt16, value)
 		_node.OptionalInt16 = value
 	}
-	if value, ok := _c.mutation.OptionalInt32(); ok {
+	if value, ok := entbuilder.GetField[int32](_c.mutation, "optional_int32"); ok {
 		_spec.SetField(FieldOptionalInt32, field.TypeInt32, value)
 		_node.OptionalInt32 = value
 	}
-	if value, ok := _c.mutation.OptionalInt64(); ok {
+	if value, ok := entbuilder.GetField[int64](_c.mutation, "optional_int64"); ok {
 		_spec.SetField(FieldOptionalInt64, field.TypeInt64, value)
 		_node.OptionalInt64 = value
 	}
-	if value, ok := _c.mutation.NillableInt(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "nillable_int"); ok {
 		_spec.SetField(FieldNillableInt, field.TypeInt, value)
 		_node.NillableInt = &value
 	}
-	if value, ok := _c.mutation.NillableInt8(); ok {
+	if value, ok := entbuilder.GetField[int8](_c.mutation, "nillable_int8"); ok {
 		_spec.SetField(FieldNillableInt8, field.TypeInt8, value)
 		_node.NillableInt8 = &value
 	}
-	if value, ok := _c.mutation.NillableInt16(); ok {
+	if value, ok := entbuilder.GetField[int16](_c.mutation, "nillable_int16"); ok {
 		_spec.SetField(FieldNillableInt16, field.TypeInt16, value)
 		_node.NillableInt16 = &value
 	}
-	if value, ok := _c.mutation.NillableInt32(); ok {
+	if value, ok := entbuilder.GetField[int32](_c.mutation, "nillable_int32"); ok {
 		_spec.SetField(FieldNillableInt32, field.TypeInt32, value)
 		_node.NillableInt32 = &value
 	}
-	if value, ok := _c.mutation.NillableInt64(); ok {
+	if value, ok := entbuilder.GetField[int64](_c.mutation, "nillable_int64"); ok {
 		_spec.SetField(FieldNillableInt64, field.TypeInt64, value)
 		_node.NillableInt64 = &value
 	}
-	if value, ok := _c.mutation.ValidateOptionalInt32(); ok {
+	if value, ok := entbuilder.GetField[int32](_c.mutation, "validate_optional_int32"); ok {
 		_spec.SetField(FieldValidateOptionalInt32, field.TypeInt32, value)
 		_node.ValidateOptionalInt32 = value
 	}
-	if value, ok := _c.mutation.OptionalUint(); ok {
+	if value, ok := entbuilder.GetField[uint](_c.mutation, "optional_uint"); ok {
 		_spec.SetField(FieldOptionalUint, field.TypeUint, value)
 		_node.OptionalUint = value
 	}
-	if value, ok := _c.mutation.OptionalUint8(); ok {
+	if value, ok := entbuilder.GetField[uint8](_c.mutation, "optional_uint8"); ok {
 		_spec.SetField(FieldOptionalUint8, field.TypeUint8, value)
 		_node.OptionalUint8 = value
 	}
-	if value, ok := _c.mutation.OptionalUint16(); ok {
+	if value, ok := entbuilder.GetField[uint16](_c.mutation, "optional_uint16"); ok {
 		_spec.SetField(FieldOptionalUint16, field.TypeUint16, value)
 		_node.OptionalUint16 = value
 	}
-	if value, ok := _c.mutation.OptionalUint32(); ok {
+	if value, ok := entbuilder.GetField[uint32](_c.mutation, "optional_uint32"); ok {
 		_spec.SetField(FieldOptionalUint32, field.TypeUint32, value)
 		_node.OptionalUint32 = value
 	}
-	if value, ok := _c.mutation.OptionalUint64(); ok {
+	if value, ok := entbuilder.GetField[uint64](_c.mutation, "optional_uint64"); ok {
 		_spec.SetField(FieldOptionalUint64, field.TypeUint64, value)
 		_node.OptionalUint64 = value
 	}
-	if value, ok := _c.mutation.State(); ok {
+	if value, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
 		_spec.SetField(FieldState, field.TypeEnum, value)
 		_node.State = value
 	}
-	if value, ok := _c.mutation.OptionalFloat(); ok {
+	if value, ok := entbuilder.GetField[float64](_c.mutation, "optional_float"); ok {
 		_spec.SetField(FieldOptionalFloat, field.TypeFloat64, value)
 		_node.OptionalFloat = value
 	}
-	if value, ok := _c.mutation.OptionalFloat32(); ok {
+	if value, ok := entbuilder.GetField[float32](_c.mutation, "optional_float32"); ok {
 		_spec.SetField(FieldOptionalFloat32, field.TypeFloat32, value)
 		_node.OptionalFloat32 = value
 	}
-	if value, ok := _c.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 		_node.Text = value
 	}
-	if value, ok := _c.mutation.Datetime(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "datetime"); ok {
 		_spec.SetField(FieldDatetime, field.TypeTime, value)
 		_node.Datetime = value
 	}
-	if value, ok := _c.mutation.Decimal(); ok {
+	if value, ok := entbuilder.GetField[float64](_c.mutation, "decimal"); ok {
 		_spec.SetField(FieldDecimal, field.TypeFloat64, value)
 		_node.Decimal = value
 	}
-	if value, ok := _c.mutation.LinkOther(); ok {
+	if value, ok := entbuilder.GetField[*schema.Link](_c.mutation, "link_other"); ok {
 		_spec.SetField(FieldLinkOther, field.TypeOther, value)
 		_node.LinkOther = value
 	}
-	if value, ok := _c.mutation.LinkOtherFunc(); ok {
+	if value, ok := entbuilder.GetField[*schema.Link](_c.mutation, "link_other_func"); ok {
 		_spec.SetField(FieldLinkOtherFunc, field.TypeOther, value)
 		_node.LinkOtherFunc = value
 	}
-	if value, ok := _c.mutation.MAC(); ok {
+	if value, ok := entbuilder.GetField[schema.MAC](_c.mutation, "mac"); ok {
 		_spec.SetField(FieldMAC, field.TypeString, value)
 		_node.MAC = value
 	}
-	if value, ok := _c.mutation.StringArray(); ok {
+	if value, ok := entbuilder.GetField[schema.Strings](_c.mutation, "string_array"); ok {
 		_spec.SetField(FieldStringArray, field.TypeOther, value)
 		_node.StringArray = value
 	}
-	if value, ok := _c.mutation.Password(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "password"); ok {
 		_spec.SetField(FieldPassword, field.TypeString, value)
 		_node.Password = value
 	}
-	if value, ok := _c.mutation.StringScanner(); ok {
+	if value, ok := entbuilder.GetField[schema.StringScanner](_c.mutation, "string_scanner"); ok {
 		_spec.SetField(FieldStringScanner, field.TypeString, value)
 		_node.StringScanner = &value
 	}
-	if value, ok := _c.mutation.Duration(); ok {
+	if value, ok := entbuilder.GetField[time.Duration](_c.mutation, "duration"); ok {
 		_spec.SetField(FieldDuration, field.TypeInt64, value)
 		_node.Duration = value
 	}
-	if value, ok := _c.mutation.Dir(); ok {
+	if value, ok := entbuilder.GetField[http.Dir](_c.mutation, "dir"); ok {
 		_spec.SetField(FieldDir, field.TypeString, value)
 		_node.Dir = value
 	}
-	if value, ok := _c.mutation.Ndir(); ok {
+	if value, ok := entbuilder.GetField[http.Dir](_c.mutation, "ndir"); ok {
 		_spec.SetField(FieldNdir, field.TypeString, value)
 		_node.Ndir = &value
 	}
-	if value, ok := _c.mutation.Str(); ok {
+	if value, ok := entbuilder.GetField[sql.NullString](_c.mutation, "str"); ok {
 		_spec.SetField(FieldStr, field.TypeString, value)
 		_node.Str = value
 	}
-	if value, ok := _c.mutation.NullStr(); ok {
+	if value, ok := entbuilder.GetField[*sql.NullString](_c.mutation, "null_str"); ok {
 		_spec.SetField(FieldNullStr, field.TypeString, value)
 		_node.NullStr = value
 	}
-	if value, ok := _c.mutation.Link(); ok {
+	if value, ok := entbuilder.GetField[schema.Link](_c.mutation, "link"); ok {
 		_spec.SetField(FieldLink, field.TypeString, value)
 		_node.Link = value
 	}
-	if value, ok := _c.mutation.NullLink(); ok {
+	if value, ok := entbuilder.GetField[*schema.Link](_c.mutation, "null_link"); ok {
 		_spec.SetField(FieldNullLink, field.TypeString, value)
 		_node.NullLink = value
 	}
-	if value, ok := _c.mutation.Active(); ok {
+	if value, ok := entbuilder.GetField[schema.Status](_c.mutation, "active"); ok {
 		_spec.SetField(FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
-	if value, ok := _c.mutation.NullActive(); ok {
+	if value, ok := entbuilder.GetField[schema.Status](_c.mutation, "null_active"); ok {
 		_spec.SetField(FieldNullActive, field.TypeBool, value)
 		_node.NullActive = &value
 	}
-	if value, ok := _c.mutation.Deleted(); ok {
+	if value, ok := entbuilder.GetField[*sql.NullBool](_c.mutation, "deleted"); ok {
 		_spec.SetField(FieldDeleted, field.TypeBool, value)
 		_node.Deleted = value
 	}
-	if value, ok := _c.mutation.DeletedAt(); ok {
+	if value, ok := entbuilder.GetField[*sql.NullTime](_c.mutation, "deleted_at"); ok {
 		_spec.SetField(FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = value
 	}
-	if value, ok := _c.mutation.RawData(); ok {
+	if value, ok := entbuilder.GetField[[]byte](_c.mutation, "raw_data"); ok {
 		_spec.SetField(FieldRawData, field.TypeBytes, value)
 		_node.RawData = value
 	}
-	if value, ok := _c.mutation.Sensitive(); ok {
+	if value, ok := entbuilder.GetField[[]byte](_c.mutation, "sensitive"); ok {
 		_spec.SetField(FieldSensitive, field.TypeBytes, value)
 		_node.Sensitive = value
 	}
-	if value, ok := _c.mutation.IP(); ok {
+	if value, ok := entbuilder.GetField[net.IP](_c.mutation, "ip"); ok {
 		_spec.SetField(FieldIP, field.TypeBytes, value)
 		_node.IP = value
 	}
-	if value, ok := _c.mutation.NullInt64(); ok {
+	if value, ok := entbuilder.GetField[*sql.NullInt64](_c.mutation, "null_int64"); ok {
 		_spec.SetField(FieldNullInt64, field.TypeInt, value)
 		_node.NullInt64 = value
 	}
-	if value, ok := _c.mutation.SchemaInt(); ok {
+	if value, ok := entbuilder.GetField[schema.Int](_c.mutation, "schema_int"); ok {
 		_spec.SetField(FieldSchemaInt, field.TypeInt, value)
 		_node.SchemaInt = value
 	}
-	if value, ok := _c.mutation.SchemaInt8(); ok {
+	if value, ok := entbuilder.GetField[schema.Int8](_c.mutation, "schema_int8"); ok {
 		_spec.SetField(FieldSchemaInt8, field.TypeInt8, value)
 		_node.SchemaInt8 = value
 	}
-	if value, ok := _c.mutation.SchemaInt64(); ok {
+	if value, ok := entbuilder.GetField[schema.Int64](_c.mutation, "schema_int64"); ok {
 		_spec.SetField(FieldSchemaInt64, field.TypeInt64, value)
 		_node.SchemaInt64 = value
 	}
-	if value, ok := _c.mutation.SchemaFloat(); ok {
+	if value, ok := entbuilder.GetField[schema.Float64](_c.mutation, "schema_float"); ok {
 		_spec.SetField(FieldSchemaFloat, field.TypeFloat64, value)
 		_node.SchemaFloat = value
 	}
-	if value, ok := _c.mutation.SchemaFloat32(); ok {
+	if value, ok := entbuilder.GetField[schema.Float32](_c.mutation, "schema_float32"); ok {
 		_spec.SetField(FieldSchemaFloat32, field.TypeFloat32, value)
 		_node.SchemaFloat32 = value
 	}
-	if value, ok := _c.mutation.NullFloat(); ok {
+	if value, ok := entbuilder.GetField[*sql.NullFloat64](_c.mutation, "null_float"); ok {
 		_spec.SetField(FieldNullFloat, field.TypeFloat64, value)
 		_node.NullFloat = value
 	}
-	if value, ok := _c.mutation.Role(); ok {
+	if value, ok := entbuilder.GetField[role.Role](_c.mutation, "role"); ok {
 		_spec.SetField(FieldRole, field.TypeEnum, value)
 		_node.Role = value
 	}
-	if value, ok := _c.mutation.Priority(); ok {
+	if value, ok := entbuilder.GetField[role.Priority](_c.mutation, "priority"); ok {
 		_spec.SetField(FieldPriority, field.TypeEnum, value)
 		_node.Priority = value
 	}
-	if value, ok := _c.mutation.OptionalUUID(); ok {
+	if value, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "optional_uuid"); ok {
 		_spec.SetField(FieldOptionalUUID, field.TypeUUID, value)
 		_node.OptionalUUID = value
 	}
-	if value, ok := _c.mutation.NillableUUID(); ok {
+	if value, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "nillable_uuid"); ok {
 		_spec.SetField(FieldNillableUUID, field.TypeUUID, value)
 		_node.NillableUUID = &value
 	}
-	if value, ok := _c.mutation.Strings(); ok {
+	if value, ok := entbuilder.GetField[[]string](_c.mutation, "strings"); ok {
 		_spec.SetField(FieldStrings, field.TypeJSON, value)
 		_node.Strings = value
 	}
-	if value, ok := _c.mutation.Pair(); ok {
+	if value, ok := entbuilder.GetField[schema.Pair](_c.mutation, "pair"); ok {
 		_spec.SetField(FieldPair, field.TypeBytes, value)
 		_node.Pair = value
 	}
-	if value, ok := _c.mutation.NilPair(); ok {
+	if value, ok := entbuilder.GetField[*schema.Pair](_c.mutation, "nil_pair"); ok {
 		_spec.SetField(FieldNilPair, field.TypeBytes, value)
 		_node.NilPair = value
 	}
-	if value, ok := _c.mutation.Vstring(); ok {
+	if value, ok := entbuilder.GetField[schema.VString](_c.mutation, "vstring"); ok {
 		_spec.SetField(FieldVstring, field.TypeString, value)
 		_node.Vstring = value
 	}
-	if value, ok := _c.mutation.Triple(); ok {
+	if value, ok := entbuilder.GetField[schema.Triple](_c.mutation, "triple"); ok {
 		_spec.SetField(FieldTriple, field.TypeString, value)
 		_node.Triple = value
 	}
-	if value, ok := _c.mutation.BigInt(); ok {
+	if value, ok := entbuilder.GetField[schema.BigInt](_c.mutation, "big_int"); ok {
 		_spec.SetField(FieldBigInt, field.TypeInt, value)
 		_node.BigInt = value
 	}
-	if value, ok := _c.mutation.PasswordOther(); ok {
+	if value, ok := entbuilder.GetField[schema.Password](_c.mutation, "password_other"); ok {
 		_spec.SetField(FieldPasswordOther, field.TypeOther, value)
 		_node.PasswordOther = value
 	}
@@ -4227,11 +4228,11 @@ func (_c *FieldTypeCreateBulk) Save(ctx context.Context) ([]*FieldType, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

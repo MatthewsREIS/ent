@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,7 +32,7 @@ func NewRevisionUpdate(c Config, hooks []Hook, mutation *RevisionMutation) *Revi
 
 // Where appends a list predicates to the RevisionUpdate builder.
 func (_u *RevisionUpdate) Where(ps ...predicate.Revision) *RevisionUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -42,7 +43,7 @@ func (_u *RevisionUpdate) Mutation() *RevisionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RevisionUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RevisionMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -108,7 +109,7 @@ func (_u *RevisionUpdateOne) Mutation() *RevisionMutation {
 
 // Where appends a list predicates to the RevisionUpdate builder.
 func (_u *RevisionUpdateOne) Where(ps ...predicate.Revision) *RevisionUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -121,7 +122,7 @@ func (_u *RevisionUpdateOne) Select(field string, fields ...string) *RevisionUpd
 
 // Save executes the query and returns the updated Revision entity.
 func (_u *RevisionUpdateOne) Save(ctx context.Context) (*Revision, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Revision](ctx, &entbuilder.UpdateState[*RevisionMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

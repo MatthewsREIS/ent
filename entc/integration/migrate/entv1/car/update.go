@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewCarUpdate(c Config, hooks []Hook, mutation *CarMutation) *CarUpdate {
 
 // Where appends a list predicates to the CarUpdate builder.
 func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CarUpdate) SetOwnerID(id int) *CarUpdate {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -56,13 +57,13 @@ func (_u *CarUpdate) Mutation() *CarMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CarUpdate) ClearOwner() *CarUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -96,7 +97,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -109,7 +110,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -152,7 +153,7 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -171,13 +172,13 @@ func (_u *CarUpdateOne) Mutation() *CarMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CarUpdateOne) ClearOwner() *CarUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Where appends a list predicates to the CarUpdate builder.
 func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -190,7 +191,7 @@ func (_u *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
 
 // Save executes the query and returns the updated Car entity.
 func (_u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Car](ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -241,7 +242,7 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			}
 		}
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -254,7 +255,7 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,

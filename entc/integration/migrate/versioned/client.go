@@ -141,9 +141,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *GroupMutation:
-		return c.Group.mutate(ctx, m)
+		return c.Group.Mutate(ctx, m)
 	case *UserMutation:
-		return c.User.mutate(ctx, m)
+		return c.User.Mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("versioned: unknown mutation type %T", m)
 	}

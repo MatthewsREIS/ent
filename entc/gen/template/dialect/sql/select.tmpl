@@ -12,11 +12,11 @@ in the LICENSE file in the root directory of this source tree.
 
 func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, root *{{ $.QueryName }}, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len({{ $receiver}}.fns))
-	for _, fn := range {{ $receiver }}.fns {
+	aggregation := make([]string, 0, len({{ $receiver}}.Fns))
+	for _, fn := range {{ $receiver }}.Fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*{{ $receiver }}.selector.flds); {
+	switch n := len(*{{ $receiver }}.selector.Flds); {
 	{{- /* If no columns were selected, the default selection is the aggregation.*/}}
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)

@@ -187,14 +187,15 @@ func HasUser() predicate.Role {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Role {
-	return predicate.Role(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Role(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRolesUsers applies the HasEdge predicate on the "roles_users" edge.
@@ -210,14 +211,15 @@ func HasRolesUsers() predicate.Role {
 
 // HasRolesUsersWith applies the HasEdge predicate on the "roles_users" edge with a given conditions (other predicates).
 func HasRolesUsersWith(preds ...predicate.RoleUser) predicate.Role {
-	return predicate.Role(func(s *sql.Selector) {
-		step := newRolesUsersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Role(
+		func(s *sql.Selector) {
+			step := newRolesUsersStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

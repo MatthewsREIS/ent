@@ -151,14 +151,15 @@ func HasRentals() predicate.Car {
 
 // HasRentalsWith applies the HasEdge predicate on the "rentals" edge with a given conditions (other predicates).
 func HasRentalsWith(preds ...predicate.Rental) predicate.Car {
-	return predicate.Car(func(s *sql.Selector) {
-		step := newRentalsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Car(
+		func(s *sql.Selector) {
+			step := newRentalsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

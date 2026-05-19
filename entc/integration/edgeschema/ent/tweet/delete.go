@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,13 +30,13 @@ func NewTweetDelete(c Config, hooks []Hook, mutation *TweetMutation) *TweetDelet
 
 // Where appends a list predicates to the TweetDelete builder.
 func (_d *TweetDelete) Where(ps ...predicate.Tweet) *TweetDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *TweetDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*TweetMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -76,7 +77,7 @@ func NewTweetDeleteOne(d *TweetDelete) *TweetDeleteOne {
 
 // Where appends a list predicates to the TweetDelete builder.
 func (_d *TweetDeleteOne) Where(ps ...predicate.Tweet) *TweetDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

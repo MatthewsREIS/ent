@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -34,7 +35,7 @@ func NewLinkCreate(c Config, hooks []Hook, mutation *LinkMutation) *LinkCreate {
 
 // SetLinkInformation sets the "link_information" field.
 func (_c *LinkCreate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkCreate {
-	_c.mutation.SetLinkInformation(v)
+	_ = _c.mutation.SetField("link_information", v)
 	return _c
 }
 
@@ -87,9 +88,9 @@ func (_c *LinkCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *LinkCreate) defaults() {
-	if _, ok := _c.mutation.LinkInformation(); !ok {
+	if _, ok := entbuilder.GetField[map[string]schema.LinkInformation](_c.mutation, "link_information"); !ok {
 		v := DefaultLinkInformation
-		_c.mutation.SetLinkInformation(v)
+		_ = _c.mutation.SetField("link_information", v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := DefaultID()
@@ -99,7 +100,7 @@ func (_c *LinkCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *LinkCreate) check() error {
-	if _, ok := _c.mutation.LinkInformation(); !ok {
+	if _, ok := entbuilder.GetField[map[string]schema.LinkInformation](_c.mutation, "link_information"); !ok {
 		return &ValidationError{Name: "link_information", Err: errors.New(`ent: missing required field "Link.link_information"`)}
 	}
 	return nil
@@ -123,7 +124,7 @@ func (_c *LinkCreate) sqlSave(ctx context.Context) (*Link, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -138,7 +139,7 @@ func (_c *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.LinkInformation(); ok {
+	if value, ok := entbuilder.GetField[map[string]schema.LinkInformation](_c.mutation, "link_information"); ok {
 		_spec.SetField(FieldLinkInformation, field.TypeJSON, value)
 		_node.LinkInformation = value
 	}
@@ -362,7 +363,7 @@ func (_c *LinkCreateBulk) Save(ctx context.Context) ([]*Link, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,13 +34,13 @@ func NewParentUpdate(c Config, hooks []Hook, mutation *ParentMutation) *ParentUp
 
 // Where appends a list predicates to the ParentUpdate builder.
 func (_u *ParentUpdate) Where(ps ...predicate.Parent) *ParentUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetByAdoption sets the "by_adoption" field.
 func (_u *ParentUpdate) SetByAdoption(v bool) *ParentUpdate {
-	_u.mutation.SetByAdoption(v)
+	_ = _u.mutation.SetField("by_adoption", v)
 	return _u
 }
 
@@ -58,7 +59,7 @@ func (_u *ParentUpdate) Mutation() *ParentMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ParentUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ParentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -85,10 +86,10 @@ func (_u *ParentUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ParentUpdate) check() error {
-	if _u.mutation.ChildCleared() && len(_u.mutation.ChildIDs()) > 0 {
+	if _u.mutation.EdgeCleared("child") && len(_u.mutation.EdgeIDs("child")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Parent.child"`)
 	}
-	if _u.mutation.ParentCleared() && len(_u.mutation.ParentIDs()) > 0 {
+	if _u.mutation.EdgeCleared("parent") && len(_u.mutation.EdgeIDs("parent")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Parent.parent"`)
 	}
 	return nil
@@ -112,7 +113,7 @@ func (_u *ParentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.ByAdoption(); ok {
+	if value, ok := entbuilder.GetField[bool](_u.mutation, "by_adoption"); ok {
 		_spec.SetField(FieldByAdoption, field.TypeBool, value)
 	}
 	schemaConfig := _u.Config.SchemaConfig()
@@ -147,7 +148,7 @@ func NewParentUpdateOne(c Config, hooks []Hook, mutation *ParentMutation) *Paren
 
 // SetByAdoption sets the "by_adoption" field.
 func (_u *ParentUpdateOne) SetByAdoption(v bool) *ParentUpdateOne {
-	_u.mutation.SetByAdoption(v)
+	_ = _u.mutation.SetField("by_adoption", v)
 	return _u
 }
 
@@ -166,7 +167,7 @@ func (_u *ParentUpdateOne) Mutation() *ParentMutation {
 
 // Where appends a list predicates to the ParentUpdate builder.
 func (_u *ParentUpdateOne) Where(ps ...predicate.Parent) *ParentUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -179,7 +180,7 @@ func (_u *ParentUpdateOne) Select(field string, fields ...string) *ParentUpdateO
 
 // Save executes the query and returns the updated Parent entity.
 func (_u *ParentUpdateOne) Save(ctx context.Context) (*Parent, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Parent](ctx, &entbuilder.UpdateState[*ParentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -206,10 +207,10 @@ func (_u *ParentUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ParentUpdateOne) check() error {
-	if _u.mutation.ChildCleared() && len(_u.mutation.ChildIDs()) > 0 {
+	if _u.mutation.EdgeCleared("child") && len(_u.mutation.EdgeIDs("child")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Parent.child"`)
 	}
-	if _u.mutation.ParentCleared() && len(_u.mutation.ParentIDs()) > 0 {
+	if _u.mutation.EdgeCleared("parent") && len(_u.mutation.EdgeIDs("parent")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Parent.parent"`)
 	}
 	return nil
@@ -250,7 +251,7 @@ func (_u *ParentUpdateOne) sqlSave(ctx context.Context) (_node *Parent, err erro
 			}
 		}
 	}
-	if value, ok := _u.mutation.ByAdoption(); ok {
+	if value, ok := entbuilder.GetField[bool](_u.mutation, "by_adoption"); ok {
 		_spec.SetField(FieldByAdoption, field.TypeBool, value)
 	}
 	schemaConfig := _u.Config.SchemaConfig()

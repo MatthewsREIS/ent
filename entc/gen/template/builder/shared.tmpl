@@ -14,12 +14,21 @@ in the LICENSE file in the root directory of this source tree.
 
 import (
 	"context"
+	"fmt"
+	{{- if eq $.Storage.Name "sql" }}
+	"reflect"
+	{{- end }}
 	{{- if eq $.Storage.Name "gremlin" }}
-		"fmt"
 		"strings"
 
 		"entgo.io/ent/dialect/gremlin"
 		"entgo.io/ent/dialect/gremlin/encoding/graphson"
+	{{- end }}
+
+	"entgo.io/ent"
+	{{- if and (eq $.Storage.Name "sql") ($.Config.FeatureEnabled "entql") }}
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 	{{- end }}
 
 	"{{ $.Config.Package }}/internal"
@@ -76,15 +85,214 @@ type {{ $.Name }}Edges = internal.{{ $.Name }}Edges
 {{- end }}
 type {{ plural $.Name }} = internal.{{ plural $.Name }}
 
-// Mutation type aliases and constructors from internal.
-type {{ $.MutationName }} = internal.{{ $.MutationName }}
-type {{ $.MutationName }}Option = internal.{{ $.MutationName }}Option
+{{- /* Mutation aliases moved to mutation_type.tmpl (PR 6 sub-package owner). */}}
 
-var New{{ $.MutationName }} = internal.New{{ $.MutationName }}
-{{- with $.HasOneFieldID }}
-var With{{ $.Name }}ID = internal.With{{ $.Name }}ID
-var With{{ $.Name }} = internal.With{{ $.Name }}
-var With{{ $.Name }}IDsFunc = internal.With{{ $.Name }}IDsFunc
+// Error-check function aliases for the shared helpers in the internal package.
+var (
+	IsValidationError = internal.IsValidationError
+	IsNotFound        = internal.IsNotFound
+	MaskNotFound      = internal.MaskNotFound
+	IsNotSingular     = internal.IsNotSingular
+	IsNotLoaded       = internal.IsNotLoaded
+	IsConstraintError = internal.IsConstraintError
+)
+
+// setContextOp is an alias for the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
+
+// withInterceptors is a wrapper around internal.WithInterceptors so callers
+// can use the conventional lowercase name. Generic functions can't be assigned
+// to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
+}
+
+{{- if eq $.Storage.Name "sql" }}
+
+// Type aliases for sql-specific shared helpers.
+type (
+	selector       = internal.Selector
+	AggregateFunc  = internal.AggregateFunc
+	queryHook      = internal.QueryHook
+	{{- if $.Config.FeatureEnabled "entql" }}
+	predicateAdder = internal.PredicateAdder
+	{{- end }}
+)
+
+{{- /* Aggregator builders (As/Count/Max/Min/Mean/Sum) intentionally NOT emitted
+       in sub-package scope: (a) consumer code calls them as ent.X via the root
+       facade (AggregateFunc is aliased so the type flows through), (b) the
+       builder names collide with where-predicates for fields that happen to be
+       named "count"/"max"/"min" etc. (e.g., customid/Blob.Count predicate).
+       checkColumn is also root-only — sub-package consumers go through Aggregate
+       on builders, not raw checkColumn calls. */}}
+
+// querierAll / querierCount have generic constraints that bind to local
+// sqlAll/sqlCount methods (whose identity is package-local because the
+// method name is unexported) — so they must be emitted per-sub-package.
+func querierAll[V Value, Q interface {
+	sqlAll(context.Context, ...queryHook) (V, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlAll(ctx)
+	})
+}
+
+func querierCount[Q interface {
+	sqlCount(context.Context) (int, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlCount(ctx)
+	})
+}
+
+// scanWithInterceptors's Q2 constraint references the unexported sqlScan
+// method, whose identity is package-local — must stay per-sub-package.
+func scanWithInterceptors[Q1 ent.Query, Q2 interface {
+	sqlScan(context.Context, Q1, any) error
+}](ctx context.Context, rootQuery Q1, selectOrGroup Q2, inters []Interceptor, v any) error {
+	rv := reflect.ValueOf(v)
+	var qr Querier = QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q1)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		if err := selectOrGroup.sqlScan(ctx, query, v); err != nil {
+			return nil, err
+		}
+		if k := rv.Kind(); k == reflect.Pointer && rv.Elem().CanInterface() {
+			return rv.Elem().Interface(), nil
+		}
+		return v, nil
+	})
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	vv, err := qr.Query(ctx, rootQuery)
+	if err != nil {
+		return err
+	}
+	switch rv2 := reflect.ValueOf(vv); {
+	case rv.IsNil(), rv2.IsNil(), rv.Kind() != reflect.Pointer:
+	case rv.Type() == rv2.Type():
+		rv.Elem().Set(rv2.Elem())
+	case rv.Elem().Type() == rv2.Type():
+		rv.Elem().Set(rv2)
+	}
+	return nil
+}
+
+{{- if $.Config.FeatureEnabled "entql" }}
+
+// schemaGraph holds this entity's schema for entql predicate evaluation.
+// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
+var schemaGraph = func() *sqlgraph.Schema {
+	{{- /* Deduplicate edge target Types: an entity can have multiple edges
+	       pointing at the same neighbor (e.g., owner + reviewer → User).
+	       We key dedupe on Type.Name but keep the *Type around so we can
+	       emit Table / Columns / ID metadata into the stub NodeSpec. */}}
+	{{- $stubs := dict $.Name true }}
+	{{- $stubTypes := list }}
+	{{- range $e := $.Edges }}
+	{{- if not (hasKey $stubs $e.Type.Name) }}
+	{{- $stubs = set $stubs $e.Type.Name true }}
+	{{- $stubTypes = append $stubTypes $e.Type }}
+	{{- end }}
+	{{- end }}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, {{ add 1 (len $stubTypes) }})}
+	graph.Nodes[0] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   Table,
+			Columns: Columns,
+			{{- if $.HasOneFieldID }}
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.{{ $.ID.Type.ConstName }},
+				Column: {{ $.ID.Constant }},
+			},
+			{{- else }}
+			CompositeID: []*sqlgraph.FieldSpec{
+				{{- range $id := $.EdgeSchema.ID }}
+				{Type: field.{{ $id.Type.ConstName }}, Column: {{ $id.Constant }}},
+				{{- end }}
+			},
+			{{- end }}
+		},
+		Type: "{{ $.Name }}",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			{{- range $f := $.Fields }}
+			{{ $f.Constant }}: {Type: field.{{ $f.Type.ConstName }}, Column: {{ $f.Constant }}},
+			{{- end }}
+		},
+	}
+	{{- range $i, $t := $stubTypes }}
+	graph.Nodes[{{ add 1 $i }}] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "{{ $t.Table }}",
+			Columns: []string{
+				{{- if $t.HasOneFieldID }}
+				"{{ $t.ID.StorageKey }}",
+				{{- end }}
+				{{- range $f := $t.Fields }}
+				{{- if not $f.IsDeprecated }}
+				"{{ $f.StorageKey }}",
+				{{- end }}
+				{{- end }}
+			},
+			{{- if $t.HasOneFieldID }}
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.{{ $t.ID.Type.ConstName }},
+				Column: "{{ $t.ID.StorageKey }}",
+			},
+			{{- else }}
+			CompositeID: []*sqlgraph.FieldSpec{
+				{{- range $idf := $t.EdgeSchema.ID }}
+				{Type: field.{{ $idf.Type.ConstName }}, Column: "{{ $idf.StorageKey }}"},
+				{{- end }}
+			},
+			{{- end }}
+		},
+		Type: "{{ $t.Name }}",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			{{- range $f := $t.Fields }}
+			"{{ $f.StorageKey }}": {Type: field.{{ $f.Type.ConstName }}, Column: "{{ $f.StorageKey }}"},
+			{{- end }}
+		},
+	}
+	{{- end }}
+	{{- range $e := $.Edges }}
+	graph.MustAddE(
+		"{{ $e.Name }}",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.{{ $e.Rel.Type }},
+			Inverse: {{ $e.IsInverse }},
+			Table:   {{ $e.TableConstant }},
+			Columns: {{ if $e.M2M }}{{ $e.PKConstant }}{{ else }}[]string{ {{ $e.ColumnConstant }} }{{ end }},
+			Bidi:    {{ $e.Bidi }},
+		},
+		"{{ $.Name }}",
+		"{{ $e.Type.Name }}",
+	)
+	{{- end }}
+	return graph
+}()
+{{- end }}
+
 {{- end }}
 
 {{- if eq $.Storage.Name "gremlin" }}

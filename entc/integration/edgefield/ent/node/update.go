@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,14 +32,14 @@ func NewNodeUpdate(c Config, hooks []Hook, mutation *NodeMutation) *NodeUpdate {
 
 // Where appends a list predicates to the NodeUpdate builder.
 func (_u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetValue sets the "value" field.
 func (_u *NodeUpdate) SetValue(v int) *NodeUpdate {
-	_u.mutation.ResetValue()
-	_u.mutation.SetValue(v)
+	_ = _u.mutation.ResetField("value")
+	_ = _u.mutation.SetField("value", v)
 	return _u
 }
 
@@ -52,13 +53,13 @@ func (_u *NodeUpdate) SetNillableValue(v *int) *NodeUpdate {
 
 // AddValue adds value to the "value" field.
 func (_u *NodeUpdate) AddValue(v int) *NodeUpdate {
-	_u.mutation.AddValue(v)
+	_ = _u.mutation.AddField("value", v)
 	return _u
 }
 
 // SetPrevID sets the "prev_id" field.
 func (_u *NodeUpdate) SetPrevID(v int) *NodeUpdate {
-	_u.mutation.SetPrevID(v)
+	_ = _u.mutation.SetEdgeID("prev", v)
 	return _u
 }
 
@@ -72,13 +73,13 @@ func (_u *NodeUpdate) SetNillablePrevID(v *int) *NodeUpdate {
 
 // ClearPrevID clears the value of the "prev_id" field.
 func (_u *NodeUpdate) ClearPrevID() *NodeUpdate {
-	_u.mutation.ClearPrevID()
+	_ = _u.mutation.ClearEdge("prev")
 	return _u
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
 func (_u *NodeUpdate) SetNextID(id int) *NodeUpdate {
-	_u.mutation.SetNextID(id)
+	_ = _u.mutation.SetEdgeID("next", id)
 	return _u
 }
 
@@ -97,19 +98,19 @@ func (_u *NodeUpdate) Mutation() *NodeMutation {
 
 // ClearPrev clears the "prev" edge to the Node entity.
 func (_u *NodeUpdate) ClearPrev() *NodeUpdate {
-	_u.mutation.ClearPrev()
+	_ = _u.mutation.ClearEdge("prev")
 	return _u
 }
 
 // ClearNext clears the "next" edge to the Node entity.
 func (_u *NodeUpdate) ClearNext() *NodeUpdate {
-	_u.mutation.ClearNext()
+	_ = _u.mutation.ClearEdge("next")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *NodeUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*NodeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -143,13 +144,14 @@ func (_u *NodeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Value(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "value"); ok {
 		_spec.SetField(FieldValue, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedValue(); ok {
+	if added, ok := _u.mutation.AddedField("value"); ok {
+		value := added.(int)
 		_spec.AddField(FieldValue, field.TypeInt, value)
 	}
-	if _u.mutation.PrevCleared() {
+	if _u.mutation.EdgeCleared("prev") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -162,7 +164,7 @@ func (_u *NodeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.PrevIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("prev"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -178,7 +180,7 @@ func (_u *NodeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.NextCleared() {
+	if _u.mutation.EdgeCleared("next") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -191,7 +193,7 @@ func (_u *NodeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.NextIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("next"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -234,8 +236,8 @@ func NewNodeUpdateOne(c Config, hooks []Hook, mutation *NodeMutation) *NodeUpdat
 
 // SetValue sets the "value" field.
 func (_u *NodeUpdateOne) SetValue(v int) *NodeUpdateOne {
-	_u.mutation.ResetValue()
-	_u.mutation.SetValue(v)
+	_ = _u.mutation.ResetField("value")
+	_ = _u.mutation.SetField("value", v)
 	return _u
 }
 
@@ -249,13 +251,13 @@ func (_u *NodeUpdateOne) SetNillableValue(v *int) *NodeUpdateOne {
 
 // AddValue adds value to the "value" field.
 func (_u *NodeUpdateOne) AddValue(v int) *NodeUpdateOne {
-	_u.mutation.AddValue(v)
+	_ = _u.mutation.AddField("value", v)
 	return _u
 }
 
 // SetPrevID sets the "prev_id" field.
 func (_u *NodeUpdateOne) SetPrevID(v int) *NodeUpdateOne {
-	_u.mutation.SetPrevID(v)
+	_ = _u.mutation.SetEdgeID("prev", v)
 	return _u
 }
 
@@ -269,13 +271,13 @@ func (_u *NodeUpdateOne) SetNillablePrevID(v *int) *NodeUpdateOne {
 
 // ClearPrevID clears the value of the "prev_id" field.
 func (_u *NodeUpdateOne) ClearPrevID() *NodeUpdateOne {
-	_u.mutation.ClearPrevID()
+	_ = _u.mutation.ClearEdge("prev")
 	return _u
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
 func (_u *NodeUpdateOne) SetNextID(id int) *NodeUpdateOne {
-	_u.mutation.SetNextID(id)
+	_ = _u.mutation.SetEdgeID("next", id)
 	return _u
 }
 
@@ -294,19 +296,19 @@ func (_u *NodeUpdateOne) Mutation() *NodeMutation {
 
 // ClearPrev clears the "prev" edge to the Node entity.
 func (_u *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
-	_u.mutation.ClearPrev()
+	_ = _u.mutation.ClearEdge("prev")
 	return _u
 }
 
 // ClearNext clears the "next" edge to the Node entity.
 func (_u *NodeUpdateOne) ClearNext() *NodeUpdateOne {
-	_u.mutation.ClearNext()
+	_ = _u.mutation.ClearEdge("next")
 	return _u
 }
 
 // Where appends a list predicates to the NodeUpdate builder.
 func (_u *NodeUpdateOne) Where(ps ...predicate.Node) *NodeUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -319,7 +321,7 @@ func (_u *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {
 
 // Save executes the query and returns the updated Node entity.
 func (_u *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Node](ctx, &entbuilder.UpdateState[*NodeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -370,13 +372,14 @@ func (_u *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Value(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "value"); ok {
 		_spec.SetField(FieldValue, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedValue(); ok {
+	if added, ok := _u.mutation.AddedField("value"); ok {
+		value := added.(int)
 		_spec.AddField(FieldValue, field.TypeInt, value)
 	}
-	if _u.mutation.PrevCleared() {
+	if _u.mutation.EdgeCleared("prev") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -389,7 +392,7 @@ func (_u *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.PrevIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("prev"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -405,7 +408,7 @@ func (_u *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.NextCleared() {
+	if _u.mutation.EdgeCleared("next") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -418,7 +421,7 @@ func (_u *NodeUpdateOne) sqlSave(ctx context.Context) (_node *Node, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.NextIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("next"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,

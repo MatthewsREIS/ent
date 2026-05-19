@@ -115,14 +115,15 @@ func HasAdmins() predicate.Blog {
 
 // HasAdminsWith applies the HasEdge predicate on the "admins" edge with a given conditions (other predicates).
 func HasAdminsWith(preds ...predicate.User) predicate.Blog {
-	return predicate.Blog(func(s *sql.Selector) {
-		step := newAdminsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Blog(
+		func(s *sql.Selector) {
+			step := newAdminsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

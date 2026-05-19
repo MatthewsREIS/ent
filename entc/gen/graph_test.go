@@ -559,23 +559,37 @@ func TestGraph_Gen(t *testing.T) {
 		_, err := os.Stat(fmt.Sprintf("%s/%s.go", target, name))
 		require.NoError(err)
 	}
-	// Ensure entity files were generated (root-level).
-	for _, format := range []string{"%s", "%s_query"} {
-		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
+	// Ensure entity model files were generated at the root (these are
+	// the typed model files, e.g. t1.go) and the per-entity query lives
+	// in the sub-package (PR 6: t1/query.go, not root t1_query.go).
+	for _, name := range []string{"t1", "t2"} {
+		_, err := os.Stat(filepath.Join(target, name+".go"))
 		require.NoError(err)
-		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
+		_, err = os.Stat(filepath.Join(target, name, "query.go"))
 		require.NoError(err)
 	}
-	// Ensure CUD builder files were generated in sub-packages.
-	for _, name := range []string{"create", "update", "delete"} {
+	// Ensure create builder files were generated in sub-packages.
+	// (update/delete are suppressed when AllFeatures includes FeatureNoUpdate/FeatureNoDelete.)
+	for _, name := range []string{"create"} {
 		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
 		require.NoError(err)
 		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
 		require.NoError(err)
 	}
-	// Ensure client files were generated in the root target.
-	for _, name := range []string{"t1_client.go", "t2_client.go"} {
-		_, err := os.Stat(filepath.Join(target, name))
+	// Ensure update/delete files are NOT generated when FeatureNoUpdate/FeatureNoDelete active.
+	for _, name := range []string{"update", "delete"} {
+		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
+		require.True(os.IsNotExist(err), "expected %s/t1/%s.go to not exist with no-update/no-delete features", target, name)
+		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
+		require.True(os.IsNotExist(err), "expected %s/t2/%s.go to not exist with no-update/no-delete features", target, name)
+	}
+	// PR 6: per-entity client lives at <entity>/client.go inside the
+	// sub-package; the root-level <entity>_facade.go provides type
+	// aliases and edge free functions. Both should exist.
+	for _, entity := range []string{"t1", "t2"} {
+		_, err := os.Stat(filepath.Join(target, entity+"_facade.go"))
+		require.NoError(err)
+		_, err = os.Stat(filepath.Join(target, entity, "client.go"))
 		require.NoError(err)
 	}
 	_, err = os.Stat(filepath.Join(target, "external.go"))
@@ -620,24 +634,30 @@ func TestGraph_Gen(t *testing.T) {
 	require.NoError(err)
 	require.NotNil(graph)
 	require.NoError(graph.Gen())
-	// Ensure entity files were generated for t1 but not t2.
-	for _, format := range []string{"%s", "%s_query"} {
-		_, err := os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t1"))
-		require.NoError(err)
-		_, err = os.Stat(fmt.Sprintf(fmt.Sprintf("%s/%s.go", target, format), "t2"))
-		require.Error(err)
-	}
-	// Ensure CUD builder files were generated in sub-packages for t1 but not t2.
-	for _, name := range []string{"create", "update", "delete"} {
-		_, err := os.Stat(filepath.Join(target, "t1", name+".go"))
-		require.NoError(err)
-		_, err = os.Stat(filepath.Join(target, "t2", name+".go"))
-		require.Error(err)
-	}
-	// Ensure client files were generated in the root target for t1 but not t2.
-	_, err = os.Stat(filepath.Join(target, "t1_client.go"))
+	// Ensure entity model file (t1.go) is at root and per-entity query
+	// (t1/query.go) is in the sub-package — for t1 but not t2.
+	_, err = os.Stat(filepath.Join(target, "t1.go"))
 	require.NoError(err)
-	_, err = os.Stat(filepath.Join(target, "t2_client.go"))
+	_, err = os.Stat(filepath.Join(target, "t2.go"))
+	require.Error(err)
+	_, err = os.Stat(filepath.Join(target, "t1", "query.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "t2", "query.go"))
+	require.Error(err)
+	// Ensure create builder was generated for t1 but not t2.
+	// (update/delete suppressed by FeatureNoUpdate/FeatureNoDelete in AllFeatures.)
+	_, err = os.Stat(filepath.Join(target, "t1", "create.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "t2", "create.go"))
+	require.Error(err)
+	// PR 6 facade file at root + sub-package client.go: emitted for t1, not for t2.
+	_, err = os.Stat(filepath.Join(target, "t1_facade.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "t2_facade.go"))
+	require.Error(err)
+	_, err = os.Stat(filepath.Join(target, "t1", "client.go"))
+	require.NoError(err)
+	_, err = os.Stat(filepath.Join(target, "t2", "client.go"))
 	require.Error(err)
 	// Ensure the deleted type's sub-package directory was removed.
 	_, err = os.Stat(filepath.Join(target, "t2"))
@@ -674,9 +694,12 @@ func TestGraph_Gen_CleanStaleRootFiles(t *testing.T) {
 			require.NoError(err)
 		}
 	}
-	// Ensure client files were generated in the root target.
-	for _, name := range []string{"user_client.go", "pet_client.go"} {
-		_, err := os.Stat(filepath.Join(target, name))
+	// PR 6 replaced root-level <entity>_client.go with <entity>_facade.go;
+	// the actual sub-package client lives at <entity>/client.go.
+	for _, entity := range []string{"user", "pet"} {
+		_, err := os.Stat(filepath.Join(target, entity+"_facade.go"))
+		require.NoError(err)
+		_, err = os.Stat(filepath.Join(target, entity, "client.go"))
 		require.NoError(err)
 	}
 	// Ensure stale root-level CUD files were replaced with stubs for active types.
@@ -819,11 +842,14 @@ func TestGraph_Gen_SplitOffByDefault(t *testing.T) {
 	require.NoError(err)
 	require.NoError(graph.Gen())
 
-	_, err = os.Stat(filepath.Join(target, "user_query.go"))
+	// PR 6: per-entity query file lives at user/query.go, not the
+	// pre-PR6 root-level user_query.go. Without the Split feature the
+	// per-entity file is monolithic (no _base / _<entity> variants).
+	_, err = os.Stat(filepath.Join(target, "user", "query.go"))
 	require.NoError(err)
-	_, err = os.Stat(filepath.Join(target, "user_query_base.go"))
+	_, err = os.Stat(filepath.Join(target, "user", "query_base.go"))
 	require.True(os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(target, "user_query_user.go"))
+	_, err = os.Stat(filepath.Join(target, "user", "query_user.go"))
 	require.True(os.IsNotExist(err))
 }
 
@@ -860,19 +886,21 @@ func TestGraph_Gen_SplitDisableRemovesStaleFiles(t *testing.T) {
 	require.NoError(err)
 	require.NoError(graph.Gen())
 
-	_, err = os.Stat(filepath.Join(target, "user_query_base.go"))
+	// PR 6: split-feature variants live inside the sub-package dir as
+	// user/query_base.go + user/query_<type>.go, not at root level.
+	_, err = os.Stat(filepath.Join(target, "user", "query_base.go"))
 	require.NoError(err)
-	parts, err := splitTypeFiles(target, "user_query")
+	parts, err := splitTypeFiles(filepath.Join(target, "user"), "query")
 	require.NoError(err)
 	require.NotEmpty(parts)
 
 	graph.Split = nil
 	require.NoError(graph.Gen())
-	_, err = os.Stat(filepath.Join(target, "user_query.go"))
+	_, err = os.Stat(filepath.Join(target, "user", "query.go"))
 	require.NoError(err)
-	_, err = os.Stat(filepath.Join(target, "user_query_base.go"))
+	_, err = os.Stat(filepath.Join(target, "user", "query_base.go"))
 	require.True(os.IsNotExist(err))
-	parts, err = splitTypeFiles(target, "user_query")
+	parts, err = splitTypeFiles(filepath.Join(target, "user"), "query")
 	require.NoError(err)
 	require.Empty(parts)
 }

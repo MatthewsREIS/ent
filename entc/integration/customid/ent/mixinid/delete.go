@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,13 +30,13 @@ func NewMixinIDDelete(c Config, hooks []Hook, mutation *MixinIDMutation) *MixinI
 
 // Where appends a list predicates to the MixinIDDelete builder.
 func (_d *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *MixinIDDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*MixinIDMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -76,7 +77,7 @@ func NewMixinIDDeleteOne(d *MixinIDDelete) *MixinIDDeleteOne {
 
 // Where appends a list predicates to the MixinIDDelete builder.
 func (_d *MixinIDDeleteOne) Where(ps ...predicate.MixinID) *MixinIDDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

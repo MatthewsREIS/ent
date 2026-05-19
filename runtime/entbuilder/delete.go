@@ -1,9 +1,11 @@
 package entbuilder
 
 import (
+	"context"
 	"database/sql/driver"
 	"fmt"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -85,4 +87,25 @@ func BuildDeleteSpec[C any, M any](cfg C, mutation M, desc *DeleteDescriptor[C, 
 		}
 	}
 	return spec, nil
+}
+
+// DeleteState holds the generic state every generated <Entity>Delete and
+// <Entity>DeleteOne builder carries.
+type DeleteState[M any] struct {
+	Hooks    []ent.Hook
+	Mutation M
+}
+
+// RunDelete executes the Exec-shaped terminal for *<Entity>Delete builders.
+//
+// sqlExec is the per-entity SQL execution; it receives the prepared ctx.
+// When state.Hooks is non-empty, the hook chain is built and invoked via
+// the package-private runMutate helper shared with RunUpdate/RunUpdateOne
+// (see update.go).
+func RunDelete[M ent.Mutation](
+	ctx context.Context,
+	state *DeleteState[M],
+	sqlExec func(context.Context) (int, error),
+) (int, error) {
+	return runMutate[int, M](ctx, state.Hooks, state.Mutation, sqlExec)
 }

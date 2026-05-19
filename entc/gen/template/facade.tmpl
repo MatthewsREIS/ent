@@ -1,0 +1,101 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{ define "facade/type" }}
+{{ with extend $ "Package" (base $.Config.Package) }}
+	{{ template "header" . }}
+{{ end }}
+
+{{ $n := $ }}
+{{ $client := $n.ClientName }}
+
+import (
+	{{- if $n.Edges }}
+	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
+	"{{ $.Config.Package }}/edges"
+	{{- else }}
+	{{ $.PackageAlias }} "{{ $.Config.Package }}/{{ $.PackageDir }}"
+	{{- end }}
+)
+
+// Type aliases — public consumer-facing names continue resolving here
+// while the underlying types live in the per-entity sub-package.
+type (
+	{{ $client }}              = {{ $.Package }}.{{ $client }}
+	{{ $n.QueryName }}         = {{ $.Package }}.{{ $n.QueryName }}
+	{{- if not $n.IsView }}
+	{{ $n.MutationName }}      = {{ $.Package }}.{{ $n.MutationName }}
+	{{ $n.CreateName }}        = {{ $.Package }}.{{ $n.CreateName }}
+	{{ $n.CreateBulkName }}    = {{ $.Package }}.{{ $n.CreateBulkName }}
+	{{- $noUpdate := $n.FeatureEnabled "no-update" }}
+	{{- if hasKey $n.Annotations "ReadOnly" }}{{ $noUpdate = true }}{{ end }}
+	{{- if not $noUpdate }}
+	{{ $n.UpdateName }}        = {{ $.Package }}.{{ $n.UpdateName }}
+	{{ $n.UpdateOneName }}     = {{ $.Package }}.{{ $n.UpdateOneName }}
+	{{- end }}
+	{{- $noDelete := $n.FeatureEnabled "no-delete" }}
+	{{- if hasKey $n.Annotations "ReadOnly" }}{{ $noDelete = true }}{{ end }}
+	{{- if not $noDelete }}
+	{{ $n.DeleteName }}        = {{ $.Package }}.{{ $n.DeleteName }}
+	{{ $n.DeleteOneName }}     = {{ $.Package }}.{{ $n.DeleteOneName }}
+	{{- end }}
+	{{- end }}
+	{{ pascal $n.Name }}GroupBy  = {{ $.Package }}.{{ pascal $n.Name }}GroupBy
+	{{ pascal $n.Name }}Select   = {{ $.Package }}.{{ pascal $n.Name }}Select
+	{{- if $n.FeatureEnabled "entql" }}
+	{{ $n.FilterName }}        = {{ $.Package }}.{{ $n.FilterName }}
+	{{- end }}
+	{{- /* Enum-field aliases — the sub-package re-exports each enum as
+	       <FieldStructField> (e.g. propertylist.ReadyToCall), but consumer
+	       schema/hook code historically referenced the fully-qualified
+	       <NodeName><FieldStructField> form (e.g. PropertyListReadyToCall)
+	       which used to live in the monolithic root pkg. Re-export them
+	       here so consumers don't need a per-call import + qualifier
+	       change. Skip fields with custom GoType — those resolve via their
+	       declared package already. */}}
+	{{- range $f := $n.EnumFields }}
+	{{- if not $f.HasGoType }}
+	{{- $enum := trimPackage $f.Type.String $.Package }}
+	{{ $n.Name }}{{ $enum }} = {{ $.Package }}.{{ $enum }}
+	{{- end }}
+	{{- end }}
+)
+
+// Constructor aliases — the sub-package's New<X> stays the source of truth.
+var (
+	New{{ $client }} = {{ $.Package }}.New{{ $client }}
+	{{- if and (not $n.IsView) ($n.FeatureEnabled "entql") }}
+	New{{ $n.FilterName }}ForMutation = {{ $.Package }}.New{{ $n.FilterName }}ForMutation
+	{{- end }}
+)
+
+{{- /* Cross-entity edge wiring. Edge function bodies (With, WithNamed, Query,
+       QueryFromQuery) now live in gen/edges/<entity>.go (edges.tmpl).
+       Forwarders below redirect the root-package API to the edges sub-package. */}}
+{{- range $e := $n.Edges }}
+{{ $func := print "With" $n.Name $e.StructField }}
+{{ $qfunc := print "Query" $n.Name $e.StructField }}
+{{ $qqfunc := print "Query" $n.Name $e.StructField "FromQuery" }}
+
+// {{ $func }} forwards to edges.{{ $func }} — body hoisted to gen/edges/{{ $n.Package }}.go for build parallelism.
+var {{ $func }} = edges.{{ $func }}
+
+{{- if and ($.FeatureEnabled "namedges") (not $e.Unique) }}
+{{ $nfunc := print "WithNamed" $n.Name $e.StructField }}
+// {{ $nfunc }} forwards to edges.{{ $nfunc }}.
+var {{ $nfunc }} = edges.{{ $nfunc }}
+{{- end }}
+
+// {{ $qfunc }} forwards to edges.{{ $qfunc }}.
+var {{ $qfunc }} = edges.{{ $qfunc }}
+
+// {{ $qqfunc }} forwards to edges.{{ $qqfunc }}.
+var {{ $qqfunc }} = edges.{{ $qqfunc }}
+{{- end }}
+
+{{ end }}

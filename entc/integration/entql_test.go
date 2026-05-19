@@ -90,7 +90,7 @@ func EntQL(t *testing.T, client *ent.Client) {
 
 	uq = client.User.Query()
 	uq.Filter().WhereName(entql.StringEQ(a8m.Name))
-	uq = uq.QueryFriends()
+	uq = ent.QueryUserFriendsFromQuery(uq)
 	uq.Filter().WhereName(entql.StringEQ(nati.Name))
-	require.Equal(luna.ID, uq.QueryPets().OnlyIDX(ctx))
+	require.Equal(luna.ID, ent.QueryUserPetsFromQuery(uq).OnlyIDX(ctx))
 }

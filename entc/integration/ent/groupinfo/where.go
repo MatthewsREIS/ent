@@ -185,14 +185,15 @@ func HasGroups() predicate.GroupInfo {
 
 // HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
 func HasGroupsWith(preds ...predicate.Group) predicate.GroupInfo {
-	return predicate.GroupInfo(func(s *sql.Selector) {
-		step := newGroupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.GroupInfo(
+		func(s *sql.Selector) {
+			step := newGroupsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

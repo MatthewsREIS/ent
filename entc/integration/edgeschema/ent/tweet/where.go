@@ -140,14 +140,15 @@ func HasLikedUsers() predicate.Tweet {
 
 // HasLikedUsersWith applies the HasEdge predicate on the "liked_users" edge with a given conditions (other predicates).
 func HasLikedUsersWith(preds ...predicate.User) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newLikedUsersStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newLikedUsersStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -163,14 +164,15 @@ func HasUser() predicate.Tweet {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTags applies the HasEdge predicate on the "tags" edge.
@@ -186,14 +188,15 @@ func HasTags() predicate.Tweet {
 
 // HasTagsWith applies the HasEdge predicate on the "tags" edge with a given conditions (other predicates).
 func HasTagsWith(preds ...predicate.Tag) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newTagsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newTagsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasLikes applies the HasEdge predicate on the "likes" edge.
@@ -209,14 +212,15 @@ func HasLikes() predicate.Tweet {
 
 // HasLikesWith applies the HasEdge predicate on the "likes" edge with a given conditions (other predicates).
 func HasLikesWith(preds ...predicate.TweetLike) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newLikesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newLikesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTweetUser applies the HasEdge predicate on the "tweet_user" edge.
@@ -232,14 +236,15 @@ func HasTweetUser() predicate.Tweet {
 
 // HasTweetUserWith applies the HasEdge predicate on the "tweet_user" edge with a given conditions (other predicates).
 func HasTweetUserWith(preds ...predicate.UserTweet) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newTweetUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newTweetUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasTweetTags applies the HasEdge predicate on the "tweet_tags" edge.
@@ -255,14 +260,15 @@ func HasTweetTags() predicate.Tweet {
 
 // HasTweetTagsWith applies the HasEdge predicate on the "tweet_tags" edge with a given conditions (other predicates).
 func HasTweetTagsWith(preds ...predicate.TweetTag) predicate.Tweet {
-	return predicate.Tweet(func(s *sql.Selector) {
-		step := newTweetTagsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Tweet(
+		func(s *sql.Selector) {
+			step := newTweetTagsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

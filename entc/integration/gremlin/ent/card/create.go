@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CardCreate is the builder for creating a Card entity.
@@ -35,7 +36,7 @@ func NewCardCreate(c Config, hooks []Hook, mutation *CardMutation) *CardCreate {
 
 // SetCreateTime sets the "create_time" field.
 func (_c *CardCreate) SetCreateTime(v time.Time) *CardCreate {
-	_c.mutation.SetCreateTime(v)
+	_ = _c.mutation.SetField("create_time", v)
 	return _c
 }
 
@@ -49,7 +50,7 @@ func (_c *CardCreate) SetNillableCreateTime(v *time.Time) *CardCreate {
 
 // SetUpdateTime sets the "update_time" field.
 func (_c *CardCreate) SetUpdateTime(v time.Time) *CardCreate {
-	_c.mutation.SetUpdateTime(v)
+	_ = _c.mutation.SetField("update_time", v)
 	return _c
 }
 
@@ -63,7 +64,7 @@ func (_c *CardCreate) SetNillableUpdateTime(v *time.Time) *CardCreate {
 
 // SetBalance sets the "balance" field.
 func (_c *CardCreate) SetBalance(v float64) *CardCreate {
-	_c.mutation.SetBalance(v)
+	_ = _c.mutation.SetField("balance", v)
 	return _c
 }
 
@@ -77,13 +78,13 @@ func (_c *CardCreate) SetNillableBalance(v *float64) *CardCreate {
 
 // SetNumber sets the "number" field.
 func (_c *CardCreate) SetNumber(v string) *CardCreate {
-	_c.mutation.SetNumber(v)
+	_ = _c.mutation.SetField("number", v)
 	return _c
 }
 
 // SetName sets the "name" field.
 func (_c *CardCreate) SetName(v string) *CardCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
@@ -97,7 +98,7 @@ func (_c *CardCreate) SetNillableName(v *string) *CardCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *CardCreate) SetOwnerID(id string) *CardCreate {
-	_c.mutation.SetOwnerID(id)
+	_ = _c.mutation.SetEdgeID("owner", id)
 	return _c
 }
 
@@ -111,7 +112,7 @@ func (_c *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (_c *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
-	_c.mutation.AddSpecIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -150,40 +151,40 @@ func (_c *CardCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *CardCreate) defaults() {
-	if _, ok := _c.mutation.CreateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); !ok {
 		v := DefaultCreateTime()
-		_c.mutation.SetCreateTime(v)
+		_ = _c.mutation.SetField("create_time", v)
 	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); !ok {
 		v := DefaultUpdateTime()
-		_c.mutation.SetUpdateTime(v)
+		_ = _c.mutation.SetField("update_time", v)
 	}
-	if _, ok := _c.mutation.Balance(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "balance"); !ok {
 		v := DefaultBalance
-		_c.mutation.SetBalance(v)
+		_ = _c.mutation.SetField("balance", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *CardCreate) check() error {
-	if _, ok := _c.mutation.CreateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); !ok {
 		return &ValidationError{Name: "create_time", Err: errors.New(`ent: missing required field "Card.create_time"`)}
 	}
-	if _, ok := _c.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); !ok {
 		return &ValidationError{Name: "update_time", Err: errors.New(`ent: missing required field "Card.update_time"`)}
 	}
-	if _, ok := _c.mutation.Balance(); !ok {
+	if _, ok := entbuilder.GetField[float64](_c.mutation, "balance"); !ok {
 		return &ValidationError{Name: "balance", Err: errors.New(`ent: missing required field "Card.balance"`)}
 	}
-	if _, ok := _c.mutation.Number(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "number"); !ok {
 		return &ValidationError{Name: "number", Err: errors.New(`ent: missing required field "Card.number"`)}
 	}
-	if v, ok := _c.mutation.Number(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "number"); ok {
 		if err := NumberValidator(v); err != nil {
 			return &ValidationError{Name: "number", Err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
 		}
 	}
-	if v, ok := _c.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}

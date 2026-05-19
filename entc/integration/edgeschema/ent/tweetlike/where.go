@@ -122,14 +122,15 @@ func HasTweet() predicate.TweetLike {
 
 // HasTweetWith applies the HasEdge predicate on the "tweet" edge with a given conditions (other predicates).
 func HasTweetWith(preds ...predicate.Tweet) predicate.TweetLike {
-	return predicate.TweetLike(func(s *sql.Selector) {
-		step := newTweetStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.TweetLike(
+		func(s *sql.Selector) {
+			step := newTweetStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasUser applies the HasEdge predicate on the "user" edge.
@@ -145,14 +146,15 @@ func HasUser() predicate.TweetLike {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.TweetLike {
-	return predicate.TweetLike(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.TweetLike(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

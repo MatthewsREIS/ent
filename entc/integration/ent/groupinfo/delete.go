@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupInfoDelete is the builder for deleting a GroupInfo entity.
 type GroupInfoDelete struct {
 	Config
-	hooks    []Hook
-	mutation *GroupInfoMutation
+	hooks     []Hook
+	mutation  *GroupInfoMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewGroupInfoDelete returns a new GroupInfoDelete initialized with the given config, hooks, and mutation.
@@ -29,13 +31,13 @@ func NewGroupInfoDelete(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 
 // Where appends a list predicates to the GroupInfoDelete builder.
 func (_d *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*GroupInfoMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -47,8 +49,15 @@ func (_d *GroupInfoDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *GroupInfoDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *GroupInfoDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *GroupInfoDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -76,7 +85,7 @@ func NewGroupInfoDeleteOne(d *GroupInfoDelete) *GroupInfoDeleteOne {
 
 // Where appends a list predicates to the GroupInfoDelete builder.
 func (_d *GroupInfoDeleteOne) Where(ps ...predicate.GroupInfo) *GroupInfoDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

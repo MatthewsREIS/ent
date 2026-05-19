@@ -144,17 +144,18 @@ func HasPets() predicate.User {
 
 // HasPetsWith applies the HasEdge predicate on the "pets" edge with a given conditions (other predicates).
 func HasPetsWith(preds ...predicate.Pet) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newPetsStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Pet
-		step.Edge.Schema = schemaConfig.Pet
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newPetsStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.Pet
+			step.Edge.Schema = schemaConfig.Pet
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasGroups applies the HasEdge predicate on the "groups" edge.
@@ -173,17 +174,18 @@ func HasGroups() predicate.User {
 
 // HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
 func HasGroupsWith(preds ...predicate.Group) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newGroupsStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Group
-		step.Edge.Schema = schemaConfig.GroupUsers
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newGroupsStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.Group
+			step.Edge.Schema = schemaConfig.GroupUsers
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFriends applies the HasEdge predicate on the "friends" edge.
@@ -202,17 +204,18 @@ func HasFriends() predicate.User {
 
 // HasFriendsWith applies the HasEdge predicate on the "friends" edge with a given conditions (other predicates).
 func HasFriendsWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFriendsStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Friendship
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFriendsStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Friendship
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFollowers applies the HasEdge predicate on the "followers" edge.
@@ -231,17 +234,18 @@ func HasFollowers() predicate.User {
 
 // HasFollowersWith applies the HasEdge predicate on the "followers" edge with a given conditions (other predicates).
 func HasFollowersWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFollowersStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.UserFollowing
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFollowersStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.UserFollowing
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFollowing applies the HasEdge predicate on the "following" edge.
@@ -260,17 +264,18 @@ func HasFollowing() predicate.User {
 
 // HasFollowingWith applies the HasEdge predicate on the "following" edge with a given conditions (other predicates).
 func HasFollowingWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFollowingStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.UserFollowing
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFollowingStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.UserFollowing
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasFriendships applies the HasEdge predicate on the "friendships" edge.
@@ -289,17 +294,18 @@ func HasFriendships() predicate.User {
 
 // HasFriendshipsWith applies the HasEdge predicate on the "friendships" edge with a given conditions (other predicates).
 func HasFriendshipsWith(preds ...predicate.Friendship) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newFriendshipsStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.Friendship
-		step.Edge.Schema = schemaConfig.Friendship
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newFriendshipsStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.Friendship
+			step.Edge.Schema = schemaConfig.Friendship
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,7 +30,7 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 
 // SetName sets the "name" field.
 func (_c *GroupCreate) SetName(v string) *GroupCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
@@ -43,7 +44,7 @@ func (_c *GroupCreate) SetNillableName(v *string) *GroupCreate {
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
 func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
-	_c.mutation.AddUserIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -82,15 +83,15 @@ func (_c *GroupCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *GroupCreate) defaults() {
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		v := DefaultName
-		_c.mutation.SetName(v)
+		_ = _c.mutation.SetField("name", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *GroupCreate) check() error {
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "Group.name"`)}
 	}
 	return nil
@@ -109,7 +110,7 @@ func (_c *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -121,11 +122,11 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	)
 	schemaConfig := _c.Config.SchemaConfig()
 	_spec.Schema = schemaConfig.Group
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := _c.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "users"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -199,11 +200,11 @@ func (_c *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

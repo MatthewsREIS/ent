@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewItemUpdate(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdate {
 
 // Where appends a list predicates to the ItemUpdate builder.
 func (_u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *ItemUpdate) SetText(v string) *ItemUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -52,7 +53,7 @@ func (_u *ItemUpdate) SetNillableText(v *string) *ItemUpdate {
 
 // ClearText clears the value of the "text" field.
 func (_u *ItemUpdate) ClearText() *ItemUpdate {
-	_u.mutation.ClearText()
+	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -63,7 +64,7 @@ func (_u *ItemUpdate) Mutation() *ItemMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ItemUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ItemMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -90,7 +91,7 @@ func (_u *ItemUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ItemUpdate) check() error {
-	if v, ok := _u.mutation.Text(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		if err := TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", Err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
@@ -116,10 +117,10 @@ func (_u *ItemUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.TextCleared() {
+	if _u.mutation.FieldCleared("text") {
 		_spec.ClearField(FieldText, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
@@ -151,7 +152,7 @@ func NewItemUpdateOne(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdat
 
 // SetText sets the "text" field.
 func (_u *ItemUpdateOne) SetText(v string) *ItemUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -165,7 +166,7 @@ func (_u *ItemUpdateOne) SetNillableText(v *string) *ItemUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *ItemUpdateOne) ClearText() *ItemUpdateOne {
-	_u.mutation.ClearText()
+	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -176,7 +177,7 @@ func (_u *ItemUpdateOne) Mutation() *ItemMutation {
 
 // Where appends a list predicates to the ItemUpdate builder.
 func (_u *ItemUpdateOne) Where(ps ...predicate.Item) *ItemUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -189,7 +190,7 @@ func (_u *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne {
 
 // Save executes the query and returns the updated Item entity.
 func (_u *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Item](ctx, &entbuilder.UpdateState[*ItemMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -216,7 +217,7 @@ func (_u *ItemUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *ItemUpdateOne) check() error {
-	if v, ok := _u.mutation.Text(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		if err := TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", Err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
@@ -259,10 +260,10 @@ func (_u *ItemUpdateOne) sqlSave(ctx context.Context) (_node *Item, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.TextCleared() {
+	if _u.mutation.FieldCleared("text") {
 		_spec.ClearField(FieldText, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)

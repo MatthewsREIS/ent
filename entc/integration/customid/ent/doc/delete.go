@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,13 +30,13 @@ func NewDocDelete(c Config, hooks []Hook, mutation *DocMutation) *DocDelete {
 
 // Where appends a list predicates to the DocDelete builder.
 func (_d *DocDelete) Where(ps ...predicate.Doc) *DocDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *DocDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*DocMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -76,7 +77,7 @@ func NewDocDeleteOne(d *DocDelete) *DocDeleteOne {
 
 // Where appends a list predicates to the DocDelete builder.
 func (_d *DocDeleteOne) Where(ps ...predicate.Doc) *DocDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

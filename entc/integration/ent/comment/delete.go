@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // CommentDelete is the builder for deleting a Comment entity.
 type CommentDelete struct {
 	Config
-	hooks    []Hook
-	mutation *CommentMutation
+	hooks     []Hook
+	mutation  *CommentMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewCommentDelete returns a new CommentDelete initialized with the given config, hooks, and mutation.
@@ -29,13 +31,13 @@ func NewCommentDelete(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 
 // Where appends a list predicates to the CommentDelete builder.
 func (_d *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *CommentDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*CommentMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -47,8 +49,15 @@ func (_d *CommentDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *CommentDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *CommentDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *CommentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -76,7 +85,7 @@ func NewCommentDeleteOne(d *CommentDelete) *CommentDeleteOne {
 
 // Where appends a list predicates to the CommentDelete builder.
 func (_d *CommentDeleteOne) Where(ps ...predicate.Comment) *CommentDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

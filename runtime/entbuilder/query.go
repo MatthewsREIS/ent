@@ -9,9 +9,71 @@ import (
 	"database/sql/driver"
 	"fmt"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
+
+// QueryState holds the generic state every generated <Entity>Query carries.
+// Generated <Entity>Query structs embed QueryState[predicate.Entity] and
+// delegate chaining methods (Where/Limit/Offset/Unique) to helpers on this
+// struct. Terminal methods (All/First/Count/etc.) delegate to the package-level
+// Run* generic functions below.
+//
+// The P type parameter is the entity's predicate type (e.g., predicate.User);
+// PR 3 made every predicate.<Entity> a type alias for func(*sql.Selector), so
+// P naturally satisfies the ~func(*sql.Selector) constraint.
+type QueryState[P ~func(*sql.Selector)] struct {
+	Ctx        *ent.QueryContext
+	Inters     []ent.Interceptor
+	Predicates []P
+	// Sql is the in-progress query selector. nil for fresh queries built
+	// via Client.Entity.Query(); non-nil when the query is being constructed
+	// from another query (e.g., as part of an edge traversal).
+	Sql *sql.Selector
+	// Path is set when the query was constructed from a parent query
+	// (e.g., user.QueryTeams()). When set, Sql is built lazily by calling Path.
+	Path func(context.Context) (*sql.Selector, error)
+}
+
+// AddPredicates appends ps to the state's predicate list.
+func (s *QueryState[P]) AddPredicates(ps ...P) {
+	s.Predicates = append(s.Predicates, ps...)
+}
+
+// SetLimit sets the LIMIT clause for this query.
+func (s *QueryState[P]) SetLimit(n int) {
+	s.Ctx.Limit = &n
+}
+
+// SetOffset sets the OFFSET clause for this query.
+func (s *QueryState[P]) SetOffset(n int) {
+	s.Ctx.Offset = &n
+}
+
+// SetUnique sets the DISTINCT flag for this query.
+func (s *QueryState[P]) SetUnique(b bool) {
+	s.Ctx.Unique = &b
+}
+
+// Clone returns a deep copy of the state. The returned QueryState shares no
+// mutable state with the receiver — appending to Clone's Predicates / Inters
+// does not affect the original.
+//
+// Note: Clone does NOT deep-copy entity-specific edge state held on the
+// embedding <Entity>Query — that's the caller's responsibility (the generated
+// Clone method copies edge state, then defers to s.Clone() for the embedded
+// state).
+func (s *QueryState[P]) Clone() *QueryState[P] {
+	out := &QueryState[P]{
+		Ctx:        s.Ctx.Clone(),
+		Inters:     append([]ent.Interceptor(nil), s.Inters...),
+		Predicates: append([]P(nil), s.Predicates...),
+		Sql:        s.Sql,
+		Path:       s.Path,
+	}
+	return out
+}
 
 // EdgeLoadDescriptor describes how to load edges for a query.
 // This is used to reduce generated code by extracting common edge loading patterns.
@@ -294,4 +356,106 @@ func LoadEdgeM2O[N, E any, NID, EID comparable](
 	}
 
 	return nil
+}
+
+// RunAll executes the All-shaped query: attaches op to ctx, runs prepareQuery,
+// then dispatches through the interceptor chain to sqlAll. The returned slice
+// type V is typically []*T for an entity type T.
+//
+// prepareQuery is the per-entity hook that runs validation/setup before sql.
+// sqlAll is the per-entity SQL execution; it receives the prepared ctx.
+func RunAll[V ent.Value](
+	ctx context.Context,
+	q ent.Query,
+	qc *ent.QueryContext,
+	op string,
+	inters []ent.Interceptor,
+	prepareQuery func(context.Context) error,
+	sqlAll func(context.Context) (V, error),
+) (V, error) {
+	ctx = SetContextOp(ctx, qc, op)
+	if err := prepareQuery(ctx); err != nil {
+		var zero V
+		return zero, err
+	}
+	qr := ent.QuerierFunc(func(ctx context.Context, _ ent.Query) (ent.Value, error) {
+		return sqlAll(ctx)
+	})
+	return WithInterceptors[V](ctx, q, qr, inters)
+}
+
+// RunCount executes the Count-shaped query.
+func RunCount(
+	ctx context.Context,
+	q ent.Query,
+	qc *ent.QueryContext,
+	op string,
+	inters []ent.Interceptor,
+	prepareQuery func(context.Context) error,
+	sqlCount func(context.Context) (int, error),
+) (int, error) {
+	ctx = SetContextOp(ctx, qc, op)
+	if err := prepareQuery(ctx); err != nil {
+		return 0, err
+	}
+	qr := ent.QuerierFunc(func(ctx context.Context, _ ent.Query) (ent.Value, error) {
+		return sqlCount(ctx)
+	})
+	return WithInterceptors[int](ctx, q, qr, inters)
+}
+
+// RunFirst executes the First-shaped query: returns the first node from sqlAll
+// or a typeNotFound error when the slice is empty. V is typically []*T (the
+// node-slice type); the function returns the first element as N (the element
+// type of V).
+func RunFirst[N any, V ~[]N](
+	ctx context.Context,
+	q ent.Query,
+	qc *ent.QueryContext,
+	op, label string,
+	inters []ent.Interceptor,
+	prepareQuery func(context.Context) error,
+	sqlAll func(context.Context) (V, error),
+	notFoundError func(label string) error,
+) (N, error) {
+	nodes, err := RunAll[V](ctx, q, qc, op, inters, prepareQuery, sqlAll)
+	if err != nil {
+		var zero N
+		return zero, err
+	}
+	if len(nodes) == 0 {
+		var zero N
+		return zero, notFoundError(label)
+	}
+	return nodes[0], nil
+}
+
+// RunOnly executes the Only-shaped query: returns exactly one node, or an
+// error if zero (notFoundError) or multiple (notSingularError).
+func RunOnly[N any, V ~[]N](
+	ctx context.Context,
+	q ent.Query,
+	qc *ent.QueryContext,
+	op, label string,
+	inters []ent.Interceptor,
+	prepareQuery func(context.Context) error,
+	sqlAll func(context.Context) (V, error),
+	notFoundError func(label string) error,
+	notSingularError func(label string) error,
+) (N, error) {
+	nodes, err := RunAll[V](ctx, q, qc, op, inters, prepareQuery, sqlAll)
+	if err != nil {
+		var zero N
+		return zero, err
+	}
+	switch len(nodes) {
+	case 0:
+		var zero N
+		return zero, notFoundError(label)
+	case 1:
+		return nodes[0], nil
+	default:
+		var zero N
+		return zero, notSingularError(label)
+	}
 }

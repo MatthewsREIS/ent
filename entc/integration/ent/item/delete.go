@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // ItemDelete is the builder for deleting a Item entity.
 type ItemDelete struct {
 	Config
-	hooks    []Hook
-	mutation *ItemMutation
+	hooks     []Hook
+	mutation  *ItemMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewItemDelete returns a new ItemDelete initialized with the given config, hooks, and mutation.
@@ -29,13 +31,13 @@ func NewItemDelete(c Config, hooks []Hook, mutation *ItemMutation) *ItemDelete {
 
 // Where appends a list predicates to the ItemDelete builder.
 func (_d *ItemDelete) Where(ps ...predicate.Item) *ItemDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *ItemDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*ItemMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -47,8 +49,15 @@ func (_d *ItemDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *ItemDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ItemDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *ItemDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -76,7 +85,7 @@ func NewItemDeleteOne(d *ItemDelete) *ItemDeleteOne {
 
 // Where appends a list predicates to the ItemDelete builder.
 func (_d *ItemDeleteOne) Where(ps ...predicate.Item) *ItemDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

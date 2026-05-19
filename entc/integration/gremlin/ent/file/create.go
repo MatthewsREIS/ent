@@ -19,6 +19,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // FileCreate is the builder for creating a File entity.
@@ -35,7 +36,7 @@ func NewFileCreate(c Config, hooks []Hook, mutation *FileMutation) *FileCreate {
 
 // SetSetID sets the "set_id" field.
 func (_c *FileCreate) SetSetID(v int) *FileCreate {
-	_c.mutation.SetSetID(v)
+	_ = _c.mutation.SetField("set_id", v)
 	return _c
 }
 
@@ -49,7 +50,7 @@ func (_c *FileCreate) SetNillableSetID(v *int) *FileCreate {
 
 // SetSize sets the "size" field.
 func (_c *FileCreate) SetSize(v int) *FileCreate {
-	_c.mutation.SetSize(v)
+	_ = _c.mutation.SetField("size", v)
 	return _c
 }
 
@@ -63,13 +64,13 @@ func (_c *FileCreate) SetNillableSize(v *int) *FileCreate {
 
 // SetName sets the "name" field.
 func (_c *FileCreate) SetName(v string) *FileCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // SetUser sets the "user" field.
 func (_c *FileCreate) SetUser(v string) *FileCreate {
-	_c.mutation.SetUser(v)
+	_ = _c.mutation.SetField("user", v)
 	return _c
 }
 
@@ -83,7 +84,7 @@ func (_c *FileCreate) SetNillableUser(v *string) *FileCreate {
 
 // SetGroup sets the "group" field.
 func (_c *FileCreate) SetGroup(v string) *FileCreate {
-	_c.mutation.SetGroup(v)
+	_ = _c.mutation.SetField("group", v)
 	return _c
 }
 
@@ -97,7 +98,7 @@ func (_c *FileCreate) SetNillableGroup(v *string) *FileCreate {
 
 // SetOp sets the "op" field.
 func (_c *FileCreate) SetOp(v bool) *FileCreate {
-	_c.mutation.SetOpField(v)
+	_ = _c.mutation.SetField("op", v)
 	return _c
 }
 
@@ -111,7 +112,7 @@ func (_c *FileCreate) SetNillableOp(v *bool) *FileCreate {
 
 // SetFieldID sets the "field_id" field.
 func (_c *FileCreate) SetFieldID(v int) *FileCreate {
-	_c.mutation.SetFieldID(v)
+	_ = _c.mutation.SetField("field_id", v)
 	return _c
 }
 
@@ -125,7 +126,7 @@ func (_c *FileCreate) SetNillableFieldID(v *int) *FileCreate {
 
 // SetCreateTime sets the "create_time" field.
 func (_c *FileCreate) SetCreateTime(v time.Time) *FileCreate {
-	_c.mutation.SetCreateTime(v)
+	_ = _c.mutation.SetField("create_time", v)
 	return _c
 }
 
@@ -139,7 +140,7 @@ func (_c *FileCreate) SetNillableCreateTime(v *time.Time) *FileCreate {
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_c *FileCreate) SetOwnerID(id string) *FileCreate {
-	_c.mutation.SetOwnerID(id)
+	_ = _c.mutation.SetEdgeID("owner", id)
 	return _c
 }
 
@@ -153,7 +154,7 @@ func (_c *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
 func (_c *FileCreate) SetTypeID(id string) *FileCreate {
-	_c.mutation.SetTypeID(id)
+	_ = _c.mutation.SetEdgeID("type", id)
 	return _c
 }
 
@@ -167,7 +168,7 @@ func (_c *FileCreate) SetNillableTypeID(id *string) *FileCreate {
 
 // AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
 func (_c *FileCreate) AddFieldIDs(ids ...string) *FileCreate {
-	_c.mutation.AddFieldIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("field", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -206,28 +207,28 @@ func (_c *FileCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *FileCreate) defaults() {
-	if _, ok := _c.mutation.Size(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "size"); !ok {
 		v := DefaultSize
-		_c.mutation.SetSize(v)
+		_ = _c.mutation.SetField("size", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *FileCreate) check() error {
-	if v, ok := _c.mutation.SetID(); ok {
+	if v, ok := entbuilder.GetField[int](_c.mutation, "set_id"); ok {
 		if err := SetIDValidator(v); err != nil {
 			return &ValidationError{Name: "set_id", Err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Size(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "size"); !ok {
 		return &ValidationError{Name: "size", Err: errors.New(`ent: missing required field "File.size"`)}
 	}
-	if v, ok := _c.mutation.Size(); ok {
+	if v, ok := entbuilder.GetField[int](_c.mutation, "size"); ok {
 		if err := SizeValidator(v); err != nil {
 			return &ValidationError{Name: "size", Err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "File.name"`)}
 	}
 	return nil

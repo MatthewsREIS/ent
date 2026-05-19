@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewMixinIDUpdate(c Config, hooks []Hook, mutation *MixinIDMutation) *MixinI
 
 // Where appends a list predicates to the MixinIDUpdate builder.
 func (_u *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetSomeField sets the "some_field" field.
 func (_u *MixinIDUpdate) SetSomeField(v string) *MixinIDUpdate {
-	_u.mutation.SetSomeField(v)
+	_ = _u.mutation.SetField("some_field", v)
 	return _u
 }
 
@@ -51,7 +52,7 @@ func (_u *MixinIDUpdate) SetNillableSomeField(v *string) *MixinIDUpdate {
 
 // SetMixinField sets the "mixin_field" field.
 func (_u *MixinIDUpdate) SetMixinField(v string) *MixinIDUpdate {
-	_u.mutation.SetMixinField(v)
+	_ = _u.mutation.SetField("mixin_field", v)
 	return _u
 }
 
@@ -70,7 +71,7 @@ func (_u *MixinIDUpdate) Mutation() *MixinIDMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MixinIDUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*MixinIDMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -104,10 +105,10 @@ func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.SomeField(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "some_field"); ok {
 		_spec.SetField(FieldSomeField, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.MixinField(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "mixin_field"); ok {
 		_spec.SetField(FieldMixinField, field.TypeString, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -137,7 +138,7 @@ func NewMixinIDUpdateOne(c Config, hooks []Hook, mutation *MixinIDMutation) *Mix
 
 // SetSomeField sets the "some_field" field.
 func (_u *MixinIDUpdateOne) SetSomeField(v string) *MixinIDUpdateOne {
-	_u.mutation.SetSomeField(v)
+	_ = _u.mutation.SetField("some_field", v)
 	return _u
 }
 
@@ -151,7 +152,7 @@ func (_u *MixinIDUpdateOne) SetNillableSomeField(v *string) *MixinIDUpdateOne {
 
 // SetMixinField sets the "mixin_field" field.
 func (_u *MixinIDUpdateOne) SetMixinField(v string) *MixinIDUpdateOne {
-	_u.mutation.SetMixinField(v)
+	_ = _u.mutation.SetField("mixin_field", v)
 	return _u
 }
 
@@ -170,7 +171,7 @@ func (_u *MixinIDUpdateOne) Mutation() *MixinIDMutation {
 
 // Where appends a list predicates to the MixinIDUpdate builder.
 func (_u *MixinIDUpdateOne) Where(ps ...predicate.MixinID) *MixinIDUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -183,7 +184,7 @@ func (_u *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpdat
 
 // Save executes the query and returns the updated MixinID entity.
 func (_u *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[MixinID](ctx, &entbuilder.UpdateState[*MixinIDMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -234,10 +235,10 @@ func (_u *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err er
 			}
 		}
 	}
-	if value, ok := _u.mutation.SomeField(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "some_field"); ok {
 		_spec.SetField(FieldSomeField, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.MixinField(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "mixin_field"); ok {
 		_spec.SetField(FieldMixinField, field.TypeString, value)
 	}
 	_node = &MixinID{Config: _u.Config}

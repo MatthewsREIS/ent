@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewFileCreate(c Config, hooks []Hook, mutation *FileMutation) *FileCreate {
 
 // SetName sets the "name" field.
 func (_c *FileCreate) SetName(v string) *FileCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
 // AddProcessIDs adds the "processes" edge to the Process entity by IDs.
 func (_c *FileCreate) AddProcessIDs(ids ...int) *FileCreate {
-	_c.mutation.AddProcessIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("processes", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -75,7 +76,7 @@ func (_c *FileCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *FileCreate) check() error {
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "File.name"`)}
 	}
 	return nil
@@ -94,7 +95,7 @@ func (_c *FileCreate) sqlSave(ctx context.Context) (*File, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -105,11 +106,11 @@ func (_c *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := _c.mutation.ProcessesIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "processes"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -331,11 +332,11 @@ func (_c *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

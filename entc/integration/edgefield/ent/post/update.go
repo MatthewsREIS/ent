@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewPostUpdate(c Config, hooks []Hook, mutation *PostMutation) *PostUpdate {
 
 // Where appends a list predicates to the PostUpdate builder.
 func (_u *PostUpdate) Where(ps ...predicate.Post) *PostUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *PostUpdate) SetText(v string) *PostUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -51,7 +52,7 @@ func (_u *PostUpdate) SetNillableText(v *string) *PostUpdate {
 
 // SetAuthorID sets the "author_id" field.
 func (_u *PostUpdate) SetAuthorID(v int) *PostUpdate {
-	_u.mutation.SetAuthorID(v)
+	_ = _u.mutation.SetEdgeID("author", v)
 	return _u
 }
 
@@ -65,7 +66,7 @@ func (_u *PostUpdate) SetNillableAuthorID(v *int) *PostUpdate {
 
 // ClearAuthorID clears the value of the "author_id" field.
 func (_u *PostUpdate) ClearAuthorID() *PostUpdate {
-	_u.mutation.ClearAuthorID()
+	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
@@ -76,13 +77,13 @@ func (_u *PostUpdate) Mutation() *PostMutation {
 
 // ClearAuthor clears the "author" edge to the User entity.
 func (_u *PostUpdate) ClearAuthor() *PostUpdate {
-	_u.mutation.ClearAuthor()
+	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PostUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*PostMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -116,10 +117,10 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.AuthorCleared() {
+	if _u.mutation.EdgeCleared("author") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -132,7 +133,7 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AuthorIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("author"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -175,7 +176,7 @@ func NewPostUpdateOne(c Config, hooks []Hook, mutation *PostMutation) *PostUpdat
 
 // SetText sets the "text" field.
 func (_u *PostUpdateOne) SetText(v string) *PostUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -189,7 +190,7 @@ func (_u *PostUpdateOne) SetNillableText(v *string) *PostUpdateOne {
 
 // SetAuthorID sets the "author_id" field.
 func (_u *PostUpdateOne) SetAuthorID(v int) *PostUpdateOne {
-	_u.mutation.SetAuthorID(v)
+	_ = _u.mutation.SetEdgeID("author", v)
 	return _u
 }
 
@@ -203,7 +204,7 @@ func (_u *PostUpdateOne) SetNillableAuthorID(v *int) *PostUpdateOne {
 
 // ClearAuthorID clears the value of the "author_id" field.
 func (_u *PostUpdateOne) ClearAuthorID() *PostUpdateOne {
-	_u.mutation.ClearAuthorID()
+	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
@@ -214,13 +215,13 @@ func (_u *PostUpdateOne) Mutation() *PostMutation {
 
 // ClearAuthor clears the "author" edge to the User entity.
 func (_u *PostUpdateOne) ClearAuthor() *PostUpdateOne {
-	_u.mutation.ClearAuthor()
+	_ = _u.mutation.ClearEdge("author")
 	return _u
 }
 
 // Where appends a list predicates to the PostUpdate builder.
 func (_u *PostUpdateOne) Where(ps ...predicate.Post) *PostUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -233,7 +234,7 @@ func (_u *PostUpdateOne) Select(field string, fields ...string) *PostUpdateOne {
 
 // Save executes the query and returns the updated Post entity.
 func (_u *PostUpdateOne) Save(ctx context.Context) (*Post, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Post](ctx, &entbuilder.UpdateState[*PostMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -284,10 +285,10 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.AuthorCleared() {
+	if _u.mutation.EdgeCleared("author") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -300,7 +301,7 @@ func (_u *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AuthorIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("author"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

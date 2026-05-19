@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // SpecUpdate is the builder for updating Spec entities.
@@ -31,13 +32,13 @@ func NewSpecUpdate(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdate {
 
 // Where appends a list predicates to the SpecUpdate builder.
 func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (_u *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
-	_u.mutation.AddCardIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -48,13 +49,13 @@ func (_u *SpecUpdate) Mutation() *SpecMutation {
 
 // ClearCard clears all "card" edges to the Card entity.
 func (_u *SpecUpdate) ClearCard() *SpecUpdate {
-	_u.mutation.ClearCard()
+	_ = _u.mutation.ClearEdge("card")
 	return _u
 }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (_u *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
-	_u.mutation.RemoveCardIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -136,7 +137,7 @@ func NewSpecUpdateOne(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdat
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (_u *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
-	_u.mutation.AddCardIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -147,19 +148,19 @@ func (_u *SpecUpdateOne) Mutation() *SpecMutation {
 
 // ClearCard clears all "card" edges to the Card entity.
 func (_u *SpecUpdateOne) ClearCard() *SpecUpdateOne {
-	_u.mutation.ClearCard()
+	_ = _u.mutation.ClearEdge("card")
 	return _u
 }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (_u *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
-	_u.mutation.RemoveCardIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the SpecUpdate builder.
 func (_u *SpecUpdateOne) Where(ps ...predicate.Spec) *SpecUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 

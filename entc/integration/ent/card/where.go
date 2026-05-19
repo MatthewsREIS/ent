@@ -357,14 +357,15 @@ func HasOwner() predicate.Card {
 
 // HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
 func HasOwnerWith(preds ...predicate.User) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		step := newOwnerStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Card(
+		func(s *sql.Selector) {
+			step := newOwnerStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasSpec applies the HasEdge predicate on the "spec" edge.
@@ -380,14 +381,15 @@ func HasSpec() predicate.Card {
 
 // HasSpecWith applies the HasEdge predicate on the "spec" edge with a given conditions (other predicates).
 func HasSpecWith(preds ...predicate.Spec) predicate.Card {
-	return predicate.Card(func(s *sql.Selector) {
-		step := newSpecStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Card(
+		func(s *sql.Selector) {
+			step := newSpecStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

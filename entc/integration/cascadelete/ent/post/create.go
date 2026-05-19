@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,7 +30,7 @@ func NewPostCreate(c Config, hooks []Hook, mutation *PostMutation) *PostCreate {
 
 // SetText sets the "text" field.
 func (_c *PostCreate) SetText(v string) *PostCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
@@ -43,7 +44,7 @@ func (_c *PostCreate) SetNillableText(v *string) *PostCreate {
 
 // SetAuthorID sets the "author_id" field.
 func (_c *PostCreate) SetAuthorID(v int) *PostCreate {
-	_c.mutation.SetAuthorID(v)
+	_ = _c.mutation.SetEdgeID("author", v)
 	return _c
 }
 
@@ -57,7 +58,7 @@ func (_c *PostCreate) SetNillableAuthorID(v *int) *PostCreate {
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
 func (_c *PostCreate) AddCommentIDs(ids ...int) *PostCreate {
-	_c.mutation.AddCommentIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("comments", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -96,15 +97,15 @@ func (_c *PostCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *PostCreate) defaults() {
-	if _, ok := _c.mutation.Text(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "text"); !ok {
 		v := DefaultText
-		_c.mutation.SetText(v)
+		_ = _c.mutation.SetField("text", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *PostCreate) check() error {
-	if _, ok := _c.mutation.Text(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "text"); !ok {
 		return &ValidationError{Name: "text", Err: errors.New(`ent: missing required field "Post.text"`)}
 	}
 	return nil
@@ -123,7 +124,7 @@ func (_c *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -133,11 +134,11 @@ func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		_node = &Post{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 		_node.Text = value
 	}
-	if nodes := _c.mutation.AuthorIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "author"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -154,7 +155,7 @@ func (_c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 		_node.AuthorID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.CommentsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "comments"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -227,11 +228,11 @@ func (_c *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

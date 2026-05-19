@@ -120,14 +120,15 @@ func HasTag() predicate.GroupTag {
 
 // HasTagWith applies the HasEdge predicate on the "tag" edge with a given conditions (other predicates).
 func HasTagWith(preds ...predicate.Tag) predicate.GroupTag {
-	return predicate.GroupTag(func(s *sql.Selector) {
-		step := newTagStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.GroupTag(
+		func(s *sql.Selector) {
+			step := newTagStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasGroup applies the HasEdge predicate on the "group" edge.
@@ -143,14 +144,15 @@ func HasGroup() predicate.GroupTag {
 
 // HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
 func HasGroupWith(preds ...predicate.Group) predicate.GroupTag {
-	return predicate.GroupTag(func(s *sql.Selector) {
-		step := newGroupStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.GroupTag(
+		func(s *sql.Selector) {
+			step := newGroupStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

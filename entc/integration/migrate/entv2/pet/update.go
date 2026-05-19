@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewPetUpdate(c Config, hooks []Hook, mutation *PetMutation) *PetUpdate {
 
 // Where appends a list predicates to the PetUpdate builder.
 func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *PetUpdate) SetName(v string) *PetUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -51,13 +52,13 @@ func (_u *PetUpdate) SetNillableName(v *string) *PetUpdate {
 
 // ClearName clears the value of the "name" field.
 func (_u *PetUpdate) ClearName() *PetUpdate {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -76,13 +77,13 @@ func (_u *PetUpdate) Mutation() *PetMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*PetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -116,13 +117,13 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -135,7 +136,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -178,7 +179,7 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 
 // SetName sets the "name" field.
 func (_u *PetUpdateOne) SetName(v string) *PetUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -192,13 +193,13 @@ func (_u *PetUpdateOne) SetNillableName(v *string) *PetUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *PetUpdateOne) ClearName() *PetUpdateOne {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -217,13 +218,13 @@ func (_u *PetUpdateOne) Mutation() *PetMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Where appends a list predicates to the PetUpdate builder.
 func (_u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -236,7 +237,7 @@ func (_u *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
 
 // Save executes the query and returns the updated Pet entity.
 func (_u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Pet](ctx, &entbuilder.UpdateState[*PetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -287,13 +288,13 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -306,7 +307,7 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,

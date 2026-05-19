@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewMediaUpdate(c Config, hooks []Hook, mutation *MediaMutation) *MediaUpdat
 
 // Where appends a list predicates to the MediaUpdate builder.
 func (_u *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetSource sets the "source" field.
 func (_u *MediaUpdate) SetSource(v string) *MediaUpdate {
-	_u.mutation.SetSource(v)
+	_ = _u.mutation.SetField("source", v)
 	return _u
 }
 
@@ -51,13 +52,13 @@ func (_u *MediaUpdate) SetNillableSource(v *string) *MediaUpdate {
 
 // ClearSource clears the value of the "source" field.
 func (_u *MediaUpdate) ClearSource() *MediaUpdate {
-	_u.mutation.ClearSource()
+	_ = _u.mutation.ClearField("source")
 	return _u
 }
 
 // SetSourceURI sets the "source_uri" field.
 func (_u *MediaUpdate) SetSourceURI(v string) *MediaUpdate {
-	_u.mutation.SetSourceURI(v)
+	_ = _u.mutation.SetField("source_uri", v)
 	return _u
 }
 
@@ -71,13 +72,13 @@ func (_u *MediaUpdate) SetNillableSourceURI(v *string) *MediaUpdate {
 
 // ClearSourceURI clears the value of the "source_uri" field.
 func (_u *MediaUpdate) ClearSourceURI() *MediaUpdate {
-	_u.mutation.ClearSourceURI()
+	_ = _u.mutation.ClearField("source_uri")
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *MediaUpdate) SetText(v string) *MediaUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -91,7 +92,7 @@ func (_u *MediaUpdate) SetNillableText(v *string) *MediaUpdate {
 
 // ClearText clears the value of the "text" field.
 func (_u *MediaUpdate) ClearText() *MediaUpdate {
-	_u.mutation.ClearText()
+	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -102,7 +103,7 @@ func (_u *MediaUpdate) Mutation() *MediaMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MediaUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*MediaMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -136,22 +137,22 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Source(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "source"); ok {
 		_spec.SetField(FieldSource, field.TypeString, value)
 	}
-	if _u.mutation.SourceCleared() {
+	if _u.mutation.FieldCleared("source") {
 		_spec.ClearField(FieldSource, field.TypeString)
 	}
-	if value, ok := _u.mutation.SourceURI(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "source_uri"); ok {
 		_spec.SetField(FieldSourceURI, field.TypeString, value)
 	}
-	if _u.mutation.SourceURICleared() {
+	if _u.mutation.FieldCleared("source_uri") {
 		_spec.ClearField(FieldSourceURI, field.TypeString)
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.TextCleared() {
+	if _u.mutation.FieldCleared("text") {
 		_spec.ClearField(FieldText, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -181,7 +182,7 @@ func NewMediaUpdateOne(c Config, hooks []Hook, mutation *MediaMutation) *MediaUp
 
 // SetSource sets the "source" field.
 func (_u *MediaUpdateOne) SetSource(v string) *MediaUpdateOne {
-	_u.mutation.SetSource(v)
+	_ = _u.mutation.SetField("source", v)
 	return _u
 }
 
@@ -195,13 +196,13 @@ func (_u *MediaUpdateOne) SetNillableSource(v *string) *MediaUpdateOne {
 
 // ClearSource clears the value of the "source" field.
 func (_u *MediaUpdateOne) ClearSource() *MediaUpdateOne {
-	_u.mutation.ClearSource()
+	_ = _u.mutation.ClearField("source")
 	return _u
 }
 
 // SetSourceURI sets the "source_uri" field.
 func (_u *MediaUpdateOne) SetSourceURI(v string) *MediaUpdateOne {
-	_u.mutation.SetSourceURI(v)
+	_ = _u.mutation.SetField("source_uri", v)
 	return _u
 }
 
@@ -215,13 +216,13 @@ func (_u *MediaUpdateOne) SetNillableSourceURI(v *string) *MediaUpdateOne {
 
 // ClearSourceURI clears the value of the "source_uri" field.
 func (_u *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
-	_u.mutation.ClearSourceURI()
+	_ = _u.mutation.ClearField("source_uri")
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *MediaUpdateOne) SetText(v string) *MediaUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -235,7 +236,7 @@ func (_u *MediaUpdateOne) SetNillableText(v *string) *MediaUpdateOne {
 
 // ClearText clears the value of the "text" field.
 func (_u *MediaUpdateOne) ClearText() *MediaUpdateOne {
-	_u.mutation.ClearText()
+	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -246,7 +247,7 @@ func (_u *MediaUpdateOne) Mutation() *MediaMutation {
 
 // Where appends a list predicates to the MediaUpdate builder.
 func (_u *MediaUpdateOne) Where(ps ...predicate.Media) *MediaUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -259,7 +260,7 @@ func (_u *MediaUpdateOne) Select(field string, fields ...string) *MediaUpdateOne
 
 // Save executes the query and returns the updated Media entity.
 func (_u *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Media](ctx, &entbuilder.UpdateState[*MediaMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -310,22 +311,22 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Source(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "source"); ok {
 		_spec.SetField(FieldSource, field.TypeString, value)
 	}
-	if _u.mutation.SourceCleared() {
+	if _u.mutation.FieldCleared("source") {
 		_spec.ClearField(FieldSource, field.TypeString)
 	}
-	if value, ok := _u.mutation.SourceURI(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "source_uri"); ok {
 		_spec.SetField(FieldSourceURI, field.TypeString, value)
 	}
-	if _u.mutation.SourceURICleared() {
+	if _u.mutation.FieldCleared("source_uri") {
 		_spec.ClearField(FieldSourceURI, field.TypeString)
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.TextCleared() {
+	if _u.mutation.FieldCleared("text") {
 		_spec.ClearField(FieldText, field.TypeString)
 	}
 	_node = &Media{Config: _u.Config}

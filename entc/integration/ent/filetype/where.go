@@ -180,14 +180,15 @@ func HasFiles() predicate.FileType {
 
 // HasFilesWith applies the HasEdge predicate on the "files" edge with a given conditions (other predicates).
 func HasFilesWith(preds ...predicate.File) predicate.FileType {
-	return predicate.FileType(func(s *sql.Selector) {
-		step := newFilesStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.FileType(
+		func(s *sql.Selector) {
+			step := newFilesStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

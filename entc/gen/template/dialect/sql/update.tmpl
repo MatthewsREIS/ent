@@ -46,7 +46,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		{{- end }})
 	{{- if $one }}
 		{{- if $.HasOneFieldID }}
-			id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}()
+			id, ok := {{ $mutation }}.ID()
 			if !ok {
 				return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", Err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
 			}
@@ -65,11 +65,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			}
 		{{- else }}{{/* Composite ID. */}}
 			{{- range $i, $id := $.EdgeSchema.ID }}
-				if id, ok := {{ $mutation }}.{{ $id.MutationGet }}(); !ok {
+				{{- $edgeName := $id.EdgeName }}
+				{{- if $edgeName }}
+				if rawID, ok := {{ $mutation }}.EdgeID({{ printf "%q" $edgeName }}); !ok {
+					return {{ $zero }}, &ValidationError{Name: "{{ $id.Name }}", Err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $id.Name }}" for update`)}
+				} else {
+					_spec.Node.CompositeID[{{ $i }}].Value = rawID.({{ trimPackage $id.Type.String $.Package }})
+				}
+				{{- else }}
+				if id, ok := entbuilder.GetField[{{ trimPackage $id.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $id.Name }}); !ok {
 					return {{ $zero }}, &ValidationError{Name: "{{ $id.Name }}", Err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $id.Name }}" for update`)}
 				} else {
 					_spec.Node.CompositeID[{{ $i }}].Value = id
 				}
+				{{- end }}
 			{{- end }}
 			if fields := {{ $receiver }}.fields; len(fields) > 0 {
 				_spec.Node.Columns = make([]string, len(fields))
@@ -91,7 +100,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 	}
 	{{- range $f := $.MutationFields }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
-				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+				if value, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); ok {
 					{{- if $f.HasValueScanner }}
 						vv, err := {{ trimPackage $f.ValueFunc $.Package }}(value)
 						if err != nil {
@@ -103,7 +112,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 					{{- end }}
 				}
 				{{- if $f.SupportsMutationAdd }}
-					if value, ok := {{ $mutation }}.{{ $f.MutationAdded }}(); ok {
+					if added, ok := {{ $mutation }}.AddedField({{ printf "%q" $f.Name }}); ok {
+						value := added.({{ trimPackage $f.SignedType.String $.Package }})
 						{{- if $f.HasValueScanner }}
 							vv, err := {{ trimPackage $f.ValueFunc $.Package }}(value)
 							if err != nil {
@@ -116,15 +126,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 					}
 				{{- end }}
 				{{- if $f.SupportsMutationAppend }}
-					if value, ok := {{ $mutation }}.{{ $f.MutationAppended }}(); ok {
+					if value, ok := {{ $mutation }}.AppendedField({{ printf "%q" $f.Name }}); ok {
 						_spec.AddModifier(func(u *sql.UpdateBuilder) {
-							sqljson.Append(u, {{ $.PackageQualifier }}{{ $f.Constant }}, value)
+							sqljson.Append(u, {{ $.PackageQualifier }}{{ $f.Constant }}, value.({{ trimPackage $f.Type.String $.Package }}))
 						})
 					}
 				{{- end }}
 			{{- end }}
 			{{- if $f.Optional }}
-				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
+				if {{ $mutation }}.FieldCleared({{ printf "%q" $f.Name }}) {
 					_spec.ClearField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }})
 				}
 			{{- end }}
@@ -134,21 +144,21 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			{{- /* Skip to the next one as immutable edges cannot be updated. */}}
 			{{- continue }}
 		{{- end }}
-		if {{ $mutation }}.{{ $e.MutationCleared }}() {
+		if {{ $mutation }}.EdgeCleared({{ printf "%q" $e.Name }}) {
 			{{- with extend $ "Edge" $e }}
 				{{ template "dialect/sql/defedge" . }}
 			{{- end }}
 			_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 		}
 		{{- if not $e.Unique }}
-			if nodes := {{ $mutation }}.Removed{{ $e.StructField }}IDs(); len(nodes) > 0 && !{{ $mutation }}.{{ $e.MutationCleared }}() {
+			if nodes := {{ $mutation }}.RemovedEdgeIDs({{ printf "%q" $e.Name }}); len(nodes) > 0 && !{{ $mutation }}.EdgeCleared({{ printf "%q" $e.Name }}) {
 				{{- with extend $ "Edge" $e "Nodes" true "Zero" $zero }}
 					{{ template "dialect/sql/defedge" . }}
 				{{- end }}
 				_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 			}
 		{{- end }}
-		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
+		if nodes := {{ $mutation }}.EdgeIDs({{ printf "%q" $e.Name }}); len(nodes) > 0 {
 			{{- with extend $ "Edge" $e "Nodes" true "Zero" $zero }}
 				{{ template "dialect/sql/defedge" . }}
 			{{- end }}

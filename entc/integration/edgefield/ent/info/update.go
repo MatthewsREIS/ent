@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -33,25 +34,25 @@ func NewInfoUpdate(c Config, hooks []Hook, mutation *InfoMutation) *InfoUpdate {
 
 // Where appends a list predicates to the InfoUpdate builder.
 func (_u *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetContent sets the "content" field.
 func (_u *InfoUpdate) SetContent(v json.RawMessage) *InfoUpdate {
-	_u.mutation.SetContent(v)
+	_ = _u.mutation.SetField("content", v)
 	return _u
 }
 
 // AppendContent appends value to the "content" field.
 func (_u *InfoUpdate) AppendContent(v json.RawMessage) *InfoUpdate {
-	_u.mutation.AppendContent(v)
+	_ = _u.mutation.AppendField("content", v)
 	return _u
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *InfoUpdate) SetUserID(id int) *InfoUpdate {
-	_u.mutation.SetUserID(id)
+	_ = _u.mutation.SetEdgeID("user", id)
 	return _u
 }
 
@@ -70,13 +71,13 @@ func (_u *InfoUpdate) Mutation() *InfoMutation {
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *InfoUpdate) ClearUser() *InfoUpdate {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *InfoUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*InfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -110,15 +111,15 @@ func (_u *InfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Content(); ok {
+	if value, ok := entbuilder.GetField[json.RawMessage](_u.mutation, "content"); ok {
 		_spec.SetField(FieldContent, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.AppendedContent(); ok {
+	if value, ok := _u.mutation.AppendedField("content"); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldContent, value)
+			sqljson.Append(u, FieldContent, value.(json.RawMessage))
 		})
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -131,7 +132,7 @@ func (_u *InfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -174,19 +175,19 @@ func NewInfoUpdateOne(c Config, hooks []Hook, mutation *InfoMutation) *InfoUpdat
 
 // SetContent sets the "content" field.
 func (_u *InfoUpdateOne) SetContent(v json.RawMessage) *InfoUpdateOne {
-	_u.mutation.SetContent(v)
+	_ = _u.mutation.SetField("content", v)
 	return _u
 }
 
 // AppendContent appends value to the "content" field.
 func (_u *InfoUpdateOne) AppendContent(v json.RawMessage) *InfoUpdateOne {
-	_u.mutation.AppendContent(v)
+	_ = _u.mutation.AppendField("content", v)
 	return _u
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
 func (_u *InfoUpdateOne) SetUserID(id int) *InfoUpdateOne {
-	_u.mutation.SetUserID(id)
+	_ = _u.mutation.SetEdgeID("user", id)
 	return _u
 }
 
@@ -205,13 +206,13 @@ func (_u *InfoUpdateOne) Mutation() *InfoMutation {
 
 // ClearUser clears the "user" edge to the User entity.
 func (_u *InfoUpdateOne) ClearUser() *InfoUpdateOne {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // Where appends a list predicates to the InfoUpdate builder.
 func (_u *InfoUpdateOne) Where(ps ...predicate.Info) *InfoUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -224,7 +225,7 @@ func (_u *InfoUpdateOne) Select(field string, fields ...string) *InfoUpdateOne {
 
 // Save executes the query and returns the updated Info entity.
 func (_u *InfoUpdateOne) Save(ctx context.Context) (*Info, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Info](ctx, &entbuilder.UpdateState[*InfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -275,15 +276,15 @@ func (_u *InfoUpdateOne) sqlSave(ctx context.Context) (_node *Info, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Content(); ok {
+	if value, ok := entbuilder.GetField[json.RawMessage](_u.mutation, "content"); ok {
 		_spec.SetField(FieldContent, field.TypeJSON, value)
 	}
-	if value, ok := _u.mutation.AppendedContent(); ok {
+	if value, ok := _u.mutation.AppendedField("content"); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldContent, value)
+			sqljson.Append(u, FieldContent, value.(json.RawMessage))
 		})
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -296,7 +297,7 @@ func (_u *InfoUpdateOne) sqlSave(ctx context.Context) (_node *Info, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

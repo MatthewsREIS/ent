@@ -11,52 +11,52 @@ import (
 )
 
 // AttachedFile is the predicate function for attachedfile builders.
-type AttachedFile func(*sql.Selector)
+type AttachedFile = func(*sql.Selector)
 
 // File is the predicate function for file builders.
-type File func(*sql.Selector)
+type File = func(*sql.Selector)
 
 // Friendship is the predicate function for friendship builders.
-type Friendship func(*sql.Selector)
+type Friendship = func(*sql.Selector)
 
 // Group is the predicate function for group builders.
-type Group func(*sql.Selector)
+type Group = func(*sql.Selector)
 
 // GroupTag is the predicate function for grouptag builders.
-type GroupTag func(*sql.Selector)
+type GroupTag = func(*sql.Selector)
 
 // Process is the predicate function for process builders.
-type Process func(*sql.Selector)
+type Process = func(*sql.Selector)
 
 // Relationship is the predicate function for relationship builders.
-type Relationship func(*sql.Selector)
+type Relationship = func(*sql.Selector)
 
 // RelationshipInfo is the predicate function for relationshipinfo builders.
-type RelationshipInfo func(*sql.Selector)
+type RelationshipInfo = func(*sql.Selector)
 
 // Role is the predicate function for role builders.
-type Role func(*sql.Selector)
+type Role = func(*sql.Selector)
 
 // RoleUser is the predicate function for roleuser builders.
-type RoleUser func(*sql.Selector)
+type RoleUser = func(*sql.Selector)
 
 // Tag is the predicate function for tag builders.
-type Tag func(*sql.Selector)
+type Tag = func(*sql.Selector)
 
 // Tweet is the predicate function for tweet builders.
-type Tweet func(*sql.Selector)
+type Tweet = func(*sql.Selector)
 
 // TweetLike is the predicate function for tweetlike builders.
-type TweetLike func(*sql.Selector)
+type TweetLike = func(*sql.Selector)
 
 // TweetTag is the predicate function for tweettag builders.
-type TweetTag func(*sql.Selector)
+type TweetTag = func(*sql.Selector)
 
 // User is the predicate function for user builders.
-type User func(*sql.Selector)
+type User = func(*sql.Selector)
 
 // UserGroup is the predicate function for usergroup builders.
-type UserGroup func(*sql.Selector)
+type UserGroup = func(*sql.Selector)
 
 // UserTweet is the predicate function for usertweet builders.
-type UserTweet func(*sql.Selector)
+type UserTweet = func(*sql.Selector)

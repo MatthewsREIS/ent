@@ -30,7 +30,7 @@ func NewBuilderUpdate(c Config, hooks []Hook, mutation *BuilderMutation) *Builde
 
 // Where appends a list predicates to the BuilderUpdate builder.
 func (_u *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -112,7 +112,7 @@ func (_u *BuilderUpdateOne) Mutation() *BuilderMutation {
 
 // Where appends a list predicates to the BuilderUpdate builder.
 func (_u *BuilderUpdateOne) Where(ps ...predicate.Builder) *BuilderUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 

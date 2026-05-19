@@ -8,6 +8,12 @@ package fieldtype
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/internal"
 )
@@ -60,11 +66,186 @@ func WithHooks[V Value, M any, PM interface {
 type FieldType = internal.FieldType
 type FieldTypes = internal.FieldTypes
 
-// Mutation type aliases and constructors from internal.
-type FieldTypeMutation = internal.FieldTypeMutation
-type FieldTypeMutationOption = internal.FieldTypeMutationOption
+// Error-check function aliases for the shared helpers in the internal package.
+var (
+	IsValidationError = internal.IsValidationError
+	IsNotFound        = internal.IsNotFound
+	MaskNotFound      = internal.MaskNotFound
+	IsNotSingular     = internal.IsNotSingular
+	IsNotLoaded       = internal.IsNotLoaded
+	IsConstraintError = internal.IsConstraintError
+)
 
-var NewFieldTypeMutation = internal.NewFieldTypeMutation
-var WithFieldTypeID = internal.WithFieldTypeID
-var WithFieldType = internal.WithFieldType
-var WithFieldTypeIDsFunc = internal.WithFieldTypeIDsFunc
+// setContextOp is an alias for the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
+
+// withInterceptors is a wrapper around internal.WithInterceptors so callers
+// can use the conventional lowercase name. Generic functions can't be assigned
+// to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
+}
+
+// Type aliases for sql-specific shared helpers.
+type (
+	selector       = internal.Selector
+	AggregateFunc  = internal.AggregateFunc
+	queryHook      = internal.QueryHook
+	predicateAdder = internal.PredicateAdder
+)
+
+// querierAll / querierCount have generic constraints that bind to local
+// sqlAll/sqlCount methods (whose identity is package-local because the
+// method name is unexported) — so they must be emitted per-sub-package.
+func querierAll[V Value, Q interface {
+	sqlAll(context.Context, ...queryHook) (V, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlAll(ctx)
+	})
+}
+
+func querierCount[Q interface {
+	sqlCount(context.Context) (int, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlCount(ctx)
+	})
+}
+
+// scanWithInterceptors's Q2 constraint references the unexported sqlScan
+// method, whose identity is package-local — must stay per-sub-package.
+func scanWithInterceptors[Q1 ent.Query, Q2 interface {
+	sqlScan(context.Context, Q1, any) error
+}](ctx context.Context, rootQuery Q1, selectOrGroup Q2, inters []Interceptor, v any) error {
+	rv := reflect.ValueOf(v)
+	var qr Querier = QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q1)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		if err := selectOrGroup.sqlScan(ctx, query, v); err != nil {
+			return nil, err
+		}
+		if k := rv.Kind(); k == reflect.Pointer && rv.Elem().CanInterface() {
+			return rv.Elem().Interface(), nil
+		}
+		return v, nil
+	})
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	vv, err := qr.Query(ctx, rootQuery)
+	if err != nil {
+		return err
+	}
+	switch rv2 := reflect.ValueOf(vv); {
+	case rv.IsNil(), rv2.IsNil(), rv.Kind() != reflect.Pointer:
+	case rv.Type() == rv2.Type():
+		rv.Elem().Set(rv2.Elem())
+	case rv.Elem().Type() == rv2.Type():
+		rv.Elem().Set(rv2)
+	}
+	return nil
+}
+
+// schemaGraph holds this entity's schema for entql predicate evaluation.
+// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
+var schemaGraph = func() *sqlgraph.Schema {
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 1)}
+	graph.Nodes[0] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   Table,
+			Columns: Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: FieldID,
+			},
+		},
+		Type: "FieldType",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			FieldInt:                   {Type: field.TypeInt, Column: FieldInt},
+			FieldInt8:                  {Type: field.TypeInt8, Column: FieldInt8},
+			FieldInt16:                 {Type: field.TypeInt16, Column: FieldInt16},
+			FieldInt32:                 {Type: field.TypeInt32, Column: FieldInt32},
+			FieldInt64:                 {Type: field.TypeInt64, Column: FieldInt64},
+			FieldOptionalInt:           {Type: field.TypeInt, Column: FieldOptionalInt},
+			FieldOptionalInt8:          {Type: field.TypeInt8, Column: FieldOptionalInt8},
+			FieldOptionalInt16:         {Type: field.TypeInt16, Column: FieldOptionalInt16},
+			FieldOptionalInt32:         {Type: field.TypeInt32, Column: FieldOptionalInt32},
+			FieldOptionalInt64:         {Type: field.TypeInt64, Column: FieldOptionalInt64},
+			FieldNillableInt:           {Type: field.TypeInt, Column: FieldNillableInt},
+			FieldNillableInt8:          {Type: field.TypeInt8, Column: FieldNillableInt8},
+			FieldNillableInt16:         {Type: field.TypeInt16, Column: FieldNillableInt16},
+			FieldNillableInt32:         {Type: field.TypeInt32, Column: FieldNillableInt32},
+			FieldNillableInt64:         {Type: field.TypeInt64, Column: FieldNillableInt64},
+			FieldValidateOptionalInt32: {Type: field.TypeInt32, Column: FieldValidateOptionalInt32},
+			FieldOptionalUint:          {Type: field.TypeUint, Column: FieldOptionalUint},
+			FieldOptionalUint8:         {Type: field.TypeUint8, Column: FieldOptionalUint8},
+			FieldOptionalUint16:        {Type: field.TypeUint16, Column: FieldOptionalUint16},
+			FieldOptionalUint32:        {Type: field.TypeUint32, Column: FieldOptionalUint32},
+			FieldOptionalUint64:        {Type: field.TypeUint64, Column: FieldOptionalUint64},
+			FieldState:                 {Type: field.TypeEnum, Column: FieldState},
+			FieldOptionalFloat:         {Type: field.TypeFloat64, Column: FieldOptionalFloat},
+			FieldOptionalFloat32:       {Type: field.TypeFloat32, Column: FieldOptionalFloat32},
+			FieldText:                  {Type: field.TypeString, Column: FieldText},
+			FieldDatetime:              {Type: field.TypeTime, Column: FieldDatetime},
+			FieldDecimal:               {Type: field.TypeFloat64, Column: FieldDecimal},
+			FieldLinkOther:             {Type: field.TypeOther, Column: FieldLinkOther},
+			FieldLinkOtherFunc:         {Type: field.TypeOther, Column: FieldLinkOtherFunc},
+			FieldMAC:                   {Type: field.TypeString, Column: FieldMAC},
+			FieldStringArray:           {Type: field.TypeOther, Column: FieldStringArray},
+			FieldPassword:              {Type: field.TypeString, Column: FieldPassword},
+			FieldStringScanner:         {Type: field.TypeString, Column: FieldStringScanner},
+			FieldDuration:              {Type: field.TypeInt64, Column: FieldDuration},
+			FieldDir:                   {Type: field.TypeString, Column: FieldDir},
+			FieldNdir:                  {Type: field.TypeString, Column: FieldNdir},
+			FieldStr:                   {Type: field.TypeString, Column: FieldStr},
+			FieldNullStr:               {Type: field.TypeString, Column: FieldNullStr},
+			FieldLink:                  {Type: field.TypeString, Column: FieldLink},
+			FieldNullLink:              {Type: field.TypeString, Column: FieldNullLink},
+			FieldActive:                {Type: field.TypeBool, Column: FieldActive},
+			FieldNullActive:            {Type: field.TypeBool, Column: FieldNullActive},
+			FieldDeleted:               {Type: field.TypeBool, Column: FieldDeleted},
+			FieldDeletedAt:             {Type: field.TypeTime, Column: FieldDeletedAt},
+			FieldRawData:               {Type: field.TypeBytes, Column: FieldRawData},
+			FieldSensitive:             {Type: field.TypeBytes, Column: FieldSensitive},
+			FieldIP:                    {Type: field.TypeBytes, Column: FieldIP},
+			FieldNullInt64:             {Type: field.TypeInt, Column: FieldNullInt64},
+			FieldSchemaInt:             {Type: field.TypeInt, Column: FieldSchemaInt},
+			FieldSchemaInt8:            {Type: field.TypeInt8, Column: FieldSchemaInt8},
+			FieldSchemaInt64:           {Type: field.TypeInt64, Column: FieldSchemaInt64},
+			FieldSchemaFloat:           {Type: field.TypeFloat64, Column: FieldSchemaFloat},
+			FieldSchemaFloat32:         {Type: field.TypeFloat32, Column: FieldSchemaFloat32},
+			FieldNullFloat:             {Type: field.TypeFloat64, Column: FieldNullFloat},
+			FieldRole:                  {Type: field.TypeEnum, Column: FieldRole},
+			FieldPriority:              {Type: field.TypeEnum, Column: FieldPriority},
+			FieldOptionalUUID:          {Type: field.TypeUUID, Column: FieldOptionalUUID},
+			FieldNillableUUID:          {Type: field.TypeUUID, Column: FieldNillableUUID},
+			FieldStrings:               {Type: field.TypeJSON, Column: FieldStrings},
+			FieldPair:                  {Type: field.TypeBytes, Column: FieldPair},
+			FieldNilPair:               {Type: field.TypeBytes, Column: FieldNilPair},
+			FieldVstring:               {Type: field.TypeString, Column: FieldVstring},
+			FieldTriple:                {Type: field.TypeString, Column: FieldTriple},
+			FieldBigInt:                {Type: field.TypeInt, Column: FieldBigInt},
+			FieldPasswordOther:         {Type: field.TypeOther, Column: FieldPasswordOther},
+		},
+	}
+	return graph
+}()

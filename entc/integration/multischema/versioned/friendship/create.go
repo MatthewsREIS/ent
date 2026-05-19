@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -30,7 +31,7 @@ func NewFriendshipCreate(c Config, hooks []Hook, mutation *FriendshipMutation) *
 
 // SetWeight sets the "weight" field.
 func (_c *FriendshipCreate) SetWeight(v int) *FriendshipCreate {
-	_c.mutation.SetWeight(v)
+	_ = _c.mutation.SetField("weight", v)
 	return _c
 }
 
@@ -44,7 +45,7 @@ func (_c *FriendshipCreate) SetNillableWeight(v *int) *FriendshipCreate {
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *FriendshipCreate) SetCreatedAt(v time.Time) *FriendshipCreate {
-	_c.mutation.SetCreatedAt(v)
+	_ = _c.mutation.SetField("created_at", v)
 	return _c
 }
 
@@ -58,13 +59,13 @@ func (_c *FriendshipCreate) SetNillableCreatedAt(v *time.Time) *FriendshipCreate
 
 // SetUserID sets the "user_id" field.
 func (_c *FriendshipCreate) SetUserID(v int) *FriendshipCreate {
-	_c.mutation.SetUserID(v)
+	_ = _c.mutation.SetEdgeID("user", v)
 	return _c
 }
 
 // SetFriendID sets the "friend_id" field.
 func (_c *FriendshipCreate) SetFriendID(v int) *FriendshipCreate {
-	_c.mutation.SetFriendID(v)
+	_ = _c.mutation.SetEdgeID("friend", v)
 	return _c
 }
 
@@ -103,34 +104,28 @@ func (_c *FriendshipCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *FriendshipCreate) defaults() {
-	if _, ok := _c.mutation.Weight(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "weight"); !ok {
 		v := DefaultWeight
-		_c.mutation.SetWeight(v)
+		_ = _c.mutation.SetField("weight", v)
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		v := DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+		_ = _c.mutation.SetField("created_at", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *FriendshipCreate) check() error {
-	if _, ok := _c.mutation.Weight(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "weight"); !ok {
 		return &ValidationError{Name: "weight", Err: errors.New(`versioned: missing required field "Friendship.weight"`)}
 	}
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		return &ValidationError{Name: "created_at", Err: errors.New(`versioned: missing required field "Friendship.created_at"`)}
 	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", Err: errors.New(`versioned: missing required field "Friendship.user_id"`)}
-	}
-	if _, ok := _c.mutation.FriendID(); !ok {
-		return &ValidationError{Name: "friend_id", Err: errors.New(`versioned: missing required field "Friendship.friend_id"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("user")) == 0 {
 		return &ValidationError{Name: "user", Err: errors.New(`versioned: missing required edge "Friendship.user"`)}
 	}
-	if len(_c.mutation.FriendIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("friend")) == 0 {
 		return &ValidationError{Name: "friend", Err: errors.New(`versioned: missing required edge "Friendship.friend"`)}
 	}
 	return nil
@@ -149,7 +144,7 @@ func (_c *FriendshipCreate) sqlSave(ctx context.Context) (*Friendship, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -161,15 +156,15 @@ func (_c *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 	)
 	schemaConfig := _c.Config.SchemaConfig()
 	_spec.Schema = schemaConfig.Friendship
-	if value, ok := _c.mutation.Weight(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "weight"); ok {
 		_spec.SetField(FieldWeight, field.TypeInt, value)
 		_node.Weight = value
 	}
-	if value, ok := _c.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -187,7 +182,7 @@ func (_c *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.FriendIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friend"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -272,11 +267,11 @@ func (_c *FriendshipCreateBulk) Save(ctx context.Context) ([]*Friendship, error)
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

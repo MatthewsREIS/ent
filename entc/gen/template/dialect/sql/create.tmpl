@@ -58,7 +58,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		{{- end }}
 	{{- end }}
 	{{- if $.HasOneFieldID }}
-		{{ $mutation }}.SetMutationID(&_node.{{ $.ID.StructField }})
+		{{ $mutation }}.SetID(_node.{{ $.ID.StructField }})
 		{{ $mutation }}.SetDone()
 	{{- end }}
 	return _node, nil
@@ -76,13 +76,13 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		{{- end }}
 	{{- end }}
 	{{- if and (not $.HasCompositeID) $.ID.UserDefined }}
-		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
+		if id, ok := {{ $mutation }}.ID(); ok {
 			_node.ID = id
 			_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
 		}
 	{{- end }}
 	{{- range $f := $.MutationFields }}
-		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+		if value, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); ok {
 			{{- if $f.HasValueScanner }}
 				vv, err := {{ trimPackage $f.ValueFunc $.Package }}(value)
 				if err != nil {
@@ -96,7 +96,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		}
 	{{- end }}
 	{{- range $e := $.EdgesWithID }}
-		if nodes := {{ $mutation }}.{{ $e.StructField }}IDs(); len(nodes) > 0 {
+		if nodes := entbuilder.EdgeIDsAs[{{ trimPackage $e.Type.ID.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $e.Name }}); len(nodes) > 0 {
 			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
 				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
 			{{- end }}
@@ -212,7 +212,6 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 					return nil, err
 				}
 				{{- if $.HasOneFieldID }}
-					mutation.SetMutationID(&nodes[i].{{ $.ID.StructField }})
 					{{- if or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther }}
 						{{- /* Do nothing, because these 4 types must be supplied by the user. */ -}}
 					{{- else if or $.ID.Type.ValueScanner }}
@@ -227,6 +226,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 							nodes[i].ID = {{ $.ID.Type }}(id)
 						}
 					{{- end }}
+					mutation.SetID(nodes[i].{{ $.ID.StructField }})
 				{{- end }}
 				mutation.SetDone()
 				return nodes[i], nil

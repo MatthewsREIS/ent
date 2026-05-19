@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // BlobLinkDelete is the builder for deleting a BlobLink entity.
@@ -28,13 +29,13 @@ func NewBlobLinkDelete(c Config, hooks []Hook, mutation *BlobLinkMutation) *Blob
 
 // Where appends a list predicates to the BlobLinkDelete builder.
 func (_d *BlobLinkDelete) Where(ps ...predicate.BlobLink) *BlobLinkDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *BlobLinkDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*BlobLinkMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -75,7 +76,7 @@ func NewBlobLinkDeleteOne(d *BlobLinkDelete) *BlobLinkDeleteOne {
 
 // Where appends a list predicates to the BlobLinkDelete builder.
 func (_d *BlobLinkDeleteOne) Where(ps ...predicate.BlobLink) *BlobLinkDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

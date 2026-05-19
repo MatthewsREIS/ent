@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewTokenUpdate(c Config, hooks []Hook, mutation *TokenMutation) *TokenUpdat
 
 // Where appends a list predicates to the TokenUpdate builder.
 func (_u *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetBody sets the "body" field.
 func (_u *TokenUpdate) SetBody(v string) *TokenUpdate {
-	_u.mutation.SetBody(v)
+	_ = _u.mutation.SetField("body", v)
 	return _u
 }
 
@@ -52,7 +53,7 @@ func (_u *TokenUpdate) SetNillableBody(v *string) *TokenUpdate {
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (_u *TokenUpdate) SetAccountID(id sid.ID) *TokenUpdate {
-	_u.mutation.SetAccountID(id)
+	_ = _u.mutation.SetEdgeID("account", id)
 	return _u
 }
 
@@ -63,13 +64,13 @@ func (_u *TokenUpdate) Mutation() *TokenMutation {
 
 // ClearAccount clears the "account" edge to the Account entity.
 func (_u *TokenUpdate) ClearAccount() *TokenUpdate {
-	_u.mutation.ClearAccount()
+	_ = _u.mutation.ClearEdge("account")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TokenUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TokenMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -96,12 +97,12 @@ func (_u *TokenUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *TokenUpdate) check() error {
-	if v, ok := _u.mutation.Body(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "body"); ok {
 		if err := BodyValidator(v); err != nil {
 			return &ValidationError{Name: "body", Err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
-	if _u.mutation.AccountCleared() && len(_u.mutation.AccountIDs()) > 0 {
+	if _u.mutation.EdgeCleared("account") && len(_u.mutation.EdgeIDs("account")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Token.account"`)
 	}
 	return nil
@@ -119,10 +120,10 @@ func (_u *TokenUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Body(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "body"); ok {
 		_spec.SetField(FieldBody, field.TypeString, value)
 	}
-	if _u.mutation.AccountCleared() {
+	if _u.mutation.EdgeCleared("account") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -135,7 +136,7 @@ func (_u *TokenUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AccountIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("account"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -178,7 +179,7 @@ func NewTokenUpdateOne(c Config, hooks []Hook, mutation *TokenMutation) *TokenUp
 
 // SetBody sets the "body" field.
 func (_u *TokenUpdateOne) SetBody(v string) *TokenUpdateOne {
-	_u.mutation.SetBody(v)
+	_ = _u.mutation.SetField("body", v)
 	return _u
 }
 
@@ -192,7 +193,7 @@ func (_u *TokenUpdateOne) SetNillableBody(v *string) *TokenUpdateOne {
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
 func (_u *TokenUpdateOne) SetAccountID(id sid.ID) *TokenUpdateOne {
-	_u.mutation.SetAccountID(id)
+	_ = _u.mutation.SetEdgeID("account", id)
 	return _u
 }
 
@@ -203,13 +204,13 @@ func (_u *TokenUpdateOne) Mutation() *TokenMutation {
 
 // ClearAccount clears the "account" edge to the Account entity.
 func (_u *TokenUpdateOne) ClearAccount() *TokenUpdateOne {
-	_u.mutation.ClearAccount()
+	_ = _u.mutation.ClearEdge("account")
 	return _u
 }
 
 // Where appends a list predicates to the TokenUpdate builder.
 func (_u *TokenUpdateOne) Where(ps ...predicate.Token) *TokenUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -222,7 +223,7 @@ func (_u *TokenUpdateOne) Select(field string, fields ...string) *TokenUpdateOne
 
 // Save executes the query and returns the updated Token entity.
 func (_u *TokenUpdateOne) Save(ctx context.Context) (*Token, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Token](ctx, &entbuilder.UpdateState[*TokenMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -249,12 +250,12 @@ func (_u *TokenUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *TokenUpdateOne) check() error {
-	if v, ok := _u.mutation.Body(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "body"); ok {
 		if err := BodyValidator(v); err != nil {
 			return &ValidationError{Name: "body", Err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
-	if _u.mutation.AccountCleared() && len(_u.mutation.AccountIDs()) > 0 {
+	if _u.mutation.EdgeCleared("account") && len(_u.mutation.EdgeIDs("account")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Token.account"`)
 	}
 	return nil
@@ -289,10 +290,10 @@ func (_u *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Body(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "body"); ok {
 		_spec.SetField(FieldBody, field.TypeString, value)
 	}
-	if _u.mutation.AccountCleared() {
+	if _u.mutation.EdgeCleared("account") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -305,7 +306,7 @@ func (_u *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AccountIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("account"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,

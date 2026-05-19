@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -33,31 +34,31 @@ func NewTagCreate(c Config, hooks []Hook, mutation *TagMutation) *TagCreate {
 
 // SetValue sets the "value" field.
 func (_c *TagCreate) SetValue(v string) *TagCreate {
-	_c.mutation.SetValue(v)
+	_ = _c.mutation.SetField("value", v)
 	return _c
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
 func (_c *TagCreate) AddTweetIDs(ids ...int) *TagCreate {
-	_c.mutation.AddTweetIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_c *TagCreate) AddGroupIDs(ids ...int) *TagCreate {
-	_c.mutation.AddGroupIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (_c *TagCreate) AddTweetTagIDs(ids ...uuid.UUID) *TagCreate {
-	_c.mutation.AddTweetTagIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
 func (_c *TagCreate) AddGroupTagIDs(ids ...int) *TagCreate {
-	_c.mutation.AddGroupTagIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -95,7 +96,7 @@ func (_c *TagCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *TagCreate) check() error {
-	if _, ok := _c.mutation.Value(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "value"); !ok {
 		return &ValidationError{Name: "value", Err: errors.New(`ent: missing required field "Tag.value"`)}
 	}
 	return nil
@@ -114,7 +115,7 @@ func (_c *TagCreate) sqlSave(ctx context.Context) (*Tag, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -125,11 +126,11 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Value(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "value"); ok {
 		_spec.SetField(FieldValue, field.TypeString, value)
 		_node.Value = value
 	}
-	if nodes := _c.mutation.TweetsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tweets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -150,7 +151,7 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -166,7 +167,7 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TweetTagsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "tweet_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -182,7 +183,7 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.GroupTagsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "group_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -404,11 +405,11 @@ func (_c *TagCreateBulk) Save(ctx context.Context) ([]*Tag, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

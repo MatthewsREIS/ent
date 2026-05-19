@@ -8,6 +8,12 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"reflect"
+
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/internal"
 )
@@ -61,11 +67,373 @@ type User = internal.User
 type UserEdges = internal.UserEdges
 type Users = internal.Users
 
-// Mutation type aliases and constructors from internal.
-type UserMutation = internal.UserMutation
-type UserMutationOption = internal.UserMutationOption
+// Error-check function aliases for the shared helpers in the internal package.
+var (
+	IsValidationError = internal.IsValidationError
+	IsNotFound        = internal.IsNotFound
+	MaskNotFound      = internal.MaskNotFound
+	IsNotSingular     = internal.IsNotSingular
+	IsNotLoaded       = internal.IsNotLoaded
+	IsConstraintError = internal.IsConstraintError
+)
 
-var NewUserMutation = internal.NewUserMutation
-var WithUserID = internal.WithUserID
-var WithUser = internal.WithUser
-var WithUserIDsFunc = internal.WithUserIDsFunc
+// setContextOp is an alias for the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
+
+// withInterceptors is a wrapper around internal.WithInterceptors so callers
+// can use the conventional lowercase name. Generic functions can't be assigned
+// to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
+}
+
+// Type aliases for sql-specific shared helpers.
+type (
+	selector       = internal.Selector
+	AggregateFunc  = internal.AggregateFunc
+	queryHook      = internal.QueryHook
+	predicateAdder = internal.PredicateAdder
+)
+
+// querierAll / querierCount have generic constraints that bind to local
+// sqlAll/sqlCount methods (whose identity is package-local because the
+// method name is unexported) — so they must be emitted per-sub-package.
+func querierAll[V Value, Q interface {
+	sqlAll(context.Context, ...queryHook) (V, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlAll(ctx)
+	})
+}
+
+func querierCount[Q interface {
+	sqlCount(context.Context) (int, error)
+}]() Querier {
+	return QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		return query.sqlCount(ctx)
+	})
+}
+
+// scanWithInterceptors's Q2 constraint references the unexported sqlScan
+// method, whose identity is package-local — must stay per-sub-package.
+func scanWithInterceptors[Q1 ent.Query, Q2 interface {
+	sqlScan(context.Context, Q1, any) error
+}](ctx context.Context, rootQuery Q1, selectOrGroup Q2, inters []Interceptor, v any) error {
+	rv := reflect.ValueOf(v)
+	var qr Querier = QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		query, ok := q.(Q1)
+		if !ok {
+			return nil, fmt.Errorf("unexpected query type %T", q)
+		}
+		if err := selectOrGroup.sqlScan(ctx, query, v); err != nil {
+			return nil, err
+		}
+		if k := rv.Kind(); k == reflect.Pointer && rv.Elem().CanInterface() {
+			return rv.Elem().Interface(), nil
+		}
+		return v, nil
+	})
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	vv, err := qr.Query(ctx, rootQuery)
+	if err != nil {
+		return err
+	}
+	switch rv2 := reflect.ValueOf(vv); {
+	case rv.IsNil(), rv2.IsNil(), rv.Kind() != reflect.Pointer:
+	case rv.Type() == rv2.Type():
+		rv.Elem().Set(rv2.Elem())
+	case rv.Elem().Type() == rv2.Type():
+		rv.Elem().Set(rv2)
+	}
+	return nil
+}
+
+// schemaGraph holds this entity's schema for entql predicate evaluation.
+// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
+// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
+// string literals (sibling sub-packages cannot be imported from a leaf).
+// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
+// join table, including the SQL "FROM <target_table>" sub-selects emitted
+// by HasNeighborsWith. Cross-edge entql field predicates against sibling
+// entity columns are out of scope at the sub-package boundary; generated
+// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
+// closures directly to the SQL selector and never reads stub.Fields.
+var schemaGraph = func() *sqlgraph.Schema {
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 5)}
+	graph.Nodes[0] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   Table,
+			Columns: Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: FieldID,
+			},
+		},
+		Type: "User",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			FieldOptionalInt: {Type: field.TypeInt, Column: FieldOptionalInt},
+			FieldAge:         {Type: field.TypeInt, Column: FieldAge},
+			FieldName:        {Type: field.TypeString, Column: FieldName},
+			FieldLast:        {Type: field.TypeString, Column: FieldLast},
+			FieldNickname:    {Type: field.TypeString, Column: FieldNickname},
+			FieldAddress:     {Type: field.TypeString, Column: FieldAddress},
+			FieldPhone:       {Type: field.TypeString, Column: FieldPhone},
+			FieldPassword:    {Type: field.TypeString, Column: FieldPassword},
+			FieldRole:        {Type: field.TypeEnum, Column: FieldRole},
+			FieldEmployment:  {Type: field.TypeEnum, Column: FieldEmployment},
+			FieldSSOCert:     {Type: field.TypeString, Column: FieldSSOCert},
+			FieldFilesCount:  {Type: field.TypeInt, Column: FieldFilesCount},
+		},
+	}
+	graph.Nodes[1] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "cards",
+			Columns: []string{
+				"id",
+				"create_time",
+				"update_time",
+				"balance",
+				"number",
+				"name",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Card",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"create_time": {Type: field.TypeTime, Column: "create_time"},
+			"update_time": {Type: field.TypeTime, Column: "update_time"},
+			"balance":     {Type: field.TypeFloat64, Column: "balance"},
+			"number":      {Type: field.TypeString, Column: "number"},
+			"name":        {Type: field.TypeString, Column: "name"},
+		},
+	}
+	graph.Nodes[2] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "pet",
+			Columns: []string{
+				"id",
+				"age",
+				"name",
+				"uuid",
+				"nickname",
+				"trained",
+				"optional_time",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Pet",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"age":           {Type: field.TypeFloat64, Column: "age"},
+			"name":          {Type: field.TypeString, Column: "name"},
+			"uuid":          {Type: field.TypeUUID, Column: "uuid"},
+			"nickname":      {Type: field.TypeString, Column: "nickname"},
+			"trained":       {Type: field.TypeBool, Column: "trained"},
+			"optional_time": {Type: field.TypeTime, Column: "optional_time"},
+		},
+	}
+	graph.Nodes[3] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "files",
+			Columns: []string{
+				"id",
+				"set_id",
+				"fsize",
+				"name",
+				"user",
+				"group",
+				"op",
+				"field_id",
+				"create_time",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "File",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"set_id":      {Type: field.TypeInt, Column: "set_id"},
+			"fsize":       {Type: field.TypeInt, Column: "fsize"},
+			"name":        {Type: field.TypeString, Column: "name"},
+			"user":        {Type: field.TypeString, Column: "user"},
+			"group":       {Type: field.TypeString, Column: "group"},
+			"op":          {Type: field.TypeBool, Column: "op"},
+			"field_id":    {Type: field.TypeInt, Column: "field_id"},
+			"create_time": {Type: field.TypeTime, Column: "create_time"},
+		},
+	}
+	graph.Nodes[4] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table: "groups",
+			Columns: []string{
+				"id",
+				"active",
+				"expire",
+				"type",
+				"max_users",
+				"name",
+			},
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: "id",
+			},
+		},
+		Type: "Group",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			"active":    {Type: field.TypeBool, Column: "active"},
+			"expire":    {Type: field.TypeTime, Column: "expire"},
+			"type":      {Type: field.TypeString, Column: "type"},
+			"max_users": {Type: field.TypeInt, Column: "max_users"},
+			"name":      {Type: field.TypeString, Column: "name"},
+		},
+	}
+	graph.MustAddE(
+		"card",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   CardTable,
+			Columns: []string{CardColumn},
+			Bidi:    false,
+		},
+		"User",
+		"Card",
+	)
+	graph.MustAddE(
+		"pets",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   PetsTable,
+			Columns: []string{PetsColumn},
+			Bidi:    false,
+		},
+		"User",
+		"Pet",
+	)
+	graph.MustAddE(
+		"files",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   FilesTable,
+			Columns: []string{FilesColumn},
+			Bidi:    false,
+		},
+		"User",
+		"File",
+	)
+	graph.MustAddE(
+		"groups",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   GroupsTable,
+			Columns: GroupsPrimaryKey,
+			Bidi:    false,
+		},
+		"User",
+		"Group",
+	)
+	graph.MustAddE(
+		"friends",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   FriendsTable,
+			Columns: FriendsPrimaryKey,
+			Bidi:    true,
+		},
+		"User",
+		"User",
+	)
+	graph.MustAddE(
+		"followers",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   FollowersTable,
+			Columns: FollowersPrimaryKey,
+			Bidi:    false,
+		},
+		"User",
+		"User",
+	)
+	graph.MustAddE(
+		"following",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   FollowingTable,
+			Columns: FollowingPrimaryKey,
+			Bidi:    false,
+		},
+		"User",
+		"User",
+	)
+	graph.MustAddE(
+		"team",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   TeamTable,
+			Columns: []string{TeamColumn},
+			Bidi:    false,
+		},
+		"User",
+		"Pet",
+	)
+	graph.MustAddE(
+		"spouse",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   SpouseTable,
+			Columns: []string{SpouseColumn},
+			Bidi:    true,
+		},
+		"User",
+		"User",
+	)
+	graph.MustAddE(
+		"children",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   ChildrenTable,
+			Columns: []string{ChildrenColumn},
+			Bidi:    false,
+		},
+		"User",
+		"User",
+	)
+	graph.MustAddE(
+		"parent",
+		&sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   ParentTable,
+			Columns: []string{ParentColumn},
+			Bidi:    false,
+		},
+		"User",
+		"User",
+	)
+	return graph
+}()

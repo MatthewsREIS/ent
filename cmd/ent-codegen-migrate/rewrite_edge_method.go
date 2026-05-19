@@ -1,0 +1,761 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"go/ast"
+	"go/printer"
+	"go/token"
+	"path"
+	"strings"
+
+	"golang.org/x/tools/go/ast/astutil"
+)
+
+// RewriteEdgeMethodSource parses src and rewrites the cross-entity edge
+// methods that PR 6 lifted out of per-entity sub-packages into the root
+// facade:
+//
+//	q.With<Edge>(opts...)  →  <alias>.With<Entity><Edge>(q, opts...)
+//	c.Query<Edge>(t)       →  <alias>.Query<Entity><Edge>(c, t)
+//	q.Query<Edge>()        →  <alias>.Query<Entity><Edge>FromQuery(q)
+//
+// where q is *<pkg>.<Entity>Query and c is *<pkg>.<Entity>Client.
+// Other receivers are left untouched (schema-DSL and unrelated user
+// types with overlapping method names).
+//
+// <alias> is the local name the file binds genImportPath to. If the
+// file imports genImportPath without an alias, the alias is the import
+// path's leaf segment (e.g. "gen" for ".../ent/gen"). If genImportPath
+// is not imported in this file, the rewriter adds the import so the
+// emitted call resolves at compile time.
+//
+// genImportPath is the full module path of the consumer's generated ent
+// package (carried in from main's -gen-package flag). It must be
+// non-empty for the rewriter to know how to qualify the facade calls.
+// When empty (as in legacy per-pass tests that predate the flag), the
+// rewriter falls back to the historical "ent" identifier.
+//
+// Idempotent: re-running on already-transformed code is a no-op (the
+// new shapes are plain function calls — no With/Query-prefixed method
+// on a Query/Client receiver remains to match).
+func RewriteEdgeMethodSource(filename, src string, descs Descriptors, genImportPath string) (string, error) {
+	r, err := NewResolver(filename, src)
+	if err != nil {
+		return "", fmt.Errorf("parse: %w", err)
+	}
+
+	// Resolve the local alias for the gen package once per file. The
+	// facade calls emitted below all qualify with this name. If the
+	// gen package is not imported in this file, fall through to the
+	// default leaf name and add the import — without the import the
+	// emitted call would not compile.
+	alias, addImport := resolveGenAlias(r, genImportPath)
+
+	rewrote := false
+	emit := func(c *astutil.Cursor, expr ast.Expr) {
+		c.Replace(expr)
+		rewrote = true
+	}
+
+	// Post-order traversal: rewrite inner calls before outer ones so a
+	// chained pattern like q.QueryX().QueryY() is processed bottom-up.
+	// The outer pass sees the already-rewritten inner (an `<alias>.QueryEFromQuery`
+	// call) and can rebuild the chain receiver-type chain syntactically.
+	astutil.Apply(r.File, nil, func(c *astutil.Cursor) bool {
+		call, ok := c.Node().(*ast.CallExpr)
+		if !ok {
+			return true
+		}
+		sel, ok := call.Fun.(*ast.SelectorExpr)
+		if !ok {
+			return true
+		}
+		methodName := sel.Sel.Name
+
+		if edge, ok := strings.CutPrefix(methodName, "With"); ok && edge != "" {
+			// Peel a trailing .Select(...) off the receiver chain. Pre-PR-6
+			// code sometimes did `q.Select(FieldID).WithFoo(...)` as a
+			// column-projection hint; that "worked" because Select still
+			// fired the eager-load on a fresh sub-query. Post-PR-6 the With
+			// facade expects *<Entity>Query and rejects *<Entity>Select, so
+			// the only mechanical fix that preserves the eager-load is to
+			// drop the Select — main rows then load with all columns, but
+			// callers consuming the result only read Edges (the projection
+			// was on the wrong table to begin with).
+			peeledRecv, droppedSelect := peelTrailingSelect(sel.X)
+			recvForMatch := peeledRecv
+			if entity, matched := matchEdgeReceiver(r, callWithReceiver(call, recvForMatch), descs, "Query", edge); matched {
+				newArgs := append([]ast.Expr{recvForMatch}, call.Args...)
+				emit(c, &ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X:   ast.NewIdent(alias),
+						Sel: ast.NewIdent("With" + entity + edge),
+					},
+					Args: newArgs,
+				})
+				_ = droppedSelect
+				return true
+			}
+			// Syntactic fallback for cross-package consumers where go/types
+			// can't resolve the receiver. Walk the call chain to infer the
+			// entity from the *<Entity>Query (or *<Entity>Select) receiver,
+			// then verify the edge exists before emitting.
+			if entity, ok := inferQueryReceiverEntityInFile(recvForMatch, r.File, descs, alias); ok {
+				if edgeDescLookup(descs[entity], edge) {
+					newArgs := append([]ast.Expr{recvForMatch}, call.Args...)
+					emit(c, &ast.CallExpr{
+						Fun: &ast.SelectorExpr{
+							X:   ast.NewIdent(alias),
+							Sel: ast.NewIdent("With" + entity + edge),
+						},
+						Args: newArgs,
+					})
+					_ = droppedSelect
+					return true
+				}
+			}
+		}
+		if edge, ok := strings.CutPrefix(methodName, "Query"); ok && edge != "" {
+			if entity, matched := matchEdgeReceiver(r, call, descs, "Client", edge); matched {
+				newArgs := append([]ast.Expr{sel.X}, call.Args...)
+				emit(c, &ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X:   ast.NewIdent(alias),
+						Sel: ast.NewIdent("Query" + entity + edge),
+					},
+					Args: newArgs,
+				})
+				return true
+			}
+			// Syntactic fallback for *<Entity>Client receivers (cross-package
+			// consumer files where the importer can't resolve types). Shape:
+			//   <expr>.<EntityName>.Query<EdgeName>(args...)
+			// sel.X is the SelectorExpr "<expr>.<EntityName>"; the inner
+			// Sel.Name is the EntityName slot of the typed-client field access
+			// (e.g. gen.FromContext(ctx).Escrow → "Escrow", client.UserReminder
+			// → "UserReminder"). Only rewrite when EntityName matches a known
+			// descriptor and the edge is declared on that entity.
+			if innerSel, ok := sel.X.(*ast.SelectorExpr); ok {
+				if ed, present := descs[innerSel.Sel.Name]; present && edgeDescLookup(ed, edge) {
+					newArgs := append([]ast.Expr{sel.X}, call.Args...)
+					emit(c, &ast.CallExpr{
+						Fun: &ast.SelectorExpr{
+							X:   ast.NewIdent(alias),
+							Sel: ast.NewIdent("Query" + innerSel.Sel.Name + edge),
+						},
+						Args: newArgs,
+					})
+					return true
+				}
+			}
+			// Receiver is *<Entity>Query — emit the FromQuery facade variant.
+			// Try go/types resolution first, then fall back to a syntactic
+			// chain walk for cross-package call sites where the importer
+			// can't see consumer packages.
+			if entity, matched := matchEdgeReceiver(r, call, descs, "Query", edge); matched {
+				emit(c, &ast.CallExpr{
+					Fun: &ast.SelectorExpr{
+						X:   ast.NewIdent(alias),
+						Sel: ast.NewIdent("Query" + entity + edge + "FromQuery"),
+					},
+					Args: []ast.Expr{sel.X},
+				})
+				return true
+			}
+			if entity, ok := inferQueryReceiverEntityInFile(sel.X, r.File, descs, alias); ok {
+				if edgeDescLookup(descs[entity], edge) {
+					emit(c, &ast.CallExpr{
+						Fun: &ast.SelectorExpr{
+							X:   ast.NewIdent(alias),
+							Sel: ast.NewIdent("Query" + entity + edge + "FromQuery"),
+						},
+						Args: []ast.Expr{sel.X},
+					})
+					return true
+				}
+			}
+		}
+		return true
+	})
+
+	// Add the missing import only if a rewrite actually fired in this
+	// file. Files that didn't emit any facade call don't need the import
+	// — adding it would produce an unused-import build error.
+	if rewrote && addImport && genImportPath != "" {
+		astutil.AddImport(r.Fset, r.File, genImportPath)
+	}
+
+	var buf bytes.Buffer
+	if err := printer.Fprint(&buf, r.Fset, r.File); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+// resolveGenAlias returns the package-selector identifier to emit for
+// facade calls in this file, plus a flag indicating whether the gen
+// package import is missing and must be added.
+//
+// Resolution:
+//   - genImportPath == "": legacy callers (and most per-pass tests)
+//     pre-date the flag; fall back to "ent" with no import add — those
+//     test fixtures declare their own dummy "ent" package or rely on
+//     existing imports.
+//   - Imported in this file: return the alias (or the import path's
+//     leaf segment if no alias).
+//   - Not imported: return the leaf segment AND signal that the import
+//     must be added if the rewriter ends up emitting a call.
+func resolveGenAlias(r *Resolver, genImportPath string) (alias string, addImport bool) {
+	if genImportPath == "" {
+		return "ent", false
+	}
+	if name, ok := r.GenAlias(genImportPath); ok {
+		return name, false
+	}
+	// Not imported. Default to the path leaf as the alias and ask the
+	// caller to add the import iff a rewrite fires.
+	return path.Base(genImportPath), true
+}
+
+// inferQueryReceiverEntityInFile deduces the entity name behind a
+// *<Entity>Query (or *<Entity>Select) receiver expression by walking the
+// AST when go/types resolution is unavailable (cross-package consumer
+// files where the importer can't see the generated ent package).
+//
+// Recognised shapes (chained from a client):
+//
+//	X.<Entity>.Query()                  → entity
+//	<expr>.Query<Edge>()                → descs[parent(expr)].Edges[edge].Target
+//	<expr>.Where(...) | .Order(...) etc → recurse into <expr>
+//	<expr>.Clone() | .Modify(...) etc   → recurse into <expr>
+//	<expr>.Select(...)                  → recurse into <expr> (entity preserved)
+//	<ident> declared as &<pkg>.<E>Query{} → entity (via file short-var scan)
+//
+// file is the file's AST (may be nil). When non-nil it enables a terminal
+// fallback that looks up bare identifiers via their short-var declarations
+// (e.g. "q := &gen.ChatterMessageQuery{}" → "ChatterMessage").
+//
+// genAlias is the local identifier this file binds the gen package to;
+// it gates the "prior pass rewrote an inner segment" branch so we only
+// follow our own rewritten chains (e.g. gen.QueryXFromQuery(...)),
+// not unrelated package selectors.
+//
+// Returns the entity name and true only when the chain unambiguously
+// resolves to an entity present in descs. Returns false otherwise — a
+// missed rewrite is recoverable, a wrong rewrite corrupts user code.
+// file may be nil (disables ident scanning).
+func inferQueryReceiverEntityInFile(expr ast.Expr, file *ast.File, descs Descriptors, genAlias string) (string, bool) {
+	// Terminal case: bare identifier — scan the file for its declaration.
+	if ident, ok := expr.(*ast.Ident); ok {
+		if file == nil {
+			return "", false
+		}
+		return inferEntityFromIdent(ident, file, descs, genAlias)
+	}
+	call, ok := expr.(*ast.CallExpr)
+	if !ok {
+		return "", false
+	}
+	sel, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return "", false
+	}
+	switch sel.Sel.Name {
+	case "Query":
+		// X.<Entity>.Query() — the preceding selector field is the entity.
+		inner, ok := sel.X.(*ast.SelectorExpr)
+		if !ok {
+			return "", false
+		}
+		name := inner.Sel.Name
+		if _, present := descs[name]; present {
+			return name, true
+		}
+		return "", false
+	default:
+		// <alias>.Query<Parent><Edge>FromQuery(...) — rewritten form produced by
+		// a prior post-order pass on an inner chain segment. Return the
+		// edge's target entity (== Y in Query<X><Y>FromQuery → returns *<Y>Query).
+		// Also recognise <alias>.With<Parent><Edge>(...) — its return type is the
+		// receiver entity (the parent), which is what callers chaining a further
+		// .WithFoo() on the result need to identify.
+		if x, ok := sel.X.(*ast.Ident); ok && x.Name == genAlias {
+			if entity, found := entityFromFacadeName(sel.Sel.Name, descs); found {
+				return entity, true
+			}
+			if entity, found := entityFromWithFacadeName(sel.Sel.Name, descs); found {
+				return entity, true
+			}
+		}
+		// QueryEdge: walk back to the parent entity, then look up edge target.
+		if edge, found := strings.CutPrefix(sel.Sel.Name, "Query"); found && edge != "" {
+			parent, ok := inferQueryReceiverEntityInFile(sel.X, file, descs, genAlias)
+			if !ok {
+				return "", false
+			}
+			ed, ok := descs[parent]
+			if !ok {
+				return "", false
+			}
+			edesc, ok := lookupEdgeDesc(ed, edge)
+			if !ok || edesc.Target == "" {
+				return "", false
+			}
+			if _, present := descs[edesc.Target]; !present {
+				return "", false
+			}
+			return edesc.Target, true
+		}
+		// Select returns *<Entity>Select (not *<Entity>Query), so it is NOT
+		// a passthrough in the isQueryPassthrough sense. However the entity
+		// context is the same — Select operates on the same entity as the
+		// preceding Query call — so we can safely recurse into sel.X.
+		if sel.Sel.Name == "Select" {
+			return inferQueryReceiverEntityInFile(sel.X, file, descs, genAlias)
+		}
+		// Pass-through query-builder methods that preserve receiver type.
+		// Be conservative: only recurse on names known to belong to the
+		// generated *<Entity>Query builder so we don't follow random calls.
+		if isQueryPassthrough(sel.Sel.Name) {
+			return inferQueryReceiverEntityInFile(sel.X, file, descs, genAlias)
+		}
+		return "", false
+	}
+}
+
+// inferEntityFromIdent resolves a bare identifier to an entity name by
+// scanning the file AST for the identifier's short-var declaration or, if
+// it's a function parameter, the enclosing function's parameter list.
+// Handles the common consumer patterns:
+//
+//	q := &<genAlias>.<Entity>Query{}                 // short-var decl
+//	func(q *<genAlias>.<Entity>Query) { q.WithFoo() } // funcLit param
+//	func F(q *<genAlias>.<Entity>Query) { ... }      // funcDecl param
+//
+// where the type-expression's type name (StarExpr → SelectorExpr/Ident →
+// "<Entity>Query") encodes the entity. Returns ("", false) if no
+// recognisable declaration or parameter is found.
+func inferEntityFromIdent(ident *ast.Ident, file *ast.File, descs Descriptors, genAlias string) (string, bool) {
+	want := ident.Name
+	var found string
+	ast.Inspect(file, func(n ast.Node) bool {
+		if found != "" {
+			return false
+		}
+		assign, ok := n.(*ast.AssignStmt)
+		if !ok || assign.Tok != token.DEFINE {
+			return true
+		}
+		for i, lhs := range assign.Lhs {
+			lhsIdent, ok := lhs.(*ast.Ident)
+			if !ok || lhsIdent.Name != want {
+				continue
+			}
+			if i >= len(assign.Rhs) {
+				continue
+			}
+			// Look for &<pkg>.<Entity>Query{} / &<pkg>.<Entity>Select{}
+			// composite literals, or q.(*<pkg>.<Entity>Query) type
+			// assertions (comma-ok and single-value forms) on the RHS.
+			if entity, ok := entityFromAssignedPtrType(assign.Rhs[i], descs); ok {
+				found = entity
+				return false
+			}
+			// Chain RHS: q := <something>.Query()... or
+			// q := gen.QueryXFromQuery(...).Limit().Order(...). Recurse
+			// into the chain walker so callers can resolve `q.WithEdge()`
+			// later in the same function. genAlias gates whether we follow
+			// the gen-package-prefixed FromQuery/With facade shapes.
+			if entity, ok := inferQueryReceiverEntityInFile(assign.Rhs[i], file, descs, genAlias); ok {
+				found = entity
+				return false
+			}
+		}
+		return true
+	})
+	if found != "" {
+		return found, true
+	}
+	// Fallback: the identifier may name a parameter of the enclosing
+	// FuncLit or FuncDecl (e.g.  `func(query *gen.PartyToTransactionQuery)`
+	// in a `With<X>` eager-load option callback). Walk the file looking
+	// for the nearest enclosing function whose param list binds `want`,
+	// then extract the entity from the param's declared type.
+	if entity, ok := entityFromEnclosingFuncParam(ident, file, descs); ok {
+		return entity, true
+	}
+	return "", false
+}
+
+// entityFromEnclosingFuncParam walks the file AST for the smallest FuncLit
+// or FuncDecl whose position range contains ident, looks up `ident.Name`
+// in its parameter list, and returns the entity inferred from the
+// parameter's type expression (`*<pkg>.<Entity>Query` /
+// `*<pkg>.<Entity>Select` / `*<pkg>.<Entity>Client`).
+//
+// Smallest enclosing function wins so a nested funcLit's param shadows an
+// outer FuncDecl's same-named param — matches Go's scoping rules.
+func entityFromEnclosingFuncParam(ident *ast.Ident, file *ast.File, descs Descriptors) (string, bool) {
+	var enclosing ast.Node
+	ast.Inspect(file, func(n ast.Node) bool {
+		if n == nil {
+			return false
+		}
+		if n.Pos() <= ident.Pos() && ident.End() <= n.End() {
+			switch n.(type) {
+			case *ast.FuncDecl, *ast.FuncLit:
+				// Overwrite with each deeper match so the smallest (most
+				// specific) enclosing function wins.
+				enclosing = n
+			}
+			return true
+		}
+		return false
+	})
+	if enclosing == nil {
+		return "", false
+	}
+	paramExpr := paramType(enclosing, ident.Name)
+	if paramExpr == nil {
+		return "", false
+	}
+	// Param type must be a pointer (`*<pkg>.<Entity>Query` shape). The
+	// SelectorExpr / Ident handling mirrors entityFromAssignedPtrType.
+	star, ok := paramExpr.(*ast.StarExpr)
+	if !ok {
+		return "", false
+	}
+	var typeName string
+	switch t := star.X.(type) {
+	case *ast.SelectorExpr:
+		typeName = t.Sel.Name
+	case *ast.Ident:
+		typeName = t.Name
+	}
+	return entityNameFromQueryTypeName(typeName, descs)
+}
+
+// entityFromAssignedPtrType extracts the entity name from two RHS expression
+// shapes that assign a typed query/select pointer to a short variable:
+//
+//  1. Composite-literal pointer:   &<pkg>.<Entity>{Query,Select,Client}{}
+//  2. Type-assertion pointer:      <expr>.(*<pkg>.<Entity>{Query,Select,Client})
+//     — covers both the comma-ok form (query, ok := ...) and the
+//     single-value form (query := ...).
+//
+// Both *<Entity>Query and *<Entity>Select are recognised (same entity context).
+// The package qualifier is not checked — any qualified type whose name suffix
+// is "Query", "Select", or "Client" and whose prefix matches a known entity is
+// accepted. This mirrors the permissiveness of the existing "Query" selector
+// case in inferQueryReceiverEntityInFile which also omits a package check.
+// The safety gate is the descs lookup: only known entities are returned.
+func entityFromAssignedPtrType(expr ast.Expr, descs Descriptors) (string, bool) {
+	// Shape 1: &<pkg>.<Entity>Query{} — unary address-of a composite literal.
+	if unary, ok := expr.(*ast.UnaryExpr); ok && unary.Op == token.AND {
+		if lit, ok := unary.X.(*ast.CompositeLit); ok && lit.Type != nil {
+			var typeName string
+			switch t := lit.Type.(type) {
+			case *ast.SelectorExpr:
+				typeName = t.Sel.Name
+			case *ast.Ident:
+				typeName = t.Name
+			}
+			if entity, ok := entityNameFromQueryTypeName(typeName, descs); ok {
+				return entity, true
+			}
+		}
+	}
+
+	// Shape 2: <expr>.(*<pkg>.<Entity>Query) — type assertion to a pointer type.
+	// The asserted type must be *T where T encodes the entity name.
+	if ta, ok := expr.(*ast.TypeAssertExpr); ok && ta.Type != nil {
+		star, ok := ta.Type.(*ast.StarExpr)
+		if !ok {
+			return "", false
+		}
+		var typeName string
+		switch t := star.X.(type) {
+		case *ast.SelectorExpr:
+			typeName = t.Sel.Name
+		case *ast.Ident:
+			typeName = t.Name
+		}
+		if entity, ok := entityNameFromQueryTypeName(typeName, descs); ok {
+			return entity, true
+		}
+	}
+
+	return "", false
+}
+
+// entityNameFromQueryTypeName strips a recognised suffix ("Query", "Select",
+// "Client") from typeName and returns the entity prefix when it exists in
+// descs. Returns ("", false) otherwise.
+func entityNameFromQueryTypeName(typeName string, descs Descriptors) (string, bool) {
+	for _, suffix := range []string{"Query", "Select", "Client"} {
+		if entity, found := strings.CutSuffix(typeName, suffix); found && entity != "" {
+			if _, present := descs[entity]; present {
+				return entity, true
+			}
+		}
+	}
+	return "", false
+}
+
+// entityFromFacadeName extracts the result entity from a rewritten facade
+// call name of the form "Query<Parent><Edge>FromQuery". Splits by trying
+// each known entity name as the <Parent> prefix; the remaining suffix
+// (minus "FromQuery") is treated as the PascalCase edge identifier and
+// resolved against descs[<Parent>].Edges to find the target entity.
+func entityFromFacadeName(name string, descs Descriptors) (string, bool) {
+	rest, ok := strings.CutPrefix(name, "Query")
+	if !ok {
+		return "", false
+	}
+	// Both call forms exist:
+	//   Query<Parent><Edge>FromQuery(q *<Parent>Query) *<Edge>Query
+	//   Query<Parent><Edge>(c *<Parent>Client, parent *<Parent>) *<Edge>Query
+	// Strip the optional FromQuery suffix so both shapes are recognised.
+	rest = strings.TrimSuffix(rest, "FromQuery")
+	// Greedy: try the longest parent prefix first so "WrikeProject" doesn't
+	// get split as parent="Wrike", edge="Project" if both happen to exist.
+	type candidate struct{ parent, edge string }
+	var candidates []candidate
+	for ent := range descs {
+		if strings.HasPrefix(rest, ent) && len(rest) > len(ent) {
+			candidates = append(candidates, candidate{parent: ent, edge: rest[len(ent):]})
+		}
+	}
+	// Sort by parent length desc so the most specific match wins.
+	for i := 1; i < len(candidates); i++ {
+		for j := i; j > 0 && len(candidates[j].parent) > len(candidates[j-1].parent); j-- {
+			candidates[j], candidates[j-1] = candidates[j-1], candidates[j]
+		}
+	}
+	for _, c := range candidates {
+		ed, ok := descs[c.parent]
+		if !ok {
+			continue
+		}
+		edesc, ok := lookupEdgeDesc(ed, c.edge)
+		if !ok || edesc.Target == "" {
+			continue
+		}
+		if _, present := descs[edesc.Target]; present {
+			return edesc.Target, true
+		}
+	}
+	return "", false
+}
+
+// peelTrailingSelect strips a trailing `.Select(...)` call from a receiver
+// chain so the With facade rewrite can apply. Pre-PR-6 the expression
+// `q.Select(FieldID).WithFoo(...)` typechecked because eager-loads fired on
+// a fresh sub-query; post-PR-6 the With facade takes *<Entity>Query and
+// can't accept *<Entity>Select. The mechanical fix that preserves the
+// eager-load is to drop the Select — the column projection on the main
+// rows is lost, but callers consuming the result usually read .Edges (the
+// projection didn't restrict edge loads anyway).
+//
+// Returns the inner expression and true when a Select was peeled, the
+// original expression and false otherwise. Only handles a Select call as
+// the IMMEDIATE outermost segment of the receiver chain — the rare
+// `q.Where(...).Select(...)` pattern is left untouched (caller can manually
+// reorder).
+func peelTrailingSelect(expr ast.Expr) (ast.Expr, bool) {
+	call, ok := expr.(*ast.CallExpr)
+	if !ok {
+		return expr, false
+	}
+	sel, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return expr, false
+	}
+	if sel.Sel.Name != "Select" {
+		return expr, false
+	}
+	return sel.X, true
+}
+
+// callWithReceiver clones call replacing its receiver (the X of the
+// SelectorExpr in Fun) with newRecv. Used so receiver-type lookups can
+// see the post-peel receiver without permanently mutating the AST until
+// the caller confirms the rewrite applies.
+func callWithReceiver(call *ast.CallExpr, newRecv ast.Expr) *ast.CallExpr {
+	origSel, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok {
+		return call
+	}
+	clonedSel := &ast.SelectorExpr{X: newRecv, Sel: origSel.Sel}
+	return &ast.CallExpr{
+		Fun:    clonedSel,
+		Lparen: call.Lparen,
+		Args:   call.Args,
+		Rparen: call.Rparen,
+	}
+}
+
+// entityFromWithFacadeName parses a `With<Parent><Edge>` facade name (as
+// emitted by ent's root facade.tmpl) and returns the parent entity name.
+// `gen.With<Parent><Edge>(q, ...)` returns *<Parent>Query (the receiver
+// entity is preserved across With chains, unlike Query<X><Y>FromQuery
+// which returns the edge's target).
+//
+// Used by the syntactic chain walker so a chain like
+//
+//	gen.WithBoxFolderProposal(q).WithListing(...).WithEscrow(...).Only(ctx)
+//
+// can be recognised: each chained .With<Edge> sees a receiver of the
+// preceding facade's parent entity (here, BoxFolder), and the rewriter
+// can emit a separate gen.WithBoxFoolder<Edge>(...) call for each link.
+func entityFromWithFacadeName(name string, descs Descriptors) (string, bool) {
+	rest, ok := strings.CutPrefix(name, "With")
+	if !ok {
+		return "", false
+	}
+	if strings.HasPrefix(rest, "Named") {
+		// WithNamed<Parent><Edge> follows the same return-type rule. Strip
+		// the Named prefix so the parent-prefix scan below works.
+		rest = strings.TrimPrefix(rest, "Named")
+	}
+	// Greedy: try the longest parent prefix first so e.g. "WrikeProject"
+	// doesn't get split as parent="Wrike", edge="Project" if both happen
+	// to exist as entities.
+	type candidate struct{ parent, edge string }
+	var candidates []candidate
+	for ent := range descs {
+		if strings.HasPrefix(rest, ent) && len(rest) > len(ent) {
+			candidates = append(candidates, candidate{parent: ent, edge: rest[len(ent):]})
+		}
+	}
+	for i := 1; i < len(candidates); i++ {
+		for j := i; j > 0 && len(candidates[j].parent) > len(candidates[j-1].parent); j-- {
+			candidates[j], candidates[j-1] = candidates[j-1], candidates[j]
+		}
+	}
+	for _, c := range candidates {
+		ed, ok := descs[c.parent]
+		if !ok {
+			continue
+		}
+		if _, ok := lookupEdgeDesc(ed, c.edge); ok {
+			return c.parent, true
+		}
+	}
+	return "", false
+}
+
+// isQueryPassthrough reports whether name is a *<Entity>Query method
+// that returns the same *<Entity>Query type (so it preserves the chain
+// receiver entity). Methods like Select/GroupBy/IDs are excluded
+// because they return different builder/result types and cannot be
+// followed by another QueryEdge call anyway.
+func isQueryPassthrough(name string) bool {
+	switch name {
+	case "Where", "Order", "Limit", "Offset", "Unique", "Clone",
+		"Modify", "ForUpdate", "ForShare":
+		return true
+	}
+	return false
+}
+
+// matchEdgeReceiver inspects call's receiver type. If it resolves to
+// *<pkg>.<Entity><suffix> and edge (lowercased) is a known edge on
+// <Entity>, returns the entity name and true.
+//
+// suffix is "Query" or "Client". edge is the pascal-case substring
+// stripped from the method name (e.g. "Teams" from "WithTeams").
+func matchEdgeReceiver(r *Resolver, call *ast.CallExpr, descs Descriptors, suffix, edge string) (string, bool) {
+	var entity string
+	matched := r.ReceiverTypeMatchesPattern(call, func(typeName string) bool {
+		if !strings.HasPrefix(typeName, "*") {
+			return false
+		}
+		for ent, ed := range descs {
+			if !strings.HasSuffix(typeName, "."+ent+suffix) && typeName != "*"+ent+suffix {
+				continue
+			}
+			if edgeDescLookup(ed, edge) {
+				entity = ent
+				return true
+			}
+		}
+		return false
+	})
+	return entity, matched
+}
+
+// edgeDescLookup reports whether ed has an edge whose key matches
+// the PascalCase edge identifier from a method name.
+func edgeDescLookup(ed *EntityDesc, edge string) bool {
+	_, ok := lookupEdgeDesc(ed, edge)
+	return ok
+}
+
+// lookupEdgeDesc resolves a PascalCase edge identifier from a method
+// name to its EdgeDesc. Tries both the camelCase form (lcFirst) and
+// snake_case — descriptors use the schema-declared edge name, which
+// may be either.
+func lookupEdgeDesc(ed *EntityDesc, edge string) (EdgeDesc, bool) {
+	if e, ok := ed.Edges[lcFirst(edge)]; ok {
+		return e, true
+	}
+	if e, ok := ed.Edges[pascalToSnake(edge)]; ok {
+		return e, true
+	}
+	return EdgeDesc{}, false
+}
+
+// pascalToSnake converts "WrikeProject" → "wrike_project". Inserts an
+// underscore before any uppercase letter that follows a lowercase
+// letter (or a digit), then lowercases the result. Sequences of
+// uppercase letters (e.g. "IDs") are treated as a single token.
+//
+// Digits are also separated from adjacent letters when the user is
+// likely to have declared the field with the digit as its own token
+// (e.g. "Installment1PayStatus" → "installment_1_pay_status"): an
+// underscore is inserted between a letter and a following digit, and
+// between a digit and a following letter, unless one already exists.
+// This matches the user-declared schema convention exposed in
+// descriptor keys.
+func pascalToSnake(s string) string {
+	var b strings.Builder
+	for i, r := range s {
+		if i > 0 {
+			prev := rune(s[i-1])
+			switch {
+			case isUpper(r):
+				if isLower(prev) || isDigit(prev) {
+					b.WriteByte('_')
+				} else if isUpper(prev) && i+1 < len(s) && isLower(rune(s[i+1])) {
+					b.WriteByte('_')
+				}
+			case isDigit(r) && (isLower(prev) || isUpper(prev)):
+				b.WriteByte('_')
+			case (isLower(r) || isUpper(r)) && isDigit(prev):
+				// Avoid doubling: digit→upper is already handled above via
+				// the isUpper branch on this iteration's r.
+				if isLower(r) {
+					b.WriteByte('_')
+				}
+			}
+		}
+		b.WriteRune(toLower(r))
+	}
+	return b.String()
+}
+
+func isUpper(r rune) bool { return r >= 'A' && r <= 'Z' }
+func isLower(r rune) bool { return r >= 'a' && r <= 'z' }
+func isDigit(r rune) bool { return r >= '0' && r <= '9' }
+func toLower(r rune) rune {
+	if isUpper(r) {
+		return r + ('a' - 'A')
+	}
+	return r
+}

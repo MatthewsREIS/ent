@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // RelationshipDelete is the builder for deleting a Relationship entity.
@@ -28,13 +29,13 @@ func NewRelationshipDelete(c Config, hooks []Hook, mutation *RelationshipMutatio
 
 // Where appends a list predicates to the RelationshipDelete builder.
 func (_d *RelationshipDelete) Where(ps ...predicate.Relationship) *RelationshipDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *RelationshipDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*RelationshipMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -75,7 +76,7 @@ func NewRelationshipDeleteOne(d *RelationshipDelete) *RelationshipDeleteOne {
 
 // Where appends a list predicates to the RelationshipDelete builder.
 func (_d *RelationshipDeleteOne) Where(ps ...predicate.Relationship) *RelationshipDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

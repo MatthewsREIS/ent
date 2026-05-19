@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewFileTypeUpdate(c Config, hooks []Hook, mutation *FileTypeMutation) *File
 
 // Where appends a list predicates to the FileTypeUpdate builder.
 func (_u *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *FileTypeUpdate) SetName(v string) *FileTypeUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -52,7 +53,7 @@ func (_u *FileTypeUpdate) SetNillableName(v *string) *FileTypeUpdate {
 
 // SetType sets the "type" field.
 func (_u *FileTypeUpdate) SetType(v Type) *FileTypeUpdate {
-	_u.mutation.SetType(v)
+	_ = _u.mutation.SetField("type", v)
 	return _u
 }
 
@@ -66,7 +67,7 @@ func (_u *FileTypeUpdate) SetNillableType(v *Type) *FileTypeUpdate {
 
 // SetState sets the "state" field.
 func (_u *FileTypeUpdate) SetState(v State) *FileTypeUpdate {
-	_u.mutation.SetState(v)
+	_ = _u.mutation.SetField("state", v)
 	return _u
 }
 
@@ -80,7 +81,7 @@ func (_u *FileTypeUpdate) SetNillableState(v *State) *FileTypeUpdate {
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_u *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
-	_u.mutation.AddFileIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -91,19 +92,19 @@ func (_u *FileTypeUpdate) Mutation() *FileTypeMutation {
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
-	_u.mutation.ClearFiles()
+	_ = _u.mutation.ClearEdge("files")
 	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
-	_u.mutation.RemoveFileIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*FileTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -130,12 +131,12 @@ func (_u *FileTypeUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *FileTypeUpdate) check() error {
-	if v, ok := _u.mutation.GetType(); ok {
+	if v, ok := entbuilder.GetField[Type](_u.mutation, "type"); ok {
 		if err := TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", Err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.State(); ok {
+	if v, ok := entbuilder.GetField[State](_u.mutation, "state"); ok {
 		if err := StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", Err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -161,16 +162,16 @@ func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
+	if value, ok := entbuilder.GetField[Type](_u.mutation, "type"); ok {
 		_spec.SetField(FieldType, field.TypeEnum, value)
 	}
-	if value, ok := _u.mutation.State(); ok {
+	if value, ok := entbuilder.GetField[State](_u.mutation, "state"); ok {
 		_spec.SetField(FieldState, field.TypeEnum, value)
 	}
-	if _u.mutation.FilesCleared() {
+	if _u.mutation.EdgeCleared("files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -183,7 +184,7 @@ func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !_u.mutation.FilesCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -199,7 +200,7 @@ func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -244,7 +245,7 @@ func NewFileTypeUpdateOne(c Config, hooks []Hook, mutation *FileTypeMutation) *F
 
 // SetName sets the "name" field.
 func (_u *FileTypeUpdateOne) SetName(v string) *FileTypeUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -258,7 +259,7 @@ func (_u *FileTypeUpdateOne) SetNillableName(v *string) *FileTypeUpdateOne {
 
 // SetType sets the "type" field.
 func (_u *FileTypeUpdateOne) SetType(v Type) *FileTypeUpdateOne {
-	_u.mutation.SetType(v)
+	_ = _u.mutation.SetField("type", v)
 	return _u
 }
 
@@ -272,7 +273,7 @@ func (_u *FileTypeUpdateOne) SetNillableType(v *Type) *FileTypeUpdateOne {
 
 // SetState sets the "state" field.
 func (_u *FileTypeUpdateOne) SetState(v State) *FileTypeUpdateOne {
-	_u.mutation.SetState(v)
+	_ = _u.mutation.SetField("state", v)
 	return _u
 }
 
@@ -286,7 +287,7 @@ func (_u *FileTypeUpdateOne) SetNillableState(v *State) *FileTypeUpdateOne {
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_u *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
-	_u.mutation.AddFileIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -297,19 +298,19 @@ func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation {
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
-	_u.mutation.ClearFiles()
+	_ = _u.mutation.ClearEdge("files")
 	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *FileTypeUpdateOne) RemoveFileIDs(ids ...int) *FileTypeUpdateOne {
-	_u.mutation.RemoveFileIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.
 func (_u *FileTypeUpdateOne) Where(ps ...predicate.FileType) *FileTypeUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -322,7 +323,7 @@ func (_u *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpd
 
 // Save executes the query and returns the updated FileType entity.
 func (_u *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[FileType](ctx, &entbuilder.UpdateState[*FileTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -349,12 +350,12 @@ func (_u *FileTypeUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *FileTypeUpdateOne) check() error {
-	if v, ok := _u.mutation.GetType(); ok {
+	if v, ok := entbuilder.GetField[Type](_u.mutation, "type"); ok {
 		if err := TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", Err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.State(); ok {
+	if v, ok := entbuilder.GetField[State](_u.mutation, "state"); ok {
 		if err := StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", Err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -397,16 +398,16 @@ func (_u *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, err 
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
+	if value, ok := entbuilder.GetField[Type](_u.mutation, "type"); ok {
 		_spec.SetField(FieldType, field.TypeEnum, value)
 	}
-	if value, ok := _u.mutation.State(); ok {
+	if value, ok := entbuilder.GetField[State](_u.mutation, "state"); ok {
 		_spec.SetField(FieldState, field.TypeEnum, value)
 	}
-	if _u.mutation.FilesCleared() {
+	if _u.mutation.EdgeCleared("files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -419,7 +420,7 @@ func (_u *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !_u.mutation.FilesCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -435,7 +436,7 @@ func (_u *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, err 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

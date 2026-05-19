@@ -175,14 +175,15 @@ func HasAuthor() predicate.Post {
 
 // HasAuthorWith applies the HasEdge predicate on the "author" edge with a given conditions (other predicates).
 func HasAuthorWith(preds ...predicate.User) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		step := newAuthorStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Post(
+		func(s *sql.Selector) {
+			step := newAuthorStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasComments applies the HasEdge predicate on the "comments" edge.
@@ -198,14 +199,15 @@ func HasComments() predicate.Post {
 
 // HasCommentsWith applies the HasEdge predicate on the "comments" edge with a given conditions (other predicates).
 func HasCommentsWith(preds ...predicate.Comment) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		step := newCommentsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Post(
+		func(s *sql.Selector) {
+			step := newCommentsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -247,43 +247,43 @@ func (c *Client) Driver() dialect.Driver {
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *APIMutation:
-		return c.Api.mutate(ctx, m)
+		return c.Api.Mutate(ctx, m)
 	case *BuilderMutation:
-		return c.Builder.mutate(ctx, m)
+		return c.Builder.Mutate(ctx, m)
 	case *CardMutation:
-		return c.Card.mutate(ctx, m)
+		return c.Card.Mutate(ctx, m)
 	case *CommentMutation:
-		return c.Comment.mutate(ctx, m)
+		return c.Comment.Mutate(ctx, m)
 	case *ExValueScanMutation:
-		return c.ExValueScan.mutate(ctx, m)
+		return c.ExValueScan.Mutate(ctx, m)
 	case *FieldTypeMutation:
-		return c.FieldType.mutate(ctx, m)
+		return c.FieldType.Mutate(ctx, m)
 	case *FileMutation:
-		return c.File.mutate(ctx, m)
+		return c.File.Mutate(ctx, m)
 	case *FileTypeMutation:
-		return c.FileType.mutate(ctx, m)
+		return c.FileType.Mutate(ctx, m)
 	case *GoodsMutation:
-		return c.Goods.mutate(ctx, m)
+		return c.Goods.Mutate(ctx, m)
 	case *GroupMutation:
-		return c.Group.mutate(ctx, m)
+		return c.Group.Mutate(ctx, m)
 	case *GroupInfoMutation:
-		return c.GroupInfo.mutate(ctx, m)
+		return c.GroupInfo.Mutate(ctx, m)
 	case *ItemMutation:
-		return c.Item.mutate(ctx, m)
+		return c.Item.Mutate(ctx, m)
 	case *LicenseMutation:
-		return c.License.mutate(ctx, m)
+		return c.License.Mutate(ctx, m)
 	case *NodeMutation:
-		return c.Node.mutate(ctx, m)
+		return c.Node.Mutate(ctx, m)
 	case *PCMutation:
-		return c.PC.mutate(ctx, m)
+		return c.PC.Mutate(ctx, m)
 	case *PetMutation:
-		return c.Pet.mutate(ctx, m)
+		return c.Pet.Mutate(ctx, m)
 	case *SpecMutation:
-		return c.Spec.mutate(ctx, m)
+		return c.Spec.Mutate(ctx, m)
 	case *TaskMutation:
-		return c.Task.mutate(ctx, m)
+		return c.Task.Mutate(ctx, m)
 	case *UserMutation:
-		return c.User.mutate(ctx, m)
+		return c.User.Mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}

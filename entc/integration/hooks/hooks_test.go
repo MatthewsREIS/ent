@@ -22,6 +22,7 @@ import (
 	"entgo.io/ent/entc/integration/hooks/ent/pet"
 	"entgo.io/ent/entc/integration/hooks/ent/schema"
 	"entgo.io/ent/entc/integration/hooks/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 
 	entgo "entgo.io/ent"
 	_ "github.com/mattn/go-sqlite3"
@@ -38,8 +39,8 @@ func TestSchemaHooks(t *testing.T) {
 	require.Equal(t, "unknown", crd.Name, "name was set by hook")
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
-			name, ok := m.Name()
-			require.True(t, !ok && name == "", "should be the first hook to execute")
+			name, ok := m.Field(card.FieldName)
+			require.True(t, !ok && name == nil, "should be the first hook to execute")
 			return next.Mutate(ctx, m)
 		})
 	})
@@ -101,9 +102,9 @@ func TestMutationClient(t *testing.T) {
 	defer client.Close()
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
-			id, _ := m.OwnerID()
-			usr := ent.NewUserClient(m.Config).GetX(ctx, id)
-			m.SetName(usr.Name)
+			id, _ := entbuilder.EdgeIDAs[int](m, card.EdgeOwner)
+			usr := ent.NewUserClient(*m.Config.(*ent.Config)).GetX(ctx, id)
+			_ = m.SetField(card.FieldName, usr.Name)
 			return next.Mutate(ctx, m)
 		})
 	})
@@ -125,7 +126,7 @@ func TestMutatorClient(t *testing.T) {
 						op = ent.OpUpdateOne
 					}
 					// Ensure card was not expired before.
-					m.Where(card.ExpiredAtIsNil())
+					m.WhereP(card.ExpiredAtIsNil())
 					// Count the number of affected records.
 					ids, err := m.IDs(ctx)
 					if err != nil {
@@ -134,13 +135,14 @@ func TestMutatorClient(t *testing.T) {
 					// Change the operation to update.
 					m.SetOp(op)
 					// Record when card was expired.
-					m.SetExpiredAt(time.Now())
+					_ = m.SetField(card.FieldExpiredAt, time.Now())
 					// Execute the update operation.
 					// Create a temporary client from the mutation's config to execute the mutation.
-					client := &ent.Client{Config: m.Config}
-					client.Card = ent.NewCardClient(m.Config)
-					client.Pet = ent.NewPetClient(m.Config)
-					client.User = ent.NewUserClient(m.Config)
+					cfg := *m.Config.(*ent.Config)
+					client := &ent.Client{Config: cfg}
+					client.Card = ent.NewCardClient(cfg)
+					client.Pet = ent.NewPetClient(cfg)
+					client.User = ent.NewUserClient(cfg)
 					if _, err := client.Mutate(ctx, m); err != nil {
 						return nil, err
 					}
@@ -208,7 +210,7 @@ func TestDeletion(t *testing.T) {
 			if !ok {
 				return nil, fmt.Errorf("missing id")
 			}
-			ent.NewCardClient(m.Config).Delete().Where(card.HasOwnerWith(user.ID(id))).ExecX(ctx)
+			ent.NewCardClient(*m.Config.(*ent.Config)).Delete().Where(card.HasOwnerWith(user.ID(id))).ExecX(ctx)
 			return next.Mutate(ctx, m)
 		})
 	})
@@ -295,7 +297,7 @@ func TestUpdateAfterCreation(t *testing.T) {
 			require.Equal(t, 1, existingUser.Version, "version does not match the original value")
 
 			// After the user was created, return its updated version (a new object).
-			newUser := ent.NewUserClient(m.Config).UpdateOne(existingUser).
+			newUser := ent.NewUserClient(*m.Config.(*ent.Config)).UpdateOne(existingUser).
 				SetVersion(2).
 				SaveX(ctx)
 			return newUser, nil
@@ -323,12 +325,12 @@ func TestUpdateAfterUpdateOne(t *testing.T) {
 
 			// After the user was created, return its updated version (a new object).  Don't use UpdateOne because it
 			// will cause recursive calls to this hook.
-			ent.NewUserClient(m.Config).Update().
+			ent.NewUserClient(*m.Config.(*ent.Config)).Update().
 				Where(user.IDEQ(u.ID)).
 				SetVersion(3).
 				SaveX(ctx)
 
-			return ent.NewUserClient(m.Config).Get(ctx, u.ID)
+			return ent.NewUserClient(*m.Config.(*ent.Config)).Get(ctx, u.ID)
 		})
 	}, ent.OpUpdateOne))
 
@@ -348,7 +350,7 @@ func TestOldValues(t *testing.T) {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
 			value, err := next.Mutate(ctx, m)
 			require.NoError(t, err)
-			_, err = m.OldNumber(ctx)
+			_, err = entbuilder.OldFieldAs[string](ctx, m, card.FieldNumber)
 			require.Error(t, err)
 			return value, nil
 		})
@@ -359,7 +361,7 @@ func TestOldValues(t *testing.T) {
 	// A typed hook.
 	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
 		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
-			name, err := m.OldName(ctx)
+			name, err := entbuilder.OldFieldAs[string](ctx, m, user.FieldName)
 			if err != nil {
 				return nil, err
 			}
@@ -444,7 +446,7 @@ func TestConditions(t *testing.T) {
 	client.User.Use(hook.If(func(next ent.Mutator) ent.Mutator {
 		return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {
 			require.True(t, m.Op().Is(ent.OpUpdate))
-			incr, exists := m.AddedWorth()
+			incr, exists := m.AddedField(user.FieldWorth)
 			require.True(t, exists)
 			require.EqualValues(t, 100, incr)
 			return next.Mutate(ctx, m)
@@ -470,7 +472,7 @@ func TestRuntimeTx(t *testing.T) {
 			v, err := next.Mutate(ctx, m)
 			require.NoError(t, err)
 			// Construct a Tx from the config to access transaction features
-			tx := &ent.Tx{Config: m.Config}
+			tx := &ent.Tx{Config: *m.Config.(*ent.Config)}
 			tx.OnCommit(func(next ent.Committer) ent.Committer {
 				return ent.CommitFunc(func(ctx context.Context, tx *ent.Tx) error {
 					// Ensure the transaction can see the created card.
@@ -692,12 +694,12 @@ func TestSoftDelete(t *testing.T) {
 	require.Len(t, n2c, 4)
 
 	// Edge traversals.
-	require.False(t, client.User.QueryPets(a8m).ExistX(ctx), "interceptors should be applied on edge traversals")
-	require.False(t, client.User.Query().QueryPets().ExistX(ctx))
-	require.Equal(t, 3, client.User.QueryPets(a8m).CountX(schema.SkipSoftDelete(ctx)))
+	require.False(t, ent.QueryUserPets(client.User, a8m).ExistX(ctx), "interceptors should be applied on edge traversals")
+	require.False(t, ent.QueryUserPetsFromQuery(client.User.Query()).ExistX(ctx))
+	require.Equal(t, 3, ent.QueryUserPets(client.User, a8m).CountX(schema.SkipSoftDelete(ctx)))
 
 	// Eager-loading edges.
-	a8m = client.User.Query().WithPets().OnlyX(ctx)
+	a8m = ent.WithUserPets(client.User.Query()).OnlyX(ctx)
 	require.Empty(t, a8m.Edges.Pets)
 }
 
@@ -711,7 +713,7 @@ func TestTraverseUnique(t *testing.T) {
 		client.Pet.Create().SetName("a").SetOwnerID(a8m.ID),
 		client.Pet.Create().SetName("b").SetOwnerID(a8m.ID),
 	).ExecX(ctx)
-	require.Equal(t, 1, client.Pet.Query().QueryOwner().CountX(ctx))
+	require.Equal(t, 1, ent.QueryPetOwnerFromQuery(client.Pet.Query()).CountX(ctx))
 
 	// Disable unique traversal using interceptors.
 	client.User.Intercept(
@@ -724,8 +726,8 @@ func TestTraverseUnique(t *testing.T) {
 		}),
 	)
 	// The JOIN with pets will return the same owner twice, one for each pet.
-	require.Equal(t, 2, client.Pet.Query().QueryOwner().CountX(ctx))
-	require.Equal(t, 1, client.Pet.Query().QueryOwner().Unique(true).CountX(ctx))
+	require.Equal(t, 2, ent.QueryPetOwnerFromQuery(client.Pet.Query()).CountX(ctx))
+	require.Equal(t, 1, ent.QueryPetOwnerFromQuery(client.Pet.Query()).Unique(true).CountX(ctx))
 }
 
 // The following example demonstrates how to write interceptors that
@@ -773,7 +775,7 @@ func TestTypedTraverser(t *testing.T) {
 	).ExecX(ctx)
 
 	// Get all pets of all users.
-	if n := client.User.Query().QueryPets().CountX(ctx); n != 3 {
+	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 3 {
 		t.Errorf("got %d pets, want 3", n)
 	}
 
@@ -786,7 +788,7 @@ func TestTypedTraverser(t *testing.T) {
 	)
 
 	// Only pets of active users are returned.
-	if n := client.User.Query().QueryPets().CountX(ctx); n != 2 {
+	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 2 {
 		t.Errorf("got %d pets, want 2", n)
 	}
 }
@@ -818,7 +820,7 @@ func TestFilterTraverseFunc(t *testing.T) {
 		client.Pet.Create().SetName("c").SetOwnerID(nat.ID),
 	).ExecX(ctx)
 	// Get all pets of all users.
-	if n := client.User.Query().QueryPets().CountX(ctx); n != 3 {
+	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 3 {
 		t.Errorf("got %d pets, want 3", n)
 	}
 
@@ -830,7 +832,7 @@ func TestFilterTraverseFunc(t *testing.T) {
 		}),
 	)
 	// Only pets of active users are returned.
-	if n := client.User.Query().QueryPets().CountX(ctx); n != 2 {
+	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 2 {
 		t.Errorf("got %d pets, want 2", n)
 	}
 }

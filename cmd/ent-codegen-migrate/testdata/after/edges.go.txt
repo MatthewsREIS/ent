@@ -1,0 +1,27 @@
+package x
+
+import "entgo.io/ent/runtime/entbuilder"
+
+type TaskMutation struct{}
+type TaskQuery struct{}
+type TaskClient struct{}
+type Task struct{}
+type TeamQuery struct{}
+
+func (m *TaskMutation) OwnerID() (int, bool)				{ return 0, false }
+func (m *TaskMutation) TeamsIDs() []int					{ return nil }
+func (q *TaskQuery) WithTeams(opts ...func(*TeamQuery)) *TaskQuery	{ return q }
+func (c *TaskClient) QueryTeams(t *Task) *TeamQuery			{ return &TeamQuery{} }
+
+func useM(m *TaskMutation) {
+	id, _ := entbuilder.EdgeIDAs[int](m, "owner")
+	ids := entbuilder.EdgeIDsAs[int](m, "teams")
+	_ = id
+	_ = ids
+}
+func useQ(q *TaskQuery) *TaskQuery {
+	return ent.WithTaskTeams(q, func(q *TeamQuery) {})
+}
+func useC(c *TaskClient, t *Task) *TeamQuery {
+	return ent.QueryTaskTeams(c, t)
+}

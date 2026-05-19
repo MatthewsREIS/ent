@@ -66,14 +66,25 @@ type Node = internal.Node
 type NodeEdges = internal.NodeEdges
 type Nodes = internal.Nodes
 
-// Mutation type aliases and constructors from internal.
-type NodeMutation = internal.NodeMutation
-type NodeMutationOption = internal.NodeMutationOption
+// Error-check function aliases for the shared helpers in the internal package.
+var (
+	IsValidationError = internal.IsValidationError
+	IsNotFound        = internal.IsNotFound
+	MaskNotFound      = internal.MaskNotFound
+	IsNotSingular     = internal.IsNotSingular
+	IsNotLoaded       = internal.IsNotLoaded
+	IsConstraintError = internal.IsConstraintError
+)
 
-var NewNodeMutation = internal.NewNodeMutation
-var WithNodeID = internal.WithNodeID
-var WithNode = internal.WithNode
-var WithNodeIDsFunc = internal.WithNodeIDsFunc
+// setContextOp is an alias for the shared helper in the internal package.
+var setContextOp = internal.SetContextOp
+
+// withInterceptors is a wrapper around internal.WithInterceptors so callers
+// can use the conventional lowercase name. Generic functions can't be assigned
+// to vars without instantiation, hence the thin wrapper.
+func withInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (V, error) {
+	return internal.WithInterceptors[V](ctx, q, qr, inters)
+}
 
 type gremlinConstraintError struct {
 	Msg string

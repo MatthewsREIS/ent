@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/privacy/ent/team"
 	"entgo.io/ent/entc/integration/privacy/ent/user"
 	"entgo.io/ent/entc/integration/privacy/viewer"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // DenyUpdateRule is a mutation rule that denies the update-many operation.
@@ -77,7 +78,7 @@ func AllowTaskCreateIfOwner() privacy.MutationRule {
 		if !ok {
 			return privacy.Skip
 		}
-		id, exists := m.OwnerID()
+		id, exists := entbuilder.EdgeIDAs[int](m, task.EdgeOwner)
 		if exists && view.User.ID == id {
 			return privacy.Allow
 		}
@@ -125,7 +126,7 @@ func FilterUsesDep() privacy.QueryRule {
 func DenyIfStatusChangedByOther() privacy.MutationRule {
 	policy := privacy.TaskMutationRuleFunc(func(ctx context.Context, m *ent.TaskMutation) error {
 		// Skip if the mutation does not change the task status.
-		if _, exists := m.Status(); !exists {
+		if _, exists := m.Field(task.FieldStatus); !exists {
 			return privacy.Skip
 		}
 		view, ok := viewer.FromContext(ctx).(*viewer.UserViewer)
@@ -137,7 +138,7 @@ func DenyIfStatusChangedByOther() privacy.MutationRule {
 		if !ok {
 			return fmt.Errorf("missing task id")
 		}
-		owner, err := ent.NewUserClient(m.Config).Query().Where(user.HasTasksWith(task.ID(id))).Only(ctx)
+		owner, err := ent.NewUserClient(*m.Config.(*ent.Config)).Query().Where(user.HasTasksWith(task.ID(id))).Only(ctx)
 		if err != nil {
 			return err
 		}
@@ -168,7 +169,7 @@ func AllowIfViewerInTheSameTeam() privacy.MutationRule {
 		}
 		// Query should return an error if the viewer
 		// does not belong to the task namespace/team.
-		if _, err = ent.NewTaskClient(m.Config).Query().
+		if _, err = ent.NewTaskClient(*m.Config.(*ent.Config)).Query().
 			Where(
 				task.ID(id),
 				task.HasTeamsWith(team.NameIn(teams...)),

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -51,7 +52,7 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 
 // AddPostIDs adds the "posts" edge to the Post entity by IDs.
 func (_u *UserUpdate) AddPostIDs(ids ...int) *UserUpdate {
-	_u.mutation.AddPostIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("posts", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -62,19 +63,19 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 
 // ClearPosts clears all "posts" edges to the Post entity.
 func (_u *UserUpdate) ClearPosts() *UserUpdate {
-	_u.mutation.ClearPosts()
+	_ = _u.mutation.ClearEdge("posts")
 	return _u
 }
 
 // RemovePostIDs removes the "posts" edge to Post entities by IDs.
 func (_u *UserUpdate) RemovePostIDs(ids ...int) *UserUpdate {
-	_u.mutation.RemovePostIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("posts", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -108,10 +109,10 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.PostsCleared() {
+	if _u.mutation.EdgeCleared("posts") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -124,7 +125,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedPostsIDs(); len(nodes) > 0 && !_u.mutation.PostsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("posts"); len(nodes) > 0 && !_u.mutation.EdgeCleared("posts") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -140,7 +141,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.PostsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("posts"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -183,7 +184,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -197,7 +198,7 @@ func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
 
 // AddPostIDs adds the "posts" edge to the Post entity by IDs.
 func (_u *UserUpdateOne) AddPostIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.AddPostIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("posts", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -208,19 +209,19 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 
 // ClearPosts clears all "posts" edges to the Post entity.
 func (_u *UserUpdateOne) ClearPosts() *UserUpdateOne {
-	_u.mutation.ClearPosts()
+	_ = _u.mutation.ClearEdge("posts")
 	return _u
 }
 
 // RemovePostIDs removes the "posts" edge to Post entities by IDs.
 func (_u *UserUpdateOne) RemovePostIDs(ids ...int) *UserUpdateOne {
-	_u.mutation.RemovePostIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("posts", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -233,7 +234,7 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -284,10 +285,10 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.PostsCleared() {
+	if _u.mutation.EdgeCleared("posts") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -300,7 +301,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedPostsIDs(); len(nodes) > 0 && !_u.mutation.PostsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("posts"); len(nodes) > 0 && !_u.mutation.EdgeCleared("posts") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -316,7 +317,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.PostsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("posts"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,

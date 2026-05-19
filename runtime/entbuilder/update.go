@@ -1,8 +1,11 @@
 package entbuilder
 
 import (
+	"context"
 	"database/sql/driver"
+	"fmt"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -98,4 +101,71 @@ func ApplyUpdate[C any, M any](cfg C, mutation M, desc *UpdateDescriptor[C, M], 
 		}
 	}
 	return nil
+}
+
+// UpdateState holds the generic state every generated <Entity>Update and
+// <Entity>UpdateOne builder carries. Generated builders embed this and
+// delegate Save/Exec to RunUpdate/RunUpdateOne.
+//
+// M is the entity's mutation pointer type, e.g., *UserMutation.
+type UpdateState[M any] struct {
+	Hooks    []ent.Hook
+	Mutation M
+}
+
+// RunUpdate executes the Save-shaped terminal for *<Entity>Update builders.
+// Returns the number of affected rows.
+//
+// sqlSave is the per-entity SQL execution; it receives the prepared ctx.
+//
+// When state.Hooks is non-empty, the hook chain (mutate-func → hooks → final
+// sqlSave) is built and invoked. The chain mirrors the existing
+// per-entity-package WithHooks helper that ent codegen has emitted for years.
+func RunUpdate[M ent.Mutation](
+	ctx context.Context,
+	state *UpdateState[M],
+	sqlSave func(context.Context) (int, error),
+) (int, error) {
+	return runMutate[int, M](ctx, state.Hooks, state.Mutation, sqlSave)
+}
+
+// RunUpdateOne executes the Save-shaped terminal for *<Entity>UpdateOne builders.
+// Returns the updated entity.
+func RunUpdateOne[T any, M ent.Mutation](
+	ctx context.Context,
+	state *UpdateState[M],
+	sqlSave func(context.Context) (*T, error),
+) (*T, error) {
+	return runMutate[*T, M](ctx, state.Hooks, state.Mutation, sqlSave)
+}
+
+// runMutate is the shared hook-chaining mechanic. Mirrors the per-entity
+// WithHooks helper that ent codegen has emitted: builds the chain in reverse
+// (so the first registered hook wraps outermost), then invokes it.
+//
+// Shared between RunUpdate / RunUpdateOne (this file) and RunDelete
+// (delete.go in Task 6) — keep package-private so it's an implementation detail.
+func runMutate[V ent.Value, M ent.Mutation](
+	ctx context.Context,
+	hooks []ent.Hook,
+	mutation M,
+	exec func(context.Context) (V, error),
+) (V, error) {
+	var mut ent.Mutator = ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+		return exec(ctx)
+	})
+	for i := len(hooks) - 1; i >= 0; i-- {
+		mut = hooks[i](mut)
+	}
+	rv, err := mut.Mutate(ctx, mutation)
+	if err != nil {
+		var zero V
+		return zero, err
+	}
+	v, ok := rv.(V)
+	if !ok {
+		var zero V
+		return zero, fmt.Errorf("entbuilder: unexpected mutation result type %T", rv)
+	}
+	return v, nil
 }

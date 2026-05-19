@@ -155,14 +155,15 @@ func HasUser() predicate.Relationship {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Relationship(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasRelative applies the HasEdge predicate on the "relative" edge.
@@ -178,14 +179,15 @@ func HasRelative() predicate.Relationship {
 
 // HasRelativeWith applies the HasEdge predicate on the "relative" edge with a given conditions (other predicates).
 func HasRelativeWith(preds ...predicate.User) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		step := newRelativeStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Relationship(
+		func(s *sql.Selector) {
+			step := newRelativeStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasInfo applies the HasEdge predicate on the "info" edge.
@@ -201,14 +203,15 @@ func HasInfo() predicate.Relationship {
 
 // HasInfoWith applies the HasEdge predicate on the "info" edge with a given conditions (other predicates).
 func HasInfoWith(preds ...predicate.RelationshipInfo) predicate.Relationship {
-	return predicate.Relationship(func(s *sql.Selector) {
-		step := newInfoStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Relationship(
+		func(s *sql.Selector) {
+			step := newInfoStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

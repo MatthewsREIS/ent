@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,7 +29,7 @@ func NewMediaCreate(c Config, hooks []Hook, mutation *MediaMutation) *MediaCreat
 
 // SetSource sets the "source" field.
 func (_c *MediaCreate) SetSource(v string) *MediaCreate {
-	_c.mutation.SetSource(v)
+	_ = _c.mutation.SetField("source", v)
 	return _c
 }
 
@@ -42,7 +43,7 @@ func (_c *MediaCreate) SetNillableSource(v *string) *MediaCreate {
 
 // SetSourceURI sets the "source_uri" field.
 func (_c *MediaCreate) SetSourceURI(v string) *MediaCreate {
-	_c.mutation.SetSourceURI(v)
+	_ = _c.mutation.SetField("source_uri", v)
 	return _c
 }
 
@@ -56,7 +57,7 @@ func (_c *MediaCreate) SetNillableSourceURI(v *string) *MediaCreate {
 
 // SetText sets the "text" field.
 func (_c *MediaCreate) SetText(v string) *MediaCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
@@ -118,7 +119,7 @@ func (_c *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -128,15 +129,15 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		_node = &Media{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.Source(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "source"); ok {
 		_spec.SetField(FieldSource, field.TypeString, value)
 		_node.Source = value
 	}
-	if value, ok := _c.mutation.SourceURI(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "source_uri"); ok {
 		_spec.SetField(FieldSourceURI, field.TypeString, value)
 		_node.SourceURI = value
 	}
-	if value, ok := _c.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 		_node.Text = value
 	}
@@ -196,11 +197,11 @@ func (_c *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

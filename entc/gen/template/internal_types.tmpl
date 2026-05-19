@@ -20,6 +20,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
+	{{- if eq $.Storage.Name "sql" }}
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	{{- end }}
 	{{- /* Additional dependencies injected to config. */}}
 	{{- $deps := list }}{{ with $.Config.Annotations }}{{ $deps = $.Config.Annotations.Dependencies }}{{ end }}
 	{{- range $dep := $deps }}
@@ -308,6 +312,123 @@ func WithHooks[V Value, M any, PM interface {
 type DriverUnwrapper interface {
 	UnwrapDriver() dialect.Driver
 }
+
+// SetContextOp returns a new context with the given QueryContext attached
+// (including its op) if not already present. Shared between root and
+// per-entity sub-package builders.
+func SetContextOp(ctx context.Context, qc *QueryContext, op string) context.Context {
+	if ent.QueryFromContext(ctx) == nil {
+		qc.Op = op
+		ctx = ent.NewQueryContext(ctx, qc)
+	}
+	return ctx
+}
+
+// WithInterceptors invokes the query through the given interceptor chain.
+// Shared between root and per-entity sub-package builders.
+func WithInterceptors[V Value](ctx context.Context, q Query, qr Querier, inters []Interceptor) (v V, err error) {
+	for i := len(inters) - 1; i >= 0; i-- {
+		qr = inters[i].Intercept(qr)
+	}
+	rv, err := qr.Query(ctx, q)
+	if err != nil {
+		return v, err
+	}
+	vt, ok := rv.(V)
+	if !ok {
+		return v, fmt.Errorf("unexpected type %T returned from %T. expected type: %T", vt, q, v)
+	}
+	return vt, nil
+}
+
+{{- if eq $.Storage.Name "sql" }}
+
+// AggregateFunc applies an aggregation step on the group-by traversal/selector.
+type AggregateFunc func(*sql.Selector) string
+
+// PredicateAdder wraps the AddPredicate method.
+// All update, update-one and query builders (root and per-entity sub-package)
+// implement this interface.
+type PredicateAdder interface {
+	AddPredicate(func(s *sql.Selector))
+}
+
+// QueryHook describes an internal hook for the different sqlAll methods.
+type QueryHook = func(context.Context, *sqlgraph.QuerySpec)
+
+// Selector embedded by the different Select/GroupBy builders.
+//
+// Fields are exported so both root and per-entity sub-package builders
+// (which receive Selector via a type alias) can assign and read them.
+// The scan-fn field is named ScanFn (not Scan) because the outer GroupBy
+// and Select types define their own Scan method — a same-named field would
+// be shadowed by the outer method and unassignable through the embed.
+type Selector struct {
+	Label  string
+	Flds   *[]string
+	Fns    []AggregateFunc
+	ScanFn func(context.Context, any) error
+}
+
+// ScanX is like Scan, but panics if an error occurs.
+func (s *Selector) ScanX(ctx context.Context, v any) {
+	if err := s.ScanFn(ctx, v); err != nil {
+		panic(err)
+	}
+}
+
+{{ range $t := primitives }}
+	{{ $plural := pascal $t | plural }}
+	// {{ $plural }} returns list of {{ plural $t }} from a Selector. It is only allowed when selecting one field.
+	func (s *Selector) {{ $plural }}(ctx context.Context) ([]{{ $t }}, error) {
+		if len(*s.Flds) > 1 {
+			return nil, errors.New("ent: {{ $plural }} is not achievable when selecting more than 1 field")
+		}
+		var v []{{ $t }}
+		if err := s.ScanFn(ctx, &v); err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+
+	// {{ $plural }}X is like {{ $plural }}, but panics if an error occurs.
+	func (s *Selector) {{ $plural }}X(ctx context.Context) []{{ $t }} {
+		v, err := s.{{ $plural }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+
+	{{ $singular := pascal $t -}}
+	// {{ $singular }} returns a single {{ $t }} from a Selector. It is only allowed when selecting one field.
+	func (s *Selector) {{ $singular }}(ctx context.Context) (_ {{ $t }}, err error) {
+		var v []{{ $t }}
+		if v, err = s.{{ $plural }}(ctx); err != nil {
+			return
+		}
+		switch len(v) {
+		case 1:
+			return v[0], nil
+		case 0:
+			err = &NotFoundError{Label: s.Label}
+		default:
+			err = fmt.Errorf("ent: {{ $plural }} returned %d results when one was expected", len(v))
+		}
+		return
+	}
+
+	// {{ $singular }}X is like {{ $singular }}, but panics if an error occurs.
+	func (s *Selector) {{ $singular }}X(ctx context.Context) {{ $t }} {
+		v, err := s.{{ $singular }}(ctx)
+		if err != nil {
+			panic(err)
+		}
+		return v
+	}
+{{ end }}
+
+{{- end }}
 
 // Operation types.
 const (

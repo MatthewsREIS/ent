@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,7 +30,7 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 
 // SetMaxUsers sets the "max_users" field.
 func (_c *GroupCreate) SetMaxUsers(v int) *GroupCreate {
-	_c.mutation.SetMaxUsers(v)
+	_ = _c.mutation.SetField("max_users", v)
 	return _c
 }
 
@@ -67,7 +68,7 @@ func (_c *GroupCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *GroupCreate) check() error {
-	if _, ok := _c.mutation.MaxUsers(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "max_users"); !ok {
 		return &ValidationError{Name: "max_users", Err: errors.New(`ent: missing required field "Group.max_users"`)}
 	}
 	return nil
@@ -86,7 +87,7 @@ func (_c *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -96,7 +97,7 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		_node = &Group{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.MaxUsers(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "max_users"); ok {
 		_spec.SetField(FieldMaxUsers, field.TypeInt, value)
 		_node.MaxUsers = value
 	}
@@ -156,11 +157,11 @@ func (_c *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

@@ -186,7 +186,7 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	{{- range $n := $.MutableNodes }}
 		case *{{ $n.MutationName }}:
-			return c.{{ $n.Name }}.mutate(ctx, m)
+			return c.{{ $n.Name }}.Mutate(ctx, m)
 	{{- end }}
 	default:
 		return nil, fmt.Errorf("{{ $pkg }}: unknown mutation type %T", m)

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -34,55 +35,55 @@ func NewExValueScanUpdate(c Config, hooks []Hook, mutation *ExValueScanMutation)
 
 // Where appends a list predicates to the ExValueScanUpdate builder.
 func (_u *ExValueScanUpdate) Where(ps ...predicate.ExValueScan) *ExValueScanUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetBinary sets the "binary" field.
 func (_u *ExValueScanUpdate) SetBinary(v *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinary(v)
+	_ = _u.mutation.SetField("binary", v)
 	return _u
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
 func (_u *ExValueScanUpdate) SetBinaryBytes(v *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinaryBytes(v)
+	_ = _u.mutation.SetField("binary_bytes", v)
 	return _u
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
 func (_u *ExValueScanUpdate) SetBinaryOptional(v *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinaryOptional(v)
+	_ = _u.mutation.SetField("binary_optional", v)
 	return _u
 }
 
 // ClearBinaryOptional clears the value of the "binary_optional" field.
 func (_u *ExValueScanUpdate) ClearBinaryOptional() *ExValueScanUpdate {
-	_u.mutation.ClearBinaryOptional()
+	_ = _u.mutation.ClearField("binary_optional")
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *ExValueScanUpdate) SetText(v *big.Int) *ExValueScanUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
 // SetTextOptional sets the "text_optional" field.
 func (_u *ExValueScanUpdate) SetTextOptional(v *big.Int) *ExValueScanUpdate {
-	_u.mutation.SetTextOptional(v)
+	_ = _u.mutation.SetField("text_optional", v)
 	return _u
 }
 
 // ClearTextOptional clears the value of the "text_optional" field.
 func (_u *ExValueScanUpdate) ClearTextOptional() *ExValueScanUpdate {
-	_u.mutation.ClearTextOptional()
+	_ = _u.mutation.ClearField("text_optional")
 	return _u
 }
 
 // SetBase64 sets the "base64" field.
 func (_u *ExValueScanUpdate) SetBase64(v string) *ExValueScanUpdate {
-	_u.mutation.SetBase64(v)
+	_ = _u.mutation.SetField("base64", v)
 	return _u
 }
 
@@ -96,7 +97,7 @@ func (_u *ExValueScanUpdate) SetNillableBase64(v *string) *ExValueScanUpdate {
 
 // SetCustom sets the "custom" field.
 func (_u *ExValueScanUpdate) SetCustom(v string) *ExValueScanUpdate {
-	_u.mutation.SetCustom(v)
+	_ = _u.mutation.SetField("custom", v)
 	return _u
 }
 
@@ -110,7 +111,7 @@ func (_u *ExValueScanUpdate) SetNillableCustom(v *string) *ExValueScanUpdate {
 
 // SetCustomOptional sets the "custom_optional" field.
 func (_u *ExValueScanUpdate) SetCustomOptional(v string) *ExValueScanUpdate {
-	_u.mutation.SetCustomOptional(v)
+	_ = _u.mutation.SetField("custom_optional", v)
 	return _u
 }
 
@@ -124,7 +125,7 @@ func (_u *ExValueScanUpdate) SetNillableCustomOptional(v *string) *ExValueScanUp
 
 // ClearCustomOptional clears the value of the "custom_optional" field.
 func (_u *ExValueScanUpdate) ClearCustomOptional() *ExValueScanUpdate {
-	_u.mutation.ClearCustomOptional()
+	_ = _u.mutation.ClearField("custom_optional")
 	return _u
 }
 
@@ -135,7 +136,7 @@ func (_u *ExValueScanUpdate) Mutation() *ExValueScanMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ExValueScanUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ExValueScanMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -175,69 +176,69 @@ func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (_node int, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Binary(); ok {
+	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "binary"); ok {
 		vv, err := ValueScanner.Binary.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(FieldBinary, field.TypeString, vv)
 	}
-	if value, ok := _u.mutation.BinaryBytes(); ok {
+	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "binary_bytes"); ok {
 		vv, err := ValueScanner.BinaryBytes.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(FieldBinaryBytes, field.TypeBytes, vv)
 	}
-	if value, ok := _u.mutation.BinaryOptional(); ok {
+	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "binary_optional"); ok {
 		vv, err := ValueScanner.BinaryOptional.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(FieldBinaryOptional, field.TypeString, vv)
 	}
-	if _u.mutation.BinaryOptionalCleared() {
+	if _u.mutation.FieldCleared("binary_optional") {
 		_spec.ClearField(FieldBinaryOptional, field.TypeString)
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[*big.Int](_u.mutation, "text"); ok {
 		vv, err := ValueScanner.Text.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(FieldText, field.TypeString, vv)
 	}
-	if value, ok := _u.mutation.TextOptional(); ok {
+	if value, ok := entbuilder.GetField[*big.Int](_u.mutation, "text_optional"); ok {
 		vv, err := ValueScanner.TextOptional.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(FieldTextOptional, field.TypeString, vv)
 	}
-	if _u.mutation.TextOptionalCleared() {
+	if _u.mutation.FieldCleared("text_optional") {
 		_spec.ClearField(FieldTextOptional, field.TypeString)
 	}
-	if value, ok := _u.mutation.Base64(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "base64"); ok {
 		vv, err := ValueScanner.Base64.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(FieldBase64, field.TypeString, vv)
 	}
-	if value, ok := _u.mutation.Custom(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "custom"); ok {
 		vv, err := ValueScanner.Custom.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(FieldCustom, field.TypeString, vv)
 	}
-	if value, ok := _u.mutation.CustomOptional(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "custom_optional"); ok {
 		vv, err := ValueScanner.CustomOptional.Value(value)
 		if err != nil {
 			return 0, err
 		}
 		_spec.SetField(FieldCustomOptional, field.TypeString, vv)
 	}
-	if _u.mutation.CustomOptionalCleared() {
+	if _u.mutation.FieldCleared("custom_optional") {
 		_spec.ClearField(FieldCustomOptional, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
@@ -269,49 +270,49 @@ func NewExValueScanUpdateOne(c Config, hooks []Hook, mutation *ExValueScanMutati
 
 // SetBinary sets the "binary" field.
 func (_u *ExValueScanUpdateOne) SetBinary(v *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinary(v)
+	_ = _u.mutation.SetField("binary", v)
 	return _u
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
 func (_u *ExValueScanUpdateOne) SetBinaryBytes(v *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinaryBytes(v)
+	_ = _u.mutation.SetField("binary_bytes", v)
 	return _u
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
 func (_u *ExValueScanUpdateOne) SetBinaryOptional(v *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinaryOptional(v)
+	_ = _u.mutation.SetField("binary_optional", v)
 	return _u
 }
 
 // ClearBinaryOptional clears the value of the "binary_optional" field.
 func (_u *ExValueScanUpdateOne) ClearBinaryOptional() *ExValueScanUpdateOne {
-	_u.mutation.ClearBinaryOptional()
+	_ = _u.mutation.ClearField("binary_optional")
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *ExValueScanUpdateOne) SetText(v *big.Int) *ExValueScanUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
 // SetTextOptional sets the "text_optional" field.
 func (_u *ExValueScanUpdateOne) SetTextOptional(v *big.Int) *ExValueScanUpdateOne {
-	_u.mutation.SetTextOptional(v)
+	_ = _u.mutation.SetField("text_optional", v)
 	return _u
 }
 
 // ClearTextOptional clears the value of the "text_optional" field.
 func (_u *ExValueScanUpdateOne) ClearTextOptional() *ExValueScanUpdateOne {
-	_u.mutation.ClearTextOptional()
+	_ = _u.mutation.ClearField("text_optional")
 	return _u
 }
 
 // SetBase64 sets the "base64" field.
 func (_u *ExValueScanUpdateOne) SetBase64(v string) *ExValueScanUpdateOne {
-	_u.mutation.SetBase64(v)
+	_ = _u.mutation.SetField("base64", v)
 	return _u
 }
 
@@ -325,7 +326,7 @@ func (_u *ExValueScanUpdateOne) SetNillableBase64(v *string) *ExValueScanUpdateO
 
 // SetCustom sets the "custom" field.
 func (_u *ExValueScanUpdateOne) SetCustom(v string) *ExValueScanUpdateOne {
-	_u.mutation.SetCustom(v)
+	_ = _u.mutation.SetField("custom", v)
 	return _u
 }
 
@@ -339,7 +340,7 @@ func (_u *ExValueScanUpdateOne) SetNillableCustom(v *string) *ExValueScanUpdateO
 
 // SetCustomOptional sets the "custom_optional" field.
 func (_u *ExValueScanUpdateOne) SetCustomOptional(v string) *ExValueScanUpdateOne {
-	_u.mutation.SetCustomOptional(v)
+	_ = _u.mutation.SetField("custom_optional", v)
 	return _u
 }
 
@@ -353,7 +354,7 @@ func (_u *ExValueScanUpdateOne) SetNillableCustomOptional(v *string) *ExValueSca
 
 // ClearCustomOptional clears the value of the "custom_optional" field.
 func (_u *ExValueScanUpdateOne) ClearCustomOptional() *ExValueScanUpdateOne {
-	_u.mutation.ClearCustomOptional()
+	_ = _u.mutation.ClearField("custom_optional")
 	return _u
 }
 
@@ -364,7 +365,7 @@ func (_u *ExValueScanUpdateOne) Mutation() *ExValueScanMutation {
 
 // Where appends a list predicates to the ExValueScanUpdate builder.
 func (_u *ExValueScanUpdateOne) Where(ps ...predicate.ExValueScan) *ExValueScanUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -377,7 +378,7 @@ func (_u *ExValueScanUpdateOne) Select(field string, fields ...string) *ExValueS
 
 // Save executes the query and returns the updated ExValueScan entity.
 func (_u *ExValueScanUpdateOne) Save(ctx context.Context) (*ExValueScan, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[ExValueScan](ctx, &entbuilder.UpdateState[*ExValueScanMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -434,69 +435,69 @@ func (_u *ExValueScanUpdateOne) sqlSave(ctx context.Context) (_node *ExValueScan
 			}
 		}
 	}
-	if value, ok := _u.mutation.Binary(); ok {
+	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "binary"); ok {
 		vv, err := ValueScanner.Binary.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(FieldBinary, field.TypeString, vv)
 	}
-	if value, ok := _u.mutation.BinaryBytes(); ok {
+	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "binary_bytes"); ok {
 		vv, err := ValueScanner.BinaryBytes.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(FieldBinaryBytes, field.TypeBytes, vv)
 	}
-	if value, ok := _u.mutation.BinaryOptional(); ok {
+	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "binary_optional"); ok {
 		vv, err := ValueScanner.BinaryOptional.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(FieldBinaryOptional, field.TypeString, vv)
 	}
-	if _u.mutation.BinaryOptionalCleared() {
+	if _u.mutation.FieldCleared("binary_optional") {
 		_spec.ClearField(FieldBinaryOptional, field.TypeString)
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[*big.Int](_u.mutation, "text"); ok {
 		vv, err := ValueScanner.Text.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(FieldText, field.TypeString, vv)
 	}
-	if value, ok := _u.mutation.TextOptional(); ok {
+	if value, ok := entbuilder.GetField[*big.Int](_u.mutation, "text_optional"); ok {
 		vv, err := ValueScanner.TextOptional.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(FieldTextOptional, field.TypeString, vv)
 	}
-	if _u.mutation.TextOptionalCleared() {
+	if _u.mutation.FieldCleared("text_optional") {
 		_spec.ClearField(FieldTextOptional, field.TypeString)
 	}
-	if value, ok := _u.mutation.Base64(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "base64"); ok {
 		vv, err := ValueScanner.Base64.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(FieldBase64, field.TypeString, vv)
 	}
-	if value, ok := _u.mutation.Custom(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "custom"); ok {
 		vv, err := ValueScanner.Custom.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(FieldCustom, field.TypeString, vv)
 	}
-	if value, ok := _u.mutation.CustomOptional(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "custom_optional"); ok {
 		vv, err := ValueScanner.CustomOptional.Value(value)
 		if err != nil {
 			return nil, err
 		}
 		_spec.SetField(FieldCustomOptional, field.TypeString, vv)
 	}
-	if _u.mutation.CustomOptionalCleared() {
+	if _u.mutation.FieldCleared("custom_optional") {
 		_spec.ClearField(FieldCustomOptional, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)

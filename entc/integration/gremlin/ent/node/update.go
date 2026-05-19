@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // NodeUpdate is the builder for updating Node entities.
@@ -33,14 +34,14 @@ func NewNodeUpdate(c Config, hooks []Hook, mutation *NodeMutation) *NodeUpdate {
 
 // Where appends a list predicates to the NodeUpdate builder.
 func (_u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetValue sets the "value" field.
 func (_u *NodeUpdate) SetValue(v int) *NodeUpdate {
-	_u.mutation.ResetValue()
-	_u.mutation.SetValue(v)
+	_ = _u.mutation.ResetField("value")
+	_ = _u.mutation.SetField("value", v)
 	return _u
 }
 
@@ -54,31 +55,31 @@ func (_u *NodeUpdate) SetNillableValue(v *int) *NodeUpdate {
 
 // AddValue adds value to the "value" field.
 func (_u *NodeUpdate) AddValue(v int) *NodeUpdate {
-	_u.mutation.AddValue(v)
+	_ = _u.mutation.AddField("value", v)
 	return _u
 }
 
 // ClearValue clears the value of the "value" field.
 func (_u *NodeUpdate) ClearValue() *NodeUpdate {
-	_u.mutation.ClearValue()
+	_ = _u.mutation.ClearField("value")
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *NodeUpdate) SetUpdatedAt(v time.Time) *NodeUpdate {
-	_u.mutation.SetUpdatedAt(v)
+	_ = _u.mutation.SetField("updated_at", v)
 	return _u
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
 func (_u *NodeUpdate) ClearUpdatedAt() *NodeUpdate {
-	_u.mutation.ClearUpdatedAt()
+	_ = _u.mutation.ClearField("updated_at")
 	return _u
 }
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
 func (_u *NodeUpdate) SetPrevID(id string) *NodeUpdate {
-	_u.mutation.SetPrevID(id)
+	_ = _u.mutation.SetEdgeID("prev", id)
 	return _u
 }
 
@@ -92,7 +93,7 @@ func (_u *NodeUpdate) SetNillablePrevID(id *string) *NodeUpdate {
 
 // SetNextID sets the "next" edge to the Node entity by ID.
 func (_u *NodeUpdate) SetNextID(id string) *NodeUpdate {
-	_u.mutation.SetNextID(id)
+	_ = _u.mutation.SetEdgeID("next", id)
 	return _u
 }
 
@@ -111,13 +112,13 @@ func (_u *NodeUpdate) Mutation() *NodeMutation {
 
 // ClearPrev clears the "prev" edge to the Node entity.
 func (_u *NodeUpdate) ClearPrev() *NodeUpdate {
-	_u.mutation.ClearPrev()
+	_ = _u.mutation.ClearEdge("prev")
 	return _u
 }
 
 // ClearNext clears the "next" edge to the Node entity.
 func (_u *NodeUpdate) ClearNext() *NodeUpdate {
-	_u.mutation.ClearNext()
+	_ = _u.mutation.ClearEdge("next")
 	return _u
 }
 
@@ -151,9 +152,9 @@ func (_u *NodeUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *NodeUpdate) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok && !_u.mutation.UpdatedAtCleared() {
+	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "updated_at"); !ok && !_u.mutation.FieldCleared("updated_at") {
 		v := UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+		_ = _u.mutation.SetField("updated_at", v)
 	}
 }
 
@@ -257,8 +258,8 @@ func NewNodeUpdateOne(c Config, hooks []Hook, mutation *NodeMutation) *NodeUpdat
 
 // SetValue sets the "value" field.
 func (_u *NodeUpdateOne) SetValue(v int) *NodeUpdateOne {
-	_u.mutation.ResetValue()
-	_u.mutation.SetValue(v)
+	_ = _u.mutation.ResetField("value")
+	_ = _u.mutation.SetField("value", v)
 	return _u
 }
 
@@ -272,31 +273,31 @@ func (_u *NodeUpdateOne) SetNillableValue(v *int) *NodeUpdateOne {
 
 // AddValue adds value to the "value" field.
 func (_u *NodeUpdateOne) AddValue(v int) *NodeUpdateOne {
-	_u.mutation.AddValue(v)
+	_ = _u.mutation.AddField("value", v)
 	return _u
 }
 
 // ClearValue clears the value of the "value" field.
 func (_u *NodeUpdateOne) ClearValue() *NodeUpdateOne {
-	_u.mutation.ClearValue()
+	_ = _u.mutation.ClearField("value")
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *NodeUpdateOne) SetUpdatedAt(v time.Time) *NodeUpdateOne {
-	_u.mutation.SetUpdatedAt(v)
+	_ = _u.mutation.SetField("updated_at", v)
 	return _u
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
 func (_u *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne {
-	_u.mutation.ClearUpdatedAt()
+	_ = _u.mutation.ClearField("updated_at")
 	return _u
 }
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
 func (_u *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne {
-	_u.mutation.SetPrevID(id)
+	_ = _u.mutation.SetEdgeID("prev", id)
 	return _u
 }
 
@@ -310,7 +311,7 @@ func (_u *NodeUpdateOne) SetNillablePrevID(id *string) *NodeUpdateOne {
 
 // SetNextID sets the "next" edge to the Node entity by ID.
 func (_u *NodeUpdateOne) SetNextID(id string) *NodeUpdateOne {
-	_u.mutation.SetNextID(id)
+	_ = _u.mutation.SetEdgeID("next", id)
 	return _u
 }
 
@@ -329,19 +330,19 @@ func (_u *NodeUpdateOne) Mutation() *NodeMutation {
 
 // ClearPrev clears the "prev" edge to the Node entity.
 func (_u *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
-	_u.mutation.ClearPrev()
+	_ = _u.mutation.ClearEdge("prev")
 	return _u
 }
 
 // ClearNext clears the "next" edge to the Node entity.
 func (_u *NodeUpdateOne) ClearNext() *NodeUpdateOne {
-	_u.mutation.ClearNext()
+	_ = _u.mutation.ClearEdge("next")
 	return _u
 }
 
 // Where appends a list predicates to the NodeUpdate builder.
 func (_u *NodeUpdateOne) Where(ps ...predicate.Node) *NodeUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -382,9 +383,9 @@ func (_u *NodeUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *NodeUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdatedAt(); !ok && !_u.mutation.UpdatedAtCleared() {
+	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "updated_at"); !ok && !_u.mutation.FieldCleared("updated_at") {
 		v := UpdateDefaultUpdatedAt()
-		_u.mutation.SetUpdatedAt(v)
+		_ = _u.mutation.SetField("updated_at", v)
 	}
 }
 

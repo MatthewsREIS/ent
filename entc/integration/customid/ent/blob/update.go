@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -33,13 +34,13 @@ func NewBlobUpdate(c Config, hooks []Hook, mutation *BlobMutation) *BlobUpdate {
 
 // Where appends a list predicates to the BlobUpdate builder.
 func (_u *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetUUID sets the "uuid" field.
 func (_u *BlobUpdate) SetUUID(v uuid.UUID) *BlobUpdate {
-	_u.mutation.SetUUID(v)
+	_ = _u.mutation.SetField("uuid", v)
 	return _u
 }
 
@@ -53,8 +54,8 @@ func (_u *BlobUpdate) SetNillableUUID(v *uuid.UUID) *BlobUpdate {
 
 // SetCount sets the "count" field.
 func (_u *BlobUpdate) SetCount(v int) *BlobUpdate {
-	_u.mutation.ResetCount()
-	_u.mutation.SetCount(v)
+	_ = _u.mutation.ResetField("count")
+	_ = _u.mutation.SetField("count", v)
 	return _u
 }
 
@@ -68,13 +69,13 @@ func (_u *BlobUpdate) SetNillableCount(v *int) *BlobUpdate {
 
 // AddCount adds value to the "count" field.
 func (_u *BlobUpdate) AddCount(v int) *BlobUpdate {
-	_u.mutation.AddCount(v)
+	_ = _u.mutation.AddField("count", v)
 	return _u
 }
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
 func (_u *BlobUpdate) SetParentID(id uuid.UUID) *BlobUpdate {
-	_u.mutation.SetParentID(id)
+	_ = _u.mutation.SetEdgeID("parent", id)
 	return _u
 }
 
@@ -88,7 +89,7 @@ func (_u *BlobUpdate) SetNillableParentID(id *uuid.UUID) *BlobUpdate {
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
 func (_u *BlobUpdate) AddLinkIDs(ids ...uuid.UUID) *BlobUpdate {
-	_u.mutation.AddLinkIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("links", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -99,25 +100,25 @@ func (_u *BlobUpdate) Mutation() *BlobMutation {
 
 // ClearParent clears the "parent" edge to the Blob entity.
 func (_u *BlobUpdate) ClearParent() *BlobUpdate {
-	_u.mutation.ClearParent()
+	_ = _u.mutation.ClearEdge("parent")
 	return _u
 }
 
 // ClearLinks clears all "links" edges to the Blob entity.
 func (_u *BlobUpdate) ClearLinks() *BlobUpdate {
-	_u.mutation.ClearLinks()
+	_ = _u.mutation.ClearEdge("links")
 	return _u
 }
 
 // RemoveLinkIDs removes the "links" edge to Blob entities by IDs.
 func (_u *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
-	_u.mutation.RemoveLinkIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("links", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BlobUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*BlobMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -151,16 +152,17 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UUID(); ok {
+	if value, ok := entbuilder.GetField[uuid.UUID](_u.mutation, "uuid"); ok {
 		_spec.SetField(FieldUUID, field.TypeUUID, value)
 	}
-	if value, ok := _u.mutation.Count(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "count"); ok {
 		_spec.SetField(FieldCount, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedCount(); ok {
+	if added, ok := _u.mutation.AddedField("count"); ok {
+		value := added.(int)
 		_spec.AddField(FieldCount, field.TypeInt, value)
 	}
-	if _u.mutation.ParentCleared() {
+	if _u.mutation.EdgeCleared("parent") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -173,7 +175,7 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -189,7 +191,7 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LinksCleared() {
+	if _u.mutation.EdgeCleared("links") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -204,7 +206,7 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLinksIDs(); len(nodes) > 0 && !_u.mutation.LinksCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("links"); len(nodes) > 0 && !_u.mutation.EdgeCleared("links") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -222,7 +224,7 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LinksIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("links"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -267,7 +269,7 @@ func NewBlobUpdateOne(c Config, hooks []Hook, mutation *BlobMutation) *BlobUpdat
 
 // SetUUID sets the "uuid" field.
 func (_u *BlobUpdateOne) SetUUID(v uuid.UUID) *BlobUpdateOne {
-	_u.mutation.SetUUID(v)
+	_ = _u.mutation.SetField("uuid", v)
 	return _u
 }
 
@@ -281,8 +283,8 @@ func (_u *BlobUpdateOne) SetNillableUUID(v *uuid.UUID) *BlobUpdateOne {
 
 // SetCount sets the "count" field.
 func (_u *BlobUpdateOne) SetCount(v int) *BlobUpdateOne {
-	_u.mutation.ResetCount()
-	_u.mutation.SetCount(v)
+	_ = _u.mutation.ResetField("count")
+	_ = _u.mutation.SetField("count", v)
 	return _u
 }
 
@@ -296,13 +298,13 @@ func (_u *BlobUpdateOne) SetNillableCount(v *int) *BlobUpdateOne {
 
 // AddCount adds value to the "count" field.
 func (_u *BlobUpdateOne) AddCount(v int) *BlobUpdateOne {
-	_u.mutation.AddCount(v)
+	_ = _u.mutation.AddField("count", v)
 	return _u
 }
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
 func (_u *BlobUpdateOne) SetParentID(id uuid.UUID) *BlobUpdateOne {
-	_u.mutation.SetParentID(id)
+	_ = _u.mutation.SetEdgeID("parent", id)
 	return _u
 }
 
@@ -316,7 +318,7 @@ func (_u *BlobUpdateOne) SetNillableParentID(id *uuid.UUID) *BlobUpdateOne {
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
 func (_u *BlobUpdateOne) AddLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
-	_u.mutation.AddLinkIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("links", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -327,25 +329,25 @@ func (_u *BlobUpdateOne) Mutation() *BlobMutation {
 
 // ClearParent clears the "parent" edge to the Blob entity.
 func (_u *BlobUpdateOne) ClearParent() *BlobUpdateOne {
-	_u.mutation.ClearParent()
+	_ = _u.mutation.ClearEdge("parent")
 	return _u
 }
 
 // ClearLinks clears all "links" edges to the Blob entity.
 func (_u *BlobUpdateOne) ClearLinks() *BlobUpdateOne {
-	_u.mutation.ClearLinks()
+	_ = _u.mutation.ClearEdge("links")
 	return _u
 }
 
 // RemoveLinkIDs removes the "links" edge to Blob entities by IDs.
 func (_u *BlobUpdateOne) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
-	_u.mutation.RemoveLinkIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("links", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the BlobUpdate builder.
 func (_u *BlobUpdateOne) Where(ps ...predicate.Blob) *BlobUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -358,7 +360,7 @@ func (_u *BlobUpdateOne) Select(field string, fields ...string) *BlobUpdateOne {
 
 // Save executes the query and returns the updated Blob entity.
 func (_u *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Blob](ctx, &entbuilder.UpdateState[*BlobMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -409,16 +411,17 @@ func (_u *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.UUID(); ok {
+	if value, ok := entbuilder.GetField[uuid.UUID](_u.mutation, "uuid"); ok {
 		_spec.SetField(FieldUUID, field.TypeUUID, value)
 	}
-	if value, ok := _u.mutation.Count(); ok {
+	if value, ok := entbuilder.GetField[int](_u.mutation, "count"); ok {
 		_spec.SetField(FieldCount, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedCount(); ok {
+	if added, ok := _u.mutation.AddedField("count"); ok {
+		value := added.(int)
 		_spec.AddField(FieldCount, field.TypeInt, value)
 	}
-	if _u.mutation.ParentCleared() {
+	if _u.mutation.EdgeCleared("parent") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -431,7 +434,7 @@ func (_u *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("parent"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -447,7 +450,7 @@ func (_u *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.LinksCleared() {
+	if _u.mutation.EdgeCleared("links") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -462,7 +465,7 @@ func (_u *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLinksIDs(); len(nodes) > 0 && !_u.mutation.LinksCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("links"); len(nodes) > 0 && !_u.mutation.EdgeCleared("links") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -480,7 +483,7 @@ func (_u *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LinksIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("links"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

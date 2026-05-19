@@ -11,28 +11,28 @@ import (
 )
 
 // Blog is the predicate function for blog builders.
-type Blog func(*sql.Selector)
+type Blog = func(*sql.Selector)
 
 // Car is the predicate function for car builders.
-type Car func(*sql.Selector)
+type Car = func(*sql.Selector)
 
 // Conversion is the predicate function for conversion builders.
-type Conversion func(*sql.Selector)
+type Conversion = func(*sql.Selector)
 
 // CustomType is the predicate function for customtype builders.
-type CustomType func(*sql.Selector)
+type CustomType = func(*sql.Selector)
 
 // Group is the predicate function for group builders.
-type Group func(*sql.Selector)
+type Group = func(*sql.Selector)
 
 // Media is the predicate function for media builders.
-type Media func(*sql.Selector)
+type Media = func(*sql.Selector)
 
 // Pet is the predicate function for pet builders.
-type Pet func(*sql.Selector)
+type Pet = func(*sql.Selector)
 
 // User is the predicate function for user builders.
-type User func(*sql.Selector)
+type User = func(*sql.Selector)
 
 // Zoo is the predicate function for zoo builders.
-type Zoo func(*sql.Selector)
+type Zoo = func(*sql.Selector)

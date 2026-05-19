@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupInfoCreate is the builder for creating a GroupInfo entity.
@@ -32,13 +33,13 @@ func NewGroupInfoCreate(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 
 // SetDesc sets the "desc" field.
 func (_c *GroupInfoCreate) SetDesc(v string) *GroupInfoCreate {
-	_c.mutation.SetDesc(v)
+	_ = _c.mutation.SetField("desc", v)
 	return _c
 }
 
 // SetMaxUsers sets the "max_users" field.
 func (_c *GroupInfoCreate) SetMaxUsers(v int) *GroupInfoCreate {
-	_c.mutation.SetMaxUsers(v)
+	_ = _c.mutation.SetField("max_users", v)
 	return _c
 }
 
@@ -52,7 +53,7 @@ func (_c *GroupInfoCreate) SetNillableMaxUsers(v *int) *GroupInfoCreate {
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_c *GroupInfoCreate) AddGroupIDs(ids ...string) *GroupInfoCreate {
-	_c.mutation.AddGroupIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -91,18 +92,18 @@ func (_c *GroupInfoCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *GroupInfoCreate) defaults() {
-	if _, ok := _c.mutation.MaxUsers(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "max_users"); !ok {
 		v := DefaultMaxUsers
-		_c.mutation.SetMaxUsers(v)
+		_ = _c.mutation.SetField("max_users", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *GroupInfoCreate) check() error {
-	if _, ok := _c.mutation.Desc(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "desc"); !ok {
 		return &ValidationError{Name: "desc", Err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
 	}
-	if _, ok := _c.mutation.MaxUsers(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "max_users"); !ok {
 		return &ValidationError{Name: "max_users", Err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
 	}
 	return nil

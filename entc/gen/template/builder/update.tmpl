@@ -13,7 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "Imports" $.BuilderImports }}
+{{ with extend $ "Imports" $.BuilderImports "UpdateUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -35,7 +35,7 @@ func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $mutation }}.Where(ps...)
+	{{ $mutation }}.WhereP(ps...)
 	return {{ $receiver }}
 }
 
@@ -58,7 +58,11 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
+	{{- if eq $.Config.Storage.Name "sql" }}
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*{{ $.MutationName }}]{Hooks: {{ $receiver }}.hooks, Mutation: {{ $mutation }}}, {{ $receiver }}.{{ $.Storage }}Save)
+	{{- else }}
 	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	{{- end }}
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -119,7 +123,7 @@ func New{{ $onebuilder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
-	{{ $mutation }}.Where(ps...)
+	{{ $mutation }}.WhereP(ps...)
 	return {{ $receiver }}
 }
 
@@ -141,7 +145,11 @@ func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name
 			{{ $receiver }}.defaults()
 		{{- end }}
 	{{- end }}
+	{{- if eq $.Config.Storage.Name "sql" }}
+	return entbuilder.RunUpdateOne[{{ $.Name }}](ctx, &entbuilder.UpdateState[*{{ $.MutationName }}]{Hooks: {{ $receiver }}.hooks, Mutation: {{ $mutation }}}, {{ $receiver }}.{{ $.Storage }}Save)
+	{{- else }}
 	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Save, {{ $mutation }}, {{ $receiver }}.hooks)
+	{{- end }}
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -209,14 +217,14 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	{{ $func := $e.MutationClear }}
 	// {{ $func }} clears {{ if $e.Unique }}the "{{ $e.Name }}" edge{{ else }}all "{{ $e.Name }}" edges{{ end }} to the {{ $e.Type.Name }} entity.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-		{{ $mutation }}.{{ $func }}()
+		_ = {{ $mutation }}.ClearEdge({{ printf "%q" $e.Name }})
 		return {{ $receiver }}
 	}
 	{{ if not $e.Unique }}
 		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
 		// {{ $idsFunc }} removes the "{{ $e.Name }}" edge to {{ $e.Type.Name }} entities by IDs.
 		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} {
-			{{ $mutation }}.{{ $idsFunc }}(ids...)
+			_ = {{ $mutation }}.RemoveEdgeIDs({{ printf "%q" $e.Name }}, entbuilder.ToAny(ids)...)
 			return {{ $receiver }}
 		}
 	{{ end }}
@@ -236,14 +244,14 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 	func ({{ $receiver }} *{{ $builder }}) defaults() {{ if $runtimeRequired }}error{{ end }}{
 		{{- range $f := $.Fields }}
 			{{- if $f.UpdateDefault }}
-				if _, ok := {{ $mutation }}.{{ $f.MutationGet }}(); !ok {{ if $f.Optional }} && !{{ $mutation }}.{{ $f.StructField }}Cleared() {{ end }} {
+				if _, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); !ok {{ if $f.Optional }} && !{{ $mutation }}.FieldCleared({{ printf "%q" $f.Name }}) {{ end }} {
 					{{- if $runtimeRequired }}
 						if {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }} == nil {
 							return fmt.Errorf("{{ $pkg }}: uninitialized {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }} (forgotten import {{ $pkg }}/runtime?)")
 						}
 					{{- end }}
 					v := {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }}()
-					{{ $mutation }}.{{ $f.MutationSet }}(v)
+					_ = {{ $mutation }}.SetField({{ printf "%q" $f.Name }}, v)
 				}
 			{{- end }}
 		{{- end }}
@@ -259,7 +267,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{- range $f := $.Fields }}
 			{{- $isValidator := and ($f.HasGoType) ($f.Type.Validator) }}
 			{{- with and (not $f.Immutable) (or $f.Validators $f.IsEnum $isValidator) }}
-				if v, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+				if v, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); ok {
 					if err := {{ if or $f.Validators $f.IsEnum }}{{ $.PackageQualifier }}{{ $f.Validator }}({{ $f.BasicType "v" }}){{ else }}v.Validate(){{ end }}; err != nil {
 						return &ValidationError{Name: "{{ $f.Name }}", Err: fmt.Errorf(`{{ $pkg }}: validator failed for field "{{ $.Name }}.{{ $f.Name }}": %w`, err)}
 					}
@@ -268,7 +276,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		{{- end }}
 		{{- range $e := $.Edges }}
 			{{- if and $e.Unique (not $e.Optional) }}
-				if {{ $mutation }}.{{ $e.StructField }}Cleared() && len({{ $mutation }}.{{ $e.StructField }}IDs()) > 0 {
+				if {{ $mutation }}.EdgeCleared({{ printf "%q" $e.Name }}) && len({{ $mutation }}.EdgeIDs({{ printf "%q" $e.Name }})) > 0 {
 					return errors.New(`{{ $pkg }}: clearing a required unique edge "{{ $.Name }}.{{ $e.Name }}"`)
 				}
 			{{- end }}

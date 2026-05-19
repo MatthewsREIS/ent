@@ -25,6 +25,11 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// errRecovered is returned by mayRecover when it has produced a completed
+// graph via the bootstrap fallback path. The top-level generate() checks
+// for this sentinel and skips its own LoadGraph/Gen calls.
+var errRecovered = errors.New("entc: recovered via bootstrap fallback")
+
 // LoadGraph loads the schema package from the given schema path,
 // and constructs a *gen.Graph.
 func LoadGraph(schemaPath string, cfg *gen.Config) (*gen.Graph, error) {
@@ -174,6 +179,27 @@ func SnapshotDir(dir string) Option {
 			return fmt.Errorf("resolving snapshot dir: %w", err)
 		}
 		cfg.SnapshotDir = abs
+		return nil
+	}
+}
+
+// SkipHookCompilation enables bootstrap mode: before loading the schema
+// package, entc copies the schema directory to a tmpdir and AST-strips the
+// bodies of Hooks() / Policy() / Interceptors() methods on every
+// Schema-implementing type. The loader runs against the stripped copy, so
+// codegen succeeds even when hooks reference generated symbols that do not
+// yet exist.
+//
+// Use this when you have added a new field/edge to a schema and an existing
+// hook references the not-yet-generated method (e.g., m.SetNewField(v)). The
+// user's real schema package is never modified.
+//
+// Known limitation: this only strips methods in the schema package itself.
+// If a hook lives in a subpackage that also imports the generated ent
+// package, the subpackage will still fail to type-check.
+func SkipHookCompilation() Option {
+	return func(cfg *gen.Config) error {
+		cfg.SkipHookCompilation = true
 		return nil
 	}
 }
@@ -403,12 +429,26 @@ func templateOption(next func(t *gen.Template) (*gen.Template, error)) Option {
 
 // generate loads the given schema and run codegen.
 func generate(schemaPath string, cfg *gen.Config) error {
-	graph, err := LoadGraph(schemaPath, cfg)
+	loadPath, cleanup, err := maybeStageBootstrap(schemaPath, cfg, false)
 	if err != nil {
-		if err := mayRecover(err, schemaPath, cfg); err != nil {
+		return err
+	}
+	defer cleanup()
+
+	graph, err := LoadGraph(loadPath, cfg)
+	if err != nil {
+		if rErr := mayRecover(err, schemaPath, cfg); rErr != nil {
+			if errors.Is(rErr, errRecovered) {
+				return nil
+			}
+			return rErr
+		}
+		loadPath, cleanup, err = maybeStageBootstrap(schemaPath, cfg, false)
+		if err != nil {
 			return err
 		}
-		if graph, err = LoadGraph(schemaPath, cfg); err != nil {
+		defer cleanup()
+		if graph, err = LoadGraph(loadPath, cfg); err != nil {
 			return err
 		}
 	}
@@ -440,32 +480,77 @@ func generate(schemaPath string, cfg *gen.Config) error {
 	return nil
 }
 
-func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
-	if ok, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); !ok {
-		return err
+// maybeStageBootstrap returns the schema path to feed the loader. If
+// cfg.SkipHookCompilation is true OR forceBootstrap is true, the schema dir
+// is AST-stripped into a tmpdir and that tmpdir's path is returned. Otherwise
+// the original schemaPath is returned unchanged. The returned cleanup func
+// is always non-nil and safe to defer.
+func maybeStageBootstrap(schemaPath string, cfg *gen.Config, forceBootstrap bool) (string, func(), error) {
+	if !cfg.SkipHookCompilation && !forceBootstrap {
+		return schemaPath, func() {}, nil
 	}
+	staged, err := internal.StageStrippedSchema(schemaPath)
+	if err != nil {
+		return "", func() {}, fmt.Errorf("bootstrap: %w", err)
+	}
+	return staged, func() { _ = os.RemoveAll(staged) }, nil
+}
+
+func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
 	if !errors.As(err, &packages.Error{}) && !internal.IsBuildError(err) {
 		return err
 	}
 	// If the build error comes from the schema package.
-	if err := internal.CheckDir(schemaPath); err != nil {
-		return fmt.Errorf("schema failure: %w", err)
+	if cErr := internal.CheckDir(schemaPath); cErr != nil {
+		return fmt.Errorf("schema failure: %w", cErr)
 	}
-	if ok, _ := cfg.FeatureEnabled(gen.FeatureGlobalID.Name); ok {
-		if internal.CheckDir(filepath.Dir(gen.IncrementStartsFilePath(cfg.Target))) != nil {
-			// Resolve the conflict by accepting the remote version of the file.
-			if err := gen.ResolveIncrementStartsConflict(cfg.Target); err != nil {
-				return err
+
+	snapshotOK, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name)
+	if snapshotOK {
+		if ok, _ := cfg.FeatureEnabled(gen.FeatureGlobalID.Name); ok {
+			if internal.CheckDir(filepath.Dir(gen.IncrementStartsFilePath(cfg.Target))) != nil {
+				if err := gen.ResolveIncrementStartsConflict(cfg.Target); err != nil {
+					return err
+				}
 			}
 		}
+		var target string
+		if cfg.SnapshotDir != "" {
+			target = filepath.Join(cfg.SnapshotDir, "schema.go")
+		} else {
+			target = filepath.Join(cfg.Target, "internal/schema.go")
+		}
+		if rErr := (&internal.Snapshot{Path: target, Config: cfg}).Restore(); rErr == nil {
+			// Snapshot.Restore() ran the full codegen (graph.Gen()) — the
+			// caller must NOT attempt to re-load. Return errRecovered so
+			// generate() short-circuits the post-mayRecover retry path.
+			// (Returning nil silently dropped the recovery: generate()
+			// fell through to a second LoadGraph that re-hit the same
+			// schema compile error and panicked.)
+			return errRecovered
+		}
+		// Snapshot restore failed (file missing, malformed, or schema stale).
+		// Fall through to bootstrap.
 	}
-	var target string
-	if cfg.SnapshotDir != "" {
-		target = filepath.Join(cfg.SnapshotDir, "schema.go")
-	} else {
-		target = filepath.Join(cfg.Target, "internal/schema.go")
+
+	// Bootstrap fallback: AST-strip the current schema and try generating
+	// against the stripped copy.
+	loadPath, cleanup, sErr := maybeStageBootstrap(schemaPath, cfg, true)
+	if sErr != nil {
+		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, sErr)
 	}
-	return (&internal.Snapshot{Path: target, Config: cfg}).Restore()
+	defer cleanup()
+	graph, lErr := LoadGraph(loadPath, cfg)
+	if lErr != nil {
+		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, lErr)
+	}
+	if nErr := normalizePkg(cfg); nErr != nil {
+		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, nErr)
+	}
+	if gErr := graph.Gen(); gErr != nil {
+		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, gErr)
+	}
+	return errRecovered
 }
 
 // indirect returns the type at the end of indirection.

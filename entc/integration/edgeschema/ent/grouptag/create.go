@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewGroupTagCreate(c Config, hooks []Hook, mutation *GroupTagMutation) *Grou
 
 // SetTagID sets the "tag_id" field.
 func (_c *GroupTagCreate) SetTagID(v int) *GroupTagCreate {
-	_c.mutation.SetTagID(v)
+	_ = _c.mutation.SetEdgeID("tag", v)
 	return _c
 }
 
 // SetGroupID sets the "group_id" field.
 func (_c *GroupTagCreate) SetGroupID(v int) *GroupTagCreate {
-	_c.mutation.SetGroupID(v)
+	_ = _c.mutation.SetEdgeID("group", v)
 	return _c
 }
 
@@ -75,16 +76,10 @@ func (_c *GroupTagCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *GroupTagCreate) check() error {
-	if _, ok := _c.mutation.TagID(); !ok {
-		return &ValidationError{Name: "tag_id", Err: errors.New(`ent: missing required field "GroupTag.tag_id"`)}
-	}
-	if _, ok := _c.mutation.GroupID(); !ok {
-		return &ValidationError{Name: "group_id", Err: errors.New(`ent: missing required field "GroupTag.group_id"`)}
-	}
-	if len(_c.mutation.TagIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("tag")) == 0 {
 		return &ValidationError{Name: "tag", Err: errors.New(`ent: missing required edge "GroupTag.tag"`)}
 	}
-	if len(_c.mutation.GroupIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("group")) == 0 {
 		return &ValidationError{Name: "group", Err: errors.New(`ent: missing required edge "GroupTag.group"`)}
 	}
 	return nil
@@ -103,7 +98,7 @@ func (_c *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -114,7 +109,7 @@ func (_c *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if nodes := _c.mutation.TagIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tag"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -131,7 +126,7 @@ func (_c *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 		_node.TagID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "group"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -380,11 +375,11 @@ func (_c *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

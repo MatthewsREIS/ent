@@ -71,14 +71,15 @@ func HasDevice() predicate.Session {
 
 // HasDeviceWith applies the HasEdge predicate on the "device" edge with a given conditions (other predicates).
 func HasDeviceWith(preds ...predicate.Device) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := newDeviceStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Session(
+		func(s *sql.Selector) {
+			step := newDeviceStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

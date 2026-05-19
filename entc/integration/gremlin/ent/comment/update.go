@@ -34,14 +34,14 @@ func NewCommentUpdate(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 
 // Where appends a list predicates to the CommentUpdate builder.
 func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetUniqueInt sets the "unique_int" field.
 func (_u *CommentUpdate) SetUniqueInt(v int) *CommentUpdate {
-	_u.mutation.ResetUniqueInt()
-	_u.mutation.SetUniqueInt(v)
+	_ = _u.mutation.ResetField("unique_int")
+	_ = _u.mutation.SetField("unique_int", v)
 	return _u
 }
 
@@ -55,14 +55,14 @@ func (_u *CommentUpdate) SetNillableUniqueInt(v *int) *CommentUpdate {
 
 // AddUniqueInt adds value to the "unique_int" field.
 func (_u *CommentUpdate) AddUniqueInt(v int) *CommentUpdate {
-	_u.mutation.AddUniqueInt(v)
+	_ = _u.mutation.AddField("unique_int", v)
 	return _u
 }
 
 // SetUniqueFloat sets the "unique_float" field.
 func (_u *CommentUpdate) SetUniqueFloat(v float64) *CommentUpdate {
-	_u.mutation.ResetUniqueFloat()
-	_u.mutation.SetUniqueFloat(v)
+	_ = _u.mutation.ResetField("unique_float")
+	_ = _u.mutation.SetField("unique_float", v)
 	return _u
 }
 
@@ -76,14 +76,14 @@ func (_u *CommentUpdate) SetNillableUniqueFloat(v *float64) *CommentUpdate {
 
 // AddUniqueFloat adds value to the "unique_float" field.
 func (_u *CommentUpdate) AddUniqueFloat(v float64) *CommentUpdate {
-	_u.mutation.AddUniqueFloat(v)
+	_ = _u.mutation.AddField("unique_float", v)
 	return _u
 }
 
 // SetNillableInt sets the "nillable_int" field.
 func (_u *CommentUpdate) SetNillableInt(v int) *CommentUpdate {
-	_u.mutation.ResetNillableInt()
-	_u.mutation.SetNillableInt(v)
+	_ = _u.mutation.ResetField("nillable_int")
+	_ = _u.mutation.SetField("nillable_int", v)
 	return _u
 }
 
@@ -97,19 +97,19 @@ func (_u *CommentUpdate) SetNillableNillableInt(v *int) *CommentUpdate {
 
 // AddNillableInt adds value to the "nillable_int" field.
 func (_u *CommentUpdate) AddNillableInt(v int) *CommentUpdate {
-	_u.mutation.AddNillableInt(v)
+	_ = _u.mutation.AddField("nillable_int", v)
 	return _u
 }
 
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (_u *CommentUpdate) ClearNillableInt() *CommentUpdate {
-	_u.mutation.ClearNillableInt()
+	_ = _u.mutation.ClearField("nillable_int")
 	return _u
 }
 
 // SetTable sets the "table" field.
 func (_u *CommentUpdate) SetTable(v string) *CommentUpdate {
-	_u.mutation.SetTable(v)
+	_ = _u.mutation.SetField("table", v)
 	return _u
 }
 
@@ -123,13 +123,13 @@ func (_u *CommentUpdate) SetNillableTable(v *string) *CommentUpdate {
 
 // ClearTable clears the value of the "table" field.
 func (_u *CommentUpdate) ClearTable() *CommentUpdate {
-	_u.mutation.ClearTable()
+	_ = _u.mutation.ClearField("table")
 	return _u
 }
 
 // SetDir sets the "dir" field.
 func (_u *CommentUpdate) SetDir(v schemadir.Dir) *CommentUpdate {
-	_u.mutation.SetDir(v)
+	_ = _u.mutation.SetField("dir", v)
 	return _u
 }
 
@@ -143,13 +143,13 @@ func (_u *CommentUpdate) SetNillableDir(v *schemadir.Dir) *CommentUpdate {
 
 // ClearDir clears the value of the "dir" field.
 func (_u *CommentUpdate) ClearDir() *CommentUpdate {
-	_u.mutation.ClearDir()
+	_ = _u.mutation.ClearField("dir")
 	return _u
 }
 
 // SetClient sets the "client" field.
 func (_u *CommentUpdate) SetClient(v string) *CommentUpdate {
-	_u.mutation.SetClient(v)
+	_ = _u.mutation.SetField("client", v)
 	return _u
 }
 
@@ -163,7 +163,7 @@ func (_u *CommentUpdate) SetNillableClient(v *string) *CommentUpdate {
 
 // ClearClient clears the value of the "client" field.
 func (_u *CommentUpdate) ClearClient() *CommentUpdate {
-	_u.mutation.ClearClient()
+	_ = _u.mutation.ClearField("client")
 	return _u
 }
 
@@ -319,8 +319,8 @@ func NewCommentUpdateOne(c Config, hooks []Hook, mutation *CommentMutation) *Com
 
 // SetUniqueInt sets the "unique_int" field.
 func (_u *CommentUpdateOne) SetUniqueInt(v int) *CommentUpdateOne {
-	_u.mutation.ResetUniqueInt()
-	_u.mutation.SetUniqueInt(v)
+	_ = _u.mutation.ResetField("unique_int")
+	_ = _u.mutation.SetField("unique_int", v)
 	return _u
 }
 
@@ -334,14 +334,14 @@ func (_u *CommentUpdateOne) SetNillableUniqueInt(v *int) *CommentUpdateOne {
 
 // AddUniqueInt adds value to the "unique_int" field.
 func (_u *CommentUpdateOne) AddUniqueInt(v int) *CommentUpdateOne {
-	_u.mutation.AddUniqueInt(v)
+	_ = _u.mutation.AddField("unique_int", v)
 	return _u
 }
 
 // SetUniqueFloat sets the "unique_float" field.
 func (_u *CommentUpdateOne) SetUniqueFloat(v float64) *CommentUpdateOne {
-	_u.mutation.ResetUniqueFloat()
-	_u.mutation.SetUniqueFloat(v)
+	_ = _u.mutation.ResetField("unique_float")
+	_ = _u.mutation.SetField("unique_float", v)
 	return _u
 }
 
@@ -355,14 +355,14 @@ func (_u *CommentUpdateOne) SetNillableUniqueFloat(v *float64) *CommentUpdateOne
 
 // AddUniqueFloat adds value to the "unique_float" field.
 func (_u *CommentUpdateOne) AddUniqueFloat(v float64) *CommentUpdateOne {
-	_u.mutation.AddUniqueFloat(v)
+	_ = _u.mutation.AddField("unique_float", v)
 	return _u
 }
 
 // SetNillableInt sets the "nillable_int" field.
 func (_u *CommentUpdateOne) SetNillableInt(v int) *CommentUpdateOne {
-	_u.mutation.ResetNillableInt()
-	_u.mutation.SetNillableInt(v)
+	_ = _u.mutation.ResetField("nillable_int")
+	_ = _u.mutation.SetField("nillable_int", v)
 	return _u
 }
 
@@ -376,19 +376,19 @@ func (_u *CommentUpdateOne) SetNillableNillableInt(v *int) *CommentUpdateOne {
 
 // AddNillableInt adds value to the "nillable_int" field.
 func (_u *CommentUpdateOne) AddNillableInt(v int) *CommentUpdateOne {
-	_u.mutation.AddNillableInt(v)
+	_ = _u.mutation.AddField("nillable_int", v)
 	return _u
 }
 
 // ClearNillableInt clears the value of the "nillable_int" field.
 func (_u *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
-	_u.mutation.ClearNillableInt()
+	_ = _u.mutation.ClearField("nillable_int")
 	return _u
 }
 
 // SetTable sets the "table" field.
 func (_u *CommentUpdateOne) SetTable(v string) *CommentUpdateOne {
-	_u.mutation.SetTable(v)
+	_ = _u.mutation.SetField("table", v)
 	return _u
 }
 
@@ -402,13 +402,13 @@ func (_u *CommentUpdateOne) SetNillableTable(v *string) *CommentUpdateOne {
 
 // ClearTable clears the value of the "table" field.
 func (_u *CommentUpdateOne) ClearTable() *CommentUpdateOne {
-	_u.mutation.ClearTable()
+	_ = _u.mutation.ClearField("table")
 	return _u
 }
 
 // SetDir sets the "dir" field.
 func (_u *CommentUpdateOne) SetDir(v schemadir.Dir) *CommentUpdateOne {
-	_u.mutation.SetDir(v)
+	_ = _u.mutation.SetField("dir", v)
 	return _u
 }
 
@@ -422,13 +422,13 @@ func (_u *CommentUpdateOne) SetNillableDir(v *schemadir.Dir) *CommentUpdateOne {
 
 // ClearDir clears the value of the "dir" field.
 func (_u *CommentUpdateOne) ClearDir() *CommentUpdateOne {
-	_u.mutation.ClearDir()
+	_ = _u.mutation.ClearField("dir")
 	return _u
 }
 
 // SetClient sets the "client" field.
 func (_u *CommentUpdateOne) SetClient(v string) *CommentUpdateOne {
-	_u.mutation.SetClient(v)
+	_ = _u.mutation.SetField("client", v)
 	return _u
 }
 
@@ -442,7 +442,7 @@ func (_u *CommentUpdateOne) SetNillableClient(v *string) *CommentUpdateOne {
 
 // ClearClient clears the value of the "client" field.
 func (_u *CommentUpdateOne) ClearClient() *CommentUpdateOne {
-	_u.mutation.ClearClient()
+	_ = _u.mutation.ClearField("client")
 	return _u
 }
 
@@ -453,7 +453,7 @@ func (_u *CommentUpdateOne) Mutation() *CommentMutation {
 
 // Where appends a list predicates to the CommentUpdate builder.
 func (_u *CommentUpdateOne) Where(ps ...predicate.Comment) *CommentUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 

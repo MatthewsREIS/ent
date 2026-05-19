@@ -155,13 +155,13 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *CarMutation:
-		return c.Car.mutate(ctx, m)
+		return c.Car.Mutate(ctx, m)
 	case *ConversionMutation:
-		return c.Conversion.mutate(ctx, m)
+		return c.Conversion.Mutate(ctx, m)
 	case *CustomTypeMutation:
-		return c.CustomType.mutate(ctx, m)
+		return c.CustomType.Mutate(ctx, m)
 	case *UserMutation:
-		return c.User.mutate(ctx, m)
+		return c.User.Mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("entv1: unknown mutation type %T", m)
 	}

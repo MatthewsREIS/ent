@@ -167,14 +167,15 @@ func HasUser() predicate.UserGroup {
 
 // HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
 func HasUserWith(preds ...predicate.User) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		step := newUserStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.UserGroup(
+		func(s *sql.Selector) {
+			step := newUserStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasGroup applies the HasEdge predicate on the "group" edge.
@@ -190,14 +191,15 @@ func HasGroup() predicate.UserGroup {
 
 // HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
 func HasGroupWith(preds ...predicate.Group) predicate.UserGroup {
-	return predicate.UserGroup(func(s *sql.Selector) {
-		step := newGroupStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.UserGroup(
+		func(s *sql.Selector) {
+			step := newGroupStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

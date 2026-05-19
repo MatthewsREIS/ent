@@ -14,6 +14,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -33,7 +34,7 @@ func NewBlobLinkCreate(c Config, hooks []Hook, mutation *BlobLinkMutation) *Blob
 
 // SetCreatedAt sets the "created_at" field.
 func (_c *BlobLinkCreate) SetCreatedAt(v time.Time) *BlobLinkCreate {
-	_c.mutation.SetCreatedAt(v)
+	_ = _c.mutation.SetField("created_at", v)
 	return _c
 }
 
@@ -47,13 +48,13 @@ func (_c *BlobLinkCreate) SetNillableCreatedAt(v *time.Time) *BlobLinkCreate {
 
 // SetBlobID sets the "blob_id" field.
 func (_c *BlobLinkCreate) SetBlobID(v uuid.UUID) *BlobLinkCreate {
-	_c.mutation.SetBlobID(v)
+	_ = _c.mutation.SetEdgeID("blob", v)
 	return _c
 }
 
 // SetLinkID sets the "link_id" field.
 func (_c *BlobLinkCreate) SetLinkID(v uuid.UUID) *BlobLinkCreate {
-	_c.mutation.SetLinkID(v)
+	_ = _c.mutation.SetEdgeID("link", v)
 	return _c
 }
 
@@ -92,27 +93,21 @@ func (_c *BlobLinkCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *BlobLinkCreate) defaults() {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		v := DefaultCreatedAt()
-		_c.mutation.SetCreatedAt(v)
+		_ = _c.mutation.SetField("created_at", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *BlobLinkCreate) check() error {
-	if _, ok := _c.mutation.CreatedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); !ok {
 		return &ValidationError{Name: "created_at", Err: errors.New(`ent: missing required field "BlobLink.created_at"`)}
 	}
-	if _, ok := _c.mutation.BlobID(); !ok {
-		return &ValidationError{Name: "blob_id", Err: errors.New(`ent: missing required field "BlobLink.blob_id"`)}
-	}
-	if _, ok := _c.mutation.LinkID(); !ok {
-		return &ValidationError{Name: "link_id", Err: errors.New(`ent: missing required field "BlobLink.link_id"`)}
-	}
-	if len(_c.mutation.BlobIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("blob")) == 0 {
 		return &ValidationError{Name: "blob", Err: errors.New(`ent: missing required edge "BlobLink.blob"`)}
 	}
-	if len(_c.mutation.LinkIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("link")) == 0 {
 		return &ValidationError{Name: "link", Err: errors.New(`ent: missing required edge "BlobLink.link"`)}
 	}
 	return nil
@@ -138,11 +133,11 @@ func (_c *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, nil)
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := _c.mutation.BlobIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "blob"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -159,7 +154,7 @@ func (_c *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 		_node.BlobID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.LinkIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "link"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

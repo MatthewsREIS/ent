@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -47,7 +48,7 @@ func (_c *DeviceCreate) SetNillableID(v *schema.ID) *DeviceCreate {
 
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
 func (_c *DeviceCreate) SetActiveSessionID(id schema.ID) *DeviceCreate {
-	_c.mutation.SetActiveSessionID(id)
+	_ = _c.mutation.SetEdgeID("active_session", id)
 	return _c
 }
 
@@ -61,7 +62,7 @@ func (_c *DeviceCreate) SetNillableActiveSessionID(id *schema.ID) *DeviceCreate 
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
 func (_c *DeviceCreate) AddSessionIDs(ids ...schema.ID) *DeviceCreate {
-	_c.mutation.AddSessionIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("sessions", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -108,7 +109,7 @@ func (_c *DeviceCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *DeviceCreate) check() error {
-	if v, ok := _c.mutation.ID(); ok {
+	if v, ok := entbuilder.GetField[schema.ID](_c.mutation, "id"); ok {
 		if err := IDValidator(v[:]); err != nil {
 			return &ValidationError{Name: "id", Err: fmt.Errorf(`ent: validator failed for field "Device.id": %w`, err)}
 		}
@@ -134,7 +135,7 @@ func (_c *DeviceCreate) sqlSave(ctx context.Context) (*Device, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -149,7 +150,7 @@ func (_c *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if nodes := _c.mutation.ActiveSessionIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[schema.ID](_c.mutation, "active_session"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -165,7 +166,7 @@ func (_c *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[schema.ID](_c.mutation, "sessions"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -369,7 +370,7 @@ func (_c *DeviceCreateBulk) Save(ctx context.Context) ([]*Device, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

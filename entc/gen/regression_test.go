@@ -43,28 +43,23 @@ func TestGraph_Gen_GremlinDeleteAvoidsDuplicateSelfImport(t *testing.T) {
 
 	require.NoError(t, graph.Gen())
 
-	path := filepath.Join(target, "task_delete.go")
+	// In the sub-package layout, the delete builder lives in task/delete.go
+	// (inside the task package itself). A self-import of "gremlinregen/ent/task"
+	// must not appear — the entity symbols are unqualified within the sub-package.
+	path := filepath.Join(target, "task", "delete.go")
 	content, err := os.ReadFile(path)
 	require.NoError(t, err)
 
 	file, err := parser.ParseFile(token.NewFileSet(), path, content, parser.ImportsOnly)
 	require.NoError(t, err)
 
-	wantPath := "gremlinregen/ent/task"
-	var total, aliased int
+	selfPath := "gremlinregen/ent/task"
 	for _, imp := range file.Imports {
 		importPath, err := strconv.Unquote(imp.Path.Value)
 		require.NoError(t, err)
-		if importPath != wantPath {
-			continue
-		}
-		total++
-		if imp.Name != nil && imp.Name.Name == "enttask" {
-			aliased++
-		}
+		require.NotEqualf(t, selfPath, importPath,
+			"task/delete.go must not self-import %q (file content:\n%s)", selfPath, content)
 	}
-	require.Equalf(t, 1, total, "unexpected imports in %s:\n%s", path, content)
-	require.Equalf(t, 1, aliased, "unexpected imports in %s:\n%s", path, content)
 }
 
 func TestGraph_Gen_AssignGeneratedUserIntIDAcceptsInt(t *testing.T) {
@@ -84,8 +79,11 @@ func TestGraph_Gen_AssignGeneratedUserIntIDAcceptsInt(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	testFile := filepath.Join(target, "user_create_generated_id_test.go")
-	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
+	// PR 6: userCreateDescriptor lives in the user sub-package now, so
+	// the regression test moves alongside it instead of asserting from
+	// the root ent package.
+	testFile := filepath.Join(target, "user", "user_create_generated_id_test.go")
+	require.NoError(t, os.WriteFile(testFile, []byte(`package user
 
 import "testing"
 
@@ -100,11 +98,64 @@ func TestUserCreateDescriptorAssignGeneratedInt(t *testing.T) {
 }
 `), 0644))
 
-	cmd := exec.Command("go", "test", "-mod=mod", "./ent", "-run", "TestUserCreateDescriptorAssignGeneratedInt", "-count=1")
+	cmd := exec.Command("go", "test", "-mod=mod", "./ent/user", "-run", "TestUserCreateDescriptorAssignGeneratedInt", "-count=1")
 	cmd.Dir = mod
 	cmd.Env = append(os.Environ(), "GOWORK=off")
 	out, err := cmd.CombinedOutput()
 	require.NoErrorf(t, err, "go test output:\n%s", out)
+}
+
+// TestGraph_Gen_AssignGeneratedInt64IDNoDuplicateCase verifies that when a
+// schema declares an explicit user-defined int64 id field, the rendered
+// AssignGenerated type switch contains exactly one "case int64:" clause.
+//
+// Without the int64-aware guard in the template, the generic numeric
+// fallback "case int64:" collides with the primary "case {{ $.ID.Type }}:"
+// (which is also int64), producing "duplicate case int64 in type switch".
+func TestGraph_Gen_AssignGeneratedInt64IDNoDuplicateCase(t *testing.T) {
+	mod := writeTempModule(t, "int64idregen")
+	target := filepath.Join(mod, "ent")
+
+	graph, err := NewGraph(&Config{
+		Package: "int64idregen/ent",
+		Target:  target,
+		Storage: drivers[0],
+	}, &load.Schema{
+		Name: "RiverJob",
+		Fields: []*load.Field{
+			// User-defined id of type int64 — same shape as the gemini
+			// consumer's riverjob entity that surfaced the bug.
+			{Name: "id", Info: &field.TypeInfo{Type: field.TypeInt64}},
+		},
+	})
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	queryPath := filepath.Join(target, "riverjob", "query.go")
+	content, err := os.ReadFile(queryPath)
+	require.NoError(t, err)
+	src := string(content)
+
+	// Locate the AssignGenerated body and count "case int64:" occurrences
+	// only within that switch statement (not the entire file).
+	idx := strings.Index(src, "AssignGenerated: func(n *RiverJob")
+	require.GreaterOrEqualf(t, idx, 0, "AssignGenerated body not found in %s:\n%s", queryPath, src)
+	tail := src[idx:]
+	end := strings.Index(tail, "\n\t\t},")
+	require.GreaterOrEqual(t, end, 0)
+	body := tail[:end]
+
+	got := strings.Count(body, "case int64:")
+	require.Equalf(t, 1, got,
+		"expected exactly one `case int64:` clause in AssignGenerated, got %d. Body:\n%s",
+		got, body)
+
+	// Belt-and-suspenders: the generated file must actually compile.
+	cmd := exec.Command("go", "build", "-mod=mod", "./...")
+	cmd.Dir = mod
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	out, err := cmd.CombinedOutput()
+	require.NoErrorf(t, err, "go build output:\n%s", out)
 }
 
 func TestGraph_Gen_SQLModifierDeleteBuilderHasModify(t *testing.T) {
@@ -125,8 +176,10 @@ func TestGraph_Gen_SQLModifierDeleteBuilderHasModify(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	testFile := filepath.Join(target, "task_delete_modifier_test.go")
-	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
+	// In the sub-package layout, TaskDelete lives in ent/task/delete.go
+	// (package "task"), not in the root ent package. Write the test there.
+	testFile := filepath.Join(target, "task", "task_delete_modifier_test.go")
+	require.NoError(t, os.WriteFile(testFile, []byte(`package task
 
 import (
 	"testing"
@@ -140,7 +193,7 @@ func TestTaskDeleteHasModify(t *testing.T) {
 }
 `), 0644))
 
-	cmd := exec.Command("go", "test", "-mod=mod", "./ent", "-run", "TestTaskDeleteHasModify", "-count=1")
+	cmd := exec.Command("go", "test", "-mod=mod", "./ent/task", "-run", "TestTaskDeleteHasModify", "-count=1")
 	cmd.Dir = mod
 	cmd.Env = append(os.Environ(), "GOWORK=off")
 	out, err := cmd.CombinedOutput()
@@ -176,29 +229,41 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	userQuery, err := os.ReadFile(filepath.Join(target, "user_query.go"))
+	// PR 6 / Task 4: the M2M load (and the joinT.Schema hook on it) moved
+	// from user_query.go → user_facade.go (PR 6) and then into the dedicated
+	// edges package as edges/user.go (Task 4). The sub-query parameter is
+	// named `query`, so the hook emits query.Config.SchemaConfig() (Config is
+	// shared across builders in a client).
+	userEdges, err := os.ReadFile(filepath.Join(target, "edges", "user.go"))
 	require.NoError(t, err)
-	require.Contains(t, string(userQuery), "joinT.Schema(_q.schemaConfig.UserGroups)")
-	require.NotContains(t, string(userQuery), "edge.Schema = _q.schemaConfig.UserGroups")
+	require.Contains(t, string(userEdges), "joinT.Schema(query.Config.SchemaConfig().UserGroups)")
+	require.NotContains(t, string(userEdges), "edge.Schema = query.Config.SchemaConfig().UserGroups")
 
-	groupUpdate, err := os.ReadFile(filepath.Join(target, "group_update.go"))
+	groupUpdate, err := os.ReadFile(filepath.Join(target, "group", "update.go"))
 	require.NoError(t, err)
 	require.Truef(
 		t,
-		strings.Count(string(groupUpdate), "edge.Schema = cfg.schemaConfig.UserGroups") >= 3,
+		strings.Count(string(groupUpdate), "edge.Schema = _u.Config.SchemaConfig().UserGroups") >= 3,
 		"expected schema hook to be applied for clear/remove/add edge mutations, got:\n%s",
 		groupUpdate,
 	)
 	require.NotContains(t, string(groupUpdate), "edge.Schema = _u.schemaConfig.UserGroups")
 
+	// PR 6: WithGroups moved from a method on *UserQuery to the
+	// root-facade free function WithUserGroups; ClearUsers stays a
+	// method on *GroupUpdate inside the group sub-package.
 	testFile := filepath.Join(target, "schemaconfig_compile_test.go")
 	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
 
-import "testing"
+import (
+	"testing"
+
+	"schemaconfigregen/ent/group"
+)
 
 func TestGeneratedSchemaConfigDescriptorPathsCompile(t *testing.T) {
-	_ = (*UserQuery).WithGroups
-	_ = (*GroupUpdate).ClearUsers
+	_ = WithUserGroups
+	_ = (*group.GroupUpdate).ClearUsers
 }
 `), 0644))
 

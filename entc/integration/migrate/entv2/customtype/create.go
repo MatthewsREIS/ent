@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,7 +30,7 @@ func NewCustomTypeCreate(c Config, hooks []Hook, mutation *CustomTypeMutation) *
 
 // SetCustom sets the "custom" field.
 func (_c *CustomTypeCreate) SetCustom(v string) *CustomTypeCreate {
-	_c.mutation.SetCustom(v)
+	_ = _c.mutation.SetField("custom", v)
 	return _c
 }
 
@@ -43,7 +44,7 @@ func (_c *CustomTypeCreate) SetNillableCustom(v *string) *CustomTypeCreate {
 
 // SetTz0 sets the "tz0" field.
 func (_c *CustomTypeCreate) SetTz0(v time.Time) *CustomTypeCreate {
-	_c.mutation.SetTz0(v)
+	_ = _c.mutation.SetField("tz0", v)
 	return _c
 }
 
@@ -57,7 +58,7 @@ func (_c *CustomTypeCreate) SetNillableTz0(v *time.Time) *CustomTypeCreate {
 
 // SetTz3 sets the "tz3" field.
 func (_c *CustomTypeCreate) SetTz3(v time.Time) *CustomTypeCreate {
-	_c.mutation.SetTz3(v)
+	_ = _c.mutation.SetField("tz3", v)
 	return _c
 }
 
@@ -119,7 +120,7 @@ func (_c *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -129,15 +130,15 @@ func (_c *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 		_node = &CustomType{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.Custom(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "custom"); ok {
 		_spec.SetField(FieldCustom, field.TypeString, value)
 		_node.Custom = value
 	}
-	if value, ok := _c.mutation.Tz0(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "tz0"); ok {
 		_spec.SetField(FieldTz0, field.TypeTime, value)
 		_node.Tz0 = value
 	}
-	if value, ok := _c.mutation.Tz3(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "tz3"); ok {
 		_spec.SetField(FieldTz3, field.TypeTime, value)
 		_node.Tz3 = value
 	}
@@ -197,11 +198,11 @@ func (_c *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, error)
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

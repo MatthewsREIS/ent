@@ -91,7 +91,7 @@ func (_c *RevisionCreate) sqlSave(ctx context.Context) (*Revision, error) {
 			return nil, fmt.Errorf("unexpected Revision.ID type: %T", _spec.ID.Value)
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -293,7 +293,7 @@ func (_c *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

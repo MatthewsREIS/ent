@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewRentalUpdate(c Config, hooks []Hook, mutation *RentalMutation) *RentalUp
 
 // Where appends a list predicates to the RentalUpdate builder.
 func (_u *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetDate sets the "date" field.
 func (_u *RentalUpdate) SetDate(v time.Time) *RentalUpdate {
-	_u.mutation.SetDate(v)
+	_ = _u.mutation.SetField("date", v)
 	return _u
 }
 
@@ -57,7 +58,7 @@ func (_u *RentalUpdate) Mutation() *RentalMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RentalUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RentalMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -84,10 +85,10 @@ func (_u *RentalUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *RentalUpdate) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.user"`)
 	}
-	if _u.mutation.CarCleared() && len(_u.mutation.CarIDs()) > 0 {
+	if _u.mutation.EdgeCleared("car") && len(_u.mutation.EdgeIDs("car")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.car"`)
 	}
 	return nil
@@ -105,7 +106,7 @@ func (_u *RentalUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Date(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "date"); ok {
 		_spec.SetField(FieldDate, field.TypeTime, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -135,7 +136,7 @@ func NewRentalUpdateOne(c Config, hooks []Hook, mutation *RentalMutation) *Renta
 
 // SetDate sets the "date" field.
 func (_u *RentalUpdateOne) SetDate(v time.Time) *RentalUpdateOne {
-	_u.mutation.SetDate(v)
+	_ = _u.mutation.SetField("date", v)
 	return _u
 }
 
@@ -154,7 +155,7 @@ func (_u *RentalUpdateOne) Mutation() *RentalMutation {
 
 // Where appends a list predicates to the RentalUpdate builder.
 func (_u *RentalUpdateOne) Where(ps ...predicate.Rental) *RentalUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -167,7 +168,7 @@ func (_u *RentalUpdateOne) Select(field string, fields ...string) *RentalUpdateO
 
 // Save executes the query and returns the updated Rental entity.
 func (_u *RentalUpdateOne) Save(ctx context.Context) (*Rental, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Rental](ctx, &entbuilder.UpdateState[*RentalMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -194,10 +195,10 @@ func (_u *RentalUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *RentalUpdateOne) check() error {
-	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
+	if _u.mutation.EdgeCleared("user") && len(_u.mutation.EdgeIDs("user")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.user"`)
 	}
-	if _u.mutation.CarCleared() && len(_u.mutation.CarIDs()) > 0 {
+	if _u.mutation.EdgeCleared("car") && len(_u.mutation.EdgeIDs("car")) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Rental.car"`)
 	}
 	return nil
@@ -232,7 +233,7 @@ func (_u *RentalUpdateOne) sqlSave(ctx context.Context) (_node *Rental, err erro
 			}
 		}
 	}
-	if value, ok := _u.mutation.Date(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "date"); ok {
 		_spec.SetField(FieldDate, field.TypeTime, value)
 	}
 	_node = &Rental{Config: _u.Config}

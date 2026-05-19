@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewBuilderUpdate(c Config, hooks []Hook, mutation *BuilderMutation) *Builde
 
 // Where appends a list predicates to the BuilderUpdate builder.
 func (_u *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -43,7 +44,7 @@ func (_u *BuilderUpdate) Mutation() *BuilderMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BuilderUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*BuilderMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -117,7 +118,7 @@ func (_u *BuilderUpdateOne) Mutation() *BuilderMutation {
 
 // Where appends a list predicates to the BuilderUpdate builder.
 func (_u *BuilderUpdateOne) Where(ps ...predicate.Builder) *BuilderUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -130,7 +131,7 @@ func (_u *BuilderUpdateOne) Select(field string, fields ...string) *BuilderUpdat
 
 // Save executes the query and returns the updated Builder entity.
 func (_u *BuilderUpdateOne) Save(ctx context.Context) (*Builder, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Builder](ctx, &entbuilder.UpdateState[*BuilderMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweetlike"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -35,13 +36,13 @@ func NewTweetUpdate(c Config, hooks []Hook, mutation *TweetMutation) *TweetUpdat
 
 // Where appends a list predicates to the TweetUpdate builder.
 func (_u *TweetUpdate) Where(ps ...predicate.Tweet) *TweetUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *TweetUpdate) SetText(v string) *TweetUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -55,31 +56,31 @@ func (_u *TweetUpdate) SetNillableText(v *string) *TweetUpdate {
 
 // AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
 func (_u *TweetUpdate) AddLikedUserIDs(ids ...int) *TweetUpdate {
-	_u.mutation.AddLikedUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("liked_users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *TweetUpdate) AddUserIDs(ids ...int) *TweetUpdate {
-	_u.mutation.AddUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
 func (_u *TweetUpdate) AddTagIDs(ids ...int) *TweetUpdate {
-	_u.mutation.AddTagIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
 func (_u *TweetUpdate) AddTweetUserIDs(ids ...int) *TweetUpdate {
-	_u.mutation.AddTweetUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweet_user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (_u *TweetUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
-	_u.mutation.AddTweetTagIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -90,67 +91,67 @@ func (_u *TweetUpdate) Mutation() *TweetMutation {
 
 // ClearLikedUsers clears all "liked_users" edges to the User entity.
 func (_u *TweetUpdate) ClearLikedUsers() *TweetUpdate {
-	_u.mutation.ClearLikedUsers()
+	_ = _u.mutation.ClearEdge("liked_users")
 	return _u
 }
 
 // RemoveLikedUserIDs removes the "liked_users" edge to User entities by IDs.
 func (_u *TweetUpdate) RemoveLikedUserIDs(ids ...int) *TweetUpdate {
-	_u.mutation.RemoveLikedUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("liked_users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearUser clears all "user" edges to the User entity.
 func (_u *TweetUpdate) ClearUser() *TweetUpdate {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
 func (_u *TweetUpdate) RemoveUserIDs(ids ...int) *TweetUpdate {
-	_u.mutation.RemoveUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTags clears all "tags" edges to the Tag entity.
 func (_u *TweetUpdate) ClearTags() *TweetUpdate {
-	_u.mutation.ClearTags()
+	_ = _u.mutation.ClearEdge("tags")
 	return _u
 }
 
 // RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
 func (_u *TweetUpdate) RemoveTagIDs(ids ...int) *TweetUpdate {
-	_u.mutation.RemoveTagIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTweetUser clears all "tweet_user" edges to the UserTweet entity.
 func (_u *TweetUpdate) ClearTweetUser() *TweetUpdate {
-	_u.mutation.ClearTweetUser()
+	_ = _u.mutation.ClearEdge("tweet_user")
 	return _u
 }
 
 // RemoveTweetUserIDs removes the "tweet_user" edge to UserTweet entities by IDs.
 func (_u *TweetUpdate) RemoveTweetUserIDs(ids ...int) *TweetUpdate {
-	_u.mutation.RemoveTweetUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweet_user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
 func (_u *TweetUpdate) ClearTweetTags() *TweetUpdate {
-	_u.mutation.ClearTweetTags()
+	_ = _u.mutation.ClearEdge("tweet_tags")
 	return _u
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
 func (_u *TweetUpdate) RemoveTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
-	_u.mutation.RemoveTweetTagIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TweetUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -184,10 +185,10 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.LikedUsersCleared() {
+	if _u.mutation.EdgeCleared("liked_users") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -202,7 +203,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLikedUsersIDs(); len(nodes) > 0 && !_u.mutation.LikedUsersCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("liked_users"); len(nodes) > 0 && !_u.mutation.EdgeCleared("liked_users") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -220,7 +221,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LikedUsersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("liked_users"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -238,7 +239,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -253,7 +254,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -271,7 +272,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -289,7 +290,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TagsCleared() {
+	if _u.mutation.EdgeCleared("tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -307,28 +308,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTagsIDs(); len(nodes) > 0 && !_u.mutation.TagsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   TagsTable,
-			Columns: TagsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		specE := tweettag.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TagsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedEdgeIDs("tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -347,9 +327,30 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		if specE.ID.Value != nil {
 			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EdgeIDs("tags"); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   TagsTable,
+			Columns: TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		specE := tweettag.ThroughDefaults(_u.Config)
+		edge.Target.Fields = specE.Fields
+		if specE.ID.Value != nil {
+			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetUserCleared() {
+	if _u.mutation.EdgeCleared("tweet_user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -362,7 +363,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetUserIDs(); len(nodes) > 0 && !_u.mutation.TweetUserCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweet_user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweet_user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -378,7 +379,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetUserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet_user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -394,7 +395,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetTagsCleared() {
+	if _u.mutation.EdgeCleared("tweet_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -407,7 +408,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetTagsIDs(); len(nodes) > 0 && !_u.mutation.TweetTagsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweet_tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweet_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -423,7 +424,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetTagsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -466,7 +467,7 @@ func NewTweetUpdateOne(c Config, hooks []Hook, mutation *TweetMutation) *TweetUp
 
 // SetText sets the "text" field.
 func (_u *TweetUpdateOne) SetText(v string) *TweetUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -480,31 +481,31 @@ func (_u *TweetUpdateOne) SetNillableText(v *string) *TweetUpdateOne {
 
 // AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
 func (_u *TweetUpdateOne) AddLikedUserIDs(ids ...int) *TweetUpdateOne {
-	_u.mutation.AddLikedUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("liked_users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
 func (_u *TweetUpdateOne) AddUserIDs(ids ...int) *TweetUpdateOne {
-	_u.mutation.AddUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
 func (_u *TweetUpdateOne) AddTagIDs(ids ...int) *TweetUpdateOne {
-	_u.mutation.AddTagIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
 func (_u *TweetUpdateOne) AddTweetUserIDs(ids ...int) *TweetUpdateOne {
-	_u.mutation.AddTweetUserIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweet_user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
 func (_u *TweetUpdateOne) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdateOne {
-	_u.mutation.AddTweetTagIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -515,67 +516,67 @@ func (_u *TweetUpdateOne) Mutation() *TweetMutation {
 
 // ClearLikedUsers clears all "liked_users" edges to the User entity.
 func (_u *TweetUpdateOne) ClearLikedUsers() *TweetUpdateOne {
-	_u.mutation.ClearLikedUsers()
+	_ = _u.mutation.ClearEdge("liked_users")
 	return _u
 }
 
 // RemoveLikedUserIDs removes the "liked_users" edge to User entities by IDs.
 func (_u *TweetUpdateOne) RemoveLikedUserIDs(ids ...int) *TweetUpdateOne {
-	_u.mutation.RemoveLikedUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("liked_users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearUser clears all "user" edges to the User entity.
 func (_u *TweetUpdateOne) ClearUser() *TweetUpdateOne {
-	_u.mutation.ClearUser()
+	_ = _u.mutation.ClearEdge("user")
 	return _u
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
 func (_u *TweetUpdateOne) RemoveUserIDs(ids ...int) *TweetUpdateOne {
-	_u.mutation.RemoveUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTags clears all "tags" edges to the Tag entity.
 func (_u *TweetUpdateOne) ClearTags() *TweetUpdateOne {
-	_u.mutation.ClearTags()
+	_ = _u.mutation.ClearEdge("tags")
 	return _u
 }
 
 // RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
 func (_u *TweetUpdateOne) RemoveTagIDs(ids ...int) *TweetUpdateOne {
-	_u.mutation.RemoveTagIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTweetUser clears all "tweet_user" edges to the UserTweet entity.
 func (_u *TweetUpdateOne) ClearTweetUser() *TweetUpdateOne {
-	_u.mutation.ClearTweetUser()
+	_ = _u.mutation.ClearEdge("tweet_user")
 	return _u
 }
 
 // RemoveTweetUserIDs removes the "tweet_user" edge to UserTweet entities by IDs.
 func (_u *TweetUpdateOne) RemoveTweetUserIDs(ids ...int) *TweetUpdateOne {
-	_u.mutation.RemoveTweetUserIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweet_user", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
 func (_u *TweetUpdateOne) ClearTweetTags() *TweetUpdateOne {
-	_u.mutation.ClearTweetTags()
+	_ = _u.mutation.ClearEdge("tweet_tags")
 	return _u
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
 func (_u *TweetUpdateOne) RemoveTweetTagIDs(ids ...uuid.UUID) *TweetUpdateOne {
-	_u.mutation.RemoveTweetTagIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the TweetUpdate builder.
 func (_u *TweetUpdateOne) Where(ps ...predicate.Tweet) *TweetUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -588,7 +589,7 @@ func (_u *TweetUpdateOne) Select(field string, fields ...string) *TweetUpdateOne
 
 // Save executes the query and returns the updated Tweet entity.
 func (_u *TweetUpdateOne) Save(ctx context.Context) (*Tweet, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Tweet](ctx, &entbuilder.UpdateState[*TweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -639,10 +640,10 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
-	if _u.mutation.LikedUsersCleared() {
+	if _u.mutation.EdgeCleared("liked_users") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -657,7 +658,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedLikedUsersIDs(); len(nodes) > 0 && !_u.mutation.LikedUsersCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("liked_users"); len(nodes) > 0 && !_u.mutation.EdgeCleared("liked_users") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -675,7 +676,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.LikedUsersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("liked_users"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -693,7 +694,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.UserCleared() {
+	if _u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -708,7 +709,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedUserIDs(); len(nodes) > 0 && !_u.mutation.UserCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -726,7 +727,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -744,7 +745,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TagsCleared() {
+	if _u.mutation.EdgeCleared("tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -762,28 +763,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTagsIDs(); len(nodes) > 0 && !_u.mutation.TagsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   TagsTable,
-			Columns: TagsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		specE := tweettag.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.TagsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedEdgeIDs("tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -802,9 +782,30 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		if specE.ID.Value != nil {
 			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.EdgeIDs("tags"); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   TagsTable,
+			Columns: TagsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		specE := tweettag.ThroughDefaults(_u.Config)
+		edge.Target.Fields = specE.Fields
+		if specE.ID.Value != nil {
+			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetUserCleared() {
+	if _u.mutation.EdgeCleared("tweet_user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -817,7 +818,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetUserIDs(); len(nodes) > 0 && !_u.mutation.TweetUserCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweet_user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweet_user") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -833,7 +834,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetUserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet_user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -849,7 +850,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.TweetTagsCleared() {
+	if _u.mutation.EdgeCleared("tweet_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -862,7 +863,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedTweetTagsIDs(); len(nodes) > 0 && !_u.mutation.TweetTagsCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("tweet_tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tweet_tags") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -878,7 +879,7 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.TweetTagsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("tweet_tags"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,

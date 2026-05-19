@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewCardUpdate(c Config, hooks []Hook, mutation *CardMutation) *CardUpdate {
 
 // Where appends a list predicates to the CardUpdate builder.
 func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetNumber sets the "number" field.
 func (_u *CardUpdate) SetNumber(v string) *CardUpdate {
-	_u.mutation.SetNumber(v)
+	_ = _u.mutation.SetField("number", v)
 	return _u
 }
 
@@ -51,13 +52,13 @@ func (_u *CardUpdate) SetNillableNumber(v *string) *CardUpdate {
 
 // ClearNumber clears the value of the "number" field.
 func (_u *CardUpdate) ClearNumber() *CardUpdate {
-	_u.mutation.ClearNumber()
+	_ = _u.mutation.ClearField("number")
 	return _u
 }
 
 // SetOwnerID sets the "owner_id" field.
 func (_u *CardUpdate) SetOwnerID(v int) *CardUpdate {
-	_u.mutation.SetOwnerID(v)
+	_ = _u.mutation.SetEdgeID("owner", v)
 	return _u
 }
 
@@ -71,7 +72,7 @@ func (_u *CardUpdate) SetNillableOwnerID(v *int) *CardUpdate {
 
 // ClearOwnerID clears the value of the "owner_id" field.
 func (_u *CardUpdate) ClearOwnerID() *CardUpdate {
-	_u.mutation.ClearOwnerID()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -82,13 +83,13 @@ func (_u *CardUpdate) Mutation() *CardMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdate) ClearOwner() *CardUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CardMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -122,13 +123,13 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Number(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "number"); ok {
 		_spec.SetField(FieldNumber, field.TypeString, value)
 	}
-	if _u.mutation.NumberCleared() {
+	if _u.mutation.FieldCleared("number") {
 		_spec.ClearField(FieldNumber, field.TypeString)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -141,7 +142,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -184,7 +185,7 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 
 // SetNumber sets the "number" field.
 func (_u *CardUpdateOne) SetNumber(v string) *CardUpdateOne {
-	_u.mutation.SetNumber(v)
+	_ = _u.mutation.SetField("number", v)
 	return _u
 }
 
@@ -198,13 +199,13 @@ func (_u *CardUpdateOne) SetNillableNumber(v *string) *CardUpdateOne {
 
 // ClearNumber clears the value of the "number" field.
 func (_u *CardUpdateOne) ClearNumber() *CardUpdateOne {
-	_u.mutation.ClearNumber()
+	_ = _u.mutation.ClearField("number")
 	return _u
 }
 
 // SetOwnerID sets the "owner_id" field.
 func (_u *CardUpdateOne) SetOwnerID(v int) *CardUpdateOne {
-	_u.mutation.SetOwnerID(v)
+	_ = _u.mutation.SetEdgeID("owner", v)
 	return _u
 }
 
@@ -218,7 +219,7 @@ func (_u *CardUpdateOne) SetNillableOwnerID(v *int) *CardUpdateOne {
 
 // ClearOwnerID clears the value of the "owner_id" field.
 func (_u *CardUpdateOne) ClearOwnerID() *CardUpdateOne {
-	_u.mutation.ClearOwnerID()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -229,13 +230,13 @@ func (_u *CardUpdateOne) Mutation() *CardMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdateOne) ClearOwner() *CardUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Where appends a list predicates to the CardUpdate builder.
 func (_u *CardUpdateOne) Where(ps ...predicate.Card) *CardUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -248,7 +249,7 @@ func (_u *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
 
 // Save executes the query and returns the updated Card entity.
 func (_u *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Card](ctx, &entbuilder.UpdateState[*CardMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -299,13 +300,13 @@ func (_u *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Number(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "number"); ok {
 		_spec.SetField(FieldNumber, field.TypeString, value)
 	}
-	if _u.mutation.NumberCleared() {
+	if _u.mutation.FieldCleared("number") {
 		_spec.ClearField(FieldNumber, field.TypeString)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -318,7 +319,7 @@ func (_u *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,

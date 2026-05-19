@@ -111,7 +111,7 @@ func (c *Client) noder(ctx context.Context, tbl string, id {{ $.IDType }}) (Node
 			{{- with $n.Edges }}
 				var ids []{{ $.IDType }}
 				{{- range $i, $e := $n.Edges }}
-					ids, err = c.{{ $n.Name }}.{{ print "Query" (pascal $e.Name) }}(n).
+					ids, err = {{ print "Query" $n.Name (pascal $e.Name) }}(c.{{ $n.Name }}, n).
 						Select({{ $e.Type.Package }}.FieldID).
 						{{ pascal $.IDType.String }}s(ctx)
 					if err != nil {

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/hooks/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewCardUpdate(c Config, hooks []Hook, mutation *CardMutation) *CardUpdate {
 
 // Where appends a list predicates to the CardUpdate builder.
 func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *CardUpdate) SetName(v string) *CardUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -52,13 +53,13 @@ func (_u *CardUpdate) SetNillableName(v *string) *CardUpdate {
 
 // ClearName clears the value of the "name" field.
 func (_u *CardUpdate) ClearName() *CardUpdate {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *CardUpdate) SetCreatedAt(v time.Time) *CardUpdate {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -72,7 +73,7 @@ func (_u *CardUpdate) SetNillableCreatedAt(v *time.Time) *CardUpdate {
 
 // SetInHook sets the "in_hook" field.
 func (_u *CardUpdate) SetInHook(v string) *CardUpdate {
-	_u.mutation.SetInHook(v)
+	_ = _u.mutation.SetField("in_hook", v)
 	return _u
 }
 
@@ -86,7 +87,7 @@ func (_u *CardUpdate) SetNillableInHook(v *string) *CardUpdate {
 
 // SetExpiredAt sets the "expired_at" field.
 func (_u *CardUpdate) SetExpiredAt(v time.Time) *CardUpdate {
-	_u.mutation.SetExpiredAt(v)
+	_ = _u.mutation.SetField("expired_at", v)
 	return _u
 }
 
@@ -100,13 +101,13 @@ func (_u *CardUpdate) SetNillableExpiredAt(v *time.Time) *CardUpdate {
 
 // ClearExpiredAt clears the value of the "expired_at" field.
 func (_u *CardUpdate) ClearExpiredAt() *CardUpdate {
-	_u.mutation.ClearExpiredAt()
+	_ = _u.mutation.ClearField("expired_at")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardUpdate) SetOwnerID(id int) *CardUpdate {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -125,13 +126,13 @@ func (_u *CardUpdate) Mutation() *CardMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdate) ClearOwner() *CardUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CardMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -165,25 +166,25 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.InHook(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "in_hook"); ok {
 		_spec.SetField(FieldInHook, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.ExpiredAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "expired_at"); ok {
 		_spec.SetField(FieldExpiredAt, field.TypeTime, value)
 	}
-	if _u.mutation.ExpiredAtCleared() {
+	if _u.mutation.FieldCleared("expired_at") {
 		_spec.ClearField(FieldExpiredAt, field.TypeTime)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -196,7 +197,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -239,7 +240,7 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 
 // SetName sets the "name" field.
 func (_u *CardUpdateOne) SetName(v string) *CardUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -253,13 +254,13 @@ func (_u *CardUpdateOne) SetNillableName(v *string) *CardUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *CardUpdateOne) ClearName() *CardUpdateOne {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
 func (_u *CardUpdateOne) SetCreatedAt(v time.Time) *CardUpdateOne {
-	_u.mutation.SetCreatedAt(v)
+	_ = _u.mutation.SetField("created_at", v)
 	return _u
 }
 
@@ -273,7 +274,7 @@ func (_u *CardUpdateOne) SetNillableCreatedAt(v *time.Time) *CardUpdateOne {
 
 // SetInHook sets the "in_hook" field.
 func (_u *CardUpdateOne) SetInHook(v string) *CardUpdateOne {
-	_u.mutation.SetInHook(v)
+	_ = _u.mutation.SetField("in_hook", v)
 	return _u
 }
 
@@ -287,7 +288,7 @@ func (_u *CardUpdateOne) SetNillableInHook(v *string) *CardUpdateOne {
 
 // SetExpiredAt sets the "expired_at" field.
 func (_u *CardUpdateOne) SetExpiredAt(v time.Time) *CardUpdateOne {
-	_u.mutation.SetExpiredAt(v)
+	_ = _u.mutation.SetField("expired_at", v)
 	return _u
 }
 
@@ -301,13 +302,13 @@ func (_u *CardUpdateOne) SetNillableExpiredAt(v *time.Time) *CardUpdateOne {
 
 // ClearExpiredAt clears the value of the "expired_at" field.
 func (_u *CardUpdateOne) ClearExpiredAt() *CardUpdateOne {
-	_u.mutation.ClearExpiredAt()
+	_ = _u.mutation.ClearField("expired_at")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardUpdateOne) SetOwnerID(id int) *CardUpdateOne {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -326,13 +327,13 @@ func (_u *CardUpdateOne) Mutation() *CardMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdateOne) ClearOwner() *CardUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // Where appends a list predicates to the CardUpdate builder.
 func (_u *CardUpdateOne) Where(ps ...predicate.Card) *CardUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -345,7 +346,7 @@ func (_u *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
 
 // Save executes the query and returns the updated Card entity.
 func (_u *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Card](ctx, &entbuilder.UpdateState[*CardMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -396,25 +397,25 @@ func (_u *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.NameCleared() {
+	if _u.mutation.FieldCleared("name") {
 		_spec.ClearField(FieldName, field.TypeString)
 	}
-	if value, ok := _u.mutation.CreatedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
 		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := _u.mutation.InHook(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "in_hook"); ok {
 		_spec.SetField(FieldInHook, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.ExpiredAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "expired_at"); ok {
 		_spec.SetField(FieldExpiredAt, field.TypeTime, value)
 	}
-	if _u.mutation.ExpiredAtCleared() {
+	if _u.mutation.FieldCleared("expired_at") {
 		_spec.ClearField(FieldExpiredAt, field.TypeTime)
 	}
-	if _u.mutation.OwnerCleared() {
+	if _u.mutation.EdgeCleared("owner") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -427,7 +428,7 @@ func (_u *CardUpdateOne) sqlSave(ctx context.Context) (_node *Card, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,

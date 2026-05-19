@@ -151,14 +151,15 @@ func HasParent() predicate.Note {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.Note) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		step := newParentStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Note(
+		func(s *sql.Selector) {
+			step := newParentStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasChildren applies the HasEdge predicate on the "children" edge.
@@ -174,14 +175,15 @@ func HasChildren() predicate.Note {
 
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.Note) predicate.Note {
-	return predicate.Note(func(s *sql.Selector) {
-		step := newChildrenStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Note(
+		func(s *sql.Selector) {
+			step := newChildrenStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

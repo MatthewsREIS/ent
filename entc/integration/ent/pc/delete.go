@@ -12,14 +12,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // PCDelete is the builder for deleting a PC entity.
 type PCDelete struct {
 	Config
-	hooks    []Hook
-	mutation *PCMutation
+	hooks     []Hook
+	mutation  *PCMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewPCDelete returns a new PCDelete initialized with the given config, hooks, and mutation.
@@ -29,13 +31,13 @@ func NewPCDelete(c Config, hooks []Hook, mutation *PCMutation) *PCDelete {
 
 // Where appends a list predicates to the PCDelete builder.
 func (_d *PCDelete) Where(ps ...predicate.PC) *PCDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *PCDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*PCMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -47,8 +49,15 @@ func (_d *PCDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *PCDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *PCDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *PCDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -76,7 +85,7 @@ func NewPCDeleteOne(d *PCDelete) *PCDeleteOne {
 
 // Where appends a list predicates to the PCDelete builder.
 func (_d *PCDeleteOne) Where(ps ...predicate.PC) *PCDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

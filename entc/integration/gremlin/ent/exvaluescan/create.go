@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ExValueScanCreate is the builder for creating a ExValueScan entity.
@@ -31,49 +32,49 @@ func NewExValueScanCreate(c Config, hooks []Hook, mutation *ExValueScanMutation)
 
 // SetBinary sets the "binary" field.
 func (_c *ExValueScanCreate) SetBinary(v *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinary(v)
+	_ = _c.mutation.SetField("binary", v)
 	return _c
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
 func (_c *ExValueScanCreate) SetBinaryBytes(v *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinaryBytes(v)
+	_ = _c.mutation.SetField("binary_bytes", v)
 	return _c
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
 func (_c *ExValueScanCreate) SetBinaryOptional(v *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinaryOptional(v)
+	_ = _c.mutation.SetField("binary_optional", v)
 	return _c
 }
 
 // SetText sets the "text" field.
 func (_c *ExValueScanCreate) SetText(v *big.Int) *ExValueScanCreate {
-	_c.mutation.SetText(v)
+	_ = _c.mutation.SetField("text", v)
 	return _c
 }
 
 // SetTextOptional sets the "text_optional" field.
 func (_c *ExValueScanCreate) SetTextOptional(v *big.Int) *ExValueScanCreate {
-	_c.mutation.SetTextOptional(v)
+	_ = _c.mutation.SetField("text_optional", v)
 	return _c
 }
 
 // SetBase64 sets the "base64" field.
 func (_c *ExValueScanCreate) SetBase64(v string) *ExValueScanCreate {
-	_c.mutation.SetBase64(v)
+	_ = _c.mutation.SetField("base64", v)
 	return _c
 }
 
 // SetCustom sets the "custom" field.
 func (_c *ExValueScanCreate) SetCustom(v string) *ExValueScanCreate {
-	_c.mutation.SetCustom(v)
+	_ = _c.mutation.SetField("custom", v)
 	return _c
 }
 
 // SetCustomOptional sets the "custom_optional" field.
 func (_c *ExValueScanCreate) SetCustomOptional(v string) *ExValueScanCreate {
-	_c.mutation.SetCustomOptional(v)
+	_ = _c.mutation.SetField("custom_optional", v)
 	return _c
 }
 
@@ -119,19 +120,19 @@ func (_c *ExValueScanCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *ExValueScanCreate) check() error {
-	if _, ok := _c.mutation.Binary(); !ok {
+	if _, ok := entbuilder.GetField[*url.URL](_c.mutation, "binary"); !ok {
 		return &ValidationError{Name: "binary", Err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
 	}
-	if _, ok := _c.mutation.BinaryBytes(); !ok {
+	if _, ok := entbuilder.GetField[*url.URL](_c.mutation, "binary_bytes"); !ok {
 		return &ValidationError{Name: "binary_bytes", Err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
 	}
-	if _, ok := _c.mutation.Text(); !ok {
+	if _, ok := entbuilder.GetField[*big.Int](_c.mutation, "text"); !ok {
 		return &ValidationError{Name: "text", Err: errors.New(`ent: missing required field "ExValueScan.text"`)}
 	}
-	if _, ok := _c.mutation.Base64(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "base64"); !ok {
 		return &ValidationError{Name: "base64", Err: errors.New(`ent: missing required field "ExValueScan.base64"`)}
 	}
-	if _, ok := _c.mutation.Custom(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "custom"); !ok {
 		return &ValidationError{Name: "custom", Err: errors.New(`ent: missing required field "ExValueScan.custom"`)}
 	}
 	return nil

@@ -226,39 +226,39 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *AccountMutation:
-		return c.Account.mutate(ctx, m)
+		return c.Account.Mutate(ctx, m)
 	case *BlobMutation:
-		return c.Blob.mutate(ctx, m)
+		return c.Blob.Mutate(ctx, m)
 	case *BlobLinkMutation:
-		return c.BlobLink.mutate(ctx, m)
+		return c.BlobLink.Mutate(ctx, m)
 	case *CarMutation:
-		return c.Car.mutate(ctx, m)
+		return c.Car.Mutate(ctx, m)
 	case *DeviceMutation:
-		return c.Device.mutate(ctx, m)
+		return c.Device.Mutate(ctx, m)
 	case *DocMutation:
-		return c.Doc.mutate(ctx, m)
+		return c.Doc.Mutate(ctx, m)
 	case *GroupMutation:
-		return c.Group.mutate(ctx, m)
+		return c.Group.Mutate(ctx, m)
 	case *IntSIDMutation:
-		return c.IntSID.mutate(ctx, m)
+		return c.IntSID.Mutate(ctx, m)
 	case *LinkMutation:
-		return c.Link.mutate(ctx, m)
+		return c.Link.Mutate(ctx, m)
 	case *MixinIDMutation:
-		return c.MixinID.mutate(ctx, m)
+		return c.MixinID.Mutate(ctx, m)
 	case *NoteMutation:
-		return c.Note.mutate(ctx, m)
+		return c.Note.Mutate(ctx, m)
 	case *OtherMutation:
-		return c.Other.mutate(ctx, m)
+		return c.Other.Mutate(ctx, m)
 	case *PetMutation:
-		return c.Pet.mutate(ctx, m)
+		return c.Pet.Mutate(ctx, m)
 	case *RevisionMutation:
-		return c.Revision.mutate(ctx, m)
+		return c.Revision.Mutate(ctx, m)
 	case *SessionMutation:
-		return c.Session.mutate(ctx, m)
+		return c.Session.Mutate(ctx, m)
 	case *TokenMutation:
-		return c.Token.mutate(ctx, m)
+		return c.Token.Mutate(ctx, m)
 	case *UserMutation:
-		return c.User.mutate(ctx, m)
+		return c.User.Mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}

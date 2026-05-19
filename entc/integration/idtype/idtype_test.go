@@ -27,5 +27,5 @@ func TestIDType(t *testing.T) {
 	require.Equal(t, "a8m", a8m.Name)
 	neta := client.User.Create().SetName("neta").SetSpouseID(a8m.ID).SaveX(ctx)
 	require.Equal(t, "neta", neta.Name)
-	require.Equal(t, []string{a8m.Name}, client.User.QuerySpouse(neta).Select(user.FieldName).StringsX(ctx))
+	require.Equal(t, []string{a8m.Name}, ent.QueryUserSpouse(client.User, neta).Select(user.FieldName).StringsX(ctx))
 }

@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,7 +32,7 @@ func NewRelationshipCreate(c Config, hooks []Hook, mutation *RelationshipMutatio
 
 // SetWeight sets the "weight" field.
 func (_c *RelationshipCreate) SetWeight(v int) *RelationshipCreate {
-	_c.mutation.SetWeight(v)
+	_ = _c.mutation.SetField("weight", v)
 	return _c
 }
 
@@ -45,19 +46,19 @@ func (_c *RelationshipCreate) SetNillableWeight(v *int) *RelationshipCreate {
 
 // SetUserID sets the "user_id" field.
 func (_c *RelationshipCreate) SetUserID(v int) *RelationshipCreate {
-	_c.mutation.SetUserID(v)
+	_ = _c.mutation.SetEdgeID("user", v)
 	return _c
 }
 
 // SetRelativeID sets the "relative_id" field.
 func (_c *RelationshipCreate) SetRelativeID(v int) *RelationshipCreate {
-	_c.mutation.SetRelativeID(v)
+	_ = _c.mutation.SetEdgeID("relative", v)
 	return _c
 }
 
 // SetInfoID sets the "info_id" field.
 func (_c *RelationshipCreate) SetInfoID(v int) *RelationshipCreate {
-	_c.mutation.SetInfoID(v)
+	_ = _c.mutation.SetEdgeID("info", v)
 	return _c
 }
 
@@ -106,28 +107,22 @@ func (_c *RelationshipCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *RelationshipCreate) defaults() error {
-	if _, ok := _c.mutation.Weight(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "weight"); !ok {
 		v := DefaultWeight
-		_c.mutation.SetWeight(v)
+		_ = _c.mutation.SetField("weight", v)
 	}
 	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *RelationshipCreate) check() error {
-	if _, ok := _c.mutation.Weight(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "weight"); !ok {
 		return &ValidationError{Name: "weight", Err: errors.New(`ent: missing required field "Relationship.weight"`)}
 	}
-	if _, ok := _c.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", Err: errors.New(`ent: missing required field "Relationship.user_id"`)}
-	}
-	if _, ok := _c.mutation.RelativeID(); !ok {
-		return &ValidationError{Name: "relative_id", Err: errors.New(`ent: missing required field "Relationship.relative_id"`)}
-	}
-	if len(_c.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("user")) == 0 {
 		return &ValidationError{Name: "user", Err: errors.New(`ent: missing required edge "Relationship.user"`)}
 	}
-	if len(_c.mutation.RelativeIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("relative")) == 0 {
 		return &ValidationError{Name: "relative", Err: errors.New(`ent: missing required edge "Relationship.relative"`)}
 	}
 	return nil
@@ -153,11 +148,11 @@ func (_c *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 		_spec = sqlgraph.NewCreateSpec(Table, nil)
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Weight(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "weight"); ok {
 		_spec.SetField(FieldWeight, field.TypeInt, value)
 		_node.Weight = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -174,7 +169,7 @@ func (_c *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.RelativeIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "relative"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -191,7 +186,7 @@ func (_c *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 		_node.RelativeID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.InfoIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "info"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,

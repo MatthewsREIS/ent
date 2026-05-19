@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewRelationshipInfoUpdate(c Config, hooks []Hook, mutation *RelationshipInf
 
 // Where appends a list predicates to the RelationshipInfoUpdate builder.
 func (_u *RelationshipInfoUpdate) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetText sets the "text" field.
 func (_u *RelationshipInfoUpdate) SetText(v string) *RelationshipInfoUpdate {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -56,7 +57,7 @@ func (_u *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RelationshipInfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -90,7 +91,7 @@ func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (_node int, err e
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -120,7 +121,7 @@ func NewRelationshipInfoUpdateOne(c Config, hooks []Hook, mutation *Relationship
 
 // SetText sets the "text" field.
 func (_u *RelationshipInfoUpdateOne) SetText(v string) *RelationshipInfoUpdateOne {
-	_u.mutation.SetText(v)
+	_ = _u.mutation.SetField("text", v)
 	return _u
 }
 
@@ -139,7 +140,7 @@ func (_u *RelationshipInfoUpdateOne) Mutation() *RelationshipInfoMutation {
 
 // Where appends a list predicates to the RelationshipInfoUpdate builder.
 func (_u *RelationshipInfoUpdateOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -152,7 +153,7 @@ func (_u *RelationshipInfoUpdateOne) Select(field string, fields ...string) *Rel
 
 // Save executes the query and returns the updated RelationshipInfo entity.
 func (_u *RelationshipInfoUpdateOne) Save(ctx context.Context) (*RelationshipInfo, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[RelationshipInfo](ctx, &entbuilder.UpdateState[*RelationshipInfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -203,7 +204,7 @@ func (_u *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *Relati
 			}
 		}
 	}
-	if value, ok := _u.mutation.Text(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
 		_spec.SetField(FieldText, field.TypeString, value)
 	}
 	_node = &RelationshipInfo{Config: _u.Config}

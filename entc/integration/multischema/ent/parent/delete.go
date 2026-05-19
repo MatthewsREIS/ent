@@ -13,14 +13,16 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // ParentDelete is the builder for deleting a Parent entity.
 type ParentDelete struct {
 	Config
-	hooks    []Hook
-	mutation *ParentMutation
+	hooks     []Hook
+	mutation  *ParentMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewParentDelete returns a new ParentDelete initialized with the given config, hooks, and mutation.
@@ -30,13 +32,13 @@ func NewParentDelete(c Config, hooks []Hook, mutation *ParentMutation) *ParentDe
 
 // Where appends a list predicates to the ParentDelete builder.
 func (_d *ParentDelete) Where(ps ...predicate.Parent) *ParentDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *ParentDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*ParentMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -48,11 +50,18 @@ func (_d *ParentDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *ParentDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ParentDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *ParentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	schemaConfig := _d.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Parent
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -80,7 +89,7 @@ func NewParentDeleteOne(d *ParentDelete) *ParentDeleteOne {
 
 // Where appends a list predicates to the ParentDelete builder.
 func (_d *ParentDeleteOne) Where(ps ...predicate.Parent) *ParentDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 

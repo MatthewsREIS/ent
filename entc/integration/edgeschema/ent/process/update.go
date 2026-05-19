@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,19 +33,19 @@ func NewProcessUpdate(c Config, hooks []Hook, mutation *ProcessMutation) *Proces
 
 // Where appends a list predicates to the ProcessUpdate builder.
 func (_u *ProcessUpdate) Where(ps ...predicate.Process) *ProcessUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_u *ProcessUpdate) AddFileIDs(ids ...int) *ProcessUpdate {
-	_u.mutation.AddFileIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddAttachedFileIDs adds the "attached_files" edge to the AttachedFile entity by IDs.
 func (_u *ProcessUpdate) AddAttachedFileIDs(ids ...int) *ProcessUpdate {
-	_u.mutation.AddAttachedFileIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -55,31 +56,31 @@ func (_u *ProcessUpdate) Mutation() *ProcessMutation {
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *ProcessUpdate) ClearFiles() *ProcessUpdate {
-	_u.mutation.ClearFiles()
+	_ = _u.mutation.ClearEdge("files")
 	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *ProcessUpdate) RemoveFileIDs(ids ...int) *ProcessUpdate {
-	_u.mutation.RemoveFileIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearAttachedFiles clears all "attached_files" edges to the AttachedFile entity.
 func (_u *ProcessUpdate) ClearAttachedFiles() *ProcessUpdate {
-	_u.mutation.ClearAttachedFiles()
+	_ = _u.mutation.ClearEdge("attached_files")
 	return _u
 }
 
 // RemoveAttachedFileIDs removes the "attached_files" edge to AttachedFile entities by IDs.
 func (_u *ProcessUpdate) RemoveAttachedFileIDs(ids ...int) *ProcessUpdate {
-	_u.mutation.RemoveAttachedFileIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ProcessUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ProcessMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -113,7 +114,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.FilesCleared() {
+	if _u.mutation.EdgeCleared("files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -128,7 +129,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !_u.mutation.FilesCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -146,7 +147,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -164,7 +165,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.AttachedFilesCleared() {
+	if _u.mutation.EdgeCleared("attached_files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -177,7 +178,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedAttachedFilesIDs(); len(nodes) > 0 && !_u.mutation.AttachedFilesCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("attached_files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("attached_files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -193,7 +194,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AttachedFilesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("attached_files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -236,13 +237,13 @@ func NewProcessUpdateOne(c Config, hooks []Hook, mutation *ProcessMutation) *Pro
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
 func (_u *ProcessUpdateOne) AddFileIDs(ids ...int) *ProcessUpdateOne {
-	_u.mutation.AddFileIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddAttachedFileIDs adds the "attached_files" edge to the AttachedFile entity by IDs.
 func (_u *ProcessUpdateOne) AddAttachedFileIDs(ids ...int) *ProcessUpdateOne {
-	_u.mutation.AddAttachedFileIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -253,31 +254,31 @@ func (_u *ProcessUpdateOne) Mutation() *ProcessMutation {
 
 // ClearFiles clears all "files" edges to the File entity.
 func (_u *ProcessUpdateOne) ClearFiles() *ProcessUpdateOne {
-	_u.mutation.ClearFiles()
+	_ = _u.mutation.ClearEdge("files")
 	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
 func (_u *ProcessUpdateOne) RemoveFileIDs(ids ...int) *ProcessUpdateOne {
-	_u.mutation.RemoveFileIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearAttachedFiles clears all "attached_files" edges to the AttachedFile entity.
 func (_u *ProcessUpdateOne) ClearAttachedFiles() *ProcessUpdateOne {
-	_u.mutation.ClearAttachedFiles()
+	_ = _u.mutation.ClearEdge("attached_files")
 	return _u
 }
 
 // RemoveAttachedFileIDs removes the "attached_files" edge to AttachedFile entities by IDs.
 func (_u *ProcessUpdateOne) RemoveAttachedFileIDs(ids ...int) *ProcessUpdateOne {
-	_u.mutation.RemoveAttachedFileIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the ProcessUpdate builder.
 func (_u *ProcessUpdateOne) Where(ps ...predicate.Process) *ProcessUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -290,7 +291,7 @@ func (_u *ProcessUpdateOne) Select(field string, fields ...string) *ProcessUpdat
 
 // Save executes the query and returns the updated Process entity.
 func (_u *ProcessUpdateOne) Save(ctx context.Context) (*Process, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Process](ctx, &entbuilder.UpdateState[*ProcessMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -341,7 +342,7 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 			}
 		}
 	}
-	if _u.mutation.FilesCleared() {
+	if _u.mutation.EdgeCleared("files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -356,7 +357,7 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !_u.mutation.FilesCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -374,7 +375,7 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -392,7 +393,7 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.AttachedFilesCleared() {
+	if _u.mutation.EdgeCleared("attached_files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -405,7 +406,7 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedAttachedFilesIDs(); len(nodes) > 0 && !_u.mutation.AttachedFilesCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("attached_files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("attached_files") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -421,7 +422,7 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.AttachedFilesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("attached_files"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,

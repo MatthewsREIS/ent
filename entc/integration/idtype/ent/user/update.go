@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/idtype/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewUserUpdate(c Config, hooks []Hook, mutation *UserMutation) *UserUpdate {
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -51,7 +52,7 @@ func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (_u *UserUpdate) SetSpouseID(id uint64) *UserUpdate {
-	_u.mutation.SetSpouseID(id)
+	_ = _u.mutation.SetEdgeID("spouse", id)
 	return _u
 }
 
@@ -65,13 +66,13 @@ func (_u *UserUpdate) SetNillableSpouseID(id *uint64) *UserUpdate {
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
 func (_u *UserUpdate) AddFollowerIDs(ids ...uint64) *UserUpdate {
-	_u.mutation.AddFollowerIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("followers", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddFollowingIDs adds the "following" edge to the User entity by IDs.
 func (_u *UserUpdate) AddFollowingIDs(ids ...uint64) *UserUpdate {
-	_u.mutation.AddFollowingIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("following", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -82,37 +83,37 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 
 // ClearSpouse clears the "spouse" edge to the User entity.
 func (_u *UserUpdate) ClearSpouse() *UserUpdate {
-	_u.mutation.ClearSpouse()
+	_ = _u.mutation.ClearEdge("spouse")
 	return _u
 }
 
 // ClearFollowers clears all "followers" edges to the User entity.
 func (_u *UserUpdate) ClearFollowers() *UserUpdate {
-	_u.mutation.ClearFollowers()
+	_ = _u.mutation.ClearEdge("followers")
 	return _u
 }
 
 // RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveFollowerIDs(ids ...uint64) *UserUpdate {
-	_u.mutation.RemoveFollowerIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("followers", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearFollowing clears all "following" edges to the User entity.
 func (_u *UserUpdate) ClearFollowing() *UserUpdate {
-	_u.mutation.ClearFollowing()
+	_ = _u.mutation.ClearEdge("following")
 	return _u
 }
 
 // RemoveFollowingIDs removes the "following" edge to User entities by IDs.
 func (_u *UserUpdate) RemoveFollowingIDs(ids ...uint64) *UserUpdate {
-	_u.mutation.RemoveFollowingIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("following", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -146,10 +147,10 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.SpouseCleared() {
+	if _u.mutation.EdgeCleared("spouse") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -162,7 +163,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SpouseIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("spouse"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -178,7 +179,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FollowersCleared() {
+	if _u.mutation.EdgeCleared("followers") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -191,7 +192,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !_u.mutation.FollowersCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("followers"); len(nodes) > 0 && !_u.mutation.EdgeCleared("followers") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -207,7 +208,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FollowersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("followers"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -223,7 +224,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FollowingCleared() {
+	if _u.mutation.EdgeCleared("following") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -236,7 +237,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !_u.mutation.FollowingCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("following"); len(nodes) > 0 && !_u.mutation.EdgeCleared("following") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -252,7 +253,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FollowingIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("following"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -295,7 +296,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 
 // SetName sets the "name" field.
 func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -309,7 +310,7 @@ func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
 func (_u *UserUpdateOne) SetSpouseID(id uint64) *UserUpdateOne {
-	_u.mutation.SetSpouseID(id)
+	_ = _u.mutation.SetEdgeID("spouse", id)
 	return _u
 }
 
@@ -323,13 +324,13 @@ func (_u *UserUpdateOne) SetNillableSpouseID(id *uint64) *UserUpdateOne {
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
 func (_u *UserUpdateOne) AddFollowerIDs(ids ...uint64) *UserUpdateOne {
-	_u.mutation.AddFollowerIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("followers", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // AddFollowingIDs adds the "following" edge to the User entity by IDs.
 func (_u *UserUpdateOne) AddFollowingIDs(ids ...uint64) *UserUpdateOne {
-	_u.mutation.AddFollowingIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("following", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -340,37 +341,37 @@ func (_u *UserUpdateOne) Mutation() *UserMutation {
 
 // ClearSpouse clears the "spouse" edge to the User entity.
 func (_u *UserUpdateOne) ClearSpouse() *UserUpdateOne {
-	_u.mutation.ClearSpouse()
+	_ = _u.mutation.ClearEdge("spouse")
 	return _u
 }
 
 // ClearFollowers clears all "followers" edges to the User entity.
 func (_u *UserUpdateOne) ClearFollowers() *UserUpdateOne {
-	_u.mutation.ClearFollowers()
+	_ = _u.mutation.ClearEdge("followers")
 	return _u
 }
 
 // RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveFollowerIDs(ids ...uint64) *UserUpdateOne {
-	_u.mutation.RemoveFollowerIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("followers", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // ClearFollowing clears all "following" edges to the User entity.
 func (_u *UserUpdateOne) ClearFollowing() *UserUpdateOne {
-	_u.mutation.ClearFollowing()
+	_ = _u.mutation.ClearEdge("following")
 	return _u
 }
 
 // RemoveFollowingIDs removes the "following" edge to User entities by IDs.
 func (_u *UserUpdateOne) RemoveFollowingIDs(ids ...uint64) *UserUpdateOne {
-	_u.mutation.RemoveFollowingIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("following", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the UserUpdate builder.
 func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -383,7 +384,7 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -434,10 +435,10 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 	}
-	if _u.mutation.SpouseCleared() {
+	if _u.mutation.EdgeCleared("spouse") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -450,7 +451,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.SpouseIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("spouse"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -466,7 +467,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FollowersCleared() {
+	if _u.mutation.EdgeCleared("followers") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -479,7 +480,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !_u.mutation.FollowersCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("followers"); len(nodes) > 0 && !_u.mutation.EdgeCleared("followers") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -495,7 +496,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FollowersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("followers"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -511,7 +512,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if _u.mutation.FollowingCleared() {
+	if _u.mutation.EdgeCleared("following") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -524,7 +525,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !_u.mutation.FollowingCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("following"); len(nodes) > 0 && !_u.mutation.EdgeCleared("following") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -540,7 +541,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.FollowingIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("following"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

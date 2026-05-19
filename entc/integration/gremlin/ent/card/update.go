@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // CardUpdate is the builder for updating Card entities.
@@ -36,20 +37,20 @@ func NewCardUpdate(c Config, hooks []Hook, mutation *CardMutation) *CardUpdate {
 
 // Where appends a list predicates to the CardUpdate builder.
 func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetUpdateTime sets the "update_time" field.
 func (_u *CardUpdate) SetUpdateTime(v time.Time) *CardUpdate {
-	_u.mutation.SetUpdateTime(v)
+	_ = _u.mutation.SetField("update_time", v)
 	return _u
 }
 
 // SetBalance sets the "balance" field.
 func (_u *CardUpdate) SetBalance(v float64) *CardUpdate {
-	_u.mutation.ResetBalance()
-	_u.mutation.SetBalance(v)
+	_ = _u.mutation.ResetField("balance")
+	_ = _u.mutation.SetField("balance", v)
 	return _u
 }
 
@@ -63,13 +64,13 @@ func (_u *CardUpdate) SetNillableBalance(v *float64) *CardUpdate {
 
 // AddBalance adds value to the "balance" field.
 func (_u *CardUpdate) AddBalance(v float64) *CardUpdate {
-	_u.mutation.AddBalance(v)
+	_ = _u.mutation.AddField("balance", v)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *CardUpdate) SetName(v string) *CardUpdate {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -83,13 +84,13 @@ func (_u *CardUpdate) SetNillableName(v *string) *CardUpdate {
 
 // ClearName clears the value of the "name" field.
 func (_u *CardUpdate) ClearName() *CardUpdate {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardUpdate) SetOwnerID(id string) *CardUpdate {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -103,7 +104,7 @@ func (_u *CardUpdate) SetNillableOwnerID(id *string) *CardUpdate {
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (_u *CardUpdate) AddSpecIDs(ids ...string) *CardUpdate {
-	_u.mutation.AddSpecIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -114,19 +115,19 @@ func (_u *CardUpdate) Mutation() *CardMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdate) ClearOwner() *CardUpdate {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // ClearSpec clears all "spec" edges to the Spec entity.
 func (_u *CardUpdate) ClearSpec() *CardUpdate {
-	_u.mutation.ClearSpec()
+	_ = _u.mutation.ClearEdge("spec")
 	return _u
 }
 
 // RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (_u *CardUpdate) RemoveSpecIDs(ids ...string) *CardUpdate {
-	_u.mutation.RemoveSpecIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -160,15 +161,15 @@ func (_u *CardUpdate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *CardUpdate) defaults() {
-	if _, ok := _u.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); !ok {
 		v := UpdateDefaultUpdateTime()
-		_u.mutation.SetUpdateTime(v)
+		_ = _u.mutation.SetField("update_time", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *CardUpdate) check() error {
-	if v, ok := _u.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
@@ -275,14 +276,14 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 
 // SetUpdateTime sets the "update_time" field.
 func (_u *CardUpdateOne) SetUpdateTime(v time.Time) *CardUpdateOne {
-	_u.mutation.SetUpdateTime(v)
+	_ = _u.mutation.SetField("update_time", v)
 	return _u
 }
 
 // SetBalance sets the "balance" field.
 func (_u *CardUpdateOne) SetBalance(v float64) *CardUpdateOne {
-	_u.mutation.ResetBalance()
-	_u.mutation.SetBalance(v)
+	_ = _u.mutation.ResetField("balance")
+	_ = _u.mutation.SetField("balance", v)
 	return _u
 }
 
@@ -296,13 +297,13 @@ func (_u *CardUpdateOne) SetNillableBalance(v *float64) *CardUpdateOne {
 
 // AddBalance adds value to the "balance" field.
 func (_u *CardUpdateOne) AddBalance(v float64) *CardUpdateOne {
-	_u.mutation.AddBalance(v)
+	_ = _u.mutation.AddField("balance", v)
 	return _u
 }
 
 // SetName sets the "name" field.
 func (_u *CardUpdateOne) SetName(v string) *CardUpdateOne {
-	_u.mutation.SetName(v)
+	_ = _u.mutation.SetField("name", v)
 	return _u
 }
 
@@ -316,13 +317,13 @@ func (_u *CardUpdateOne) SetNillableName(v *string) *CardUpdateOne {
 
 // ClearName clears the value of the "name" field.
 func (_u *CardUpdateOne) ClearName() *CardUpdateOne {
-	_u.mutation.ClearName()
+	_ = _u.mutation.ClearField("name")
 	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
 func (_u *CardUpdateOne) SetOwnerID(id string) *CardUpdateOne {
-	_u.mutation.SetOwnerID(id)
+	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -336,7 +337,7 @@ func (_u *CardUpdateOne) SetNillableOwnerID(id *string) *CardUpdateOne {
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
 func (_u *CardUpdateOne) AddSpecIDs(ids ...string) *CardUpdateOne {
-	_u.mutation.AddSpecIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -347,25 +348,25 @@ func (_u *CardUpdateOne) Mutation() *CardMutation {
 
 // ClearOwner clears the "owner" edge to the User entity.
 func (_u *CardUpdateOne) ClearOwner() *CardUpdateOne {
-	_u.mutation.ClearOwner()
+	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
 // ClearSpec clears all "spec" edges to the Spec entity.
 func (_u *CardUpdateOne) ClearSpec() *CardUpdateOne {
-	_u.mutation.ClearSpec()
+	_ = _u.mutation.ClearEdge("spec")
 	return _u
 }
 
 // RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
 func (_u *CardUpdateOne) RemoveSpecIDs(ids ...string) *CardUpdateOne {
-	_u.mutation.RemoveSpecIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the CardUpdate builder.
 func (_u *CardUpdateOne) Where(ps ...predicate.Card) *CardUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -406,15 +407,15 @@ func (_u *CardUpdateOne) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_u *CardUpdateOne) defaults() {
-	if _, ok := _u.mutation.UpdateTime(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); !ok {
 		v := UpdateDefaultUpdateTime()
-		_u.mutation.SetUpdateTime(v)
+		_ = _u.mutation.SetField("update_time", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_u *CardUpdateOne) check() error {
-	if v, ok := _u.mutation.Name(); ok {
+	if v, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
 		if err := NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", Err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}

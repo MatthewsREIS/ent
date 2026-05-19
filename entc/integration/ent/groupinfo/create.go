@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,13 +32,13 @@ func NewGroupInfoCreate(c Config, hooks []Hook, mutation *GroupInfoMutation) *Gr
 
 // SetDesc sets the "desc" field.
 func (_c *GroupInfoCreate) SetDesc(v string) *GroupInfoCreate {
-	_c.mutation.SetDesc(v)
+	_ = _c.mutation.SetField("desc", v)
 	return _c
 }
 
 // SetMaxUsers sets the "max_users" field.
 func (_c *GroupInfoCreate) SetMaxUsers(v int) *GroupInfoCreate {
-	_c.mutation.SetMaxUsers(v)
+	_ = _c.mutation.SetField("max_users", v)
 	return _c
 }
 
@@ -51,7 +52,7 @@ func (_c *GroupInfoCreate) SetNillableMaxUsers(v *int) *GroupInfoCreate {
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_c *GroupInfoCreate) AddGroupIDs(ids ...int) *GroupInfoCreate {
-	_c.mutation.AddGroupIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -90,18 +91,18 @@ func (_c *GroupInfoCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *GroupInfoCreate) defaults() {
-	if _, ok := _c.mutation.MaxUsers(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "max_users"); !ok {
 		v := DefaultMaxUsers
-		_c.mutation.SetMaxUsers(v)
+		_ = _c.mutation.SetField("max_users", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *GroupInfoCreate) check() error {
-	if _, ok := _c.mutation.Desc(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "desc"); !ok {
 		return &ValidationError{Name: "desc", Err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
 	}
-	if _, ok := _c.mutation.MaxUsers(); !ok {
+	if _, ok := entbuilder.GetField[int](_c.mutation, "max_users"); !ok {
 		return &ValidationError{Name: "max_users", Err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
 	}
 	return nil
@@ -120,7 +121,7 @@ func (_c *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -131,15 +132,15 @@ func (_c *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := _c.mutation.Desc(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "desc"); ok {
 		_spec.SetField(FieldDesc, field.TypeString, value)
 		_node.Desc = value
 	}
-	if value, ok := _c.mutation.MaxUsers(); ok {
+	if value, ok := entbuilder.GetField[int](_c.mutation, "max_users"); ok {
 		_spec.SetField(FieldMaxUsers, field.TypeInt, value)
 		_node.MaxUsers = value
 	}
-	if nodes := _c.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -401,11 +402,11 @@ func (_c *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

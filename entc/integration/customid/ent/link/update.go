@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewLinkUpdate(c Config, hooks []Hook, mutation *LinkMutation) *LinkUpdate {
 
 // Where appends a list predicates to the LinkUpdate builder.
 func (_u *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // SetLinkInformation sets the "link_information" field.
 func (_u *LinkUpdate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdate {
-	_u.mutation.SetLinkInformation(v)
+	_ = _u.mutation.SetField("link_information", v)
 	return _u
 }
 
@@ -49,7 +50,7 @@ func (_u *LinkUpdate) Mutation() *LinkMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LinkUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*LinkMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -83,7 +84,7 @@ func (_u *LinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.LinkInformation(); ok {
+	if value, ok := entbuilder.GetField[map[string]schema.LinkInformation](_u.mutation, "link_information"); ok {
 		_spec.SetField(FieldLinkInformation, field.TypeJSON, value)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -113,7 +114,7 @@ func NewLinkUpdateOne(c Config, hooks []Hook, mutation *LinkMutation) *LinkUpdat
 
 // SetLinkInformation sets the "link_information" field.
 func (_u *LinkUpdateOne) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdateOne {
-	_u.mutation.SetLinkInformation(v)
+	_ = _u.mutation.SetField("link_information", v)
 	return _u
 }
 
@@ -124,7 +125,7 @@ func (_u *LinkUpdateOne) Mutation() *LinkMutation {
 
 // Where appends a list predicates to the LinkUpdate builder.
 func (_u *LinkUpdateOne) Where(ps ...predicate.Link) *LinkUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -137,7 +138,7 @@ func (_u *LinkUpdateOne) Select(field string, fields ...string) *LinkUpdateOne {
 
 // Save executes the query and returns the updated Link entity.
 func (_u *LinkUpdateOne) Save(ctx context.Context) (*Link, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Link](ctx, &entbuilder.UpdateState[*LinkMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -188,7 +189,7 @@ func (_u *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) {
 			}
 		}
 	}
-	if value, ok := _u.mutation.LinkInformation(); ok {
+	if value, ok := entbuilder.GetField[map[string]schema.LinkInformation](_u.mutation, "link_information"); ok {
 		_spec.SetField(FieldLinkInformation, field.TypeJSON, value)
 	}
 	_node = &Link{Config: _u.Config}

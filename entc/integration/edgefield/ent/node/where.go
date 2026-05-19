@@ -145,14 +145,15 @@ func HasPrev() predicate.Node {
 
 // HasPrevWith applies the HasEdge predicate on the "prev" edge with a given conditions (other predicates).
 func HasPrevWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		step := newPrevStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Node(
+		func(s *sql.Selector) {
+			step := newPrevStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // HasNext applies the HasEdge predicate on the "next" edge.
@@ -168,14 +169,15 @@ func HasNext() predicate.Node {
 
 // HasNextWith applies the HasEdge predicate on the "next" edge with a given conditions (other predicates).
 func HasNextWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(func(s *sql.Selector) {
-		step := newNextStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Node(
+		func(s *sql.Selector) {
+			step := newNextStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

@@ -1420,6 +1420,17 @@ func (f Field) Edge() (*Edge, error) {
 	return f.fk.Edge.Ref, nil
 }
 
+// EdgeName returns the name of the edge this field is paired with, or
+// the empty string if the field is not an edge-field. Used by templates
+// to bridge edge-fields to the generic SetEdgeID/EdgeID runtime API.
+func (f Field) EdgeName() string {
+	e, err := f.Edge()
+	if err != nil {
+		return ""
+	}
+	return e.Name
+}
+
 // Sensitive returns true if the field is a sensitive field.
 func (f Field) Sensitive() bool { return f.def != nil && f.def.Sensitive }
 

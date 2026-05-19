@@ -144,17 +144,18 @@ func HasUsers() predicate.Group {
 
 // HasUsersWith applies the HasEdge predicate on the "users" edge with a given conditions (other predicates).
 func HasUsersWith(preds ...predicate.User) predicate.Group {
-	return predicate.Group(func(s *sql.Selector) {
-		step := newUsersStep()
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.GroupUsers
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.Group(
+		func(s *sql.Selector) {
+			step := newUsersStep()
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.GroupUsers
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

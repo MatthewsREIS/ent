@@ -13,7 +13,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ template "import" $ }}
+{{ with extend $ "DeleteUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
+	{{ template "import" . }}
+{{ end }}
 
 {{ $builder := $.DeleteName }}
 {{ $receiver := $.DeleteReceiver }}
@@ -24,6 +26,11 @@ type {{ $builder }} struct {
 	Config
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
+	{{- /* Additional fields to add to the builder. */}}
+	{{- $deleteFieldsTmpl := printf "dialect/%s/delete/fields" $.Storage }}
+	{{- if hasTemplate $deleteFieldsTmpl }}
+		{{- xtemplate $deleteFieldsTmpl . }}
+	{{- end }}
 }
 
 // New{{ $builder }} returns a new {{ $builder }} initialized with the given config, hooks, and mutation.
@@ -33,13 +40,17 @@ func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
-	{{ $mutation }}.Where(ps...)
+	{{ $mutation }}.WhereP(ps...)
 	return {{ $receiver }}
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
+	{{- if eq $.Config.Storage.Name "sql" }}
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*{{ $.MutationName }}]{Hooks: {{ $receiver }}.hooks, Mutation: {{ $mutation }}}, {{ $receiver }}.{{ $.Storage }}Exec)
+	{{- else }}
 	return WithHooks(ctx, {{ $receiver }}.{{ $.Storage }}Exec, {{ $mutation }}, {{ $receiver }}.hooks)
+	{{- end }}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -78,7 +89,7 @@ func New{{ $onebuilder }}(d *{{ $builder }}) *{{ $onebuilder }} {
 
 // Where appends a list predicates to the {{ $builder }} builder.
 func ({{ $oneReceiver }} *{{ $onebuilder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $onebuilder }} {
-	{{ $oneReceiver }}.{{ $mutation }}.Where(ps...)
+	{{ $oneReceiver }}.{{ $mutation }}.WhereP(ps...)
 	return {{ $oneReceiver }}
 }
 

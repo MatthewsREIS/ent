@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -34,7 +35,7 @@ func NewTweetTagCreate(c Config, hooks []Hook, mutation *TweetTagMutation) *Twee
 
 // SetAddedAt sets the "added_at" field.
 func (_c *TweetTagCreate) SetAddedAt(v time.Time) *TweetTagCreate {
-	_c.mutation.SetAddedAt(v)
+	_ = _c.mutation.SetField("added_at", v)
 	return _c
 }
 
@@ -48,13 +49,13 @@ func (_c *TweetTagCreate) SetNillableAddedAt(v *time.Time) *TweetTagCreate {
 
 // SetTagID sets the "tag_id" field.
 func (_c *TweetTagCreate) SetTagID(v int) *TweetTagCreate {
-	_c.mutation.SetTagID(v)
+	_ = _c.mutation.SetEdgeID("tag", v)
 	return _c
 }
 
 // SetTweetID sets the "tweet_id" field.
 func (_c *TweetTagCreate) SetTweetID(v int) *TweetTagCreate {
-	_c.mutation.SetTweetID(v)
+	_ = _c.mutation.SetEdgeID("tweet", v)
 	return _c
 }
 
@@ -107,9 +108,9 @@ func (_c *TweetTagCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *TweetTagCreate) defaults() {
-	if _, ok := _c.mutation.AddedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "added_at"); !ok {
 		v := DefaultAddedAt()
-		_c.mutation.SetAddedAt(v)
+		_ = _c.mutation.SetField("added_at", v)
 	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := DefaultID()
@@ -119,19 +120,13 @@ func (_c *TweetTagCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *TweetTagCreate) check() error {
-	if _, ok := _c.mutation.AddedAt(); !ok {
+	if _, ok := entbuilder.GetField[time.Time](_c.mutation, "added_at"); !ok {
 		return &ValidationError{Name: "added_at", Err: errors.New(`ent: missing required field "TweetTag.added_at"`)}
 	}
-	if _, ok := _c.mutation.TagID(); !ok {
-		return &ValidationError{Name: "tag_id", Err: errors.New(`ent: missing required field "TweetTag.tag_id"`)}
-	}
-	if _, ok := _c.mutation.TweetID(); !ok {
-		return &ValidationError{Name: "tweet_id", Err: errors.New(`ent: missing required field "TweetTag.tweet_id"`)}
-	}
-	if len(_c.mutation.TagIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("tag")) == 0 {
 		return &ValidationError{Name: "tag", Err: errors.New(`ent: missing required edge "TweetTag.tag"`)}
 	}
-	if len(_c.mutation.TweetIDs()) == 0 {
+	if len(_c.mutation.EdgeIDs("tweet")) == 0 {
 		return &ValidationError{Name: "tweet", Err: errors.New(`ent: missing required edge "TweetTag.tweet"`)}
 	}
 	return nil
@@ -155,7 +150,7 @@ func (_c *TweetTagCreate) sqlSave(ctx context.Context) (*TweetTag, error) {
 			return nil, err
 		}
 	}
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -170,11 +165,11 @@ func (_c *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := _c.mutation.AddedAt(); ok {
+	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "added_at"); ok {
 		_spec.SetField(FieldAddedAt, field.TypeTime, value)
 		_node.AddedAt = value
 	}
-	if nodes := _c.mutation.TagIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tag"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -191,7 +186,7 @@ func (_c *TweetTagCreate) createSpec() (*TweetTag, *sqlgraph.CreateSpec) {
 		_node.TagID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tweet"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -490,7 +485,7 @@ func (_c *TweetTagCreateBulk) Save(ctx context.Context) ([]*TweetTag, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

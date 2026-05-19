@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,13 +33,13 @@ func NewSpecUpdate(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdate {
 
 // Where appends a list predicates to the SpecUpdate builder.
 func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (_u *SpecUpdate) AddCardIDs(ids ...int) *SpecUpdate {
-	_u.mutation.AddCardIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -49,19 +50,19 @@ func (_u *SpecUpdate) Mutation() *SpecMutation {
 
 // ClearCard clears all "card" edges to the Card entity.
 func (_u *SpecUpdate) ClearCard() *SpecUpdate {
-	_u.mutation.ClearCard()
+	_ = _u.mutation.ClearEdge("card")
 	return _u
 }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (_u *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
-	_u.mutation.RemoveCardIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *SpecUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*SpecMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -101,7 +102,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			}
 		}
 	}
-	if _u.mutation.CardCleared() {
+	if _u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -114,7 +115,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedCardIDs(); len(nodes) > 0 && !_u.mutation.CardCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("card"); len(nodes) > 0 && !_u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -130,7 +131,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("card"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -175,7 +176,7 @@ func NewSpecUpdateOne(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdat
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
 func (_u *SpecUpdateOne) AddCardIDs(ids ...int) *SpecUpdateOne {
-	_u.mutation.AddCardIDs(ids...)
+	_ = _u.mutation.AddEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -186,19 +187,19 @@ func (_u *SpecUpdateOne) Mutation() *SpecMutation {
 
 // ClearCard clears all "card" edges to the Card entity.
 func (_u *SpecUpdateOne) ClearCard() *SpecUpdateOne {
-	_u.mutation.ClearCard()
+	_ = _u.mutation.ClearEdge("card")
 	return _u
 }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
 func (_u *SpecUpdateOne) RemoveCardIDs(ids ...int) *SpecUpdateOne {
-	_u.mutation.RemoveCardIDs(ids...)
+	_ = _u.mutation.RemoveEdgeIDs("card", entbuilder.ToAny(ids)...)
 	return _u
 }
 
 // Where appends a list predicates to the SpecUpdate builder.
 func (_u *SpecUpdateOne) Where(ps ...predicate.Spec) *SpecUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -211,7 +212,7 @@ func (_u *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
 
 // Save executes the query and returns the updated Spec entity.
 func (_u *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Spec](ctx, &entbuilder.UpdateState[*SpecMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -268,7 +269,7 @@ func (_u *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 			}
 		}
 	}
-	if _u.mutation.CardCleared() {
+	if _u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -281,7 +282,7 @@ func (_u *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.RemovedCardIDs(); len(nodes) > 0 && !_u.mutation.CardCleared() {
+	if nodes := _u.mutation.RemovedEdgeIDs("card"); len(nodes) > 0 && !_u.mutation.EdgeCleared("card") {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -297,7 +298,7 @@ func (_u *SpecUpdateOne) sqlSave(ctx context.Context) (_node *Spec, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.EdgeIDs("card"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,

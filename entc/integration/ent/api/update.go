@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -32,7 +33,7 @@ func NewAPIUpdate(c Config, hooks []Hook, mutation *APIMutation) *APIUpdate {
 
 // Where appends a list predicates to the APIUpdate builder.
 func (_u *APIUpdate) Where(ps ...predicate.Api) *APIUpdate {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -43,7 +44,7 @@ func (_u *APIUpdate) Mutation() *APIMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *APIUpdate) Save(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*APIMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -117,7 +118,7 @@ func (_u *APIUpdateOne) Mutation() *APIMutation {
 
 // Where appends a list predicates to the APIUpdate builder.
 func (_u *APIUpdateOne) Where(ps ...predicate.Api) *APIUpdateOne {
-	_u.mutation.Where(ps...)
+	_u.mutation.WhereP(ps...)
 	return _u
 }
 
@@ -130,7 +131,7 @@ func (_u *APIUpdateOne) Select(field string, fields ...string) *APIUpdateOne {
 
 // Save executes the query and returns the updated Api entity.
 func (_u *APIUpdateOne) Save(ctx context.Context) (*Api, error) {
-	return WithHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
+	return entbuilder.RunUpdateOne[Api](ctx, &entbuilder.UpdateState[*APIMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
 // SaveX is like Save, but panics if an error occurs.

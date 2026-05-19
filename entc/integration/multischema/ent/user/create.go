@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -31,7 +32,7 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 
 // SetName sets the "name" field.
 func (_c *UserCreate) SetName(v string) *UserCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
@@ -45,43 +46,43 @@ func (_c *UserCreate) SetNillableName(v *string) *UserCreate {
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
-	_c.mutation.AddPetIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
 func (_c *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
-	_c.mutation.AddGroupIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
 func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
-	_c.mutation.AddFriendIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddParentIDs adds the "parents" edge to the User entity by IDs.
 func (_c *UserCreate) AddParentIDs(ids ...int) *UserCreate {
-	_c.mutation.AddParentIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("parents", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
 func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	_c.mutation.AddChildIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
 func (_c *UserCreate) AddFriendshipIDs(ids ...int) *UserCreate {
-	_c.mutation.AddFriendshipIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("friendships", entbuilder.ToAny(ids)...)
 	return _c
 }
 
 // AddParentHoodIDs adds the "parent_hood" edge to the Parent entity by IDs.
 func (_c *UserCreate) AddParentHoodIDs(ids ...int) *UserCreate {
-	_c.mutation.AddParentHoodIDs(ids...)
+	_ = _c.mutation.AddEdgeIDs("parent_hood", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -120,15 +121,15 @@ func (_c *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (_c *UserCreate) defaults() {
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		v := DefaultName
-		_c.mutation.SetName(v)
+		_ = _c.mutation.SetField("name", v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (_c *UserCreate) check() error {
-	if _, ok := _c.mutation.Name(); !ok {
+	if _, ok := entbuilder.GetField[string](_c.mutation, "name"); !ok {
 		return &ValidationError{Name: "name", Err: errors.New(`ent: missing required field "User.name"`)}
 	}
 	return nil
@@ -147,7 +148,7 @@ func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -159,11 +160,11 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	)
 	schemaConfig := _c.Config.SchemaConfig()
 	_spec.Schema = schemaConfig.User
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := _c.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "pets"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -180,7 +181,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "groups"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -197,7 +198,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friends"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -216,7 +217,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ParentsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "parents"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -233,7 +234,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "children"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -252,7 +253,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.FriendshipsIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friendships"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -269,7 +270,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := _c.mutation.ParentHoodIDs(); len(nodes) > 0 {
+	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "parent_hood"); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -343,11 +344,11 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

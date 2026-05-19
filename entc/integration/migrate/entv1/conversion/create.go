@@ -11,6 +11,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -28,7 +29,7 @@ func NewConversionCreate(c Config, hooks []Hook, mutation *ConversionMutation) *
 
 // SetName sets the "name" field.
 func (_c *ConversionCreate) SetName(v string) *ConversionCreate {
-	_c.mutation.SetName(v)
+	_ = _c.mutation.SetField("name", v)
 	return _c
 }
 
@@ -42,7 +43,7 @@ func (_c *ConversionCreate) SetNillableName(v *string) *ConversionCreate {
 
 // SetInt8ToString sets the "int8_to_string" field.
 func (_c *ConversionCreate) SetInt8ToString(v int8) *ConversionCreate {
-	_c.mutation.SetInt8ToString(v)
+	_ = _c.mutation.SetField("int8_to_string", v)
 	return _c
 }
 
@@ -56,7 +57,7 @@ func (_c *ConversionCreate) SetNillableInt8ToString(v *int8) *ConversionCreate {
 
 // SetUint8ToString sets the "uint8_to_string" field.
 func (_c *ConversionCreate) SetUint8ToString(v uint8) *ConversionCreate {
-	_c.mutation.SetUint8ToString(v)
+	_ = _c.mutation.SetField("uint8_to_string", v)
 	return _c
 }
 
@@ -70,7 +71,7 @@ func (_c *ConversionCreate) SetNillableUint8ToString(v *uint8) *ConversionCreate
 
 // SetInt16ToString sets the "int16_to_string" field.
 func (_c *ConversionCreate) SetInt16ToString(v int16) *ConversionCreate {
-	_c.mutation.SetInt16ToString(v)
+	_ = _c.mutation.SetField("int16_to_string", v)
 	return _c
 }
 
@@ -84,7 +85,7 @@ func (_c *ConversionCreate) SetNillableInt16ToString(v *int16) *ConversionCreate
 
 // SetUint16ToString sets the "uint16_to_string" field.
 func (_c *ConversionCreate) SetUint16ToString(v uint16) *ConversionCreate {
-	_c.mutation.SetUint16ToString(v)
+	_ = _c.mutation.SetField("uint16_to_string", v)
 	return _c
 }
 
@@ -98,7 +99,7 @@ func (_c *ConversionCreate) SetNillableUint16ToString(v *uint16) *ConversionCrea
 
 // SetInt32ToString sets the "int32_to_string" field.
 func (_c *ConversionCreate) SetInt32ToString(v int32) *ConversionCreate {
-	_c.mutation.SetInt32ToString(v)
+	_ = _c.mutation.SetField("int32_to_string", v)
 	return _c
 }
 
@@ -112,7 +113,7 @@ func (_c *ConversionCreate) SetNillableInt32ToString(v *int32) *ConversionCreate
 
 // SetUint32ToString sets the "uint32_to_string" field.
 func (_c *ConversionCreate) SetUint32ToString(v uint32) *ConversionCreate {
-	_c.mutation.SetUint32ToString(v)
+	_ = _c.mutation.SetField("uint32_to_string", v)
 	return _c
 }
 
@@ -126,7 +127,7 @@ func (_c *ConversionCreate) SetNillableUint32ToString(v *uint32) *ConversionCrea
 
 // SetInt64ToString sets the "int64_to_string" field.
 func (_c *ConversionCreate) SetInt64ToString(v int64) *ConversionCreate {
-	_c.mutation.SetInt64ToString(v)
+	_ = _c.mutation.SetField("int64_to_string", v)
 	return _c
 }
 
@@ -140,7 +141,7 @@ func (_c *ConversionCreate) SetNillableInt64ToString(v *int64) *ConversionCreate
 
 // SetUint64ToString sets the "uint64_to_string" field.
 func (_c *ConversionCreate) SetUint64ToString(v uint64) *ConversionCreate {
-	_c.mutation.SetUint64ToString(v)
+	_ = _c.mutation.SetField("uint64_to_string", v)
 	return _c
 }
 
@@ -202,7 +203,7 @@ func (_c *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_c.mutation.SetMutationID(&_node.ID)
+	_c.mutation.SetID(_node.ID)
 	_c.mutation.SetDone()
 	return _node, nil
 }
@@ -212,39 +213,39 @@ func (_c *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 		_node = &Conversion{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := _c.mutation.Name(); ok {
+	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
 		_spec.SetField(FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Int8ToString(); ok {
+	if value, ok := entbuilder.GetField[int8](_c.mutation, "int8_to_string"); ok {
 		_spec.SetField(FieldInt8ToString, field.TypeInt8, value)
 		_node.Int8ToString = value
 	}
-	if value, ok := _c.mutation.Uint8ToString(); ok {
+	if value, ok := entbuilder.GetField[uint8](_c.mutation, "uint8_to_string"); ok {
 		_spec.SetField(FieldUint8ToString, field.TypeUint8, value)
 		_node.Uint8ToString = value
 	}
-	if value, ok := _c.mutation.Int16ToString(); ok {
+	if value, ok := entbuilder.GetField[int16](_c.mutation, "int16_to_string"); ok {
 		_spec.SetField(FieldInt16ToString, field.TypeInt16, value)
 		_node.Int16ToString = value
 	}
-	if value, ok := _c.mutation.Uint16ToString(); ok {
+	if value, ok := entbuilder.GetField[uint16](_c.mutation, "uint16_to_string"); ok {
 		_spec.SetField(FieldUint16ToString, field.TypeUint16, value)
 		_node.Uint16ToString = value
 	}
-	if value, ok := _c.mutation.Int32ToString(); ok {
+	if value, ok := entbuilder.GetField[int32](_c.mutation, "int32_to_string"); ok {
 		_spec.SetField(FieldInt32ToString, field.TypeInt32, value)
 		_node.Int32ToString = value
 	}
-	if value, ok := _c.mutation.Uint32ToString(); ok {
+	if value, ok := entbuilder.GetField[uint32](_c.mutation, "uint32_to_string"); ok {
 		_spec.SetField(FieldUint32ToString, field.TypeUint32, value)
 		_node.Uint32ToString = value
 	}
-	if value, ok := _c.mutation.Int64ToString(); ok {
+	if value, ok := entbuilder.GetField[int64](_c.mutation, "int64_to_string"); ok {
 		_spec.SetField(FieldInt64ToString, field.TypeInt64, value)
 		_node.Int64ToString = value
 	}
-	if value, ok := _c.mutation.Uint64ToString(); ok {
+	if value, ok := entbuilder.GetField[uint64](_c.mutation, "uint64_to_string"); ok {
 		_spec.SetField(FieldUint64ToString, field.TypeUint64, value)
 		_node.Uint64ToString = value
 	}
@@ -304,11 +305,11 @@ func (_c *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error)
 				if err != nil {
 					return nil, err
 				}
-				mutation.SetMutationID(&nodes[i].ID)
 				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}
+				mutation.SetID(nodes[i].ID)
 				mutation.SetDone()
 				return nodes[i], nil
 			})

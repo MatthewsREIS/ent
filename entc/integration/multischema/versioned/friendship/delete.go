@@ -13,14 +13,16 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/versioned/internal"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
 // FriendshipDelete is the builder for deleting a Friendship entity.
 type FriendshipDelete struct {
 	Config
-	hooks    []Hook
-	mutation *FriendshipMutation
+	hooks     []Hook
+	mutation  *FriendshipMutation
+	modifiers []func(*sql.DeleteBuilder)
 }
 
 // NewFriendshipDelete returns a new FriendshipDelete initialized with the given config, hooks, and mutation.
@@ -30,13 +32,13 @@ func NewFriendshipDelete(c Config, hooks []Hook, mutation *FriendshipMutation) *
 
 // Where appends a list predicates to the FriendshipDelete builder.
 func (_d *FriendshipDelete) Where(ps ...predicate.Friendship) *FriendshipDelete {
-	_d.mutation.Where(ps...)
+	_d.mutation.WhereP(ps...)
 	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (_d *FriendshipDelete) Exec(ctx context.Context) (int, error) {
-	return WithHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
+	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*FriendshipMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -48,11 +50,18 @@ func (_d *FriendshipDelete) ExecX(ctx context.Context) int {
 	return n
 }
 
+// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
+func (_d *FriendshipDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *FriendshipDelete {
+	_d.modifiers = append(_d.modifiers, modifiers...)
+	return _d
+}
+
 func (_d *FriendshipDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	schemaConfig := _d.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Friendship
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
+	_spec.AddModifiers(_d.modifiers...)
 	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -80,7 +89,7 @@ func NewFriendshipDeleteOne(d *FriendshipDelete) *FriendshipDeleteOne {
 
 // Where appends a list predicates to the FriendshipDelete builder.
 func (_d *FriendshipDeleteOne) Where(ps ...predicate.Friendship) *FriendshipDeleteOne {
-	_d._d.mutation.Where(ps...)
+	_d._d.mutation.WhereP(ps...)
 	return _d
 }
 
