@@ -82,7 +82,8 @@ func main() {
 
 // RewritePackage walks pkgPath for .go files and applies all rewriters in
 // canonical order: edge-fk-setfield → typed-setter → mutation → predicate
-// → edge-method → typed-edge-accessor → collection-method → add-missing-imports.
+// → edge-method → typed-edge-accessor → collection-method → has-all-fields
+// → add-missing-imports.
 //
 // The genRoot argument is the absolute path of the generated package root
 // (the parent of the -descriptors internal/ directory). The walker skips
@@ -115,6 +116,9 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 	collectionMethodPass := func(filename, src string, d Descriptors, gp string) (string, error) {
 		return RewriteCollectionMethodSource(filename, src, d, gp)
 	}
+	hasAllFieldsPass := func(filename, src string, d Descriptors, gp string) (string, error) {
+		return RewriteHasAllFieldsSource(filename, src, d, gp)
+	}
 	edgeFKSetFieldPass := func(filename, src string, d Descriptors, gp string) (string, error) {
 		return RewriteEdgeFKSetFieldSource(filename, src, d, gp)
 	}
@@ -144,6 +148,11 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 		{"edge-method", edgeMethodPass},
 		{"typed-edge-accessor", typedEdgePass},
 		{"collection-method", collectionMethodPass},
+		// has-all-fields rewrites q.HasAllFields(fields...) →
+		// gen.<Entity>HasAllFields(q, fields...). Sibling of collection-method
+		// (same Query-receiver pattern) but emits a Query-less facade name —
+		// gqlgen's collection template predates the Query-infix convention.
+		{"has-all-fields", hasAllFieldsPass},
 		// add-missing-imports runs last so it sees every type-arg
 		// emitted by earlier passes (GetField[time.Time], EdgeIDAs[uuid.UUID])
 		// and adds the matching import when missing.
