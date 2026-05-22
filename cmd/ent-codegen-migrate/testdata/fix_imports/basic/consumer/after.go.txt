@@ -4,4 +4,4 @@ import (
 	"example.com/fixmod/gen/contact"
 )
 
-func _f()	{ _ = contact.Find("a") }
+func _f() { _ = contact.Find("a") }

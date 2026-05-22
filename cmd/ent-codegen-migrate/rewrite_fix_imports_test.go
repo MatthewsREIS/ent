@@ -29,10 +29,13 @@ func TestRewriteFixImports_RebindsUniqueSymbol(t *testing.T) {
 }
 
 func TestRewriteFixImports_LeavesIntactImports(t *testing.T) {
+	// Source is already goimports-normalized: stdlib and third-party imports
+	// are separated by a blank line, all imports are used.
 	src := `package consumer
 
 import (
 	"fmt"
+
 	"example.com/fixmod/gen/contact"
 )
 
@@ -76,4 +79,24 @@ func TestRewriteFixImports_LeavesAmbiguousAlone(t *testing.T) {
 	got, err := RewriteFixImportsSource("consumer/before.go.txt", string(before), cfg)
 	require.NoError(t, err)
 	require.Equal(t, string(before), got, "ambiguous symbol must leave import unchanged")
+}
+
+func TestRewriteFixImports_RemovesUnusedImport(t *testing.T) {
+	src := `package consumer
+
+import (
+	"fmt"
+	"strings"
+)
+
+func _f() { fmt.Println("x") }
+`
+	cfg := FixImportsConfig{
+		ModuleRoot:   filepath.Join("testdata", "fix_imports", "basic"),
+		EntRootPaths: []string{"example.com/fixmod/gen/"},
+	}
+	got, err := RewriteFixImportsSource("x.go", src, cfg)
+	require.NoError(t, err)
+	require.NotContains(t, got, `"strings"`, "unused import should be removed by goimports phase")
+	require.Contains(t, got, `"fmt"`)
 }

@@ -17,6 +17,7 @@ import (
 
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
+	"golang.org/x/tools/imports"
 )
 
 // FixImportsConfig configures the fix-imports pass.
@@ -157,12 +158,7 @@ func RewriteFixImportsSource(filename, src string, cfg FixImportsConfig) (string
 		rewrites = append(rewrites, pending{oldPath: oldPath, newPath: candidate[0]})
 	}
 
-	// No rewrites needed — return original source unchanged to avoid spurious
-	// formatting changes from printer.Fprint.
-	if len(rewrites) == 0 {
-		return src, nil
-	}
-
+	// Phase B1: apply any import rebindings found above.
 	for _, r := range rewrites {
 		if !astutil.RewriteImport(fset, file, r.oldPath, r.newPath) {
 			fmt.Printf("fix-imports: %s: failed to rewrite %q → %q\n", filename, r.oldPath, r.newPath)
@@ -175,11 +171,40 @@ func RewriteFixImportsSource(filename, src string, cfg FixImportsConfig) (string
 		}
 	}
 
-	var buf bytes.Buffer
-	if err := printer.Fprint(&buf, fset, file); err != nil {
-		return "", err
+	// Phase B2: goimports cleanup. Removes unused imports left over from
+	// rewrites and tidies grouping. Applied unconditionally so that files
+	// with stale unused imports are always cleaned up, even when no import
+	// path rebinding was needed.
+	cleaned, err := imports.Process(filename, []byte(src), &imports.Options{
+		Comments:  true,
+		TabIndent: true,
+		TabWidth:  8,
+	})
+	if err != nil {
+		return "", fmt.Errorf("goimports: %w", err)
 	}
-	return buf.String(), nil
+	// If goimports didn't change anything AND no rebindings happened, return
+	// the original source to preserve exact byte identity for no-op callers.
+	if len(rewrites) == 0 && string(cleaned) == src {
+		return src, nil
+	}
+
+	// Rebindings happened: print the rewritten AST and run goimports on it.
+	if len(rewrites) > 0 {
+		var buf bytes.Buffer
+		if err := printer.Fprint(&buf, fset, file); err != nil {
+			return "", err
+		}
+		cleaned, err = imports.Process(filename, buf.Bytes(), &imports.Options{
+			Comments:  true,
+			TabIndent: true,
+			TabWidth:  8,
+		})
+		if err != nil {
+			return "", fmt.Errorf("goimports: %w", err)
+		}
+	}
+	return string(cleaned), nil
 }
 
 // renameSelectorsFor walks file and renames all uses of oldLocal as a
