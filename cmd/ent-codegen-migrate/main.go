@@ -21,13 +21,26 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/tools/imports"
 )
+
+// canonicalFormatOpts configure the post-walk canonical-form comparison.
+// FormatOnly=true keeps imports.Process pure gofmt — no import resolution —
+// so the canonical form depends only on whitespace and AST shape.
+var canonicalFormatOpts = &imports.Options{
+	Comments:   true,
+	TabIndent:  true,
+	TabWidth:   8,
+	FormatOnly: true,
+}
 
 func main() {
 	var (
-		descriptorsFlag = flag.String("descriptors", "", "path to the consumer's regenerated <pkg>/internal/ directory")
-		genPackageFlag  = flag.String("gen-package", "", "full import path of the consumer's generated ent package (e.g. github.com/foo/bar/internal/ent/gen). Required: the rewriter emits cross-package facade calls (ent.Query<X><Y>FromQuery) and needs to qualify them with the correct local alias per consumer file. If the file imports the gen package as \"gen\", the call becomes gen.Query...; if aliased as \"myent\", it becomes myent.Query...")
-		dryRunFlag      = flag.Bool("dry-run", false, "print changes without writing files")
+		descriptorsFlag  = flag.String("descriptors", "", "path to the consumer's regenerated <pkg>/internal/ directory")
+		genPackageFlag   = flag.String("gen-package", "", "full import path of the consumer's generated ent package (e.g. github.com/foo/bar/internal/ent/gen). Required: the rewriter emits cross-package facade calls (ent.Query<X><Y>FromQuery) and needs to qualify them with the correct local alias per consumer file. If the file imports the gen package as \"gen\", the call becomes gen.Query...; if aliased as \"myent\", it becomes myent.Query...")
+		entRootPathsFlag = flag.String("ent-root-paths", "", "comma-separated list of import-path prefixes considered the ent root for the fix-imports pass (e.g. \"github.com/foo/bar/internal/ent/gen/\"). When empty, the fix-imports pass is skipped.")
+		dryRunFlag       = flag.Bool("dry-run", false, "print changes without writing files")
 	)
 	flag.Parse()
 
@@ -72,8 +85,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	var entRootPaths []string
+	if *entRootPathsFlag != "" {
+		for _, p := range strings.Split(*entRootPathsFlag, ",") {
+			if trimmed := strings.TrimSpace(p); trimmed != "" {
+				entRootPaths = append(entRootPaths, trimmed)
+			}
+		}
+	}
+
 	for _, pkg := range flag.Args() {
-		if err := RewritePackage(pkg, descs, genRoot, *genPackageFlag, *dryRunFlag); err != nil {
+		if err := RewritePackage(pkg, descs, genRoot, *genPackageFlag, entRootPaths, *dryRunFlag); err != nil {
 			fmt.Fprintf(os.Stderr, "ent-codegen-migrate: rewrite %s: %v\n", pkg, err)
 			os.Exit(1)
 		}
@@ -82,8 +104,9 @@ func main() {
 
 // RewritePackage walks pkgPath for .go files and applies all rewriters in
 // canonical order: edge-fk-setfield → typed-setter → mutation → predicate
-// → edge-method → typed-edge-accessor → collection-method → has-all-fields
-// → add-missing-imports.
+// → edge-method → typed-edge-accessor → edge-name-constant → collection-method
+// → has-all-fields → add-missing-imports → fix-imports (when entRootPaths
+// is non-empty).
 //
 // The genRoot argument is the absolute path of the generated package root
 // (the parent of the -descriptors internal/ directory). The walker skips
@@ -92,12 +115,15 @@ func main() {
 // src/ent/schema/ in consumer layouts).
 //
 // genPackage is the full import path of the consumer's generated package
-// (e.g. "github.com/foo/bar/internal/ent/gen"). The edge-method pass uses
-// it to resolve the local alias for each file emitting facade calls.
+// (e.g. "github.com/foo/bar/internal/ent/gen"). The edge-method and
+// edge-name-constant passes use it to qualify cross-package emissions.
+//
+// entRootPaths gates the fix-imports pass. When empty, fix-imports is
+// skipped (the pass needs an explicit prefix to scope rebinding).
 //
 // Each pass is idempotent; the chain is safe to re-run. Order matters
 // because later passes may inspect shapes produced by earlier ones.
-func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage string, dryRun bool) error {
+func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage string, entRootPaths []string, dryRun bool) error {
 	// Adapt the three rewriters that don't care about the gen package
 	// to the four-arg pass signature. Keeping their public signatures
 	// unchanged keeps the existing per-pass tests stable.
@@ -128,6 +154,9 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 	addMissingImportsPass := func(filename, src string, d Descriptors, gp string) (string, error) {
 		return RewriteAddMissingImportsSource(filename, src, d, gp)
 	}
+	edgeNameConstantPass := func(filename, src string, d Descriptors, gp string) (string, error) {
+		return RewriteEdgeNameConstantSource(filename, src, d, gp)
+	}
 	passes := []struct {
 		name string
 		fn   func(string, string, Descriptors, string) (string, error)
@@ -147,16 +176,41 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 		{"predicate", predicatePass},
 		{"edge-method", edgeMethodPass},
 		{"typed-edge-accessor", typedEdgePass},
+		// edge-name-constant runs after the call-shape passes (mutation,
+		// edge-method, typed-edge-accessor) and before the import-cleanup
+		// passes. It rewrites string-literal first args at the 9 edge methods
+		// (AddEdgeIDs, RemoveEdgeIDs, SetEdgeID, ClearEdge, EdgeID, EdgeIDs,
+		// RemovedEdgeIDs, EdgeCleared, ResetEdge) into typed per-entity
+		// constants (<entity>.Edge<X>), emitting per-entity imports as needed.
+		{"edge-name-constant", edgeNameConstantPass},
 		{"collection-method", collectionMethodPass},
 		// has-all-fields rewrites q.HasAllFields(fields...) →
 		// gen.<Entity>HasAllFields(q, fields...). Sibling of collection-method
 		// (same Query-receiver pattern) but emits a Query-less facade name —
 		// gqlgen's collection template predates the Query-infix convention.
 		{"has-all-fields", hasAllFieldsPass},
-		// add-missing-imports runs last so it sees every type-arg
-		// emitted by earlier passes (GetField[time.Time], EdgeIDAs[uuid.UUID])
-		// and adds the matching import when missing.
+		// add-missing-imports runs last among the Descriptors-driven passes
+		// so it sees every type-arg emitted by earlier passes
+		// (GetField[time.Time], EdgeIDAs[uuid.UUID]) and adds the matching
+		// import when missing.
 		{"add-missing-imports", addMissingImportsPass},
+	}
+	// fix-imports runs after every Descriptors-driven pass when the caller
+	// has scoped it with one or more --ent-root-paths prefixes. It rebinds
+	// broken imports under the ent root via symbol-index lookup and then
+	// runs goimports.Process to remove unused imports left over from the
+	// earlier rewrites.
+	if len(entRootPaths) > 0 {
+		fixImportsPass := func(filename, src string, _ Descriptors, _ string) (string, error) {
+			return RewriteFixImportsSource(filename, src, FixImportsConfig{
+				ModuleRoot:   pkgPath,
+				EntRootPaths: entRootPaths,
+			})
+		}
+		passes = append(passes, struct {
+			name string
+			fn   func(string, string, Descriptors, string) (string, error)
+		}{"fix-imports", fixImportsPass})
 	}
 	return filepath.WalkDir(pkgPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -189,10 +243,29 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 		if out == string(src) {
 			return nil
 		}
+		// Cosmetic-difference filter: when the only delta between src and
+		// out is whitespace (printer.Fprint emits subtly different alignment
+		// in struct literals than gofmt), leave the file alone. Each pass
+		// re-emits files it parses via go/printer regardless of whether it
+		// changed anything; without this filter the migrator would touch
+		// dozens of consumer files with pure-whitespace churn on a typical
+		// run. Falls back to writing out as-is if either canonicalization
+		// errors (e.g. the file doesn't parse).
+		srcCanon, srcErr := imports.Process(path, src, canonicalFormatOpts)
+		outCanon, outErr := imports.Process(path, []byte(out), canonicalFormatOpts)
+		if srcErr == nil && outErr == nil && string(srcCanon) == string(outCanon) {
+			return nil
+		}
 		if dryRun {
 			fmt.Printf("--- %s (would rewrite) ---\n", path)
 			return nil
 		}
-		return os.WriteFile(path, []byte(out), 0o644)
+		// Prefer the canonical-formatted output so the on-disk file matches
+		// gofmt conventions after a rewrite.
+		toWrite := []byte(out)
+		if outErr == nil {
+			toWrite = outCanon
+		}
+		return os.WriteFile(path, toWrite, 0o644)
 	})
 }
