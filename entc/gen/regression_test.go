@@ -158,6 +158,59 @@ func TestGraph_Gen_AssignGeneratedInt64IDNoDuplicateCase(t *testing.T) {
 	require.NoErrorf(t, err, "go build output:\n%s", out)
 }
 
+// TestGraph_Gen_EdgesTmplEmitsExplicitIDPkgImport verifies that the edges/<entity>.go
+// template emits an explicit import for the package backing the entity ID's Go
+// type (e.g. github.com/google/uuid) instead of relying on goimports to add it
+// post-render. On hosts whose Go module cache happens to contain a different
+// package with the same local name (e.g. github.com/gofrs/uuid alongside
+// github.com/google/uuid), goimports picks the wrong one, producing files that
+// fail to compile at the consumer even though the consumer's go.mod only lists
+// google/uuid.
+func TestGraph_Gen_EdgesTmplEmitsExplicitIDPkgImport(t *testing.T) {
+	mod := writeTempModule(t, "edgesuuidregen")
+	target := filepath.Join(mod, "ent")
+
+	uuidIDInfo := &field.TypeInfo{
+		Type:    field.TypeUUID,
+		Ident:   "uuid.UUID",
+		PkgPath: "github.com/google/uuid",
+		PkgName: "uuid",
+	}
+	graph, err := NewGraph(&Config{
+		Package: "edgesuuidregen/ent",
+		Target:  target,
+		Storage: drivers[0],
+		IDType:  uuidIDInfo,
+	},
+		&load.Schema{
+			Name: "Task",
+			Fields: []*load.Field{
+				{Name: "id", Info: uuidIDInfo},
+				{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+				{Name: "owner_id", Info: uuidIDInfo, Optional: true, Nillable: true},
+			},
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", Unique: true, Field: "owner_id"},
+			},
+		},
+		&load.Schema{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "id", Info: uuidIDInfo},
+			},
+		},
+	)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	edgesPath := filepath.Join(target, "edges", "task.go")
+	content, err := os.ReadFile(edgesPath)
+	require.NoErrorf(t, err, "expected generated edges file at %s", edgesPath)
+	require.Containsf(t, string(content), `"github.com/google/uuid"`,
+		"edges/task.go must explicitly import google/uuid (not rely on goimports). Content:\n%s",
+		content)
+}
+
 func TestGraph_Gen_SQLModifierDeleteBuilderHasModify(t *testing.T) {
 	mod := writeTempModule(t, "deletemodifierregen")
 	target := filepath.Join(mod, "ent")

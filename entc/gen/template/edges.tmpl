@@ -61,6 +61,27 @@ import (
 	{{- $imported = set $imported $e.Type.PackageDir true }}
 	{{- end }}
 	{{- end }}
+	{{- /* Import packages backing custom ID Go types (e.g. uuid.UUID) so
+	       references to {{ $n.ID.Type }} / {{ $e.Type.ID.Type }} resolve
+	       without relying on goimports to guess between same-named packages
+	       in the host's module cache. */}}
+	{{- $seenIDPkg := dict }}
+	{{- if and $n.HasOneFieldID $n.ID.UserDefined }}
+		{{- $pkg := $n.ID.Type.PkgPath }}
+		{{- if and $pkg (not (hasKey $seenIDPkg $pkg)) }}
+			{{- $name := $n.ID.Type.PkgName }}
+			{{ if ne $name (base $pkg) }}{{ $name }} {{ end }}"{{ $pkg }}"
+			{{- $seenIDPkg = set $seenIDPkg $pkg true }}
+		{{- end }}
+	{{- end }}
+	{{- range $e := $n.EdgesWithID }}
+		{{- $pkg := $e.Type.ID.Type.PkgPath }}
+		{{- if and $pkg (not (hasKey $seenIDPkg $pkg)) }}
+			{{- $name := $e.Type.ID.Type.PkgName }}
+			{{ if ne $name (base $pkg) }}{{ $name }} {{ end }}"{{ $pkg }}"
+			{{- $seenIDPkg = set $seenIDPkg $pkg true }}
+		{{- end }}
+	{{- end }}
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
