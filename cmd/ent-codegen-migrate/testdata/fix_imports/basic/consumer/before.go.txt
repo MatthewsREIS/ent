@@ -1,0 +1,7 @@
+package consumer
+
+import (
+	"example.com/fixmod/gen/oldquery"
+)
+
+func _f() { _ = oldquery.Find("a") }
