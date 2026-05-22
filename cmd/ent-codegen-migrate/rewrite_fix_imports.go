@@ -171,38 +171,29 @@ func RewriteFixImportsSource(filename, src string, cfg FixImportsConfig) (string
 		}
 	}
 
-	// Phase B2: goimports cleanup. Removes unused imports left over from
-	// rewrites and tidies grouping. Applied unconditionally so that files
-	// with stale unused imports are always cleaned up, even when no import
-	// path rebinding was needed.
-	cleaned, err := imports.Process(filename, []byte(src), &imports.Options{
+	// When no rebindings happened, leave the file untouched. Earlier versions
+	// of this pass ran goimports unconditionally to clean up stale unused
+	// imports, but that turned every non-gofmt-canonical file in the consumer
+	// tree into a whitespace-churn diff — surprising for a pass named
+	// "fix-imports". Scope is now strictly: rebind broken imports under the
+	// ent root, and (if any rebinding happens) tidy the result via goimports.
+	if len(rewrites) == 0 {
+		return src, nil
+	}
+
+	// Phase B2: goimports cleanup on the rewritten AST. Removes imports the
+	// rebinding may have orphaned and normalizes grouping for the new state.
+	var buf bytes.Buffer
+	if err := printer.Fprint(&buf, fset, file); err != nil {
+		return "", err
+	}
+	cleaned, err := imports.Process(filename, buf.Bytes(), &imports.Options{
 		Comments:  true,
 		TabIndent: true,
 		TabWidth:  8,
 	})
 	if err != nil {
 		return "", fmt.Errorf("goimports: %w", err)
-	}
-	// If goimports didn't change anything AND no rebindings happened, return
-	// the original source to preserve exact byte identity for no-op callers.
-	if len(rewrites) == 0 && string(cleaned) == src {
-		return src, nil
-	}
-
-	// Rebindings happened: print the rewritten AST and run goimports on it.
-	if len(rewrites) > 0 {
-		var buf bytes.Buffer
-		if err := printer.Fprint(&buf, fset, file); err != nil {
-			return "", err
-		}
-		cleaned, err = imports.Process(filename, buf.Bytes(), &imports.Options{
-			Comments:  true,
-			TabIndent: true,
-			TabWidth:  8,
-		})
-		if err != nil {
-			return "", fmt.Errorf("goimports: %w", err)
-		}
 	}
 	return string(cleaned), nil
 }

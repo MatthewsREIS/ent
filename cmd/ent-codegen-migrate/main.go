@@ -21,7 +21,19 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/tools/imports"
 )
+
+// canonicalFormatOpts configure the post-walk canonical-form comparison.
+// FormatOnly=true keeps imports.Process pure gofmt — no import resolution —
+// so the canonical form depends only on whitespace and AST shape.
+var canonicalFormatOpts = &imports.Options{
+	Comments:   true,
+	TabIndent:  true,
+	TabWidth:   8,
+	FormatOnly: true,
+}
 
 func main() {
 	var (
@@ -231,10 +243,29 @@ func RewritePackage(pkgPath string, descs Descriptors, genRoot, genPackage strin
 		if out == string(src) {
 			return nil
 		}
+		// Cosmetic-difference filter: when the only delta between src and
+		// out is whitespace (printer.Fprint emits subtly different alignment
+		// in struct literals than gofmt), leave the file alone. Each pass
+		// re-emits files it parses via go/printer regardless of whether it
+		// changed anything; without this filter the migrator would touch
+		// dozens of consumer files with pure-whitespace churn on a typical
+		// run. Falls back to writing out as-is if either canonicalization
+		// errors (e.g. the file doesn't parse).
+		srcCanon, srcErr := imports.Process(path, src, canonicalFormatOpts)
+		outCanon, outErr := imports.Process(path, []byte(out), canonicalFormatOpts)
+		if srcErr == nil && outErr == nil && string(srcCanon) == string(outCanon) {
+			return nil
+		}
 		if dryRun {
 			fmt.Printf("--- %s (would rewrite) ---\n", path)
 			return nil
 		}
-		return os.WriteFile(path, []byte(out), 0o644)
+		// Prefer the canonical-formatted output so the on-disk file matches
+		// gofmt conventions after a rewrite.
+		toWrite := []byte(out)
+		if outErr == nil {
+			toWrite = outCanon
+		}
+		return os.WriteFile(path, toWrite, 0o644)
 	})
 }

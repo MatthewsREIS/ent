@@ -81,7 +81,12 @@ func TestRewriteFixImports_LeavesAmbiguousAlone(t *testing.T) {
 	require.Equal(t, string(before), got, "ambiguous symbol must leave import unchanged")
 }
 
-func TestRewriteFixImports_RemovesUnusedImport(t *testing.T) {
+func TestRewriteFixImports_LeavesUnusedImportsWhenNoRebinding(t *testing.T) {
+	// The pass is intentionally scoped to imports it actually rebinds — it
+	// no longer runs goimports globally to clean up unused imports from
+	// other passes (that caused whole-tree whitespace churn on consumer
+	// runs). Verifies the file is returned untouched when no rebinding
+	// happens, even if it has obviously-unused imports.
 	src := `package consumer
 
 import (
@@ -97,6 +102,5 @@ func _f() { fmt.Println("x") }
 	}
 	got, err := RewriteFixImportsSource("x.go", src, cfg)
 	require.NoError(t, err)
-	require.NotContains(t, got, `"strings"`, "unused import should be removed by goimports phase")
-	require.Contains(t, got, `"fmt"`)
+	require.Equal(t, src, got, "file with no rebindings must be returned unchanged")
 }
