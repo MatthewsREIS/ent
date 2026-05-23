@@ -26,6 +26,9 @@ import (
 // is broken by the split-runtime form (see user.go for why).
 //
 // At runtime, register this hook explicitly via client.User.Use(...).
+//
+// Exported for use by out-of-package tests that verify the Class B file is
+// reachable in normal builds.
 func UserCreateHook() ent.Hook {
 	return func(next ent.Mutator) ent.Mutator {
 		return hook.UserFunc(func(ctx context.Context, m *genent.UserMutation) (ent.Value, error) {
