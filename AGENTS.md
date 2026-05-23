@@ -280,6 +280,44 @@ go build ./...  # Verify compilation
 
 ---
 
+## Fork-Specific Behavior: `entcodegen` Build Tag
+
+This fork (MatthewsREIS/ent) unconditionally injects `-tags=entcodegen` into the `BuildFlags` passed to `packages.Load` inside `Config.Load` (`entc/load/load.go`). This allows schema packages to gate files that reference generated code with `//go:build !entcodegen`, so `entc.Generate` succeeds from a clean state (no pre-existing generated output).
+
+### Load flow
+
+```
+entc.Generate → LoadGraph → packages.Load(schema pkg, BuildFlags += "-tags=entcodegen")
+                                        ↓ fails?
+                              wrapLoadError → informative error naming file + build-tag hint
+```
+
+No snapshot fallback. The `mayRecover` function, `SnapshotDir` option, `FeatureSnapshot`, and `entc/internal/snapshot.go` have been removed.
+
+### Schema file classes
+
+Consumer schema packages (e.g. `matthewsreis/gemini`) organize files into three classes:
+
+| Class | Build tag | Purpose |
+|---|---|---|
+| A | none | Schema type definitions, Fields/Edges/Annotations. No `gen/` imports. |
+| B | `//go:build !entcodegen` | Hook bodies, interceptors, gen-referencing helpers. |
+| C | `//go:build entcodegen` | No-op stubs for B-file symbols referenced from A-file `Hooks()`/`Interceptors()` methods. |
+
+### Key files changed from upstream
+
+| File | Change |
+|---|---|
+| `entc/load/load.go` | Calls `mergeCodegenTag(c.BuildFlags)` before every load |
+| `entc/load/tags.go` | `mergeCodegenTag` helper — merges `entcodegen` into `-tags` flag without overwriting user flags |
+| `entc/load_error.go` | `wrapLoadError` — annotates typecheck failures with file path and build-tag hint |
+| `entc/entc.go` | `mayRecover` deleted; `SnapshotDir` option deleted |
+| `entc/gen/feature.go` | `FeatureSnapshot` deleted |
+| `entc/gen/globalid.go` | `ResolveIncrementStartsConflict` is now unconditional (was gated on `FeatureSnapshot`) |
+| `entc/internal/snapshot.go` | Deleted |
+
+---
+
 ## Common Pitfalls
 
 ### Pitfall 1: Manually Editing Generated Code
@@ -301,6 +339,10 @@ go build ./...  # Verify compilation
 ### Pitfall 5: Breaking Schema Compatibility
 **Wrong**: Changing the `ent.Schema` interface without versioning.
 **Right**: New methods on `ent.Schema` must be optional or backward-compatible (use embedding).
+
+### Pitfall 6: Adding schema test files that import generated code without a build tag (fork-specific)
+**Wrong**: Adding a file to a consumer's `ent/schema/` package that imports `ent/gen` or `ent/hook` without a build tag.
+**Right**: Add `//go:build !entcodegen` as the first line. This fork unconditionally injects `-tags=entcodegen` into every `packages.Load` call so that schema files referencing generated code are excluded during codegen. Missing the tag produces a clear error naming the file.
 
 ---
 
