@@ -421,6 +421,14 @@ func generate(schemaPath string, cfg *gen.Config) error {
 	if err != nil {
 		return wrapLoadError(err, schemaPath)
 	}
+	// When bootstrap staged the schema into a tmpdir adjacent to schemaPath,
+	// LoadGraph sets cfg.Schema to the tmpdir's package path
+	// (e.g. ".../ent/ent-bootstrap-XXXX"). That leaks into generated
+	// runtime.go init() references. Fix it by replacing the last path
+	// component (the tmpdir name) with the real schema directory name.
+	if loadPath != schemaPath {
+		cfg.Schema = path.Join(path.Dir(cfg.Schema), path.Base(schemaPath))
+	}
 	if err := normalizePkg(cfg); err != nil {
 		return err
 	}
