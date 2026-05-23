@@ -42,3 +42,23 @@ func TestWrapLoadError_NoHintWhenSymbolDoesNotLookGenerated(t *testing.T) {
 	require.Contains(t, got, "undefined: time.Tomorrow")
 	require.NotContains(t, got, "//go:build !entcodegen", "should not suggest the tag for non-generated-looking symbols")
 }
+
+func TestWrapLoadError_AnnotatesPlainErrorWithGeneratedSymbol(t *testing.T) {
+	// Simulates the gorun/gocmd error path: schema package loaded but
+	// go run failed to compile the introspection helper. The error is
+	// delivered as a plain error (not a packages.Error), but the message
+	// still references generated-looking code.
+	plain := errors.New("undefined: hook.UserFunc")
+	got := wrapLoadError(plain, "./schema").Error()
+
+	require.Contains(t, got, "undefined: hook.UserFunc", "must include the original message")
+	require.Contains(t, got, "//go:build !entcodegen", "must suggest the build-tag escape hatch for generated-looking symbols")
+}
+
+func TestWrapLoadError_PreservesPlainErrorWithoutGeneratedSymbol(t *testing.T) {
+	// Plain error with no generated-looking symbol passes through unchanged
+	// so we don't over-annotate unrelated build failures.
+	plain := errors.New("connection refused")
+	got := wrapLoadError(plain, "./schema")
+	require.ErrorIs(t, got, plain, "non-generated plain errors should pass through unchanged")
+}
