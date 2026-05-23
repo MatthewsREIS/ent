@@ -37,12 +37,11 @@ func setupTempModule(t *testing.T, module string) string {
 	// entc/integration/codegen_isolation → three levels up to repo root.
 	repoRoot := filepath.Clean(filepath.Join(wd, "..", "..", ".."))
 
-	modDir, err := os.MkdirTemp("", "entc-errorpath-*")
-	require.NoError(t, err)
+	modDir := t.TempDir()
 
 	goMod := fmt.Sprintf(`module %s
 
-go 1.22
+go 1.24
 
 require entgo.io/ent v0.0.0
 
@@ -54,8 +53,7 @@ replace entgo.io/ent => %s
 	// inside load.Config.load() / gocmd() operate within the right module root.
 	require.NoError(t, os.Chdir(modDir))
 	t.Cleanup(func() {
-		os.Chdir(wd)         //nolint:errcheck // best-effort restore
-		os.RemoveAll(modDir) //nolint:errcheck
+		os.Chdir(wd) //nolint:errcheck // best-effort restore
 	})
 
 	return modDir
@@ -118,9 +116,9 @@ var _ = nonexistent.Symbol
 
 	require.Error(t, err, "codegen must not silently succeed when schema package fails to typecheck")
 	require.Contains(t, err.Error(), "this/package/does/not/exist", "error must name the failing import")
-	// No build-tag hint expected here since "nonexistent.Symbol" does not
-	// match the generated-code heuristic. The point is to verify we no
-	// longer silently restore from a snapshot.
+	// No build-tag hint expected: the broken symbol does not match the
+	// generated-code heuristic, so the hint must be absent.
+	require.NotContains(t, err.Error(), "//go:build !entcodegen", "must not suggest the build-tag for non-generated-looking symbols")
 }
 
 // TestErrorPath_HookReferencesGeneratedCode confirms that the build-tag
