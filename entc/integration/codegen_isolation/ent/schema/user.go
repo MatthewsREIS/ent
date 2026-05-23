@@ -32,6 +32,7 @@ func (User) Fields() []ent.Field {
 // //go:build !entcodegen), registered explicitly via client.Use(...).
 func (User) Hooks() []ent.Hook {
 	return []ent.Hook{
+		// identity hook — intentionally empty; presence alone triggers runtime split.
 		func(next ent.Mutator) ent.Mutator { return next },
 	}
 }
