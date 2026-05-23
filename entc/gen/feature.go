@@ -61,23 +61,6 @@ var (
 		Description: "This features guides Ent to set two-way references when loading (O2M/O2O) edges",
 	}
 
-	// FeatureSnapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852).
-	FeatureSnapshot = Feature{
-		Name:        "schema/snapshot",
-		Stage:       Experimental,
-		Default:     false,
-		Description: "Schema snapshot stores a snapshot of ent/schema and auto-solve merge-conflict (issue #852)",
-		GraphTemplates: []GraphTemplate{
-			{
-				Name:   "internal/schema",
-				Format: "internal/schema.go",
-			},
-		},
-		cleanup: func(c *Config) error {
-			return remove(filepath.Join(c.Target, "internal"), "schema.go")
-		},
-	}
-
 	// FeatureSchemaConfig allows users to pass init time alternate schema names
 	// for each ent model. This is useful if your SQL tables are spread out against
 	// multiple databases.
@@ -186,7 +169,6 @@ var (
 		FeatureEntQL,
 		FeatureNamedEdges,
 		FeatureBidiEdgeRefs,
-		FeatureSnapshot,
 		FeatureSchemaConfig,
 		FeatureLock,
 		FeatureModifier,
