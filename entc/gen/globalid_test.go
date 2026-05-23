@@ -97,14 +97,11 @@ const IncrementStarts = %s
 	require.NoError(t, os.MkdirAll(filepath.Dir(p), 0755))
 	require.NoError(t, os.WriteFile(p, []byte(cflct), 0644))
 
-	// Expect an error when there is a file conflict.
-	_, err := gen.NewGraph(c, s...)
-	require.Error(t, err)
-	// Conflict is resolved to "accept theirs".
-	require.NoError(t, gen.ResolveIncrementStartsConflict(c.Target))
-	require.NoError(t, internal.CheckDir(filepath.Dir(p)))
+	// NewGraph auto-resolves the conflict to "accept theirs" and loads
+	// the resolved file in a single pass.
 	g, err := gen.NewGraph(c, s...)
 	require.NoError(t, err)
+	require.NoError(t, internal.CheckDir(filepath.Dir(p)))
 	// Expect the conflict to be resolved with the remote table d keeping
 	// its range and our newly added table c gets the next one (3<<32).
 	require.Equal(t,
