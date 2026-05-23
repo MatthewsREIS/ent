@@ -33,14 +33,12 @@ func IncrementStartAnnotation(g *Graph) error {
 	case err != nil:
 		return err
 	default:
-		if ok, _ := g.FeatureEnabled(FeatureSnapshot.Name); ok {
-			if err = ResolveIncrementStartsConflict(g.Target); err != nil {
-				return err
-			}
-			buf, err = os.ReadFile(path)
-			if err != nil {
-				return err
-			}
+		if err = ResolveIncrementStartsConflict(g.Target); err != nil {
+			return err
+		}
+		buf, err = os.ReadFile(path)
+		if err != nil {
+			return err
 		}
 		var (
 			matches = make([][]byte, 0, 2)
