@@ -7,7 +7,6 @@ package internal
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -44,11 +43,11 @@ func (User) Hooks() []ent.Hook {
 	}
 }
 `
-	out, err := StripHookBodies([]byte(src))
+	out, err := StripHookBodies([]byte(src), nil)
 	require.NoError(t, err)
 	s := string(out)
 	require.Contains(t, s, "func (User) Hooks() []ent.Hook {")
-	require.Contains(t, s, "return nil\n}", "Hooks body must be replaced with `return nil`")
+	require.Contains(t, s, "return make([]ent.Hook, 1)", "1-element Hooks body must become make([]ent.Hook, 1)")
 	require.NotContains(t, s, "SetName", "the original hook body must be gone")
 	require.NotContains(t, s, "MutateFunc", "the original hook body must be gone")
 	require.NotContains(t, s, `"context"`, "context import must be dropped (now unused)")
@@ -84,13 +83,15 @@ func (Tenant) Interceptors() []ent.Interceptor {
 	}
 }
 `
-	out, err := StripHookBodies([]byte(src))
+	out, err := StripHookBodies([]byte(src), nil)
 	require.NoError(t, err)
 	s := string(out)
 	require.Contains(t, s, "func (Tenant) Policy() ent.Policy {")
 	require.Contains(t, s, "func (Tenant) Interceptors() []ent.Interceptor {")
-	occurrences := strings.Count(s, "return nil\n}")
-	require.GreaterOrEqual(t, occurrences, 2, "both Policy and Interceptors bodies must be replaced")
+	// Policy() returns a composite struct literal (not []ent.Hook) so falls
+	// back to return nil. Interceptors() has 1 element so becomes make([]ent.Interceptor, 1).
+	require.Contains(t, s, "return nil", "Policy body must be replaced")
+	require.Contains(t, s, "return make([]ent.Interceptor, 1)", "Interceptors body must be replaced with correct count")
 	require.NotContains(t, s, "DenyIfNoTenant", "Policy body must be gone")
 	require.NotContains(t, s, "FilterTenant", "Interceptors body must be gone")
 	require.NotContains(t, s, `"entgo.io/ent/privacy"`, "privacy import must be dropped (now unused)")
@@ -119,7 +120,7 @@ func someHelper() int {
 	return 42
 }
 `
-	out, err := StripHookBodies([]byte(src))
+	out, err := StripHookBodies([]byte(src), nil)
 	require.NoError(t, err)
 	s := string(out)
 	require.Contains(t, s, "func someHelper() int {", "top-level helpers must be preserved (only method receivers are stripped)")
@@ -141,7 +142,7 @@ func (Group) Fields() []ent.Field {
 	return nil
 }
 `
-	out, err := StripHookBodies([]byte(src))
+	out, err := StripHookBodies([]byte(src), nil)
 	require.NoError(t, err)
 	s := string(out)
 	require.Contains(t, s, "func (Group) Fields() []ent.Field {")
@@ -159,7 +160,7 @@ func Hooks() []ent.Hook {
 	return []ent.Hook{nil}
 }
 `
-	out, err := StripHookBodies([]byte(src))
+	out, err := StripHookBodies([]byte(src), nil)
 	require.NoError(t, err)
 	s := string(out)
 	require.Contains(t, s, "[]ent.Hook{nil}", "top-level Hooks function must be preserved")
@@ -169,7 +170,7 @@ func TestStripHookBodies_SyntaxErrorReturnsError(t *testing.T) {
 	src := `package schema
 
 func ((((`
-	_, err := StripHookBodies([]byte(src))
+	_, err := StripHookBodies([]byte(src), nil)
 	require.Error(t, err)
 }
 
@@ -230,6 +231,7 @@ func (Comment) Fields() []ent.Field { return nil }
 	require.NotContains(t, string(userOut), "badpackage", "bad import must be gone from stripped file")
 	require.NotContains(t, string(userOut), "GoSomething", "stripped body content must be gone")
 	require.Contains(t, string(userOut), "func (User) Hooks() []ent.Hook {")
+	require.Contains(t, string(userOut), "make([]ent.Hook, 1)", "1-element hook preserved as make")
 
 	// README should be copied verbatim.
 	readme, err := os.ReadFile(filepath.Join(dst, "README"))
@@ -250,4 +252,226 @@ func (Comment) Fields() []ent.Field { return nil }
 func TestStageStrippedSchema_NonExistentSrc(t *testing.T) {
 	_, err := StageStrippedSchema("/this/path/does/not/exist")
 	require.Error(t, err)
+}
+
+// --- count-aware stripping tests ---
+
+func TestStripHookBodies_CompositeLiteralCountPreserved(t *testing.T) {
+	// Hooks() returning a composite literal with 2 elements should become
+	// `return make([]ent.Hook, 2)`, not `return nil`, so ent allocates
+	// the right number of slots in the generated runtime.go init().
+	src := `package schema
+
+import (
+	"entgo.io/ent"
+	"example.com/x/ent/gen/hook"
+)
+
+type User struct{ ent.Schema }
+
+func (User) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hook.UserFunc(nil),
+		hook.UserFunc(nil),
+	}
+}
+`
+	out, err := StripHookBodies([]byte(src), nil)
+	require.NoError(t, err)
+	s := string(out)
+	require.Contains(t, s, "return make([]ent.Hook, 2)", "2-element literal must become make([]ent.Hook, 2)")
+	require.NotContains(t, s, "hook.UserFunc", "original body must be gone")
+}
+
+func TestStripHookBodies_EmptyLiteralBecomesNil(t *testing.T) {
+	// An empty literal `return []ent.Hook{}` has 0 elements and should
+	// become `return nil` (same as the existing nil-body behaviour).
+	src := `package schema
+
+import "entgo.io/ent"
+
+type Group struct{ ent.Schema }
+
+func (Group) Hooks() []ent.Hook {
+	return []ent.Hook{}
+}
+`
+	out, err := StripHookBodies([]byte(src), nil)
+	require.NoError(t, err)
+	require.Contains(t, string(out), "return nil")
+}
+
+func TestStripHookBodies_InterceptorCountPreserved(t *testing.T) {
+	// Same count-preservation applies to Interceptors().
+	src := `package schema
+
+import (
+	"entgo.io/ent"
+	"example.com/x/ent/gen/intercept"
+)
+
+type Order struct{ ent.Schema }
+
+func (Order) Interceptors() []ent.Interceptor {
+	return []ent.Interceptor{
+		intercept.OrderFunc(nil),
+		intercept.OrderFunc(nil),
+		intercept.OrderFunc(nil),
+	}
+}
+`
+	out, err := StripHookBodies([]byte(src), nil)
+	require.NoError(t, err)
+	require.Contains(t, string(out), "return make([]ent.Interceptor, 3)")
+}
+
+func TestStripHookBodies_NamedFuncCallUsesCountMap(t *testing.T) {
+	// When Hooks() returns a named function call, the count map supplies
+	// the element count so ent allocates the right number of slots.
+	src := `package schema
+
+import "entgo.io/ent"
+
+type BoxFolder struct{ ent.Schema }
+
+func (BoxFolder) Hooks() []ent.Hook {
+	return boxFolderHooks()
+}
+`
+	counts := map[string]int{"boxFolderHooks": 2}
+	out, err := StripHookBodies([]byte(src), counts)
+	require.NoError(t, err)
+	require.Contains(t, string(out), "return make([]ent.Hook, 2)",
+		"named-func call with count 2 must become make([]ent.Hook, 2)")
+	require.NotContains(t, string(out), "boxFolderHooks")
+}
+
+func TestStripHookBodies_NamedFuncNotInCountMapBecomesNil(t *testing.T) {
+	// When the function is not in the count map (e.g. because the
+	// *_runtime.go file couldn't be parsed), fall back to nil.
+	src := `package schema
+
+import "entgo.io/ent"
+
+type Widget struct{ ent.Schema }
+
+func (Widget) Hooks() []ent.Hook {
+	return unknownHooks()
+}
+`
+	out, err := StripHookBodies([]byte(src), nil)
+	require.NoError(t, err)
+	require.Contains(t, string(out), "return nil")
+}
+
+func TestCountHookFunctions_BasicCases(t *testing.T) {
+	dir := t.TempDir()
+
+	// A *_runtime.go with two hook functions of different counts.
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "owner_runtime.go"), []byte(`package schema
+
+import "entgo.io/ent"
+
+func ownerMixinHooks() []ent.Hook {
+	return []ent.Hook{nil, nil}
+}
+
+func ownerCMixinHooks() []ent.Hook {
+	return []ent.Hook{nil, nil, nil}
+}
+`), 0o644))
+
+	// A regular schema file — its methods must NOT be counted.
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "user.go"), []byte(`package schema
+
+import "entgo.io/ent"
+
+type User struct{ ent.Schema }
+
+func (User) Hooks() []ent.Hook {
+	return ownerMixinHooks()
+}
+`), 0o644))
+
+	counts, err := CountHookFunctions(dir)
+	require.NoError(t, err)
+	require.Equal(t, 2, counts["ownerMixinHooks"])
+	require.Equal(t, 3, counts["ownerCMixinHooks"])
+	require.NotContains(t, counts, "Hooks", "schema methods must not be in the count map")
+}
+
+func TestCountHookFunctions_InterceptorFunctions(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "base_runtime.go"), []byte(`package schema
+
+import "entgo.io/ent"
+
+func baseMixinInterceptors() []ent.Interceptor {
+	return []ent.Interceptor{nil}
+}
+`), 0o644))
+
+	counts, err := CountHookFunctions(dir)
+	require.NoError(t, err)
+	require.Equal(t, 1, counts["baseMixinInterceptors"])
+}
+
+func TestCountHookFunctions_EmptyAndNilReturn(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "noop_runtime.go"), []byte(`package schema
+
+import "entgo.io/ent"
+
+func noopHooks() []ent.Hook {
+	return nil
+}
+
+func emptyHooks() []ent.Hook {
+	return []ent.Hook{}
+}
+`), 0o644))
+
+	counts, err := CountHookFunctions(dir)
+	require.NoError(t, err)
+	require.Equal(t, 0, counts["noopHooks"])
+	require.Equal(t, 0, counts["emptyHooks"])
+}
+
+func TestStageStrippedSchema_HookCountsPreservedAcrossFiles(t *testing.T) {
+	// End-to-end: a schema dir where the schema file delegates to a runtime
+	// file. After staging, the stripped schema method should contain the
+	// right make() count so the generated runtime.go allocates the right
+	// number of slots.
+	src := t.TempDir()
+
+	require.NoError(t, os.WriteFile(filepath.Join(src, "owner.go"), []byte(`package schema
+
+import "entgo.io/ent"
+
+type Owner struct{ ent.Schema }
+
+func (Owner) Hooks() []ent.Hook {
+	return ownerHooks()
+}
+`), 0o644))
+
+	require.NoError(t, os.WriteFile(filepath.Join(src, "owner_runtime.go"), []byte(`//go:build !entcodegen
+
+package schema
+
+import "entgo.io/ent"
+
+func ownerHooks() []ent.Hook {
+	return []ent.Hook{nil, nil}
+}
+`), 0o644))
+
+	dst, err := StageStrippedSchema(src)
+	require.NoError(t, err)
+	defer os.RemoveAll(dst)
+
+	ownerOut, err := os.ReadFile(filepath.Join(dst, "owner.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(ownerOut), "return make([]ent.Hook, 2)",
+		"staged schema must reflect the hook count from the runtime file")
 }
