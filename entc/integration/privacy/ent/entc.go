@@ -25,7 +25,6 @@ func main() {
 		entc.FeatureNames(
 			"privacy",
 			"entql",
-			"schema/snapshot",
 		),
 	}
 	err := entc.Generate("./schema", &gen.Config{
