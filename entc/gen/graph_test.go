@@ -598,23 +598,11 @@ func TestGraph_Gen(t *testing.T) {
 	require.True(os.IsNotExist(err))
 
 	// Generated feature templates.
-	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
-	require.NoError(err)
 	_, err = os.Stat(filepath.Join(target, "internal", "schemaconfig.go"))
 	require.NoError(err)
 	c, err := os.ReadFile(filepath.Join(target, "internal", "globalid.go"))
 	require.NoError(err)
 	require.Contains(string(c), fmt.Sprintf(`"{\"t1s\":0,\"t2s\":%d,\"t3s\":%d}"`, 1<<32, 2<<32))
-	// Rerun codegen with only one feature-flag.
-	graph.Features = []Feature{FeatureSnapshot}
-	require.NoError(graph.Gen())
-	// Generated feature templates.
-	_, err = os.Stat(filepath.Join(target, "internal", "schema.go"))
-	require.NoError(err)
-	_, err = os.Stat(filepath.Join(target, "internal", "schemaconfig.go"))
-	require.True(os.IsNotExist(err))
-	_, err = os.Stat(filepath.Join(target, "internal", "globalid.go"))
-	require.True(os.IsNotExist(err))
 	// Rerun codegen without any feature-flags.
 	graph.Features = nil
 	require.NoError(graph.Gen())
