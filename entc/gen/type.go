@@ -2026,7 +2026,14 @@ func (e Edge) OwnFK() bool {
 	switch {
 	case e.M2O():
 		return true
-	case e.O2O() && (e.IsInverse() || e.Bidi):
+	case e.O2O() && e.Bidi:
+		return true
+	case e.O2O() && e.Owner != nil && e.Owner.featureEnabled(FeatureO2OFKOnAssoc):
+		// With FeatureO2OFKOnAssoc the foreign key of a two-type O2O lives on
+		// the association (edge.To) side, so the non-inverse edge owns it.
+		// This is inverted from the default, where the inverse side owns it.
+		return !e.IsInverse()
+	case e.O2O() && e.IsInverse():
 		return true
 	}
 	return false

@@ -162,6 +162,19 @@ var (
 		Description: "Suppress generation of *Delete/*DeleteOne builders for every entity",
 	}
 
+	// FeatureO2OFKOnAssoc places the foreign-key column of a two-type O2O
+	// relation on the association (edge.To) side instead of ent's default
+	// inverse (edge.From) side. With this enabled, the FK table is determined
+	// by the edge.To owner regardless of whether a unique back-reference edge
+	// exists, so an O2O can be declared in its natural orientation (the owner
+	// holds edge.To) and the FK lands on the owner's table.
+	FeatureO2OFKOnAssoc = Feature{
+		Name:        "sql/o2o-fk-on-assoc",
+		Stage:       Experimental,
+		Default:     false,
+		Description: "Place two-type O2O foreign keys on the association (edge.To) side instead of the inverse (edge.From) side",
+	}
+
 	// AllFeatures holds a list of all feature-flags.
 	AllFeatures = []Feature{
 		FeaturePrivacy,
@@ -178,6 +191,7 @@ var (
 		FeatureGlobalID,
 		FeatureNoUpdate,
 		FeatureNoDelete,
+		FeatureO2OFKOnAssoc,
 	}
 	// allFeatures includes all public and private features.
 	allFeatures = append(AllFeatures, featureMultiSchema)
