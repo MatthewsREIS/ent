@@ -63,6 +63,11 @@ type (
 
 // Load loads the schemas package and build the Go plugin with this info.
 func (c *Config) Load() (*SchemaSpec, error) {
+	// Inject the entcodegen build tag so files with //go:build !entcodegen
+	// are excluded from typechecking and from the .entc runtime program.
+	// See entc/load/tags.go for details.
+	c.BuildFlags = mergeCodegenTag(c.BuildFlags)
+
 	spec, pos, err := c.load()
 	if err != nil {
 		return nil, fmt.Errorf("entc/load: parse schema dir: %w", err)
