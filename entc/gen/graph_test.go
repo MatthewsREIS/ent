@@ -350,6 +350,133 @@ func TestFKColumns(t *testing.T) {
 	}
 }
 
+func TestFeatureO2OFKOnAssoc_DefinitionPresent(t *testing.T) {
+	require.Equal(t, "sql/o2o-fk-on-assoc", FeatureO2OFKOnAssoc.Name, "feature name is the contract consumers gate on; renaming it breaks them")
+	require.False(t, FeatureO2OFKOnAssoc.Default, "default must be off so upstream ent behavior is unchanged")
+	require.NotEmpty(t, FeatureO2OFKOnAssoc.Description)
+	require.Contains(t, AllFeatures, FeatureO2OFKOnAssoc, "feature must be registered in AllFeatures so --feature sql/o2o-fk-on-assoc works")
+}
+
+func TestO2OFKOnAssocFeature(t *testing.T) {
+	require := require.New(t)
+	// User owns the relation via edge.To("card"); Card holds the unique
+	// back-reference. This is a two-type O2O.
+	newSchemas := func() (*load.Schema, *load.Schema) {
+		return &load.Schema{
+				Name: "User",
+				Edges: []*load.Edge{
+					{Name: "card", Type: "Card", Unique: true},
+				},
+			}, &load.Schema{
+				Name: "Card",
+				Edges: []*load.Edge{
+					{Name: "owner", Type: "User", RefName: "card", Inverse: true, Unique: true},
+				},
+			}
+	}
+	tableByName := func(ts []*schema.Table, name string) *schema.Table {
+		for _, tbl := range ts {
+			if tbl.Name == name {
+				return tbl
+			}
+		}
+		return nil
+	}
+	fkColumnOf := func(tbl *schema.Table, col string) *schema.ForeignKey {
+		for _, fk := range tbl.ForeignKeys {
+			if len(fk.Columns) == 1 && fk.Columns[0].Name == col {
+				return fk
+			}
+		}
+		return nil
+	}
+	hasColumn := func(tbl *schema.Table, col string) bool {
+		return slices.ContainsFunc(tbl.Columns, func(c *schema.Column) bool { return c.Name == col })
+	}
+
+	// --- default: FK on the inverse (edge.From) side (cards) ---
+	user, card := newSchemas()
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, card)
+	require.NoError(err)
+	require.Equal("cards", g.Nodes[0].Edges[0].Rel.Table, "default: O2O FK on the inverse (edge.From) side")
+	require.False(g.Nodes[0].Edges[0].OwnFK(), "default: assoc (edge.To) edge does not own the FK")
+	require.True(g.Nodes[1].Edges[0].OwnFK(), "default: inverse (edge.From) edge owns the FK")
+	ts, err := g.Tables()
+	require.NoError(err)
+	require.True(hasColumn(tableByName(ts, "cards"), "user_card"), "default: FK column lives on cards")
+	require.False(hasColumn(tableByName(ts, "users"), "user_card"), "default: no FK column on users")
+
+	// --- feature on: FK on the association (edge.To) side (users) ---
+	user, card = newSchemas()
+	g, err = NewGraph(&Config{
+		Package:  "entc/gen",
+		Storage:  drivers[0],
+		Features: []Feature{FeatureO2OFKOnAssoc},
+	}, user, card)
+	require.NoError(err)
+	assoc := g.Nodes[0].Edges[0] // User.card (edge.To)
+	inv := g.Nodes[1].Edges[0]   // Card.owner (edge.From)
+	require.Equal(O2O, assoc.Rel.Type)
+	require.Equal(O2O, inv.Rel.Type)
+	require.Equal("users", assoc.Rel.Table, "feature: O2O FK moves to the edge.To (assoc) side")
+	require.Equal([]string{"user_card"}, assoc.Rel.Columns)
+	require.True(assoc.OwnFK(), "feature: assoc (edge.To) edge owns the FK")
+	require.False(inv.OwnFK(), "feature: inverse (edge.From) edge no longer owns the FK")
+
+	ts, err = g.Tables()
+	require.NoError(err)
+	users, cards := tableByName(ts, "users"), tableByName(ts, "cards")
+	require.True(hasColumn(users, "user_card"), "feature: FK column must be on users")
+	require.False(hasColumn(cards, "user_card"), "feature: FK column must NOT be on cards")
+	fk := fkColumnOf(users, "user_card")
+	require.NotNil(fk, "feature: users must hold the user_card foreign key")
+	require.Equal("cards", fk.RefTable.Name, "feature: FK must reference cards, not a self-reference to users")
+	require.True(fk.Columns[0].Unique, "feature: O2O FK column must carry the unique constraint")
+}
+
+func TestGraph_Gen_O2OFKOnAssocCompiles(t *testing.T) {
+	mod := writeTempModule(t, "o2ofkassocgen")
+	target := filepath.Join(mod, "ent")
+
+	// A two-type O2O declared in its natural orientation: User owns
+	// edge.To("card"), Card holds the unique back-reference. With the feature
+	// the FK lives on users, so the assoc edge owns it (OwnFK flips). This
+	// exercises every template path that branches on OwnFK for the edge.
+	graph, err := NewGraph(&Config{
+		Package:  "o2ofkassocgen/ent",
+		Target:   target,
+		Storage:  drivers[0],
+		Features: []Feature{FeatureO2OFKOnAssoc},
+	},
+		&load.Schema{
+			Name:   "User",
+			Fields: []*load.Field{{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}}},
+			Edges:  []*load.Edge{{Name: "card", Type: "Card", Unique: true}},
+		},
+		&load.Schema{
+			Name:   "Card",
+			Fields: []*load.Field{{Name: "number", Info: &field.TypeInfo{Type: field.TypeString}}},
+			Edges:  []*load.Edge{{Name: "owner", Type: "User", RefName: "card", Inverse: true, Unique: true}},
+		},
+	)
+	require.NoError(t, err)
+	require.NoError(t, graph.Gen())
+
+	// Sanity: the migrate schema must carry the FK column, and the unique
+	// constraint that enforces the O2O, on the users side.
+	content, err := os.ReadFile(filepath.Join(target, "migrate", "schema.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(content), "user_card", "generated migrate schema must define the user_card FK column")
+
+	// Decisive: the generated client (queries, mutations, eager-loading,
+	// migrate schema) must actually compile with the flipped OwnFK.
+	cmd := exec.Command("go", "build", "-mod=mod", "./...")
+	cmd.Dir = mod
+	cmd.Env = append(os.Environ(), "GOWORK=off")
+	out, err := cmd.CombinedOutput()
+	require.NoErrorf(t, err, "generated O2O-FK-on-assoc client failed to compile:\n%s", out)
+}
+
 func TestAbortDuplicateFK(t *testing.T) {
 	var (
 		user = &load.Schema{

@@ -507,6 +507,14 @@ func (g *Graph) resolve(t *Type) error {
 			// then inverse is M2O and the relation is in its table.
 			case a && b:
 				e.Rel.Type, ref.Rel.Type = O2O, O2O
+				// By default the O2O foreign key lives on the inverse
+				// (edge.From) side. With FeatureO2OFKOnAssoc it moves to the
+				// association (edge.To) side, so the FK table is independent of
+				// whether the unique back-reference edge exists (it matches the
+				// M2O placement of a bare unique edge.To).
+				if g.featureEnabled(FeatureO2OFKOnAssoc) {
+					table = e.Type.Table()
+				}
 			case !a && b:
 				e.Rel.Type, ref.Rel.Type = M2O, O2M
 
@@ -750,10 +758,22 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				// The "owner" is the table that owns the relation (we set
 				// the foreign-key on) and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
+				// With FeatureO2OFKOnAssoc the O2O foreign key lives on the
+				// association (edge.To) side, so it references the edge target
+				// rather than the assoc-declaring node.
+				fkOnAssoc := e.O2O() && g.featureEnabled(FeatureO2OFKOnAssoc)
+				if fkOnAssoc {
+					ref = tables[e.Type.Table()]
+				}
 				column := fkColumn(e, owner, ref.PrimaryKey[0])
-				// If it's not a circular reference (self-referencing table),
-				// and the inverse edge is required, make it non-nullable.
-				if n != e.Type && e.Ref != nil && !e.Ref.Optional {
+				// If it's not a circular reference (self-referencing table) and
+				// the required end of the relation is set, make it non-nullable.
+				switch {
+				// FK on the assoc side: requiredness follows the assoc edge.
+				case fkOnAssoc && n != e.Type && !e.Optional:
+					column.Nullable = false
+				// Default: requiredness follows the (required) inverse edge.
+				case !fkOnAssoc && n != e.Type && e.Ref != nil && !e.Ref.Optional:
 					column.Nullable = false
 				}
 				mayAddColumn(owner, column)
