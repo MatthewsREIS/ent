@@ -5,6 +5,8 @@
 package internal
 
 import (
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"testing"
@@ -362,6 +364,61 @@ func (Widget) Hooks() []ent.Hook {
 	out, err := StripHookBodies([]byte(src), nil)
 	require.NoError(t, err)
 	require.Contains(t, string(out), "return nil")
+}
+
+func TestStripHookBodies_GuardedHooksPreservesGuardAndCount(t *testing.T) {
+	// A Hooks() method with a DisableSoftDelete guard before the real return
+	// (the BaseMixin pattern). The guard must be PRESERVED so codegen evaluates
+	// it per-instance: a mixin with DisableSoftDelete=true returns nil (count 0,
+	// so no runtime wiring), while DisableSoftDelete=false returns the real
+	// count. Only the undefined leaf-func-call return is rewritten to make().
+	src := `package schema
+
+import "entgo.io/ent"
+
+type BaseMixin struct{ DisableSoftDelete bool }
+
+func (b BaseMixin) Hooks() []ent.Hook {
+	if b.DisableSoftDelete {
+		return nil
+	}
+	return baseMixinHooks(b)
+}
+`
+	counts := map[string]int{"baseMixinHooks": 1}
+	out, err := StripHookBodies([]byte(src), counts)
+	require.NoError(t, err)
+	s := string(out)
+	require.Contains(t, s, "if b.DisableSoftDelete", "the guard clause must be preserved so the count is per-instance")
+	require.Contains(t, s, "return make([]ent.Hook, 1)", "the real (leaf-func) return must become make([]ent.Hook, 1)")
+	require.NotContains(t, s, "baseMixinHooks", "the undefined leaf-func call must be gone")
+	_, perr := parser.ParseFile(token.NewFileSet(), "", out, 0)
+	require.NoError(t, perr, "stripped output must be valid Go")
+}
+
+func TestStripHookBodies_GuardedInterceptorsPreservesGuardAndCount(t *testing.T) {
+	src := `package schema
+
+import "entgo.io/ent"
+
+type BaseMixin struct{ DisableSoftDelete bool }
+
+func (b BaseMixin) Interceptors() []ent.Interceptor {
+	if b.DisableSoftDelete {
+		return nil
+	}
+	return baseMixinInterceptors(b)
+}
+`
+	counts := map[string]int{"baseMixinInterceptors": 1}
+	out, err := StripHookBodies([]byte(src), counts)
+	require.NoError(t, err)
+	s := string(out)
+	require.Contains(t, s, "if b.DisableSoftDelete", "the guard clause must be preserved")
+	require.Contains(t, s, "return make([]ent.Interceptor, 1)", "the real return must become make([]ent.Interceptor, 1)")
+	require.NotContains(t, s, "baseMixinInterceptors", "the undefined leaf-func call must be gone")
+	_, perr := parser.ParseFile(token.NewFileSet(), "", out, 0)
+	require.NoError(t, perr, "stripped output must be valid Go")
 }
 
 func TestCountHookFunctions_BasicCases(t *testing.T) {
