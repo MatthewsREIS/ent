@@ -20,18 +20,10 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 )
 
-// returnNilBody is the source we parse to obtain a properly-positioned BlockStmt
-// that formats as a multi-line body:
-//
-//	{
-//		return nil
-//	}
-const returnNilBody = "package p\nfunc f(){\nreturn nil\n}\n"
-
-// hookMethodNames is the set of Schema-interface methods whose bodies bootstrap
-// mode replaces with a count-preserving stub. These methods run at the
-// consumer's runtime, not at codegen time, so the loader does not need their
-// behavior — only their signatures and slot counts.
+// hookMethodNames is the set of Schema-interface methods whose hook-slice
+// return expressions bootstrap mode rewrites to count-preserving stubs. These
+// methods run at the consumer's runtime, not at codegen time, so the loader
+// does not need their real behavior — only their per-instance slot counts.
 var hookMethodNames = map[string]bool{
 	"Hooks":        true,
 	"Policy":       true,
@@ -39,39 +31,30 @@ var hookMethodNames = map[string]bool{
 }
 
 // hookSliceTypes maps hook/interceptor method names to the Go slice type used
-// in the count-preserving make() stub body.
+// in the count-preserving make() stub expression. Policy() has no entry: its
+// returns are rewritten to nil (it is a single value, never slot-counted).
 var hookSliceTypes = map[string]string{
 	"Hooks":        "ent.Hook",
 	"Interceptors": "ent.Interceptor",
 }
 
-// newReturnNilBody parses a tiny stub into fset and returns the *ast.BlockStmt
-// whose positions cause go/format to render it as a multi-line body:
-//
-//	{
-//		return nil
-//	}
-func newReturnNilBody(fset *token.FileSet) *ast.BlockStmt {
-	stub, err := parser.ParseFile(fset, "<bootstrap>", returnNilBody, 0)
-	if err != nil {
-		// returnNilBody is a constant literal; this must never fail.
-		panic(fmt.Sprintf("bootstrap: parse stub: %v", err))
+// makeSliceExpr builds the expression `make([]elemType, n)` (e.g.
+// `make([]ent.Hook, 1)`), used to replace a hook/interceptor return value while
+// preserving its element count for codegen.
+func makeSliceExpr(elemType string, n int) ast.Expr {
+	var elt ast.Expr
+	if i := strings.IndexByte(elemType, '.'); i >= 0 {
+		elt = &ast.SelectorExpr{X: ast.NewIdent(elemType[:i]), Sel: ast.NewIdent(elemType[i+1:])}
+	} else {
+		elt = ast.NewIdent(elemType)
 	}
-	return stub.Decls[0].(*ast.FuncDecl).Body
-}
-
-// newReturnMakeBody returns a BlockStmt that formats as:
-//
-//	{
-//		return make([]T, N)
-//	}
-func newReturnMakeBody(fset *token.FileSet, elemType string, n int) *ast.BlockStmt {
-	src := fmt.Sprintf("package p\nfunc f(){\nreturn make([]%s, %d)\n}\n", elemType, n)
-	stub, err := parser.ParseFile(fset, "<bootstrap>", src, 0)
-	if err != nil {
-		panic(fmt.Sprintf("bootstrap: parse make stub: %v", err))
+	return &ast.CallExpr{
+		Fun: ast.NewIdent("make"),
+		Args: []ast.Expr{
+			&ast.ArrayType{Elt: elt},
+			&ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(n)},
+		},
 	}
-	return stub.Decls[0].(*ast.FuncDecl).Body
 }
 
 // countReturnElems returns the number of elements in the first return
@@ -163,21 +146,33 @@ func returnsHookSlice(fn *ast.FuncDecl) bool {
 	return sel.Sel.Name == "Hook" || sel.Sel.Name == "Interceptor"
 }
 
-// StripHookBodies returns src with the bodies of every method whose name is in
-// hookMethodNames (`Hooks`, `Policy`, `Interceptors`) replaced with a
-// count-preserving stub:
-//   - `return make([]ent.Hook, N)` when N > 0 (preserves slot count for codegen)
-//   - `return nil` when N == 0
+// StripHookBodies returns src with the hook-slice return expressions of every
+// method whose name is in hookMethodNames (`Hooks`, `Policy`, `Interceptors`)
+// replaced with a count-preserving stub, while PRESERVING the method's control
+// flow. Each single-value return is rewritten as:
+//   - Hooks/Interceptors: `return make([]T, N)` when N > 0, else `return nil`.
+//   - Policy: `return nil` (a single value, never slot-counted).
 //
-// The count N is determined by inspecting the method body:
-//  1. Composite literal return (e.g. `return []ent.Hook{h1, h2}`): N = len(elts).
-//  2. Named-function call (e.g. `return myHooks()`): N = funcCounts["myHooks"],
-//     defaulting to 0 when the name is absent.
-//  3. nil return or unrecognised pattern: N = 0.
+// N is derived from the return expression: composite-literal length, or the
+// funcCounts entry for a named-function call (e.g. `return myHooks()`),
+// defaulting to 0.
 //
-// Top-level functions with the same name are NOT touched — only methods (where
-// FuncDecl.Recv is non-nil). After stripping, any imports made unused by the
-// removal are deleted from the import block.
+// Preserving control flow matters for guarded methods such as
+//
+//	func (b BaseMixin) Hooks() []ent.Hook {
+//		if b.DisableSoftDelete { return nil }
+//		return baseMixinHooks(b)
+//	}
+//
+// Replacing the whole body with a static `make([]ent.Hook, 1)` would lose the
+// guard, making the loader count one slot for hard-delete mixins too and
+// panicking the generated runtime.go (which then indexes a nil hook slice). By
+// rewriting only the return expressions, the loader runs the guard per
+// instance: 0 slots for DisableSoftDelete=true, 1 otherwise. Returns inside
+// nested function literals are left untouched.
+//
+// Top-level functions are NOT touched — only methods (FuncDecl.Recv non-nil).
+// After rewriting, any imports made unused are deleted from the import block.
 //
 // funcCounts is typically built by CountHookFunctions over the schema dir and
 // may be nil (treated as empty).
@@ -190,23 +185,14 @@ func StripHookBodies(src []byte, funcCounts map[string]int) ([]byte, error) {
 
 	for _, decl := range f.Decls {
 		fn, ok := decl.(*ast.FuncDecl)
-		if !ok {
-			continue
-		}
-		if fn.Recv == nil {
-			// Top-level function, not a method. Skip.
+		if !ok || fn.Recv == nil {
+			// Top-level functions are not stripped; only methods.
 			continue
 		}
 		if !hookMethodNames[fn.Name.Name] {
 			continue
 		}
-		n := resolveHookCount(fn, funcCounts)
-		elemType := hookSliceTypes[fn.Name.Name]
-		if n > 0 && elemType != "" {
-			fn.Body = newReturnMakeBody(fset, elemType, n)
-		} else {
-			fn.Body = newReturnNilBody(fset)
-		}
+		stripHookMethodReturns(fn, hookSliceTypes[fn.Name.Name], funcCounts)
 	}
 
 	// Remove imports made unused by stripping. Iterate over a copy because
@@ -314,28 +300,48 @@ func stripAndCopyTree(src, dst string, funcCounts map[string]int) error {
 	})
 }
 
-// resolveHookCount determines the hook/interceptor slot count for a method
-// whose body is being stripped. It checks:
-//  1. Composite literal return: count the elements directly.
-//  2. Named-function call: look up the function in funcCounts.
-//  3. Anything else (nil, unknown): return 0.
-func resolveHookCount(fn *ast.FuncDecl, funcCounts map[string]int) int {
-	if fn.Body == nil || len(fn.Body.List) == 0 {
-		return 0
+// stripHookMethodReturns rewrites every single-value return statement in a hook
+// method body to a count-preserving stub, preserving the surrounding control
+// flow. Returns inside nested function literals are left untouched.
+//
+// For Hooks/Interceptors (elemType != ""): the return value becomes
+// make([]elemType, N) where N is the count implied by the original expression,
+// or nil when N == 0. For Policy (elemType == ""): every return becomes nil.
+func stripHookMethodReturns(fn *ast.FuncDecl, elemType string, funcCounts map[string]int) {
+	if fn.Body == nil {
+		return
 	}
-	ret, ok := fn.Body.List[0].(*ast.ReturnStmt)
-	if !ok || len(ret.Results) != 1 {
-		return 0
-	}
-	switch r := ret.Results[0].(type) {
+	astutil.Apply(fn.Body, func(c *astutil.Cursor) bool {
+		switch node := c.Node().(type) {
+		case *ast.FuncLit:
+			return false // never rewrite returns inside nested closures
+		case *ast.ReturnStmt:
+			if len(node.Results) != 1 {
+				return false
+			}
+			if elemType == "" {
+				node.Results[0] = ast.NewIdent("nil")
+				return false
+			}
+			if n := countReturnResult(node.Results[0], funcCounts); n > 0 {
+				node.Results[0] = makeSliceExpr(elemType, n)
+			} else {
+				node.Results[0] = ast.NewIdent("nil")
+			}
+			return false
+		}
+		return true
+	}, nil)
+}
+
+// countReturnResult returns the hook/interceptor element count implied by a
+// single return expression: the element count of a composite literal, the
+// funcCounts entry for a named-function call, or 0 for nil/unrecognised forms.
+func countReturnResult(expr ast.Expr, funcCounts map[string]int) int {
+	switch r := expr.(type) {
 	case *ast.CompositeLit:
 		return len(r.Elts)
-	case *ast.Ident:
-		if r.Name == "nil" {
-			return 0
-		}
 	case *ast.CallExpr:
-		// Named function call: e.g. `return boxFolderHooks()`
 		if ident, ok := r.Fun.(*ast.Ident); ok {
 			if n, found := funcCounts[ident.Name]; found {
 				return n
