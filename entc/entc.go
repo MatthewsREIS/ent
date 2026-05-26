@@ -21,14 +21,8 @@ import (
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
-
-	"golang.org/x/tools/go/packages"
 )
 
-// errRecovered is returned by mayRecover when it has produced a completed
-// graph via the bootstrap fallback path. The top-level generate() checks
-// for this sentinel and skips its own LoadGraph/Gen calls.
-var errRecovered = errors.New("entc: recovered via bootstrap fallback")
 
 // LoadGraph loads the schema package from the given schema path,
 // and constructs a *gen.Graph.
@@ -170,19 +164,6 @@ func BuildTags(tags ...string) Option {
 	return BuildFlags("-tags", strings.Join(tags, ","))
 }
 
-// SnapshotDir sets an alternative directory for the schema snapshot file,
-// allowing it to live outside the gitignored Target directory.
-func SnapshotDir(dir string) Option {
-	return func(cfg *gen.Config) error {
-		abs, err := filepath.Abs(dir)
-		if err != nil {
-			return fmt.Errorf("resolving snapshot dir: %w", err)
-		}
-		cfg.SnapshotDir = abs
-		return nil
-	}
-}
-
 // SkipHookCompilation enables bootstrap mode: before loading the schema
 // package, entc copies the schema directory to a tmpdir and AST-strips the
 // bodies of Hooks() / Policy() / Interceptors() methods on every
@@ -203,6 +184,7 @@ func SkipHookCompilation() Option {
 		return nil
 	}
 }
+
 
 // Split enables and configures optional file splitting for generated Go files.
 func Split(opts ...gen.SplitOption) Option {
@@ -437,45 +419,21 @@ func generate(schemaPath string, cfg *gen.Config) error {
 
 	graph, err := LoadGraph(loadPath, cfg)
 	if err != nil {
-		if rErr := mayRecover(err, schemaPath, cfg); rErr != nil {
-			if errors.Is(rErr, errRecovered) {
-				return nil
-			}
-			return rErr
-		}
-		loadPath, cleanup, err = maybeStageBootstrap(schemaPath, cfg, false)
-		if err != nil {
-			return err
-		}
-		defer cleanup()
-		if graph, err = LoadGraph(loadPath, cfg); err != nil {
-			return err
-		}
+		return wrapLoadError(err, schemaPath)
+	}
+	// When bootstrap staged the schema into a tmpdir adjacent to schemaPath,
+	// LoadGraph sets cfg.Schema to the tmpdir's package path
+	// (e.g. ".../ent/ent-bootstrap-XXXX"). That leaks into generated
+	// runtime.go init() references. Fix it by replacing the last path
+	// component (the tmpdir name) with the real schema directory name.
+	if loadPath != schemaPath {
+		cfg.Schema = path.Join(path.Dir(cfg.Schema), path.Base(schemaPath))
 	}
 	if err := normalizePkg(cfg); err != nil {
 		return err
 	}
-	// Save the original target before Gen (Split rewrites cfg.Target to a temp dir).
-	origTarget := cfg.Target
 	if err := graph.Gen(); err != nil {
 		return err
-	}
-	// Copy snapshot to external directory if configured.
-	if cfg.SnapshotDir != "" {
-		if ok, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name); ok {
-			src := filepath.Join(origTarget, "internal", "schema.go")
-			dst := filepath.Join(cfg.SnapshotDir, "schema.go")
-			data, err := os.ReadFile(src)
-			if err != nil {
-				return fmt.Errorf("reading snapshot for copy: %w", err)
-			}
-			if err := os.MkdirAll(cfg.SnapshotDir, 0o755); err != nil {
-				return fmt.Errorf("creating snapshot dir: %w", err)
-			}
-			if err := os.WriteFile(dst, data, 0o644); err != nil {
-				return fmt.Errorf("writing snapshot copy: %w", err)
-			}
-		}
 	}
 	return nil
 }
@@ -496,62 +454,6 @@ func maybeStageBootstrap(schemaPath string, cfg *gen.Config, forceBootstrap bool
 	return staged, func() { _ = os.RemoveAll(staged) }, nil
 }
 
-func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
-	if !errors.As(err, &packages.Error{}) && !internal.IsBuildError(err) {
-		return err
-	}
-	// If the build error comes from the schema package.
-	if cErr := internal.CheckDir(schemaPath); cErr != nil {
-		return fmt.Errorf("schema failure: %w", cErr)
-	}
-
-	snapshotOK, _ := cfg.FeatureEnabled(gen.FeatureSnapshot.Name)
-	if snapshotOK {
-		if ok, _ := cfg.FeatureEnabled(gen.FeatureGlobalID.Name); ok {
-			if internal.CheckDir(filepath.Dir(gen.IncrementStartsFilePath(cfg.Target))) != nil {
-				if err := gen.ResolveIncrementStartsConflict(cfg.Target); err != nil {
-					return err
-				}
-			}
-		}
-		var target string
-		if cfg.SnapshotDir != "" {
-			target = filepath.Join(cfg.SnapshotDir, "schema.go")
-		} else {
-			target = filepath.Join(cfg.Target, "internal/schema.go")
-		}
-		if rErr := (&internal.Snapshot{Path: target, Config: cfg}).Restore(); rErr == nil {
-			// Snapshot.Restore() ran the full codegen (graph.Gen()) — the
-			// caller must NOT attempt to re-load. Return errRecovered so
-			// generate() short-circuits the post-mayRecover retry path.
-			// (Returning nil silently dropped the recovery: generate()
-			// fell through to a second LoadGraph that re-hit the same
-			// schema compile error and panicked.)
-			return errRecovered
-		}
-		// Snapshot restore failed (file missing, malformed, or schema stale).
-		// Fall through to bootstrap.
-	}
-
-	// Bootstrap fallback: AST-strip the current schema and try generating
-	// against the stripped copy.
-	loadPath, cleanup, sErr := maybeStageBootstrap(schemaPath, cfg, true)
-	if sErr != nil {
-		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, sErr)
-	}
-	defer cleanup()
-	graph, lErr := LoadGraph(loadPath, cfg)
-	if lErr != nil {
-		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, lErr)
-	}
-	if nErr := normalizePkg(cfg); nErr != nil {
-		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, nErr)
-	}
-	if gErr := graph.Gen(); gErr != nil {
-		return fmt.Errorf("%w; bootstrap fallback also failed: %v", err, gErr)
-	}
-	return errRecovered
-}
 
 // indirect returns the type at the end of indirection.
 func indirect(t reflect.Type) reflect.Type {

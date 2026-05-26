@@ -27,7 +27,6 @@ func main() {
 			gen.FeatureEntQL,
 			gen.FeatureUpsert,
 			gen.FeaturePrivacy,
-			gen.FeatureSnapshot,
 		},
 	})
 	if err != nil {
