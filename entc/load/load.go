@@ -18,6 +18,7 @@ import (
 	"maps"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -28,6 +29,7 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/entc/internal"
 
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/go/packages"
@@ -68,6 +70,42 @@ func (c *Config) Load() (*SchemaSpec, error) {
 	// See entc/load/tags.go for details.
 	c.BuildFlags = mergeCodegenTag(c.BuildFlags)
 
+	spec, err := c.loadOnce()
+	if err == nil {
+		return spec, nil
+	}
+	// A schema can fail to load purely because Hooks()/Interceptors()/Policy()
+	// method bodies reference symbols excluded under the entcodegen build tag
+	// (helpers in //go:build !entcodegen files that import not-yet-generated
+	// code). Those bodies don't affect the loaded schema descriptors, so retry
+	// against a copy with the bodies AST-stripped. This gives every loader
+	// consumer the robustness entc.Generate gets from SkipHookCompilation —
+	// notably atlas's ent:// provider, which calls the loader directly. The
+	// retry is all-or-nothing: if staging is impossible or the stripped copy
+	// still fails to load (e.g. a genuine import cycle), surface the original
+	// error, which is more actionable than one referencing the staging dir.
+	staged, serr := internal.StageStrippedSchema(c.Path)
+	if serr != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(staged)
+	origPath := c.Path
+	c.Path = staged
+	spec, rerr := c.loadOnce()
+	if rerr != nil {
+		return nil, err
+	}
+	// spec.PkgPath points at the staging dir (a sibling of the real schema dir).
+	// Map it back so callers and generated code see the real package: same parent
+	// package path, real basename.
+	spec.PkgPath = path.Join(path.Dir(spec.PkgPath), filepath.Base(origPath))
+	return spec, nil
+}
+
+// loadOnce loads the schema package at c.Path and runs the generated .entc
+// program to extract the schema descriptors. It performs no hook stripping; see
+// Load for the strip-and-retry wrapper.
+func (c *Config) loadOnce() (*SchemaSpec, error) {
 	spec, pos, err := c.load()
 	if err != nil {
 		return nil, fmt.Errorf("entc/load: parse schema dir: %w", err)
