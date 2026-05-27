@@ -6,14 +6,17 @@ package internal
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/ast"
+	"go/build/constraint"
 	"go/format"
 	"go/parser"
 	"go/token"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -55,6 +58,140 @@ func makeSliceExpr(elemType string, n int) ast.Expr {
 			&ast.BasicLit{Kind: token.INT, Value: strconv.Itoa(n)},
 		},
 	}
+}
+
+// UncountableHookReturnError is returned by StripHookBodies when a
+// Hooks()/Interceptors() method has a return expression whose hook-slice
+// element count cannot be determined statically — anything other than a
+// composite literal, a bare nil, or a call to a helper recorded by
+// CountHookFunctions. Silently stubbing such a return to nil would wire zero
+// slots and drop the entity's hooks at runtime with no error, so bootstrap
+// fails closed instead.
+type UncountableHookReturnError struct {
+	Method string // the Hooks/Interceptors method name
+	Expr   string // the offending return expression, rendered
+}
+
+func (e *UncountableHookReturnError) Error() string {
+	return fmt.Sprintf("cannot determine hook count for %s() return %q: return a composite "+
+		"literal (e.g. []ent.Hook{...}), nil, or a helper function whose body is a single "+
+		"composite-literal return so CountHookFunctions can count it", e.Method, e.Expr)
+}
+
+// exprString renders an AST expression back to source for error messages.
+func exprString(fset *token.FileSet, e ast.Expr) string {
+	var buf bytes.Buffer
+	if err := format.Node(&buf, fset, e); err != nil {
+		return fmt.Sprintf("%T", e)
+	}
+	return buf.String()
+}
+
+// checkHookMethodVisibility fails closed when a schema type declares a
+// Hooks/Interceptors/Policy method ONLY in build-excluded (!entcodegen) files.
+//
+// Codegen loads the schema with -tags entcodegen, so a method that lives solely
+// in a !entcodegen file is invisible to the loader: it wires zero hooks for that
+// type and the real hooks silently never fire at runtime. The method
+// declaration must live in a file compiled under entcodegen (typically the
+// untagged entity file); only the hook/interceptor *implementations* (which
+// reference the not-yet-generated gen package) belong in !entcodegen files.
+//
+// It scans every .go file regardless of build tags (like CountHookFunctions),
+// records which files declaring each type's hook method are visible under
+// entcodegen, and errors for any method seen only in excluded files.
+func checkHookMethodVisibility(dir string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return fmt.Errorf("bootstrap: read dir: %w", err)
+	}
+	fset := token.NewFileSet()
+	visible := make(map[string]bool)      // "Type.Method" -> declared in a codegen-visible file
+	excludedIn := make(map[string][]string) // "Type.Method" -> excluded files declaring it
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".go") {
+			continue
+		}
+		data, rerr := os.ReadFile(filepath.Join(dir, e.Name()))
+		if rerr != nil {
+			continue
+		}
+		f, perr := parser.ParseFile(fset, e.Name(), data, parser.ParseComments)
+		if perr != nil {
+			continue
+		}
+		excluded := fileExcludedUnderEntcodegen(data)
+		for _, decl := range f.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Recv == nil || !hookMethodNames[fn.Name.Name] {
+				continue
+			}
+			recv := recvTypeName(fn)
+			if recv == "" {
+				continue
+			}
+			key := recv + "." + fn.Name.Name
+			if excluded {
+				excludedIn[key] = append(excludedIn[key], e.Name())
+				if _, seen := visible[key]; !seen {
+					visible[key] = false
+				}
+			} else {
+				visible[key] = true
+			}
+		}
+	}
+	var bad []string
+	for key, vis := range visible {
+		if !vis {
+			bad = append(bad, fmt.Sprintf("%s (only in %s)", key, strings.Join(excludedIn[key], ", ")))
+		}
+	}
+	if len(bad) > 0 {
+		sort.Strings(bad)
+		return fmt.Errorf("bootstrap: hook method(s) declared only in build-excluded (!entcodegen) files, so "+
+			"codegen would wire zero hooks for them and the real hooks would silently never fire at runtime — move "+
+			"the method declaration to a file compiled under entcodegen (e.g. the untagged entity file), keeping the "+
+			"implementation in the !entcodegen file: %s", strings.Join(bad, "; "))
+	}
+	return nil
+}
+
+// recvTypeName returns the receiver type name of a method (dereferencing a
+// pointer receiver), or "" if it cannot be determined.
+func recvTypeName(fn *ast.FuncDecl) string {
+	if fn.Recv == nil || len(fn.Recv.List) == 0 {
+		return ""
+	}
+	t := fn.Recv.List[0].Type
+	if star, ok := t.(*ast.StarExpr); ok {
+		t = star.X
+	}
+	if id, ok := t.(*ast.Ident); ok {
+		return id.Name
+	}
+	return ""
+}
+
+// fileExcludedUnderEntcodegen reports whether src's //go:build constraint
+// excludes the file when only the entcodegen tag is set (the codegen build).
+// A file with no build constraint is included (false). Schema files use only
+// the entcodegen/entc tag dimension, so evaluating with entcodegen=true and
+// every other tag=false matches the codegen environment.
+func fileExcludedUnderEntcodegen(src []byte) bool {
+	for _, line := range strings.Split(string(src), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		if !strings.HasPrefix(line, "//") {
+			break // build constraints must precede the package clause
+		}
+		if expr, err := constraint.Parse(line); err == nil {
+			return !expr.Eval(func(tag string) bool { return tag == "entcodegen" })
+		}
+	}
+	return false
 }
 
 // countReturnElems returns the number of elements in the first return
@@ -192,7 +329,9 @@ func StripHookBodies(src []byte, funcCounts map[string]int) ([]byte, error) {
 		if !hookMethodNames[fn.Name.Name] {
 			continue
 		}
-		stripHookMethodReturns(fn, hookSliceTypes[fn.Name.Name], funcCounts)
+		if err := stripHookMethodReturns(fset, fn, hookSliceTypes[fn.Name.Name], funcCounts); err != nil {
+			return nil, err
+		}
 	}
 
 	// Remove imports made unused by stripping. Iterate over a copy because
@@ -254,6 +393,13 @@ func StageStrippedSchema(srcDir string) (string, error) {
 		_ = os.RemoveAll(dst)
 		return "", err
 	}
+	// Fail closed if any type's Hooks/Interceptors/Policy method is declared only
+	// in a build-excluded (!entcodegen) file: codegen would never see it and would
+	// wire zero hooks, dropping them silently at runtime.
+	if err := checkHookMethodVisibility(srcDir); err != nil {
+		_ = os.RemoveAll(dst)
+		return "", err
+	}
 	if err := stripAndCopyTree(srcDir, dst, funcCounts); err != nil {
 		_ = os.RemoveAll(dst)
 		return "", err
@@ -289,9 +435,15 @@ func stripAndCopyTree(src, dst string, funcCounts map[string]int) error {
 		if strings.HasSuffix(d.Name(), ".go") {
 			stripped, serr := StripHookBodies(data, funcCounts)
 			if serr != nil {
+				var ue *UncountableHookReturnError
+				if errors.As(serr, &ue) {
+					// An undeterminable hook count would be silently stubbed to
+					// zero and drop the entity's hooks at runtime. Fail closed.
+					return fmt.Errorf("bootstrap: %s: %w", path, serr)
+				}
 				// File doesn't parse cleanly -- copy verbatim and let the
-				// downstream loader surface the real error. Don't pretend
-				// to have stripped a file we couldn't parse.
+				// downstream loader surface the real error. Don't pretend to
+				// have stripped a file we couldn't parse.
 				stripped = data
 			}
 			data = stripped
@@ -307,11 +459,15 @@ func stripAndCopyTree(src, dst string, funcCounts map[string]int) error {
 // For Hooks/Interceptors (elemType != ""): the return value becomes
 // make([]elemType, N) where N is the count implied by the original expression,
 // or nil when N == 0. For Policy (elemType == ""): every return becomes nil.
-func stripHookMethodReturns(fn *ast.FuncDecl, elemType string, funcCounts map[string]int) {
+func stripHookMethodReturns(fset *token.FileSet, fn *ast.FuncDecl, elemType string, funcCounts map[string]int) error {
 	if fn.Body == nil {
-		return
+		return nil
 	}
+	var stripErr error
 	astutil.Apply(fn.Body, func(c *astutil.Cursor) bool {
+		if stripErr != nil {
+			return false
+		}
 		switch node := c.Node().(type) {
 		case *ast.FuncLit:
 			return false // never rewrite returns inside nested closures
@@ -323,7 +479,15 @@ func stripHookMethodReturns(fn *ast.FuncDecl, elemType string, funcCounts map[st
 				node.Results[0] = ast.NewIdent("nil")
 				return false
 			}
-			if n := countReturnResult(node.Results[0], funcCounts); n > 0 {
+			n, ok := countReturnResult(node.Results[0], funcCounts)
+			if !ok {
+				stripErr = &UncountableHookReturnError{
+					Method: fn.Name.Name,
+					Expr:   exprString(fset, node.Results[0]),
+				}
+				return false
+			}
+			if n > 0 {
 				node.Results[0] = makeSliceExpr(elemType, n)
 			} else {
 				node.Results[0] = ast.NewIdent("nil")
@@ -332,21 +496,31 @@ func stripHookMethodReturns(fn *ast.FuncDecl, elemType string, funcCounts map[st
 		}
 		return true
 	}, nil)
+	return stripErr
 }
 
 // countReturnResult returns the hook/interceptor element count implied by a
-// single return expression: the element count of a composite literal, the
-// funcCounts entry for a named-function call, or 0 for nil/unrecognised forms.
-func countReturnResult(expr ast.Expr, funcCounts map[string]int) int {
+// single return expression, and whether that count could be determined. A
+// composite literal counts its elements; a bare `nil` is a deliberate zero; a
+// call to a helper recorded by CountHookFunctions uses that count. Any other
+// form — an unrecorded helper call, a selector call (pkg.Fn()), a bare
+// identifier, append(), etc. — is uncountable: ok is false so the caller can
+// fail closed instead of silently stubbing the return to nil and dropping the
+// entity's hooks at runtime.
+func countReturnResult(expr ast.Expr, funcCounts map[string]int) (count int, ok bool) {
 	switch r := expr.(type) {
 	case *ast.CompositeLit:
-		return len(r.Elts)
+		return len(r.Elts), true
+	case *ast.Ident:
+		if r.Name == "nil" {
+			return 0, true
+		}
 	case *ast.CallExpr:
 		if ident, ok := r.Fun.(*ast.Ident); ok {
 			if n, found := funcCounts[ident.Name]; found {
-				return n
+				return n, true
 			}
 		}
 	}
-	return 0
+	return 0, false
 }

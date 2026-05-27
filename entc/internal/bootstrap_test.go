@@ -348,9 +348,12 @@ func (BoxFolder) Hooks() []ent.Hook {
 	require.NotContains(t, string(out), "boxFolderHooks")
 }
 
-func TestStripHookBodies_NamedFuncNotInCountMapBecomesNil(t *testing.T) {
-	// When the function is not in the count map (e.g. because the
-	// *_runtime.go file couldn't be parsed), fall back to nil.
+func TestStripHookBodies_NamedFuncNotInCountMapErrors(t *testing.T) {
+	// When the helper is not in the count map (e.g. its *_runtime.go body is not
+	// a single composite-literal return, so CountHookFunctions could not count
+	// it), the slot count is undeterminable. Stubbing it to nil would silently
+	// wire zero hooks and drop the entity's hooks at runtime, so StripHookBodies
+	// fails closed instead of guessing.
 	src := `package schema
 
 import "entgo.io/ent"
@@ -359,6 +362,47 @@ type Widget struct{ ent.Schema }
 
 func (Widget) Hooks() []ent.Hook {
 	return unknownHooks()
+}
+`
+	_, err := StripHookBodies([]byte(src), nil)
+	require.Error(t, err)
+	var ue *UncountableHookReturnError
+	require.ErrorAs(t, err, &ue)
+	require.Equal(t, "Hooks", ue.Method)
+	require.Contains(t, ue.Expr, "unknownHooks")
+}
+
+func TestStripHookBodies_UnrecognizedReturnErrors(t *testing.T) {
+	// A return that is neither a composite literal, a bare nil, nor a known
+	// helper call (here a bare identifier built from a local) cannot be counted.
+	src := `package schema
+
+import "entgo.io/ent"
+
+type Widget struct{ ent.Schema }
+
+func (Widget) Hooks() []ent.Hook {
+	hooks := buildWidgetHooks()
+	return hooks
+}
+`
+	_, err := StripHookBodies([]byte(src), nil)
+	require.Error(t, err, "a bare-identifier return is not a recognized countable form")
+	var ue *UncountableHookReturnError
+	require.ErrorAs(t, err, &ue)
+}
+
+func TestStripHookBodies_NilReturnStillValid(t *testing.T) {
+	// A bare nil return is a deliberate zero (the guarded-mixin pattern) and must
+	// remain valid — it is not an uncountable error.
+	src := `package schema
+
+import "entgo.io/ent"
+
+type Widget struct{ ent.Schema }
+
+func (Widget) Hooks() []ent.Hook {
+	return nil
 }
 `
 	out, err := StripHookBodies([]byte(src), nil)
@@ -531,4 +575,67 @@ func ownerHooks() []ent.Hook {
 	require.NoError(t, err)
 	require.Contains(t, string(ownerOut), "return make([]ent.Hook, 2)",
 		"staged schema must reflect the hook count from the runtime file")
+}
+
+func TestStageStrippedSchema_HookMethodOnlyInExcludedFileErrors(t *testing.T) {
+	// The Hooks() METHOD itself lives in a //go:build !entcodegen file, so the
+	// loader (which builds with -tags entcodegen) never sees it and would wire
+	// zero hooks for Escrow — silently dropping them at runtime. Fail closed.
+	src := t.TempDir()
+
+	require.NoError(t, os.WriteFile(filepath.Join(src, "escrow.go"), []byte(`package schema
+
+import "entgo.io/ent"
+
+type Escrow struct{ ent.Schema }
+`), 0o644))
+
+	require.NoError(t, os.WriteFile(filepath.Join(src, "escrow_hooks.go"), []byte(`//go:build !entcodegen
+
+package schema
+
+import "entgo.io/ent"
+
+func (Escrow) Hooks() []ent.Hook {
+	return []ent.Hook{escrowTrsHook}
+}
+`), 0o644))
+
+	_, err := StageStrippedSchema(src)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Escrow.Hooks")
+	require.Contains(t, err.Error(), "!entcodegen")
+}
+
+func TestStageStrippedSchema_HookMethodInUntaggedFileOK(t *testing.T) {
+	// The correct pattern: the Hooks() METHOD is in the untagged entity file
+	// (visible to codegen) and only the implementation lives in the !entcodegen
+	// file. This must NOT error.
+	src := t.TempDir()
+
+	require.NoError(t, os.WriteFile(filepath.Join(src, "escrow.go"), []byte(`package schema
+
+import "entgo.io/ent"
+
+type Escrow struct{ ent.Schema }
+
+func (Escrow) Hooks() []ent.Hook {
+	return escrowHooks()
+}
+`), 0o644))
+
+	require.NoError(t, os.WriteFile(filepath.Join(src, "escrow_hooks.go"), []byte(`//go:build !entcodegen
+
+package schema
+
+import "entgo.io/ent"
+
+func escrowHooks() []ent.Hook {
+	return []ent.Hook{nil}
+}
+`), 0o644))
+
+	dst, err := StageStrippedSchema(src)
+	require.NoError(t, err)
+	defer os.RemoveAll(dst)
 }
