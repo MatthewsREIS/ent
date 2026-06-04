@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
+	"golang.org/x/tools/go/packages"
 )
 
 // hookMethodNames is the set of Schema-interface methods whose hook-slice
@@ -314,6 +315,21 @@ func returnsHookSlice(fn *ast.FuncDecl) bool {
 // funcCounts is typically built by CountHookFunctions over the schema dir and
 // may be nil (treated as empty).
 func StripHookBodies(src []byte, funcCounts map[string]int) ([]byte, error) {
+	return stripHookBodies(src, funcCounts, nil)
+}
+
+// stripHookBodies implements StripHookBodies with an injectable pkgNames map
+// (import path -> real package name) used by the unused-import pruning step.
+// The stripping semantics are documented on StripHookBodies.
+//
+// pkgNames lets the pruner match an unaliased import by its real package name
+// rather than guessing it from the path's last segment (the "educated guess"
+// astutil.UsesImport makes), which is wrong for paths whose package name
+// differs from the basename — e.g. github.com/caarlos0/env/v11 (package env)
+// or github.com/posthog/posthog-go (package posthog). A path absent from
+// pkgNames falls back to that basename guess, which is already correct for the
+// common case and for the not-yet-generated gen sub-packages.
+func stripHookBodies(src []byte, funcCounts map[string]int, pkgNames map[string]string) ([]byte, error) {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "", src, parser.ParseComments)
 	if err != nil {
@@ -347,7 +363,7 @@ func StripHookBodies(src []byte, funcCounts map[string]int) ([]byte, error) {
 		if imp.Name != nil && (imp.Name.Name == "_" || imp.Name.Name == ".") {
 			continue
 		}
-		if astutil.UsesImport(f, path) {
+		if importUsed(f, imp, path, pkgNames) {
 			continue
 		}
 		if imp.Name != nil {
@@ -362,6 +378,49 @@ func StripHookBodies(src []byte, funcCounts map[string]int) ([]byte, error) {
 		return nil, fmt.Errorf("bootstrap: format: %w", err)
 	}
 	return buf.Bytes(), nil
+}
+
+// importBindingName returns the identifier by which an import is referenced in
+// source: its alias when one is present, otherwise the real package name from
+// pkgNames, otherwise an educated guess from the path's last segment. The
+// basename guess matches astutil.UsesImport and is only reached for paths
+// absent from pkgNames — it is correct when the package name equals the
+// basename (the common case, and the not-yet-generated gen sub-packages).
+func importBindingName(imp *ast.ImportSpec, path string, pkgNames map[string]string) string {
+	if imp.Name != nil {
+		return imp.Name.Name
+	}
+	if name := pkgNames[path]; name != "" {
+		return name
+	}
+	if i := strings.LastIndex(path, "/"); i >= 0 {
+		return path[i+1:]
+	}
+	return path
+}
+
+// importUsed reports whether the import imp is still referenced in f after
+// stripping. It mirrors astutil.UsesImport's scan — a top-level (unresolved)
+// identifier used as a selector qualifier — but resolves the binding name via
+// importBindingName instead of guessing it from the path basename, so imports
+// whose package name differs from the basename (e.g. github.com/caarlos0/env/v11
+// binding "env") are not wrongly pruned. Relies on f having been parsed with
+// object resolution so that local identifiers carry a non-nil Obj.
+func importUsed(f *ast.File, imp *ast.ImportSpec, path string, pkgNames map[string]string) bool {
+	name := importBindingName(imp, path, pkgNames)
+	var used bool
+	ast.Inspect(f, func(n ast.Node) bool {
+		if used {
+			return false
+		}
+		if sel, ok := n.(*ast.SelectorExpr); ok {
+			if id, ok := sel.X.(*ast.Ident); ok && id.Name == name && id.Obj == nil {
+				used = true
+			}
+		}
+		return true
+	})
+	return used
 }
 
 // StageStrippedSchema copies the schema directory at srcDir into a fresh
@@ -400,7 +459,18 @@ func StageStrippedSchema(srcDir string) (string, error) {
 		_ = os.RemoveAll(dst)
 		return "", err
 	}
-	if err := stripAndCopyTree(srcDir, dst, funcCounts); err != nil {
+	// Resolve real package names for the schema's imports so the per-file
+	// import pruning in stripHookBodies matches selector qualifiers by package
+	// name rather than guessing from the path basename (which is wrong for
+	// imports like github.com/caarlos0/env/v11 -> "env" or
+	// github.com/posthog/posthog-go -> "posthog"). Best-effort: on failure
+	// (e.g. srcDir outside a module) pkgNames is nil and the pruner falls back
+	// to the basename guess, preserving prior behavior.
+	pkgNames, perr := resolveImportPackageNames(srcDir)
+	if perr != nil {
+		pkgNames = nil
+	}
+	if err := stripAndCopyTree(srcDir, dst, funcCounts, pkgNames); err != nil {
 		_ = os.RemoveAll(dst)
 		return "", err
 	}
@@ -418,7 +488,82 @@ func StageStrippedSchema(srcDir string) (string, error) {
 	return abs, nil
 }
 
-func stripAndCopyTree(src, dst string, funcCounts map[string]int) error {
+// resolveImportPackageNames returns a map from import path to real package name
+// for every distinct import used by the .go files under dir. It uses
+// go/packages in NeedName mode, which reads package clauses via `go list -e`
+// without compiling — so it resolves third-party dependencies even before the
+// generated gen package exists, and a missing/erroring package (e.g. the
+// not-yet-generated gen sub-packages) is reported per-package rather than
+// failing the whole load. Such unresolved paths are omitted from the map; the
+// caller (importBindingName) then falls back to the basename guess, which is
+// already correct for them.
+func resolveImportPackageNames(dir string) (map[string]string, error) {
+	paths, err := collectImportPaths(dir)
+	if err != nil {
+		return nil, err
+	}
+	if len(paths) == 0 {
+		return map[string]string{}, nil
+	}
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName, Dir: dir}, paths...)
+	if err != nil {
+		return nil, fmt.Errorf("bootstrap: resolve import names: %w", err)
+	}
+	names := make(map[string]string, len(pkgs))
+	for _, p := range pkgs {
+		if p.PkgPath != "" && p.Name != "" {
+			names[p.PkgPath] = p.Name
+		}
+	}
+	return names, nil
+}
+
+// collectImportPaths parses the import blocks of every .go file under dir
+// (regardless of build tags) and returns the sorted set of distinct import
+// paths. Blank ("_") and dot (".") imports are skipped because the pruner never
+// deletes them, so their package names are never needed.
+func collectImportPaths(dir string) ([]string, error) {
+	set := make(map[string]struct{})
+	fset := token.NewFileSet()
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, werr error) error {
+		if werr != nil {
+			return werr
+		}
+		if d.IsDir() || !strings.HasSuffix(d.Name(), ".go") {
+			return nil
+		}
+		data, rerr := os.ReadFile(path)
+		if rerr != nil {
+			return nil
+		}
+		f, perr := parser.ParseFile(fset, path, data, parser.ImportsOnly)
+		if perr != nil {
+			return nil
+		}
+		for _, imp := range f.Imports {
+			if imp.Name != nil && (imp.Name.Name == "_" || imp.Name.Name == ".") {
+				continue
+			}
+			p, uerr := strconv.Unquote(imp.Path.Value)
+			if uerr != nil {
+				continue
+			}
+			set[p] = struct{}{}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("bootstrap: collect imports: %w", err)
+	}
+	paths := make([]string, 0, len(set))
+	for p := range set {
+		paths = append(paths, p)
+	}
+	sort.Strings(paths)
+	return paths, nil
+}
+
+func stripAndCopyTree(src, dst string, funcCounts map[string]int, pkgNames map[string]string) error {
 	return filepath.WalkDir(src, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -433,7 +578,7 @@ func stripAndCopyTree(src, dst string, funcCounts map[string]int) error {
 			return rerr
 		}
 		if strings.HasSuffix(d.Name(), ".go") {
-			stripped, serr := StripHookBodies(data, funcCounts)
+			stripped, serr := stripHookBodies(data, funcCounts, pkgNames)
 			if serr != nil {
 				var ue *UncountableHookReturnError
 				if errors.As(serr, &ue) {
