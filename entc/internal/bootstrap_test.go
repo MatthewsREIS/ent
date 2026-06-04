@@ -639,3 +639,77 @@ func escrowHooks() []ent.Hook {
 	require.NoError(t, err)
 	defer os.RemoveAll(dst)
 }
+
+// --- import pruning: package name != path basename ---
+
+// TestStripHookBodies_PreservesImportWithMismatchedPackageName guards against
+// deleting an import whose package name differs from its path basename. An
+// unaliased import of github.com/caarlos0/env/v11 binds the name "env", but a
+// basename guess yields "v11"; the pruner must use the supplied package name so
+// that an import still used OUTSIDE any stripped hook body (here a package-level
+// var) survives. Without the pkgNames lookup the import is wrongly deleted and
+// the staged file fails to typecheck with "undefined: env".
+func TestStripHookBodies_PreservesImportWithMismatchedPackageName(t *testing.T) {
+	src := `//go:build !entcodegen
+
+package schema
+
+import (
+	"entgo.io/ent"
+	"github.com/caarlos0/env/v11"
+)
+
+// Package-level use of env, outside any hook method, that stripping never touches.
+var _ = env.GetString("SOME_KEY")
+
+type User struct {
+	ent.Schema
+}
+
+func (User) Hooks() []ent.Hook {
+	return nil
+}
+`
+	pkgNames := map[string]string{"github.com/caarlos0/env/v11": "env"}
+	out, err := stripHookBodies([]byte(src), nil, pkgNames)
+	require.NoError(t, err)
+	s := string(out)
+	require.Contains(t, s, `"github.com/caarlos0/env/v11"`,
+		"import must be preserved: package env is still used by the package-level var outside any hook")
+	require.Contains(t, s, "env.GetString", "the package-level env use must remain")
+}
+
+// TestStripHookBodies_DeletesImportUsedOnlyInsideHookBody is the converse
+// guard: even with the package name resolved via pkgNames, an import that is
+// referenced ONLY inside a hook body becomes genuinely unused once that body is
+// stripped and must still be deleted — otherwise the staged file fails with
+// "imported and not used".
+func TestStripHookBodies_DeletesImportUsedOnlyInsideHookBody(t *testing.T) {
+	src := `//go:build !entcodegen
+
+package schema
+
+import (
+	"entgo.io/ent"
+	"github.com/caarlos0/env/v11"
+)
+
+type User struct {
+	ent.Schema
+}
+
+func (User) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hookUsingEnv(env.GetString("X")),
+	}
+}
+`
+	pkgNames := map[string]string{"github.com/caarlos0/env/v11": "env"}
+	out, err := stripHookBodies([]byte(src), nil, pkgNames)
+	require.NoError(t, err)
+	s := string(out)
+	require.NotContains(t, s, `"github.com/caarlos0/env/v11"`,
+		"import must be deleted: env was used only inside the now-stripped hook body")
+	require.NotContains(t, s, "env.GetString", "the in-hook env use must be gone after stripping")
+	require.Contains(t, s, "make([]ent.Hook, 1)", "the 1-element hook count must be preserved")
+}
