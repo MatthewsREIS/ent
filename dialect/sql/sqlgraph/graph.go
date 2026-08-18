@@ -638,6 +638,13 @@ type (
 		// Additional fields can be set on the
 		// edge join table. Valid for M2M edges.
 		Fields []*FieldSpec
+		// NewFields returns a fresh Fields for one row, re-evaluating the edge
+		// schema's defaults. A single M2M call can insert many rows, and a
+		// default such as uuid.New() or time.Now() must not be shared by all of
+		// them — an edge schema with a generated id primary key collides with
+		// itself on the second row. Fields supplies the column list and stays
+		// the fallback for callers that construct an EdgeTarget by hand.
+		NewFields func() []*FieldSpec
 	}
 
 	// EdgeSpec holds the information for updating a field
@@ -684,8 +691,12 @@ func (n *NodeSpec) AddColumnOnce(column string) *NodeSpec {
 
 // FieldValues returns the values of additional fields that were set on the join-table.
 func (e *EdgeTarget) FieldValues() []any {
-	vs := make([]any, len(e.Fields))
-	for i, f := range e.Fields {
+	fields := e.Fields
+	if e.NewFields != nil {
+		fields = e.NewFields()
+	}
+	vs := make([]any, len(fields))
+	for i, f := range fields {
 		vs[i] = f.Value
 	}
 	return vs
@@ -1724,12 +1735,12 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 		var (
 			edges   = tables[table]
 			columns = edges[0].Columns
-			values  = make([]any, 0, len(edges[0].Target.Fields))
 		)
 		// Additional fields, such as edge-schema fields. Note, we use the first index,
 		// because Ent generates the same spec fields for all edges from the same type.
+		// Only the columns are taken from here; the values are re-read per row below,
+		// because a default like uuid.New() must differ between them.
 		for _, f := range edges[0].Target.Fields {
-			values = append(values, f.Value)
 			columns = append(columns, f.Column)
 		}
 		insert := g.builder.Insert(table).Columns(columns...)
@@ -1744,9 +1755,9 @@ func (g *graph) addM2MEdges(ctx context.Context, ids []driver.Value, edges EdgeS
 				pk1, pk2 = pk2, pk1
 			}
 			for _, pair := range product(pk1, pk2) {
-				insert.Values(append([]any{pair[0], pair[1]}, values...)...)
+				insert.Values(append([]any{pair[0], pair[1]}, edge.Target.FieldValues()...)...)
 				if edge.Bidi {
-					insert.Values(append([]any{pair[1], pair[0]}, values...)...)
+					insert.Values(append([]any{pair[1], pair[0]}, edge.Target.FieldValues()...)...)
 				}
 			}
 		}

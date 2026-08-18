@@ -142,8 +142,13 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := roleuser.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := roleuser.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user") {
@@ -160,8 +165,13 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := roleuser.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := roleuser.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
@@ -178,8 +188,13 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := roleuser.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := roleuser.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -341,8 +356,13 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := roleuser.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := roleuser.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user") {
@@ -359,8 +379,13 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := roleuser.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := roleuser.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
@@ -377,8 +402,13 @@ func (_u *RoleUpdateOne) sqlSave(ctx context.Context) (_node *Role, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := roleuser.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := roleuser.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Role{Config: _u.Config}

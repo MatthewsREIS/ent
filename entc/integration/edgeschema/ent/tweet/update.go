@@ -199,8 +199,13 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := tweetlike.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweetlike.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("liked_users"); len(nodes) > 0 && !_u.mutation.EdgeCleared("liked_users") {
@@ -217,8 +222,13 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweetlike.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweetlike.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("liked_users"); len(nodes) > 0 {
@@ -235,8 +245,13 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweetlike.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweetlike.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.EdgeCleared("user") {
@@ -250,8 +265,13 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := usertweet.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usertweet.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user") {
@@ -268,8 +288,13 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := usertweet.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usertweet.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
@@ -286,8 +311,13 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := usertweet.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usertweet.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.EdgeCleared("tags") {
@@ -301,11 +331,16 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := tweettag.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweettag.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			if specE.ID.Value != nil {
+				fields = append(fields, specE.ID)
+			}
+			return fields
 		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tags") {
@@ -322,11 +357,16 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweettag.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweettag.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			if specE.ID.Value != nil {
+				fields = append(fields, specE.ID)
+			}
+			return fields
 		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("tags"); len(nodes) > 0 {
@@ -343,11 +383,16 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweettag.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweettag.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			if specE.ID.Value != nil {
+				fields = append(fields, specE.ID)
+			}
+			return fields
 		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.EdgeCleared("tweet_user") {
@@ -654,8 +699,13 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := tweetlike.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweetlike.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("liked_users"); len(nodes) > 0 && !_u.mutation.EdgeCleared("liked_users") {
@@ -672,8 +722,13 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweetlike.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweetlike.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("liked_users"); len(nodes) > 0 {
@@ -690,8 +745,13 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweetlike.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweetlike.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.EdgeCleared("user") {
@@ -705,8 +765,13 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := usertweet.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usertweet.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("user"); len(nodes) > 0 && !_u.mutation.EdgeCleared("user") {
@@ -723,8 +788,13 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := usertweet.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usertweet.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
@@ -741,8 +811,13 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := usertweet.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usertweet.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.EdgeCleared("tags") {
@@ -756,11 +831,16 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := tweettag.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweettag.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			if specE.ID.Value != nil {
+				fields = append(fields, specE.ID)
+			}
+			return fields
 		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("tags"); len(nodes) > 0 && !_u.mutation.EdgeCleared("tags") {
@@ -777,11 +857,16 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweettag.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweettag.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			if specE.ID.Value != nil {
+				fields = append(fields, specE.ID)
+			}
+			return fields
 		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("tags"); len(nodes) > 0 {
@@ -798,11 +883,16 @@ func (_u *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error)
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweettag.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweettag.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			if specE.ID.Value != nil {
+				fields = append(fields, specE.ID)
+			}
+			return fields
 		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.EdgeCleared("tweet_user") {

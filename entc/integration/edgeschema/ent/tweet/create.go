@@ -152,8 +152,13 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweetlike.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweetlike.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
@@ -170,8 +175,13 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := usertweet.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usertweet.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tags"); len(nodes) > 0 {
@@ -188,11 +198,16 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweettag.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
-		if specE.ID.Value != nil {
-			edge.Target.Fields = append(edge.Target.Fields, specE.ID)
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweettag.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			if specE.ID.Value != nil {
+				fields = append(fields, specE.ID)
+			}
+			return fields
 		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tweet_user"); len(nodes) > 0 {
