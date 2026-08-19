@@ -1342,6 +1342,37 @@ func TestCreateNode(t *testing.T) {
 			},
 		},
 		{
+			// One call, many rows: an edge schema whose fields carry defaults
+			// (uuid.New, time.Now) must re-evaluate them per row. Sharing one
+			// value made a generated id repeat and collide with itself.
+			name: "edges/m2m/edge-schema/per-row-defaults",
+			spec: &CreateSpec{
+				Table: "groups",
+				ID:    &FieldSpec{Column: "id", Type: field.TypeInt},
+				Fields: []*FieldSpec{
+					{Column: "name", Type: field.TypeString, Value: "GitHub"},
+				},
+				Edges: []*EdgeSpec{
+					{Rel: M2M, Table: "group_users", Columns: []string{"group_id", "user_id"}, Target: &EdgeTarget{
+						Nodes:     []driver.Value{2, 3},
+						IDSpec:    &FieldSpec{Column: "id"},
+						Fields:    []*FieldSpec{{Column: "ts", Type: field.TypeInt, Value: 0}},
+						NewFields: incrementingEdgeFields(),
+					}},
+				},
+			},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectBegin()
+				m.ExpectExec(escape("INSERT INTO `groups` (`name`) VALUES (?)")).
+					WithArgs("GitHub").
+					WillReturnResult(sqlmock.NewResult(1, 1))
+				m.ExpectExec(escape("INSERT INTO `group_users` (`group_id`, `user_id`, `ts`) VALUES (?, ?, ?), (?, ?, ?)")).
+					WithArgs(1, 2, 1, 1, 3, 2).
+					WillReturnResult(sqlmock.NewResult(1, 2))
+				m.ExpectCommit()
+			},
+		},
+		{
 			name: "edges/m2m/inverse",
 			spec: &CreateSpec{
 				Table: "users",
@@ -2735,4 +2766,14 @@ func escape(query string) string {
 	}
 	query = strings.Join(rows, " ")
 	return strings.TrimSpace(regexp.QuoteMeta(query)) + "$"
+}
+
+// incrementingEdgeFields stands in for a default like uuid.New: a distinct
+// value on every call. Equal values would let the shared-slice bug pass.
+func incrementingEdgeFields() func() []*FieldSpec {
+	var n int
+	return func() []*FieldSpec {
+		n++
+		return []*FieldSpec{{Column: "ts", Type: field.TypeInt, Value: n}}
+	}
 }

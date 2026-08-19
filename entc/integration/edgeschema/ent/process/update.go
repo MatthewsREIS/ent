@@ -125,8 +125,13 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := attachedfile.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := attachedfile.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
@@ -143,8 +148,13 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := attachedfile.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := attachedfile.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
@@ -161,8 +171,13 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := attachedfile.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := attachedfile.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.EdgeCleared("attached_files") {
@@ -353,8 +368,13 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
 			},
 		}
-		specE := attachedfile.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := attachedfile.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
@@ -371,8 +391,13 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := attachedfile.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := attachedfile.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
@@ -389,8 +414,13 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := attachedfile.ThroughDefaults(_u.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := attachedfile.ThroughDefaults(_u.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.EdgeCleared("attached_files") {

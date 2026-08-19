@@ -160,8 +160,13 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := usergroup.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usergroup.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tags"); len(nodes) > 0 {

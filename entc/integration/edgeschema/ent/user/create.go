@@ -198,8 +198,13 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := usergroup.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usergroup.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friends"); len(nodes) > 0 {
@@ -216,8 +221,13 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := friendship.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := friendship.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "relatives"); len(nodes) > 0 {
@@ -234,8 +244,13 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := relationship.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := relationship.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "liked_tweets"); len(nodes) > 0 {
@@ -252,8 +267,13 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := tweetlike.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := tweetlike.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tweets"); len(nodes) > 0 {
@@ -270,8 +290,13 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := usertweet.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := usertweet.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "roles"); len(nodes) > 0 {
@@ -288,8 +313,13 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		specE := roleuser.ThroughDefaults(_c.Config)
-		edge.Target.Fields = specE.Fields
+		newFieldsE := func() []*sqlgraph.FieldSpec {
+			specE := roleuser.ThroughDefaults(_c.Config)
+			fields := specE.Fields
+			return fields
+		}
+		edge.Target.Fields = newFieldsE()
+		edge.Target.NewFields = newFieldsE
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "joined_groups"); len(nodes) > 0 {
