@@ -54,9 +54,14 @@ lower generator RSS) — the likely driver is `go run entc.go` doing a
 from-source rebuild of the local-filesystem-`replace`d fork (including its new
 `entbuilder` package and the added generics/reflection surface) rather than
 pulling a cached module build, which is expected for local-path testing and
-would not apply once gemini switches back to a pushed pseudo-version. This
-should be re-checked once the fork branch is pushed and gemini's `replace` is
-swapped from a local path to a real module version.
+would not apply once gemini switches back to a pushed pseudo-version.
+
+**Re-measured after the swap** to the pushed pseudo-version
+(`v0.0.0-20260827190939-1131aa8509a1`): generation was **60.38s wall /
+9.1 GB peak RSS** — i.e. -3.4% wall and +5.8% RSS vs baseline. The +27.9%
+figure was indeed dominated by the local-replace from-source rebuild; the
+real generation cost of this change is roughly noise on wall time and a
+small RSS increase.
 
 ### Migration
 
@@ -130,20 +135,24 @@ are clean across every gemini module that references `entgo.io/ent`.
   were already running from a prior session, in a degraded state) — not
   something introduced by this migration. It could not be resolved without
   restarting containers, which was out of scope for this task.
+  **Resolved in a follow-up session**: after the test containers were
+  recreated and gemini was regenerated against the pushed pseudo-version,
+  `task api:test-integration -- -run OnConflict -count=1` ran **47 tests, all
+  passing** (63.1s), and the workers suite (previously failing only on the
+  dead container port) passed clean. Upsert runtime behavior is now
+  confirmed end-to-end in gemini, not just compile-time parity.
 
 ### Concerns / follow-ups for the user
 
-- The generation peak-RSS increase (+27.9%) should be re-measured once
-  gemini's `go.mod` points at a pushed pseudo-version of the fork branch
-  instead of a local filesystem `replace`, to rule out from-source rebuild
-  overhead as the cause.
-- The on-conflict integration tests could not be exercised end-to-end in this
-  session due to broken local test infra (IntegreSQL 500s); re-run them once
-  the test containers are healthy to get direct confirmation of upsert
-  runtime behavior, not just compile-time parity.
-- `models/go.mod`, `api/go.mod`, and `workers/go.mod` currently have a local
-  filesystem `replace entgo.io/ent => .../worktrees/say-less` left in place
-  for this benchmarking/migration pass, per this task's scope (gemini changes
-  are intentionally left uncommitted for review). Reverting to a pushed
-  pseudo-version, and committing the gemini-side changes, is deferred to the
-  user/next task.
+- ~~Re-measure generation peak RSS against a pushed pseudo-version~~ —
+  done: 60.38s / 9.1 GB (see re-measurement note above); local-replace
+  artifact confirmed.
+- ~~Run the on-conflict integration tests once test infra is healthy~~ —
+  done: 47/47 passing (see integration-test note above).
+- ~~Swap the local filesystem `replace` to a pushed pseudo-version~~ —
+  done: `models`/`api`/`workers` go.mod now replace to
+  `github.com/MatthewsREIS/ent v0.0.0-20260827190939-1131aa8509a1`
+  (branch `worktree-say-less`, PR #20).
+- Remaining: gemini-side changes (go.mod replaces, regenerated `gen/`, one
+  migrated worker file) are intentionally left uncommitted in
+  `gemini/.worktrees/main` for user review and commit.
