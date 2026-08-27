@@ -10,7 +10,6 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/version/ent/internal"
 )
 
 const (
@@ -48,14 +47,18 @@ var (
 	DefaultVersion func() int64
 )
 
-// Status is an alias for the enum type defined in the internal package.
-type Status = internal.UserStatus
+// Status defines the type for the "status" enum field.
+type Status string
 
 // Status values.
 const (
 	StatusOnline  Status = "online"
 	StatusOffline Status = "offline"
 )
+
+func (s Status) String() string {
+	return string(s)
+}
 
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {

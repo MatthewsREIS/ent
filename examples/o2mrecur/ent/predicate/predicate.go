@@ -11,4 +11,4 @@ import (
 )
 
 // Node is the predicate function for node builders.
-type Node = func(*sql.Selector)
+type Node func(*sql.Selector)

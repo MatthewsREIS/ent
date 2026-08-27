@@ -57,6 +57,11 @@ func IDLTE(id int) predicate.Node {
 	return predicate.Node(sql.FieldLTE(FieldID, id))
 }
 
+// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
+func Value(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldValue, v))
+}
+
 // ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
 func ParentID(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldParentID, v))
@@ -145,15 +150,14 @@ func HasParent() predicate.Node {
 
 // HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
 func HasParentWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			step := newParentStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
+	return predicate.Node(func(s *sql.Selector) {
+		step := newParentStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
 		})
+	})
 }
 
 // HasChildren applies the HasEdge predicate on the "children" edge.
@@ -169,15 +173,14 @@ func HasChildren() predicate.Node {
 
 // HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
 func HasChildrenWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			step := newChildrenStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
+	return predicate.Node(func(s *sql.Selector) {
+		step := newChildrenStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
 		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

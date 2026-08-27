@@ -11,7 +11,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/migration/ent/internal"
 )
 
 const (
@@ -70,8 +69,8 @@ var (
 	AmountValidator func(float64) error
 )
 
-// Currency is an alias for the enum type defined in the internal package.
-type Currency = internal.PaymentCurrency
+// Currency defines the type for the "currency" enum field.
+type Currency string
 
 // Currency values.
 const (
@@ -80,6 +79,10 @@ const (
 	CurrencyVND Currency = "VND"
 	CurrencyILS Currency = "ILS"
 )
+
+func (c Currency) String() string {
+	return string(c)
+}
 
 // CurrencyValidator is a validator for the "currency" field enum values. It is called by the builders before save.
 func CurrencyValidator(c Currency) error {
@@ -91,8 +94,8 @@ func CurrencyValidator(c Currency) error {
 	}
 }
 
-// Status is an alias for the enum type defined in the internal package.
-type Status = internal.PaymentStatus
+// Status defines the type for the "status" enum field.
+type Status string
 
 // Status values.
 const (
@@ -100,6 +103,10 @@ const (
 	StatusCompleted Status = "completed"
 	StatusFailed    Status = "failed"
 )
+
+func (s Status) String() string {
+	return string(s)
+}
 
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {

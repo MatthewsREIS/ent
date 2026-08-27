@@ -11,4 +11,4 @@ import (
 )
 
 // File is the predicate function for file builders.
-type File = func(*sql.Selector)
+type File func(*sql.Selector)

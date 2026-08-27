@@ -57,6 +57,11 @@ func IDLTE(id int) predicate.Node {
 	return predicate.Node(sql.FieldLTE(FieldID, id))
 }
 
+// Value applies equality check predicate on the "value" field. It's identical to ValueEQ.
+func Value(v int) predicate.Node {
+	return predicate.Node(sql.FieldEQ(FieldValue, v))
+}
+
 // PrevID applies equality check predicate on the "prev_id" field. It's identical to PrevIDEQ.
 func PrevID(v int) predicate.Node {
 	return predicate.Node(sql.FieldEQ(FieldPrevID, v))
@@ -145,15 +150,14 @@ func HasPrev() predicate.Node {
 
 // HasPrevWith applies the HasEdge predicate on the "prev" edge with a given conditions (other predicates).
 func HasPrevWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			step := newPrevStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
+	return predicate.Node(func(s *sql.Selector) {
+		step := newPrevStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
 		})
+	})
 }
 
 // HasNext applies the HasEdge predicate on the "next" edge.
@@ -169,15 +173,14 @@ func HasNext() predicate.Node {
 
 // HasNextWith applies the HasEdge predicate on the "next" edge with a given conditions (other predicates).
 func HasNextWith(preds ...predicate.Node) predicate.Node {
-	return predicate.Node(
-		func(s *sql.Selector) {
-			step := newNextStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
+	return predicate.Node(func(s *sql.Selector) {
+		step := newNextStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
 		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

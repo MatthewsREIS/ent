@@ -140,15 +140,14 @@ func HasCity() predicate.Street {
 
 // HasCityWith applies the HasEdge predicate on the "city" edge with a given conditions (other predicates).
 func HasCityWith(preds ...predicate.City) predicate.Street {
-	return predicate.Street(
-		func(s *sql.Selector) {
-			step := newCityStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
+	return predicate.Street(func(s *sql.Selector) {
+		step := newCityStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
 		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

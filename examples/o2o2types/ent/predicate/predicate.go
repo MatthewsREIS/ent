@@ -11,7 +11,7 @@ import (
 )
 
 // Card is the predicate function for card builders.
-type Card = func(*sql.Selector)
+type Card func(*sql.Selector)
 
 // User is the predicate function for user builders.
-type User = func(*sql.Selector)
+type User func(*sql.Selector)

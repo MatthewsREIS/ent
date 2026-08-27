@@ -236,11 +236,11 @@ func queryFilter(q ent.Query) (Filter, error) {
 func mutationFilter(m ent.Mutation) (Filter, error) {
 	switch m := m.(type) {
 	case *ent.GroupMutation:
-		return ent.NewGroupFilterForMutation(m), nil
+		return m.Filter(), nil
 	case *ent.TenantMutation:
-		return ent.NewTenantFilterForMutation(m), nil
+		return m.Filter(), nil
 	case *ent.UserMutation:
-		return ent.NewUserFilterForMutation(m), nil
+		return m.Filter(), nil
 	default:
 		return nil, Denyf("ent/privacy: unexpected mutation type %T for mutation filter", m)
 	}

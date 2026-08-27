@@ -15,7 +15,7 @@ import (
 
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
-	Config
+	config
 	// City is the client for interacting with the City builders.
 	City *CityClient
 	// Street is the client for interacting with the Street builders.
@@ -64,7 +64,7 @@ func (f CommitFunc) Commit(ctx context.Context, tx *Tx) error {
 
 // Commit commits the transaction.
 func (tx *Tx) Commit() error {
-	txDriver := tx.Config.Drv.(*txDriver)
+	txDriver := tx.config.driver.(*txDriver)
 	var fn Committer = CommitFunc(func(context.Context, *Tx) error {
 		return txDriver.tx.Commit()
 	})
@@ -79,7 +79,7 @@ func (tx *Tx) Commit() error {
 
 // OnCommit adds a hook to call on commit.
 func (tx *Tx) OnCommit(f CommitHook) {
-	txDriver := tx.Config.Drv.(*txDriver)
+	txDriver := tx.config.driver.(*txDriver)
 	txDriver.mu.Lock()
 	txDriver.onCommit = append(txDriver.onCommit, f)
 	txDriver.mu.Unlock()
@@ -120,7 +120,7 @@ func (f RollbackFunc) Rollback(ctx context.Context, tx *Tx) error {
 
 // Rollback rollbacks the transaction.
 func (tx *Tx) Rollback() error {
-	txDriver := tx.Config.Drv.(*txDriver)
+	txDriver := tx.config.driver.(*txDriver)
 	var fn Rollbacker = RollbackFunc(func(context.Context, *Tx) error {
 		return txDriver.tx.Rollback()
 	})
@@ -135,7 +135,7 @@ func (tx *Tx) Rollback() error {
 
 // OnRollback adds a hook to call on rollback.
 func (tx *Tx) OnRollback(f RollbackHook) {
-	txDriver := tx.Config.Drv.(*txDriver)
+	txDriver := tx.config.driver.(*txDriver)
 	txDriver.mu.Lock()
 	txDriver.onRollback = append(txDriver.onRollback, f)
 	txDriver.mu.Unlock()
@@ -144,15 +144,15 @@ func (tx *Tx) OnRollback(f RollbackHook) {
 // Client returns a Client that binds to current transaction.
 func (tx *Tx) Client() *Client {
 	tx.clientOnce.Do(func() {
-		tx.client = &Client{Config: tx.Config}
+		tx.client = &Client{config: tx.config}
 		tx.client.init()
 	})
 	return tx.client
 }
 
 func (tx *Tx) init() {
-	tx.City = NewCityClient(tx.Config)
-	tx.Street = NewStreetClient(tx.Config)
+	tx.City = NewCityClient(tx.config)
+	tx.Street = NewStreetClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -212,11 +212,6 @@ func (tx *txDriver) Exec(ctx context.Context, query string, args, v any) error {
 // Query calls tx.Query.
 func (tx *txDriver) Query(ctx context.Context, query string, args, v any) error {
 	return tx.tx.Query(ctx, query, args, v)
-}
-
-// UnwrapDriver implements internal.DriverUnwrapper for model Unwrap() support.
-func (tx *txDriver) UnwrapDriver() dialect.Driver {
-	return tx.drv
 }
 
 var _ dialect.Driver = (*txDriver)(nil)
