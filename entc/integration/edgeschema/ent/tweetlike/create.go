@@ -214,7 +214,7 @@ func (_c *TweetLikeCreate) upsertConfig() entbuilder.UpsertConfig[struct{}] {
 		Mutations: func() []entbuilder.FieldReader {
 			return []entbuilder.FieldReader{_c.mutation}
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 
@@ -354,7 +354,7 @@ func (_c *TweetLikeCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[struct
 			}
 			return ms
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 

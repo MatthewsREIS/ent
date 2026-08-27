@@ -193,7 +193,7 @@ func (_c *MixinIDCreate) upsertConfig() entbuilder.UpsertConfig[uuid.UUID] {
 		Mutations: func() []entbuilder.FieldReader {
 			return []entbuilder.FieldReader{_c.mutation}
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 
@@ -341,7 +341,7 @@ func (_c *MixinIDCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[uuid.UUI
 			}
 			return ms
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 

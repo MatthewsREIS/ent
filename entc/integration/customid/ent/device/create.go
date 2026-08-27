@@ -223,7 +223,7 @@ func (_c *DeviceCreate) upsertConfig() entbuilder.UpsertConfig[schema.ID] {
 		Mutations: func() []entbuilder.FieldReader {
 			return []entbuilder.FieldReader{_c.mutation}
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 
@@ -371,7 +371,7 @@ func (_c *DeviceCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[schema.ID
 			}
 			return ms
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 

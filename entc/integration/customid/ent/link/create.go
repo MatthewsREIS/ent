@@ -185,7 +185,7 @@ func (_c *LinkCreate) upsertConfig() entbuilder.UpsertConfig[uuidc.UUIDC] {
 		Mutations: func() []entbuilder.FieldReader {
 			return []entbuilder.FieldReader{_c.mutation}
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 
@@ -333,7 +333,7 @@ func (_c *LinkCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[uuidc.UUIDC
 			}
 			return ms
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 

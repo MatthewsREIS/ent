@@ -151,7 +151,7 @@ func (_c *SpecCreate) upsertConfig() entbuilder.UpsertConfig[int] {
 		Mutations: func() []entbuilder.FieldReader {
 			return []entbuilder.FieldReader{_c.mutation}
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 
@@ -295,7 +295,7 @@ func (_c *SpecCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
 			}
 			return ms
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 

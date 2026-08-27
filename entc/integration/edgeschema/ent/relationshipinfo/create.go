@@ -143,7 +143,7 @@ func (_c *RelationshipInfoCreate) upsertConfig() entbuilder.UpsertConfig[int] {
 		Mutations: func() []entbuilder.FieldReader {
 			return []entbuilder.FieldReader{_c.mutation}
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 
@@ -287,7 +287,7 @@ func (_c *RelationshipInfoCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig
 			}
 			return ms
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 

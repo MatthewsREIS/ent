@@ -148,7 +148,7 @@ func (_c *RevisionCreate) upsertConfig() entbuilder.UpsertConfig[string] {
 		Mutations: func() []entbuilder.FieldReader {
 			return []entbuilder.FieldReader{_c.mutation}
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 
@@ -295,7 +295,7 @@ func (_c *RevisionCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[string]
 			}
 			return ms
 		},
-		Dialect: _c.Drv.Dialect,
+		Dialect: func() string { return _c.Drv.Dialect() },
 	}
 }
 
