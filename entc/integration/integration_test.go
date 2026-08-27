@@ -345,7 +345,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 			sql.ConflictColumns(user.FieldPhone),
 		).
 		// Update "name" to the value that was set on create ("Mashraki").
-		UpdateName().
+		UpdateFields(user.FieldName).
 		ExecX(ctx)
 	u = client.User.GetX(ctx, u.ID)
 	require.Equal(t, "Mashraki", u.Name, "name was changed by the UPDATE clause")
@@ -358,9 +358,9 @@ func Upsert(t *testing.T, client *ent.Client) {
 		// Override some fields with custom update.
 		Update(func(u *user.UserUpsert) {
 			// Age was set to the new value (33).
-			u.UpdateAge()
+			u.Update(user.FieldAge)
 			// Update an additional field that was defined in `VALUES`.
-			u.SetAddress("localhost")
+			u.Set(user.FieldAddress, "localhost")
 		}).
 		IDX(ctx)
 	require.Equal(t, u.ID, id)
@@ -375,7 +375,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 		SetPhone("0000").
 		OnConflictColumns(user.FieldPhone).
 		// Override some fields with custom update.
-		AddAge(-1).
+		Add(user.FieldAge, -1).
 		IDX(ctx)
 	u = client.User.GetX(ctx, id)
 	require.Equal(t, 32, u.Age, "age was modified by the UPDATE clause")
@@ -490,7 +490,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.NotEqual(t, l1.UpdateTime.Unix(), l2.UpdateTime.Unix())
 
 	c3 := client.Card.Create().SetName("a8m").SetNumber("405060").SaveX(ctx)
-	client.Card.Create().SetNumber(c3.Number).OnConflictColumns(card.FieldNumber).ClearName().UpdateNewValues().ExecX(ctx)
+	client.Card.Create().SetNumber(c3.Number).OnConflictColumns(card.FieldNumber).Clear(card.FieldName).UpdateNewValues().ExecX(ctx)
 	require.Empty(t, client.Card.GetX(ctx, c3.ID).Name)
 	client.Card.UpdateOne(c3).SetName("a8m").ExecX(ctx)
 	client.Card.CreateBulk(client.Card.Create().SetNumber(c3.Number), client.Card.Create().SetNumber("708090").SetName("m8a")).
@@ -507,7 +507,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 		SetOwner("a8m").
 		SetPriority(task.PriorityHigh).
 		OnConflictColumns(enttask.FieldName, enttask.FieldOwner).
-		UpdatePriority().
+		UpdateFields(enttask.FieldPriority).
 		IDX(ctx)
 	require.Equal(t, t1.ID, tid)
 	require.Equal(t, task.PriorityHigh, client.Task.GetX(ctx, tid).Priority)
@@ -2226,12 +2226,8 @@ func Mutation(t *testing.T, client *ent.Client) {
 	t.Run("IDs", func(t *testing.T) {
 		ids := client.User.Query().IDsX(ctx)
 		u := client.User.Update().Where(user.IDIn(ids...)).AddAge(1)
-		midsAny, err := u.Mutation().IDs(ctx)
+		mids, err := u.Mutation().IDs(ctx)
 		require.NoError(t, err)
-		mids := make([]int, len(midsAny))
-		for i, v := range midsAny {
-			mids[i] = v.(int)
-		}
 		// Order can change between the 2 queries.
 		sort.Ints(ids)
 		sort.Ints(mids)
@@ -2248,10 +2244,10 @@ func Mutation(t *testing.T, client *ent.Client) {
 					pet.Name(pedro.Name),
 				),
 			)
-		midsAny, err = u.Mutation().IDs(ctx)
+		mids, err = u.Mutation().IDs(ctx)
 		require.NoError(t, err)
-		require.Len(t, midsAny, 1)
-		require.Equal(t, a8m.ID, midsAny[0])
+		require.Len(t, mids, 1)
+		require.Equal(t, a8m.ID, mids[0])
 		u.ExecX(ctx)
 	})
 

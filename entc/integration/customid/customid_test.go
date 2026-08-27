@@ -214,7 +214,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 			SetID(id).
 			OnConflictColumns(blob.FieldID).
 			Update(func(set *blob.BlobUpsert) {
-				set.AddCount(1)
+				set.Add(blob.FieldCount, 1)
 			}).
 			ExecX(ctx)
 		require.Equal(t, 1, client.Blob.GetX(ctx, id).Count)
@@ -223,7 +223,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 		client.Doc.Create().
 			SetID(d.ID).
 			OnConflictColumns(doc.FieldID).
-			SetText("Hello World").
+			Set(doc.FieldText, "Hello World").
 			UpdateNewValues().
 			ExecX(ctx)
 		require.Equal(t, "Hello World", client.Doc.GetX(ctx, d.ID).Text)
