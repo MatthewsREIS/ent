@@ -100,7 +100,7 @@ func ({{ $receiver }} *{{ $builder }}) upsertConfig() entbuilder.UpsertConfig[{{
 		Mutations: func() []entbuilder.FieldReader {
 			return []entbuilder.FieldReader{ {{ $receiver }}.mutation }
 		},
-		Dialect: {{ $receiver }}.Drv.Dialect,
+		Dialect: func() string { return {{ $receiver }}.Drv.Dialect() },
 	}
 }
 
@@ -168,7 +168,7 @@ func ({{ $receiver }} *{{ $builder }}) upsertBulkConfig() entbuilder.UpsertConfi
 			}
 			return ms
 		},
-		Dialect: {{ $receiver }}.Drv.Dialect,
+		Dialect: func() string { return {{ $receiver }}.Drv.Dialect() },
 	}
 }
 

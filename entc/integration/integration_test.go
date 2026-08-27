@@ -2298,6 +2298,12 @@ func CreateBulk(t *testing.T, client *ent.Client) {
 	_, err := client.Group.MapCreateBulk(1, nil).Save(ctx)
 	require.Error(t, err)
 
+	// OnConflict on a bulk builder created from an error (e.g. wrong-type
+	// MapCreateBulk input) must not panic on the nil driver when building
+	// the upsert config; the original error should still surface.
+	err = client.User.MapCreateBulk(1, nil).OnConflict().Exec(ctx)
+	require.Error(t, err)
+
 	client.User.Use(
 		func(next ent.Mutator) ent.Mutator {
 			return hook.UserFunc(func(ctx context.Context, m *ent.UserMutation) (ent.Value, error) {

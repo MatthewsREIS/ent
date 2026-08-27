@@ -50,7 +50,7 @@ func TestUpsertAdd(t *testing.T) {
 		u := &entbuilder.Upsert{UpdateSet: s}
 		u.Add("age", 2)
 	}))
-	require.Contains(t, q, "+")
+	require.Contains(t, q, `"age" = COALESCE("users"."age", 0) + `)
 }
 
 type fakeFieldReader map[string]any
