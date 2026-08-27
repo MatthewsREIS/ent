@@ -88,7 +88,19 @@ are clean across every gemini module that references `entgo.io/ent`.
   error-returning form) performed. The generic builder runs that validation
   unconditionally, so a call that previously silently fell through to a plain
   `INSERT` (masking a misconfigured upsert) now panics fail-fast via `ExecX`
-  instead.
+  instead. `ID()`/`IDX()` likewise now error/panic on missing conflict options
+  where upstream silently performed a plain `INSERT` and returned the ID.
+- **Per-entity upsert aliases now collapse to identical types across
+  entities.** `XUpsertOne = entbuilder.UpsertOne[ID]`, so every entity that
+  shares an ID type (e.g. all `int`-ID entities) shares one concrete Go type;
+  every `XUpsert` is the same `entbuilder.Upsert` type regardless of entity.
+  Cross-entity compile-time distinctness is lost — a function declared as
+  `func(*EscrowUpsertOne)` will happily accept a `*ParcelUpsertOne` argument.
+  There is no runtime state-sharing hazard (each builder still holds its own
+  `UpsertConfig` closure), only a loss of the compiler catching a
+  wrong-entity-type mistake. A phantom-type parameter (`UpsertOne[E, ID]`,
+  with `E` an uninstantiated marker type per entity) could restore that
+  distinctness in a later stage if needed.
 
 ### Test results
 
