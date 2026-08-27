@@ -8,7 +8,6 @@ package spec
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -116,120 +115,64 @@ func (_c *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// SpecUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. spec.FieldName).
+	SpecUpsert = entbuilder.Upsert
+
+	// SpecUpsertOne is the builder for "upsert"-ing one Spec node.
+	SpecUpsertOne = entbuilder.UpsertOne[int]
+
+	// SpecUpsertBulk is the builder for "upsert"-ing many Spec nodes.
+	SpecUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var specUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "SpecCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *SpecCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &specUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Spec.Create().
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
+//		OnConflict(sql.ResolveWithNewValues()).
+//		Update(func(u *ent.SpecUpsert) {
+//			u.Set(spec.FieldX, v)
+//		}).
 //		Exec(ctx)
 func (_c *SpecCreate) OnConflict(opts ...sql.ConflictOption) *SpecUpsertOne {
 	_c.conflict = opts
-	return &SpecUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Spec.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *SpecCreate) OnConflictColumns(columns ...string) *SpecUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &SpecUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// SpecUpsertOne is the builder for "upsert"-ing
-	//  one Spec node.
-	SpecUpsertOne struct {
-		create *SpecCreate
-	}
-
-	// SpecUpsert is the "OnConflict" setter.
-	SpecUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Spec.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *SpecUpsertOne) UpdateNewValues() *SpecUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Spec.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *SpecUpsertOne) Ignore() *SpecUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *SpecUpsertOne) DoNothing() *SpecUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the SpecCreate.OnConflict
-// documentation for more info.
-func (u *SpecUpsertOne) Update(set func(*SpecUpsert)) *SpecUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&SpecUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// Exec executes the query.
-func (u *SpecUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for SpecCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *SpecUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SpecUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *SpecUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // SpecCreateBulk is the builder for creating many Spec entities in bulk.
@@ -331,101 +274,40 @@ func (_c *SpecCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *SpecCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &specUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Spec.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
+// of the `INSERT` statement (see SpecCreate.OnConflict).
 func (_c *SpecCreateBulk) OnConflict(opts ...sql.ConflictOption) *SpecUpsertBulk {
 	_c.conflict = opts
-	return &SpecUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Spec.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *SpecCreateBulk) OnConflictColumns(columns ...string) *SpecUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &SpecUpsertBulk{
-		create: _c,
-	}
-}
-
-// SpecUpsertBulk is the builder for "upsert"-ing
-// a bulk of Spec nodes.
-type SpecUpsertBulk struct {
-	create *SpecCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Spec.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *SpecUpsertBulk) UpdateNewValues() *SpecUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Spec.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *SpecUpsertBulk) Ignore() *SpecUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *SpecUpsertBulk) DoNothing() *SpecUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the SpecCreateBulk.OnConflict
-// documentation for more info.
-func (u *SpecUpsertBulk) Update(set func(*SpecUpsert)) *SpecUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&SpecUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// Exec executes the query.
-func (u *SpecUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the SpecCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for SpecCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *SpecUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

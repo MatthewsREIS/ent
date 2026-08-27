@@ -207,152 +207,64 @@ func (_c *TagCreate) createSpec() (*Tag, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// TagUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. tag.FieldName).
+	TagUpsert = entbuilder.Upsert
+
+	// TagUpsertOne is the builder for "upsert"-ing one Tag node.
+	TagUpsertOne = entbuilder.UpsertOne[int]
+
+	// TagUpsertBulk is the builder for "upsert"-ing many Tag nodes.
+	TagUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var tagUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "TagCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *TagCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &tagUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Tag.Create().
-//		SetValue(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.TagUpsert) {
-//			SetValue(v+v).
+//			u.Set(tag.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *TagCreate) OnConflict(opts ...sql.ConflictOption) *TagUpsertOne {
 	_c.conflict = opts
-	return &TagUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Tag.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *TagCreate) OnConflictColumns(columns ...string) *TagUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &TagUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// TagUpsertOne is the builder for "upsert"-ing
-	//  one Tag node.
-	TagUpsertOne struct {
-		create *TagCreate
-	}
-
-	// TagUpsert is the "OnConflict" setter.
-	TagUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetValue sets the "value" field.
-func (u *TagUpsert) SetValue(v string) *TagUpsert {
-	u.Set(FieldValue, v)
-	return u
-}
-
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *TagUpsert) UpdateValue() *TagUpsert {
-	u.SetExcluded(FieldValue)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Tag.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *TagUpsertOne) UpdateNewValues() *TagUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Tag.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *TagUpsertOne) Ignore() *TagUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *TagUpsertOne) DoNothing() *TagUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the TagCreate.OnConflict
-// documentation for more info.
-func (u *TagUpsertOne) Update(set func(*TagUpsert)) *TagUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&TagUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetValue sets the "value" field.
-func (u *TagUpsertOne) SetValue(v string) *TagUpsertOne {
-	return u.Update(func(s *TagUpsert) {
-		s.SetValue(v)
-	})
-}
-
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *TagUpsertOne) UpdateValue() *TagUpsertOne {
-	return u.Update(func(s *TagUpsert) {
-		s.UpdateValue()
-	})
-}
-
-// Exec executes the query.
-func (u *TagUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for TagCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *TagUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *TagUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *TagUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // TagCreateBulk is the builder for creating many Tag entities in bulk.
@@ -454,120 +366,40 @@ func (_c *TagCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *TagCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &tagUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Tag.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.TagUpsert) {
-//			SetValue(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see TagCreate.OnConflict).
 func (_c *TagCreateBulk) OnConflict(opts ...sql.ConflictOption) *TagUpsertBulk {
 	_c.conflict = opts
-	return &TagUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Tag.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *TagCreateBulk) OnConflictColumns(columns ...string) *TagUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &TagUpsertBulk{
-		create: _c,
-	}
-}
-
-// TagUpsertBulk is the builder for "upsert"-ing
-// a bulk of Tag nodes.
-type TagUpsertBulk struct {
-	create *TagCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Tag.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *TagUpsertBulk) UpdateNewValues() *TagUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Tag.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *TagUpsertBulk) Ignore() *TagUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *TagUpsertBulk) DoNothing() *TagUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the TagCreateBulk.OnConflict
-// documentation for more info.
-func (u *TagUpsertBulk) Update(set func(*TagUpsert)) *TagUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&TagUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetValue sets the "value" field.
-func (u *TagUpsertBulk) SetValue(v string) *TagUpsertBulk {
-	return u.Update(func(s *TagUpsert) {
-		s.SetValue(v)
-	})
-}
-
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *TagUpsertBulk) UpdateValue() *TagUpsertBulk {
-	return u.Update(func(s *TagUpsert) {
-		s.UpdateValue()
-	})
-}
-
-// Exec executes the query.
-func (u *TagUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TagCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for TagCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *TagUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

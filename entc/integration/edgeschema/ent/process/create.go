@@ -8,7 +8,6 @@ package process
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -146,120 +145,64 @@ func (_c *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// ProcessUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. process.FieldName).
+	ProcessUpsert = entbuilder.Upsert
+
+	// ProcessUpsertOne is the builder for "upsert"-ing one Process node.
+	ProcessUpsertOne = entbuilder.UpsertOne[int]
+
+	// ProcessUpsertBulk is the builder for "upsert"-ing many Process nodes.
+	ProcessUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var processUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "ProcessCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *ProcessCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &processUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Process.Create().
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
+//		OnConflict(sql.ResolveWithNewValues()).
+//		Update(func(u *ent.ProcessUpsert) {
+//			u.Set(process.FieldX, v)
+//		}).
 //		Exec(ctx)
 func (_c *ProcessCreate) OnConflict(opts ...sql.ConflictOption) *ProcessUpsertOne {
 	_c.conflict = opts
-	return &ProcessUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Process.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *ProcessCreate) OnConflictColumns(columns ...string) *ProcessUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &ProcessUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// ProcessUpsertOne is the builder for "upsert"-ing
-	//  one Process node.
-	ProcessUpsertOne struct {
-		create *ProcessCreate
-	}
-
-	// ProcessUpsert is the "OnConflict" setter.
-	ProcessUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Process.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *ProcessUpsertOne) UpdateNewValues() *ProcessUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Process.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *ProcessUpsertOne) Ignore() *ProcessUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *ProcessUpsertOne) DoNothing() *ProcessUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the ProcessCreate.OnConflict
-// documentation for more info.
-func (u *ProcessUpsertOne) Update(set func(*ProcessUpsert)) *ProcessUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&ProcessUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// Exec executes the query.
-func (u *ProcessUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for ProcessCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *ProcessUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *ProcessUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *ProcessUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // ProcessCreateBulk is the builder for creating many Process entities in bulk.
@@ -361,101 +304,40 @@ func (_c *ProcessCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *ProcessCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &processUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Process.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
+// of the `INSERT` statement (see ProcessCreate.OnConflict).
 func (_c *ProcessCreateBulk) OnConflict(opts ...sql.ConflictOption) *ProcessUpsertBulk {
 	_c.conflict = opts
-	return &ProcessUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Process.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *ProcessCreateBulk) OnConflictColumns(columns ...string) *ProcessUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &ProcessUpsertBulk{
-		create: _c,
-	}
-}
-
-// ProcessUpsertBulk is the builder for "upsert"-ing
-// a bulk of Process nodes.
-type ProcessUpsertBulk struct {
-	create *ProcessCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Process.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *ProcessUpsertBulk) UpdateNewValues() *ProcessUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Process.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *ProcessUpsertBulk) Ignore() *ProcessUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *ProcessUpsertBulk) DoNothing() *ProcessUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the ProcessCreateBulk.OnConflict
-// documentation for more info.
-func (u *ProcessUpsertBulk) Update(set func(*ProcessUpsert)) *ProcessUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&ProcessUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// Exec executes the query.
-func (u *ProcessUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ProcessCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for ProcessCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *ProcessUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

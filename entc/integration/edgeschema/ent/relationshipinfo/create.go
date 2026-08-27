@@ -107,152 +107,64 @@ func (_c *RelationshipInfoCreate) createSpec() (*RelationshipInfo, *sqlgraph.Cre
 	return _node, _spec
 }
 
+type (
+	// RelationshipInfoUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. relationshipinfo.FieldName).
+	RelationshipInfoUpsert = entbuilder.Upsert
+
+	// RelationshipInfoUpsertOne is the builder for "upsert"-ing one RelationshipInfo node.
+	RelationshipInfoUpsertOne = entbuilder.UpsertOne[int]
+
+	// RelationshipInfoUpsertBulk is the builder for "upsert"-ing many RelationshipInfo nodes.
+	RelationshipInfoUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var relationshipinfoUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "RelationshipInfoCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *RelationshipInfoCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &relationshipinfoUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.RelationshipInfo.Create().
-//		SetText(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.RelationshipInfoUpsert) {
-//			SetText(v+v).
+//			u.Set(relationshipinfo.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *RelationshipInfoCreate) OnConflict(opts ...sql.ConflictOption) *RelationshipInfoUpsertOne {
 	_c.conflict = opts
-	return &RelationshipInfoUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.RelationshipInfo.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *RelationshipInfoCreate) OnConflictColumns(columns ...string) *RelationshipInfoUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &RelationshipInfoUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// RelationshipInfoUpsertOne is the builder for "upsert"-ing
-	//  one RelationshipInfo node.
-	RelationshipInfoUpsertOne struct {
-		create *RelationshipInfoCreate
-	}
-
-	// RelationshipInfoUpsert is the "OnConflict" setter.
-	RelationshipInfoUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetText sets the "text" field.
-func (u *RelationshipInfoUpsert) SetText(v string) *RelationshipInfoUpsert {
-	u.Set(FieldText, v)
-	return u
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *RelationshipInfoUpsert) UpdateText() *RelationshipInfoUpsert {
-	u.SetExcluded(FieldText)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.RelationshipInfo.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *RelationshipInfoUpsertOne) UpdateNewValues() *RelationshipInfoUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.RelationshipInfo.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *RelationshipInfoUpsertOne) Ignore() *RelationshipInfoUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *RelationshipInfoUpsertOne) DoNothing() *RelationshipInfoUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the RelationshipInfoCreate.OnConflict
-// documentation for more info.
-func (u *RelationshipInfoUpsertOne) Update(set func(*RelationshipInfoUpsert)) *RelationshipInfoUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&RelationshipInfoUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetText sets the "text" field.
-func (u *RelationshipInfoUpsertOne) SetText(v string) *RelationshipInfoUpsertOne {
-	return u.Update(func(s *RelationshipInfoUpsert) {
-		s.SetText(v)
-	})
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *RelationshipInfoUpsertOne) UpdateText() *RelationshipInfoUpsertOne {
-	return u.Update(func(s *RelationshipInfoUpsert) {
-		s.UpdateText()
-	})
-}
-
-// Exec executes the query.
-func (u *RelationshipInfoUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for RelationshipInfoCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *RelationshipInfoUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *RelationshipInfoUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *RelationshipInfoUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // RelationshipInfoCreateBulk is the builder for creating many RelationshipInfo entities in bulk.
@@ -354,120 +266,40 @@ func (_c *RelationshipInfoCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *RelationshipInfoCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &relationshipinfoUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.RelationshipInfo.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.RelationshipInfoUpsert) {
-//			SetText(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see RelationshipInfoCreate.OnConflict).
 func (_c *RelationshipInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *RelationshipInfoUpsertBulk {
 	_c.conflict = opts
-	return &RelationshipInfoUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.RelationshipInfo.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *RelationshipInfoCreateBulk) OnConflictColumns(columns ...string) *RelationshipInfoUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &RelationshipInfoUpsertBulk{
-		create: _c,
-	}
-}
-
-// RelationshipInfoUpsertBulk is the builder for "upsert"-ing
-// a bulk of RelationshipInfo nodes.
-type RelationshipInfoUpsertBulk struct {
-	create *RelationshipInfoCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.RelationshipInfo.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *RelationshipInfoUpsertBulk) UpdateNewValues() *RelationshipInfoUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.RelationshipInfo.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *RelationshipInfoUpsertBulk) Ignore() *RelationshipInfoUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *RelationshipInfoUpsertBulk) DoNothing() *RelationshipInfoUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the RelationshipInfoCreateBulk.OnConflict
-// documentation for more info.
-func (u *RelationshipInfoUpsertBulk) Update(set func(*RelationshipInfoUpsert)) *RelationshipInfoUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&RelationshipInfoUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetText sets the "text" field.
-func (u *RelationshipInfoUpsertBulk) SetText(v string) *RelationshipInfoUpsertBulk {
-	return u.Update(func(s *RelationshipInfoUpsert) {
-		s.SetText(v)
-	})
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *RelationshipInfoUpsertBulk) UpdateText() *RelationshipInfoUpsertBulk {
-	return u.Update(func(s *RelationshipInfoUpsert) {
-		s.UpdateText()
-	})
-}
-
-// Exec executes the query.
-func (u *RelationshipInfoUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the RelationshipInfoCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for RelationshipInfoCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *RelationshipInfoUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

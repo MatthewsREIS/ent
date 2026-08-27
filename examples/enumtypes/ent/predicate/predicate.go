@@ -7,4 +7,4 @@ import (
 )
 
 // User is the predicate function for user builders.
-type User func(*sql.Selector)
+type User = func(*sql.Selector)

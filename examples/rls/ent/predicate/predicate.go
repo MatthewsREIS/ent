@@ -7,7 +7,7 @@ import (
 )
 
 // Tenant is the predicate function for tenant builders.
-type Tenant func(*sql.Selector)
+type Tenant = func(*sql.Selector)
 
 // User is the predicate function for user builders.
-type User func(*sql.Selector)
+type User = func(*sql.Selector)

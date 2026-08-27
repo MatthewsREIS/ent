@@ -268,417 +268,65 @@ func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// TaskUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. enttask.FieldName).
+	TaskUpsert = entbuilder.Upsert
+
+	// TaskUpsertOne is the builder for "upsert"-ing one Task node.
+	TaskUpsertOne = entbuilder.UpsertOne[int]
+
+	// TaskUpsertBulk is the builder for "upsert"-ing many Task nodes.
+	TaskUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var taskUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "TaskCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+	Immutable:     []string{FieldCreatedAt},
+}
+
+func (_c *TaskCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &taskUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Task.Create().
-//		SetPriority(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.TaskUpsert) {
-//			SetPriority(v+v).
+//			u.Set(enttask.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *TaskCreate) OnConflict(opts ...sql.ConflictOption) *TaskUpsertOne {
 	_c.conflict = opts
-	return &TaskUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Task.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *TaskCreate) OnConflictColumns(columns ...string) *TaskUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &TaskUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// TaskUpsertOne is the builder for "upsert"-ing
-	//  one Task node.
-	TaskUpsertOne struct {
-		create *TaskCreate
-	}
-
-	// TaskUpsert is the "OnConflict" setter.
-	TaskUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetPriority sets the "priority" field.
-func (u *TaskUpsert) SetPriority(v task.Priority) *TaskUpsert {
-	u.Set(FieldPriority, v)
-	return u
-}
-
-// UpdatePriority sets the "priority" field to the value that was provided on create.
-func (u *TaskUpsert) UpdatePriority() *TaskUpsert {
-	u.SetExcluded(FieldPriority)
-	return u
-}
-
-// AddPriority adds v to the "priority" field.
-func (u *TaskUpsert) AddPriority(v task.Priority) *TaskUpsert {
-	u.Add(FieldPriority, v)
-	return u
-}
-
-// SetPriorities sets the "priorities" field.
-func (u *TaskUpsert) SetPriorities(v map[string]task.Priority) *TaskUpsert {
-	u.Set(FieldPriorities, v)
-	return u
-}
-
-// UpdatePriorities sets the "priorities" field to the value that was provided on create.
-func (u *TaskUpsert) UpdatePriorities() *TaskUpsert {
-	u.SetExcluded(FieldPriorities)
-	return u
-}
-
-// ClearPriorities clears the value of the "priorities" field.
-func (u *TaskUpsert) ClearPriorities() *TaskUpsert {
-	u.SetNull(FieldPriorities)
-	return u
-}
-
-// SetName sets the "name" field.
-func (u *TaskUpsert) SetName(v string) *TaskUpsert {
-	u.Set(FieldName, v)
-	return u
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *TaskUpsert) UpdateName() *TaskUpsert {
-	u.SetExcluded(FieldName)
-	return u
-}
-
-// ClearName clears the value of the "name" field.
-func (u *TaskUpsert) ClearName() *TaskUpsert {
-	u.SetNull(FieldName)
-	return u
-}
-
-// SetOwner sets the "owner" field.
-func (u *TaskUpsert) SetOwner(v string) *TaskUpsert {
-	u.Set(FieldOwner, v)
-	return u
-}
-
-// UpdateOwner sets the "owner" field to the value that was provided on create.
-func (u *TaskUpsert) UpdateOwner() *TaskUpsert {
-	u.SetExcluded(FieldOwner)
-	return u
-}
-
-// ClearOwner clears the value of the "owner" field.
-func (u *TaskUpsert) ClearOwner() *TaskUpsert {
-	u.SetNull(FieldOwner)
-	return u
-}
-
-// SetOrder sets the "order" field.
-func (u *TaskUpsert) SetOrder(v int) *TaskUpsert {
-	u.Set(FieldOrder, v)
-	return u
-}
-
-// UpdateOrder sets the "order" field to the value that was provided on create.
-func (u *TaskUpsert) UpdateOrder() *TaskUpsert {
-	u.SetExcluded(FieldOrder)
-	return u
-}
-
-// AddOrder adds v to the "order" field.
-func (u *TaskUpsert) AddOrder(v int) *TaskUpsert {
-	u.Add(FieldOrder, v)
-	return u
-}
-
-// ClearOrder clears the value of the "order" field.
-func (u *TaskUpsert) ClearOrder() *TaskUpsert {
-	u.SetNull(FieldOrder)
-	return u
-}
-
-// SetOrderOption sets the "order_option" field.
-func (u *TaskUpsert) SetOrderOption(v int) *TaskUpsert {
-	u.Set(FieldOrderOption, v)
-	return u
-}
-
-// UpdateOrderOption sets the "order_option" field to the value that was provided on create.
-func (u *TaskUpsert) UpdateOrderOption() *TaskUpsert {
-	u.SetExcluded(FieldOrderOption)
-	return u
-}
-
-// AddOrderOption adds v to the "order_option" field.
-func (u *TaskUpsert) AddOrderOption(v int) *TaskUpsert {
-	u.Add(FieldOrderOption, v)
-	return u
-}
-
-// ClearOrderOption clears the value of the "order_option" field.
-func (u *TaskUpsert) ClearOrderOption() *TaskUpsert {
-	u.SetNull(FieldOrderOption)
-	return u
-}
-
-// SetOp sets the "op" field.
-func (u *TaskUpsert) SetOp(v string) *TaskUpsert {
-	u.Set(FieldOp, v)
-	return u
-}
-
-// UpdateOp sets the "op" field to the value that was provided on create.
-func (u *TaskUpsert) UpdateOp() *TaskUpsert {
-	u.SetExcluded(FieldOp)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Task.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *TaskUpsertOne) UpdateNewValues() *TaskUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.Field(FieldCreatedAt); exists {
-			s.SetIgnore(FieldCreatedAt)
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Task.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *TaskUpsertOne) Ignore() *TaskUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *TaskUpsertOne) DoNothing() *TaskUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the TaskCreate.OnConflict
-// documentation for more info.
-func (u *TaskUpsertOne) Update(set func(*TaskUpsert)) *TaskUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&TaskUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetPriority sets the "priority" field.
-func (u *TaskUpsertOne) SetPriority(v task.Priority) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetPriority(v)
-	})
-}
-
-// AddPriority adds v to the "priority" field.
-func (u *TaskUpsertOne) AddPriority(v task.Priority) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.AddPriority(v)
-	})
-}
-
-// UpdatePriority sets the "priority" field to the value that was provided on create.
-func (u *TaskUpsertOne) UpdatePriority() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdatePriority()
-	})
-}
-
-// SetPriorities sets the "priorities" field.
-func (u *TaskUpsertOne) SetPriorities(v map[string]task.Priority) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetPriorities(v)
-	})
-}
-
-// UpdatePriorities sets the "priorities" field to the value that was provided on create.
-func (u *TaskUpsertOne) UpdatePriorities() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdatePriorities()
-	})
-}
-
-// ClearPriorities clears the value of the "priorities" field.
-func (u *TaskUpsertOne) ClearPriorities() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearPriorities()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *TaskUpsertOne) SetName(v string) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *TaskUpsertOne) UpdateName() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateName()
-	})
-}
-
-// ClearName clears the value of the "name" field.
-func (u *TaskUpsertOne) ClearName() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearName()
-	})
-}
-
-// SetOwner sets the "owner" field.
-func (u *TaskUpsertOne) SetOwner(v string) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetOwner(v)
-	})
-}
-
-// UpdateOwner sets the "owner" field to the value that was provided on create.
-func (u *TaskUpsertOne) UpdateOwner() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateOwner()
-	})
-}
-
-// ClearOwner clears the value of the "owner" field.
-func (u *TaskUpsertOne) ClearOwner() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearOwner()
-	})
-}
-
-// SetOrder sets the "order" field.
-func (u *TaskUpsertOne) SetOrder(v int) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetOrder(v)
-	})
-}
-
-// AddOrder adds v to the "order" field.
-func (u *TaskUpsertOne) AddOrder(v int) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.AddOrder(v)
-	})
-}
-
-// UpdateOrder sets the "order" field to the value that was provided on create.
-func (u *TaskUpsertOne) UpdateOrder() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateOrder()
-	})
-}
-
-// ClearOrder clears the value of the "order" field.
-func (u *TaskUpsertOne) ClearOrder() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearOrder()
-	})
-}
-
-// SetOrderOption sets the "order_option" field.
-func (u *TaskUpsertOne) SetOrderOption(v int) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetOrderOption(v)
-	})
-}
-
-// AddOrderOption adds v to the "order_option" field.
-func (u *TaskUpsertOne) AddOrderOption(v int) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.AddOrderOption(v)
-	})
-}
-
-// UpdateOrderOption sets the "order_option" field to the value that was provided on create.
-func (u *TaskUpsertOne) UpdateOrderOption() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateOrderOption()
-	})
-}
-
-// ClearOrderOption clears the value of the "order_option" field.
-func (u *TaskUpsertOne) ClearOrderOption() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearOrderOption()
-	})
-}
-
-// SetOp sets the "op" field.
-func (u *TaskUpsertOne) SetOp(v string) *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetOp(v)
-	})
-}
-
-// UpdateOp sets the "op" field to the value that was provided on create.
-func (u *TaskUpsertOne) UpdateOp() *TaskUpsertOne {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateOp()
-	})
-}
-
-// Exec executes the query.
-func (u *TaskUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for TaskCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *TaskUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *TaskUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *TaskUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // TaskCreateBulk is the builder for creating many Task entities in bulk.
@@ -781,267 +429,40 @@ func (_c *TaskCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *TaskCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &taskUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Task.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.TaskUpsert) {
-//			SetPriority(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see TaskCreate.OnConflict).
 func (_c *TaskCreateBulk) OnConflict(opts ...sql.ConflictOption) *TaskUpsertBulk {
 	_c.conflict = opts
-	return &TaskUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Task.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *TaskCreateBulk) OnConflictColumns(columns ...string) *TaskUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &TaskUpsertBulk{
-		create: _c,
-	}
-}
-
-// TaskUpsertBulk is the builder for "upsert"-ing
-// a bulk of Task nodes.
-type TaskUpsertBulk struct {
-	create *TaskCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Task.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *TaskUpsertBulk) UpdateNewValues() *TaskUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.Field(FieldCreatedAt); exists {
-				s.SetIgnore(FieldCreatedAt)
-			}
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Task.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *TaskUpsertBulk) Ignore() *TaskUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *TaskUpsertBulk) DoNothing() *TaskUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the TaskCreateBulk.OnConflict
-// documentation for more info.
-func (u *TaskUpsertBulk) Update(set func(*TaskUpsert)) *TaskUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&TaskUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetPriority sets the "priority" field.
-func (u *TaskUpsertBulk) SetPriority(v task.Priority) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetPriority(v)
-	})
-}
-
-// AddPriority adds v to the "priority" field.
-func (u *TaskUpsertBulk) AddPriority(v task.Priority) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.AddPriority(v)
-	})
-}
-
-// UpdatePriority sets the "priority" field to the value that was provided on create.
-func (u *TaskUpsertBulk) UpdatePriority() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdatePriority()
-	})
-}
-
-// SetPriorities sets the "priorities" field.
-func (u *TaskUpsertBulk) SetPriorities(v map[string]task.Priority) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetPriorities(v)
-	})
-}
-
-// UpdatePriorities sets the "priorities" field to the value that was provided on create.
-func (u *TaskUpsertBulk) UpdatePriorities() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdatePriorities()
-	})
-}
-
-// ClearPriorities clears the value of the "priorities" field.
-func (u *TaskUpsertBulk) ClearPriorities() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearPriorities()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *TaskUpsertBulk) SetName(v string) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *TaskUpsertBulk) UpdateName() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateName()
-	})
-}
-
-// ClearName clears the value of the "name" field.
-func (u *TaskUpsertBulk) ClearName() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearName()
-	})
-}
-
-// SetOwner sets the "owner" field.
-func (u *TaskUpsertBulk) SetOwner(v string) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetOwner(v)
-	})
-}
-
-// UpdateOwner sets the "owner" field to the value that was provided on create.
-func (u *TaskUpsertBulk) UpdateOwner() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateOwner()
-	})
-}
-
-// ClearOwner clears the value of the "owner" field.
-func (u *TaskUpsertBulk) ClearOwner() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearOwner()
-	})
-}
-
-// SetOrder sets the "order" field.
-func (u *TaskUpsertBulk) SetOrder(v int) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetOrder(v)
-	})
-}
-
-// AddOrder adds v to the "order" field.
-func (u *TaskUpsertBulk) AddOrder(v int) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.AddOrder(v)
-	})
-}
-
-// UpdateOrder sets the "order" field to the value that was provided on create.
-func (u *TaskUpsertBulk) UpdateOrder() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateOrder()
-	})
-}
-
-// ClearOrder clears the value of the "order" field.
-func (u *TaskUpsertBulk) ClearOrder() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearOrder()
-	})
-}
-
-// SetOrderOption sets the "order_option" field.
-func (u *TaskUpsertBulk) SetOrderOption(v int) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetOrderOption(v)
-	})
-}
-
-// AddOrderOption adds v to the "order_option" field.
-func (u *TaskUpsertBulk) AddOrderOption(v int) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.AddOrderOption(v)
-	})
-}
-
-// UpdateOrderOption sets the "order_option" field to the value that was provided on create.
-func (u *TaskUpsertBulk) UpdateOrderOption() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateOrderOption()
-	})
-}
-
-// ClearOrderOption clears the value of the "order_option" field.
-func (u *TaskUpsertBulk) ClearOrderOption() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.ClearOrderOption()
-	})
-}
-
-// SetOp sets the "op" field.
-func (u *TaskUpsertBulk) SetOp(v string) *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.SetOp(v)
-	})
-}
-
-// UpdateOp sets the "op" field to the value that was provided on create.
-func (u *TaskUpsertBulk) UpdateOp() *TaskUpsertBulk {
-	return u.Update(func(s *TaskUpsert) {
-		s.UpdateOp()
-	})
-}
-
-// Exec executes the query.
-func (u *TaskUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TaskCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for TaskCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *TaskUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

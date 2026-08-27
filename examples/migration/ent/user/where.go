@@ -265,14 +265,15 @@ func HasCards() predicate.User {
 
 // HasCardsWith applies the HasEdge predicate on the "cards" edge with a given conditions (other predicates).
 func HasCardsWith(preds ...predicate.Card) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newCardsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
+	return predicate.User(
+		func(s *sql.Selector) {
+			step := newCardsStep()
+			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+				for _, p := range preds {
+					p(s)
+				}
+			})
 		})
-	})
 }
 
 // And groups predicates with the AND operator between them.

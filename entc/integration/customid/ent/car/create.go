@@ -200,264 +200,68 @@ func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// CarUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. car.FieldName).
+	CarUpsert = entbuilder.Upsert
+
+	// CarUpsertOne is the builder for "upsert"-ing one Car node.
+	CarUpsertOne = entbuilder.UpsertOne[int]
+
+	// CarUpsertBulk is the builder for "upsert"-ing many Car nodes.
+	CarUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var carUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "CarCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: true,
+	NumericID:     true,
+}
+
+func (_c *CarCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &carUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		IDsSet: func() []bool {
+			_, ok := _c.mutation.ID()
+			return []bool{ok}
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Car.Create().
-//		SetBeforeID(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.CarUpsert) {
-//			SetBeforeID(v+v).
+//			u.Set(car.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *CarCreate) OnConflict(opts ...sql.ConflictOption) *CarUpsertOne {
 	_c.conflict = opts
-	return &CarUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Car.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *CarCreate) OnConflictColumns(columns ...string) *CarUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &CarUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// CarUpsertOne is the builder for "upsert"-ing
-	//  one Car node.
-	CarUpsertOne struct {
-		create *CarCreate
-	}
-
-	// CarUpsert is the "OnConflict" setter.
-	CarUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetBeforeID sets the "before_id" field.
-func (u *CarUpsert) SetBeforeID(v float64) *CarUpsert {
-	u.Set(FieldBeforeID, v)
-	return u
-}
-
-// UpdateBeforeID sets the "before_id" field to the value that was provided on create.
-func (u *CarUpsert) UpdateBeforeID() *CarUpsert {
-	u.SetExcluded(FieldBeforeID)
-	return u
-}
-
-// AddBeforeID adds v to the "before_id" field.
-func (u *CarUpsert) AddBeforeID(v float64) *CarUpsert {
-	u.Add(FieldBeforeID, v)
-	return u
-}
-
-// ClearBeforeID clears the value of the "before_id" field.
-func (u *CarUpsert) ClearBeforeID() *CarUpsert {
-	u.SetNull(FieldBeforeID)
-	return u
-}
-
-// SetAfterID sets the "after_id" field.
-func (u *CarUpsert) SetAfterID(v float64) *CarUpsert {
-	u.Set(FieldAfterID, v)
-	return u
-}
-
-// UpdateAfterID sets the "after_id" field to the value that was provided on create.
-func (u *CarUpsert) UpdateAfterID() *CarUpsert {
-	u.SetExcluded(FieldAfterID)
-	return u
-}
-
-// AddAfterID adds v to the "after_id" field.
-func (u *CarUpsert) AddAfterID(v float64) *CarUpsert {
-	u.Add(FieldAfterID, v)
-	return u
-}
-
-// ClearAfterID clears the value of the "after_id" field.
-func (u *CarUpsert) ClearAfterID() *CarUpsert {
-	u.SetNull(FieldAfterID)
-	return u
-}
-
-// SetModel sets the "model" field.
-func (u *CarUpsert) SetModel(v string) *CarUpsert {
-	u.Set(FieldModel, v)
-	return u
-}
-
-// UpdateModel sets the "model" field to the value that was provided on create.
-func (u *CarUpsert) UpdateModel() *CarUpsert {
-	u.SetExcluded(FieldModel)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
-// Using this option is equivalent to using:
-//
-//	client.Car.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(car.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *CarUpsertOne) UpdateNewValues() *CarUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(FieldID)
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Car.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *CarUpsertOne) Ignore() *CarUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *CarUpsertOne) DoNothing() *CarUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the CarCreate.OnConflict
-// documentation for more info.
-func (u *CarUpsertOne) Update(set func(*CarUpsert)) *CarUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&CarUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetBeforeID sets the "before_id" field.
-func (u *CarUpsertOne) SetBeforeID(v float64) *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.SetBeforeID(v)
-	})
-}
-
-// AddBeforeID adds v to the "before_id" field.
-func (u *CarUpsertOne) AddBeforeID(v float64) *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.AddBeforeID(v)
-	})
-}
-
-// UpdateBeforeID sets the "before_id" field to the value that was provided on create.
-func (u *CarUpsertOne) UpdateBeforeID() *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.UpdateBeforeID()
-	})
-}
-
-// ClearBeforeID clears the value of the "before_id" field.
-func (u *CarUpsertOne) ClearBeforeID() *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.ClearBeforeID()
-	})
-}
-
-// SetAfterID sets the "after_id" field.
-func (u *CarUpsertOne) SetAfterID(v float64) *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.SetAfterID(v)
-	})
-}
-
-// AddAfterID adds v to the "after_id" field.
-func (u *CarUpsertOne) AddAfterID(v float64) *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.AddAfterID(v)
-	})
-}
-
-// UpdateAfterID sets the "after_id" field to the value that was provided on create.
-func (u *CarUpsertOne) UpdateAfterID() *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.UpdateAfterID()
-	})
-}
-
-// ClearAfterID clears the value of the "after_id" field.
-func (u *CarUpsertOne) ClearAfterID() *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.ClearAfterID()
-	})
-}
-
-// SetModel sets the "model" field.
-func (u *CarUpsertOne) SetModel(v string) *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.SetModel(v)
-	})
-}
-
-// UpdateModel sets the "model" field to the value that was provided on create.
-func (u *CarUpsertOne) UpdateModel() *CarUpsertOne {
-	return u.Update(func(s *CarUpsert) {
-		s.UpdateModel()
-	})
-}
-
-// Exec executes the query.
-func (u *CarUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for CarCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *CarUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CarUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *CarUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // CarCreateBulk is the builder for creating many Car entities in bulk.
@@ -559,186 +363,47 @@ func (_c *CarCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *CarCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &carUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		IDsSet: func() []bool {
+			set := make([]bool, len(_c.builders))
+			for i, b := range _c.builders {
+				_, set[i] = b.mutation.ID()
+			}
+			return set
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Car.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.CarUpsert) {
-//			SetBeforeID(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see CarCreate.OnConflict).
 func (_c *CarCreateBulk) OnConflict(opts ...sql.ConflictOption) *CarUpsertBulk {
 	_c.conflict = opts
-	return &CarUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Car.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *CarCreateBulk) OnConflictColumns(columns ...string) *CarUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &CarUpsertBulk{
-		create: _c,
-	}
-}
-
-// CarUpsertBulk is the builder for "upsert"-ing
-// a bulk of Car nodes.
-type CarUpsertBulk struct {
-	create *CarCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Car.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(car.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *CarUpsertBulk) UpdateNewValues() *CarUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(FieldID)
-			}
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Car.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *CarUpsertBulk) Ignore() *CarUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *CarUpsertBulk) DoNothing() *CarUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the CarCreateBulk.OnConflict
-// documentation for more info.
-func (u *CarUpsertBulk) Update(set func(*CarUpsert)) *CarUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&CarUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetBeforeID sets the "before_id" field.
-func (u *CarUpsertBulk) SetBeforeID(v float64) *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.SetBeforeID(v)
-	})
-}
-
-// AddBeforeID adds v to the "before_id" field.
-func (u *CarUpsertBulk) AddBeforeID(v float64) *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.AddBeforeID(v)
-	})
-}
-
-// UpdateBeforeID sets the "before_id" field to the value that was provided on create.
-func (u *CarUpsertBulk) UpdateBeforeID() *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.UpdateBeforeID()
-	})
-}
-
-// ClearBeforeID clears the value of the "before_id" field.
-func (u *CarUpsertBulk) ClearBeforeID() *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.ClearBeforeID()
-	})
-}
-
-// SetAfterID sets the "after_id" field.
-func (u *CarUpsertBulk) SetAfterID(v float64) *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.SetAfterID(v)
-	})
-}
-
-// AddAfterID adds v to the "after_id" field.
-func (u *CarUpsertBulk) AddAfterID(v float64) *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.AddAfterID(v)
-	})
-}
-
-// UpdateAfterID sets the "after_id" field to the value that was provided on create.
-func (u *CarUpsertBulk) UpdateAfterID() *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.UpdateAfterID()
-	})
-}
-
-// ClearAfterID clears the value of the "after_id" field.
-func (u *CarUpsertBulk) ClearAfterID() *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.ClearAfterID()
-	})
-}
-
-// SetModel sets the "model" field.
-func (u *CarUpsertBulk) SetModel(v string) *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.SetModel(v)
-	})
-}
-
-// UpdateModel sets the "model" field to the value that was provided on create.
-func (u *CarUpsertBulk) UpdateModel() *CarUpsertBulk {
-	return u.Update(func(s *CarUpsert) {
-		s.UpdateModel()
-	})
-}
-
-// Exec executes the query.
-func (u *CarUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CarCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for CarCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *CarUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

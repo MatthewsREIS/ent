@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
@@ -238,204 +237,68 @@ func (_c *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// BlobUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. blob.FieldName).
+	BlobUpsert = entbuilder.Upsert
+
+	// BlobUpsertOne is the builder for "upsert"-ing one Blob node.
+	BlobUpsertOne = entbuilder.UpsertOne[uuid.UUID]
+
+	// BlobUpsertBulk is the builder for "upsert"-ing many Blob nodes.
+	BlobUpsertBulk = entbuilder.UpsertBulk[uuid.UUID]
+)
+
+var blobUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "BlobCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: true,
+	NumericID:     false,
+}
+
+func (_c *BlobCreate) upsertConfig() entbuilder.UpsertConfig[uuid.UUID] {
+	return entbuilder.UpsertConfig[uuid.UUID]{
+		Meta:     &blobUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (uuid.UUID, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero uuid.UUID
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		IDsSet: func() []bool {
+			_, ok := _c.mutation.ID()
+			return []bool{ok}
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Blob.Create().
-//		SetUUID(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.BlobUpsert) {
-//			SetUUID(v+v).
+//			u.Set(blob.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *BlobCreate) OnConflict(opts ...sql.ConflictOption) *BlobUpsertOne {
 	_c.conflict = opts
-	return &BlobUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Blob.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *BlobCreate) OnConflictColumns(columns ...string) *BlobUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &BlobUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// BlobUpsertOne is the builder for "upsert"-ing
-	//  one Blob node.
-	BlobUpsertOne struct {
-		create *BlobCreate
-	}
-
-	// BlobUpsert is the "OnConflict" setter.
-	BlobUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetUUID sets the "uuid" field.
-func (u *BlobUpsert) SetUUID(v uuid.UUID) *BlobUpsert {
-	u.Set(FieldUUID, v)
-	return u
-}
-
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *BlobUpsert) UpdateUUID() *BlobUpsert {
-	u.SetExcluded(FieldUUID)
-	return u
-}
-
-// SetCount sets the "count" field.
-func (u *BlobUpsert) SetCount(v int) *BlobUpsert {
-	u.Set(FieldCount, v)
-	return u
-}
-
-// UpdateCount sets the "count" field to the value that was provided on create.
-func (u *BlobUpsert) UpdateCount() *BlobUpsert {
-	u.SetExcluded(FieldCount)
-	return u
-}
-
-// AddCount adds v to the "count" field.
-func (u *BlobUpsert) AddCount(v int) *BlobUpsert {
-	u.Add(FieldCount, v)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
-// Using this option is equivalent to using:
-//
-//	client.Blob.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(blob.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *BlobUpsertOne) UpdateNewValues() *BlobUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(FieldID)
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Blob.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *BlobUpsertOne) Ignore() *BlobUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *BlobUpsertOne) DoNothing() *BlobUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the BlobCreate.OnConflict
-// documentation for more info.
-func (u *BlobUpsertOne) Update(set func(*BlobUpsert)) *BlobUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&BlobUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetUUID sets the "uuid" field.
-func (u *BlobUpsertOne) SetUUID(v uuid.UUID) *BlobUpsertOne {
-	return u.Update(func(s *BlobUpsert) {
-		s.SetUUID(v)
-	})
-}
-
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *BlobUpsertOne) UpdateUUID() *BlobUpsertOne {
-	return u.Update(func(s *BlobUpsert) {
-		s.UpdateUUID()
-	})
-}
-
-// SetCount sets the "count" field.
-func (u *BlobUpsertOne) SetCount(v int) *BlobUpsertOne {
-	return u.Update(func(s *BlobUpsert) {
-		s.SetCount(v)
-	})
-}
-
-// AddCount adds v to the "count" field.
-func (u *BlobUpsertOne) AddCount(v int) *BlobUpsertOne {
-	return u.Update(func(s *BlobUpsert) {
-		s.AddCount(v)
-	})
-}
-
-// UpdateCount sets the "count" field to the value that was provided on create.
-func (u *BlobUpsertOne) UpdateCount() *BlobUpsertOne {
-	return u.Update(func(s *BlobUpsert) {
-		s.UpdateCount()
-	})
-}
-
-// Exec executes the query.
-func (u *BlobUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for BlobCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *BlobUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *BlobUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.Drv.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: BlobUpsertOne.ID is not supported by MySQL driver. Use BlobUpsertOne.Exec instead")
-	}
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *BlobUpsertOne) IDX(ctx context.Context) uuid.UUID {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // BlobCreateBulk is the builder for creating many Blob entities in bulk.
@@ -534,151 +397,47 @@ func (_c *BlobCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *BlobCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[uuid.UUID] {
+	return entbuilder.UpsertConfig[uuid.UUID]{
+		Meta:     &blobUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		IDsSet: func() []bool {
+			set := make([]bool, len(_c.builders))
+			for i, b := range _c.builders {
+				_, set[i] = b.mutation.ID()
+			}
+			return set
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Blob.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.BlobUpsert) {
-//			SetUUID(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see BlobCreate.OnConflict).
 func (_c *BlobCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobUpsertBulk {
 	_c.conflict = opts
-	return &BlobUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Blob.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *BlobCreateBulk) OnConflictColumns(columns ...string) *BlobUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &BlobUpsertBulk{
-		create: _c,
-	}
-}
-
-// BlobUpsertBulk is the builder for "upsert"-ing
-// a bulk of Blob nodes.
-type BlobUpsertBulk struct {
-	create *BlobCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Blob.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(blob.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *BlobUpsertBulk) UpdateNewValues() *BlobUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(FieldID)
-			}
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Blob.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *BlobUpsertBulk) Ignore() *BlobUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *BlobUpsertBulk) DoNothing() *BlobUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the BlobCreateBulk.OnConflict
-// documentation for more info.
-func (u *BlobUpsertBulk) Update(set func(*BlobUpsert)) *BlobUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&BlobUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetUUID sets the "uuid" field.
-func (u *BlobUpsertBulk) SetUUID(v uuid.UUID) *BlobUpsertBulk {
-	return u.Update(func(s *BlobUpsert) {
-		s.SetUUID(v)
-	})
-}
-
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *BlobUpsertBulk) UpdateUUID() *BlobUpsertBulk {
-	return u.Update(func(s *BlobUpsert) {
-		s.UpdateUUID()
-	})
-}
-
-// SetCount sets the "count" field.
-func (u *BlobUpsertBulk) SetCount(v int) *BlobUpsertBulk {
-	return u.Update(func(s *BlobUpsert) {
-		s.SetCount(v)
-	})
-}
-
-// AddCount adds v to the "count" field.
-func (u *BlobUpsertBulk) AddCount(v int) *BlobUpsertBulk {
-	return u.Update(func(s *BlobUpsert) {
-		s.AddCount(v)
-	})
-}
-
-// UpdateCount sets the "count" field to the value that was provided on create.
-func (u *BlobUpsertBulk) UpdateCount() *BlobUpsertBulk {
-	return u.Update(func(s *BlobUpsert) {
-		s.UpdateCount()
-	})
-}
-
-// Exec executes the query.
-func (u *BlobUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BlobCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for BlobCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *BlobUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

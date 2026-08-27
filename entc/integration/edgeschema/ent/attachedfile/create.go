@@ -193,204 +193,64 @@ func ThroughDefaults(c Config) *sqlgraph.CreateSpec {
 	return spec
 }
 
+type (
+	// AttachedFileUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. attachedfile.FieldName).
+	AttachedFileUpsert = entbuilder.Upsert
+
+	// AttachedFileUpsertOne is the builder for "upsert"-ing one AttachedFile node.
+	AttachedFileUpsertOne = entbuilder.UpsertOne[int]
+
+	// AttachedFileUpsertBulk is the builder for "upsert"-ing many AttachedFile nodes.
+	AttachedFileUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var attachedfileUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "AttachedFileCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *AttachedFileCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &attachedfileUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.AttachedFile.Create().
-//		SetAttachTime(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.AttachedFileUpsert) {
-//			SetAttachTime(v+v).
+//			u.Set(attachedfile.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *AttachedFileCreate) OnConflict(opts ...sql.ConflictOption) *AttachedFileUpsertOne {
 	_c.conflict = opts
-	return &AttachedFileUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.AttachedFile.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *AttachedFileCreate) OnConflictColumns(columns ...string) *AttachedFileUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &AttachedFileUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// AttachedFileUpsertOne is the builder for "upsert"-ing
-	//  one AttachedFile node.
-	AttachedFileUpsertOne struct {
-		create *AttachedFileCreate
-	}
-
-	// AttachedFileUpsert is the "OnConflict" setter.
-	AttachedFileUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetAttachTime sets the "attach_time" field.
-func (u *AttachedFileUpsert) SetAttachTime(v time.Time) *AttachedFileUpsert {
-	u.Set(FieldAttachTime, v)
-	return u
-}
-
-// UpdateAttachTime sets the "attach_time" field to the value that was provided on create.
-func (u *AttachedFileUpsert) UpdateAttachTime() *AttachedFileUpsert {
-	u.SetExcluded(FieldAttachTime)
-	return u
-}
-
-// SetFID sets the "f_id" field.
-func (u *AttachedFileUpsert) SetFID(v int) *AttachedFileUpsert {
-	u.Set(FieldFID, v)
-	return u
-}
-
-// UpdateFID sets the "f_id" field to the value that was provided on create.
-func (u *AttachedFileUpsert) UpdateFID() *AttachedFileUpsert {
-	u.SetExcluded(FieldFID)
-	return u
-}
-
-// SetProcID sets the "proc_id" field.
-func (u *AttachedFileUpsert) SetProcID(v int) *AttachedFileUpsert {
-	u.Set(FieldProcID, v)
-	return u
-}
-
-// UpdateProcID sets the "proc_id" field to the value that was provided on create.
-func (u *AttachedFileUpsert) UpdateProcID() *AttachedFileUpsert {
-	u.SetExcluded(FieldProcID)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.AttachedFile.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *AttachedFileUpsertOne) UpdateNewValues() *AttachedFileUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.AttachedFile.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *AttachedFileUpsertOne) Ignore() *AttachedFileUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *AttachedFileUpsertOne) DoNothing() *AttachedFileUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the AttachedFileCreate.OnConflict
-// documentation for more info.
-func (u *AttachedFileUpsertOne) Update(set func(*AttachedFileUpsert)) *AttachedFileUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&AttachedFileUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetAttachTime sets the "attach_time" field.
-func (u *AttachedFileUpsertOne) SetAttachTime(v time.Time) *AttachedFileUpsertOne {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.SetAttachTime(v)
-	})
-}
-
-// UpdateAttachTime sets the "attach_time" field to the value that was provided on create.
-func (u *AttachedFileUpsertOne) UpdateAttachTime() *AttachedFileUpsertOne {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.UpdateAttachTime()
-	})
-}
-
-// SetFID sets the "f_id" field.
-func (u *AttachedFileUpsertOne) SetFID(v int) *AttachedFileUpsertOne {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.SetFID(v)
-	})
-}
-
-// UpdateFID sets the "f_id" field to the value that was provided on create.
-func (u *AttachedFileUpsertOne) UpdateFID() *AttachedFileUpsertOne {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.UpdateFID()
-	})
-}
-
-// SetProcID sets the "proc_id" field.
-func (u *AttachedFileUpsertOne) SetProcID(v int) *AttachedFileUpsertOne {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.SetProcID(v)
-	})
-}
-
-// UpdateProcID sets the "proc_id" field to the value that was provided on create.
-func (u *AttachedFileUpsertOne) UpdateProcID() *AttachedFileUpsertOne {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.UpdateProcID()
-	})
-}
-
-// Exec executes the query.
-func (u *AttachedFileUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for AttachedFileCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *AttachedFileUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *AttachedFileUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *AttachedFileUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // AttachedFileCreateBulk is the builder for creating many AttachedFile entities in bulk.
@@ -493,148 +353,40 @@ func (_c *AttachedFileCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *AttachedFileCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &attachedfileUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.AttachedFile.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.AttachedFileUpsert) {
-//			SetAttachTime(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see AttachedFileCreate.OnConflict).
 func (_c *AttachedFileCreateBulk) OnConflict(opts ...sql.ConflictOption) *AttachedFileUpsertBulk {
 	_c.conflict = opts
-	return &AttachedFileUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.AttachedFile.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *AttachedFileCreateBulk) OnConflictColumns(columns ...string) *AttachedFileUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &AttachedFileUpsertBulk{
-		create: _c,
-	}
-}
-
-// AttachedFileUpsertBulk is the builder for "upsert"-ing
-// a bulk of AttachedFile nodes.
-type AttachedFileUpsertBulk struct {
-	create *AttachedFileCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.AttachedFile.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *AttachedFileUpsertBulk) UpdateNewValues() *AttachedFileUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.AttachedFile.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *AttachedFileUpsertBulk) Ignore() *AttachedFileUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *AttachedFileUpsertBulk) DoNothing() *AttachedFileUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the AttachedFileCreateBulk.OnConflict
-// documentation for more info.
-func (u *AttachedFileUpsertBulk) Update(set func(*AttachedFileUpsert)) *AttachedFileUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&AttachedFileUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetAttachTime sets the "attach_time" field.
-func (u *AttachedFileUpsertBulk) SetAttachTime(v time.Time) *AttachedFileUpsertBulk {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.SetAttachTime(v)
-	})
-}
-
-// UpdateAttachTime sets the "attach_time" field to the value that was provided on create.
-func (u *AttachedFileUpsertBulk) UpdateAttachTime() *AttachedFileUpsertBulk {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.UpdateAttachTime()
-	})
-}
-
-// SetFID sets the "f_id" field.
-func (u *AttachedFileUpsertBulk) SetFID(v int) *AttachedFileUpsertBulk {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.SetFID(v)
-	})
-}
-
-// UpdateFID sets the "f_id" field to the value that was provided on create.
-func (u *AttachedFileUpsertBulk) UpdateFID() *AttachedFileUpsertBulk {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.UpdateFID()
-	})
-}
-
-// SetProcID sets the "proc_id" field.
-func (u *AttachedFileUpsertBulk) SetProcID(v int) *AttachedFileUpsertBulk {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.SetProcID(v)
-	})
-}
-
-// UpdateProcID sets the "proc_id" field to the value that was provided on create.
-func (u *AttachedFileUpsertBulk) UpdateProcID() *AttachedFileUpsertBulk {
-	return u.Update(func(s *AttachedFileUpsert) {
-		s.UpdateProcID()
-	})
-}
-
-// Exec executes the query.
-func (u *AttachedFileUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the AttachedFileCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for AttachedFileCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *AttachedFileUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

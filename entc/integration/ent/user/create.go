@@ -619,568 +619,64 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// UserUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. user.FieldName).
+	UserUpsert = entbuilder.Upsert
+
+	// UserUpsertOne is the builder for "upsert"-ing one User node.
+	UserUpsertOne = entbuilder.UpsertOne[int]
+
+	// UserUpsertBulk is the builder for "upsert"-ing many User nodes.
+	UserUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var userUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "UserCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *UserCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &userUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.User.Create().
-//		SetOptionalInt(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.UserUpsert) {
-//			SetOptionalInt(v+v).
+//			u.Set(user.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *UserCreate) OnConflict(opts ...sql.ConflictOption) *UserUpsertOne {
 	_c.conflict = opts
-	return &UserUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *UserCreate) OnConflictColumns(columns ...string) *UserUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &UserUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// UserUpsertOne is the builder for "upsert"-ing
-	//  one User node.
-	UserUpsertOne struct {
-		create *UserCreate
-	}
-
-	// UserUpsert is the "OnConflict" setter.
-	UserUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetOptionalInt sets the "optional_int" field.
-func (u *UserUpsert) SetOptionalInt(v int) *UserUpsert {
-	u.Set(FieldOptionalInt, v)
-	return u
-}
-
-// UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
-func (u *UserUpsert) UpdateOptionalInt() *UserUpsert {
-	u.SetExcluded(FieldOptionalInt)
-	return u
-}
-
-// AddOptionalInt adds v to the "optional_int" field.
-func (u *UserUpsert) AddOptionalInt(v int) *UserUpsert {
-	u.Add(FieldOptionalInt, v)
-	return u
-}
-
-// ClearOptionalInt clears the value of the "optional_int" field.
-func (u *UserUpsert) ClearOptionalInt() *UserUpsert {
-	u.SetNull(FieldOptionalInt)
-	return u
-}
-
-// SetAge sets the "age" field.
-func (u *UserUpsert) SetAge(v int) *UserUpsert {
-	u.Set(FieldAge, v)
-	return u
-}
-
-// UpdateAge sets the "age" field to the value that was provided on create.
-func (u *UserUpsert) UpdateAge() *UserUpsert {
-	u.SetExcluded(FieldAge)
-	return u
-}
-
-// AddAge adds v to the "age" field.
-func (u *UserUpsert) AddAge(v int) *UserUpsert {
-	u.Add(FieldAge, v)
-	return u
-}
-
-// SetName sets the "name" field.
-func (u *UserUpsert) SetName(v string) *UserUpsert {
-	u.Set(FieldName, v)
-	return u
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *UserUpsert) UpdateName() *UserUpsert {
-	u.SetExcluded(FieldName)
-	return u
-}
-
-// SetLast sets the "last" field.
-func (u *UserUpsert) SetLast(v string) *UserUpsert {
-	u.Set(FieldLast, v)
-	return u
-}
-
-// UpdateLast sets the "last" field to the value that was provided on create.
-func (u *UserUpsert) UpdateLast() *UserUpsert {
-	u.SetExcluded(FieldLast)
-	return u
-}
-
-// SetNickname sets the "nickname" field.
-func (u *UserUpsert) SetNickname(v string) *UserUpsert {
-	u.Set(FieldNickname, v)
-	return u
-}
-
-// UpdateNickname sets the "nickname" field to the value that was provided on create.
-func (u *UserUpsert) UpdateNickname() *UserUpsert {
-	u.SetExcluded(FieldNickname)
-	return u
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (u *UserUpsert) ClearNickname() *UserUpsert {
-	u.SetNull(FieldNickname)
-	return u
-}
-
-// SetAddress sets the "address" field.
-func (u *UserUpsert) SetAddress(v string) *UserUpsert {
-	u.Set(FieldAddress, v)
-	return u
-}
-
-// UpdateAddress sets the "address" field to the value that was provided on create.
-func (u *UserUpsert) UpdateAddress() *UserUpsert {
-	u.SetExcluded(FieldAddress)
-	return u
-}
-
-// ClearAddress clears the value of the "address" field.
-func (u *UserUpsert) ClearAddress() *UserUpsert {
-	u.SetNull(FieldAddress)
-	return u
-}
-
-// SetPhone sets the "phone" field.
-func (u *UserUpsert) SetPhone(v string) *UserUpsert {
-	u.Set(FieldPhone, v)
-	return u
-}
-
-// UpdatePhone sets the "phone" field to the value that was provided on create.
-func (u *UserUpsert) UpdatePhone() *UserUpsert {
-	u.SetExcluded(FieldPhone)
-	return u
-}
-
-// ClearPhone clears the value of the "phone" field.
-func (u *UserUpsert) ClearPhone() *UserUpsert {
-	u.SetNull(FieldPhone)
-	return u
-}
-
-// SetPassword sets the "password" field.
-func (u *UserUpsert) SetPassword(v string) *UserUpsert {
-	u.Set(FieldPassword, v)
-	return u
-}
-
-// UpdatePassword sets the "password" field to the value that was provided on create.
-func (u *UserUpsert) UpdatePassword() *UserUpsert {
-	u.SetExcluded(FieldPassword)
-	return u
-}
-
-// ClearPassword clears the value of the "password" field.
-func (u *UserUpsert) ClearPassword() *UserUpsert {
-	u.SetNull(FieldPassword)
-	return u
-}
-
-// SetRole sets the "role" field.
-func (u *UserUpsert) SetRole(v Role) *UserUpsert {
-	u.Set(FieldRole, v)
-	return u
-}
-
-// UpdateRole sets the "role" field to the value that was provided on create.
-func (u *UserUpsert) UpdateRole() *UserUpsert {
-	u.SetExcluded(FieldRole)
-	return u
-}
-
-// SetEmployment sets the "employment" field.
-func (u *UserUpsert) SetEmployment(v Employment) *UserUpsert {
-	u.Set(FieldEmployment, v)
-	return u
-}
-
-// UpdateEmployment sets the "employment" field to the value that was provided on create.
-func (u *UserUpsert) UpdateEmployment() *UserUpsert {
-	u.SetExcluded(FieldEmployment)
-	return u
-}
-
-// SetSSOCert sets the "SSOCert" field.
-func (u *UserUpsert) SetSSOCert(v string) *UserUpsert {
-	u.Set(FieldSSOCert, v)
-	return u
-}
-
-// UpdateSSOCert sets the "SSOCert" field to the value that was provided on create.
-func (u *UserUpsert) UpdateSSOCert() *UserUpsert {
-	u.SetExcluded(FieldSSOCert)
-	return u
-}
-
-// ClearSSOCert clears the value of the "SSOCert" field.
-func (u *UserUpsert) ClearSSOCert() *UserUpsert {
-	u.SetNull(FieldSSOCert)
-	return u
-}
-
-// SetFilesCount sets the "files_count" field.
-func (u *UserUpsert) SetFilesCount(v int) *UserUpsert {
-	u.Set(FieldFilesCount, v)
-	return u
-}
-
-// UpdateFilesCount sets the "files_count" field to the value that was provided on create.
-func (u *UserUpsert) UpdateFilesCount() *UserUpsert {
-	u.SetExcluded(FieldFilesCount)
-	return u
-}
-
-// AddFilesCount adds v to the "files_count" field.
-func (u *UserUpsert) AddFilesCount(v int) *UserUpsert {
-	u.Add(FieldFilesCount, v)
-	return u
-}
-
-// ClearFilesCount clears the value of the "files_count" field.
-func (u *UserUpsert) ClearFilesCount() *UserUpsert {
-	u.SetNull(FieldFilesCount)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *UserUpsertOne) UpdateNewValues() *UserUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.User.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *UserUpsertOne) Ignore() *UserUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *UserUpsertOne) DoNothing() *UserUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the UserCreate.OnConflict
-// documentation for more info.
-func (u *UserUpsertOne) Update(set func(*UserUpsert)) *UserUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&UserUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetOptionalInt sets the "optional_int" field.
-func (u *UserUpsertOne) SetOptionalInt(v int) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetOptionalInt(v)
-	})
-}
-
-// AddOptionalInt adds v to the "optional_int" field.
-func (u *UserUpsertOne) AddOptionalInt(v int) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.AddOptionalInt(v)
-	})
-}
-
-// UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateOptionalInt() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateOptionalInt()
-	})
-}
-
-// ClearOptionalInt clears the value of the "optional_int" field.
-func (u *UserUpsertOne) ClearOptionalInt() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearOptionalInt()
-	})
-}
-
-// SetAge sets the "age" field.
-func (u *UserUpsertOne) SetAge(v int) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetAge(v)
-	})
-}
-
-// AddAge adds v to the "age" field.
-func (u *UserUpsertOne) AddAge(v int) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.AddAge(v)
-	})
-}
-
-// UpdateAge sets the "age" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateAge() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateAge()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *UserUpsertOne) SetName(v string) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateName() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateName()
-	})
-}
-
-// SetLast sets the "last" field.
-func (u *UserUpsertOne) SetLast(v string) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetLast(v)
-	})
-}
-
-// UpdateLast sets the "last" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateLast() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateLast()
-	})
-}
-
-// SetNickname sets the "nickname" field.
-func (u *UserUpsertOne) SetNickname(v string) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetNickname(v)
-	})
-}
-
-// UpdateNickname sets the "nickname" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateNickname() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateNickname()
-	})
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (u *UserUpsertOne) ClearNickname() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearNickname()
-	})
-}
-
-// SetAddress sets the "address" field.
-func (u *UserUpsertOne) SetAddress(v string) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetAddress(v)
-	})
-}
-
-// UpdateAddress sets the "address" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateAddress() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateAddress()
-	})
-}
-
-// ClearAddress clears the value of the "address" field.
-func (u *UserUpsertOne) ClearAddress() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearAddress()
-	})
-}
-
-// SetPhone sets the "phone" field.
-func (u *UserUpsertOne) SetPhone(v string) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetPhone(v)
-	})
-}
-
-// UpdatePhone sets the "phone" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdatePhone() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdatePhone()
-	})
-}
-
-// ClearPhone clears the value of the "phone" field.
-func (u *UserUpsertOne) ClearPhone() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearPhone()
-	})
-}
-
-// SetPassword sets the "password" field.
-func (u *UserUpsertOne) SetPassword(v string) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetPassword(v)
-	})
-}
-
-// UpdatePassword sets the "password" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdatePassword() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdatePassword()
-	})
-}
-
-// ClearPassword clears the value of the "password" field.
-func (u *UserUpsertOne) ClearPassword() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearPassword()
-	})
-}
-
-// SetRole sets the "role" field.
-func (u *UserUpsertOne) SetRole(v Role) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetRole(v)
-	})
-}
-
-// UpdateRole sets the "role" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateRole() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateRole()
-	})
-}
-
-// SetEmployment sets the "employment" field.
-func (u *UserUpsertOne) SetEmployment(v Employment) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetEmployment(v)
-	})
-}
-
-// UpdateEmployment sets the "employment" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateEmployment() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateEmployment()
-	})
-}
-
-// SetSSOCert sets the "SSOCert" field.
-func (u *UserUpsertOne) SetSSOCert(v string) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetSSOCert(v)
-	})
-}
-
-// UpdateSSOCert sets the "SSOCert" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateSSOCert() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateSSOCert()
-	})
-}
-
-// ClearSSOCert clears the value of the "SSOCert" field.
-func (u *UserUpsertOne) ClearSSOCert() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearSSOCert()
-	})
-}
-
-// SetFilesCount sets the "files_count" field.
-func (u *UserUpsertOne) SetFilesCount(v int) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.SetFilesCount(v)
-	})
-}
-
-// AddFilesCount adds v to the "files_count" field.
-func (u *UserUpsertOne) AddFilesCount(v int) *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.AddFilesCount(v)
-	})
-}
-
-// UpdateFilesCount sets the "files_count" field to the value that was provided on create.
-func (u *UserUpsertOne) UpdateFilesCount() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateFilesCount()
-	})
-}
-
-// ClearFilesCount clears the value of the "files_count" field.
-func (u *UserUpsertOne) ClearFilesCount() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearFilesCount()
-	})
-}
-
-// Exec executes the query.
-func (u *UserUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for UserCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *UserUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *UserUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *UserUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // UserCreateBulk is the builder for creating many User entities in bulk.
@@ -1283,344 +779,40 @@ func (_c *UserCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *UserCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &userUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.User.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.UserUpsert) {
-//			SetOptionalInt(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see UserCreate.OnConflict).
 func (_c *UserCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserUpsertBulk {
 	_c.conflict = opts
-	return &UserUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *UserCreateBulk) OnConflictColumns(columns ...string) *UserUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &UserUpsertBulk{
-		create: _c,
-	}
-}
-
-// UserUpsertBulk is the builder for "upsert"-ing
-// a bulk of User nodes.
-type UserUpsertBulk struct {
-	create *UserCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *UserUpsertBulk) UpdateNewValues() *UserUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *UserUpsertBulk) Ignore() *UserUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *UserUpsertBulk) DoNothing() *UserUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the UserCreateBulk.OnConflict
-// documentation for more info.
-func (u *UserUpsertBulk) Update(set func(*UserUpsert)) *UserUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&UserUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetOptionalInt sets the "optional_int" field.
-func (u *UserUpsertBulk) SetOptionalInt(v int) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetOptionalInt(v)
-	})
-}
-
-// AddOptionalInt adds v to the "optional_int" field.
-func (u *UserUpsertBulk) AddOptionalInt(v int) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.AddOptionalInt(v)
-	})
-}
-
-// UpdateOptionalInt sets the "optional_int" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateOptionalInt() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateOptionalInt()
-	})
-}
-
-// ClearOptionalInt clears the value of the "optional_int" field.
-func (u *UserUpsertBulk) ClearOptionalInt() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearOptionalInt()
-	})
-}
-
-// SetAge sets the "age" field.
-func (u *UserUpsertBulk) SetAge(v int) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetAge(v)
-	})
-}
-
-// AddAge adds v to the "age" field.
-func (u *UserUpsertBulk) AddAge(v int) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.AddAge(v)
-	})
-}
-
-// UpdateAge sets the "age" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateAge() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateAge()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *UserUpsertBulk) SetName(v string) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateName() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateName()
-	})
-}
-
-// SetLast sets the "last" field.
-func (u *UserUpsertBulk) SetLast(v string) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetLast(v)
-	})
-}
-
-// UpdateLast sets the "last" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateLast() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateLast()
-	})
-}
-
-// SetNickname sets the "nickname" field.
-func (u *UserUpsertBulk) SetNickname(v string) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetNickname(v)
-	})
-}
-
-// UpdateNickname sets the "nickname" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateNickname() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateNickname()
-	})
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (u *UserUpsertBulk) ClearNickname() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearNickname()
-	})
-}
-
-// SetAddress sets the "address" field.
-func (u *UserUpsertBulk) SetAddress(v string) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetAddress(v)
-	})
-}
-
-// UpdateAddress sets the "address" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateAddress() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateAddress()
-	})
-}
-
-// ClearAddress clears the value of the "address" field.
-func (u *UserUpsertBulk) ClearAddress() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearAddress()
-	})
-}
-
-// SetPhone sets the "phone" field.
-func (u *UserUpsertBulk) SetPhone(v string) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetPhone(v)
-	})
-}
-
-// UpdatePhone sets the "phone" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdatePhone() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdatePhone()
-	})
-}
-
-// ClearPhone clears the value of the "phone" field.
-func (u *UserUpsertBulk) ClearPhone() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearPhone()
-	})
-}
-
-// SetPassword sets the "password" field.
-func (u *UserUpsertBulk) SetPassword(v string) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetPassword(v)
-	})
-}
-
-// UpdatePassword sets the "password" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdatePassword() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdatePassword()
-	})
-}
-
-// ClearPassword clears the value of the "password" field.
-func (u *UserUpsertBulk) ClearPassword() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearPassword()
-	})
-}
-
-// SetRole sets the "role" field.
-func (u *UserUpsertBulk) SetRole(v Role) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetRole(v)
-	})
-}
-
-// UpdateRole sets the "role" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateRole() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateRole()
-	})
-}
-
-// SetEmployment sets the "employment" field.
-func (u *UserUpsertBulk) SetEmployment(v Employment) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetEmployment(v)
-	})
-}
-
-// UpdateEmployment sets the "employment" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateEmployment() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateEmployment()
-	})
-}
-
-// SetSSOCert sets the "SSOCert" field.
-func (u *UserUpsertBulk) SetSSOCert(v string) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetSSOCert(v)
-	})
-}
-
-// UpdateSSOCert sets the "SSOCert" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateSSOCert() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateSSOCert()
-	})
-}
-
-// ClearSSOCert clears the value of the "SSOCert" field.
-func (u *UserUpsertBulk) ClearSSOCert() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearSSOCert()
-	})
-}
-
-// SetFilesCount sets the "files_count" field.
-func (u *UserUpsertBulk) SetFilesCount(v int) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.SetFilesCount(v)
-	})
-}
-
-// AddFilesCount adds v to the "files_count" field.
-func (u *UserUpsertBulk) AddFilesCount(v int) *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.AddFilesCount(v)
-	})
-}
-
-// UpdateFilesCount sets the "files_count" field to the value that was provided on create.
-func (u *UserUpsertBulk) UpdateFilesCount() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.UpdateFilesCount()
-	})
-}
-
-// ClearFilesCount clears the value of the "files_count" field.
-func (u *UserUpsertBulk) ClearFilesCount() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearFilesCount()
-	})
-}
-
-// Exec executes the query.
-func (u *UserUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the UserCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for UserCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *UserUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

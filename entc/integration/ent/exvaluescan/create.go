@@ -234,373 +234,64 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 	return _node, _spec, nil
 }
 
+type (
+	// ExValueScanUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. exvaluescan.FieldName).
+	ExValueScanUpsert = entbuilder.Upsert
+
+	// ExValueScanUpsertOne is the builder for "upsert"-ing one ExValueScan node.
+	ExValueScanUpsertOne = entbuilder.UpsertOne[int]
+
+	// ExValueScanUpsertBulk is the builder for "upsert"-ing many ExValueScan nodes.
+	ExValueScanUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var exvaluescanUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "ExValueScanCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *ExValueScanCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &exvaluescanUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.ExValueScan.Create().
-//		SetBinary(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.ExValueScanUpsert) {
-//			SetBinary(v+v).
+//			u.Set(exvaluescan.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *ExValueScanCreate) OnConflict(opts ...sql.ConflictOption) *ExValueScanUpsertOne {
 	_c.conflict = opts
-	return &ExValueScanUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.ExValueScan.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *ExValueScanCreate) OnConflictColumns(columns ...string) *ExValueScanUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &ExValueScanUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// ExValueScanUpsertOne is the builder for "upsert"-ing
-	//  one ExValueScan node.
-	ExValueScanUpsertOne struct {
-		create *ExValueScanCreate
-	}
-
-	// ExValueScanUpsert is the "OnConflict" setter.
-	ExValueScanUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetBinary sets the "binary" field.
-func (u *ExValueScanUpsert) SetBinary(v *url.URL) *ExValueScanUpsert {
-	u.Set(FieldBinary, v)
-	return u
-}
-
-// UpdateBinary sets the "binary" field to the value that was provided on create.
-func (u *ExValueScanUpsert) UpdateBinary() *ExValueScanUpsert {
-	u.SetExcluded(FieldBinary)
-	return u
-}
-
-// SetBinaryBytes sets the "binary_bytes" field.
-func (u *ExValueScanUpsert) SetBinaryBytes(v *url.URL) *ExValueScanUpsert {
-	u.Set(FieldBinaryBytes, v)
-	return u
-}
-
-// UpdateBinaryBytes sets the "binary_bytes" field to the value that was provided on create.
-func (u *ExValueScanUpsert) UpdateBinaryBytes() *ExValueScanUpsert {
-	u.SetExcluded(FieldBinaryBytes)
-	return u
-}
-
-// SetBinaryOptional sets the "binary_optional" field.
-func (u *ExValueScanUpsert) SetBinaryOptional(v *url.URL) *ExValueScanUpsert {
-	u.Set(FieldBinaryOptional, v)
-	return u
-}
-
-// UpdateBinaryOptional sets the "binary_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsert) UpdateBinaryOptional() *ExValueScanUpsert {
-	u.SetExcluded(FieldBinaryOptional)
-	return u
-}
-
-// ClearBinaryOptional clears the value of the "binary_optional" field.
-func (u *ExValueScanUpsert) ClearBinaryOptional() *ExValueScanUpsert {
-	u.SetNull(FieldBinaryOptional)
-	return u
-}
-
-// SetText sets the "text" field.
-func (u *ExValueScanUpsert) SetText(v *big.Int) *ExValueScanUpsert {
-	u.Set(FieldText, v)
-	return u
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *ExValueScanUpsert) UpdateText() *ExValueScanUpsert {
-	u.SetExcluded(FieldText)
-	return u
-}
-
-// SetTextOptional sets the "text_optional" field.
-func (u *ExValueScanUpsert) SetTextOptional(v *big.Int) *ExValueScanUpsert {
-	u.Set(FieldTextOptional, v)
-	return u
-}
-
-// UpdateTextOptional sets the "text_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsert) UpdateTextOptional() *ExValueScanUpsert {
-	u.SetExcluded(FieldTextOptional)
-	return u
-}
-
-// ClearTextOptional clears the value of the "text_optional" field.
-func (u *ExValueScanUpsert) ClearTextOptional() *ExValueScanUpsert {
-	u.SetNull(FieldTextOptional)
-	return u
-}
-
-// SetBase64 sets the "base64" field.
-func (u *ExValueScanUpsert) SetBase64(v string) *ExValueScanUpsert {
-	u.Set(FieldBase64, v)
-	return u
-}
-
-// UpdateBase64 sets the "base64" field to the value that was provided on create.
-func (u *ExValueScanUpsert) UpdateBase64() *ExValueScanUpsert {
-	u.SetExcluded(FieldBase64)
-	return u
-}
-
-// SetCustom sets the "custom" field.
-func (u *ExValueScanUpsert) SetCustom(v string) *ExValueScanUpsert {
-	u.Set(FieldCustom, v)
-	return u
-}
-
-// UpdateCustom sets the "custom" field to the value that was provided on create.
-func (u *ExValueScanUpsert) UpdateCustom() *ExValueScanUpsert {
-	u.SetExcluded(FieldCustom)
-	return u
-}
-
-// SetCustomOptional sets the "custom_optional" field.
-func (u *ExValueScanUpsert) SetCustomOptional(v string) *ExValueScanUpsert {
-	u.Set(FieldCustomOptional, v)
-	return u
-}
-
-// UpdateCustomOptional sets the "custom_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsert) UpdateCustomOptional() *ExValueScanUpsert {
-	u.SetExcluded(FieldCustomOptional)
-	return u
-}
-
-// ClearCustomOptional clears the value of the "custom_optional" field.
-func (u *ExValueScanUpsert) ClearCustomOptional() *ExValueScanUpsert {
-	u.SetNull(FieldCustomOptional)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.ExValueScan.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *ExValueScanUpsertOne) UpdateNewValues() *ExValueScanUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.ExValueScan.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *ExValueScanUpsertOne) Ignore() *ExValueScanUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *ExValueScanUpsertOne) DoNothing() *ExValueScanUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the ExValueScanCreate.OnConflict
-// documentation for more info.
-func (u *ExValueScanUpsertOne) Update(set func(*ExValueScanUpsert)) *ExValueScanUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&ExValueScanUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetBinary sets the "binary" field.
-func (u *ExValueScanUpsertOne) SetBinary(v *url.URL) *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetBinary(v)
-	})
-}
-
-// UpdateBinary sets the "binary" field to the value that was provided on create.
-func (u *ExValueScanUpsertOne) UpdateBinary() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateBinary()
-	})
-}
-
-// SetBinaryBytes sets the "binary_bytes" field.
-func (u *ExValueScanUpsertOne) SetBinaryBytes(v *url.URL) *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetBinaryBytes(v)
-	})
-}
-
-// UpdateBinaryBytes sets the "binary_bytes" field to the value that was provided on create.
-func (u *ExValueScanUpsertOne) UpdateBinaryBytes() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateBinaryBytes()
-	})
-}
-
-// SetBinaryOptional sets the "binary_optional" field.
-func (u *ExValueScanUpsertOne) SetBinaryOptional(v *url.URL) *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetBinaryOptional(v)
-	})
-}
-
-// UpdateBinaryOptional sets the "binary_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsertOne) UpdateBinaryOptional() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateBinaryOptional()
-	})
-}
-
-// ClearBinaryOptional clears the value of the "binary_optional" field.
-func (u *ExValueScanUpsertOne) ClearBinaryOptional() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.ClearBinaryOptional()
-	})
-}
-
-// SetText sets the "text" field.
-func (u *ExValueScanUpsertOne) SetText(v *big.Int) *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetText(v)
-	})
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *ExValueScanUpsertOne) UpdateText() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateText()
-	})
-}
-
-// SetTextOptional sets the "text_optional" field.
-func (u *ExValueScanUpsertOne) SetTextOptional(v *big.Int) *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetTextOptional(v)
-	})
-}
-
-// UpdateTextOptional sets the "text_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsertOne) UpdateTextOptional() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateTextOptional()
-	})
-}
-
-// ClearTextOptional clears the value of the "text_optional" field.
-func (u *ExValueScanUpsertOne) ClearTextOptional() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.ClearTextOptional()
-	})
-}
-
-// SetBase64 sets the "base64" field.
-func (u *ExValueScanUpsertOne) SetBase64(v string) *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetBase64(v)
-	})
-}
-
-// UpdateBase64 sets the "base64" field to the value that was provided on create.
-func (u *ExValueScanUpsertOne) UpdateBase64() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateBase64()
-	})
-}
-
-// SetCustom sets the "custom" field.
-func (u *ExValueScanUpsertOne) SetCustom(v string) *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetCustom(v)
-	})
-}
-
-// UpdateCustom sets the "custom" field to the value that was provided on create.
-func (u *ExValueScanUpsertOne) UpdateCustom() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateCustom()
-	})
-}
-
-// SetCustomOptional sets the "custom_optional" field.
-func (u *ExValueScanUpsertOne) SetCustomOptional(v string) *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetCustomOptional(v)
-	})
-}
-
-// UpdateCustomOptional sets the "custom_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsertOne) UpdateCustomOptional() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateCustomOptional()
-	})
-}
-
-// ClearCustomOptional clears the value of the "custom_optional" field.
-func (u *ExValueScanUpsertOne) ClearCustomOptional() *ExValueScanUpsertOne {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.ClearCustomOptional()
-	})
-}
-
-// Exec executes the query.
-func (u *ExValueScanUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for ExValueScanCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *ExValueScanUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *ExValueScanUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *ExValueScanUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // ExValueScanCreateBulk is the builder for creating many ExValueScan entities in bulk.
@@ -705,239 +396,40 @@ func (_c *ExValueScanCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *ExValueScanCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &exvaluescanUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.ExValueScan.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.ExValueScanUpsert) {
-//			SetBinary(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see ExValueScanCreate.OnConflict).
 func (_c *ExValueScanCreateBulk) OnConflict(opts ...sql.ConflictOption) *ExValueScanUpsertBulk {
 	_c.conflict = opts
-	return &ExValueScanUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.ExValueScan.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *ExValueScanCreateBulk) OnConflictColumns(columns ...string) *ExValueScanUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &ExValueScanUpsertBulk{
-		create: _c,
-	}
-}
-
-// ExValueScanUpsertBulk is the builder for "upsert"-ing
-// a bulk of ExValueScan nodes.
-type ExValueScanUpsertBulk struct {
-	create *ExValueScanCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.ExValueScan.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *ExValueScanUpsertBulk) UpdateNewValues() *ExValueScanUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.ExValueScan.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *ExValueScanUpsertBulk) Ignore() *ExValueScanUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *ExValueScanUpsertBulk) DoNothing() *ExValueScanUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the ExValueScanCreateBulk.OnConflict
-// documentation for more info.
-func (u *ExValueScanUpsertBulk) Update(set func(*ExValueScanUpsert)) *ExValueScanUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&ExValueScanUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetBinary sets the "binary" field.
-func (u *ExValueScanUpsertBulk) SetBinary(v *url.URL) *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetBinary(v)
-	})
-}
-
-// UpdateBinary sets the "binary" field to the value that was provided on create.
-func (u *ExValueScanUpsertBulk) UpdateBinary() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateBinary()
-	})
-}
-
-// SetBinaryBytes sets the "binary_bytes" field.
-func (u *ExValueScanUpsertBulk) SetBinaryBytes(v *url.URL) *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetBinaryBytes(v)
-	})
-}
-
-// UpdateBinaryBytes sets the "binary_bytes" field to the value that was provided on create.
-func (u *ExValueScanUpsertBulk) UpdateBinaryBytes() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateBinaryBytes()
-	})
-}
-
-// SetBinaryOptional sets the "binary_optional" field.
-func (u *ExValueScanUpsertBulk) SetBinaryOptional(v *url.URL) *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetBinaryOptional(v)
-	})
-}
-
-// UpdateBinaryOptional sets the "binary_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsertBulk) UpdateBinaryOptional() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateBinaryOptional()
-	})
-}
-
-// ClearBinaryOptional clears the value of the "binary_optional" field.
-func (u *ExValueScanUpsertBulk) ClearBinaryOptional() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.ClearBinaryOptional()
-	})
-}
-
-// SetText sets the "text" field.
-func (u *ExValueScanUpsertBulk) SetText(v *big.Int) *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetText(v)
-	})
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *ExValueScanUpsertBulk) UpdateText() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateText()
-	})
-}
-
-// SetTextOptional sets the "text_optional" field.
-func (u *ExValueScanUpsertBulk) SetTextOptional(v *big.Int) *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetTextOptional(v)
-	})
-}
-
-// UpdateTextOptional sets the "text_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsertBulk) UpdateTextOptional() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateTextOptional()
-	})
-}
-
-// ClearTextOptional clears the value of the "text_optional" field.
-func (u *ExValueScanUpsertBulk) ClearTextOptional() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.ClearTextOptional()
-	})
-}
-
-// SetBase64 sets the "base64" field.
-func (u *ExValueScanUpsertBulk) SetBase64(v string) *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetBase64(v)
-	})
-}
-
-// UpdateBase64 sets the "base64" field to the value that was provided on create.
-func (u *ExValueScanUpsertBulk) UpdateBase64() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateBase64()
-	})
-}
-
-// SetCustom sets the "custom" field.
-func (u *ExValueScanUpsertBulk) SetCustom(v string) *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetCustom(v)
-	})
-}
-
-// UpdateCustom sets the "custom" field to the value that was provided on create.
-func (u *ExValueScanUpsertBulk) UpdateCustom() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateCustom()
-	})
-}
-
-// SetCustomOptional sets the "custom_optional" field.
-func (u *ExValueScanUpsertBulk) SetCustomOptional(v string) *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.SetCustomOptional(v)
-	})
-}
-
-// UpdateCustomOptional sets the "custom_optional" field to the value that was provided on create.
-func (u *ExValueScanUpsertBulk) UpdateCustomOptional() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.UpdateCustomOptional()
-	})
-}
-
-// ClearCustomOptional clears the value of the "custom_optional" field.
-func (u *ExValueScanUpsertBulk) ClearCustomOptional() *ExValueScanUpsertBulk {
-	return u.Update(func(s *ExValueScanUpsert) {
-		s.ClearCustomOptional()
-	})
-}
-
-// Exec executes the query.
-func (u *ExValueScanUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ExValueScanCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for ExValueScanCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *ExValueScanUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

@@ -11,7 +11,7 @@ import (
 )
 
 // Pet is the predicate function for pet builders.
-type Pet func(*sql.Selector)
+type Pet = func(*sql.Selector)
 
 // User is the predicate function for user builders.
-type User func(*sql.Selector)
+type User = func(*sql.Selector)

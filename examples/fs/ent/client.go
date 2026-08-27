@@ -10,21 +10,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
-	"reflect"
 
-	"entgo.io/ent"
 	"entgo.io/ent/examples/fs/ent/migrate"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/examples/fs/ent/file"
 )
 
 // Client is the client that holds all ent builders.
 type Client struct {
-	config
+	Config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
 	// File is the client for interacting with the File builders.
@@ -33,70 +28,14 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	client := &Client{config: newConfig(opts...)}
+	client := &Client{Config: NewConfig(opts...)}
 	client.init()
 	return client
 }
 
 func (c *Client) init() {
-	c.Schema = migrate.NewSchema(c.driver)
-	c.File = NewFileClient(c.config)
-}
-
-type (
-	// config is the configuration for the client and its builder.
-	config struct {
-		// driver used for executing database requests.
-		driver dialect.Driver
-		// debug enable a debug logging.
-		debug bool
-		// log used for logging on debug mode.
-		log func(...any)
-		// hooks to execute on mutations.
-		hooks *hooks
-		// interceptors to execute on queries.
-		inters *inters
-	}
-	// Option function to configure the client.
-	Option func(*config)
-)
-
-// newConfig creates a new config for the client.
-func newConfig(opts ...Option) config {
-	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
-	cfg.options(opts...)
-	return cfg
-}
-
-// options applies the options on the config object.
-func (c *config) options(opts ...Option) {
-	for _, opt := range opts {
-		opt(c)
-	}
-	if c.debug {
-		c.driver = dialect.Debug(c.driver, c.log)
-	}
-}
-
-// Debug enables debug logging on the ent.Driver.
-func Debug() Option {
-	return func(c *config) {
-		c.debug = true
-	}
-}
-
-// Log sets the logging function for debug mode.
-func Log(fn func(...any)) Option {
-	return func(c *config) {
-		c.log = fn
-	}
-}
-
-// Driver configures the client driver.
-func Driver(driver dialect.Driver) Option {
-	return func(c *config) {
-		c.driver = driver
-	}
+	c.Schema = migrate.NewSchema(c.Drv)
+	c.File = NewFileClient(c.Config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -121,38 +60,38 @@ var ErrTxStarted = errors.New("ent: cannot start a transaction within a transact
 // Tx returns a new transactional client. The provided context
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
-	if _, ok := c.driver.(*txDriver); ok {
+	if _, ok := c.Drv.(*txDriver); ok {
 		return nil, ErrTxStarted
 	}
-	tx, err := newTx(ctx, c.driver)
+	tx, err := newTx(ctx, c.Drv)
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := c.config
-	cfg.driver = tx
+	cfg := c.Config
+	cfg.Drv = tx
 	return &Tx{
 		ctx:    ctx,
-		config: cfg,
+		Config: cfg,
 		File:   NewFileClient(cfg),
 	}, nil
 }
 
 // BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
-	if _, ok := c.driver.(*txDriver); ok {
+	if _, ok := c.Drv.(*txDriver); ok {
 		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
-	tx, err := c.driver.(interface {
+	tx, err := c.Drv.(interface {
 		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
 	}).BeginTx(ctx, opts)
 	if err != nil {
 		return nil, fmt.Errorf("ent: starting a transaction: %w", err)
 	}
-	cfg := c.config
-	cfg.driver = &txDriver{tx: tx, drv: c.driver}
+	cfg := c.Config
+	cfg.Drv = &txDriver{tx: tx, drv: c.Drv}
 	return &Tx{
 		ctx:    ctx,
-		config: cfg,
+		Config: cfg,
 		File:   NewFileClient(cfg),
 	}, nil
 }
@@ -164,19 +103,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
-	if c.debug {
+	if c.Dbg {
 		return c
 	}
-	cfg := c.config
-	cfg.driver = dialect.Debug(c.driver, c.log)
-	client := &Client{config: cfg}
+	cfg := c.Config
+	cfg.Drv = dialect.Debug(c.Drv, c.LogFn)
+	client := &Client{Config: cfg}
 	client.init()
 	return client
 }
 
 // Close closes the database connection and prevents new queries from starting.
 func (c *Client) Close() error {
-	return c.driver.Close()
+	return c.Drv.Close()
 }
 
 // Use adds the mutation hooks to all the entity clients.
@@ -195,183 +134,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *FileMutation:
-		return c.File.mutate(ctx, m)
+		return c.File.Mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
 }
-
-// FileClient is a client for the File schema.
-type FileClient struct {
-	config
-}
-
-// NewFileClient returns a client for the File from the given config.
-func NewFileClient(c config) *FileClient {
-	return &FileClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `file.Hooks(f(g(h())))`.
-func (c *FileClient) Use(hooks ...Hook) {
-	c.hooks.File = append(c.hooks.File, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `file.Intercept(f(g(h())))`.
-func (c *FileClient) Intercept(interceptors ...Interceptor) {
-	c.inters.File = append(c.inters.File, interceptors...)
-}
-
-// Create returns a builder for creating a File entity.
-func (c *FileClient) Create() *FileCreate {
-	mutation := newFileMutation(c.config, OpCreate)
-	return &FileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of File entities.
-func (c *FileClient) CreateBulk(builders ...*FileCreate) *FileCreateBulk {
-	return &FileCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *FileClient) MapCreateBulk(slice any, setFunc func(*FileCreate, int)) *FileCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &FileCreateBulk{err: fmt.Errorf("calling to FileClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*FileCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &FileCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for File.
-func (c *FileClient) Update() *FileUpdate {
-	mutation := newFileMutation(c.config, OpUpdate)
-	return &FileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *FileClient) UpdateOne(_m *File) *FileUpdateOne {
-	mutation := newFileMutation(c.config, OpUpdateOne, withFile(_m))
-	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *FileClient) UpdateOneID(id int) *FileUpdateOne {
-	mutation := newFileMutation(c.config, OpUpdateOne, withFileID(id))
-	return &FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for File.
-func (c *FileClient) Delete() *FileDelete {
-	mutation := newFileMutation(c.config, OpDelete)
-	return &FileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *FileClient) DeleteOne(_m *File) *FileDeleteOne {
-	return c.DeleteOneID(_m.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
-	builder := c.Delete().Where(file.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &FileDeleteOne{builder}
-}
-
-// Query returns a query builder for File.
-func (c *FileClient) Query() *FileQuery {
-	return &FileQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeFile},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a File entity by its id.
-func (c *FileClient) Get(ctx context.Context, id int) (*File, error) {
-	return c.Query().Where(file.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *FileClient) GetX(ctx context.Context, id int) *File {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryParent queries the parent edge of a File.
-func (c *FileClient) QueryParent(_m *File) *FileQuery {
-	query := (&FileClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, file.ParentTable, file.ParentColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryChildren queries the children edge of a File.
-func (c *FileClient) QueryChildren(_m *File) *FileQuery {
-	query := (&FileClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := _m.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(file.Table, file.FieldID, id),
-			sqlgraph.To(file.Table, file.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, file.ChildrenTable, file.ChildrenColumn),
-		)
-		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *FileClient) Hooks() []Hook {
-	return c.hooks.File
-}
-
-// Interceptors returns the client interceptors.
-func (c *FileClient) Interceptors() []Interceptor {
-	return c.inters.File
-}
-
-func (c *FileClient) mutate(ctx context.Context, m *FileMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&FileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&FileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&FileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&FileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown File mutation op: %q", m.Op())
-	}
-}
-
-// hooks and interceptors per client, for fast access.
-type (
-	hooks struct {
-		File []ent.Hook
-	}
-	inters struct {
-		File []ent.Interceptor
-	}
-)

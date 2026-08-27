@@ -8,10 +8,8 @@ package doc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -225,178 +223,68 @@ func (_c *DocCreate) createSpec() (*Doc, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// DocUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. doc.FieldName).
+	DocUpsert = entbuilder.Upsert
+
+	// DocUpsertOne is the builder for "upsert"-ing one Doc node.
+	DocUpsertOne = entbuilder.UpsertOne[schema.DocID]
+
+	// DocUpsertBulk is the builder for "upsert"-ing many Doc nodes.
+	DocUpsertBulk = entbuilder.UpsertBulk[schema.DocID]
+)
+
+var docUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "DocCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: true,
+	NumericID:     false,
+}
+
+func (_c *DocCreate) upsertConfig() entbuilder.UpsertConfig[schema.DocID] {
+	return entbuilder.UpsertConfig[schema.DocID]{
+		Meta:     &docUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (schema.DocID, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero schema.DocID
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		IDsSet: func() []bool {
+			_, ok := _c.mutation.ID()
+			return []bool{ok}
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Doc.Create().
-//		SetText(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.DocUpsert) {
-//			SetText(v+v).
+//			u.Set(doc.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *DocCreate) OnConflict(opts ...sql.ConflictOption) *DocUpsertOne {
 	_c.conflict = opts
-	return &DocUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Doc.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *DocCreate) OnConflictColumns(columns ...string) *DocUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &DocUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// DocUpsertOne is the builder for "upsert"-ing
-	//  one Doc node.
-	DocUpsertOne struct {
-		create *DocCreate
-	}
-
-	// DocUpsert is the "OnConflict" setter.
-	DocUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetText sets the "text" field.
-func (u *DocUpsert) SetText(v string) *DocUpsert {
-	u.Set(FieldText, v)
-	return u
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *DocUpsert) UpdateText() *DocUpsert {
-	u.SetExcluded(FieldText)
-	return u
-}
-
-// ClearText clears the value of the "text" field.
-func (u *DocUpsert) ClearText() *DocUpsert {
-	u.SetNull(FieldText)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
-// Using this option is equivalent to using:
-//
-//	client.Doc.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(doc.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *DocUpsertOne) UpdateNewValues() *DocUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(FieldID)
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Doc.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *DocUpsertOne) Ignore() *DocUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *DocUpsertOne) DoNothing() *DocUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the DocCreate.OnConflict
-// documentation for more info.
-func (u *DocUpsertOne) Update(set func(*DocUpsert)) *DocUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&DocUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetText sets the "text" field.
-func (u *DocUpsertOne) SetText(v string) *DocUpsertOne {
-	return u.Update(func(s *DocUpsert) {
-		s.SetText(v)
-	})
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *DocUpsertOne) UpdateText() *DocUpsertOne {
-	return u.Update(func(s *DocUpsert) {
-		s.UpdateText()
-	})
-}
-
-// ClearText clears the value of the "text" field.
-func (u *DocUpsertOne) ClearText() *DocUpsertOne {
-	return u.Update(func(s *DocUpsert) {
-		s.ClearText()
-	})
-}
-
-// Exec executes the query.
-func (u *DocUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for DocCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *DocUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *DocUpsertOne) ID(ctx context.Context) (id schema.DocID, err error) {
-	if u.create.Drv.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: DocUpsertOne.ID is not supported by MySQL driver. Use DocUpsertOne.Exec instead")
-	}
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *DocUpsertOne) IDX(ctx context.Context) schema.DocID {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // DocCreateBulk is the builder for creating many Doc entities in bulk.
@@ -495,137 +383,47 @@ func (_c *DocCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *DocCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[schema.DocID] {
+	return entbuilder.UpsertConfig[schema.DocID]{
+		Meta:     &docUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		IDsSet: func() []bool {
+			set := make([]bool, len(_c.builders))
+			for i, b := range _c.builders {
+				_, set[i] = b.mutation.ID()
+			}
+			return set
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: _c.Drv.Dialect,
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Doc.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.DocUpsert) {
-//			SetText(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see DocCreate.OnConflict).
 func (_c *DocCreateBulk) OnConflict(opts ...sql.ConflictOption) *DocUpsertBulk {
 	_c.conflict = opts
-	return &DocUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Doc.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *DocCreateBulk) OnConflictColumns(columns ...string) *DocUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &DocUpsertBulk{
-		create: _c,
-	}
-}
-
-// DocUpsertBulk is the builder for "upsert"-ing
-// a bulk of Doc nodes.
-type DocUpsertBulk struct {
-	create *DocCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Doc.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(doc.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *DocUpsertBulk) UpdateNewValues() *DocUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(FieldID)
-			}
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Doc.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *DocUpsertBulk) Ignore() *DocUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *DocUpsertBulk) DoNothing() *DocUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the DocCreateBulk.OnConflict
-// documentation for more info.
-func (u *DocUpsertBulk) Update(set func(*DocUpsert)) *DocUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&DocUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetText sets the "text" field.
-func (u *DocUpsertBulk) SetText(v string) *DocUpsertBulk {
-	return u.Update(func(s *DocUpsert) {
-		s.SetText(v)
-	})
-}
-
-// UpdateText sets the "text" field to the value that was provided on create.
-func (u *DocUpsertBulk) UpdateText() *DocUpsertBulk {
-	return u.Update(func(s *DocUpsert) {
-		s.UpdateText()
-	})
-}
-
-// ClearText clears the value of the "text" field.
-func (u *DocUpsertBulk) ClearText() *DocUpsertBulk {
-	return u.Update(func(s *DocUpsert) {
-		s.ClearText()
-	})
-}
-
-// Exec executes the query.
-func (u *DocUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the DocCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for DocCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *DocUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

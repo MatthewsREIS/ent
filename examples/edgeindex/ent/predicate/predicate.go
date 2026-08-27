@@ -11,7 +11,7 @@ import (
 )
 
 // City is the predicate function for city builders.
-type City func(*sql.Selector)
+type City = func(*sql.Selector)
 
 // Street is the predicate function for street builders.
-type Street func(*sql.Selector)
+type Street = func(*sql.Selector)
