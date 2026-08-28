@@ -397,6 +397,38 @@ does not compile test files and would have missed both).
   gemini could build at all. Recorded here since it's the kind of gap the
   next consumer of this fork should expect to hit if they diff against an
   older contrib commit.
+- **`BasicType` conversion loss for non-`Valuer` custom Go types.** The old
+  per-field codegen converted a field's custom Go type to its underlying
+  basic type before handing the value to the sql helper (`time.Time(v)` for
+  a custom time type, `v.String()` for a `Stringer`-backed string type,
+  `v[:]` for an array-of-bytes type) whenever that type didn't itself
+  implement `driver.Valuer`. `Value[T]`/`Number[T]` pass the declared Go
+  type straight through to the driver instead — for a hypothetical
+  non-`Valuer` custom time/`Stringer`-string/array-bytes `GoType` field,
+  that's a runtime driver error (`sql: converting argument ... unsupported
+  type`) where the old codegen silently normalized it to something the
+  driver accepts. No call site in gemini or the fork uses such a `GoType`
+  today (confirmed by grep), so this is a theoretical narrowing, not an
+  observed regression — worth a test if a schema ever adds one.
+- **`sql/schemaconfig` (multischema) routing was initially dropped, then
+  restored.** The first cut of the `where.tmpl`/`entfield.Edge` rewrite lost
+  the `internal.SchemaConfigFromContext(s.Context())` /
+  `step.To.Schema` / `step.Edge.Schema` routing that base's generated
+  `Has<Edge>()`/`Has<Edge>With()` inlined for graphs with the
+  `sql/schemaconfig` feature — a silent wrong-schema-query bug for any
+  consumer using `AlternateSchema`, caught in stage 2a's final review
+  (not by any test, since the fork's own `multischema` integration package
+  is pre-existing-broken for unrelated reasons and so never ran). Fixed by
+  adding `entfield.NewEdgeSteps` (a `stepMods []func(*sql.Selector,
+  *sqlgraph.Step)` hook applied to the freshly built step before use) and
+  having `where.tmpl` emit a stepMod that reproduces
+  `dialect/sql/feature/schemaconfig.tmpl`'s own schema-name resolution
+  verbatim when the feature is enabled; parity with base was verified line
+  for line across every edge in `entc/integration/multischema/ent/user/where.go`.
+  One deliberate deviation from base: the stepMods also run for
+  `OrderByCount`/`OrderBy` (edge-neighbor ordering), so those now get
+  schema routing too — base never applied it there. Strictly more correct
+  for schemaconfig graphs, not a narrowing.
 
 ### Test results
 
