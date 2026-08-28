@@ -62,10 +62,25 @@ func (m *Mutation[T, I]) Field(name string) (ent.Value, bool) {
 // field is not in the descriptor or the value type does not match the
 // field's expected Go type. Fields typed as the empty interface (e.g.
 // schema.Any) accept any value.
+//
+// A user-defined ID field (m.desc.IDField) is special-cased: it's never a
+// key in m.desc.Fields (see the Descriptor.IDField doc comment), so it's
+// routed to SetID instead of the generic m.fields bookkeeping below.
 func (m *Mutation[T, I]) SetField(name string, value ent.Value) error {
+	if m.desc.IDField != "" && name == m.desc.IDField {
+		id, ok := value.(I)
+		if !ok {
+			return fmt.Errorf("unexpected ID type %T for field %s (want %T)", value, name, id)
+		}
+		m.SetID(id)
+		return nil
+	}
 	spec, ok := m.desc.Fields[name]
 	if !ok {
 		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
+	}
+	if err := m.checkImmutable(spec, name); err != nil {
+		return err
 	}
 	if value != nil && spec.Type.Kind() != reflect.Interface && reflect.TypeOf(value) != spec.Type {
 		return fmt.Errorf("unexpected type %T for field %s (want %s)", value, name, spec.Type)
@@ -78,6 +93,17 @@ func (m *Mutation[T, I]) SetField(name string, value ent.Value) error {
 	delete(m.cleared, name)
 	// Setting a field should override any prior append for the same field.
 	delete(m.appended, name)
+	return nil
+}
+
+// checkImmutable rejects a write to an immutable field on an Update/
+// UpdateOne mutation (Create is unaffected — see FieldSpec.Immutable's doc
+// comment for why this check exists here rather than at the generated
+// builder level, the way the old per-field codegen enforced it).
+func (m *Mutation[T, I]) checkImmutable(spec FieldSpec, name string) error {
+	if spec.Immutable && m.op.Is(ent.OpUpdate|ent.OpUpdateOne) {
+		return fmt.Errorf("entbuilder: %s field %s is immutable and cannot be updated", m.desc.Name, name)
+	}
 	return nil
 }
 
@@ -150,6 +176,9 @@ func (m *Mutation[T, I]) ClearField(name string) error {
 	if !ok {
 		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
 	}
+	if err := m.checkImmutable(spec, name); err != nil {
+		return err
+	}
 	if !spec.Nillable {
 		return fmt.Errorf("entbuilder: %s field %s is not nillable", m.desc.Name, name)
 	}
@@ -210,6 +239,9 @@ func (m *Mutation[T, I]) AddField(name string, value ent.Value) error {
 	if !ok {
 		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
 	}
+	if err := m.checkImmutable(spec, name); err != nil {
+		return err
+	}
 	if !spec.Numeric {
 		return fmt.Errorf("entbuilder: %s field %s is not numeric", m.desc.Name, name)
 	}
@@ -266,6 +298,9 @@ func (m *Mutation[T, I]) AppendField(name string, value ent.Value) error {
 	spec, ok := m.desc.Fields[name]
 	if !ok {
 		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
+	}
+	if err := m.checkImmutable(spec, name); err != nil {
+		return err
 	}
 	if value != nil && reflect.TypeOf(value) != spec.Type {
 		return fmt.Errorf("unexpected type %T for field %s (want %s)", value, name, spec.Type)

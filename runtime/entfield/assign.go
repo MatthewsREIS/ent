@@ -84,8 +84,12 @@ type EdgeField[T any] struct {
 }
 
 // NewEdgeField creates a new EdgeField handle for the given column and edge.
+// The embedded Value's "name" is set to col too — it's only reachable
+// through Value's own (predicate) methods, which need the DB column; every
+// EdgeField assignment method below is defined directly on EdgeField
+// (shadowing Value's) and routes through edge, not through Value at all.
 func NewEdgeField[T any](col, edge string) EdgeField[T] {
-	return EdgeField[T]{Value: NewValue[T](col), edge: edge}
+	return EdgeField[T]{Value: NewValue[T](col, col), edge: edge}
 }
 
 // Set assigns v via the edge (SetEdgeID), not the column.

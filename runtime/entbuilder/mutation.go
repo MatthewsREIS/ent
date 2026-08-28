@@ -40,6 +40,14 @@ type FieldSpec struct {
 	Numeric bool
 	// Default is the value ResetField restores if non-nil.
 	Default any
+	// Immutable blocks SetField/AddField/AppendField/ClearField on an
+	// Update/UpdateOne mutation (Create is unaffected — an immutable field
+	// is still settable once, at creation). Mirrors what the old per-field
+	// codegen enforced structurally, by generating Set<F> only on the
+	// create builder for an immutable field, never on Update/UpdateOne:
+	// entfield's F.<Field> handles are shared across every builder type, so
+	// that structural gate is gone and this replaces it.
+	Immutable bool
 }
 
 // EdgeSpec describes an edge on an entity.
@@ -65,6 +73,16 @@ type Descriptor struct {
 	IDType reflect.Type
 	Fields map[string]FieldSpec
 	Edges  map[string]EdgeSpec
+
+	// IDField is the schema-declared name of a user-defined ID field (e.g.
+	// "id"), or "" for an auto-generated ID. A user-defined ID is never
+	// itself a key in Fields (see internal_mutation.tmpl's MutationFields) —
+	// it's carried on the typed *Mutation.id, set/read via SetID/ID, not
+	// through the generic Fields map. SetField routes a call addressed to
+	// this name through SetID instead, so entfield's generic per-field Set
+	// (which only knows the field's schema name, and calls SetField with
+	// it) works for a user-defined ID field the same as any other field.
+	IDField string
 
 	// OldValueFn fetches the existing entity for OldField support.
 	// Returns the entity boxed as `any` (Mutation reads via reflect).

@@ -13,7 +13,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "Imports" $.BuilderImports "UpdateUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
+{{ with extend $ "Imports" $.BuilderImports "UpdateUsesEntbuilder" (eq $.Config.Storage.Name "sql") "UpdateUsesEntfield" true }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -49,6 +49,9 @@ func ({{ $receiver}} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $b
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (int, error) {
+	if {{ $receiver }}.err != nil {
+		return 0, {{ $receiver }}.err
+	}
 	{{- if $.HasUpdateDefault }}
 		{{- if $runtimeRequired }}
 			if err := {{ $receiver }}.defaults(); err != nil {
@@ -136,6 +139,9 @@ func ({{ $receiver }} *{{ $onebuilder }}) Select(field string, fields ...string)
 
 // Save executes the query and returns the updated {{ $.Name }} entity.
 func ({{ $receiver }} *{{ $onebuilder }} ) Save(ctx context.Context) (*{{ $.Name }}, error) {
+	if {{ $receiver }}.err != nil {
+		return nil, {{ $receiver }}.err
+	}
 	{{- if $.HasUpdateDefault }}
 		{{- if $runtimeRequired }}
 			if err := {{ $receiver }}.defaults(); err != nil {
@@ -194,6 +200,7 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 
 {{/* shared struct fields between the two updaters */}}
 {{ define "update/fields"}}
+	err error
 	hooks []Hook
 	mutation *{{ $.MutationName }}
 	{{- /* Additional fields to add to the builder. */}}

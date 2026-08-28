@@ -91,14 +91,14 @@ func (f *errFake) SetField(name string, value ent.Value) error {
 
 func TestFieldAssignments(t *testing.T) {
 	rec := &recorder{}
-	name := entfield.NewString[string]("name")
+	name := entfield.NewString[string]("name", "name")
 	require.NoError(t, entfield.Apply(rec, name.Set("a"), name.Clear(), name.SetNillable(nil), name.SetNillable(ptr("b"))))
 	require.Equal(t, []op{{"SetField", "name", "a"}, {"ClearField", "name", nil}, {"SetField", "name", "b"}}, rec.ops)
 }
 
 func TestNumberSetResetsAdd(t *testing.T) {
 	rec := &recorder{}
-	age := entfield.NewNumber[int]("age")
+	age := entfield.NewNumber[int]("age", "age")
 	require.NoError(t, entfield.Apply(rec, age.Set(5)))
 	require.Equal(t, []op{{"ResetField", "age", nil}, {"SetField", "age", 5}}, rec.ops)
 
@@ -107,12 +107,19 @@ func TestNumberSetResetsAdd(t *testing.T) {
 	require.Equal(t, []op{{"AddField", "age", 3}}, rec2.ops)
 }
 
-func TestEnumSetConvertsToString(t *testing.T) {
+// TestEnumSetPreservesDeclaredType guards against reintroducing a
+// string(v) conversion in Enum[T].Set: the mutation's field descriptor
+// (entbuilder.Mutation) type-checks a set value's dynamic type against the
+// field's *declared* Go type (Status here, e.g. http.Dir for a real
+// fieldtype schema field) — boxing a converted plain string instead trips
+// that check (SetField) and then GetField's v.(V) assertion, both at
+// runtime, since Go generated code always reads the field back as T.
+func TestEnumSetPreservesDeclaredType(t *testing.T) {
 	type Status string
 	rec := &recorder{}
-	status := entfield.NewEnum[Status]("status")
+	status := entfield.NewEnum[Status]("status", "status")
 	require.NoError(t, entfield.Apply(rec, status.Set(Status("active"))))
-	require.Equal(t, []op{{"SetField", "status", "active"}}, rec.ops)
+	require.Equal(t, []op{{"SetField", "status", Status("active")}}, rec.ops)
 }
 
 func TestJSONAppendAndSet(t *testing.T) {
@@ -159,8 +166,8 @@ func TestEdgeAssignments(t *testing.T) {
 func TestApplyStopsOnFirstError(t *testing.T) {
 	boom := errors.New("boom")
 	fake := &errFake{recorder: &recorder{}, failOn: "bad", err: boom}
-	name := entfield.NewString[string]("name")
-	bad := entfield.NewString[string]("bad")
+	name := entfield.NewString[string]("name", "name")
+	bad := entfield.NewString[string]("bad", "bad")
 	err := entfield.Apply(fake, name.Set("a"), bad.Set("x"), name.Set("z"))
 	require.Equal(t, boom, err)
 	require.Equal(t, []op{{"SetField", "name", "a"}}, fake.recorder.ops)
@@ -171,7 +178,7 @@ func TestApplyStopsOnFirstError(t *testing.T) {
 // codegen passed raw values, and scanning happened later at spec-build time.
 func TestScanHandleSetUsesRawValue(t *testing.T) {
 	rec := &recorder{}
-	slug := entfield.NewStringScan[string]("slug", func(v string) (driver.Value, error) { return "s:" + v, nil })
+	slug := entfield.NewStringScan[string]("slug", "slug", func(v string) (driver.Value, error) { return "s:" + v, nil })
 	require.NoError(t, entfield.Apply(rec, slug.Set("hi")))
 	require.Equal(t, []op{{"SetField", "slug", "hi"}}, rec.ops)
 }

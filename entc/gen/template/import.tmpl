@@ -49,7 +49,7 @@ import (
 	{{- if and (hasField $ "Scope") ($.Scope.WhereUsesWherePkg) }}
 		"entgo.io/ent/where"
 	{{- end }}
-	{{- if and (hasField $ "Scope") (or ($.Scope.WhereUsesEntfield) ($.Scope.MetaUsesEntfield)) }}
+	{{- if and (hasField $ "Scope") (or ($.Scope.WhereUsesEntfield) ($.Scope.MetaUsesEntfield) ($.Scope.CreateUsesEntfield) ($.Scope.UpdateUsesEntfield)) }}
 		"entgo.io/ent/runtime/entfield"
 	{{- end }}
 	{{- template "import/additional" $ }}

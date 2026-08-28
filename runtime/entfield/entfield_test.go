@@ -30,7 +30,7 @@ func renderErr(t *testing.T, p func(*sql.Selector)) error {
 }
 
 func TestStringOps(t *testing.T) {
-	name := entfield.NewString[string]("name")
+	name := entfield.NewString[string]("name", "name")
 	q, args := render(t, name.EQ("a"))
 	require.Contains(t, q, `"name" = $1`)
 	require.Equal(t, []any{"a"}, args)
@@ -44,7 +44,7 @@ func TestStringOps(t *testing.T) {
 
 func TestCustomStringType(t *testing.T) {
 	type Status string
-	status := entfield.NewEnum[Status]("status")
+	status := entfield.NewEnum[Status]("status", "status")
 	q, args := render(t, status.EQ(Status("active")))
 	require.Contains(t, q, `"status" = $1`)
 	require.Equal(t, []any{"active"}, args)
@@ -54,28 +54,28 @@ func TestCustomStringType(t *testing.T) {
 }
 
 func TestNumberOps(t *testing.T) {
-	age := entfield.NewNumber[int]("age")
+	age := entfield.NewNumber[int]("age", "age")
 	q, args := render(t, age.GT(3))
 	require.Contains(t, q, `"age" > $1`)
 	require.Equal(t, []any{3}, args)
 }
 
 func TestTimeAndBoolAndValue(t *testing.T) {
-	at := entfield.NewTime("created_at")
+	at := entfield.NewTime("created_at", "created_at")
 	q, _ := render(t, at.LTE(time.Unix(0, 0)))
 	require.Contains(t, q, `"created_at" <= $1`)
-	ok := entfield.NewBool[bool]("ok")
+	ok := entfield.NewBool[bool]("ok", "ok")
 	q, _ = render(t, ok.EQ(true))
 	require.Contains(t, q, `WHERE "users"."ok"`)
 	q, _ = render(t, ok.EQ(false))
 	require.Contains(t, q, `WHERE NOT "users"."ok"`)
-	id := entfield.NewValue[[16]byte]("id")
+	id := entfield.NewValue[[16]byte]("id", "id")
 	q, _ = render(t, id.NEQ([16]byte{}))
 	require.Contains(t, q, `"id" <> $1`)
 }
 
 func TestOrders(t *testing.T) {
-	name := entfield.NewString[string]("name")
+	name := entfield.NewString[string]("name", "name")
 	s := sql.Dialect(dialect.Postgres).Select("*").From(sql.Table("users"))
 	name.Desc()(s)
 	q, _ := s.Query()
@@ -84,10 +84,10 @@ func TestOrders(t *testing.T) {
 }
 
 func TestScannerConversionAndError(t *testing.T) {
-	good := entfield.NewStringScan[string]("slug", func(v string) (driver.Value, error) { return "s:" + v, nil })
+	good := entfield.NewStringScan[string]("slug", "slug", func(v string) (driver.Value, error) { return "s:" + v, nil })
 	_, args := render(t, good.EQ("x"))
 	require.Equal(t, []any{"s:x"}, args)
-	bad := entfield.NewStringScan[string]("slug", func(v string) (driver.Value, error) { return nil, fmt.Errorf("boom") })
+	bad := entfield.NewStringScan[string]("slug", "slug", func(v string) (driver.Value, error) { return nil, fmt.Errorf("boom") })
 	require.ErrorContains(t, renderErr(t, bad.EQ("x")), "boom")
 	require.ErrorContains(t, renderErr(t, bad.In("a", "b")), "boom")
 }
@@ -100,11 +100,11 @@ func TestScannerConversionAndError(t *testing.T) {
 // entc/integration/ent/exvaluescan's "custom" (hex-encoded) field for the
 // real-world case this guards.
 func TestScannedStringOps(t *testing.T) {
-	hex := entfield.NewStringScan[string]("custom", func(v string) (driver.Value, error) { return "0x:" + v, nil })
+	hex := entfield.NewStringScan[string]("custom", "custom", func(v string) (driver.Value, error) { return "0x:" + v, nil })
 	q, args := render(t, hex.HasPrefix("ent"))
 	require.Contains(t, q, `"custom" LIKE`)
 	require.Equal(t, []any{"0x:ent%"}, args)
 
-	notStr := entfield.NewStringScan[string]("custom", func(v string) (driver.Value, error) { return 7, nil })
+	notStr := entfield.NewStringScan[string]("custom", "custom", func(v string) (driver.Value, error) { return 7, nil })
 	require.ErrorContains(t, renderErr(t, notStr.Contains("ent")), "not a string")
 }

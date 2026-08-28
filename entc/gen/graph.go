@@ -386,6 +386,28 @@ type handlePkgEntry struct {
 	// Table, FieldID, Value, or the entity's own name). Those fields still
 	// get the op-suffixed form (NameEQ, NameIn, ...), just not the bare one.
 	NoBareEQ map[string]bool `json:"noBareEQ,omitempty"`
+	// ImportPath is the entity package's full import path, used by
+	// tools/handlerewrite's -chains mode to insert the import when emitting
+	// a F/E handle reference in place of a rewritten setter-chain call.
+	ImportPath string `json:"importPath"`
+	// Setters describes the assignment-side (Set/Add/Append/Clear) API for
+	// each field/edge that got one on the old generated builders (setter.tmpl,
+	// pre-With), keyed by its PascalCase struct-field name. Consumed only by
+	// -chains mode to decompose old Set<F>/Add<F>/Set<E>ID/... call sites
+	// into the new handle-assignment form.
+	Setters map[string]handleSetterEntry `json:"setters"`
+}
+
+// handleSetterEntry mirrors tools/handlerewrite.SetterEntry exactly (field
+// names, JSON tags, and semantics) — see that type's doc comments for what
+// each field governs during -chains decomposition.
+type handleSetterEntry struct {
+	Kind       string `json:"kind"`
+	Nillable   bool   `json:"nillable"`
+	CanAdd     bool   `json:"canAdd"`
+	CanAppend  bool   `json:"canAppend"`
+	Unique     bool   `json:"unique"`
+	MethodBase string `json:"methodBase"`
 }
 
 // reservedStructFieldNames are struct-field names that collide with another
@@ -426,13 +448,78 @@ func writeHandleManifest(g *Graph) error {
 		for _, e := range n.Edges {
 			edges[e.StructField()] = true
 		}
-		manifest[n.PackageDir()] = handlePkgEntry{Fields: fields, Edges: edges, NoBareEQ: noBareEQ}
+		manifest[n.PackageDir()] = handlePkgEntry{
+			Fields: fields, Edges: edges, NoBareEQ: noBareEQ,
+			ImportPath: n.SubPackageImport(), Setters: handleSetters(n),
+		}
 	}
 	b, err := json.MarshalIndent(manifest, "", "\t")
 	if err != nil {
 		return fmt.Errorf("marshal handle manifest: %w", err)
 	}
 	return os.WriteFile(filepath.Join(g.Config.Target, "handle_manifest.json"), append(b, '\n'), 0644)
+}
+
+// handleSetters builds the "setters" table for one entity's manifest entry,
+// mirroring exactly which assignment methods the old (pre-With) generated
+// builders emitted (setter.tmpl before its rewrite for this task) — so
+// tools/handlerewrite's -chains mode decomposes precisely the call sites
+// that used to exist, no more, no less.
+func handleSetters(n *Type) map[string]handleSetterEntry {
+	setters := make(map[string]handleSetterEntry)
+	// Basic Set<F>/SetNillable<F>/Add<F>/Append<F> — one entry per field
+	// that ever got a Set<F> on the create builder: n.Fields, plus the ID
+	// field itself when user-defined (n.MutableFields() is always a subset
+	// of n.Fields, so ranging over the creator list alone covers both
+	// builders). Nillable is true if either builder generated
+	// SetNillable<F> for it (creator: Optional or Default; updater:
+	// mutable and not UpdateDefault).
+	mutable := make(map[string]bool, len(n.MutableFields()))
+	for _, f := range n.MutableFields() {
+		mutable[f.Name] = true
+	}
+	creator := n.Fields
+	if n.HasOneFieldID() && n.ID.UserDefined {
+		creator = append(append([]*Field{}, creator...), n.ID)
+	}
+	for _, f := range creator {
+		kind := "field"
+		if f.IsEdgeField() {
+			kind = "edgefield"
+		}
+		nillable := !f.Type.Nillable && (f.Optional || f.Default || (mutable[f.Name] && !f.UpdateDefault))
+		// entfield.Number[T]'s Add is only wired up for entfield's own
+		// "Number" handle kind (T under entfield.Numeric — plain integer/
+		// float kinds). SupportsMutationAdd() alone is broader: it's also
+		// true for a custom GoType that merely implements its own
+		// Add(T) T method (e.g. a big.Int wrapper) — HandleKind for that
+		// resolves to "Value", which has no Add. Gate on HandleKind to
+		// avoid advertising a decomposition -chains can't actually emit.
+		canAdd := f.SupportsMutationAdd() && f.HandleKind() == "Number"
+		setters[f.StructField()] = handleSetterEntry{
+			Kind: kind, Nillable: nillable,
+			CanAdd: canAdd, CanAppend: f.SupportsMutationAppend(),
+		}
+	}
+	// Edge assignment methods (Set<E>ID/SetNillable<E>ID/Add<E>IDs/
+	// Remove<E>IDs/Clear<E>) — one entry per edge in EdgesWithID (edges to a
+	// composite-ID target never got these), skipping edges whose assignment
+	// is already covered by a paired edge-field's Set (HasFieldSetter) —
+	// old setter.tmpl never emitted a separate Set<E>ID for those either.
+	for _, e := range n.EdgesWithID() {
+		if e.HasFieldSetter() {
+			continue
+		}
+		entry := handleSetterEntry{Kind: "edge", Unique: e.Unique}
+		if e.Unique {
+			entry.Nillable = e.Optional
+		} else {
+			base := strings.TrimSuffix(strings.TrimPrefix(e.MutationAdd(), "Add"), "IDs")
+			entry.MethodBase = base
+		}
+		setters[e.StructField()] = entry
+	}
+	return setters
 }
 
 // addNode creates a new Type/Node/Ent to the graph.

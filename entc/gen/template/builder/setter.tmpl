@@ -9,114 +9,24 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "setter" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := $.Scope.Receiver }}
-{{ $fields := $.Fields }}
-{{ $updater := false }}
-{{ $creator := true }}
-{{- if or (hasSuffix $builder "Update") (hasSuffix $builder "UpdateOne") }}
-	{{ $updater = true }}
-	{{ $creator = false }}
-	{{ $fields = $.MutableFields }}
-{{- else if $.HasCompositeID }}
-{{- else if $.ID.UserDefined }}
-	{{ $fields = append $fields $.ID }}
-{{- end }}
 
-{{ range $f := $fields }}
-	{{ $func := print "Set" $f.StructField }}
-	{{ $ft := $f.Type.String }}{{ if and $.Scope.InSubPackage $f.IsEnum }}{{ $ft = trimPackage $f.Type.String $.Package }}{{ end }}
-	{{ $isIDField := and (not $updater) $.HasOneFieldID (eq $f.Name $.ID.Name) }}
-	{{ $edgeName := $f.EdgeName }}
-	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $ft }}) *{{ $builder }} {
-		{{- /* setting numeric type override previous calls to Add. */}}
-		{{- if and $updater $f.SupportsMutationAdd }}
-			_ = {{ $receiver }}.mutation.ResetField({{ printf "%q" $f.Name }})
-		{{- end }}
-		{{- if $isIDField }}
-		{{ $receiver }}.mutation.SetID(v)
-		{{- else if $edgeName }}
-		_ = {{ $receiver }}.mutation.SetEdgeID({{ printf "%q" $edgeName }}, v)
-		{{- else }}
-		_ = {{ $receiver }}.mutation.SetField({{ printf "%q" $f.Name }}, v)
-		{{- end }}
-		return {{ $receiver }}
+{{/*
+All per-field/per-edge setters (SetX/SetNillableX/AddX/AppendX/ClearX,
+Set/AddX(ID(s))/RemoveXIDs/ClearX for edges) are gone: that surface now
+lives on the entfield handles (F/E, see where.tmpl) as field/edge-assignment
+methods, applied here via With. Dialect-independent: gremlin builders get
+With too, since *entbuilder.Mutation[T, I] satisfies entfield.Mutable
+regardless of storage.
+*/}}
+
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the {{ $builder }} builder. The first error from as is recorded and returned by Save.
+func ({{ $receiver }} *{{ $builder }}) With(as ...entfield.Assignment) *{{ $builder }} {
+	if {{ $receiver }}.err == nil {
+		{{ $receiver }}.err = entfield.Apply({{ $receiver }}.mutation, as...)
 	}
-
-	{{/* Avoid generating nillable setters for nillable types. */}}
-	{{ $nillableC := and $creator (or $f.Optional $f.Default) }}
-	{{ $nillableU := and $updater (not $f.UpdateDefault) }}
-	{{ $nillableFunc := print "SetNillable" $f.StructField }}
-	{{ $skipNillable := false }}{{ range $fields }}{{ if and (ne .Name $f.Name) (eq .MutationSet $nillableFunc) }}{{ $skipNillable = true }}{{ break }}{{ end }}{{ end }}
-	{{ if and (not $f.Type.Nillable) (not $skipNillable) (or $nillableC $nillableU) }}
-		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}(v *{{ $ft }}) *{{ $builder }} {
-			if v != nil {
-				{{ $receiver }}.{{ $func }}(*v)
-			}
-			return {{ $receiver }}
-		}
-	{{ end }}
-
-	{{ if and $updater $f.SupportsMutationAdd }}
-		// {{ $f.MutationAdd }} adds value to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}(v {{ $f.SignedType }}) *{{ $builder }} {
-			_ = {{ $receiver }}.mutation.AddField({{ printf "%q" $f.Name }}, v)
-			return {{ $receiver }}
-		}
-	{{ end }}
-
-	{{ if and $updater $f.SupportsMutationAppend }}
-		// {{ $f.MutationAppend }} appends value to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}(v {{ $f.Type }}) *{{ $builder }} {
-			_ = {{ $receiver }}.mutation.AppendField({{ printf "%q" $f.Name }}, v)
-			return {{ $receiver }}
-		}
-	{{ end }}
-
-	{{ if and $f.Optional $updater }}
-		{{ $func := print "Clear" $f.StructField }}
-		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $func }}() *{{ $builder }} {
-			{{- if $edgeName }}
-			_ = {{ $receiver }}.mutation.ClearEdge({{ printf "%q" $edgeName }})
-			{{- else }}
-			_ = {{ $receiver }}.mutation.ClearField({{ printf "%q" $f.Name }})
-			{{- end }}
-			return {{ $receiver }}
-		}
-	{{ end }}
-{{ end }}
-
-{{ range $e := $.EdgesWithID }}
-	{{ if and $updater $e.Immutable }}
-		{{/* Skip to the next one as immutable edges cannot be updated. */}}
-		{{continue}}
-	{{ end }}
-	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
-	{{/* Check if this setter was already defined by the field-setters (e.g. edge-field with the same name). */}}
-	{{ $withSetter := not $e.HasFieldSetter }}
-	{{ if $withSetter }}
-		// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID{{ if not $e.Unique }}s{{ end }}.
-		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) *{{ $builder }} {
-			{{- if $e.Unique }}
-			_ = {{ $receiver }}.mutation.SetEdgeID({{ printf "%q" $e.Name }}, id)
-			{{- else }}
-			_ = {{ $receiver }}.mutation.AddEdgeIDs({{ printf "%q" $e.Name }}, entbuilder.ToAny(ids)...)
-			{{- end }}
-			return {{ $receiver }}
-		}
-	{{ end }}
-	{{ if and $e.Unique $e.Optional $withSetter }}
-		{{ $nillableIDsFunc := print "SetNillable" $e.StructField "ID" }}
-		// {{ $nillableIDsFunc }} sets the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by ID if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableIDsFunc }}(id *{{ $e.Type.ID.Type }}) *{{ $builder }} {
-			if id != nil {
-				{{ $receiver}} = {{ $receiver }}.{{ $idsFunc }}(*id)
-			}
-			return {{ $receiver }}
-		}
-	{{ end }}
-{{ end }}
+	return {{ $receiver }}
+}
 
 // Mutation returns the {{ $.MutationName }} object of the builder.
 func ({{ $receiver }} *{{ $builder }}) Mutation() *{{ $.MutationName }} {

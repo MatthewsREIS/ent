@@ -17,24 +17,33 @@ type Order = func(*sql.Selector)
 // Numeric is a constraint that represents all numeric types.
 type Numeric interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
-	~float32 | ~float64
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
+		~float32 | ~float64
 }
 
 // String is a generic handle for string-based fields.
+//
+// col and name are deliberately kept as two separate strings, not one: col
+// is the DB column (used by every predicate/order method below, which build
+// SQL against *sql.Selector), while name is the field's schema-declared
+// name (used by every assignment method, which calls into
+// entbuilder.Mutation — keyed by that logical name, not the column). They
+// coincide for the overwhelmingly common case (no field.StorageKey
+// override), which is why this split went unnoticed until a field with a
+// customized storage key was exercised end to end.
 type String[T ~string] struct {
-	col  string
-	scan func(T) (driver.Value, error)
+	col, name string
+	scan      func(T) (driver.Value, error)
 }
 
-// NewString creates a new String handle for the given column.
-func NewString[T ~string](col string) String[T] {
-	return String[T]{col: col}
+// NewString creates a new String handle for the given column/field name.
+func NewString[T ~string](col, name string) String[T] {
+	return String[T]{col: col, name: name}
 }
 
 // NewStringScan creates a new String handle with a custom scanner function.
-func NewStringScan[T ~string](col string, scan func(T) (driver.Value, error)) String[T] {
-	return String[T]{col: col, scan: scan}
+func NewStringScan[T ~string](col, name string, scan func(T) (driver.Value, error)) String[T] {
+	return String[T]{col: col, name: name, scan: scan}
 }
 
 // Column returns the column name.
@@ -264,10 +273,17 @@ func (f String[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
-// Set assigns v to the field. Passes the raw Go conversion (string(v)), not
-// the scan-func-encoded form: scanning happens later at spec-build time.
+// Set assigns v to the field, passing v as-is (T, not string(v)): the
+// mutation's field descriptor expects the field's declared Go type (e.g.
+// a `type Dir string` GoType), and boxing v straight into the ent.Value
+// interface preserves that dynamic type — converting to a bare string here
+// would make it mismatch the descriptor (entbuilder.Mutation.SetField
+// type-checks reflect.TypeOf(value) against the descriptor) and panic
+// GetField's later v.(V) assertion. Not the scan-func-encoded form either:
+// scanning happens later at spec-build time. Routed by name (the schema
+// field name), not col (the DB column) — see the type doc comment.
 func (f String[T]) Set(v T) Assignment {
-	return func(m Mutable) error { return m.SetField(f.col, string(v)) }
+	return func(m Mutable) error { return m.SetField(f.name, v) }
 }
 
 // SetNillable assigns *v when non-nil; no-op otherwise.
@@ -283,17 +299,18 @@ func (f String[T]) SetNillable(v *T) Assignment {
 // Clear clears the field.
 // ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
 func (f String[T]) Clear() Assignment {
-	return func(m Mutable) error { return m.ClearField(f.col) }
+	return func(m Mutable) error { return m.ClearField(f.name) }
 }
 
-// Number is a generic handle for numeric fields.
+// Number is a generic handle for numeric fields. See String's doc comment
+// for why col and name are kept separate.
 type Number[T Numeric] struct {
-	col string
+	col, name string
 }
 
-// NewNumber creates a new Number handle for the given column.
-func NewNumber[T Numeric](col string) Number[T] {
-	return Number[T]{col: col}
+// NewNumber creates a new Number handle for the given column/field name.
+func NewNumber[T Numeric](col, name string) Number[T] {
+	return Number[T]{col: col, name: name}
 }
 
 // Column returns the column name.
@@ -369,8 +386,8 @@ func (f Number[T]) NotNil() P {
 // builder; harmless no-op on create.
 func (f Number[T]) Set(v T) Assignment {
 	return func(m Mutable) error {
-		_ = m.ResetField(f.col)
-		return m.SetField(f.col, v)
+		_ = m.ResetField(f.name)
+		return m.SetField(f.name, v)
 	}
 }
 
@@ -386,23 +403,24 @@ func (f Number[T]) SetNillable(v *T) Assignment {
 
 // Add records a delta to add to the field.
 func (f Number[T]) Add(v T) Assignment {
-	return func(m Mutable) error { return m.AddField(f.col, v) }
+	return func(m Mutable) error { return m.AddField(f.name, v) }
 }
 
 // Clear clears the field.
 // ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
 func (f Number[T]) Clear() Assignment {
-	return func(m Mutable) error { return m.ClearField(f.col) }
+	return func(m Mutable) error { return m.ClearField(f.name) }
 }
 
-// Bool is a generic handle for boolean fields.
+// Bool is a generic handle for boolean fields. See String's doc comment for
+// why col and name are kept separate.
 type Bool[T ~bool] struct {
-	col string
+	col, name string
 }
 
-// NewBool creates a new Bool handle for the given column.
-func NewBool[T ~bool](col string) Bool[T] {
-	return Bool[T]{col: col}
+// NewBool creates a new Bool handle for the given column/field name.
+func NewBool[T ~bool](col, name string) Bool[T] {
+	return Bool[T]{col: col, name: name}
 }
 
 // Column returns the column name.
@@ -445,7 +463,7 @@ func (f Bool[T]) NotNil() P {
 
 // Set assigns v to the field.
 func (f Bool[T]) Set(v T) Assignment {
-	return func(m Mutable) error { return m.SetField(f.col, bool(v)) }
+	return func(m Mutable) error { return m.SetField(f.name, bool(v)) }
 }
 
 // SetNillable assigns *v when non-nil; no-op otherwise.
@@ -461,17 +479,18 @@ func (f Bool[T]) SetNillable(v *T) Assignment {
 // Clear clears the field.
 // ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
 func (f Bool[T]) Clear() Assignment {
-	return func(m Mutable) error { return m.ClearField(f.col) }
+	return func(m Mutable) error { return m.ClearField(f.name) }
 }
 
-// Time is a handle for time.Time fields.
+// Time is a handle for time.Time fields. See String's doc comment for why
+// col and name are kept separate.
 type Time struct {
-	col string
+	col, name string
 }
 
-// NewTime creates a new Time handle for the given column.
-func NewTime(col string) Time {
-	return Time{col: col}
+// NewTime creates a new Time handle for the given column/field name.
+func NewTime(col, name string) Time {
+	return Time{col: col, name: name}
 }
 
 // Column returns the column name.
@@ -544,7 +563,7 @@ func (f Time) NotNil() P {
 
 // Set assigns v to the field.
 func (f Time) Set(v time.Time) Assignment {
-	return func(m Mutable) error { return m.SetField(f.col, v) }
+	return func(m Mutable) error { return m.SetField(f.name, v) }
 }
 
 // SetNillable assigns *v when non-nil; no-op otherwise.
@@ -560,17 +579,18 @@ func (f Time) SetNillable(v *time.Time) Assignment {
 // Clear clears the field.
 // ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
 func (f Time) Clear() Assignment {
-	return func(m Mutable) error { return m.ClearField(f.col) }
+	return func(m Mutable) error { return m.ClearField(f.name) }
 }
 
-// Enum is a generic handle for enum fields.
+// Enum is a generic handle for enum fields. See String's doc comment for
+// why col and name are kept separate.
 type Enum[T ~string] struct {
-	col string
+	col, name string
 }
 
-// NewEnum creates a new Enum handle for the given column.
-func NewEnum[T ~string](col string) Enum[T] {
-	return Enum[T]{col: col}
+// NewEnum creates a new Enum handle for the given column/field name.
+func NewEnum[T ~string](col, name string) Enum[T] {
+	return Enum[T]{col: col, name: name}
 }
 
 // Column returns the column name.
@@ -629,9 +649,11 @@ func (f Enum[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
-// Set assigns v to the field.
+// Set assigns v to the field. Passes v as-is (T, not string(v)) — same
+// reasoning as String[T].Set: the mutation descriptor expects the field's
+// declared enum Go type, not a bare string.
 func (f Enum[T]) Set(v T) Assignment {
-	return func(m Mutable) error { return m.SetField(f.col, string(v)) }
+	return func(m Mutable) error { return m.SetField(f.name, v) }
 }
 
 // SetNillable assigns *v when non-nil; no-op otherwise.
@@ -647,23 +669,24 @@ func (f Enum[T]) SetNillable(v *T) Assignment {
 // Clear clears the field.
 // ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
 func (f Enum[T]) Clear() Assignment {
-	return func(m Mutable) error { return m.ClearField(f.col) }
+	return func(m Mutable) error { return m.ClearField(f.name) }
 }
 
-// Value is a generic handle for arbitrary value fields.
+// Value is a generic handle for arbitrary value fields. See String's doc
+// comment for why col and name are kept separate.
 type Value[T any] struct {
-	col  string
-	scan func(T) (driver.Value, error)
+	col, name string
+	scan      func(T) (driver.Value, error)
 }
 
-// NewValue creates a new Value handle for the given column.
-func NewValue[T any](col string) Value[T] {
-	return Value[T]{col: col}
+// NewValue creates a new Value handle for the given column/field name.
+func NewValue[T any](col, name string) Value[T] {
+	return Value[T]{col: col, name: name}
 }
 
 // NewValueScan creates a new Value handle with a custom scanner function.
-func NewValueScan[T any](col string, scan func(T) (driver.Value, error)) Value[T] {
-	return Value[T]{col: col, scan: scan}
+func NewValueScan[T any](col, name string, scan func(T) (driver.Value, error)) Value[T] {
+	return Value[T]{col: col, name: name, scan: scan}
 }
 
 // Column returns the column name.
@@ -825,7 +848,7 @@ func (f Value[T]) NotNil() P {
 // Set assigns v to the field, passing the raw Go value (not the scan-func-
 // encoded form): scanning happens later at spec-build time.
 func (f Value[T]) Set(v T) Assignment {
-	return func(m Mutable) error { return m.SetField(f.col, v) }
+	return func(m Mutable) error { return m.SetField(f.name, v) }
 }
 
 // SetNillable assigns *v when non-nil; no-op otherwise.
@@ -841,17 +864,18 @@ func (f Value[T]) SetNillable(v *T) Assignment {
 // Clear clears the field.
 // ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
 func (f Value[T]) Clear() Assignment {
-	return func(m Mutable) error { return m.ClearField(f.col) }
+	return func(m Mutable) error { return m.ClearField(f.name) }
 }
 
-// Bytes is a handle for byte slice fields.
+// Bytes is a handle for byte slice fields. See String's doc comment for why
+// col and name are kept separate.
 type Bytes struct {
-	col string
+	col, name string
 }
 
-// NewBytes creates a new Bytes handle for the given column.
-func NewBytes(col string) Bytes {
-	return Bytes{col: col}
+// NewBytes creates a new Bytes handle for the given column/field name.
+func NewBytes(col, name string) Bytes {
+	return Bytes{col: col, name: name}
 }
 
 // Column returns the column name.
@@ -924,7 +948,7 @@ func (f Bytes) NotNil() P {
 
 // Set assigns v to the field.
 func (f Bytes) Set(v []byte) Assignment {
-	return func(m Mutable) error { return m.SetField(f.col, v) }
+	return func(m Mutable) error { return m.SetField(f.name, v) }
 }
 
 // SetNillable assigns *v when non-nil; no-op otherwise.
@@ -940,5 +964,5 @@ func (f Bytes) SetNillable(v *[]byte) Assignment {
 // Clear clears the field.
 // ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
 func (f Bytes) Clear() Assignment {
-	return func(m Mutable) error { return m.ClearField(f.col) }
+	return func(m Mutable) error { return m.ClearField(f.name) }
 }

@@ -49,13 +49,13 @@ func TestGraph_Gen_HasWithSoftDeleteFilter(t *testing.T) {
 	// filter is applied by entfield.Edge.HasWith, not inlined in where.go).
 	parentWhere, err := os.ReadFile(filepath.Join(target, "parent", "where.go"))
 	require.NoError(t, err)
-	require.Contains(t, string(parentWhere), `entfield.NewEdge[predicate.Child](newChildrenStep, sql.FieldIsNull("deleted_at"))`,
+	require.Contains(t, string(parentWhere), `entfield.NewEdge[predicate.Child, int]("children", newChildrenStep, sql.FieldIsNull("deleted_at"))`,
 		"E.Children should auto-inject soft-delete filter because Child has deleted_at field")
 
 	// Child -> Parent edge: Parent does NOT have deleted_at, so E.Parent should NOT inject a filter.
 	childWhere, err := os.ReadFile(filepath.Join(target, "child", "where.go"))
 	require.NoError(t, err)
-	require.Contains(t, string(childWhere), `entfield.NewEdge[predicate.Parent](newParentStep)`,
+	require.Contains(t, string(childWhere), `entfield.NewEdge[predicate.Parent, int]("parent", newParentStep)`,
 		"E.Parent should not take a neighborFilters argument")
 	require.NotContains(t, string(childWhere), `sql.FieldIsNull("deleted_at")`,
 		"E.Parent should NOT auto-inject soft-delete filter because Parent has no deleted_at field")

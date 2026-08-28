@@ -14,7 +14,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "Imports" $.BuilderImports "CreateUsesEntbuilder" (eq $.Config.Storage.Name "sql") }}
+{{ with extend $ "Imports" $.BuilderImports "CreateUsesEntbuilder" (eq $.Config.Storage.Name "sql") "CreateUsesEntfield" true }}
 	{{ template "import" . }}
 {{ end }}
 
@@ -25,6 +25,7 @@ in the LICENSE file in the root directory of this source tree.
 // {{ $builder }} is the builder for creating a {{ $.Name }} entity.
 type {{ $builder }} struct {
 	Config
+	err error
 	mutation *{{  $.MutationName }}
 	hooks []Hook
 	{{- /* Additional fields to add to the builder. */}}
@@ -45,6 +46,9 @@ func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *
 
 // Save creates the {{ $.Name }} in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
+	if {{ $receiver }}.err != nil {
+		return nil, {{ $receiver }}.err
+	}
 	{{- if $.HasDefault }}
 		{{- if $runtimeRequired }}
 			if err := {{ $receiver }}.defaults(); err != nil {
