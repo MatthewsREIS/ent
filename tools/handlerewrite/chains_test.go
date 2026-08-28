@@ -85,6 +85,20 @@ var chainsManifest = Manifest{
 
 var chainsPrefixes = []string{"example.com/chainsmod/gen"}
 
+// voucherManifest describes the Voucher entity used by the deleted-setters
+// (Tests:true + propagation) fixture — see VoucherCreate's doc comment in
+// gen/gen.go for why it's a separate stand-in from escrow.
+var voucherManifest = Manifest{
+	"voucher": {
+		ImportPath: "example.com/chainsmod/gen/voucher",
+		Setters: map[string]SetterEntry{
+			"Title": {Kind: "field"},
+			"Desc":  {Kind: "field"},
+			"Price": {Kind: "field", CanAdd: true},
+		},
+	},
+}
+
 func mustContain(t *testing.T, got, want string) {
 	t.Helper()
 	if !strings.Contains(got, want) {
@@ -225,6 +239,52 @@ func TestChainsImportInsertionReusesExistingAlias(t *testing.T) {
 	if n := strings.Count(got, `"example.com/chainsmod/gen/escrow"`); n != 1 {
 		t.Errorf("want exactly one import of the escrow path, got %d:\n%s", n, got)
 	}
+}
+
+// TestChainsLoadsTestFiles_AndFoldsThroughDeletedSetters is the regression
+// test for c049aca1a's two most consequential fixes at once: without
+// packages.Config.Tests: true this _test.go fixture is never even loaded
+// (changed would come back empty); without exprResult.entry/hasEntry
+// propagation, only SetTitle (the link right after Create(), whose
+// receiver type Create() itself still resolves) would decompose — SetDesc
+// and SetPrice would be left untouched, since VoucherCreate has no old
+// setter methods at all (their own receiver, the previous link's call, is
+// itself unresolvable).
+func TestChainsLoadsTestFiles_AndFoldsThroughDeletedSetters(t *testing.T) {
+	got, changed := runChains(t, voucherManifest, chainsPrefixes, "deleted_setters_test.go")
+	mustContainChanged(t, changed, "usage/deleted_setters_test.go")
+	mustContain(t, got, `client.Voucher.Create().With(voucher.F.Title.Set("x"), voucher.F.Desc.Set("y"), voucher.F.Price.Set(5))`)
+	if strings.Count(got, ".With(") != 1 {
+		t.Errorf("want exactly one .With( call (all three links folded), got:\n%s", got)
+	}
+	mustNotContain(t, got, `.SetTitle(`)
+	mustNotContain(t, got, `.SetDesc(`)
+	mustNotContain(t, got, `.SetPrice(`)
+}
+
+// TestChainsVariadicSpreadPreserved guards buildHandleCall carrying
+// call.Ellipsis over: AddParcelIDs(ids...) must rewrite to
+// E.Parcels.AddIDs(ids...), not AddIDs(ids) (a []int where the handle's
+// variadic AddIDs(vs ...ID) wants ...int — a compile error the old text
+// output wouldn't have caught since these fixtures aren't compiled).
+func TestChainsVariadicSpreadPreserved(t *testing.T) {
+	got, changed := runChains(t, chainsManifest, chainsPrefixes, "variadic_spread.go")
+	mustContainChanged(t, changed, "usage/variadic_spread.go")
+	mustContain(t, got, `client.Escrow.Create().With(escrow.E.Parcels.AddIDs(ids...))`)
+	mustNotContain(t, got, `AddIDs(ids)`)
+}
+
+// TestChainsFuncLiteralArgumentRewritten guards the func-literal fallback
+// in processExpr (walkForChains): a chain nested inside a func-literal
+// argument (the common t.Run(name, func(t *testing.T) { ... }) shape) must
+// still be found and rewritten, not silently left untouched because
+// processExpr's own receiver/args recursion doesn't see into a literal's
+// body on its own.
+func TestChainsFuncLiteralArgumentRewritten(t *testing.T) {
+	got, changed := runChains(t, chainsManifest, chainsPrefixes, "func_literal.go")
+	mustContainChanged(t, changed, "usage/func_literal.go")
+	mustContain(t, got, `client.Escrow.Create().With(escrow.F.Name.Set("x"))`)
+	mustNotContain(t, got, `.SetName(`)
 }
 
 func mustContainChanged(t *testing.T, changed []string, want string) {

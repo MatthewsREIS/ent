@@ -9,8 +9,27 @@ import "context"
 type Escrow struct{}
 
 type Client struct {
-	Escrow *EscrowClient
+	Escrow  *EscrowClient
+	Voucher *VoucherClient
 }
+
+// Voucher and VoucherCreate stand in for what a real Task-3-regenerated
+// builder actually looks like post-migration: no old Set<F> methods at
+// all (unlike EscrowCreate above, which keeps every old setter so its
+// receiver's static type always resolves cleanly — never exercising the
+// case this type exists for). A chain of 2+ decomposed setters against
+// VoucherCreate forces every link after the first to hit an unresolvable
+// receiver type (the method it calls doesn't exist), which is exactly the
+// state real regenerated code is in: processExpr must recognize the
+// builder from a *propagated* manifest entry (see exprResult.entry), not
+// from resolving each link's original static type.
+type Voucher struct{}
+
+type VoucherClient struct{}
+
+func (c *VoucherClient) Create() *VoucherCreate { return &VoucherCreate{} }
+
+type VoucherCreate struct{}
 
 type EscrowClient struct{}
 
