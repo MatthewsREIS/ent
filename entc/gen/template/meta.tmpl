@@ -158,11 +158,11 @@ const (
 
 {{ $tmpl = printf "dialect/%s/meta/order" $.Storage }}
 // OrderOption defines the ordering options for the {{ $.Name }} queries.
-{{ if eq $.Storage.Name "sql" }}
+{{- if eq $.Storage.Name "sql" }}
 	type OrderOption = entfield.Order
-{{ else }}
+{{- else }}
 	type OrderOption func({{ $.Config.Storage.Builder }})
-{{ end }}
+{{- end }}
 {{ if hasTemplate $tmpl }}
 	{{ xtemplate $tmpl $ }}
 {{ end }}
