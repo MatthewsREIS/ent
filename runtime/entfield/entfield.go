@@ -184,6 +184,7 @@ func (f String[T]) LTE(v T) P {
 	return sql.FieldLTE(f.col, string(v))
 }
 
+// ponytail: full string op set on all String handles
 // Contains returns a predicate for substring containment.
 func (f String[T]) Contains(v T) P {
 	return sql.FieldContains(f.col, string(v))
@@ -225,21 +226,20 @@ func (f String[T]) Desc() Order {
 }
 
 // IsNil returns a predicate for checking NULL values.
-// ponytail: shared implementation for all types
+// ponytail: identical across all handle types (String, Number, Bool, Time, Enum, Value, Bytes)
 func (f String[T]) IsNil() P {
 	return sql.FieldIsNull(f.col)
 }
 
 // NotNil returns a predicate for checking non-NULL values.
-// ponytail: shared implementation for all types
+// ponytail: identical across all handle types (String, Number, Bool, Time, Enum, Value, Bytes)
 func (f String[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
 // Number is a generic handle for numeric fields.
 type Number[T Numeric] struct {
-	col  string
-	scan func(T) (driver.Value, error)
+	col string
 }
 
 // NewNumber creates a new Number handle for the given column.
@@ -252,129 +252,41 @@ func (f Number[T]) Column() string { return f.col }
 
 // EQ returns a predicate for equality.
 func (f Number[T]) EQ(v T) P {
-	if f.scan != nil {
-		return func(s *sql.Selector) {
-			scanned, err := f.scan(v)
-			if err != nil {
-				s.AddError(err)
-				return
-			}
-			s.Where(sql.EQ(s.C(f.col), scanned))
-		}
-	}
 	return sql.FieldEQ(f.col, v)
 }
 
 // NEQ returns a predicate for inequality.
 func (f Number[T]) NEQ(v T) P {
-	if f.scan != nil {
-		return func(s *sql.Selector) {
-			scanned, err := f.scan(v)
-			if err != nil {
-				s.AddError(err)
-				return
-			}
-			s.Where(sql.NEQ(s.C(f.col), scanned))
-		}
-	}
 	return sql.FieldNEQ(f.col, v)
 }
 
 // In returns a predicate for membership.
 func (f Number[T]) In(vs ...T) P {
-	if f.scan != nil {
-		return func(s *sql.Selector) {
-			scanned := make([]any, len(vs))
-			for i, v := range vs {
-				val, err := f.scan(v)
-				if err != nil {
-					s.AddError(err)
-					return
-				}
-				scanned[i] = val
-			}
-			s.Where(sql.In(s.C(f.col), scanned...))
-		}
-	}
 	return sql.FieldIn(f.col, vs...)
 }
 
 // NotIn returns a predicate for non-membership.
 func (f Number[T]) NotIn(vs ...T) P {
-	if f.scan != nil {
-		return func(s *sql.Selector) {
-			scanned := make([]any, len(vs))
-			for i, v := range vs {
-				val, err := f.scan(v)
-				if err != nil {
-					s.AddError(err)
-					return
-				}
-				scanned[i] = val
-			}
-			s.Where(sql.NotIn(s.C(f.col), scanned...))
-		}
-	}
 	return sql.FieldNotIn(f.col, vs...)
 }
 
 // GT returns a predicate for greater than.
 func (f Number[T]) GT(v T) P {
-	if f.scan != nil {
-		return func(s *sql.Selector) {
-			scanned, err := f.scan(v)
-			if err != nil {
-				s.AddError(err)
-				return
-			}
-			s.Where(sql.GT(s.C(f.col), scanned))
-		}
-	}
 	return sql.FieldGT(f.col, v)
 }
 
 // GTE returns a predicate for greater than or equal.
 func (f Number[T]) GTE(v T) P {
-	if f.scan != nil {
-		return func(s *sql.Selector) {
-			scanned, err := f.scan(v)
-			if err != nil {
-				s.AddError(err)
-				return
-			}
-			s.Where(sql.GTE(s.C(f.col), scanned))
-		}
-	}
 	return sql.FieldGTE(f.col, v)
 }
 
 // LT returns a predicate for less than.
 func (f Number[T]) LT(v T) P {
-	if f.scan != nil {
-		return func(s *sql.Selector) {
-			scanned, err := f.scan(v)
-			if err != nil {
-				s.AddError(err)
-				return
-			}
-			s.Where(sql.LT(s.C(f.col), scanned))
-		}
-	}
 	return sql.FieldLT(f.col, v)
 }
 
 // LTE returns a predicate for less than or equal.
 func (f Number[T]) LTE(v T) P {
-	if f.scan != nil {
-		return func(s *sql.Selector) {
-			scanned, err := f.scan(v)
-			if err != nil {
-				s.AddError(err)
-				return
-			}
-			s.Where(sql.LTE(s.C(f.col), scanned))
-		}
-	}
 	return sql.FieldLTE(f.col, v)
 }
 
@@ -554,12 +466,20 @@ func (f Enum[T]) NEQ(v T) P {
 
 // In returns a predicate for membership.
 func (f Enum[T]) In(vs ...T) P {
-	return sql.FieldIn(f.col, anySlice(vs)...)
+	v := make([]any, len(vs))
+	for i, val := range vs {
+		v[i] = string(val)
+	}
+	return sql.FieldIn(f.col, v...)
 }
 
 // NotIn returns a predicate for non-membership.
 func (f Enum[T]) NotIn(vs ...T) P {
-	return sql.FieldNotIn(f.col, anySlice(vs)...)
+	v := make([]any, len(vs))
+	for i, val := range vs {
+		v[i] = string(val)
+	}
+	return sql.FieldNotIn(f.col, v...)
 }
 
 // Order returns an ordering by this field.

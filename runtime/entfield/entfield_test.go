@@ -48,8 +48,9 @@ func TestCustomStringType(t *testing.T) {
 	q, args := render(t, status.EQ(Status("active")))
 	require.Contains(t, q, `"status" = $1`)
 	require.Equal(t, []any{"active"}, args)
-	q, _ = render(t, status.In(Status("a"), Status("b")))
+	q, args = render(t, status.In(Status("a"), Status("b")))
 	require.Contains(t, q, "IN")
+	require.Equal(t, []any{"a", "b"}, args)
 }
 
 func TestNumberOps(t *testing.T) {
@@ -65,7 +66,9 @@ func TestTimeAndBoolAndValue(t *testing.T) {
 	require.Contains(t, q, `"created_at" <= $1`)
 	ok := entfield.NewBool[bool]("ok")
 	q, _ = render(t, ok.EQ(true))
-	require.Contains(t, q, `"ok"`)
+	require.Contains(t, q, `WHERE "users"."ok"`)
+	q, _ = render(t, ok.EQ(false))
+	require.Contains(t, q, `WHERE NOT "users"."ok"`)
 	id := entfield.NewValue[[16]byte]("id")
 	q, _ = render(t, id.NEQ([16]byte{}))
 	require.Contains(t, q, `"id" <> $1`)
