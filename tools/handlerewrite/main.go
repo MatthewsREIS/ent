@@ -21,6 +21,19 @@ func (p *prefixList) Set(s string) error {
 	return nil
 }
 
+// validateChainsFlags enforces that -chains is only used with -pkgprefix.
+// Without a prefix guard, builderEntry would match any <X>Create/Update/
+// UpdateOne-named type across the whole load, risking a rewrite of an
+// unrelated same-named type in a mass migration — fail closed rather than
+// rely on the flag's doc string.
+func validateChainsFlags(chains bool, prefixes []string) error {
+	if chains && len(prefixes) == 0 {
+		return fmt.Errorf("-chains requires -pkgprefix (without it, any same-named " +
+			"*<X>Create/*<X>Update/*<X>UpdateOne type across the whole load would be eligible)")
+	}
+	return nil
+}
+
 func main() {
 	manifestPath := flag.String("manifest", "", "path to handle manifest JSON")
 	chains := flag.Bool("chains", false, "types-aware setter-chain rewrite mode: decompose "+
@@ -39,6 +52,10 @@ func main() {
 	dirs := flag.Args()
 	if *manifestPath == "" || len(dirs) == 0 {
 		fmt.Fprintln(os.Stderr, "usage: handlerewrite -manifest <manifest.json> [-pkgprefix <prefix>[,<prefix>...]] <pkg-dir>...")
+		os.Exit(2)
+	}
+	if err := validateChainsFlags(*chains, prefixes); err != nil {
+		fmt.Fprintln(os.Stderr, "handlerewrite:", err)
 		os.Exit(2)
 	}
 
