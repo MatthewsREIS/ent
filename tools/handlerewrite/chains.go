@@ -236,10 +236,28 @@ type exprResult struct {
 	// call was left as an ordinary call (not a decomposed setter), so the
 	// next link (if any) must start a fresh `.With(...)`.
 	openWith *ast.CallExpr
+	// entry/hasEntry carry the manifest entry for expr's builder type, once
+	// known, so the *next* link in the same chain can decompose even when
+	// its own receiver's static type fails to resolve. That happens for
+	// every setter chain this tool is meant to migrate: once the first
+	// old Set<F> in a chain is gone from the generated builder, go/types
+	// can no longer type the *next* link's original receiver expression
+	// (`recv.SetFoo(...)`) at all — it was built on a call to a method
+	// that no longer exists — even though the chain's builder type never
+	// actually changes link to link. Propagating the entry sidesteps
+	// re-deriving it from a static type that's gone missing precisely
+	// because a sibling link in the same chain was already rewritten.
+	entry    PkgEntry
+	hasEntry bool
 }
 
 // buildHandleCall renders `<pkgAlias>.<r.handle>.<r.name>.<r.op>(args...)`.
-func buildHandleCall(pkgAlias string, r setterReading, args []ast.Expr) *ast.CallExpr {
+// ellipsis is the original call's Ellipsis position (call.Ellipsis) — a
+// non-zero value marks the last arg as a `slice...` spread (e.g.
+// AddUserIDs(ids...)); it must carry over verbatim or the rewritten call
+// silently drops the spread and fails to compile against the handle's
+// variadic parameter.
+func buildHandleCall(pkgAlias string, r setterReading, args []ast.Expr, ellipsis token.Pos) *ast.CallExpr {
 	sel := &ast.SelectorExpr{
 		X: &ast.SelectorExpr{
 			X:   &ast.SelectorExpr{X: ast.NewIdent(pkgAlias), Sel: ast.NewIdent(r.handle)},
@@ -247,7 +265,7 @@ func buildHandleCall(pkgAlias string, r setterReading, args []ast.Expr) *ast.Cal
 		},
 		Sel: ast.NewIdent(r.op),
 	}
-	return &ast.CallExpr{Fun: sel, Args: args}
+	return &ast.CallExpr{Fun: sel, Args: args, Ellipsis: ellipsis}
 }
 
 // processExpr recursively rewrites e (bottom-up: receivers and arguments
@@ -256,7 +274,14 @@ func buildHandleCall(pkgAlias string, r setterReading, args []ast.Expr) *ast.Cal
 func (rc *rewriteCtx) processExpr(e ast.Expr) exprResult {
 	call, ok := e.(*ast.CallExpr)
 	if !ok {
-		return exprResult{expr: e}
+		// Not a call at all — but it may still CONTAIN calls arbitrarily
+		// deep inside (most commonly a func literal argument, e.g.
+		// t.Run(name, func(t *testing.T) { ...chain... })). The receiver/
+		// args recursion above only walks direct call-expression positions;
+		// it can't see into a func literal's body on its own. Fall back to
+		// a full sub-tree walk so setter chains nested in there still get
+		// rewritten.
+		return exprResult{expr: e, changed: rc.walkForChains(e)}
 	}
 	sel, ok := call.Fun.(*ast.SelectorExpr)
 	if !ok {
@@ -287,23 +312,37 @@ func (rc *rewriteCtx) processExpr(e ast.Expr) exprResult {
 		}
 	}
 
-	if entry, ok := rc.builderEntry(recvType); ok {
+	entry, ok := rc.builderEntry(recvType)
+	if !ok && recvType == nil && recvRes.hasEntry {
+		// recv's original static type is unresolvable — not because it's
+		// some unrelated type, but because go/types has nothing at all for
+		// it (recvType == nil): the usual case is that recv itself is a
+		// call to a Set<F>/Add<F>/... method already deleted from the
+		// generated builder by this same migration. The previous link in
+		// this chain already resolved (or inherited) the builder's entry;
+		// reuse it rather than giving up.
+		entry, ok = recvRes.entry, true
+	}
+	if ok {
 		switch cands := decomposeSetter(sel.Sel.Name, entry.Setters); len(cands) {
 		case 1:
 			alias := rc.ensureImport(entry.ImportPath)
-			argExpr := buildHandleCall(alias, cands[0], call.Args)
+			argExpr := buildHandleCall(alias, cands[0], call.Args, call.Ellipsis)
 			if recvRes.openWith != nil {
 				recvRes.openWith.Args = append(recvRes.openWith.Args, argExpr)
-				return exprResult{expr: recvRes.expr, changed: true, openWith: recvRes.openWith}
+				return exprResult{expr: recvRes.expr, changed: true, openWith: recvRes.openWith, entry: entry, hasEntry: true}
 			}
 			withCall := &ast.CallExpr{
 				Fun:  &ast.SelectorExpr{X: recvRes.expr, Sel: ast.NewIdent("With")},
 				Args: []ast.Expr{argExpr},
 			}
-			return exprResult{expr: withCall, changed: true, openWith: withCall}
+			return exprResult{expr: withCall, changed: true, openWith: withCall, entry: entry, hasEntry: true}
 		case 0:
 			// Not a setter name (Where/Save/Exec/OnConflict/Mutation/...):
-			// an ordinary call. Falls through — closes any open fold.
+			// an ordinary call. Falls through — closes any open fold, but
+			// the builder identity (entry) still carries forward below, so
+			// a later setter further down the same chain (e.g. after a
+			// Where(...)) is still recognized.
 		default:
 			rc.warnAmbiguous(sel, cands)
 			// Refuse to rewrite this call; falls through as ordinary.
@@ -311,7 +350,32 @@ func (rc *rewriteCtx) processExpr(e ast.Expr) exprResult {
 	}
 
 	call.Fun = sel
-	return exprResult{expr: call, changed: recvRes.changed || argsChanged}
+	return exprResult{expr: call, changed: recvRes.changed || argsChanged, entry: entry, hasEntry: ok}
+}
+
+// walkForChains rewrites every setter-chain call site reachable from root
+// (root included), via astutil.Apply's own generic tree descent — which,
+// unlike processExpr's hand-rolled receiver/args recursion, follows into
+// every kind of node (func literal bodies, composite literals, statements
+// inside them, ...). It's the single traversal RewriteChainsFile uses at
+// the file root, and processExpr's non-call fallback re-enters it for any
+// sub-tree its own recursion can't see into directly (e.g. a func literal
+// argument). Reports whether anything under root was rewritten.
+func (rc *rewriteCtx) walkForChains(root ast.Node) bool {
+	changed := false
+	astutil.Apply(root, func(cur *astutil.Cursor) bool {
+		call, ok := cur.Node().(*ast.CallExpr)
+		if !ok {
+			return true
+		}
+		res := rc.processExpr(call)
+		if res.changed {
+			cur.Replace(res.expr)
+			changed = true
+		}
+		return false
+	}, nil)
+	return changed
 }
 
 // RewriteChainsFile rewrites file's setter-chain call sites in place,
@@ -321,18 +385,7 @@ func RewriteChainsFile(fset *token.FileSet, info *types.Info, file *ast.File, fi
 		return false
 	}
 	rc := &rewriteCtx{fset: fset, info: info, manifest: manifest, prefixes: prefixes, file: file, filename: filename, aliases: map[string]string{}}
-	astutil.Apply(file, func(cur *astutil.Cursor) bool {
-		call, ok := cur.Node().(*ast.CallExpr)
-		if !ok {
-			return true
-		}
-		res := rc.processExpr(call)
-		if res.changed {
-			cur.Replace(res.expr)
-			rc.changed = true
-		}
-		return false
-	}, nil)
+	rc.changed = rc.walkForChains(file)
 	return rc.changed
 }
 
@@ -348,6 +401,11 @@ func ProcessPackages(dir string, patterns []string, manifest Manifest, prefixes 
 		Dir: dir,
 		Mode: packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles |
 			packages.NeedImports | packages.NeedTypes | packages.NeedSyntax | packages.NeedTypesInfo,
+		// Tests: true is required for go/packages to load _test.go files at
+		// all (as synthetic "[pkg].test"/"[pkg]_test" packages) — without it
+		// every old setter-chain call site in a _test.go file is invisible
+		// to this tool, silently skipped rather than rewritten.
+		Tests: true,
 	}
 	pkgs, err := packages.Load(cfg, patterns...)
 	if err != nil {
@@ -357,10 +415,17 @@ func ProcessPackages(dir string, patterns []string, manifest Manifest, prefixes 
 	seen := map[string]bool{}
 	for _, pkg := range pkgs {
 		if len(pkg.Errors) > 0 {
+			// Don't skip the package: this is exactly the expected state for
+			// every file this tool needs to touch — a generated builder just
+			// dropped the old Set<F>/Add<F>/... methods, so any caller still
+			// using them fails to type-check by definition. go/types records
+			// best-effort type info for whatever DID resolve (e.g. the
+			// receiver expression of a call whose method doesn't exist), and
+			// that's all decomposeSetter needs — so still attempt the
+			// rewrite; only report the errors for visibility.
 			for _, e := range pkg.Errors {
 				fmt.Fprintf(os.Stderr, "handlerewrite: package %s: %v\n", pkg.PkgPath, e)
 			}
-			continue
 		}
 		for i, file := range pkg.Syntax {
 			if i >= len(pkg.CompiledGoFiles) {
