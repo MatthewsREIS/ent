@@ -252,6 +252,15 @@ change itself — but this round had no pushed commit and no same-commit
 the clean-build wall-time/RSS deltas (+14.0%/+15.2%) must not be read as a
 regression from the codegen change alone.**
 
+**Re-measured on a quiet machine** (after the original benchmarking session's
+concurrent build/test workloads triggered an OOM crash — the crash-era numbers
+above were taken under that load): generation **112.4s wall / 3.2 GB peak
+RSS**, clean build **63.8s wall / 3.17 GB peak RSS**. The generation-RSS drop
+(~3 GB vs Stage 1's 9.1 GB) reproduces exactly; the clean-build wall delta
+shrinks from +14.0% to +3.3% vs Stage 1's confounded baseline; generation
+wall stays ~2 min under the local-replace from-source path (still to be
+re-measured against a pushed pseudo-version after merge).
+
 ### Migration
 
 Built the rewriter from the fork (`go build -o handlerewrite
