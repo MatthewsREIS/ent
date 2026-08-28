@@ -42,6 +42,27 @@ func TestEdgeHasWithNeighborFilter(t *testing.T) {
 	require.Equal(t, []any{"fido"}, args)
 }
 
+func TestEdgeStepModsHas(t *testing.T) {
+	mod := func(_ *sql.Selector, step *sqlgraph.Step) {
+		step.To.Schema = "alt_schema"
+		step.Edge.Schema = "alt_schema"
+	}
+	e := entfield.NewEdgeSteps[entfield.P](petsStep, []func(*sql.Selector, *sqlgraph.Step){mod})
+	q, _ := render(t, e.Has())
+	require.Contains(t, q, `"alt_schema"."pets"`)
+}
+
+func TestEdgeStepModsHasWith(t *testing.T) {
+	mod := func(_ *sql.Selector, step *sqlgraph.Step) {
+		step.To.Schema = "alt_schema"
+		step.Edge.Schema = "alt_schema"
+	}
+	e := entfield.NewEdgeSteps[entfield.P](petsStep, []func(*sql.Selector, *sqlgraph.Step){mod})
+	inner := sql.FieldEQ("name", "fido")
+	q, _ := render(t, e.HasWith(inner))
+	require.Contains(t, q, `"alt_schema"."pets"`)
+}
+
 func TestEdgeOrderByCount(t *testing.T) {
 	e := entfield.NewEdge[entfield.P](petsStep)
 	q, _ := render(t, e.OrderByCount())

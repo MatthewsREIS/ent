@@ -11,6 +11,7 @@ import (
 // The constraint (not plain "any") is required so HasWith can call preds directly.
 type Edge[TP ~func(*sql.Selector)] struct {
 	step            func() *sqlgraph.Step
+	stepMods        []func(*sql.Selector, *sqlgraph.Step)
 	neighborFilters []func(*sql.Selector)
 }
 
@@ -22,10 +23,28 @@ func NewEdge[TP ~func(*sql.Selector)](step func() *sqlgraph.Step, neighborFilter
 	return Edge[TP]{step: step, neighborFilters: neighborFilters}
 }
 
+// NewEdgeSteps is NewEdge plus stepMods: callbacks run (in order) against the
+// freshly built step before it's used, with access to the outer selector (e.g.
+// to read schemaConfig off s.Context()). Used by graphs with the sql/schemaconfig
+// feature to route step.To.Schema / step.Edge.Schema, mirroring the routing the
+// classic per-edge Has/HasWith codegen used to inline directly.
+func NewEdgeSteps[TP ~func(*sql.Selector)](step func() *sqlgraph.Step, stepMods []func(*sql.Selector, *sqlgraph.Step), neighborFilters ...func(*sql.Selector)) Edge[TP] {
+	return Edge[TP]{step: step, stepMods: stepMods, neighborFilters: neighborFilters}
+}
+
+// mkStep builds a fresh step and applies stepMods against it.
+func (e Edge[TP]) mkStep(s *sql.Selector) *sqlgraph.Step {
+	step := e.step()
+	for _, mod := range e.stepMods {
+		mod(s, step)
+	}
+	return step
+}
+
 // Has returns a predicate testing for the existence of the edge.
 func (e Edge[TP]) Has() P {
 	return func(s *sql.Selector) {
-		sqlgraph.HasNeighbors(s, e.step())
+		sqlgraph.HasNeighbors(s, e.mkStep(s))
 	}
 }
 
@@ -33,7 +52,7 @@ func (e Edge[TP]) Has() P {
 // given conditions (that are applied on the "other" side of the edge).
 func (e Edge[TP]) HasWith(preds ...TP) P {
 	return func(s *sql.Selector) {
-		sqlgraph.HasNeighborsWith(s, e.step(), func(s *sql.Selector) {
+		sqlgraph.HasNeighborsWith(s, e.mkStep(s), func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
 			}
@@ -47,13 +66,13 @@ func (e Edge[TP]) HasWith(preds ...TP) P {
 // OrderByCount orders the results by the count of the edge connections.
 func (e Edge[TP]) OrderByCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, e.step(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, e.mkStep(s), opts...)
 	}
 }
 
 // OrderBy orders the results by terms of the edge's neighbor table.
 func (e Edge[TP]) OrderBy(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, e.step(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, e.mkStep(s), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
