@@ -264,6 +264,28 @@ func (f String[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
+// Set assigns v to the field. Passes the raw Go conversion (string(v)), not
+// the scan-func-encoded form: scanning happens later at spec-build time.
+func (f String[T]) Set(v T) Assignment {
+	return func(m Mutable) error { return m.SetField(f.col, string(v)) }
+}
+
+// SetNillable assigns *v when non-nil; no-op otherwise.
+func (f String[T]) SetNillable(v *T) Assignment {
+	return func(m Mutable) error {
+		if v == nil {
+			return nil
+		}
+		return f.Set(*v)(m)
+	}
+}
+
+// Clear clears the field.
+// ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
+func (f String[T]) Clear() Assignment {
+	return func(m Mutable) error { return m.ClearField(f.col) }
+}
+
 // Number is a generic handle for numeric fields.
 type Number[T Numeric] struct {
 	col string
@@ -342,6 +364,37 @@ func (f Number[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
+// Set assigns v to the field. Resets any prior AddField delta first (ignoring
+// its error — the field may be unset), so Set overrides Add on an update
+// builder; harmless no-op on create.
+func (f Number[T]) Set(v T) Assignment {
+	return func(m Mutable) error {
+		_ = m.ResetField(f.col)
+		return m.SetField(f.col, v)
+	}
+}
+
+// SetNillable assigns *v when non-nil; no-op otherwise.
+func (f Number[T]) SetNillable(v *T) Assignment {
+	return func(m Mutable) error {
+		if v == nil {
+			return nil
+		}
+		return f.Set(*v)(m)
+	}
+}
+
+// Add records a delta to add to the field.
+func (f Number[T]) Add(v T) Assignment {
+	return func(m Mutable) error { return m.AddField(f.col, v) }
+}
+
+// Clear clears the field.
+// ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
+func (f Number[T]) Clear() Assignment {
+	return func(m Mutable) error { return m.ClearField(f.col) }
+}
+
 // Bool is a generic handle for boolean fields.
 type Bool[T ~bool] struct {
 	col string
@@ -388,6 +441,27 @@ func (f Bool[T]) IsNil() P {
 // NotNil returns a predicate for checking non-NULL values.
 func (f Bool[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
+}
+
+// Set assigns v to the field.
+func (f Bool[T]) Set(v T) Assignment {
+	return func(m Mutable) error { return m.SetField(f.col, bool(v)) }
+}
+
+// SetNillable assigns *v when non-nil; no-op otherwise.
+func (f Bool[T]) SetNillable(v *T) Assignment {
+	return func(m Mutable) error {
+		if v == nil {
+			return nil
+		}
+		return f.Set(*v)(m)
+	}
+}
+
+// Clear clears the field.
+// ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
+func (f Bool[T]) Clear() Assignment {
+	return func(m Mutable) error { return m.ClearField(f.col) }
 }
 
 // Time is a handle for time.Time fields.
@@ -468,6 +542,27 @@ func (f Time) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
+// Set assigns v to the field.
+func (f Time) Set(v time.Time) Assignment {
+	return func(m Mutable) error { return m.SetField(f.col, v) }
+}
+
+// SetNillable assigns *v when non-nil; no-op otherwise.
+func (f Time) SetNillable(v *time.Time) Assignment {
+	return func(m Mutable) error {
+		if v == nil {
+			return nil
+		}
+		return f.Set(*v)(m)
+	}
+}
+
+// Clear clears the field.
+// ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
+func (f Time) Clear() Assignment {
+	return func(m Mutable) error { return m.ClearField(f.col) }
+}
+
 // Enum is a generic handle for enum fields.
 type Enum[T ~string] struct {
 	col string
@@ -532,6 +627,27 @@ func (f Enum[T]) IsNil() P {
 // NotNil returns a predicate for checking non-NULL values.
 func (f Enum[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
+}
+
+// Set assigns v to the field.
+func (f Enum[T]) Set(v T) Assignment {
+	return func(m Mutable) error { return m.SetField(f.col, string(v)) }
+}
+
+// SetNillable assigns *v when non-nil; no-op otherwise.
+func (f Enum[T]) SetNillable(v *T) Assignment {
+	return func(m Mutable) error {
+		if v == nil {
+			return nil
+		}
+		return f.Set(*v)(m)
+	}
+}
+
+// Clear clears the field.
+// ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
+func (f Enum[T]) Clear() Assignment {
+	return func(m Mutable) error { return m.ClearField(f.col) }
 }
 
 // Value is a generic handle for arbitrary value fields.
@@ -706,6 +822,28 @@ func (f Value[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
+// Set assigns v to the field, passing the raw Go value (not the scan-func-
+// encoded form): scanning happens later at spec-build time.
+func (f Value[T]) Set(v T) Assignment {
+	return func(m Mutable) error { return m.SetField(f.col, v) }
+}
+
+// SetNillable assigns *v when non-nil; no-op otherwise.
+func (f Value[T]) SetNillable(v *T) Assignment {
+	return func(m Mutable) error {
+		if v == nil {
+			return nil
+		}
+		return f.Set(*v)(m)
+	}
+}
+
+// Clear clears the field.
+// ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
+func (f Value[T]) Clear() Assignment {
+	return func(m Mutable) error { return m.ClearField(f.col) }
+}
+
 // Bytes is a handle for byte slice fields.
 type Bytes struct {
 	col string
@@ -782,4 +920,25 @@ func (f Bytes) IsNil() P {
 // NotNil returns a predicate for checking non-NULL values.
 func (f Bytes) NotNil() P {
 	return sql.FieldNotNull(f.col)
+}
+
+// Set assigns v to the field.
+func (f Bytes) Set(v []byte) Assignment {
+	return func(m Mutable) error { return m.SetField(f.col, v) }
+}
+
+// SetNillable assigns *v when non-nil; no-op otherwise.
+func (f Bytes) SetNillable(v *[]byte) Assignment {
+	return func(m Mutable) error {
+		if v == nil {
+			return nil
+		}
+		return f.Set(*v)(m)
+	}
+}
+
+// Clear clears the field.
+// ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
+func (f Bytes) Clear() Assignment {
+	return func(m Mutable) error { return m.ClearField(f.col) }
 }
