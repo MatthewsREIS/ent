@@ -120,7 +120,6 @@ func StatusValidator(s Status) error {
 }
 
 // OrderOption defines the ordering options for the Task queries.
-
 type OrderOption = entfield.Order
 
 func newTeamsStep() *sqlgraph.Step {

@@ -8,6 +8,8 @@ package user
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/runtime/entfield"
 )
@@ -40,13 +42,55 @@ var E = struct {
 	// ParentHood is the handle for the "parent_hood" edge.
 	ParentHood entfield.Edge[predicate.Parent]
 }{
-	Pets:        entfield.NewEdge[predicate.Pet](newPetsStep),
-	Groups:      entfield.NewEdge[predicate.Group](newGroupsStep),
-	Friends:     entfield.NewEdge[predicate.User](newFriendsStep),
-	Parents:     entfield.NewEdge[predicate.User](newParentsStep),
-	Children:    entfield.NewEdge[predicate.User](newChildrenStep),
-	Friendships: entfield.NewEdge[predicate.Friendship](newFriendshipsStep),
-	ParentHood:  entfield.NewEdge[predicate.Parent](newParentHoodStep),
+	Pets: entfield.NewEdgeSteps[predicate.Pet](newPetsStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.Pet
+			step.Edge.Schema = schemaConfig.Pet
+		},
+	}),
+	Groups: entfield.NewEdgeSteps[predicate.Group](newGroupsStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.Group
+			step.Edge.Schema = schemaConfig.GroupUsers
+		},
+	}),
+	Friends: entfield.NewEdgeSteps[predicate.User](newFriendsStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Friendship
+		},
+	}),
+	Parents: entfield.NewEdgeSteps[predicate.User](newParentsStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.UserChildren
+		},
+	}),
+	Children: entfield.NewEdgeSteps[predicate.User](newChildrenStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Parent
+		},
+	}),
+	Friendships: entfield.NewEdgeSteps[predicate.Friendship](newFriendshipsStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.Friendship
+			step.Edge.Schema = schemaConfig.Friendship
+		},
+	}),
+	ParentHood: entfield.NewEdgeSteps[predicate.Parent](newParentHoodStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.Parent
+			step.Edge.Schema = schemaConfig.Parent
+		},
+	}),
 }
 
 // And groups predicates with the AND operator between them.

@@ -56,7 +56,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Account queries.
-
 type OrderOption = entfield.Order
 
 func newTokenStep() *sqlgraph.Step {

@@ -77,7 +77,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the ExValueScan queries.
-
 type OrderOption = entfield.Order
 
 // comment from another template.

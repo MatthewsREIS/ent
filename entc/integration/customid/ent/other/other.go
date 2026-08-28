@@ -41,5 +41,4 @@ var (
 )
 
 // OrderOption defines the ordering options for the Other queries.
-
 type OrderOption = entfield.Order

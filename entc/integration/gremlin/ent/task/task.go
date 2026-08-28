@@ -48,7 +48,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Task queries.
-
 type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

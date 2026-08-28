@@ -47,5 +47,4 @@ var (
 )
 
 // OrderOption defines the ordering options for the MixinID queries.
-
 type OrderOption = entfield.Order

@@ -80,7 +80,6 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Tag queries.
-
 type OrderOption = entfield.Order
 
 func newTweetsStep() *sqlgraph.Step {

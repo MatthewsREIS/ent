@@ -47,5 +47,4 @@ var (
 )
 
 // OrderOption defines the ordering options for the Link queries.
-
 type OrderOption = entfield.Order

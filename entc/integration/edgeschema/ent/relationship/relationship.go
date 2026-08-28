@@ -89,7 +89,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Relationship queries.
-
 type OrderOption = entfield.Order
 
 func newUserStep() *sqlgraph.Step {

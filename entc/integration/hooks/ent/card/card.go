@@ -90,7 +90,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Card queries.
-
 type OrderOption = entfield.Order
 
 func newOwnerStep() *sqlgraph.Step {

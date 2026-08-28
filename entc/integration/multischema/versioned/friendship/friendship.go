@@ -75,7 +75,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Friendship queries.
-
 type OrderOption = entfield.Order
 
 func newUserStep() *sqlgraph.Step {

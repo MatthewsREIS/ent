@@ -64,7 +64,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Session queries.
-
 type OrderOption = entfield.Order
 
 func newDeviceStep() *sqlgraph.Step {

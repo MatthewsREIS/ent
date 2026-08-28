@@ -109,7 +109,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the File queries.
-
 type OrderOption = entfield.Order
 
 func newOwnerStep() *sqlgraph.Step {

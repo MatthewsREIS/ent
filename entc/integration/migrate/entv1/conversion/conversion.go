@@ -62,5 +62,4 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Conversion queries.
-
 type OrderOption = entfield.Order

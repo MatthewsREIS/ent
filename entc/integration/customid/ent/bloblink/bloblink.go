@@ -69,7 +69,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the BlobLink queries.
-
 type OrderOption = entfield.Order
 
 func newBlobStep() *sqlgraph.Step {

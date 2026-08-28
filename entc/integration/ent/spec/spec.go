@@ -49,7 +49,6 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Spec queries.
-
 type OrderOption = entfield.Order
 
 func newCardStep() *sqlgraph.Step {

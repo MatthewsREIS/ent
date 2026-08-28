@@ -8,6 +8,8 @@ package friendship
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/runtime/entfield"
 )
@@ -39,8 +41,20 @@ var E = struct {
 	// Friend is the handle for the "friend" edge.
 	Friend entfield.Edge[predicate.User]
 }{
-	User:   entfield.NewEdge[predicate.User](newUserStep),
-	Friend: entfield.NewEdge[predicate.User](newFriendStep),
+	User: entfield.NewEdgeSteps[predicate.User](newUserStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Friendship
+		},
+	}),
+	Friend: entfield.NewEdgeSteps[predicate.User](newFriendStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Friendship
+		},
+	}),
 }
 
 // And groups predicates with the AND operator between them.

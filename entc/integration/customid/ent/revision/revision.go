@@ -35,5 +35,4 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Revision queries.
-
 type OrderOption = entfield.Order

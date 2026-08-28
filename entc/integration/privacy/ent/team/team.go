@@ -75,7 +75,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Team queries.
-
 type OrderOption = entfield.Order
 
 func newTasksStep() *sqlgraph.Step {

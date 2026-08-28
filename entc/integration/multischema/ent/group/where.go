@@ -8,6 +8,8 @@ package group
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/runtime/entfield"
 )
@@ -28,7 +30,13 @@ var E = struct {
 	// Users is the handle for the "users" edge.
 	Users entfield.Edge[predicate.User]
 }{
-	Users: entfield.NewEdge[predicate.User](newUsersStep),
+	Users: entfield.NewEdgeSteps[predicate.User](newUsersStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.GroupUsers
+		},
+	}),
 }
 
 // And groups predicates with the AND operator between them.

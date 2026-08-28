@@ -80,7 +80,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Doc queries.
-
 type OrderOption = entfield.Order
 
 func newParentStep() *sqlgraph.Step {

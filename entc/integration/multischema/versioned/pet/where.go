@@ -8,6 +8,8 @@ package pet
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/versioned/internal"
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
 	"entgo.io/ent/runtime/entfield"
 )
@@ -31,7 +33,13 @@ var E = struct {
 	// Owner is the handle for the "owner" edge.
 	Owner entfield.Edge[predicate.User]
 }{
-	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
+	Owner: entfield.NewEdgeSteps[predicate.User](newOwnerStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Pet
+		},
+	}),
 }
 
 // And groups predicates with the AND operator between them.

@@ -70,7 +70,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Note queries.
-
 type OrderOption = entfield.Order
 
 func newParentStep() *sqlgraph.Step {

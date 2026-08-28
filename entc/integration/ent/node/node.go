@@ -72,7 +72,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Node queries.
-
 type OrderOption = entfield.Order
 
 func newPrevStep() *sqlgraph.Step {

@@ -54,7 +54,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Car queries.
-
 type OrderOption = entfield.Order
 
 func newRentalsStep() *sqlgraph.Step {

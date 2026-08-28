@@ -73,7 +73,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the TweetTag queries.
-
 type OrderOption = entfield.Order
 
 func newTagStep() *sqlgraph.Step {

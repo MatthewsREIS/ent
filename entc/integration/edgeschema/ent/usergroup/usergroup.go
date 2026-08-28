@@ -70,7 +70,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the UserGroup queries.
-
 type OrderOption = entfield.Order
 
 func newUserStep() *sqlgraph.Step {

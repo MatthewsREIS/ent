@@ -53,7 +53,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the User queries.
-
 type OrderOption = entfield.Order
 
 func newPostsStep() *sqlgraph.Step {

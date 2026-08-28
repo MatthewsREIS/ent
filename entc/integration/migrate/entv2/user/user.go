@@ -233,7 +233,6 @@ func StatusValidator(s Status) error {
 }
 
 // OrderOption defines the ordering options for the User queries.
-
 type OrderOption = entfield.Order
 
 func newCarStep() *sqlgraph.Step {

@@ -60,7 +60,6 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the GroupTag queries.
-
 type OrderOption = entfield.Order
 
 func newTagStep() *sqlgraph.Step {

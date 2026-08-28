@@ -47,7 +47,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Item queries.
-
 type OrderOption = entfield.Order
 
 // comment from another template.

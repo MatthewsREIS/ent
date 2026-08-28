@@ -115,7 +115,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Group queries.
-
 type OrderOption = entfield.Order
 
 func newFilesStep() *sqlgraph.Step {

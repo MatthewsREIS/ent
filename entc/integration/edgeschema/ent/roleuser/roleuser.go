@@ -71,7 +71,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the RoleUser queries.
-
 type OrderOption = entfield.Order
 
 func newRoleStep() *sqlgraph.Step {

@@ -48,7 +48,6 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Info queries.
-
 type OrderOption = entfield.Order
 
 func newUserStep() *sqlgraph.Step {

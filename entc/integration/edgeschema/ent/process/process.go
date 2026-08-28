@@ -58,7 +58,6 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Process queries.
-
 type OrderOption = entfield.Order
 
 func newFilesStep() *sqlgraph.Step {

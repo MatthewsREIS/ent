@@ -70,7 +70,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the AttachedFile queries.
-
 type OrderOption = entfield.Order
 
 func newFiStep() *sqlgraph.Step {

@@ -77,7 +77,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Task queries.
-
 type OrderOption = entfield.Order
 
 // comment from another template.

@@ -53,7 +53,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Card queries.
-
 type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

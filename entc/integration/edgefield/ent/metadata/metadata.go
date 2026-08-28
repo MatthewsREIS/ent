@@ -68,7 +68,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Metadata queries.
-
 type OrderOption = entfield.Order
 
 func newUserStep() *sqlgraph.Step {

@@ -102,7 +102,6 @@ func StateValidator(s State) error {
 }
 
 // OrderOption defines the ordering options for the FileType queries.
-
 type OrderOption = entfield.Order
 
 func newFilesStep() *sqlgraph.Step {

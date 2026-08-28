@@ -232,7 +232,6 @@ func EmploymentValidator(e Employment) error {
 }
 
 // OrderOption defines the ordering options for the User queries.
-
 type OrderOption = entfield.Order
 
 func newCardStep() *sqlgraph.Step {

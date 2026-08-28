@@ -65,7 +65,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Post queries.
-
 type OrderOption = entfield.Order
 
 func newAuthorStep() *sqlgraph.Step {

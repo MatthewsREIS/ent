@@ -18,7 +18,6 @@ const (
 )
 
 // OrderOption defines the ordering options for the PC queries.
-
 type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

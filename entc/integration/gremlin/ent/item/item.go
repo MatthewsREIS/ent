@@ -29,7 +29,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the Item queries.
-
 type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

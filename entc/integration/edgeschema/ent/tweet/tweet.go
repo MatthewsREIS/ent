@@ -99,7 +99,6 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Tweet queries.
-
 type OrderOption = entfield.Order
 
 func newLikedUsersStep() *sqlgraph.Step {

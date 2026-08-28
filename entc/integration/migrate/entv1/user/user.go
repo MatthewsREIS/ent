@@ -149,7 +149,6 @@ func StateValidator(s State) error {
 }
 
 // OrderOption defines the ordering options for the User queries.
-
 type OrderOption = entfield.Order
 
 func newParentStep() *sqlgraph.Step {

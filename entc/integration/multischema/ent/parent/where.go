@@ -8,6 +8,8 @@ package parent
 
 import (
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/runtime/entfield"
 )
@@ -36,8 +38,20 @@ var E = struct {
 	// Parent is the handle for the "parent" edge.
 	Parent entfield.Edge[predicate.User]
 }{
-	Child:  entfield.NewEdge[predicate.User](newChildStep),
-	Parent: entfield.NewEdge[predicate.User](newParentStep),
+	Child: entfield.NewEdgeSteps[predicate.User](newChildStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Parent
+		},
+	}),
+	Parent: entfield.NewEdgeSteps[predicate.User](newParentStep, []func(*sql.Selector, *sqlgraph.Step){
+		func(s *sql.Selector, step *sqlgraph.Step) {
+			schemaConfig := internal.SchemaConfigFromContext(s.Context())
+			step.To.Schema = schemaConfig.User
+			step.Edge.Schema = schemaConfig.Parent
+		},
+	}),
 }
 
 // And groups predicates with the AND operator between them.

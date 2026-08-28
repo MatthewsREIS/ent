@@ -62,7 +62,6 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Pet queries.
-
 type OrderOption = entfield.Order
 
 func newOwnerStep() *sqlgraph.Step {

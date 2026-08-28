@@ -51,7 +51,6 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Card queries.
-
 type OrderOption = entfield.Order
 
 func newOwnerStep() *sqlgraph.Step {

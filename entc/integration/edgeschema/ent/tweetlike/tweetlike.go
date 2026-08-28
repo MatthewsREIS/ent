@@ -79,7 +79,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the TweetLike queries.
-
 type OrderOption = entfield.Order
 
 func newTweetStep() *sqlgraph.Step {
