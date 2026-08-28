@@ -65,7 +65,32 @@ in the LICENSE file in the root directory of this source tree.
 					{{- $edgeHasSoftDelete = true }}
 				{{- end }}
 			{{- end }}
-			{{ $e.StructField }}: entfield.NewEdge[predicate.{{ $e.Type.Name }}](new{{ pascal $e.Name }}Step{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
+			{{- if $.FeatureEnabled "sql/schemaconfig" }}
+				{{- /* Mirror dialect/sql/query/step/ctxschemaconfig's schema-name resolution
+				(see dialect/sql/feature/schemaconfig.tmpl) so Has/HasWith/OrderBy* route
+				step.To.Schema/step.Edge.Schema the same way the classic per-edge codegen did. */}}
+				{{- $schema := $e.Type.Name }}
+				{{- if $e.OwnFK }}
+					{{- $schema = $.Name }}
+				{{- else if $e.M2M }}
+					{{- if $e.Through }}
+						{{- $schema = $e.Through.Name }}
+					{{- else if $e.Inverse }}
+						{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
+					{{- else }}
+						{{- $schema = print $.Name $e.StructField }}
+					{{- end }}
+				{{- end }}
+				{{ $e.StructField }}: entfield.NewEdgeSteps[predicate.{{ $e.Type.Name }}](new{{ pascal $e.Name }}Step, []func(*sql.Selector, *sqlgraph.Step){
+					func(s *sql.Selector, step *sqlgraph.Step) {
+						schemaConfig := internal.SchemaConfigFromContext(s.Context())
+						step.To.Schema = schemaConfig.{{ $e.Type.Name }}
+						step.Edge.Schema = schemaConfig.{{ $schema }}
+					},
+				}{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
+			{{- else }}
+				{{ $e.StructField }}: entfield.NewEdge[predicate.{{ $e.Type.Name }}](new{{ pascal $e.Name }}Step{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
+			{{- end }}
 		{{- end }}
 	}
 {{ else }}
