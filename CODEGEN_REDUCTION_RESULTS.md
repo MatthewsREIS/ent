@@ -177,6 +177,25 @@ lost mechanical migration — go.mod replaces plus the two `UpdateName()` →
 `UpdateFields(...)` call sites in `workers/wrike_workflow_status_sync_worker.go`
 — was reapplied from the Stage 1 record before starting Stage 2a).
 
+**Environment confound, separate from and additional to the local-replace
+caveat below:** because `.worktrees/main`'s state was lost, Stage 2a's
+measurements come from a *different gemini worktree checked out at a newer
+`origin/main` commit* than whatever `origin/main` snapshot Stage 1 was
+measured against — normal `main`-branch development landed in between, not
+anything this task changed. **All of the deltas below are therefore
+confounded by ordinary app-code (and potentially schema) drift on top of the
+codegen change itself, not just the codegen change in isolation.** This
+matters most for the clean-build wall-time/RSS deltas (+14.0%/+15.2%): build
+cost scales with how much application code exists to compile, and some
+unknown share of that increase is almost certainly newer gemini code added
+to `origin/main` since Stage 1's snapshot, not the field-handle migration.
+**Those two numbers must not be read as a regression caused by this stage's
+codegen change.** The generated-LOC and generation-time/RSS deltas share the
+same confound to a lesser degree (schema drift between the two `origin/main`
+snapshots would shift generated LOC independent of the F/E handle change),
+though the LOC drop and RSS drop are large enough that the codegen change is
+plausibly still the dominant driver there.
+
 ### Benchmark commands
 
 Same entrypoints as Stage 1:
@@ -217,14 +236,21 @@ possible this round.
 | Clean build peak RSS | 2.7 GB | 3.11 GB | +0.41 GB (+15.2%) |
 
 Single-run measurements, same caveats as Stage 1 (shared-box noise, not
-averaged). The generation-RSS drop is the standout number, and — being
-measured under the *more expensive* local-replace path (the scenario Stage 1
-showed inflates RSS) — is if anything a conservative floor on the real
-improvement; a pushed-pseudo-version re-measurement would likely show an
-equal or larger drop. Generation wall time and clean-build wall/RSS upticks
-are plausibly dominated by the same local-replace from-source-rebuild effect
-Stage 1 identified, not by the F/E handle change itself, but this round had
-no pushed commit to re-measure against to confirm that split out.
+averaged), **plus the newer-`origin/main`/environment confound described
+above** — every delta in this table compares two different gemini worktree
+checkouts, not just two ent forks against the same app snapshot. The
+generation-RSS drop is the standout number, and — being measured under the
+*more expensive* local-replace path (the scenario Stage 1 showed inflates
+RSS) — is if anything a conservative floor on the real improvement; a
+pushed-pseudo-version re-measurement would likely show an equal or larger
+drop. Generation wall time and clean-build wall/RSS upticks are plausibly
+dominated by the same local-replace from-source-rebuild effect Stage 1
+identified, or by the environment confound (more/different app code to
+generate against and compile), or both — not necessarily by the F/E handle
+change itself — but this round had no pushed commit and no same-commit
+"before" build to re-measure against to split those apart. **In particular,
+the clean-build wall-time/RSS deltas (+14.0%/+15.2%) must not be read as a
+regression from the codegen change alone.**
 
 ### Migration
 
@@ -399,6 +425,21 @@ does not compile test files and would have missed both).
   branch: it was not caught by contrib's own test suite before this gemini
   regen surfaced it, meaning contrib's coverage of the Relay Node-lookup
   path may be worth strengthening.
+- **The rewriter's shadowing guard needs tightening before stage 2b trusts
+  it over a larger call-site set.** It is deliberately conservative, but at
+  whole-*function* granularity rather than real Go block scoping — a local
+  variable shadowing a package name inside one `if` block (or one
+  `t.Run(func(t *testing.T) {...})` closure) gets treated as shadowing the
+  package for the rest of the enclosing function, including sibling
+  blocks/closures where the shadow has already gone out of scope. This
+  produced "cross-sibling-closure false shadowing" misses this round (e.g.
+  `api/resolvers/transactional_create.resolvers.go`, where `property`/
+  `company` locals declared in one `if` block caused genuinely-still-package
+  usages later in the function to be skipped) — silent under-migration
+  rather than a build break at rewrite time, only caught by the subsequent
+  `go build`/`go vet` pass. Worth fixing to real block-level scope tracking
+  before stage 2b runs the rewriter over a set large enough that these
+  misses aren't all caught by a full build+vet pass.
 - Remaining: gemini-side changes (go.mod replaces, regenerated `gen/`, the
   reapplied Stage 1 worker migration, 10 gemini template fixes, and the
   handful of hand-fixed call sites listed above) are intentionally left
