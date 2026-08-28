@@ -20,15 +20,6 @@ type Numeric interface {
 	~float32 | ~float64
 }
 
-// anySlice converts a slice of type T to a slice of any.
-func anySlice[T any](vs []T) []any {
-	result := make([]any, len(vs))
-	for i, v := range vs {
-		result[i] = v
-	}
-	return result
-}
-
 // String is a generic handle for string-based fields.
 type String[T ~string] struct {
 	col  string
