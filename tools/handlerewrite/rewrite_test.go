@@ -172,6 +172,32 @@ func TestRewriteSource(t *testing.T) {
 			want:  wrap(escrowImport, `escrow.E.Parcels.OrderByCount(asc)`),
 		},
 		{
+			// True ambiguity (not the direction-dependent cases above):
+			// both field "ContactListContactsCount" and edge
+			// "ContactListContacts" exist, so "ByContactListContactsCount"
+			// reads equally well as By<Field> or By<Edge>Count. Refuse to
+			// guess; leave the selector untouched (it'll surface as a
+			// compile error rather than silently picking one reading).
+			name: "ambiguous_field_and_edge_both_match_refused",
+			manifest: Manifest{"escrow": {
+				Fields: map[string]bool{"ContactListContactsCount": true},
+				Edges:  map[string]bool{"ContactListContacts": true},
+			}},
+			input: wrap(escrowImport, `escrow.ByContactListContactsCount(asc)`),
+			want:  wrap(escrowImport, `escrow.ByContactListContactsCount(asc)`),
+		},
+		{
+			// Control: same manifest as above, but a selector with no
+			// competing reading still rewrites normally.
+			name: "ambiguous_manifest_no_collision_still_rewrites",
+			manifest: Manifest{"escrow": {
+				Fields: map[string]bool{"ContactListContactsCount": true},
+				Edges:  map[string]bool{"ContactListContacts": true},
+			}},
+			input: wrap(escrowImport, `escrow.HasContactListContacts()`),
+			want:  wrap(escrowImport, `escrow.E.ContactListContacts.Has()`),
+		},
+		{
 			name:     "value_position_method_value",
 			manifest: escrowManifest,
 			input: wrap("\t\"example.com/gen/escrow\"\n\t\"example.com/wherehelpers\"\n",

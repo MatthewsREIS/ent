@@ -8,6 +8,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
@@ -66,11 +67,21 @@ var ops = func() []string {
 func isField(e PkgEntry, name string) bool { return name == "ID" || e.Fields[name] }
 func isEdge(e PkgEntry, name string) bool  { return e.Edges[name] }
 
-// decompose tries to split a selector name (e.g. "NameEQ", "HasParcelsWith",
-// "ByStatus") into a handle kind ("F" or "E"), the field/edge name, and the
-// method name, per the fork's field-handle migration rules. It returns
-// ok=false when no rule matches, leaving the caller to skip the selector.
-func decompose(sel string, e PkgEntry) (kind, name, op string, ok bool) {
+// reading is one valid decomposition of a selector name.
+type reading struct{ kind, name, op string }
+
+// String renders a reading the way a rewritten call site would read, e.g.
+// "F.ContactListContactsCount.Order".
+func (r reading) String() string { return r.kind + "." + r.name + "." + r.op }
+
+// decomposeAll returns every valid reading of sel against e's manifest
+// entry. Ordinarily there's at most one; more than one means sel is
+// genuinely ambiguous (e.g. a field "XCount" and an edge "X" both exist, so
+// "ByXCount" reads equally well as By<Field> or By<Edge>Count) and the
+// caller must refuse to rewrite rather than guess.
+func decomposeAll(sel string, e PkgEntry) []reading {
+	var rs []reading
+	add := func(kind, name, op string) { rs = append(rs, reading{kind, name, op}) }
 	// Op suffix against a field (includes the implicit "ID" field).
 	for _, o := range ops {
 		field := strings.TrimSuffix(sel, o)
@@ -78,28 +89,28 @@ func decompose(sel string, e PkgEntry) (kind, name, op string, ok bool) {
 			continue
 		}
 		if isField(e, field) {
-			return "F", field, o, true
+			add("F", field, o)
 		}
 	}
 	// Has<Edge>() / Has<Edge>With(preds...)
 	if rest, ok := strings.CutPrefix(sel, "Has"); ok && rest != "" {
 		if edge, ok := strings.CutSuffix(rest, "With"); ok && edge != "" && isEdge(e, edge) {
-			return "E", edge, "HasWith", true
+			add("E", edge, "HasWith")
 		}
 		if isEdge(e, rest) {
-			return "E", rest, "Has", true
+			add("E", rest, "Has")
 		}
 	}
 	// By<Field>(opts...) / By<Edge>Count(opts...) / By<Edge>(term, terms...)
 	if rest, ok := strings.CutPrefix(sel, "By"); ok && rest != "" {
 		if isField(e, rest) {
-			return "F", rest, "Order", true
+			add("F", rest, "Order")
 		}
 		if edge, ok := strings.CutSuffix(rest, "Count"); ok && edge != "" && isEdge(e, edge) {
-			return "E", edge, "OrderByCount", true
+			add("E", edge, "OrderByCount")
 		}
 		if isEdge(e, rest) {
-			return "E", rest, "OrderBy", true
+			add("E", rest, "OrderBy")
 		}
 	}
 	// Bare equality: pkg.Name(v) / pkg.ID(v). Excludes fields listed in
@@ -108,9 +119,21 @@ func decompose(sel string, e PkgEntry) (kind, name, op string, ok bool) {
 	// so a bare pkg.Name there is something else (an enum type reference,
 	// the reserved identifier itself, ...), not a predicate call.
 	if isField(e, sel) && !e.NoBareEQ[sel] {
-		return "F", sel, "EQ", true
+		add("F", sel, "EQ")
 	}
-	return "", "", "", false
+	return rs
+}
+
+// decompose resolves sel to exactly one reading. ok is false either when no
+// rule matches (cands is empty — nothing to rewrite) or when more than one
+// rule matches (cands has 2+ entries — ambiguous; the caller reports it and
+// leaves the selector untouched rather than picking one by rule order).
+func decompose(sel string, e PkgEntry) (kind, name, op string, cands []reading, ok bool) {
+	cands = decomposeAll(sel, e)
+	if len(cands) != 1 {
+		return "", "", "", cands, false
+	}
+	return cands[0].kind, cands[0].name, cands[0].op, cands, true
 }
 
 // importAliases maps each local identifier a file uses to refer to an
@@ -236,12 +259,27 @@ func shadowedNames(decl ast.Decl) map[string]bool {
 	return shadowed
 }
 
+// warnAmbiguous reports (to stderr) a selector that decomposed into more
+// than one valid reading, identifying the call site and the competing
+// readings so a human can resolve it. The selector is left unrewritten.
+func warnAmbiguous(fset *token.FileSet, sel *ast.SelectorExpr, pkg string, cands []reading) {
+	pos := fset.Position(sel.Pos())
+	names := make([]string, len(cands))
+	for i, c := range cands {
+		names[i] = c.String()
+	}
+	fmt.Fprintf(os.Stderr, "handlerewrite: %s:%d: ambiguous rewrite for %s.%s — competing readings: %s — refusing to rewrite\n",
+		pos.Filename, pos.Line, pkg, sel.Sel.Name, strings.Join(names, ", "))
+}
+
 // rewriteSelectors walks root, rewriting every pkg.Sel selector (call
 // position or bare value position) whose pkg resolves to a manifest entry
-// via aliases and whose Sel decomposes into a field/edge + op, into the
-// nested pkg.F.Name.Op / pkg.E.Name.Op form. It reports whether any
-// rewrite was made.
-func rewriteSelectors(root ast.Node, aliases map[string]string, manifest Manifest) bool {
+// via aliases and whose Sel decomposes into exactly one field/edge + op,
+// into the nested pkg.F.Name.Op / pkg.E.Name.Op form. A selector that
+// decomposes ambiguously (more than one valid reading) is left untouched
+// and reported via warnAmbiguous instead of guessed at. It reports whether
+// any rewrite was made.
+func rewriteSelectors(root ast.Node, aliases map[string]string, manifest Manifest, fset *token.FileSet) bool {
 	if len(aliases) == 0 {
 		return false
 	}
@@ -259,8 +297,11 @@ func rewriteSelectors(root ast.Node, aliases map[string]string, manifest Manifes
 		if !ok {
 			return true
 		}
-		kind, name, op, ok := decompose(sel.Sel.Name, manifest[pkgKey])
+		kind, name, op, cands, ok := decompose(sel.Sel.Name, manifest[pkgKey])
 		if !ok {
+			if len(cands) > 1 {
+				warnAmbiguous(fset, sel, ident.Name, cands)
+			}
 			return true
 		}
 		sel.X = &ast.SelectorExpr{
@@ -279,7 +320,7 @@ func rewriteSelectors(root ast.Node, aliases map[string]string, manifest Manifes
 // package name shadowed by a local in one function doesn't suppress
 // rewrites in sibling declarations. It reports whether any rewrite was
 // made.
-func rewriteAST(file *ast.File, manifest Manifest, prefixes []string) bool {
+func rewriteAST(file *ast.File, manifest Manifest, prefixes []string, fset *token.FileSet) bool {
 	aliases := importAliases(file, manifest, prefixes)
 	if len(aliases) == 0 {
 		return false
@@ -298,7 +339,7 @@ func rewriteAST(file *ast.File, manifest Manifest, prefixes []string) bool {
 				continue
 			}
 		}
-		if rewriteSelectors(decl, scoped, manifest) {
+		if rewriteSelectors(decl, scoped, manifest, fset) {
 			changed = true
 		}
 	}
@@ -320,7 +361,7 @@ func RewriteSource(filename string, src []byte, manifest Manifest, prefixes []st
 	if isGenerated(file) {
 		return src, false, nil
 	}
-	if !rewriteAST(file, manifest, prefixes) {
+	if !rewriteAST(file, manifest, prefixes, fset) {
 		return src, false, nil
 	}
 	var buf bytes.Buffer
