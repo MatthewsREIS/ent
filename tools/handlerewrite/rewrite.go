@@ -26,6 +26,12 @@ import (
 type PkgEntry struct {
 	Fields map[string]bool `json:"fields"`
 	Edges  map[string]bool `json:"edges"`
+	// NoBareEQ lists fields (present in Fields) that never got the classic
+	// bare-equality shortcut (func Name(v T) predicate.X): enum fields,
+	// whose bare name is the enum type, and fields whose name collides
+	// with another package-level identifier (Label, Table, ...). A bare
+	// pkg.Name reference for one of these is never a rewriteable call.
+	NoBareEQ map[string]bool `json:"noBareEQ"`
 }
 
 // Manifest maps an entity package's import name (e.g. "escrow") to its
@@ -96,8 +102,12 @@ func decompose(sel string, e PkgEntry) (kind, name, op string, ok bool) {
 			return "E", rest, "OrderBy", true
 		}
 	}
-	// Bare equality: pkg.Name(v) / pkg.ID(v).
-	if isField(e, sel) {
+	// Bare equality: pkg.Name(v) / pkg.ID(v). Excludes fields listed in
+	// NoBareEQ (enum fields, and fields colliding with a reserved
+	// identifier) — old codegen never emitted a bare shortcut for those,
+	// so a bare pkg.Name there is something else (an enum type reference,
+	// the reserved identifier itself, ...), not a predicate call.
+	if isField(e, sel) && !e.NoBareEQ[sel] {
 		return "F", sel, "EQ", true
 	}
 	return "", "", "", false

@@ -12,149 +12,208 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ with extend $ "WhereUsesWherePkg" false }}
+{{ with extend $ "WhereUsesWherePkg" false "WhereUsesEntfield" (eq $.Storage.Name "sql") }}
 	{{ template "import" . }}
 {{ end }}
 
-{{ if .HasOneFieldID }}
-	// ID filters vertices based on their ID field.
-	func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}(
-			{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
-			{{- xtemplate $tmpl $ -}}
-		)
+{{ if eq $.Storage.Name "sql" }}
+	// F holds typed predicate/order handles for every comparable field of the {{ $.Name }} type.
+	var F = struct {
+		{{- if $.HasOneFieldID }}
+			{{- $kind := $.ID.HandleKind }}
+			// ID is the handle for the id field.
+			ID entfield.{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}
+		{{- end }}
+		{{- range $f := $.Fields }}
+			{{- $kind := $f.HandleKind }}
+			{{- if $kind }}
+				// {{ $f.StructField }} is the handle for the {{ quote $f.Name }} field.
+				{{ $f.StructField }} entfield.{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}
+			{{- end }}
+		{{- end }}
+	}{
+		{{- if $.HasOneFieldID }}
+			{{- $kind := $.ID.HandleKind }}
+			ID: entfield.New{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}({{ $.ID.Constant }}),
+		{{- end }}
+		{{- range $f := $.Fields }}
+			{{- $kind := $f.HandleKind }}
+			{{- if $kind }}
+				{{- /* ValueScanner.<X>.Value is populated by the runtime package's init(),
+				which runs AFTER this package's own var initializers (Go inits
+				imports before importers). Capturing the method value directly
+				here would freeze in the zero value. Wrap it in a closure over the
+				package-level ValueScanner var instead, so the lookup happens at
+				call time, once every init() has already run. */}}
+				{{ $f.StructField }}: entfield.New{{ $kind }}{{ if $f.HasValueScanner }}Scan{{ end }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}({{ $f.Constant }}{{ if $f.HasValueScanner }}, func(v {{ $f.Type }}) (driver.Value, error) { return ValueScanner.{{ $f.StructField }}.Value(v) }{{ end }}),
+			{{- end }}
+		{{- end }}
 	}
 
-	{{ range $op := $.ID.Ops }}
-		{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
-		{{ $func := printf "ID%s" $op.Name }}
-		// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
-		func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
+	// E holds typed edge handles for every edge of the {{ $.Name }} type.
+	var E = struct {
+		{{- range $e := $.Edges }}
+			// {{ $e.StructField }} is the handle for the {{ quote $e.Name }} edge.
+			{{ $e.StructField }} entfield.Edge[predicate.{{ $e.Type.Name }}]
+		{{- end }}
+	}{
+		{{- range $e := $.Edges }}
+			{{- /* Check if the edge target type has a deleted_at field (soft delete). */}}
+			{{- $edgeHasSoftDelete := false }}
+			{{- range $f := $e.Type.Fields }}
+				{{- if eq $f.Name "deleted_at" }}
+					{{- $edgeHasSoftDelete = true }}
+				{{- end }}
+			{{- end }}
+			{{ $e.StructField }}: entfield.NewEdge[predicate.{{ $e.Type.Name }}](new{{ pascal $e.Name }}Step{{ if $edgeHasSoftDelete }}, sql.FieldIsNull("deleted_at"){{ end }}),
+		{{- end }}
+	}
+{{ else }}
+	{{/*
+	entfield handles are SQL-only (they're built on *sql.Selector). Non-sql
+	storage drivers (gremlin) keep the classic per-field/per-edge predicate
+	functions below, unchanged.
+	*/}}
+	{{ if .HasOneFieldID }}
+		// ID filters vertices based on their ID field.
+		func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
 			return predicate.{{ $.Name }}(
-				{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
-					{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
+				{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
+				{{- xtemplate $tmpl $ -}}
+			)
+		}
+
+		{{ range $op := $.ID.Ops }}
+			{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
+			{{ $func := printf "ID%s" $op.Name }}
+			// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
+			func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
+				return predicate.{{ $.Name }}(
+					{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
+						{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end -}}
+				)
+			}
+		{{ end }}
+	{{ end }}
+
+	{{ range $f := $.Fields }}
+		{{ $func := $f.StructField }}
+		{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
+		{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
+		{{ $comparable := or $f.ConvertedToBasic $f.Type.Valuer }}
+		{{ $undeclared := (and (ne $func "Label") (ne $func "OrderOption") (ne $func "Hooks") (ne $func "Policy") (ne $func "Table") (ne $func "FieldID") (ne $func "Value") (ne $func $.Name)) }}
+		{{- if and $hasP $comparable $undeclared }}
+			{{ $arg := "v" }}
+			// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
+			func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
+				{{- if $f.HasValueScanner }}
+					vc, err := ValueScanner.{{ $f.StructField }}.Value({{ $arg }})
+					{{- $arg = "vc" }}
+					return predicate.{{ $.Name }}OrErr(
+						{{- with extend $ "Arg" $arg "Field" $f -}}
+							{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
+							{{- xtemplate $tmpl . }}
+						{{- end }}, err)
+				{{- else }}
+					{{- if and $f.HasGoType (not $f.Type.Valuer) }}
+						vc := {{ $f.BasicType "v" }}
+						{{- $arg = "vc" }}
+					{{- end }}
+					return predicate.{{ $.Name }}(
+						{{- with extend $ "Arg" $arg "Field" $f -}}
+							{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
+							{{- xtemplate $tmpl . }}
+						{{- end -}}
+					)
+				{{- end }}
+			}
+		{{- end }}
+	{{ end }}
+
+	{{ range $f := $.Fields }}
+		{{ range $op := $f.Ops }}
+			{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
+			{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}
+			{{ $func := print $f.StructField $op.Name }}
+			{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
+			// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
+			func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
+				{{- if and $f.HasValueScanner (or $op.Variadic (not $op.Niladic)) }}
+					{{- if $op.Variadic }}
+						var (
+							err error
+							v = make([]any, len({{ $arg }}))
+						)
+						for i := range v {
+							if v[i], err = ValueScanner.{{ $f.StructField }}.Value({{ print $arg "[i]" }}); err != nil {
+								break
+							}
+						}
+						{{- $arg = "v" }}
+					{{- else }}
+						vc, err := ValueScanner.{{ $f.StructField }}.Value({{ $arg }})
+						{{- $arg = "vc" }}
+						{{- if $stringOp }}
+							{{- $arg = "vcs" }}
+							vcs, ok := vc.(string)
+							if err == nil && !ok {
+								err = fmt.Errorf("{{ $f.Name }} value is not a string: %T", vc)
+							}
+						{{- end }}
+					{{- end }}
+					return predicate.{{ $.Name }}OrErr(
+						{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
+							{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
+							{{- xtemplate $tmpl . }}
+						{{- end }}, err)
+				{{- else }}
+					{{- if and $f.HasGoType (or $stringOp (not $f.Type.Valuer)) }}
+						{{- if $op.Variadic }}
+							v := make([]any, len({{ $arg }}))
+							for i := range v {
+								v[i] = {{ $f.BasicType (printf "%s[i]" $arg) }}
+							}
+							{{- $arg = "v" }}
+						{{- else if not $op.Niladic }}
+							vc := {{ $f.BasicType "v" }}
+							{{- $arg = "vc" }}
+						{{- end }}
+					{{- end }}
+					return predicate.{{ $.Name }}(
+						{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
+							{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
+							{{- xtemplate $tmpl . }}
+						{{- end -}}
+					)
+				{{- end }}
+			}
+		{{ end }}
+	{{ end }}
+
+	{{ range $e := $.Edges }}
+		{{ $func := print "Has" $e.StructField }}
+		// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge.
+		func {{ $func }}() predicate.{{ $.Name }} {
+			return predicate.{{ $.Name }}(
+				{{- with extend $ "Edge" $e -}}
+					{{ $tmpl := printf "dialect/%s/predicate/edge/has" $.Storage }}
+					{{- xtemplate $tmpl . }}
+				{{- end -}}
+			)
+		}
+		{{ $func = printf "%sWith" $func }}
+		// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge with a given conditions (other predicates).
+		func {{ $func }}(preds ...predicate.{{ $e.Type.Name }}) predicate.{{ $.Name }} {
+			return predicate.{{ $.Name }}(
+				{{- with extend $ "Edge" $e -}}
+					{{ $tmpl := printf "dialect/%s/predicate/edge/haswith" $.Storage }}
 					{{- xtemplate $tmpl . }}
 				{{- end -}}
 			)
 		}
 	{{ end }}
-{{ end }}
-
-{{ range $f := $.Fields }}
-	{{ $func := $f.StructField }}
-	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
-	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
-	{{ $comparable := or $f.ConvertedToBasic $f.Type.Valuer }}
-	{{ $undeclared := (and (ne $func "Label") (ne $func "OrderOption") (ne $func "Hooks") (ne $func "Policy") (ne $func "Table") (ne $func "FieldID") (ne $func "Value") (ne $func $.Name)) }}
-	{{- if and $hasP $comparable $undeclared }}
-		{{ $arg := "v" }}
-		// {{ $func }} applies equality check predicate on the {{ quote $f.Name }} field. It's identical to {{ $func }}EQ.
-		func {{ $func }}({{ $arg }} {{ $f.Type }}) predicate.{{ $.Name }} {
-			{{- if $f.HasValueScanner }}
-				vc, err := ValueScanner.{{ $f.StructField }}.Value({{ $arg }})
-				{{- $arg = "vc" }}
-				return predicate.{{ $.Name }}OrErr(
-					{{- with extend $ "Arg" $arg "Field" $f -}}
-						{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
-						{{- xtemplate $tmpl . }}
-					{{- end }}, err)
-			{{- else }}
-				{{- if and $f.HasGoType (not $f.Type.Valuer) }}
-					vc := {{ $f.BasicType "v" }}
-					{{- $arg = "vc" }}
-				{{- end }}
-				return predicate.{{ $.Name }}(
-					{{- with extend $ "Arg" $arg "Field" $f -}}
-						{{ $tmpl := printf "dialect/%s/predicate/field" $.Storage }}
-						{{- xtemplate $tmpl . }}
-					{{- end -}}
-				)
-			{{- end }}
-		}
-	{{- end }}
-{{ end }}
-
-{{ range $f := $.Fields }}
-	{{ range $op := $f.Ops }}
-		{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
-		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}
-		{{ $func := print $f.StructField $op.Name }}
-		{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
-		// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.
-		func {{ $func }}({{ if not $op.Niladic }}{{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $type }}{{ end }}) predicate.{{ $.Name }} {
-			{{- if and $f.HasValueScanner (or $op.Variadic (not $op.Niladic)) }}
-				{{- if $op.Variadic }}
-					var (
-						err error
-						v = make([]any, len({{ $arg }}))
-					)
-					for i := range v {
-						if v[i], err = ValueScanner.{{ $f.StructField }}.Value({{ print $arg "[i]" }}); err != nil {
-							break
-						}
-					}
-					{{- $arg = "v" }}
-				{{- else }}
-					vc, err := ValueScanner.{{ $f.StructField }}.Value({{ $arg }})
-					{{- $arg = "vc" }}
-					{{- if $stringOp }}
-						{{- $arg = "vcs" }}
-						vcs, ok := vc.(string)
-						if err == nil && !ok {
-							err = fmt.Errorf("{{ $f.Name }} value is not a string: %T", vc)
-						}
-					{{- end }}
-				{{- end }}
-				return predicate.{{ $.Name }}OrErr(
-					{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
-						{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
-						{{- xtemplate $tmpl . }}
-					{{- end }}, err)
-			{{- else }}
-				{{- if and $f.HasGoType (or $stringOp (not $f.Type.Valuer)) }}
-					{{- if $op.Variadic }}
-						v := make([]any, len({{ $arg }}))
-						for i := range v {
-							v[i] = {{ $f.BasicType (printf "%s[i]" $arg) }}
-						}
-						{{- $arg = "v" }}
-					{{- else if not $op.Niladic }}
-						vc := {{ $f.BasicType "v" }}
-						{{- $arg = "vc" }}
-					{{- end }}
-				{{- end }}
-				return predicate.{{ $.Name }}(
-					{{- with extend $ "Arg" $arg "Field" $f "Op" $op "Storage" $.Storage -}}
-						{{ $tmpl := printf "dialect/%s/predicate/field/ops" $.Storage }}
-						{{- xtemplate $tmpl . }}
-					{{- end -}}
-				)
-			{{- end }}
-		}
-	{{ end }}
-{{ end }}
-
-{{ range $e := $.Edges }}
-	{{ $func := print "Has" $e.StructField }}
-	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge.
-	func {{ $func }}() predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}(
-			{{- with extend $ "Edge" $e -}}
-				{{ $tmpl := printf "dialect/%s/predicate/edge/has" $.Storage }}
-				{{- xtemplate $tmpl . }}
-			{{- end -}}
-		)
-	}
-	{{ $func = printf "%sWith" $func }}
-	// {{ $func }} applies the HasEdge predicate on the {{ quote $e.Name }} edge with a given conditions (other predicates).
-	func {{ $func }}(preds ...predicate.{{ $e.Type.Name }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}(
-			{{- with extend $ "Edge" $e -}}
-				{{ $tmpl := printf "dialect/%s/predicate/edge/haswith" $.Storage }}
-				{{- xtemplate $tmpl . }}
-			{{- end -}}
-		)
-	}
 {{ end }}
 
 // And groups predicates with the AND operator between them.

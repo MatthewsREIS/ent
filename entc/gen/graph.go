@@ -327,6 +327,9 @@ func generate(g *Graph) error {
 	if err := assets.write(); err != nil {
 		return err
 	}
+	if err := writeHandleManifest(g); err != nil {
+		return err
+	}
 	if err := assets.cleanupSplit(); err != nil {
 		return err
 	}
@@ -367,6 +370,69 @@ func generate(g *Graph) error {
 	// Because, "goimports" will drop undefined package. Therefore, it
 	// is suspended to the end of the writing.
 	return assets.format()
+}
+
+// handlePkgEntry describes the fields and edges one entity package exposes
+// as entfield handles (F/E, see where.tmpl), keyed by their PascalCase
+// struct-field name. It mirrors tools/handlerewrite's PkgEntry.
+type handlePkgEntry struct {
+	Fields map[string]bool `json:"fields"`
+	Edges  map[string]bool `json:"edges"`
+	// NoBareEQ lists fields present in Fields that never got the classic
+	// bare-equality shortcut (func Name(v T) predicate.X — see where.tmpl's
+	// old $undeclared/$hasP gate): enum fields, whose bare name is the enum
+	// *type*, not a func, and fields whose PascalCase name collides with
+	// another package-level identifier (Label, OrderOption, Hooks, Policy,
+	// Table, FieldID, Value, or the entity's own name). Those fields still
+	// get the op-suffixed form (NameEQ, NameIn, ...), just not the bare one.
+	NoBareEQ map[string]bool `json:"noBareEQ,omitempty"`
+}
+
+// reservedStructFieldNames are struct-field names that collide with another
+// package-level identifier where.tmpl always emits, so a bare equality
+// shortcut was never generated for them (mirrors old where.tmpl's
+// $undeclared check).
+var reservedStructFieldNames = map[string]bool{
+	"Label": true, "OrderOption": true, "Hooks": true, "Policy": true,
+	"Table": true, "FieldID": true, "Value": true,
+}
+
+// writeHandleManifest emits "handle_manifest.json" next to the generated
+// root, listing which fields/edges of every entity package got an F/E
+// handle in where.go. tools/handlerewrite consumes this to mechanically
+// migrate old predicate/order call sites to the new handle form.
+//
+// entfield handles are SQL-only (see where.tmpl); other storage drivers
+// (e.g. gremlin) get no F/E, so no manifest is written for them.
+func writeHandleManifest(g *Graph) error {
+	if g.Storage.Name != "sql" {
+		return nil
+	}
+	manifest := make(map[string]handlePkgEntry, len(g.Nodes))
+	for _, n := range g.Nodes {
+		fields := make(map[string]bool)
+		noBareEQ := make(map[string]bool)
+		for _, f := range n.Fields {
+			if f.HandleKind() == "" {
+				continue
+			}
+			name := f.StructField()
+			fields[name] = true
+			if f.IsEnum() || reservedStructFieldNames[name] || name == n.Name {
+				noBareEQ[name] = true
+			}
+		}
+		edges := make(map[string]bool, len(n.Edges))
+		for _, e := range n.Edges {
+			edges[e.StructField()] = true
+		}
+		manifest[n.PackageDir()] = handlePkgEntry{Fields: fields, Edges: edges, NoBareEQ: noBareEQ}
+	}
+	b, err := json.MarshalIndent(manifest, "", "\t")
+	if err != nil {
+		return fmt.Errorf("marshal handle manifest: %w", err)
+	}
+	return os.WriteFile(filepath.Join(g.Config.Target, "handle_manifest.json"), append(b, '\n'), 0644)
 }
 
 // addNode creates a new Type/Node/Ent to the graph.

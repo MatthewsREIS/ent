@@ -2,6 +2,7 @@ package entfield
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -175,30 +176,65 @@ func (f String[T]) LTE(v T) P {
 	return sql.FieldLTE(f.col, string(v))
 }
 
+// scanStr resolves v to the string that should actually reach the SQL
+// substring/prefix/suffix ops: the scanned (driver-encoded) value when this
+// handle has a scan func (matching NewStringScan's other ops, which all
+// scan first), or the plain string conversion otherwise. Substring/prefix
+// ops are meaningless against the raw Go value once a scan func has
+// transformed how it's stored (see the "custom" ValueScanner field in
+// entc/integration/ent/exvaluescan for a case where this matters).
+func (f String[T]) scanStr(v T) (string, error) {
+	if f.scan == nil {
+		return string(v), nil
+	}
+	scanned, err := f.scan(v)
+	if err != nil {
+		return "", err
+	}
+	s, ok := scanned.(string)
+	if !ok {
+		return "", fmt.Errorf("entfield: scanned value is not a string: %T", scanned)
+	}
+	return s, nil
+}
+
 // ponytail: full string op set on all String handles
 // Contains returns a predicate for substring containment.
 func (f String[T]) Contains(v T) P {
-	return sql.FieldContains(f.col, string(v))
+	return f.scannedOp(v, sql.FieldContains)
 }
 
 // HasPrefix returns a predicate for prefix matching.
 func (f String[T]) HasPrefix(v T) P {
-	return sql.FieldHasPrefix(f.col, string(v))
+	return f.scannedOp(v, sql.FieldHasPrefix)
 }
 
 // HasSuffix returns a predicate for suffix matching.
 func (f String[T]) HasSuffix(v T) P {
-	return sql.FieldHasSuffix(f.col, string(v))
+	return f.scannedOp(v, sql.FieldHasSuffix)
 }
 
 // EqualFold returns a predicate for case-insensitive equality.
 func (f String[T]) EqualFold(v T) P {
-	return sql.FieldEqualFold(f.col, string(v))
+	return f.scannedOp(v, sql.FieldEqualFold)
 }
 
 // ContainsFold returns a predicate for case-insensitive containment.
 func (f String[T]) ContainsFold(v T) P {
-	return sql.FieldContainsFold(f.col, string(v))
+	return f.scannedOp(v, sql.FieldContainsFold)
+}
+
+// scannedOp applies a sql.Field* string-comparison op to v, through
+// scanStr's scan-or-convert resolution.
+func (f String[T]) scannedOp(v T, op func(string, string) P) P {
+	return func(s *sql.Selector) {
+		str, err := f.scanStr(v)
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		op(f.col, str)(s)
+	}
 }
 
 // Order returns an ordering by this field.

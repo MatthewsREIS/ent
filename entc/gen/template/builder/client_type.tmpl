@@ -140,7 +140,7 @@ func (c *{{ $client }}) Delete() *{{ $q }}{{ $n.DeleteName }} {
 	// DeleteOneID returns a builder for deleting the given entity by its id.
 	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $q }}{{ $n.DeleteOneName }} {
 		mutation := New{{ $n.MutationName }}(c.Config, OpDeleteOne, With{{ $n.Name }}ID(id, nil))
-		mutation.WhereP({{ $n.PackageQualifier }}ID(id))
+		mutation.WhereP({{ if eq $.Storage.Name "sql" }}{{ $n.PackageQualifier }}F.ID.EQ(id){{ else }}{{ $n.PackageQualifier }}ID(id){{ end }})
 		return {{ $q }}New{{ $n.DeleteOneName }}({{ $q }}New{{ $n.DeleteName }}(c.Config, c.Hooks(), mutation))
 	}
 {{ end }}
@@ -171,7 +171,7 @@ func (c *{{ $client }}) Query() *{{ $n.QueryName }} {
 {{ with $n.HasOneFieldID }}
 	// Get returns a {{ $n.Name }} entity by its id.
 	func (c *{{ $client }}) Get(ctx context.Context, id {{ $n.ID.Type }}) (*{{ $n.Name }}, error) {
-		return c.Query().Where({{ $n.PackageQualifier }}ID(id)).Only(ctx)
+		return c.Query().Where({{ if eq $.Storage.Name "sql" }}{{ $n.PackageQualifier }}F.ID.EQ(id){{ else }}{{ $n.PackageQualifier }}ID(id){{ end }}).Only(ctx)
 	}
 
 	// GetX is like Get, but panics if an error occurs.

@@ -1756,6 +1756,69 @@ func (f Field) ConvertedToBasic() bool {
 	return !f.HasGoType() || f.BasicType("ident") != ""
 }
 
+// HandleKind returns the entfield handle kind for this field: one of
+// "String", "Number", "Bool", "Time", "Bytes", "Enum" or "Value", or ""
+// if the field has no predicate handle (JSON, or an otherwise
+// non-comparable custom type).
+//
+// Selection mirrors the field/op selection logic in fieldOps: a field
+// whose declared Go type's underlying kind matches its storage type
+// (e.g. a `type Dir string` on a string field) uses the matching typed
+// handle; a custom Go type that does not match (a struct, a pointer, an
+// int-backed enum, ...) falls back to Value, which entfield satisfies
+// generically as long as the type is comparable or implements
+// driver.Valuer. ValueScanner fields always resolve to String or Value,
+// since those are the only handles entfield provides a Scan variant for.
+func (f Field) HandleKind() string {
+	kind := func() reflect.Kind {
+		if !f.HasGoType() {
+			return reflect.Invalid
+		}
+		return f.Type.RType.Kind
+	}
+	switch {
+	case f.IsJSON():
+		return ""
+	case f.HasValueScanner():
+		if !f.HasGoType() || kind() == reflect.String {
+			return "String"
+		}
+		return "Value"
+	case f.IsEnum():
+		if !f.HasGoType() || kind() == reflect.String {
+			return "Enum"
+		}
+		return "Value"
+	case f.Type.Type == field.TypeBool:
+		if !f.HasGoType() || kind() == reflect.Bool {
+			return "Bool"
+		}
+	case f.Type.Type == field.TypeTime:
+		if !f.HasGoType() {
+			return "Time"
+		}
+	case f.Type.Type == field.TypeBytes:
+		// Only a Slice kind is assignable to entfield.Bytes' non-generic
+		// []byte parameters. An Array-kind GoType (e.g. `type ID [64]byte`)
+		// is not assignable to []byte and falls through to Value below.
+		if !f.HasGoType() || kind() == reflect.Slice {
+			return "Bytes"
+		}
+	case f.Type.Type == field.TypeString:
+		if !f.HasGoType() || kind() == reflect.String {
+			return "String"
+		}
+	case f.Type.Numeric():
+		if !f.HasGoType() || (kind() >= reflect.Int && kind() <= reflect.Float64) {
+			return "Number"
+		}
+	}
+	if f.Type.Valuer() || f.Type.Comparable() {
+		return "Value"
+	}
+	return ""
+}
+
 // SignedType returns the "signed type version" of the field type.
 // This behavior is required for supporting addition/subtraction
 // in mutations for unsigned types.

@@ -91,3 +91,20 @@ func TestScannerConversionAndError(t *testing.T) {
 	require.ErrorContains(t, renderErr(t, bad.EQ("x")), "boom")
 	require.ErrorContains(t, renderErr(t, bad.In("a", "b")), "boom")
 }
+
+// TestScannedStringOps guards against a real regression: Contains/HasPrefix/
+// HasSuffix/EqualFold/ContainsFold must run values through the scan func
+// too, like EQ/NEQ/etc already do — otherwise a substring match runs
+// against the raw Go value while the column actually stores the scanned
+// (encoded) form, silently matching nothing. See
+// entc/integration/ent/exvaluescan's "custom" (hex-encoded) field for the
+// real-world case this guards.
+func TestScannedStringOps(t *testing.T) {
+	hex := entfield.NewStringScan[string]("custom", func(v string) (driver.Value, error) { return "0x:" + v, nil })
+	q, args := render(t, hex.HasPrefix("ent"))
+	require.Contains(t, q, `"custom" LIKE`)
+	require.Equal(t, []any{"0x:ent%"}, args)
+
+	notStr := entfield.NewStringScan[string]("custom", func(v string) (driver.Value, error) { return 7, nil })
+	require.ErrorContains(t, renderErr(t, notStr.Contains("ent")), "not a string")
+}

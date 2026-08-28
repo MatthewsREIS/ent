@@ -44,17 +44,21 @@ func TestGraph_Gen_HasWithSoftDeleteFilter(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, graph.Gen())
 
-	// Parent -> Child edge: Child has deleted_at, so HasChildrenWith should inject soft-delete filter.
+	// Parent -> Child edge: Child has deleted_at, so E.Children's NewEdge call
+	// should carry the soft-delete filter as a neighborFilters argument (the
+	// filter is applied by entfield.Edge.HasWith, not inlined in where.go).
 	parentWhere, err := os.ReadFile(filepath.Join(target, "parent", "where.go"))
 	require.NoError(t, err)
-	require.Contains(t, string(parentWhere), `sql.FieldIsNull("deleted_at")(s)`,
-		"HasChildrenWith should auto-inject soft-delete filter because Child has deleted_at field")
+	require.Contains(t, string(parentWhere), `entfield.NewEdge[predicate.Child](newChildrenStep, sql.FieldIsNull("deleted_at"))`,
+		"E.Children should auto-inject soft-delete filter because Child has deleted_at field")
 
-	// Child -> Parent edge: Parent does NOT have deleted_at, so HasParentWith should NOT inject filter.
+	// Child -> Parent edge: Parent does NOT have deleted_at, so E.Parent should NOT inject a filter.
 	childWhere, err := os.ReadFile(filepath.Join(target, "child", "where.go"))
 	require.NoError(t, err)
-	require.NotContains(t, string(childWhere), `sql.FieldIsNull("deleted_at")(s)`,
-		"HasParentWith should NOT inject soft-delete filter because Parent has no deleted_at field")
+	require.Contains(t, string(childWhere), `entfield.NewEdge[predicate.Parent](newParentStep)`,
+		"E.Parent should not take a neighborFilters argument")
+	require.NotContains(t, string(childWhere), `sql.FieldIsNull("deleted_at")`,
+		"E.Parent should NOT auto-inject soft-delete filter because Parent has no deleted_at field")
 
 	// Verify generated code compiles.
 	// PR 6: WithChildren / WithParent moved from *XQuery methods to
