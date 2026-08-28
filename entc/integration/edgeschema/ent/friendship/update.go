@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // FriendshipUpdate is the builder for updating Friendship entities.
 type FriendshipUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *FriendshipMutation
 }
@@ -37,37 +39,11 @@ func (_u *FriendshipUpdate) Where(ps ...predicate.Friendship) *FriendshipUpdate 
 	return _u
 }
 
-// SetWeight sets the "weight" field.
-func (_u *FriendshipUpdate) SetWeight(v int) *FriendshipUpdate {
-	_ = _u.mutation.ResetField("weight")
-	_ = _u.mutation.SetField("weight", v)
-	return _u
-}
-
-// SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *FriendshipUpdate) SetNillableWeight(v *int) *FriendshipUpdate {
-	if v != nil {
-		_u.SetWeight(*v)
-	}
-	return _u
-}
-
-// AddWeight adds value to the "weight" field.
-func (_u *FriendshipUpdate) AddWeight(v int) *FriendshipUpdate {
-	_ = _u.mutation.AddField("weight", v)
-	return _u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_u *FriendshipUpdate) SetCreatedAt(v time.Time) *FriendshipUpdate {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *FriendshipUpdate) SetNillableCreatedAt(v *time.Time) *FriendshipUpdate {
-	if v != nil {
-		_u.SetCreatedAt(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FriendshipUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *FriendshipUpdate) With(as ...entfield.Assignment) *FriendshipUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -79,6 +55,9 @@ func (_u *FriendshipUpdate) Mutation() *FriendshipMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FriendshipUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*FriendshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -153,6 +132,7 @@ func (_u *FriendshipUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 type FriendshipUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *FriendshipMutation
 }
@@ -162,37 +142,11 @@ func NewFriendshipUpdateOne(c Config, hooks []Hook, mutation *FriendshipMutation
 	return &FriendshipUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetWeight sets the "weight" field.
-func (_u *FriendshipUpdateOne) SetWeight(v int) *FriendshipUpdateOne {
-	_ = _u.mutation.ResetField("weight")
-	_ = _u.mutation.SetField("weight", v)
-	return _u
-}
-
-// SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *FriendshipUpdateOne) SetNillableWeight(v *int) *FriendshipUpdateOne {
-	if v != nil {
-		_u.SetWeight(*v)
-	}
-	return _u
-}
-
-// AddWeight adds value to the "weight" field.
-func (_u *FriendshipUpdateOne) AddWeight(v int) *FriendshipUpdateOne {
-	_ = _u.mutation.AddField("weight", v)
-	return _u
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_u *FriendshipUpdateOne) SetCreatedAt(v time.Time) *FriendshipUpdateOne {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *FriendshipUpdateOne) SetNillableCreatedAt(v *time.Time) *FriendshipUpdateOne {
-	if v != nil {
-		_u.SetCreatedAt(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FriendshipUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *FriendshipUpdateOne) With(as ...entfield.Assignment) *FriendshipUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -217,6 +171,9 @@ func (_u *FriendshipUpdateOne) Select(field string, fields ...string) *Friendshi
 
 // Save executes the query and returns the updated Friendship entity.
 func (_u *FriendshipUpdateOne) Save(ctx context.Context) (*Friendship, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Friendship](ctx, &entbuilder.UpdateState[*FriendshipMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

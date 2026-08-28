@@ -19,6 +19,8 @@ var F = struct {
 	ID entfield.Number[int]
 	// Priority is the handle for the "priority" field.
 	Priority entfield.Number[task.Priority]
+	// Priorities is the handle for the "priorities" field.
+	Priorities entfield.JSON[map[string]task.Priority]
 	// CreatedAt is the handle for the "created_at" field.
 	CreatedAt entfield.Time
 	// Name is the handle for the "name" field.
@@ -32,14 +34,15 @@ var F = struct {
 	// Op is the handle for the "op" field.
 	Op entfield.String[string]
 }{
-	ID:          entfield.NewNumber[int](FieldID),
-	Priority:    entfield.NewNumber[task.Priority](FieldPriority),
-	CreatedAt:   entfield.NewTime(FieldCreatedAt),
-	Name:        entfield.NewString[string](FieldName),
-	Owner:       entfield.NewString[string](FieldOwner),
-	Order:       entfield.NewNumber[int](FieldOrder),
-	OrderOption: entfield.NewNumber[int](FieldOrderOption),
-	Op:          entfield.NewString[string](FieldOp),
+	ID:          entfield.NewNumber[int](FieldID, "id"),
+	Priority:    entfield.NewNumber[task.Priority](FieldPriority, "priority"),
+	Priorities:  entfield.NewJSON[map[string]task.Priority]("priorities"),
+	CreatedAt:   entfield.NewTime(FieldCreatedAt, "created_at"),
+	Name:        entfield.NewString[string](FieldName, "name"),
+	Owner:       entfield.NewString[string](FieldOwner, "owner"),
+	Order:       entfield.NewNumber[int](FieldOrder, "order"),
+	OrderOption: entfield.NewNumber[int](FieldOrderOption, "order_option"),
+	Op:          entfield.NewString[string](FieldOp, "op"),
 }
 
 // E holds typed edge handles for every edge of the Task type.

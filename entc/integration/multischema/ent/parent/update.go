@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // ParentUpdate is the builder for updating Parent entities.
 type ParentUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *ParentMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -38,16 +40,11 @@ func (_u *ParentUpdate) Where(ps ...predicate.Parent) *ParentUpdate {
 	return _u
 }
 
-// SetByAdoption sets the "by_adoption" field.
-func (_u *ParentUpdate) SetByAdoption(v bool) *ParentUpdate {
-	_ = _u.mutation.SetField("by_adoption", v)
-	return _u
-}
-
-// SetNillableByAdoption sets the "by_adoption" field if the given value is not nil.
-func (_u *ParentUpdate) SetNillableByAdoption(v *bool) *ParentUpdate {
-	if v != nil {
-		_u.SetByAdoption(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ParentUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *ParentUpdate) With(as ...entfield.Assignment) *ParentUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -59,6 +56,9 @@ func (_u *ParentUpdate) Mutation() *ParentMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ParentUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ParentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -136,6 +136,7 @@ func (_u *ParentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type ParentUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *ParentMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -146,16 +147,11 @@ func NewParentUpdateOne(c Config, hooks []Hook, mutation *ParentMutation) *Paren
 	return &ParentUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetByAdoption sets the "by_adoption" field.
-func (_u *ParentUpdateOne) SetByAdoption(v bool) *ParentUpdateOne {
-	_ = _u.mutation.SetField("by_adoption", v)
-	return _u
-}
-
-// SetNillableByAdoption sets the "by_adoption" field if the given value is not nil.
-func (_u *ParentUpdateOne) SetNillableByAdoption(v *bool) *ParentUpdateOne {
-	if v != nil {
-		_u.SetByAdoption(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ParentUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *ParentUpdateOne) With(as ...entfield.Assignment) *ParentUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -180,6 +176,9 @@ func (_u *ParentUpdateOne) Select(field string, fields ...string) *ParentUpdateO
 
 // Save executes the query and returns the updated Parent entity.
 func (_u *ParentUpdateOne) Save(ctx context.Context) (*Parent, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Parent](ctx, &entbuilder.UpdateState[*ParentMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

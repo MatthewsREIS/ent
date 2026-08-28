@@ -18,26 +18,26 @@ var F = struct {
 	ID entfield.Number[int]
 	// Age is the handle for the "age" field.
 	Age entfield.Number[int]
-	// ParentID is the handle for the "parent_id" field.
-	ParentID entfield.Number[int]
+	// ParentID is the handle for the "parent_id" field (backs the "parent" edge).
+	ParentID entfield.EdgeField[int]
 }{
-	ID:       entfield.NewNumber[int](FieldID),
-	Age:      entfield.NewNumber[int](FieldAge),
-	ParentID: entfield.NewNumber[int](FieldParentID),
+	ID:       entfield.NewNumber[int](FieldID, "id"),
+	Age:      entfield.NewNumber[int](FieldAge, "age"),
+	ParentID: entfield.NewEdgeField[int](FieldParentID, "parent"),
 }
 
 // E holds typed edge handles for every edge of the Metadata type.
 var E = struct {
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.Metadata]
+	Children entfield.Edge[predicate.Metadata, int]
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.Metadata]
+	Parent entfield.Edge[predicate.Metadata, int]
 }{
-	User:     entfield.NewEdge[predicate.User](newUserStep),
-	Children: entfield.NewEdge[predicate.Metadata](newChildrenStep),
-	Parent:   entfield.NewEdge[predicate.Metadata](newParentStep),
+	User:     entfield.NewEdge[predicate.User, int]("user", newUserStep),
+	Children: entfield.NewEdge[predicate.Metadata, int]("children", newChildrenStep),
+	Parent:   entfield.NewEdge[predicate.Metadata, int]("parent", newParentStep),
 }
 
 // And groups predicates with the AND operator between them.

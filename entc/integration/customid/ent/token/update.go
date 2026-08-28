@@ -14,14 +14,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // TokenUpdate is the builder for updating Token entities.
 type TokenUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *TokenMutation
 }
@@ -37,23 +38,12 @@ func (_u *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate {
 	return _u
 }
 
-// SetBody sets the "body" field.
-func (_u *TokenUpdate) SetBody(v string) *TokenUpdate {
-	_ = _u.mutation.SetField("body", v)
-	return _u
-}
-
-// SetNillableBody sets the "body" field if the given value is not nil.
-func (_u *TokenUpdate) SetNillableBody(v *string) *TokenUpdate {
-	if v != nil {
-		_u.SetBody(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TokenUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *TokenUpdate) With(as ...entfield.Assignment) *TokenUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetAccountID sets the "account" edge to the Account entity by ID.
-func (_u *TokenUpdate) SetAccountID(id sid.ID) *TokenUpdate {
-	_ = _u.mutation.SetEdgeID("account", id)
 	return _u
 }
 
@@ -70,6 +60,9 @@ func (_u *TokenUpdate) ClearAccount() *TokenUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TokenUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TokenMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -168,6 +161,7 @@ func (_u *TokenUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type TokenUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *TokenMutation
 }
@@ -177,23 +171,12 @@ func NewTokenUpdateOne(c Config, hooks []Hook, mutation *TokenMutation) *TokenUp
 	return &TokenUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetBody sets the "body" field.
-func (_u *TokenUpdateOne) SetBody(v string) *TokenUpdateOne {
-	_ = _u.mutation.SetField("body", v)
-	return _u
-}
-
-// SetNillableBody sets the "body" field if the given value is not nil.
-func (_u *TokenUpdateOne) SetNillableBody(v *string) *TokenUpdateOne {
-	if v != nil {
-		_u.SetBody(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TokenUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *TokenUpdateOne) With(as ...entfield.Assignment) *TokenUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetAccountID sets the "account" edge to the Account entity by ID.
-func (_u *TokenUpdateOne) SetAccountID(id sid.ID) *TokenUpdateOne {
-	_ = _u.mutation.SetEdgeID("account", id)
 	return _u
 }
 
@@ -223,6 +206,9 @@ func (_u *TokenUpdateOne) Select(field string, fields ...string) *TokenUpdateOne
 
 // Save executes the query and returns the updated Token entity.
 func (_u *TokenUpdateOne) Save(ctx context.Context) (*Token, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Token](ctx, &entbuilder.UpdateState[*TokenMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

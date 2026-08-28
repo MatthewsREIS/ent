@@ -30,24 +30,24 @@ var F = struct {
 	// OptionalTime is the handle for the "optional_time" field.
 	OptionalTime entfield.Time
 }{
-	ID:           entfield.NewNumber[int](FieldID),
-	Age:          entfield.NewNumber[float64](FieldAge),
-	Name:         entfield.NewString[string](FieldName),
-	UUID:         entfield.NewValue[uuid.UUID](FieldUUID),
-	Nickname:     entfield.NewString[string](FieldNickname),
-	Trained:      entfield.NewBool[bool](FieldTrained),
-	OptionalTime: entfield.NewTime(FieldOptionalTime),
+	ID:           entfield.NewNumber[int](FieldID, "id"),
+	Age:          entfield.NewNumber[float64](FieldAge, "age"),
+	Name:         entfield.NewString[string](FieldName, "name"),
+	UUID:         entfield.NewValue[uuid.UUID](FieldUUID, "uuid"),
+	Nickname:     entfield.NewString[string](FieldNickname, "nickname"),
+	Trained:      entfield.NewBool[bool](FieldTrained, "trained"),
+	OptionalTime: entfield.NewTime(FieldOptionalTime, "optional_time"),
 }
 
 // E holds typed edge handles for every edge of the Pet type.
 var E = struct {
 	// Team is the handle for the "team" edge.
-	Team entfield.Edge[predicate.User]
+	Team entfield.Edge[predicate.User, int]
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 }{
-	Team:  entfield.NewEdge[predicate.User](newTeamStep),
-	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
+	Team:  entfield.NewEdge[predicate.User, int]("team", newTeamStep),
+	Owner: entfield.NewEdge[predicate.User, int]("owner", newOwnerStep),
 }
 
 // And groups predicates with the AND operator between them.

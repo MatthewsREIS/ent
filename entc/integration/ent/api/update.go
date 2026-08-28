@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // APIUpdate is the builder for updating Api entities.
 type APIUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *APIMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -37,6 +39,15 @@ func (_u *APIUpdate) Where(ps ...predicate.Api) *APIUpdate {
 	return _u
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the APIUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *APIUpdate) With(as ...entfield.Assignment) *APIUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
+}
+
 // Mutation returns the APIMutation object of the builder.
 func (_u *APIUpdate) Mutation() *APIMutation {
 	return _u.mutation
@@ -44,6 +55,9 @@ func (_u *APIUpdate) Mutation() *APIMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *APIUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*APIMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -101,6 +115,7 @@ func (_u *APIUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type APIUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *APIMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -109,6 +124,15 @@ type APIUpdateOne struct {
 // NewAPIUpdateOne returns a new APIUpdateOne initialized with the given config, hooks, and mutation.
 func NewAPIUpdateOne(c Config, hooks []Hook, mutation *APIMutation) *APIUpdateOne {
 	return &APIUpdateOne{Config: c, hooks: hooks, mutation: mutation}
+}
+
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the APIUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *APIUpdateOne) With(as ...entfield.Assignment) *APIUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
 }
 
 // Mutation returns the APIMutation object of the builder.
@@ -131,6 +155,9 @@ func (_u *APIUpdateOne) Select(field string, fields ...string) *APIUpdateOne {
 
 // Save executes the query and returns the updated Api entity.
 func (_u *APIUpdateOne) Save(ctx context.Context) (*Api, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Api](ctx, &entbuilder.UpdateState[*APIMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

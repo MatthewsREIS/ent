@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -22,6 +23,7 @@ import (
 // TweetTagCreate is the builder for creating a TweetTag entity.
 type TweetTagCreate struct {
 	Config
+	err      error
 	mutation *TweetTagMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -32,42 +34,11 @@ func NewTweetTagCreate(c Config, hooks []Hook, mutation *TweetTagMutation) *Twee
 	return &TweetTagCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAddedAt sets the "added_at" field.
-func (_c *TweetTagCreate) SetAddedAt(v time.Time) *TweetTagCreate {
-	_ = _c.mutation.SetField("added_at", v)
-	return _c
-}
-
-// SetNillableAddedAt sets the "added_at" field if the given value is not nil.
-func (_c *TweetTagCreate) SetNillableAddedAt(v *time.Time) *TweetTagCreate {
-	if v != nil {
-		_c.SetAddedAt(*v)
-	}
-	return _c
-}
-
-// SetTagID sets the "tag_id" field.
-func (_c *TweetTagCreate) SetTagID(v int) *TweetTagCreate {
-	_ = _c.mutation.SetEdgeID("tag", v)
-	return _c
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (_c *TweetTagCreate) SetTweetID(v int) *TweetTagCreate {
-	_ = _c.mutation.SetEdgeID("tweet", v)
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *TweetTagCreate) SetID(v uuid.UUID) *TweetTagCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *TweetTagCreate) SetNillableID(v *uuid.UUID) *TweetTagCreate {
-	if v != nil {
-		_c.SetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TweetTagCreate builder. The first error from as is recorded and returned by Save.
+func (_c *TweetTagCreate) With(as ...entfield.Assignment) *TweetTagCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -79,6 +50,9 @@ func (_c *TweetTagCreate) Mutation() *TweetTagMutation {
 
 // Save creates the TweetTag in the database.
 func (_c *TweetTagCreate) Save(ctx context.Context) (*TweetTag, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

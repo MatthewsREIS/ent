@@ -12,12 +12,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // MediaCreate is the builder for creating a Media entity.
 type MediaCreate struct {
 	Config
+	err      error
 	mutation *MediaMutation
 	hooks    []Hook
 }
@@ -27,44 +29,11 @@ func NewMediaCreate(c Config, hooks []Hook, mutation *MediaMutation) *MediaCreat
 	return &MediaCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetSource sets the "source" field.
-func (_c *MediaCreate) SetSource(v string) *MediaCreate {
-	_ = _c.mutation.SetField("source", v)
-	return _c
-}
-
-// SetNillableSource sets the "source" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableSource(v *string) *MediaCreate {
-	if v != nil {
-		_c.SetSource(*v)
-	}
-	return _c
-}
-
-// SetSourceURI sets the "source_uri" field.
-func (_c *MediaCreate) SetSourceURI(v string) *MediaCreate {
-	_ = _c.mutation.SetField("source_uri", v)
-	return _c
-}
-
-// SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableSourceURI(v *string) *MediaCreate {
-	if v != nil {
-		_c.SetSourceURI(*v)
-	}
-	return _c
-}
-
-// SetText sets the "text" field.
-func (_c *MediaCreate) SetText(v string) *MediaCreate {
-	_ = _c.mutation.SetField("text", v)
-	return _c
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableText(v *string) *MediaCreate {
-	if v != nil {
-		_c.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MediaCreate builder. The first error from as is recorded and returned by Save.
+func (_c *MediaCreate) With(as ...entfield.Assignment) *MediaCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -76,6 +45,9 @@ func (_c *MediaCreate) Mutation() *MediaMutation {
 
 // Save creates the Media in the database.
 func (_c *MediaCreate) Save(ctx context.Context) (*Media, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CarUpdate is the builder for updating Car entities.
 type CarUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *CarMutation
 }
@@ -36,84 +38,11 @@ func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 	return _u
 }
 
-// SetBeforeID sets the "before_id" field.
-func (_u *CarUpdate) SetBeforeID(v float64) *CarUpdate {
-	_ = _u.mutation.ResetField("before_id")
-	_ = _u.mutation.SetField("before_id", v)
-	return _u
-}
-
-// SetNillableBeforeID sets the "before_id" field if the given value is not nil.
-func (_u *CarUpdate) SetNillableBeforeID(v *float64) *CarUpdate {
-	if v != nil {
-		_u.SetBeforeID(*v)
-	}
-	return _u
-}
-
-// AddBeforeID adds value to the "before_id" field.
-func (_u *CarUpdate) AddBeforeID(v float64) *CarUpdate {
-	_ = _u.mutation.AddField("before_id", v)
-	return _u
-}
-
-// ClearBeforeID clears the value of the "before_id" field.
-func (_u *CarUpdate) ClearBeforeID() *CarUpdate {
-	_ = _u.mutation.ClearField("before_id")
-	return _u
-}
-
-// SetAfterID sets the "after_id" field.
-func (_u *CarUpdate) SetAfterID(v float64) *CarUpdate {
-	_ = _u.mutation.ResetField("after_id")
-	_ = _u.mutation.SetField("after_id", v)
-	return _u
-}
-
-// SetNillableAfterID sets the "after_id" field if the given value is not nil.
-func (_u *CarUpdate) SetNillableAfterID(v *float64) *CarUpdate {
-	if v != nil {
-		_u.SetAfterID(*v)
-	}
-	return _u
-}
-
-// AddAfterID adds value to the "after_id" field.
-func (_u *CarUpdate) AddAfterID(v float64) *CarUpdate {
-	_ = _u.mutation.AddField("after_id", v)
-	return _u
-}
-
-// ClearAfterID clears the value of the "after_id" field.
-func (_u *CarUpdate) ClearAfterID() *CarUpdate {
-	_ = _u.mutation.ClearField("after_id")
-	return _u
-}
-
-// SetModel sets the "model" field.
-func (_u *CarUpdate) SetModel(v string) *CarUpdate {
-	_ = _u.mutation.SetField("model", v)
-	return _u
-}
-
-// SetNillableModel sets the "model" field if the given value is not nil.
-func (_u *CarUpdate) SetNillableModel(v *string) *CarUpdate {
-	if v != nil {
-		_u.SetModel(*v)
-	}
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the Pet entity by ID.
-func (_u *CarUpdate) SetOwnerID(id string) *CarUpdate {
-	_ = _u.mutation.SetEdgeID("owner", id)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
-func (_u *CarUpdate) SetNillableOwnerID(id *string) *CarUpdate {
-	if id != nil {
-		_u = _u.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *CarUpdate) With(as ...entfield.Assignment) *CarUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -131,6 +60,9 @@ func (_u *CarUpdate) ClearOwner() *CarUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -251,6 +183,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type CarUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *CarMutation
 }
@@ -260,84 +193,11 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 	return &CarUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetBeforeID sets the "before_id" field.
-func (_u *CarUpdateOne) SetBeforeID(v float64) *CarUpdateOne {
-	_ = _u.mutation.ResetField("before_id")
-	_ = _u.mutation.SetField("before_id", v)
-	return _u
-}
-
-// SetNillableBeforeID sets the "before_id" field if the given value is not nil.
-func (_u *CarUpdateOne) SetNillableBeforeID(v *float64) *CarUpdateOne {
-	if v != nil {
-		_u.SetBeforeID(*v)
-	}
-	return _u
-}
-
-// AddBeforeID adds value to the "before_id" field.
-func (_u *CarUpdateOne) AddBeforeID(v float64) *CarUpdateOne {
-	_ = _u.mutation.AddField("before_id", v)
-	return _u
-}
-
-// ClearBeforeID clears the value of the "before_id" field.
-func (_u *CarUpdateOne) ClearBeforeID() *CarUpdateOne {
-	_ = _u.mutation.ClearField("before_id")
-	return _u
-}
-
-// SetAfterID sets the "after_id" field.
-func (_u *CarUpdateOne) SetAfterID(v float64) *CarUpdateOne {
-	_ = _u.mutation.ResetField("after_id")
-	_ = _u.mutation.SetField("after_id", v)
-	return _u
-}
-
-// SetNillableAfterID sets the "after_id" field if the given value is not nil.
-func (_u *CarUpdateOne) SetNillableAfterID(v *float64) *CarUpdateOne {
-	if v != nil {
-		_u.SetAfterID(*v)
-	}
-	return _u
-}
-
-// AddAfterID adds value to the "after_id" field.
-func (_u *CarUpdateOne) AddAfterID(v float64) *CarUpdateOne {
-	_ = _u.mutation.AddField("after_id", v)
-	return _u
-}
-
-// ClearAfterID clears the value of the "after_id" field.
-func (_u *CarUpdateOne) ClearAfterID() *CarUpdateOne {
-	_ = _u.mutation.ClearField("after_id")
-	return _u
-}
-
-// SetModel sets the "model" field.
-func (_u *CarUpdateOne) SetModel(v string) *CarUpdateOne {
-	_ = _u.mutation.SetField("model", v)
-	return _u
-}
-
-// SetNillableModel sets the "model" field if the given value is not nil.
-func (_u *CarUpdateOne) SetNillableModel(v *string) *CarUpdateOne {
-	if v != nil {
-		_u.SetModel(*v)
-	}
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the Pet entity by ID.
-func (_u *CarUpdateOne) SetOwnerID(id string) *CarUpdateOne {
-	_ = _u.mutation.SetEdgeID("owner", id)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
-func (_u *CarUpdateOne) SetNillableOwnerID(id *string) *CarUpdateOne {
-	if id != nil {
-		_u = _u.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *CarUpdateOne) With(as ...entfield.Assignment) *CarUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -368,6 +228,9 @@ func (_u *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
 
 // Save executes the query and returns the updated Car entity.
 func (_u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Car](ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

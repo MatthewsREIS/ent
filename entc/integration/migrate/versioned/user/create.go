@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	Config
+	err      error
 	mutation *UserMutation
 	hooks    []Hook
 }
@@ -28,28 +30,11 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 	return &UserCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(v int32) *UserCreate {
-	_ = _c.mutation.SetField("age", v)
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *UserCreate) SetName(v string) *UserCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetAddress sets the "address" field.
-func (_c *UserCreate) SetAddress(v string) *UserCreate {
-	_ = _c.mutation.SetField("address", v)
-	return _c
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAddress(v *string) *UserCreate {
-	if v != nil {
-		_c.SetAddress(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserCreate builder. The first error from as is recorded and returned by Save.
+func (_c *UserCreate) With(as ...entfield.Assignment) *UserCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -61,6 +46,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

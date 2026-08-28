@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RentalUpdate is the builder for updating Rental entities.
 type RentalUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *RentalMutation
 }
@@ -37,16 +39,11 @@ func (_u *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
 	return _u
 }
 
-// SetDate sets the "date" field.
-func (_u *RentalUpdate) SetDate(v time.Time) *RentalUpdate {
-	_ = _u.mutation.SetField("date", v)
-	return _u
-}
-
-// SetNillableDate sets the "date" field if the given value is not nil.
-func (_u *RentalUpdate) SetNillableDate(v *time.Time) *RentalUpdate {
-	if v != nil {
-		_u.SetDate(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RentalUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *RentalUpdate) With(as ...entfield.Assignment) *RentalUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -58,6 +55,9 @@ func (_u *RentalUpdate) Mutation() *RentalMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RentalUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RentalMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -125,6 +125,7 @@ func (_u *RentalUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type RentalUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *RentalMutation
 }
@@ -134,16 +135,11 @@ func NewRentalUpdateOne(c Config, hooks []Hook, mutation *RentalMutation) *Renta
 	return &RentalUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetDate sets the "date" field.
-func (_u *RentalUpdateOne) SetDate(v time.Time) *RentalUpdateOne {
-	_ = _u.mutation.SetField("date", v)
-	return _u
-}
-
-// SetNillableDate sets the "date" field if the given value is not nil.
-func (_u *RentalUpdateOne) SetNillableDate(v *time.Time) *RentalUpdateOne {
-	if v != nil {
-		_u.SetDate(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RentalUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *RentalUpdateOne) With(as ...entfield.Assignment) *RentalUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -168,6 +164,9 @@ func (_u *RentalUpdateOne) Select(field string, fields ...string) *RentalUpdateO
 
 // Save executes the query and returns the updated Rental entity.
 func (_u *RentalUpdateOne) Save(ctx context.Context) (*Rental, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Rental](ctx, &entbuilder.UpdateState[*RentalMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

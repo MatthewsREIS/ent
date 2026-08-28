@@ -3,7 +3,18 @@
 		"fields": {
 			"MaxUsers": true
 		},
-		"edges": {}
+		"edges": {},
+		"importPath": "entgo.io/ent/entc/integration/template/ent/group",
+		"setters": {
+			"MaxUsers": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
+		}
 	},
 	"pet": {
 		"fields": {
@@ -12,6 +23,33 @@
 		},
 		"edges": {
 			"Owner": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/template/ent/pet",
+		"setters": {
+			"Age": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"LicensedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Owner": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			}
 		}
 	},
 	"user": {
@@ -21,6 +59,33 @@
 		"edges": {
 			"Friends": true,
 			"Pets": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/template/ent/user",
+		"setters": {
+			"Friends": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Friend"
+			},
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Pets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Pet"
+			}
 		}
 	}
 }

@@ -12,12 +12,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	Config
+	err      error
 	mutation *CardMutation
 	hooks    []Hook
 }
@@ -27,30 +29,11 @@ func NewCardCreate(c Config, hooks []Hook, mutation *CardMutation) *CardCreate {
 	return &CardCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetNumber sets the "number" field.
-func (_c *CardCreate) SetNumber(v string) *CardCreate {
-	_ = _c.mutation.SetField("number", v)
-	return _c
-}
-
-// SetNillableNumber sets the "number" field if the given value is not nil.
-func (_c *CardCreate) SetNillableNumber(v *string) *CardCreate {
-	if v != nil {
-		_c.SetNumber(*v)
-	}
-	return _c
-}
-
-// SetOwnerID sets the "owner_id" field.
-func (_c *CardCreate) SetOwnerID(v int) *CardCreate {
-	_ = _c.mutation.SetEdgeID("owner", v)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_c *CardCreate) SetNillableOwnerID(v *int) *CardCreate {
-	if v != nil {
-		_c.SetOwnerID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CardCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CardCreate) With(as ...entfield.Assignment) *CardCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -62,6 +45,9 @@ func (_c *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

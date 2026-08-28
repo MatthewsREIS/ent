@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CustomTypeUpdate is the builder for updating CustomType entities.
 type CustomTypeUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *CustomTypeMutation
 }
@@ -37,63 +39,12 @@ func (_u *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate 
 	return _u
 }
 
-// SetCustom sets the "custom" field.
-func (_u *CustomTypeUpdate) SetCustom(v string) *CustomTypeUpdate {
-	_ = _u.mutation.SetField("custom", v)
-	return _u
-}
-
-// SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_u *CustomTypeUpdate) SetNillableCustom(v *string) *CustomTypeUpdate {
-	if v != nil {
-		_u.SetCustom(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CustomTypeUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *CustomTypeUpdate) With(as ...entfield.Assignment) *CustomTypeUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearCustom clears the value of the "custom" field.
-func (_u *CustomTypeUpdate) ClearCustom() *CustomTypeUpdate {
-	_ = _u.mutation.ClearField("custom")
-	return _u
-}
-
-// SetTz0 sets the "tz0" field.
-func (_u *CustomTypeUpdate) SetTz0(v time.Time) *CustomTypeUpdate {
-	_ = _u.mutation.SetField("tz0", v)
-	return _u
-}
-
-// SetNillableTz0 sets the "tz0" field if the given value is not nil.
-func (_u *CustomTypeUpdate) SetNillableTz0(v *time.Time) *CustomTypeUpdate {
-	if v != nil {
-		_u.SetTz0(*v)
-	}
-	return _u
-}
-
-// ClearTz0 clears the value of the "tz0" field.
-func (_u *CustomTypeUpdate) ClearTz0() *CustomTypeUpdate {
-	_ = _u.mutation.ClearField("tz0")
-	return _u
-}
-
-// SetTz3 sets the "tz3" field.
-func (_u *CustomTypeUpdate) SetTz3(v time.Time) *CustomTypeUpdate {
-	_ = _u.mutation.SetField("tz3", v)
-	return _u
-}
-
-// SetNillableTz3 sets the "tz3" field if the given value is not nil.
-func (_u *CustomTypeUpdate) SetNillableTz3(v *time.Time) *CustomTypeUpdate {
-	if v != nil {
-		_u.SetTz3(*v)
-	}
-	return _u
-}
-
-// ClearTz3 clears the value of the "tz3" field.
-func (_u *CustomTypeUpdate) ClearTz3() *CustomTypeUpdate {
-	_ = _u.mutation.ClearField("tz3")
 	return _u
 }
 
@@ -104,6 +55,9 @@ func (_u *CustomTypeUpdate) Mutation() *CustomTypeMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CustomTypeUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CustomTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -172,6 +126,7 @@ func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 type CustomTypeUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *CustomTypeMutation
 }
@@ -181,63 +136,12 @@ func NewCustomTypeUpdateOne(c Config, hooks []Hook, mutation *CustomTypeMutation
 	return &CustomTypeUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetCustom sets the "custom" field.
-func (_u *CustomTypeUpdateOne) SetCustom(v string) *CustomTypeUpdateOne {
-	_ = _u.mutation.SetField("custom", v)
-	return _u
-}
-
-// SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_u *CustomTypeUpdateOne) SetNillableCustom(v *string) *CustomTypeUpdateOne {
-	if v != nil {
-		_u.SetCustom(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CustomTypeUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *CustomTypeUpdateOne) With(as ...entfield.Assignment) *CustomTypeUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearCustom clears the value of the "custom" field.
-func (_u *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
-	_ = _u.mutation.ClearField("custom")
-	return _u
-}
-
-// SetTz0 sets the "tz0" field.
-func (_u *CustomTypeUpdateOne) SetTz0(v time.Time) *CustomTypeUpdateOne {
-	_ = _u.mutation.SetField("tz0", v)
-	return _u
-}
-
-// SetNillableTz0 sets the "tz0" field if the given value is not nil.
-func (_u *CustomTypeUpdateOne) SetNillableTz0(v *time.Time) *CustomTypeUpdateOne {
-	if v != nil {
-		_u.SetTz0(*v)
-	}
-	return _u
-}
-
-// ClearTz0 clears the value of the "tz0" field.
-func (_u *CustomTypeUpdateOne) ClearTz0() *CustomTypeUpdateOne {
-	_ = _u.mutation.ClearField("tz0")
-	return _u
-}
-
-// SetTz3 sets the "tz3" field.
-func (_u *CustomTypeUpdateOne) SetTz3(v time.Time) *CustomTypeUpdateOne {
-	_ = _u.mutation.SetField("tz3", v)
-	return _u
-}
-
-// SetNillableTz3 sets the "tz3" field if the given value is not nil.
-func (_u *CustomTypeUpdateOne) SetNillableTz3(v *time.Time) *CustomTypeUpdateOne {
-	if v != nil {
-		_u.SetTz3(*v)
-	}
-	return _u
-}
-
-// ClearTz3 clears the value of the "tz3" field.
-func (_u *CustomTypeUpdateOne) ClearTz3() *CustomTypeUpdateOne {
-	_ = _u.mutation.ClearField("tz3")
 	return _u
 }
 
@@ -261,6 +165,9 @@ func (_u *CustomTypeUpdateOne) Select(field string, fields ...string) *CustomTyp
 
 // Save executes the query and returns the updated CustomType entity.
 func (_u *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[CustomType](ctx, &entbuilder.UpdateState[*CustomTypeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

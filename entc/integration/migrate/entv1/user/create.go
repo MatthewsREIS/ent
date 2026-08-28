@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	Config
+	err      error
 	mutation *UserMutation
 	hooks    []Hook
 }
@@ -28,192 +30,11 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 	return &UserCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(v int32) *UserCreate {
-	_ = _c.mutation.SetField("age", v)
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *UserCreate) SetName(v string) *UserCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetDescription sets the "description" field.
-func (_c *UserCreate) SetDescription(v string) *UserCreate {
-	_ = _c.mutation.SetField("description", v)
-	return _c
-}
-
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *UserCreate) SetNillableDescription(v *string) *UserCreate {
-	if v != nil {
-		_c.SetDescription(*v)
-	}
-	return _c
-}
-
-// SetNickname sets the "nickname" field.
-func (_c *UserCreate) SetNickname(v string) *UserCreate {
-	_ = _c.mutation.SetField("nickname", v)
-	return _c
-}
-
-// SetAddress sets the "address" field.
-func (_c *UserCreate) SetAddress(v string) *UserCreate {
-	_ = _c.mutation.SetField("address", v)
-	return _c
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAddress(v *string) *UserCreate {
-	if v != nil {
-		_c.SetAddress(*v)
-	}
-	return _c
-}
-
-// SetRenamed sets the "renamed" field.
-func (_c *UserCreate) SetRenamed(v string) *UserCreate {
-	_ = _c.mutation.SetField("renamed", v)
-	return _c
-}
-
-// SetNillableRenamed sets the "renamed" field if the given value is not nil.
-func (_c *UserCreate) SetNillableRenamed(v *string) *UserCreate {
-	if v != nil {
-		_c.SetRenamed(*v)
-	}
-	return _c
-}
-
-// SetOldToken sets the "old_token" field.
-func (_c *UserCreate) SetOldToken(v string) *UserCreate {
-	_ = _c.mutation.SetField("old_token", v)
-	return _c
-}
-
-// SetNillableOldToken sets the "old_token" field if the given value is not nil.
-func (_c *UserCreate) SetNillableOldToken(v *string) *UserCreate {
-	if v != nil {
-		_c.SetOldToken(*v)
-	}
-	return _c
-}
-
-// SetBlob sets the "blob" field.
-func (_c *UserCreate) SetBlob(v []byte) *UserCreate {
-	_ = _c.mutation.SetField("blob", v)
-	return _c
-}
-
-// SetState sets the "state" field.
-func (_c *UserCreate) SetState(v State) *UserCreate {
-	_ = _c.mutation.SetField("state", v)
-	return _c
-}
-
-// SetNillableState sets the "state" field if the given value is not nil.
-func (_c *UserCreate) SetNillableState(v *State) *UserCreate {
-	if v != nil {
-		_c.SetState(*v)
-	}
-	return _c
-}
-
-// SetStatus sets the "status" field.
-func (_c *UserCreate) SetStatus(v string) *UserCreate {
-	_ = _c.mutation.SetField("status", v)
-	return _c
-}
-
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *UserCreate) SetNillableStatus(v *string) *UserCreate {
-	if v != nil {
-		_c.SetStatus(*v)
-	}
-	return _c
-}
-
-// SetWorkplace sets the "workplace" field.
-func (_c *UserCreate) SetWorkplace(v string) *UserCreate {
-	_ = _c.mutation.SetField("workplace", v)
-	return _c
-}
-
-// SetNillableWorkplace sets the "workplace" field if the given value is not nil.
-func (_c *UserCreate) SetNillableWorkplace(v *string) *UserCreate {
-	if v != nil {
-		_c.SetWorkplace(*v)
-	}
-	return _c
-}
-
-// SetDropOptional sets the "drop_optional" field.
-func (_c *UserCreate) SetDropOptional(v string) *UserCreate {
-	_ = _c.mutation.SetField("drop_optional", v)
-	return _c
-}
-
-// SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
-func (_c *UserCreate) SetNillableDropOptional(v *string) *UserCreate {
-	if v != nil {
-		_c.SetDropOptional(*v)
-	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *UserCreate) SetID(v int) *UserCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetParentID sets the "parent" edge to the User entity by ID.
-func (_c *UserCreate) SetParentID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("parent", id)
-	return _c
-}
-
-// SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableParentID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetParentID(*id)
-	}
-	return _c
-}
-
-// AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (_c *UserCreate) SetSpouseID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("spouse", id)
-	return _c
-}
-
-// SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetSpouseID(*id)
-	}
-	return _c
-}
-
-// SetCarID sets the "car" edge to the Car entity by ID.
-func (_c *UserCreate) SetCarID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("car", id)
-	return _c
-}
-
-// SetNillableCarID sets the "car" edge to the Car entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableCarID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetCarID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserCreate builder. The first error from as is recorded and returned by Save.
+func (_c *UserCreate) With(as ...entfield.Assignment) *UserCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -225,6 +46,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

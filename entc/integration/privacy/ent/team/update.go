@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // TeamUpdate is the builder for updating Team entities.
 type TeamUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *TeamMutation
 }
@@ -36,29 +38,12 @@ func (_u *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *TeamUpdate) SetName(v string) *TeamUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TeamUpdate) SetNillableName(v *string) *TeamUpdate {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TeamUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *TeamUpdate) With(as ...entfield.Assignment) *TeamUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (_u *TeamUpdate) AddTaskIDs(ids ...int) *TeamUpdate {
-	_ = _u.mutation.AddEdgeIDs("tasks", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *TeamUpdate) AddUserIDs(ids ...int) *TeamUpdate {
-	_ = _u.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -93,6 +78,9 @@ func (_u *TeamUpdate) RemoveUserIDs(ids ...int) *TeamUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TeamUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TeamMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -249,6 +237,7 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type TeamUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *TeamMutation
 }
@@ -258,29 +247,12 @@ func NewTeamUpdateOne(c Config, hooks []Hook, mutation *TeamMutation) *TeamUpdat
 	return &TeamUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_u *TeamUpdateOne) SetName(v string) *TeamUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TeamUpdateOne) SetNillableName(v *string) *TeamUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TeamUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *TeamUpdateOne) With(as ...entfield.Assignment) *TeamUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (_u *TeamUpdateOne) AddTaskIDs(ids ...int) *TeamUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("tasks", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *TeamUpdateOne) AddUserIDs(ids ...int) *TeamUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -328,6 +300,9 @@ func (_u *TeamUpdateOne) Select(field string, fields ...string) *TeamUpdateOne {
 
 // Save executes the query and returns the updated Team entity.
 func (_u *TeamUpdateOne) Save(ctx context.Context) (*Team, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Team](ctx, &entbuilder.UpdateState[*TeamMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

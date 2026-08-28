@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -23,6 +24,7 @@ import (
 // TagUpdate is the builder for updating Tag entities.
 type TagUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *TagMutation
 }
@@ -38,41 +40,12 @@ func (_u *TagUpdate) Where(ps ...predicate.Tag) *TagUpdate {
 	return _u
 }
 
-// SetValue sets the "value" field.
-func (_u *TagUpdate) SetValue(v string) *TagUpdate {
-	_ = _u.mutation.SetField("value", v)
-	return _u
-}
-
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *TagUpdate) SetNillableValue(v *string) *TagUpdate {
-	if v != nil {
-		_u.SetValue(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TagUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *TagUpdate) With(as ...entfield.Assignment) *TagUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_u *TagUpdate) AddTweetIDs(ids ...int) *TagUpdate {
-	_ = _u.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *TagUpdate) AddGroupIDs(ids ...int) *TagUpdate {
-	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
-func (_u *TagUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TagUpdate {
-	_ = _u.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
-func (_u *TagUpdate) AddGroupTagIDs(ids ...int) *TagUpdate {
-	_ = _u.mutation.AddEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -131,6 +104,9 @@ func (_u *TagUpdate) RemoveGroupTagIDs(ids ...int) *TagUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TagUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -394,6 +370,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type TagUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *TagMutation
 }
@@ -403,41 +380,12 @@ func NewTagUpdateOne(c Config, hooks []Hook, mutation *TagMutation) *TagUpdateOn
 	return &TagUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetValue sets the "value" field.
-func (_u *TagUpdateOne) SetValue(v string) *TagUpdateOne {
-	_ = _u.mutation.SetField("value", v)
-	return _u
-}
-
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *TagUpdateOne) SetNillableValue(v *string) *TagUpdateOne {
-	if v != nil {
-		_u.SetValue(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TagUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *TagUpdateOne) With(as ...entfield.Assignment) *TagUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_u *TagUpdateOne) AddTweetIDs(ids ...int) *TagUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *TagUpdateOne) AddGroupIDs(ids ...int) *TagUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
-func (_u *TagUpdateOne) AddTweetTagIDs(ids ...uuid.UUID) *TagUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
-func (_u *TagUpdateOne) AddGroupTagIDs(ids ...int) *TagUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -509,6 +457,9 @@ func (_u *TagUpdateOne) Select(field string, fields ...string) *TagUpdateOne {
 
 // Save executes the query and returns the updated Tag entity.
 func (_u *TagUpdateOne) Save(ctx context.Context) (*Tag, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Tag](ctx, &entbuilder.UpdateState[*TagMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

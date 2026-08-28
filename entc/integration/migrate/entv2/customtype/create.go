@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CustomTypeCreate is the builder for creating a CustomType entity.
 type CustomTypeCreate struct {
 	Config
+	err      error
 	mutation *CustomTypeMutation
 	hooks    []Hook
 }
@@ -28,44 +30,11 @@ func NewCustomTypeCreate(c Config, hooks []Hook, mutation *CustomTypeMutation) *
 	return &CustomTypeCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetCustom sets the "custom" field.
-func (_c *CustomTypeCreate) SetCustom(v string) *CustomTypeCreate {
-	_ = _c.mutation.SetField("custom", v)
-	return _c
-}
-
-// SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_c *CustomTypeCreate) SetNillableCustom(v *string) *CustomTypeCreate {
-	if v != nil {
-		_c.SetCustom(*v)
-	}
-	return _c
-}
-
-// SetTz0 sets the "tz0" field.
-func (_c *CustomTypeCreate) SetTz0(v time.Time) *CustomTypeCreate {
-	_ = _c.mutation.SetField("tz0", v)
-	return _c
-}
-
-// SetNillableTz0 sets the "tz0" field if the given value is not nil.
-func (_c *CustomTypeCreate) SetNillableTz0(v *time.Time) *CustomTypeCreate {
-	if v != nil {
-		_c.SetTz0(*v)
-	}
-	return _c
-}
-
-// SetTz3 sets the "tz3" field.
-func (_c *CustomTypeCreate) SetTz3(v time.Time) *CustomTypeCreate {
-	_ = _c.mutation.SetField("tz3", v)
-	return _c
-}
-
-// SetNillableTz3 sets the "tz3" field if the given value is not nil.
-func (_c *CustomTypeCreate) SetNillableTz3(v *time.Time) *CustomTypeCreate {
-	if v != nil {
-		_c.SetTz3(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CustomTypeCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CustomTypeCreate) With(as ...entfield.Assignment) *CustomTypeCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -77,6 +46,9 @@ func (_c *CustomTypeCreate) Mutation() *CustomTypeMutation {
 
 // Save creates the CustomType in the database.
 func (_c *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

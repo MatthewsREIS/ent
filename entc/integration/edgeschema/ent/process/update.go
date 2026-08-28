@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // ProcessUpdate is the builder for updating Process entities.
 type ProcessUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *ProcessMutation
 }
@@ -37,15 +39,12 @@ func (_u *ProcessUpdate) Where(ps ...predicate.Process) *ProcessUpdate {
 	return _u
 }
 
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_u *ProcessUpdate) AddFileIDs(ids ...int) *ProcessUpdate {
-	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddAttachedFileIDs adds the "attached_files" edge to the AttachedFile entity by IDs.
-func (_u *ProcessUpdate) AddAttachedFileIDs(ids ...int) *ProcessUpdate {
-	_ = _u.mutation.AddEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ProcessUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *ProcessUpdate) With(as ...entfield.Assignment) *ProcessUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -80,6 +79,9 @@ func (_u *ProcessUpdate) RemoveAttachedFileIDs(ids ...int) *ProcessUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ProcessUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ProcessMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -241,6 +243,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type ProcessUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *ProcessMutation
 }
@@ -250,15 +253,12 @@ func NewProcessUpdateOne(c Config, hooks []Hook, mutation *ProcessMutation) *Pro
 	return &ProcessUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_u *ProcessUpdateOne) AddFileIDs(ids ...int) *ProcessUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddAttachedFileIDs adds the "attached_files" edge to the AttachedFile entity by IDs.
-func (_u *ProcessUpdateOne) AddAttachedFileIDs(ids ...int) *ProcessUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ProcessUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *ProcessUpdateOne) With(as ...entfield.Assignment) *ProcessUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -306,6 +306,9 @@ func (_u *ProcessUpdateOne) Select(field string, fields ...string) *ProcessUpdat
 
 // Save executes the query and returns the updated Process entity.
 func (_u *ProcessUpdateOne) Save(ctx context.Context) (*Process, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Process](ctx, &entbuilder.UpdateState[*ProcessMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

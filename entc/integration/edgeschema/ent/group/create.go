@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	Config
+	err      error
 	mutation *GroupMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -31,41 +33,12 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 	return &GroupCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_c *GroupCreate) SetName(v string) *GroupCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableName(v *string) *GroupCreate {
-	if v != nil {
-		_c.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupCreate builder. The first error from as is recorded and returned by Save.
+func (_c *GroupCreate) With(as ...entfield.Assignment) *GroupCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
-	_ = _c.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (_c *GroupCreate) AddTagIDs(ids ...int) *GroupCreate {
-	_ = _c.mutation.AddEdgeIDs("tags", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddJoinedUserIDs adds the "joined_users" edge to the UserGroup entity by IDs.
-func (_c *GroupCreate) AddJoinedUserIDs(ids ...int) *GroupCreate {
-	_ = _c.mutation.AddEdgeIDs("joined_users", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
-func (_c *GroupCreate) AddGroupTagIDs(ids ...int) *GroupCreate {
-	_ = _c.mutation.AddEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -76,6 +49,9 @@ func (_c *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

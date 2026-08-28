@@ -8,6 +8,41 @@
 		"edges": {
 			"Fi": true,
 			"Proc": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/attachedfile",
+		"setters": {
+			"AttachTime": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"FID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Fi": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"ProcID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"file": {
@@ -16,6 +51,25 @@
 		},
 		"edges": {
 			"Processes": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/file",
+		"setters": {
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Processes": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Process"
+			}
 		}
 	},
 	"friendship": {
@@ -28,6 +82,41 @@
 		"edges": {
 			"Friend": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/friendship",
+		"setters": {
+			"CreatedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"FriendID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Weight": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"group": {
@@ -39,6 +128,49 @@
 			"JoinedUsers": true,
 			"Tags": true,
 			"Users": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/group",
+		"setters": {
+			"GroupTags": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "GroupTag"
+			},
+			"JoinedUsers": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "JoinedUser"
+			},
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Tags": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Tag"
+			},
+			"Users": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "User"
+			}
 		}
 	},
 	"grouptag": {
@@ -49,6 +181,25 @@
 		"edges": {
 			"Group": true,
 			"Tag": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/grouptag",
+		"setters": {
+			"GroupID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"TagID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"process": {
@@ -56,6 +207,25 @@
 		"edges": {
 			"AttachedFiles": true,
 			"Files": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/process",
+		"setters": {
+			"AttachedFiles": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "AttachedFile"
+			},
+			"Files": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "File"
+			}
 		}
 	},
 	"relationship": {
@@ -69,13 +239,59 @@
 			"Info": true,
 			"Relative": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/relationship",
+		"setters": {
+			"InfoID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"RelativeID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Weight": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"relationshipinfo": {
 		"fields": {
 			"Text": true
 		},
-		"edges": {}
+		"edges": {},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/relationshipinfo",
+		"setters": {
+			"Text": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
+		}
 	},
 	"role": {
 		"fields": {
@@ -85,6 +301,33 @@
 		"edges": {
 			"RolesUsers": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/role",
+		"setters": {
+			"CreatedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"User": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "User"
+			}
 		}
 	},
 	"roleuser": {
@@ -96,6 +339,33 @@
 		"edges": {
 			"Role": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/roleuser",
+		"setters": {
+			"CreatedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"RoleID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"tag": {
@@ -110,6 +380,49 @@
 		},
 		"noBareEQ": {
 			"Value": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/tag",
+		"setters": {
+			"GroupTags": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "GroupTag"
+			},
+			"Groups": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Group"
+			},
+			"TweetTags": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "TweetTag"
+			},
+			"Tweets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Tweet"
+			},
+			"Value": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"tweet": {
@@ -123,6 +436,57 @@
 			"TweetTags": true,
 			"TweetUser": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/tweet",
+		"setters": {
+			"LikedUsers": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "LikedUser"
+			},
+			"Tags": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Tag"
+			},
+			"Text": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"TweetTags": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "TweetTag"
+			},
+			"TweetUser": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "TweetUser"
+			},
+			"User": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "User"
+			}
 		}
 	},
 	"tweetlike": {
@@ -134,6 +498,33 @@
 		"edges": {
 			"Tweet": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/tweetlike",
+		"setters": {
+			"LikedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"TweetID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"tweettag": {
@@ -145,6 +536,41 @@
 		"edges": {
 			"Tag": true,
 			"Tweet": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/tweettag",
+		"setters": {
+			"AddedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"ID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"TagID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"TweetID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"user": {
@@ -164,6 +590,89 @@
 			"RolesUsers": true,
 			"Tweets": true,
 			"UserTweets": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/user",
+		"setters": {
+			"Friends": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Friend"
+			},
+			"Friendships": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Friendship"
+			},
+			"Groups": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Group"
+			},
+			"JoinedGroups": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "JoinedGroup"
+			},
+			"LikedTweets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "LikedTweet"
+			},
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Relatives": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Relative"
+			},
+			"Roles": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Role"
+			},
+			"Tweets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Tweet"
+			},
+			"UserTweets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "UserTweet"
+			}
 		}
 	},
 	"usergroup": {
@@ -175,6 +684,33 @@
 		"edges": {
 			"Group": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/usergroup",
+		"setters": {
+			"GroupID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"JoinedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"usertweet": {
@@ -186,6 +722,33 @@
 		"edges": {
 			"Tweet": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/edgeschema/ent/usertweet",
+		"setters": {
+			"CreatedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"TweetID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	}
 }

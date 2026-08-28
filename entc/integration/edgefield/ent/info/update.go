@@ -17,12 +17,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // InfoUpdate is the builder for updating Info entities.
 type InfoUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *InfoMutation
 }
@@ -38,28 +40,11 @@ func (_u *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate {
 	return _u
 }
 
-// SetContent sets the "content" field.
-func (_u *InfoUpdate) SetContent(v json.RawMessage) *InfoUpdate {
-	_ = _u.mutation.SetField("content", v)
-	return _u
-}
-
-// AppendContent appends value to the "content" field.
-func (_u *InfoUpdate) AppendContent(v json.RawMessage) *InfoUpdate {
-	_ = _u.mutation.AppendField("content", v)
-	return _u
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *InfoUpdate) SetUserID(id int) *InfoUpdate {
-	_ = _u.mutation.SetEdgeID("user", id)
-	return _u
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_u *InfoUpdate) SetNillableUserID(id *int) *InfoUpdate {
-	if id != nil {
-		_u = _u.SetUserID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the InfoUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *InfoUpdate) With(as ...entfield.Assignment) *InfoUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -77,6 +62,9 @@ func (_u *InfoUpdate) ClearUser() *InfoUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *InfoUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*InfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -164,6 +152,7 @@ func (_u *InfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type InfoUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *InfoMutation
 }
@@ -173,28 +162,11 @@ func NewInfoUpdateOne(c Config, hooks []Hook, mutation *InfoMutation) *InfoUpdat
 	return &InfoUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetContent sets the "content" field.
-func (_u *InfoUpdateOne) SetContent(v json.RawMessage) *InfoUpdateOne {
-	_ = _u.mutation.SetField("content", v)
-	return _u
-}
-
-// AppendContent appends value to the "content" field.
-func (_u *InfoUpdateOne) AppendContent(v json.RawMessage) *InfoUpdateOne {
-	_ = _u.mutation.AppendField("content", v)
-	return _u
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *InfoUpdateOne) SetUserID(id int) *InfoUpdateOne {
-	_ = _u.mutation.SetEdgeID("user", id)
-	return _u
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_u *InfoUpdateOne) SetNillableUserID(id *int) *InfoUpdateOne {
-	if id != nil {
-		_u = _u.SetUserID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the InfoUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *InfoUpdateOne) With(as ...entfield.Assignment) *InfoUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -225,6 +197,9 @@ func (_u *InfoUpdateOne) Select(field string, fields ...string) *InfoUpdateOne {
 
 // Save executes the query and returns the updated Info entity.
 func (_u *InfoUpdateOne) Save(ctx context.Context) (*Info, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Info](ctx, &entbuilder.UpdateState[*InfoMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

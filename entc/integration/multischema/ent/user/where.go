@@ -21,70 +21,70 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Name: entfield.NewString[string](FieldName),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Name: entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Pets is the handle for the "pets" edge.
-	Pets entfield.Edge[predicate.Pet]
+	Pets entfield.Edge[predicate.Pet, int]
 	// Groups is the handle for the "groups" edge.
-	Groups entfield.Edge[predicate.Group]
+	Groups entfield.Edge[predicate.Group, int]
 	// Friends is the handle for the "friends" edge.
-	Friends entfield.Edge[predicate.User]
+	Friends entfield.Edge[predicate.User, int]
 	// Parents is the handle for the "parents" edge.
-	Parents entfield.Edge[predicate.User]
+	Parents entfield.Edge[predicate.User, int]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.User]
+	Children entfield.Edge[predicate.User, int]
 	// Friendships is the handle for the "friendships" edge.
-	Friendships entfield.Edge[predicate.Friendship]
+	Friendships entfield.Edge[predicate.Friendship, int]
 	// ParentHood is the handle for the "parent_hood" edge.
-	ParentHood entfield.Edge[predicate.Parent]
+	ParentHood entfield.Edge[predicate.Parent, int]
 }{
-	Pets: entfield.NewEdgeSteps[predicate.Pet](newPetsStep, []func(*sql.Selector, *sqlgraph.Step){
+	Pets: entfield.NewEdgeSteps[predicate.Pet, int]("pets", newPetsStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.Pet
 			step.Edge.Schema = schemaConfig.Pet
 		},
 	}),
-	Groups: entfield.NewEdgeSteps[predicate.Group](newGroupsStep, []func(*sql.Selector, *sqlgraph.Step){
+	Groups: entfield.NewEdgeSteps[predicate.Group, int]("groups", newGroupsStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.Group
 			step.Edge.Schema = schemaConfig.GroupUsers
 		},
 	}),
-	Friends: entfield.NewEdgeSteps[predicate.User](newFriendsStep, []func(*sql.Selector, *sqlgraph.Step){
+	Friends: entfield.NewEdgeSteps[predicate.User, int]("friends", newFriendsStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User
 			step.Edge.Schema = schemaConfig.Friendship
 		},
 	}),
-	Parents: entfield.NewEdgeSteps[predicate.User](newParentsStep, []func(*sql.Selector, *sqlgraph.Step){
+	Parents: entfield.NewEdgeSteps[predicate.User, int]("parents", newParentsStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User
 			step.Edge.Schema = schemaConfig.UserChildren
 		},
 	}),
-	Children: entfield.NewEdgeSteps[predicate.User](newChildrenStep, []func(*sql.Selector, *sqlgraph.Step){
+	Children: entfield.NewEdgeSteps[predicate.User, int]("children", newChildrenStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User
 			step.Edge.Schema = schemaConfig.Parent
 		},
 	}),
-	Friendships: entfield.NewEdgeSteps[predicate.Friendship](newFriendshipsStep, []func(*sql.Selector, *sqlgraph.Step){
+	Friendships: entfield.NewEdgeSteps[predicate.Friendship, int]("friendships", newFriendshipsStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.Friendship
 			step.Edge.Schema = schemaConfig.Friendship
 		},
 	}),
-	ParentHood: entfield.NewEdgeSteps[predicate.Parent](newParentHoodStep, []func(*sql.Selector, *sqlgraph.Step){
+	ParentHood: entfield.NewEdgeSteps[predicate.Parent, int]("parent_hood", newParentHoodStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.Parent

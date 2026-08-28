@@ -26,8 +26,9 @@ type NoteMutationOption = func(*NoteMutation)
 // noteDescriptor describes Note's fields and edges
 // for the generic mutation runtime.
 var noteDescriptor = &entbuilder.Descriptor{
-	Name:   "Note",
-	IDType: reflect.TypeFor[schema.NoteID](),
+	Name:    "Note",
+	IDType:  reflect.TypeFor[schema.NoteID](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"text": {
 			Type:     reflect.TypeFor[string](),

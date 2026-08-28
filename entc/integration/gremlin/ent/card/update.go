@@ -21,11 +21,13 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // CardUpdate is the builder for updating Card entities.
 type CardUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *CardMutation
 }
@@ -41,70 +43,12 @@ func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return _u
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (_u *CardUpdate) SetUpdateTime(v time.Time) *CardUpdate {
-	_ = _u.mutation.SetField("update_time", v)
-	return _u
-}
-
-// SetBalance sets the "balance" field.
-func (_u *CardUpdate) SetBalance(v float64) *CardUpdate {
-	_ = _u.mutation.ResetField("balance")
-	_ = _u.mutation.SetField("balance", v)
-	return _u
-}
-
-// SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableBalance(v *float64) *CardUpdate {
-	if v != nil {
-		_u.SetBalance(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CardUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *CardUpdate) With(as ...entfield.Assignment) *CardUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddBalance adds value to the "balance" field.
-func (_u *CardUpdate) AddBalance(v float64) *CardUpdate {
-	_ = _u.mutation.AddField("balance", v)
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *CardUpdate) SetName(v string) *CardUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableName(v *string) *CardUpdate {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// ClearName clears the value of the "name" field.
-func (_u *CardUpdate) ClearName() *CardUpdate {
-	_ = _u.mutation.ClearField("name")
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *CardUpdate) SetOwnerID(id string) *CardUpdate {
-	_ = _u.mutation.SetEdgeID("owner", id)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_u *CardUpdate) SetNillableOwnerID(id *string) *CardUpdate {
-	if id != nil {
-		_u = _u.SetOwnerID(*id)
-	}
-	return _u
-}
-
-// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
-func (_u *CardUpdate) AddSpecIDs(ids ...string) *CardUpdate {
-	_ = _u.mutation.AddEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -133,6 +77,9 @@ func (_u *CardUpdate) RemoveSpecIDs(ids ...string) *CardUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	_u.defaults()
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
@@ -265,6 +212,7 @@ func (_u *CardUpdate) gremlin() *dsl.Traversal {
 type CardUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *CardMutation
 }
@@ -274,70 +222,12 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 	return &CardUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (_u *CardUpdateOne) SetUpdateTime(v time.Time) *CardUpdateOne {
-	_ = _u.mutation.SetField("update_time", v)
-	return _u
-}
-
-// SetBalance sets the "balance" field.
-func (_u *CardUpdateOne) SetBalance(v float64) *CardUpdateOne {
-	_ = _u.mutation.ResetField("balance")
-	_ = _u.mutation.SetField("balance", v)
-	return _u
-}
-
-// SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableBalance(v *float64) *CardUpdateOne {
-	if v != nil {
-		_u.SetBalance(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CardUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *CardUpdateOne) With(as ...entfield.Assignment) *CardUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddBalance adds value to the "balance" field.
-func (_u *CardUpdateOne) AddBalance(v float64) *CardUpdateOne {
-	_ = _u.mutation.AddField("balance", v)
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *CardUpdateOne) SetName(v string) *CardUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableName(v *string) *CardUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// ClearName clears the value of the "name" field.
-func (_u *CardUpdateOne) ClearName() *CardUpdateOne {
-	_ = _u.mutation.ClearField("name")
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *CardUpdateOne) SetOwnerID(id string) *CardUpdateOne {
-	_ = _u.mutation.SetEdgeID("owner", id)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableOwnerID(id *string) *CardUpdateOne {
-	if id != nil {
-		_u = _u.SetOwnerID(*id)
-	}
-	return _u
-}
-
-// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
-func (_u *CardUpdateOne) AddSpecIDs(ids ...string) *CardUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -379,6 +269,9 @@ func (_u *CardUpdateOne) Select(field string, fields ...string) *CardUpdateOne {
 
 // Save executes the query and returns the updated Card entity.
 func (_u *CardUpdateOne) Save(ctx context.Context) (*Card, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	_u.defaults()
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }

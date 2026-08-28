@@ -19,25 +19,25 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Name: entfield.NewString[string](FieldName),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Name: entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the Group type.
 var E = struct {
 	// Users is the handle for the "users" edge.
-	Users entfield.Edge[predicate.User]
+	Users entfield.Edge[predicate.User, int]
 	// Tags is the handle for the "tags" edge.
-	Tags entfield.Edge[predicate.Tag]
+	Tags entfield.Edge[predicate.Tag, int]
 	// JoinedUsers is the handle for the "joined_users" edge.
-	JoinedUsers entfield.Edge[predicate.UserGroup]
+	JoinedUsers entfield.Edge[predicate.UserGroup, int]
 	// GroupTags is the handle for the "group_tags" edge.
-	GroupTags entfield.Edge[predicate.GroupTag]
+	GroupTags entfield.Edge[predicate.GroupTag, int]
 }{
-	Users:       entfield.NewEdge[predicate.User](newUsersStep),
-	Tags:        entfield.NewEdge[predicate.Tag](newTagsStep),
-	JoinedUsers: entfield.NewEdge[predicate.UserGroup](newJoinedUsersStep),
-	GroupTags:   entfield.NewEdge[predicate.GroupTag](newGroupTagsStep),
+	Users:       entfield.NewEdge[predicate.User, int]("users", newUsersStep),
+	Tags:        entfield.NewEdge[predicate.Tag, int]("tags", newTagsStep),
+	JoinedUsers: entfield.NewEdge[predicate.UserGroup, int]("joined_users", newJoinedUsersStep),
+	GroupTags:   entfield.NewEdge[predicate.GroupTag, int]("group_tags", newGroupTagsStep),
 }
 
 // And groups predicates with the AND operator between them.

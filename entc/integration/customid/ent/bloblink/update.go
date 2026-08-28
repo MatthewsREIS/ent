@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -23,6 +24,7 @@ import (
 // BlobLinkUpdate is the builder for updating BlobLink entities.
 type BlobLinkUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *BlobLinkMutation
 }
@@ -38,44 +40,11 @@ func (_u *BlobLinkUpdate) Where(ps ...predicate.BlobLink) *BlobLinkUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *BlobLinkUpdate) SetCreatedAt(v time.Time) *BlobLinkUpdate {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *BlobLinkUpdate) SetNillableCreatedAt(v *time.Time) *BlobLinkUpdate {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
-// SetBlobID sets the "blob_id" field.
-func (_u *BlobLinkUpdate) SetBlobID(v uuid.UUID) *BlobLinkUpdate {
-	_ = _u.mutation.SetEdgeID("blob", v)
-	return _u
-}
-
-// SetNillableBlobID sets the "blob_id" field if the given value is not nil.
-func (_u *BlobLinkUpdate) SetNillableBlobID(v *uuid.UUID) *BlobLinkUpdate {
-	if v != nil {
-		_u.SetBlobID(*v)
-	}
-	return _u
-}
-
-// SetLinkID sets the "link_id" field.
-func (_u *BlobLinkUpdate) SetLinkID(v uuid.UUID) *BlobLinkUpdate {
-	_ = _u.mutation.SetEdgeID("link", v)
-	return _u
-}
-
-// SetNillableLinkID sets the "link_id" field if the given value is not nil.
-func (_u *BlobLinkUpdate) SetNillableLinkID(v *uuid.UUID) *BlobLinkUpdate {
-	if v != nil {
-		_u.SetLinkID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BlobLinkUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *BlobLinkUpdate) With(as ...entfield.Assignment) *BlobLinkUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -99,6 +68,9 @@ func (_u *BlobLinkUpdate) ClearLink() *BlobLinkUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BlobLinkUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*BlobLinkMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -224,6 +196,7 @@ func (_u *BlobLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type BlobLinkUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *BlobLinkMutation
 }
@@ -233,44 +206,11 @@ func NewBlobLinkUpdateOne(c Config, hooks []Hook, mutation *BlobLinkMutation) *B
 	return &BlobLinkUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *BlobLinkUpdateOne) SetCreatedAt(v time.Time) *BlobLinkUpdateOne {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *BlobLinkUpdateOne) SetNillableCreatedAt(v *time.Time) *BlobLinkUpdateOne {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
-// SetBlobID sets the "blob_id" field.
-func (_u *BlobLinkUpdateOne) SetBlobID(v uuid.UUID) *BlobLinkUpdateOne {
-	_ = _u.mutation.SetEdgeID("blob", v)
-	return _u
-}
-
-// SetNillableBlobID sets the "blob_id" field if the given value is not nil.
-func (_u *BlobLinkUpdateOne) SetNillableBlobID(v *uuid.UUID) *BlobLinkUpdateOne {
-	if v != nil {
-		_u.SetBlobID(*v)
-	}
-	return _u
-}
-
-// SetLinkID sets the "link_id" field.
-func (_u *BlobLinkUpdateOne) SetLinkID(v uuid.UUID) *BlobLinkUpdateOne {
-	_ = _u.mutation.SetEdgeID("link", v)
-	return _u
-}
-
-// SetNillableLinkID sets the "link_id" field if the given value is not nil.
-func (_u *BlobLinkUpdateOne) SetNillableLinkID(v *uuid.UUID) *BlobLinkUpdateOne {
-	if v != nil {
-		_u.SetLinkID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BlobLinkUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *BlobLinkUpdateOne) With(as ...entfield.Assignment) *BlobLinkUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -307,6 +247,9 @@ func (_u *BlobLinkUpdateOne) Select(field string, fields ...string) *BlobLinkUpd
 
 // Save executes the query and returns the updated BlobLink entity.
 func (_u *BlobLinkUpdateOne) Save(ctx context.Context) (*BlobLink, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[BlobLink](ctx, &entbuilder.UpdateState[*BlobLinkMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

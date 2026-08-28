@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
 type CommentCreate struct {
 	Config
+	err      error
 	mutation *CommentMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -31,70 +33,11 @@ func NewCommentCreate(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 	return &CommentCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetUniqueInt sets the "unique_int" field.
-func (_c *CommentCreate) SetUniqueInt(v int) *CommentCreate {
-	_ = _c.mutation.SetField("unique_int", v)
-	return _c
-}
-
-// SetUniqueFloat sets the "unique_float" field.
-func (_c *CommentCreate) SetUniqueFloat(v float64) *CommentCreate {
-	_ = _c.mutation.SetField("unique_float", v)
-	return _c
-}
-
-// SetNillableInt sets the "nillable_int" field.
-func (_c *CommentCreate) SetNillableInt(v int) *CommentCreate {
-	_ = _c.mutation.SetField("nillable_int", v)
-	return _c
-}
-
-// SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableNillableInt(v *int) *CommentCreate {
-	if v != nil {
-		_c.SetNillableInt(*v)
-	}
-	return _c
-}
-
-// SetTable sets the "table" field.
-func (_c *CommentCreate) SetTable(v string) *CommentCreate {
-	_ = _c.mutation.SetField("table", v)
-	return _c
-}
-
-// SetNillableTable sets the "table" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableTable(v *string) *CommentCreate {
-	if v != nil {
-		_c.SetTable(*v)
-	}
-	return _c
-}
-
-// SetDir sets the "dir" field.
-func (_c *CommentCreate) SetDir(v schemadir.Dir) *CommentCreate {
-	_ = _c.mutation.SetField("dir", v)
-	return _c
-}
-
-// SetNillableDir sets the "dir" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableDir(v *schemadir.Dir) *CommentCreate {
-	if v != nil {
-		_c.SetDir(*v)
-	}
-	return _c
-}
-
-// SetClient sets the "client" field.
-func (_c *CommentCreate) SetClient(v string) *CommentCreate {
-	_ = _c.mutation.SetField("client", v)
-	return _c
-}
-
-// SetNillableClient sets the "client" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableClient(v *string) *CommentCreate {
-	if v != nil {
-		_c.SetClient(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CommentCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CommentCreate) With(as ...entfield.Assignment) *CommentCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -106,6 +49,9 @@ func (_c *CommentCreate) Mutation() *CommentMutation {
 
 // Save creates the Comment in the database.
 func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

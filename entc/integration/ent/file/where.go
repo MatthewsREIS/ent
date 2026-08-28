@@ -33,29 +33,29 @@ var F = struct {
 	// CreateTime is the handle for the "create_time" field.
 	CreateTime entfield.Time
 }{
-	ID:         entfield.NewNumber[int](FieldID),
-	SetID:      entfield.NewNumber[int](FieldSetID),
-	Size:       entfield.NewNumber[int](FieldSize),
-	Name:       entfield.NewString[string](FieldName),
-	User:       entfield.NewString[string](FieldUser),
-	Group:      entfield.NewString[string](FieldGroup),
-	Op:         entfield.NewBool[bool](FieldOp),
-	FieldID:    entfield.NewNumber[int](FieldFieldID),
-	CreateTime: entfield.NewTime(FieldCreateTime),
+	ID:         entfield.NewNumber[int](FieldID, "id"),
+	SetID:      entfield.NewNumber[int](FieldSetID, "set_id"),
+	Size:       entfield.NewNumber[int](FieldSize, "size"),
+	Name:       entfield.NewString[string](FieldName, "name"),
+	User:       entfield.NewString[string](FieldUser, "user"),
+	Group:      entfield.NewString[string](FieldGroup, "group"),
+	Op:         entfield.NewBool[bool](FieldOp, "op"),
+	FieldID:    entfield.NewNumber[int](FieldFieldID, "field_id"),
+	CreateTime: entfield.NewTime(FieldCreateTime, "create_time"),
 }
 
 // E holds typed edge handles for every edge of the File type.
 var E = struct {
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 	// Type is the handle for the "type" edge.
-	Type entfield.Edge[predicate.FileType]
+	Type entfield.Edge[predicate.FileType, int]
 	// Field is the handle for the "field" edge.
-	Field entfield.Edge[predicate.FieldType]
+	Field entfield.Edge[predicate.FieldType, int]
 }{
-	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
-	Type:  entfield.NewEdge[predicate.FileType](newTypeStep),
-	Field: entfield.NewEdge[predicate.FieldType](newFieldStep, sql.FieldIsNull("deleted_at")),
+	Owner: entfield.NewEdge[predicate.User, int]("owner", newOwnerStep),
+	Type:  entfield.NewEdge[predicate.FileType, int]("type", newTypeStep),
+	Field: entfield.NewEdge[predicate.FieldType, int]("field", newFieldStep, sql.FieldIsNull("deleted_at")),
 }
 
 // And groups predicates with the AND operator between them.

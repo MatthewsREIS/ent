@@ -21,17 +21,17 @@ var F = struct {
 	// MaxUsers is the handle for the "max_users" field.
 	MaxUsers entfield.Number[int]
 }{
-	ID:       entfield.NewNumber[int](FieldID),
-	Desc:     entfield.NewString[string](FieldDesc),
-	MaxUsers: entfield.NewNumber[int](FieldMaxUsers),
+	ID:       entfield.NewNumber[int](FieldID, "id"),
+	Desc:     entfield.NewString[string](FieldDesc, "desc"),
+	MaxUsers: entfield.NewNumber[int](FieldMaxUsers, "max_users"),
 }
 
 // E holds typed edge handles for every edge of the GroupInfo type.
 var E = struct {
 	// Groups is the handle for the "groups" edge.
-	Groups entfield.Edge[predicate.Group]
+	Groups entfield.Edge[predicate.Group, int]
 }{
-	Groups: entfield.NewEdge[predicate.Group](newGroupsStep),
+	Groups: entfield.NewEdge[predicate.Group, int]("groups", newGroupsStep),
 }
 
 // And groups predicates with the AND operator between them.

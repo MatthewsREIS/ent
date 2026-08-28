@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // DocCreate is the builder for creating a Doc entity.
 type DocCreate struct {
 	Config
+	err      error
 	mutation *DocMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,57 +32,12 @@ func NewDocCreate(c Config, hooks []Hook, mutation *DocMutation) *DocCreate {
 	return &DocCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_c *DocCreate) SetText(v string) *DocCreate {
-	_ = _c.mutation.SetField("text", v)
-	return _c
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_c *DocCreate) SetNillableText(v *string) *DocCreate {
-	if v != nil {
-		_c.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the DocCreate builder. The first error from as is recorded and returned by Save.
+func (_c *DocCreate) With(as ...entfield.Assignment) *DocCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *DocCreate) SetID(v schema.DocID) *DocCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *DocCreate) SetNillableID(v *schema.DocID) *DocCreate {
-	if v != nil {
-		_c.SetID(*v)
-	}
-	return _c
-}
-
-// SetParentID sets the "parent" edge to the Doc entity by ID.
-func (_c *DocCreate) SetParentID(id schema.DocID) *DocCreate {
-	_ = _c.mutation.SetEdgeID("parent", id)
-	return _c
-}
-
-// SetNillableParentID sets the "parent" edge to the Doc entity by ID if the given value is not nil.
-func (_c *DocCreate) SetNillableParentID(id *schema.DocID) *DocCreate {
-	if id != nil {
-		_c = _c.SetParentID(*id)
-	}
-	return _c
-}
-
-// AddChildIDs adds the "children" edge to the Doc entity by IDs.
-func (_c *DocCreate) AddChildIDs(ids ...schema.DocID) *DocCreate {
-	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddRelatedIDs adds the "related" edge to the Doc entity by IDs.
-func (_c *DocCreate) AddRelatedIDs(ids ...schema.DocID) *DocCreate {
-	_ = _c.mutation.AddEdgeIDs("related", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -91,6 +48,9 @@ func (_c *DocCreate) Mutation() *DocMutation {
 
 // Save creates the Doc in the database.
 func (_c *DocCreate) Save(ctx context.Context) (*Doc, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

@@ -26,8 +26,9 @@ type DocMutationOption = func(*DocMutation)
 // docDescriptor describes Doc's fields and edges
 // for the generic mutation runtime.
 var docDescriptor = &entbuilder.Descriptor{
-	Name:   "Doc",
-	IDType: reflect.TypeFor[schema.DocID](),
+	Name:    "Doc",
+	IDType:  reflect.TypeFor[schema.DocID](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"text": {
 			Type:     reflect.TypeFor[string](),

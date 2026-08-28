@@ -17,7 +17,7 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	Name: entfield.NewString[string](FieldName),
+	Name: entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the CleanUser type.

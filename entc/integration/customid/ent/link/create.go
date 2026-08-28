@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // LinkCreate is the builder for creating a Link entity.
 type LinkCreate struct {
 	Config
+	err      error
 	mutation *LinkMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -32,22 +34,11 @@ func NewLinkCreate(c Config, hooks []Hook, mutation *LinkMutation) *LinkCreate {
 	return &LinkCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetLinkInformation sets the "link_information" field.
-func (_c *LinkCreate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkCreate {
-	_ = _c.mutation.SetField("link_information", v)
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *LinkCreate) SetID(v uuidc.UUIDC) *LinkCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *LinkCreate) SetNillableID(v *uuidc.UUIDC) *LinkCreate {
-	if v != nil {
-		_c.SetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the LinkCreate builder. The first error from as is recorded and returned by Save.
+func (_c *LinkCreate) With(as ...entfield.Assignment) *LinkCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -59,6 +50,9 @@ func (_c *LinkCreate) Mutation() *LinkMutation {
 
 // Save creates the Link in the database.
 func (_c *LinkCreate) Save(ctx context.Context) (*Link, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

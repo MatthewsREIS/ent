@@ -17,24 +17,24 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 }{
-	ID: entfield.NewNumber[int](FieldID),
+	ID: entfield.NewNumber[int](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Groups is the handle for the "groups" edge.
-	Groups entfield.Edge[predicate.Group]
+	Groups entfield.Edge[predicate.Group, int]
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.User]
+	Parent entfield.Edge[predicate.User, int]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.User]
+	Children entfield.Edge[predicate.User, int]
 	// Pets is the handle for the "pets" edge.
-	Pets entfield.Edge[predicate.Pet]
+	Pets entfield.Edge[predicate.Pet, string]
 }{
-	Groups:   entfield.NewEdge[predicate.Group](newGroupsStep),
-	Parent:   entfield.NewEdge[predicate.User](newParentStep),
-	Children: entfield.NewEdge[predicate.User](newChildrenStep),
-	Pets:     entfield.NewEdge[predicate.Pet](newPetsStep),
+	Groups:   entfield.NewEdge[predicate.Group, int]("groups", newGroupsStep),
+	Parent:   entfield.NewEdge[predicate.User, int]("parent", newParentStep),
+	Children: entfield.NewEdge[predicate.User, int]("children", newChildrenStep),
+	Pets:     entfield.NewEdge[predicate.Pet, string]("pets", newPetsStep),
 }
 
 // And groups predicates with the AND operator between them.

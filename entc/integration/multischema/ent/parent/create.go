@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // ParentCreate is the builder for creating a Parent entity.
 type ParentCreate struct {
 	Config
+	err      error
 	mutation *ParentMutation
 	hooks    []Hook
 }
@@ -28,35 +30,12 @@ func NewParentCreate(c Config, hooks []Hook, mutation *ParentMutation) *ParentCr
 	return &ParentCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetByAdoption sets the "by_adoption" field.
-func (_c *ParentCreate) SetByAdoption(v bool) *ParentCreate {
-	_ = _c.mutation.SetField("by_adoption", v)
-	return _c
-}
-
-// SetNillableByAdoption sets the "by_adoption" field if the given value is not nil.
-func (_c *ParentCreate) SetNillableByAdoption(v *bool) *ParentCreate {
-	if v != nil {
-		_c.SetByAdoption(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ParentCreate builder. The first error from as is recorded and returned by Save.
+func (_c *ParentCreate) With(as ...entfield.Assignment) *ParentCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetUserID sets the "user_id" field.
-func (_c *ParentCreate) SetUserID(v int) *ParentCreate {
-	_ = _c.mutation.SetEdgeID("child", v)
-	return _c
-}
-
-// SetParentID sets the "parent_id" field.
-func (_c *ParentCreate) SetParentID(v int) *ParentCreate {
-	_ = _c.mutation.SetEdgeID("parent", v)
-	return _c
-}
-
-// SetChildID sets the "child" edge to the User entity by ID.
-func (_c *ParentCreate) SetChildID(id int) *ParentCreate {
-	_ = _c.mutation.SetEdgeID("child", id)
 	return _c
 }
 
@@ -67,6 +46,9 @@ func (_c *ParentCreate) Mutation() *ParentMutation {
 
 // Save creates the Parent in the database.
 func (_c *ParentCreate) Save(ctx context.Context) (*Parent, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

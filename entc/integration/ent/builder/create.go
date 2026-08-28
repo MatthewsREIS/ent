@@ -13,12 +13,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // BuilderCreate is the builder for creating a Builder entity.
 type BuilderCreate struct {
 	Config
+	err      error
 	mutation *BuilderMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -29,6 +31,15 @@ func NewBuilderCreate(c Config, hooks []Hook, mutation *BuilderMutation) *Builde
 	return &BuilderCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BuilderCreate builder. The first error from as is recorded and returned by Save.
+func (_c *BuilderCreate) With(as ...entfield.Assignment) *BuilderCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
+	return _c
+}
+
 // Mutation returns the BuilderMutation object of the builder.
 func (_c *BuilderCreate) Mutation() *BuilderMutation {
 	return _c.mutation
@@ -36,6 +47,9 @@ func (_c *BuilderCreate) Mutation() *BuilderMutation {
 
 // Save creates the Builder in the database.
 func (_c *BuilderCreate) Save(ctx context.Context) (*Builder, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

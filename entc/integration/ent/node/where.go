@@ -21,20 +21,20 @@ var F = struct {
 	// UpdatedAt is the handle for the "updated_at" field.
 	UpdatedAt entfield.Time
 }{
-	ID:        entfield.NewNumber[int](FieldID),
-	Value:     entfield.NewNumber[int](FieldValue),
-	UpdatedAt: entfield.NewTime(FieldUpdatedAt),
+	ID:        entfield.NewNumber[int](FieldID, "id"),
+	Value:     entfield.NewNumber[int](FieldValue, "value"),
+	UpdatedAt: entfield.NewTime(FieldUpdatedAt, "updated_at"),
 }
 
 // E holds typed edge handles for every edge of the Node type.
 var E = struct {
 	// Prev is the handle for the "prev" edge.
-	Prev entfield.Edge[predicate.Node]
+	Prev entfield.Edge[predicate.Node, int]
 	// Next is the handle for the "next" edge.
-	Next entfield.Edge[predicate.Node]
+	Next entfield.Edge[predicate.Node, int]
 }{
-	Prev: entfield.NewEdge[predicate.Node](newPrevStep),
-	Next: entfield.NewEdge[predicate.Node](newNextStep),
+	Prev: entfield.NewEdge[predicate.Node, int]("prev", newPrevStep),
+	Next: entfield.NewEdge[predicate.Node, int]("next", newNextStep),
 }
 
 // And groups predicates with the AND operator between them.

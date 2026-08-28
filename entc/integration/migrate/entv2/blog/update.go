@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // BlogUpdate is the builder for updating Blog entities.
 type BlogUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *BlogMutation
 }
@@ -36,30 +38,12 @@ func (_u *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate {
 	return _u
 }
 
-// SetOid sets the "oid" field.
-func (_u *BlogUpdate) SetOid(v int) *BlogUpdate {
-	_ = _u.mutation.ResetField("oid")
-	_ = _u.mutation.SetField("oid", v)
-	return _u
-}
-
-// SetNillableOid sets the "oid" field if the given value is not nil.
-func (_u *BlogUpdate) SetNillableOid(v *int) *BlogUpdate {
-	if v != nil {
-		_u.SetOid(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BlogUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *BlogUpdate) With(as ...entfield.Assignment) *BlogUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddOid adds value to the "oid" field.
-func (_u *BlogUpdate) AddOid(v int) *BlogUpdate {
-	_ = _u.mutation.AddField("oid", v)
-	return _u
-}
-
-// AddAdminIDs adds the "admins" edge to the User entity by IDs.
-func (_u *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate {
-	_ = _u.mutation.AddEdgeIDs("admins", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -82,6 +66,9 @@ func (_u *BlogUpdate) RemoveAdminIDs(ids ...int) *BlogUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BlogUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*BlogMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -184,6 +171,7 @@ func (_u *BlogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type BlogUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *BlogMutation
 }
@@ -193,30 +181,12 @@ func NewBlogUpdateOne(c Config, hooks []Hook, mutation *BlogMutation) *BlogUpdat
 	return &BlogUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetOid sets the "oid" field.
-func (_u *BlogUpdateOne) SetOid(v int) *BlogUpdateOne {
-	_ = _u.mutation.ResetField("oid")
-	_ = _u.mutation.SetField("oid", v)
-	return _u
-}
-
-// SetNillableOid sets the "oid" field if the given value is not nil.
-func (_u *BlogUpdateOne) SetNillableOid(v *int) *BlogUpdateOne {
-	if v != nil {
-		_u.SetOid(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BlogUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *BlogUpdateOne) With(as ...entfield.Assignment) *BlogUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddOid adds value to the "oid" field.
-func (_u *BlogUpdateOne) AddOid(v int) *BlogUpdateOne {
-	_ = _u.mutation.AddField("oid", v)
-	return _u
-}
-
-// AddAdminIDs adds the "admins" edge to the User entity by IDs.
-func (_u *BlogUpdateOne) AddAdminIDs(ids ...int) *BlogUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("admins", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -252,6 +222,9 @@ func (_u *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne {
 
 // Save executes the query and returns the updated Blog entity.
 func (_u *BlogUpdateOne) Save(ctx context.Context) (*Blog, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Blog](ctx, &entbuilder.UpdateState[*BlogMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

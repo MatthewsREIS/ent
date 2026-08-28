@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupUpdate is the builder for updating Group entities.
 type GroupUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *GroupMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -38,116 +40,12 @@ func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 	return _u
 }
 
-// SetActive sets the "active" field.
-func (_u *GroupUpdate) SetActive(v bool) *GroupUpdate {
-	_ = _u.mutation.SetField("active", v)
-	return _u
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableActive(v *bool) *GroupUpdate {
-	if v != nil {
-		_u.SetActive(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *GroupUpdate) With(as ...entfield.Assignment) *GroupUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetExpire sets the "expire" field.
-func (_u *GroupUpdate) SetExpire(v time.Time) *GroupUpdate {
-	_ = _u.mutation.SetField("expire", v)
-	return _u
-}
-
-// SetNillableExpire sets the "expire" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableExpire(v *time.Time) *GroupUpdate {
-	if v != nil {
-		_u.SetExpire(*v)
-	}
-	return _u
-}
-
-// SetType sets the "type" field.
-func (_u *GroupUpdate) SetType(v string) *GroupUpdate {
-	_ = _u.mutation.SetField("type", v)
-	return _u
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableType(v *string) *GroupUpdate {
-	if v != nil {
-		_u.SetType(*v)
-	}
-	return _u
-}
-
-// ClearType clears the value of the "type" field.
-func (_u *GroupUpdate) ClearType() *GroupUpdate {
-	_ = _u.mutation.ClearField("type")
-	return _u
-}
-
-// SetMaxUsers sets the "max_users" field.
-func (_u *GroupUpdate) SetMaxUsers(v int) *GroupUpdate {
-	_ = _u.mutation.ResetField("max_users")
-	_ = _u.mutation.SetField("max_users", v)
-	return _u
-}
-
-// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableMaxUsers(v *int) *GroupUpdate {
-	if v != nil {
-		_u.SetMaxUsers(*v)
-	}
-	return _u
-}
-
-// AddMaxUsers adds value to the "max_users" field.
-func (_u *GroupUpdate) AddMaxUsers(v int) *GroupUpdate {
-	_ = _u.mutation.AddField("max_users", v)
-	return _u
-}
-
-// ClearMaxUsers clears the value of the "max_users" field.
-func (_u *GroupUpdate) ClearMaxUsers() *GroupUpdate {
-	_ = _u.mutation.ClearField("max_users")
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *GroupUpdate) SetName(v string) *GroupUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableName(v *string) *GroupUpdate {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_u *GroupUpdate) AddFileIDs(ids ...int) *GroupUpdate {
-	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddBlockedIDs adds the "blocked" edge to the User entity by IDs.
-func (_u *GroupUpdate) AddBlockedIDs(ids ...int) *GroupUpdate {
-	_ = _u.mutation.AddEdgeIDs("blocked", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
-	_ = _u.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// SetInfoID sets the "info" edge to the GroupInfo entity by ID.
-func (_u *GroupUpdate) SetInfoID(id int) *GroupUpdate {
-	_ = _u.mutation.SetEdgeID("info", id)
 	return _u
 }
 
@@ -200,6 +98,9 @@ func (_u *GroupUpdate) ClearInfo() *GroupUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*GroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -472,6 +373,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type GroupUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *GroupMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -482,116 +384,12 @@ func NewGroupUpdateOne(c Config, hooks []Hook, mutation *GroupMutation) *GroupUp
 	return &GroupUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetActive sets the "active" field.
-func (_u *GroupUpdateOne) SetActive(v bool) *GroupUpdateOne {
-	_ = _u.mutation.SetField("active", v)
-	return _u
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableActive(v *bool) *GroupUpdateOne {
-	if v != nil {
-		_u.SetActive(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *GroupUpdateOne) With(as ...entfield.Assignment) *GroupUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetExpire sets the "expire" field.
-func (_u *GroupUpdateOne) SetExpire(v time.Time) *GroupUpdateOne {
-	_ = _u.mutation.SetField("expire", v)
-	return _u
-}
-
-// SetNillableExpire sets the "expire" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableExpire(v *time.Time) *GroupUpdateOne {
-	if v != nil {
-		_u.SetExpire(*v)
-	}
-	return _u
-}
-
-// SetType sets the "type" field.
-func (_u *GroupUpdateOne) SetType(v string) *GroupUpdateOne {
-	_ = _u.mutation.SetField("type", v)
-	return _u
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableType(v *string) *GroupUpdateOne {
-	if v != nil {
-		_u.SetType(*v)
-	}
-	return _u
-}
-
-// ClearType clears the value of the "type" field.
-func (_u *GroupUpdateOne) ClearType() *GroupUpdateOne {
-	_ = _u.mutation.ClearField("type")
-	return _u
-}
-
-// SetMaxUsers sets the "max_users" field.
-func (_u *GroupUpdateOne) SetMaxUsers(v int) *GroupUpdateOne {
-	_ = _u.mutation.ResetField("max_users")
-	_ = _u.mutation.SetField("max_users", v)
-	return _u
-}
-
-// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableMaxUsers(v *int) *GroupUpdateOne {
-	if v != nil {
-		_u.SetMaxUsers(*v)
-	}
-	return _u
-}
-
-// AddMaxUsers adds value to the "max_users" field.
-func (_u *GroupUpdateOne) AddMaxUsers(v int) *GroupUpdateOne {
-	_ = _u.mutation.AddField("max_users", v)
-	return _u
-}
-
-// ClearMaxUsers clears the value of the "max_users" field.
-func (_u *GroupUpdateOne) ClearMaxUsers() *GroupUpdateOne {
-	_ = _u.mutation.ClearField("max_users")
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *GroupUpdateOne) SetName(v string) *GroupUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableName(v *string) *GroupUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_u *GroupUpdateOne) AddFileIDs(ids ...int) *GroupUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddBlockedIDs adds the "blocked" edge to the User entity by IDs.
-func (_u *GroupUpdateOne) AddBlockedIDs(ids ...int) *GroupUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("blocked", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_u *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// SetInfoID sets the "info" edge to the GroupInfo entity by ID.
-func (_u *GroupUpdateOne) SetInfoID(id int) *GroupUpdateOne {
-	_ = _u.mutation.SetEdgeID("info", id)
 	return _u
 }
 
@@ -657,6 +455,9 @@ func (_u *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOne
 
 // Save executes the query and returns the updated Group entity.
 func (_u *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Group](ctx, &entbuilder.UpdateState[*GroupMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

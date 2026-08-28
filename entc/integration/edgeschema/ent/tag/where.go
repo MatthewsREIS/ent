@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entfield"
+	"github.com/google/uuid"
 )
 
 // F holds typed predicate/order handles for every comparable field of the Tag type.
@@ -19,25 +20,25 @@ var F = struct {
 	// Value is the handle for the "value" field.
 	Value entfield.String[string]
 }{
-	ID:    entfield.NewNumber[int](FieldID),
-	Value: entfield.NewString[string](FieldValue),
+	ID:    entfield.NewNumber[int](FieldID, "id"),
+	Value: entfield.NewString[string](FieldValue, "value"),
 }
 
 // E holds typed edge handles for every edge of the Tag type.
 var E = struct {
 	// Tweets is the handle for the "tweets" edge.
-	Tweets entfield.Edge[predicate.Tweet]
+	Tweets entfield.Edge[predicate.Tweet, int]
 	// Groups is the handle for the "groups" edge.
-	Groups entfield.Edge[predicate.Group]
+	Groups entfield.Edge[predicate.Group, int]
 	// TweetTags is the handle for the "tweet_tags" edge.
-	TweetTags entfield.Edge[predicate.TweetTag]
+	TweetTags entfield.Edge[predicate.TweetTag, uuid.UUID]
 	// GroupTags is the handle for the "group_tags" edge.
-	GroupTags entfield.Edge[predicate.GroupTag]
+	GroupTags entfield.Edge[predicate.GroupTag, int]
 }{
-	Tweets:    entfield.NewEdge[predicate.Tweet](newTweetsStep),
-	Groups:    entfield.NewEdge[predicate.Group](newGroupsStep),
-	TweetTags: entfield.NewEdge[predicate.TweetTag](newTweetTagsStep),
-	GroupTags: entfield.NewEdge[predicate.GroupTag](newGroupTagsStep),
+	Tweets:    entfield.NewEdge[predicate.Tweet, int]("tweets", newTweetsStep),
+	Groups:    entfield.NewEdge[predicate.Group, int]("groups", newGroupsStep),
+	TweetTags: entfield.NewEdge[predicate.TweetTag, uuid.UUID]("tweet_tags", newTweetTagsStep),
+	GroupTags: entfield.NewEdge[predicate.GroupTag, int]("group_tags", newGroupTagsStep),
 }
 
 // And groups predicates with the AND operator between them.

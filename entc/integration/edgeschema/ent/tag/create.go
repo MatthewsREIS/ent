@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -22,6 +23,7 @@ import (
 // TagCreate is the builder for creating a Tag entity.
 type TagCreate struct {
 	Config
+	err      error
 	mutation *TagMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -32,33 +34,12 @@ func NewTagCreate(c Config, hooks []Hook, mutation *TagMutation) *TagCreate {
 	return &TagCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetValue sets the "value" field.
-func (_c *TagCreate) SetValue(v string) *TagCreate {
-	_ = _c.mutation.SetField("value", v)
-	return _c
-}
-
-// AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_c *TagCreate) AddTweetIDs(ids ...int) *TagCreate {
-	_ = _c.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_c *TagCreate) AddGroupIDs(ids ...int) *TagCreate {
-	_ = _c.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
-func (_c *TagCreate) AddTweetTagIDs(ids ...uuid.UUID) *TagCreate {
-	_ = _c.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
-func (_c *TagCreate) AddGroupTagIDs(ids ...int) *TagCreate {
-	_ = _c.mutation.AddEdgeIDs("group_tags", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TagCreate builder. The first error from as is recorded and returned by Save.
+func (_c *TagCreate) With(as ...entfield.Assignment) *TagCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -69,6 +50,9 @@ func (_c *TagCreate) Mutation() *TagMutation {
 
 // Save creates the Tag in the database.
 func (_c *TagCreate) Save(ctx context.Context) (*Tag, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

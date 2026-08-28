@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // LicenseUpdate is the builder for updating License entities.
 type LicenseUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *LicenseMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -38,9 +40,12 @@ func (_u *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
 	return _u
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (_u *LicenseUpdate) SetUpdateTime(v time.Time) *LicenseUpdate {
-	_ = _u.mutation.SetField("update_time", v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the LicenseUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *LicenseUpdate) With(as ...entfield.Assignment) *LicenseUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -51,6 +56,9 @@ func (_u *LicenseUpdate) Mutation() *LicenseMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *LicenseUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	_u.defaults()
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*LicenseMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
@@ -120,6 +128,7 @@ func (_u *LicenseUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type LicenseUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *LicenseMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -130,9 +139,12 @@ func NewLicenseUpdateOne(c Config, hooks []Hook, mutation *LicenseMutation) *Lic
 	return &LicenseUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (_u *LicenseUpdateOne) SetUpdateTime(v time.Time) *LicenseUpdateOne {
-	_ = _u.mutation.SetField("update_time", v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the LicenseUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *LicenseUpdateOne) With(as ...entfield.Assignment) *LicenseUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
 	return _u
 }
 
@@ -156,6 +168,9 @@ func (_u *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdat
 
 // Save executes the query and returns the updated License entity.
 func (_u *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	_u.defaults()
 	return entbuilder.RunUpdateOne[License](ctx, &entbuilder.UpdateState[*LicenseMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }

@@ -7,6 +7,8 @@
 package info
 
 import (
+	"encoding/json"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entfield"
@@ -16,16 +18,19 @@ import (
 var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
+	// Content is the handle for the "content" field.
+	Content entfield.JSON[json.RawMessage]
 }{
-	ID: entfield.NewNumber[int](FieldID),
+	ID:      entfield.NewNumber[int](FieldID, "id"),
+	Content: entfield.NewJSON[json.RawMessage]("content"),
 }
 
 // E holds typed edge handles for every edge of the Info type.
 var E = struct {
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 }{
-	User: entfield.NewEdge[predicate.User](newUserStep),
+	User: entfield.NewEdge[predicate.User, int]("user", newUserStep),
 }
 
 // And groups predicates with the AND operator between them.

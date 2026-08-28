@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // DocUpdate is the builder for updating Doc entities.
 type DocUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *DocMutation
 }
@@ -37,49 +39,12 @@ func (_u *DocUpdate) Where(ps ...predicate.Doc) *DocUpdate {
 	return _u
 }
 
-// SetText sets the "text" field.
-func (_u *DocUpdate) SetText(v string) *DocUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *DocUpdate) SetNillableText(v *string) *DocUpdate {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the DocUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *DocUpdate) With(as ...entfield.Assignment) *DocUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearText clears the value of the "text" field.
-func (_u *DocUpdate) ClearText() *DocUpdate {
-	_ = _u.mutation.ClearField("text")
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the Doc entity by ID.
-func (_u *DocUpdate) SetParentID(id schema.DocID) *DocUpdate {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the Doc entity by ID if the given value is not nil.
-func (_u *DocUpdate) SetNillableParentID(id *schema.DocID) *DocUpdate {
-	if id != nil {
-		_u = _u.SetParentID(*id)
-	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the Doc entity by IDs.
-func (_u *DocUpdate) AddChildIDs(ids ...schema.DocID) *DocUpdate {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddRelatedIDs adds the "related" edge to the Doc entity by IDs.
-func (_u *DocUpdate) AddRelatedIDs(ids ...schema.DocID) *DocUpdate {
-	_ = _u.mutation.AddEdgeIDs("related", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -120,6 +85,9 @@ func (_u *DocUpdate) RemoveRelatedIDs(ids ...schema.DocID) *DocUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *DocUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*DocMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -295,6 +263,7 @@ func (_u *DocUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type DocUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *DocMutation
 }
@@ -304,49 +273,12 @@ func NewDocUpdateOne(c Config, hooks []Hook, mutation *DocMutation) *DocUpdateOn
 	return &DocUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_u *DocUpdateOne) SetText(v string) *DocUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *DocUpdateOne) SetNillableText(v *string) *DocUpdateOne {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the DocUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *DocUpdateOne) With(as ...entfield.Assignment) *DocUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearText clears the value of the "text" field.
-func (_u *DocUpdateOne) ClearText() *DocUpdateOne {
-	_ = _u.mutation.ClearField("text")
-	return _u
-}
-
-// SetParentID sets the "parent" edge to the Doc entity by ID.
-func (_u *DocUpdateOne) SetParentID(id schema.DocID) *DocUpdateOne {
-	_ = _u.mutation.SetEdgeID("parent", id)
-	return _u
-}
-
-// SetNillableParentID sets the "parent" edge to the Doc entity by ID if the given value is not nil.
-func (_u *DocUpdateOne) SetNillableParentID(id *schema.DocID) *DocUpdateOne {
-	if id != nil {
-		_u = _u.SetParentID(*id)
-	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the Doc entity by IDs.
-func (_u *DocUpdateOne) AddChildIDs(ids ...schema.DocID) *DocUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddRelatedIDs adds the "related" edge to the Doc entity by IDs.
-func (_u *DocUpdateOne) AddRelatedIDs(ids ...schema.DocID) *DocUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("related", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -400,6 +332,9 @@ func (_u *DocUpdateOne) Select(field string, fields ...string) *DocUpdateOne {
 
 // Save executes the query and returns the updated Doc entity.
 func (_u *DocUpdateOne) Save(ctx context.Context) (*Doc, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Doc](ctx, &entbuilder.UpdateState[*DocMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/bloblink"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -22,6 +23,7 @@ import (
 // BlobCreate is the builder for creating a Blob entity.
 type BlobCreate struct {
 	Config
+	err      error
 	mutation *BlobMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -32,65 +34,12 @@ func NewBlobCreate(c Config, hooks []Hook, mutation *BlobMutation) *BlobCreate {
 	return &BlobCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetUUID sets the "uuid" field.
-func (_c *BlobCreate) SetUUID(v uuid.UUID) *BlobCreate {
-	_ = _c.mutation.SetField("uuid", v)
-	return _c
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_c *BlobCreate) SetNillableUUID(v *uuid.UUID) *BlobCreate {
-	if v != nil {
-		_c.SetUUID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BlobCreate builder. The first error from as is recorded and returned by Save.
+func (_c *BlobCreate) With(as ...entfield.Assignment) *BlobCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetCount sets the "count" field.
-func (_c *BlobCreate) SetCount(v int) *BlobCreate {
-	_ = _c.mutation.SetField("count", v)
-	return _c
-}
-
-// SetNillableCount sets the "count" field if the given value is not nil.
-func (_c *BlobCreate) SetNillableCount(v *int) *BlobCreate {
-	if v != nil {
-		_c.SetCount(*v)
-	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *BlobCreate) SetID(v uuid.UUID) *BlobCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *BlobCreate) SetNillableID(v *uuid.UUID) *BlobCreate {
-	if v != nil {
-		_c.SetID(*v)
-	}
-	return _c
-}
-
-// SetParentID sets the "parent" edge to the Blob entity by ID.
-func (_c *BlobCreate) SetParentID(id uuid.UUID) *BlobCreate {
-	_ = _c.mutation.SetEdgeID("parent", id)
-	return _c
-}
-
-// SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
-func (_c *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
-	if id != nil {
-		_c = _c.SetParentID(*id)
-	}
-	return _c
-}
-
-// AddLinkIDs adds the "links" edge to the Blob entity by IDs.
-func (_c *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
-	_ = _c.mutation.AddEdgeIDs("links", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -101,6 +50,9 @@ func (_c *BlobCreate) Mutation() *BlobMutation {
 
 // Save creates the Blob in the database.
 func (_c *BlobCreate) Save(ctx context.Context) (*Blob, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CarCreate is the builder for creating a Car entity.
 type CarCreate struct {
 	Config
+	err      error
 	mutation *CarMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,56 +32,11 @@ func NewCarCreate(c Config, hooks []Hook, mutation *CarMutation) *CarCreate {
 	return &CarCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetBeforeID sets the "before_id" field.
-func (_c *CarCreate) SetBeforeID(v float64) *CarCreate {
-	_ = _c.mutation.SetField("before_id", v)
-	return _c
-}
-
-// SetNillableBeforeID sets the "before_id" field if the given value is not nil.
-func (_c *CarCreate) SetNillableBeforeID(v *float64) *CarCreate {
-	if v != nil {
-		_c.SetBeforeID(*v)
-	}
-	return _c
-}
-
-// SetAfterID sets the "after_id" field.
-func (_c *CarCreate) SetAfterID(v float64) *CarCreate {
-	_ = _c.mutation.SetField("after_id", v)
-	return _c
-}
-
-// SetNillableAfterID sets the "after_id" field if the given value is not nil.
-func (_c *CarCreate) SetNillableAfterID(v *float64) *CarCreate {
-	if v != nil {
-		_c.SetAfterID(*v)
-	}
-	return _c
-}
-
-// SetModel sets the "model" field.
-func (_c *CarCreate) SetModel(v string) *CarCreate {
-	_ = _c.mutation.SetField("model", v)
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *CarCreate) SetID(v int) *CarCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetOwnerID sets the "owner" edge to the Pet entity by ID.
-func (_c *CarCreate) SetOwnerID(id string) *CarCreate {
-	_ = _c.mutation.SetEdgeID("owner", id)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner" edge to the Pet entity by ID if the given value is not nil.
-func (_c *CarCreate) SetNillableOwnerID(id *string) *CarCreate {
-	if id != nil {
-		_c = _c.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CarCreate) With(as ...entfield.Assignment) *CarCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -91,6 +48,9 @@ func (_c *CarCreate) Mutation() *CarMutation {
 
 // Save creates the Car in the database.
 func (_c *CarCreate) Save(ctx context.Context) (*Car, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

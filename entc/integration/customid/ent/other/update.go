@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // OtherUpdate is the builder for updating Other entities.
 type OtherUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *OtherMutation
 }
@@ -36,6 +38,15 @@ func (_u *OtherUpdate) Where(ps ...predicate.Other) *OtherUpdate {
 	return _u
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the OtherUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *OtherUpdate) With(as ...entfield.Assignment) *OtherUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
+}
+
 // Mutation returns the OtherMutation object of the builder.
 func (_u *OtherUpdate) Mutation() *OtherMutation {
 	return _u.mutation
@@ -43,6 +54,9 @@ func (_u *OtherUpdate) Mutation() *OtherMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *OtherUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*OtherMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -93,6 +107,7 @@ func (_u *OtherUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type OtherUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *OtherMutation
 }
@@ -100,6 +115,15 @@ type OtherUpdateOne struct {
 // NewOtherUpdateOne returns a new OtherUpdateOne initialized with the given config, hooks, and mutation.
 func NewOtherUpdateOne(c Config, hooks []Hook, mutation *OtherMutation) *OtherUpdateOne {
 	return &OtherUpdateOne{Config: c, hooks: hooks, mutation: mutation}
+}
+
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the OtherUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *OtherUpdateOne) With(as ...entfield.Assignment) *OtherUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
 }
 
 // Mutation returns the OtherMutation object of the builder.
@@ -122,6 +146,9 @@ func (_u *OtherUpdateOne) Select(field string, fields ...string) *OtherUpdateOne
 
 // Save executes the query and returns the updated Other entity.
 func (_u *OtherUpdateOne) Save(ctx context.Context) (*Other, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Other](ctx, &entbuilder.UpdateState[*OtherMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

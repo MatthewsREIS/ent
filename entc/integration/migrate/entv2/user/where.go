@@ -48,6 +48,8 @@ var F = struct {
 	Status entfield.Enum[Status]
 	// Workplace is the handle for the "workplace" field.
 	Workplace entfield.String[string]
+	// Roles is the handle for the "roles" field.
+	Roles entfield.JSON[[]string]
 	// DefaultExpr is the handle for the "default_expr" field.
 	DefaultExpr entfield.String[string]
 	// DefaultExprs is the handle for the "default_exprs" field.
@@ -57,41 +59,42 @@ var F = struct {
 	// DropOptional is the handle for the "drop_optional" field.
 	DropOptional entfield.String[string]
 }{
-	ID:           entfield.NewNumber[int](FieldID),
-	MixedString:  entfield.NewString[string](FieldMixedString),
-	MixedEnum:    entfield.NewEnum[MixedEnum](FieldMixedEnum),
-	Active:       entfield.NewBool[bool](FieldActive),
-	Age:          entfield.NewNumber[int](FieldAge),
-	Name:         entfield.NewString[string](FieldName),
-	Description:  entfield.NewString[string](FieldDescription),
-	Nickname:     entfield.NewString[string](FieldNickname),
-	Phone:        entfield.NewString[string](FieldPhone),
-	Buffer:       entfield.NewBytes(FieldBuffer),
-	Title:        entfield.NewString[string](FieldTitle),
-	NewName:      entfield.NewString[string](FieldNewName),
-	NewToken:     entfield.NewString[string](FieldNewToken),
-	Blob:         entfield.NewBytes(FieldBlob),
-	State:        entfield.NewEnum[State](FieldState),
-	Status:       entfield.NewEnum[Status](FieldStatus),
-	Workplace:    entfield.NewString[string](FieldWorkplace),
-	DefaultExpr:  entfield.NewString[string](FieldDefaultExpr),
-	DefaultExprs: entfield.NewString[string](FieldDefaultExprs),
-	CreatedAt:    entfield.NewTime(FieldCreatedAt),
-	DropOptional: entfield.NewString[string](FieldDropOptional),
+	ID:           entfield.NewNumber[int](FieldID, "id"),
+	MixedString:  entfield.NewString[string](FieldMixedString, "mixed_string"),
+	MixedEnum:    entfield.NewEnum[MixedEnum](FieldMixedEnum, "mixed_enum"),
+	Active:       entfield.NewBool[bool](FieldActive, "active"),
+	Age:          entfield.NewNumber[int](FieldAge, "age"),
+	Name:         entfield.NewString[string](FieldName, "name"),
+	Description:  entfield.NewString[string](FieldDescription, "description"),
+	Nickname:     entfield.NewString[string](FieldNickname, "nickname"),
+	Phone:        entfield.NewString[string](FieldPhone, "phone"),
+	Buffer:       entfield.NewBytes(FieldBuffer, "buffer"),
+	Title:        entfield.NewString[string](FieldTitle, "title"),
+	NewName:      entfield.NewString[string](FieldNewName, "new_name"),
+	NewToken:     entfield.NewString[string](FieldNewToken, "new_token"),
+	Blob:         entfield.NewBytes(FieldBlob, "blob"),
+	State:        entfield.NewEnum[State](FieldState, "state"),
+	Status:       entfield.NewEnum[Status](FieldStatus, "status"),
+	Workplace:    entfield.NewString[string](FieldWorkplace, "workplace"),
+	Roles:        entfield.NewJSON[[]string]("roles"),
+	DefaultExpr:  entfield.NewString[string](FieldDefaultExpr, "default_expr"),
+	DefaultExprs: entfield.NewString[string](FieldDefaultExprs, "default_exprs"),
+	CreatedAt:    entfield.NewTime(FieldCreatedAt, "created_at"),
+	DropOptional: entfield.NewString[string](FieldDropOptional, "drop_optional"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Car is the handle for the "car" edge.
-	Car entfield.Edge[predicate.Car]
+	Car entfield.Edge[predicate.Car, int]
 	// Pets is the handle for the "pets" edge.
-	Pets entfield.Edge[predicate.Pet]
+	Pets entfield.Edge[predicate.Pet, int]
 	// Friends is the handle for the "friends" edge.
-	Friends entfield.Edge[predicate.User]
+	Friends entfield.Edge[predicate.User, int]
 }{
-	Car:     entfield.NewEdge[predicate.Car](newCarStep),
-	Pets:    entfield.NewEdge[predicate.Pet](newPetsStep),
-	Friends: entfield.NewEdge[predicate.User](newFriendsStep),
+	Car:     entfield.NewEdge[predicate.Car, int]("car", newCarStep),
+	Pets:    entfield.NewEdge[predicate.Pet, int]("pets", newPetsStep),
+	Friends: entfield.NewEdge[predicate.User, int]("friends", newFriendsStep),
 }
 
 // And groups predicates with the AND operator between them.

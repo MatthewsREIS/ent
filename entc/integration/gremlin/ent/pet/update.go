@@ -9,7 +9,6 @@ package pet
 import (
 	"context"
 	"errors"
-	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -18,12 +17,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
-	"github.com/google/uuid"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *PetMutation
 }
@@ -39,139 +39,11 @@ func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return _u
 }
 
-// SetAge sets the "age" field.
-func (_u *PetUpdate) SetAge(v float64) *PetUpdate {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableAge(v *float64) *PetUpdate {
-	if v != nil {
-		_u.SetAge(*v)
-	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *PetUpdate) AddAge(v float64) *PetUpdate {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *PetUpdate) SetName(v string) *PetUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableName(v *string) *PetUpdate {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// SetUUID sets the "uuid" field.
-func (_u *PetUpdate) SetUUID(v uuid.UUID) *PetUpdate {
-	_ = _u.mutation.SetField("uuid", v)
-	return _u
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableUUID(v *uuid.UUID) *PetUpdate {
-	if v != nil {
-		_u.SetUUID(*v)
-	}
-	return _u
-}
-
-// ClearUUID clears the value of the "uuid" field.
-func (_u *PetUpdate) ClearUUID() *PetUpdate {
-	_ = _u.mutation.ClearField("uuid")
-	return _u
-}
-
-// SetNickname sets the "nickname" field.
-func (_u *PetUpdate) SetNickname(v string) *PetUpdate {
-	_ = _u.mutation.SetField("nickname", v)
-	return _u
-}
-
-// SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableNickname(v *string) *PetUpdate {
-	if v != nil {
-		_u.SetNickname(*v)
-	}
-	return _u
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (_u *PetUpdate) ClearNickname() *PetUpdate {
-	_ = _u.mutation.ClearField("nickname")
-	return _u
-}
-
-// SetTrained sets the "trained" field.
-func (_u *PetUpdate) SetTrained(v bool) *PetUpdate {
-	_ = _u.mutation.SetField("trained", v)
-	return _u
-}
-
-// SetNillableTrained sets the "trained" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableTrained(v *bool) *PetUpdate {
-	if v != nil {
-		_u.SetTrained(*v)
-	}
-	return _u
-}
-
-// SetOptionalTime sets the "optional_time" field.
-func (_u *PetUpdate) SetOptionalTime(v time.Time) *PetUpdate {
-	_ = _u.mutation.SetField("optional_time", v)
-	return _u
-}
-
-// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableOptionalTime(v *time.Time) *PetUpdate {
-	if v != nil {
-		_u.SetOptionalTime(*v)
-	}
-	return _u
-}
-
-// ClearOptionalTime clears the value of the "optional_time" field.
-func (_u *PetUpdate) ClearOptionalTime() *PetUpdate {
-	_ = _u.mutation.ClearField("optional_time")
-	return _u
-}
-
-// SetTeamID sets the "team" edge to the User entity by ID.
-func (_u *PetUpdate) SetTeamID(id string) *PetUpdate {
-	_ = _u.mutation.SetEdgeID("team", id)
-	return _u
-}
-
-// SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
-func (_u *PetUpdate) SetNillableTeamID(id *string) *PetUpdate {
-	if id != nil {
-		_u = _u.SetTeamID(*id)
-	}
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *PetUpdate) SetOwnerID(id string) *PetUpdate {
-	_ = _u.mutation.SetEdgeID("owner", id)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_u *PetUpdate) SetNillableOwnerID(id *string) *PetUpdate {
-	if id != nil {
-		_u = _u.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *PetUpdate) With(as ...entfield.Assignment) *PetUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -195,6 +67,9 @@ func (_u *PetUpdate) ClearOwner() *PetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
@@ -320,6 +195,7 @@ func (_u *PetUpdate) gremlin() *dsl.Traversal {
 type PetUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *PetMutation
 }
@@ -329,139 +205,11 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 	return &PetUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_u *PetUpdateOne) SetAge(v float64) *PetUpdateOne {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableAge(v *float64) *PetUpdateOne {
-	if v != nil {
-		_u.SetAge(*v)
-	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *PetUpdateOne) AddAge(v float64) *PetUpdateOne {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// SetName sets the "name" field.
-func (_u *PetUpdateOne) SetName(v string) *PetUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableName(v *string) *PetUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
-	}
-	return _u
-}
-
-// SetUUID sets the "uuid" field.
-func (_u *PetUpdateOne) SetUUID(v uuid.UUID) *PetUpdateOne {
-	_ = _u.mutation.SetField("uuid", v)
-	return _u
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableUUID(v *uuid.UUID) *PetUpdateOne {
-	if v != nil {
-		_u.SetUUID(*v)
-	}
-	return _u
-}
-
-// ClearUUID clears the value of the "uuid" field.
-func (_u *PetUpdateOne) ClearUUID() *PetUpdateOne {
-	_ = _u.mutation.ClearField("uuid")
-	return _u
-}
-
-// SetNickname sets the "nickname" field.
-func (_u *PetUpdateOne) SetNickname(v string) *PetUpdateOne {
-	_ = _u.mutation.SetField("nickname", v)
-	return _u
-}
-
-// SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableNickname(v *string) *PetUpdateOne {
-	if v != nil {
-		_u.SetNickname(*v)
-	}
-	return _u
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (_u *PetUpdateOne) ClearNickname() *PetUpdateOne {
-	_ = _u.mutation.ClearField("nickname")
-	return _u
-}
-
-// SetTrained sets the "trained" field.
-func (_u *PetUpdateOne) SetTrained(v bool) *PetUpdateOne {
-	_ = _u.mutation.SetField("trained", v)
-	return _u
-}
-
-// SetNillableTrained sets the "trained" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableTrained(v *bool) *PetUpdateOne {
-	if v != nil {
-		_u.SetTrained(*v)
-	}
-	return _u
-}
-
-// SetOptionalTime sets the "optional_time" field.
-func (_u *PetUpdateOne) SetOptionalTime(v time.Time) *PetUpdateOne {
-	_ = _u.mutation.SetField("optional_time", v)
-	return _u
-}
-
-// SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableOptionalTime(v *time.Time) *PetUpdateOne {
-	if v != nil {
-		_u.SetOptionalTime(*v)
-	}
-	return _u
-}
-
-// ClearOptionalTime clears the value of the "optional_time" field.
-func (_u *PetUpdateOne) ClearOptionalTime() *PetUpdateOne {
-	_ = _u.mutation.ClearField("optional_time")
-	return _u
-}
-
-// SetTeamID sets the "team" edge to the User entity by ID.
-func (_u *PetUpdateOne) SetTeamID(id string) *PetUpdateOne {
-	_ = _u.mutation.SetEdgeID("team", id)
-	return _u
-}
-
-// SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableTeamID(id *string) *PetUpdateOne {
-	if id != nil {
-		_u = _u.SetTeamID(*id)
-	}
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *PetUpdateOne) SetOwnerID(id string) *PetUpdateOne {
-	_ = _u.mutation.SetEdgeID("owner", id)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableOwnerID(id *string) *PetUpdateOne {
-	if id != nil {
-		_u = _u.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *PetUpdateOne) With(as ...entfield.Assignment) *PetUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -498,6 +246,9 @@ func (_u *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
 
 // Save executes the query and returns the updated Pet entity.
 func (_u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 

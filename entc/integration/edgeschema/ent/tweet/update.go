@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/tweettag"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -25,6 +26,7 @@ import (
 // TweetUpdate is the builder for updating Tweet entities.
 type TweetUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *TweetMutation
 }
@@ -40,47 +42,12 @@ func (_u *TweetUpdate) Where(ps ...predicate.Tweet) *TweetUpdate {
 	return _u
 }
 
-// SetText sets the "text" field.
-func (_u *TweetUpdate) SetText(v string) *TweetUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *TweetUpdate) SetNillableText(v *string) *TweetUpdate {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TweetUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *TweetUpdate) With(as ...entfield.Assignment) *TweetUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
-func (_u *TweetUpdate) AddLikedUserIDs(ids ...int) *TweetUpdate {
-	_ = _u.mutation.AddEdgeIDs("liked_users", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *TweetUpdate) AddUserIDs(ids ...int) *TweetUpdate {
-	_ = _u.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (_u *TweetUpdate) AddTagIDs(ids ...int) *TweetUpdate {
-	_ = _u.mutation.AddEdgeIDs("tags", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
-func (_u *TweetUpdate) AddTweetUserIDs(ids ...int) *TweetUpdate {
-	_ = _u.mutation.AddEdgeIDs("tweet_user", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
-func (_u *TweetUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
-	_ = _u.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -151,6 +118,9 @@ func (_u *TweetUpdate) RemoveTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *TweetUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*TweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -501,6 +471,7 @@ func (_u *TweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type TweetUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *TweetMutation
 }
@@ -510,47 +481,12 @@ func NewTweetUpdateOne(c Config, hooks []Hook, mutation *TweetMutation) *TweetUp
 	return &TweetUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_u *TweetUpdateOne) SetText(v string) *TweetUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *TweetUpdateOne) SetNillableText(v *string) *TweetUpdateOne {
-	if v != nil {
-		_u.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TweetUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *TweetUpdateOne) With(as ...entfield.Assignment) *TweetUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
-func (_u *TweetUpdateOne) AddLikedUserIDs(ids ...int) *TweetUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("liked_users", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddUserIDs adds the "user" edge to the User entity by IDs.
-func (_u *TweetUpdateOne) AddUserIDs(ids ...int) *TweetUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("user", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (_u *TweetUpdateOne) AddTagIDs(ids ...int) *TweetUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("tags", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
-func (_u *TweetUpdateOne) AddTweetUserIDs(ids ...int) *TweetUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("tweet_user", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
-func (_u *TweetUpdateOne) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("tweet_tags", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -634,6 +570,9 @@ func (_u *TweetUpdateOne) Select(field string, fields ...string) *TweetUpdateOne
 
 // Save executes the query and returns the updated Tweet entity.
 func (_u *TweetUpdateOne) Save(ctx context.Context) (*Tweet, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Tweet](ctx, &entbuilder.UpdateState[*TweetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

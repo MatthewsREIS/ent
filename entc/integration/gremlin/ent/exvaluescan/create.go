@@ -16,11 +16,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // ExValueScanCreate is the builder for creating a ExValueScan entity.
 type ExValueScanCreate struct {
 	Config
+	err      error
 	mutation *ExValueScanMutation
 	hooks    []Hook
 }
@@ -30,58 +32,11 @@ func NewExValueScanCreate(c Config, hooks []Hook, mutation *ExValueScanMutation)
 	return &ExValueScanCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetBinary sets the "binary" field.
-func (_c *ExValueScanCreate) SetBinary(v *url.URL) *ExValueScanCreate {
-	_ = _c.mutation.SetField("binary", v)
-	return _c
-}
-
-// SetBinaryBytes sets the "binary_bytes" field.
-func (_c *ExValueScanCreate) SetBinaryBytes(v *url.URL) *ExValueScanCreate {
-	_ = _c.mutation.SetField("binary_bytes", v)
-	return _c
-}
-
-// SetBinaryOptional sets the "binary_optional" field.
-func (_c *ExValueScanCreate) SetBinaryOptional(v *url.URL) *ExValueScanCreate {
-	_ = _c.mutation.SetField("binary_optional", v)
-	return _c
-}
-
-// SetText sets the "text" field.
-func (_c *ExValueScanCreate) SetText(v *big.Int) *ExValueScanCreate {
-	_ = _c.mutation.SetField("text", v)
-	return _c
-}
-
-// SetTextOptional sets the "text_optional" field.
-func (_c *ExValueScanCreate) SetTextOptional(v *big.Int) *ExValueScanCreate {
-	_ = _c.mutation.SetField("text_optional", v)
-	return _c
-}
-
-// SetBase64 sets the "base64" field.
-func (_c *ExValueScanCreate) SetBase64(v string) *ExValueScanCreate {
-	_ = _c.mutation.SetField("base64", v)
-	return _c
-}
-
-// SetCustom sets the "custom" field.
-func (_c *ExValueScanCreate) SetCustom(v string) *ExValueScanCreate {
-	_ = _c.mutation.SetField("custom", v)
-	return _c
-}
-
-// SetCustomOptional sets the "custom_optional" field.
-func (_c *ExValueScanCreate) SetCustomOptional(v string) *ExValueScanCreate {
-	_ = _c.mutation.SetField("custom_optional", v)
-	return _c
-}
-
-// SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (_c *ExValueScanCreate) SetNillableCustomOptional(v *string) *ExValueScanCreate {
-	if v != nil {
-		_c.SetCustomOptional(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ExValueScanCreate builder. The first error from as is recorded and returned by Save.
+func (_c *ExValueScanCreate) With(as ...entfield.Assignment) *ExValueScanCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -93,6 +48,9 @@ func (_c *ExValueScanCreate) Mutation() *ExValueScanMutation {
 
 // Save creates the ExValueScan in the database.
 func (_c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 

@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // IntSIDCreate is the builder for creating a IntSID entity.
 type IntSIDCreate struct {
 	Config
+	err      error
 	mutation *IntSIDMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,29 +32,12 @@ func NewIntSIDCreate(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSIDCr
 	return &IntSIDCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetID sets the "id" field.
-func (_c *IntSIDCreate) SetID(v sid.ID) *IntSIDCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetParentID sets the "parent" edge to the IntSID entity by ID.
-func (_c *IntSIDCreate) SetParentID(id sid.ID) *IntSIDCreate {
-	_ = _c.mutation.SetEdgeID("parent", id)
-	return _c
-}
-
-// SetNillableParentID sets the "parent" edge to the IntSID entity by ID if the given value is not nil.
-func (_c *IntSIDCreate) SetNillableParentID(id *sid.ID) *IntSIDCreate {
-	if id != nil {
-		_c = _c.SetParentID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the IntSIDCreate builder. The first error from as is recorded and returned by Save.
+func (_c *IntSIDCreate) With(as ...entfield.Assignment) *IntSIDCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// AddChildIDs adds the "children" edge to the IntSID entity by IDs.
-func (_c *IntSIDCreate) AddChildIDs(ids ...sid.ID) *IntSIDCreate {
-	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -63,6 +48,9 @@ func (_c *IntSIDCreate) Mutation() *IntSIDMutation {
 
 // Save creates the IntSID in the database.
 func (_c *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

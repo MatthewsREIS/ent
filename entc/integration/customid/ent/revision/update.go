@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RevisionUpdate is the builder for updating Revision entities.
 type RevisionUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *RevisionMutation
 }
@@ -36,6 +38,15 @@ func (_u *RevisionUpdate) Where(ps ...predicate.Revision) *RevisionUpdate {
 	return _u
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RevisionUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *RevisionUpdate) With(as ...entfield.Assignment) *RevisionUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
+}
+
 // Mutation returns the RevisionMutation object of the builder.
 func (_u *RevisionUpdate) Mutation() *RevisionMutation {
 	return _u.mutation
@@ -43,6 +54,9 @@ func (_u *RevisionUpdate) Mutation() *RevisionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RevisionUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RevisionMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -93,6 +107,7 @@ func (_u *RevisionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type RevisionUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *RevisionMutation
 }
@@ -100,6 +115,15 @@ type RevisionUpdateOne struct {
 // NewRevisionUpdateOne returns a new RevisionUpdateOne initialized with the given config, hooks, and mutation.
 func NewRevisionUpdateOne(c Config, hooks []Hook, mutation *RevisionMutation) *RevisionUpdateOne {
 	return &RevisionUpdateOne{Config: c, hooks: hooks, mutation: mutation}
+}
+
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RevisionUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *RevisionUpdateOne) With(as ...entfield.Assignment) *RevisionUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
 }
 
 // Mutation returns the RevisionMutation object of the builder.
@@ -122,6 +146,9 @@ func (_u *RevisionUpdateOne) Select(field string, fields ...string) *RevisionUpd
 
 // Save executes the query and returns the updated Revision entity.
 func (_u *RevisionUpdateOne) Save(ctx context.Context) (*Revision, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Revision](ctx, &entbuilder.UpdateState[*RevisionMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

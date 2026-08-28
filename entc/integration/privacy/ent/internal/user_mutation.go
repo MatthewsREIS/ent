@@ -29,8 +29,9 @@ var userDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:      reflect.TypeFor[string](),
+			GoName:    "Name",
+			Immutable: true,
 		},
 		"age": {
 			Type:     reflect.TypeFor[uint](),

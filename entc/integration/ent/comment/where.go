@@ -9,6 +9,7 @@ package comment
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/runtime/entfield"
 )
 
@@ -24,15 +25,18 @@ var F = struct {
 	NillableInt entfield.Number[int]
 	// Table is the handle for the "table" field.
 	Table entfield.String[string]
+	// Dir is the handle for the "dir" field.
+	Dir entfield.JSON[schemadir.Dir]
 	// Client is the handle for the "client" field.
 	Client entfield.String[string]
 }{
-	ID:          entfield.NewNumber[int](FieldID),
-	UniqueInt:   entfield.NewNumber[int](FieldUniqueInt),
-	UniqueFloat: entfield.NewNumber[float64](FieldUniqueFloat),
-	NillableInt: entfield.NewNumber[int](FieldNillableInt),
-	Table:       entfield.NewString[string](FieldTable),
-	Client:      entfield.NewString[string](FieldClient),
+	ID:          entfield.NewNumber[int](FieldID, "id"),
+	UniqueInt:   entfield.NewNumber[int](FieldUniqueInt, "unique_int"),
+	UniqueFloat: entfield.NewNumber[float64](FieldUniqueFloat, "unique_float"),
+	NillableInt: entfield.NewNumber[int](FieldNillableInt, "nillable_int"),
+	Table:       entfield.NewString[string](FieldTable, "table"),
+	Dir:         entfield.NewJSON[schemadir.Dir]("dir"),
+	Client:      entfield.NewString[string](FieldClient, "client"),
 }
 
 // E holds typed edge handles for every edge of the Comment type.

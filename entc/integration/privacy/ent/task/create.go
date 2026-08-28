@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -20,6 +21,7 @@ import (
 // TaskCreate is the builder for creating a Task entity.
 type TaskCreate struct {
 	Config
+	err      error
 	mutation *TaskMutation
 	hooks    []Hook
 }
@@ -29,70 +31,11 @@ func NewTaskCreate(c Config, hooks []Hook, mutation *TaskMutation) *TaskCreate {
 	return &TaskCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetTitle sets the "title" field.
-func (_c *TaskCreate) SetTitle(v string) *TaskCreate {
-	_ = _c.mutation.SetField("title", v)
-	return _c
-}
-
-// SetDescription sets the "description" field.
-func (_c *TaskCreate) SetDescription(v string) *TaskCreate {
-	_ = _c.mutation.SetField("description", v)
-	return _c
-}
-
-// SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableDescription(v *string) *TaskCreate {
-	if v != nil {
-		_c.SetDescription(*v)
-	}
-	return _c
-}
-
-// SetStatus sets the "status" field.
-func (_c *TaskCreate) SetStatus(v Status) *TaskCreate {
-	_ = _c.mutation.SetField("status", v)
-	return _c
-}
-
-// SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableStatus(v *Status) *TaskCreate {
-	if v != nil {
-		_c.SetStatus(*v)
-	}
-	return _c
-}
-
-// SetUUID sets the "uuid" field.
-func (_c *TaskCreate) SetUUID(v uuid.UUID) *TaskCreate {
-	_ = _c.mutation.SetField("uuid", v)
-	return _c
-}
-
-// SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableUUID(v *uuid.UUID) *TaskCreate {
-	if v != nil {
-		_c.SetUUID(*v)
-	}
-	return _c
-}
-
-// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (_c *TaskCreate) AddTeamIDs(ids ...int) *TaskCreate {
-	_ = _c.mutation.AddEdgeIDs("teams", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *TaskCreate) SetOwnerID(id int) *TaskCreate {
-	_ = _c.mutation.SetEdgeID("owner", id)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_c *TaskCreate) SetNillableOwnerID(id *int) *TaskCreate {
-	if id != nil {
-		_c = _c.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TaskCreate builder. The first error from as is recorded and returned by Save.
+func (_c *TaskCreate) With(as ...entfield.Assignment) *TaskCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -104,6 +47,9 @@ func (_c *TaskCreate) Mutation() *TaskMutation {
 
 // Save creates the Task in the database.
 func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	if err := _c.defaults(); err != nil {
 		return nil, err
 	}

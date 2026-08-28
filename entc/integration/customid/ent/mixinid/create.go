@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -21,6 +22,7 @@ import (
 // MixinIDCreate is the builder for creating a MixinID entity.
 type MixinIDCreate struct {
 	Config
+	err      error
 	mutation *MixinIDMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -31,28 +33,11 @@ func NewMixinIDCreate(c Config, hooks []Hook, mutation *MixinIDMutation) *MixinI
 	return &MixinIDCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetSomeField sets the "some_field" field.
-func (_c *MixinIDCreate) SetSomeField(v string) *MixinIDCreate {
-	_ = _c.mutation.SetField("some_field", v)
-	return _c
-}
-
-// SetMixinField sets the "mixin_field" field.
-func (_c *MixinIDCreate) SetMixinField(v string) *MixinIDCreate {
-	_ = _c.mutation.SetField("mixin_field", v)
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *MixinIDCreate) SetID(v uuid.UUID) *MixinIDCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *MixinIDCreate) SetNillableID(v *uuid.UUID) *MixinIDCreate {
-	if v != nil {
-		_c.SetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MixinIDCreate builder. The first error from as is recorded and returned by Save.
+func (_c *MixinIDCreate) With(as ...entfield.Assignment) *MixinIDCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -64,6 +49,9 @@ func (_c *MixinIDCreate) Mutation() *MixinIDMutation {
 
 // Save creates the MixinID in the database.
 func (_c *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

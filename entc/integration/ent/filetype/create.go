@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // FileTypeCreate is the builder for creating a FileType entity.
 type FileTypeCreate struct {
 	Config
+	err      error
 	mutation *FileTypeMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,43 +32,12 @@ func NewFileTypeCreate(c Config, hooks []Hook, mutation *FileTypeMutation) *File
 	return &FileTypeCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_c *FileTypeCreate) SetName(v string) *FileTypeCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetType sets the "type" field.
-func (_c *FileTypeCreate) SetType(v Type) *FileTypeCreate {
-	_ = _c.mutation.SetField("type", v)
-	return _c
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_c *FileTypeCreate) SetNillableType(v *Type) *FileTypeCreate {
-	if v != nil {
-		_c.SetType(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FileTypeCreate builder. The first error from as is recorded and returned by Save.
+func (_c *FileTypeCreate) With(as ...entfield.Assignment) *FileTypeCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetState sets the "state" field.
-func (_c *FileTypeCreate) SetState(v State) *FileTypeCreate {
-	_ = _c.mutation.SetField("state", v)
-	return _c
-}
-
-// SetNillableState sets the "state" field if the given value is not nil.
-func (_c *FileTypeCreate) SetNillableState(v *State) *FileTypeCreate {
-	if v != nil {
-		_c.SetState(*v)
-	}
-	return _c
-}
-
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_c *FileTypeCreate) AddFileIDs(ids ...int) *FileTypeCreate {
-	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -77,6 +48,9 @@ func (_c *FileTypeCreate) Mutation() *FileTypeMutation {
 
 // Save creates the FileType in the database.
 func (_c *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

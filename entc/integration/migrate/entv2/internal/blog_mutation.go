@@ -25,8 +25,9 @@ type BlogMutationOption = func(*BlogMutation)
 // blogDescriptor describes Blog's fields and edges
 // for the generic mutation runtime.
 var blogDescriptor = &entbuilder.Descriptor{
-	Name:   "Blog",
-	IDType: reflect.TypeFor[int](),
+	Name:    "Blog",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"oid": {
 			Type:    reflect.TypeFor[int](),

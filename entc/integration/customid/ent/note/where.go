@@ -20,19 +20,19 @@ var F = struct {
 	// Text is the handle for the "text" field.
 	Text entfield.String[string]
 }{
-	ID:   entfield.NewString[schema.NoteID](FieldID),
-	Text: entfield.NewString[string](FieldText),
+	ID:   entfield.NewString[schema.NoteID](FieldID, "id"),
+	Text: entfield.NewString[string](FieldText, "text"),
 }
 
 // E holds typed edge handles for every edge of the Note type.
 var E = struct {
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.Note]
+	Parent entfield.Edge[predicate.Note, schema.NoteID]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.Note]
+	Children entfield.Edge[predicate.Note, schema.NoteID]
 }{
-	Parent:   entfield.NewEdge[predicate.Note](newParentStep),
-	Children: entfield.NewEdge[predicate.Note](newChildrenStep),
+	Parent:   entfield.NewEdge[predicate.Note, schema.NoteID]("parent", newParentStep),
+	Children: entfield.NewEdge[predicate.Note, schema.NoteID]("children", newChildrenStep),
 }
 
 // And groups predicates with the AND operator between them.

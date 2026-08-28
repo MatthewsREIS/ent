@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CarUpdate is the builder for updating Car entities.
 type CarUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *CarMutation
 }
@@ -36,29 +38,12 @@ func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 	return _u
 }
 
-// SetNumber sets the "number" field.
-func (_u *CarUpdate) SetNumber(v string) *CarUpdate {
-	_ = _u.mutation.SetField("number", v)
-	return _u
-}
-
-// SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CarUpdate) SetNillableNumber(v *string) *CarUpdate {
-	if v != nil {
-		_u.SetNumber(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *CarUpdate) With(as ...entfield.Assignment) *CarUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearNumber clears the value of the "number" field.
-func (_u *CarUpdate) ClearNumber() *CarUpdate {
-	_ = _u.mutation.ClearField("number")
-	return _u
-}
-
-// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (_u *CarUpdate) AddRentalIDs(ids ...int) *CarUpdate {
-	_ = _u.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -81,6 +66,9 @@ func (_u *CarUpdate) RemoveRentalIDs(ids ...int) *CarUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -182,6 +170,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type CarUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *CarMutation
 }
@@ -191,29 +180,12 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 	return &CarUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetNumber sets the "number" field.
-func (_u *CarUpdateOne) SetNumber(v string) *CarUpdateOne {
-	_ = _u.mutation.SetField("number", v)
-	return _u
-}
-
-// SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CarUpdateOne) SetNillableNumber(v *string) *CarUpdateOne {
-	if v != nil {
-		_u.SetNumber(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *CarUpdateOne) With(as ...entfield.Assignment) *CarUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearNumber clears the value of the "number" field.
-func (_u *CarUpdateOne) ClearNumber() *CarUpdateOne {
-	_ = _u.mutation.ClearField("number")
-	return _u
-}
-
-// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (_u *CarUpdateOne) AddRentalIDs(ids ...int) *CarUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -249,6 +221,9 @@ func (_u *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
 
 // Save executes the query and returns the updated Car entity.
 func (_u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Car](ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

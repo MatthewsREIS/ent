@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // ProcessCreate is the builder for creating a Process entity.
 type ProcessCreate struct {
 	Config
+	err      error
 	mutation *ProcessMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,15 +32,12 @@ func NewProcessCreate(c Config, hooks []Hook, mutation *ProcessMutation) *Proces
 	return &ProcessCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_c *ProcessCreate) AddFileIDs(ids ...int) *ProcessCreate {
-	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddAttachedFileIDs adds the "attached_files" edge to the AttachedFile entity by IDs.
-func (_c *ProcessCreate) AddAttachedFileIDs(ids ...int) *ProcessCreate {
-	_ = _c.mutation.AddEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ProcessCreate builder. The first error from as is recorded and returned by Save.
+func (_c *ProcessCreate) With(as ...entfield.Assignment) *ProcessCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -49,6 +48,9 @@ func (_c *ProcessCreate) Mutation() *ProcessMutation {
 
 // Save creates the Process in the database.
 func (_c *ProcessCreate) Save(ctx context.Context) (*Process, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

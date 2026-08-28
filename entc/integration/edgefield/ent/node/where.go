@@ -18,23 +18,23 @@ var F = struct {
 	ID entfield.Number[int]
 	// Value is the handle for the "value" field.
 	Value entfield.Number[int]
-	// PrevID is the handle for the "prev_id" field.
-	PrevID entfield.Number[int]
+	// PrevID is the handle for the "prev_id" field (backs the "prev" edge).
+	PrevID entfield.EdgeField[int]
 }{
-	ID:     entfield.NewNumber[int](FieldID),
-	Value:  entfield.NewNumber[int](FieldValue),
-	PrevID: entfield.NewNumber[int](FieldPrevID),
+	ID:     entfield.NewNumber[int](FieldID, "id"),
+	Value:  entfield.NewNumber[int](FieldValue, "value"),
+	PrevID: entfield.NewEdgeField[int](FieldPrevID, "prev"),
 }
 
 // E holds typed edge handles for every edge of the Node type.
 var E = struct {
 	// Prev is the handle for the "prev" edge.
-	Prev entfield.Edge[predicate.Node]
+	Prev entfield.Edge[predicate.Node, int]
 	// Next is the handle for the "next" edge.
-	Next entfield.Edge[predicate.Node]
+	Next entfield.Edge[predicate.Node, int]
 }{
-	Prev: entfield.NewEdge[predicate.Node](newPrevStep),
-	Next: entfield.NewEdge[predicate.Node](newNextStep),
+	Prev: entfield.NewEdge[predicate.Node, int]("prev", newPrevStep),
+	Next: entfield.NewEdge[predicate.Node, int]("next", newNextStep),
 }
 
 // And groups predicates with the AND operator between them.

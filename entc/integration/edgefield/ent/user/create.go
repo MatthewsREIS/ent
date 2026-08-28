@@ -12,12 +12,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	Config
+	err      error
 	mutation *UserMutation
 	hooks    []Hook
 }
@@ -27,89 +29,12 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 	return &UserCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetParentID sets the "parent_id" field.
-func (_c *UserCreate) SetParentID(v int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("parent", v)
-	return _c
-}
-
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *UserCreate) SetNillableParentID(v *int) *UserCreate {
-	if v != nil {
-		_c.SetParentID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserCreate builder. The first error from as is recorded and returned by Save.
+func (_c *UserCreate) With(as ...entfield.Assignment) *UserCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetSpouseID sets the "spouse_id" field.
-func (_c *UserCreate) SetSpouseID(v int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("spouse", v)
-	return _c
-}
-
-// SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
-func (_c *UserCreate) SetNillableSpouseID(v *int) *UserCreate {
-	if v != nil {
-		_c.SetSpouseID(*v)
-	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *UserCreate) SetID(v int) *UserCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("pets", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddChildIDs adds the "children" edge to the User entity by IDs.
-func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// SetCardID sets the "card" edge to the Card entity by ID.
-func (_c *UserCreate) SetCardID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("card", id)
-	return _c
-}
-
-// SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableCardID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetCardID(*id)
-	}
-	return _c
-}
-
-// SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
-func (_c *UserCreate) SetMetadataID(id int) *UserCreate {
-	_ = _c.mutation.SetEdgeID("metadata", id)
-	return _c
-}
-
-// SetNillableMetadataID sets the "metadata" edge to the Metadata entity by ID if the given value is not nil.
-func (_c *UserCreate) SetNillableMetadataID(id *int) *UserCreate {
-	if id != nil {
-		_c = _c.SetMetadataID(*id)
-	}
-	return _c
-}
-
-// AddInfoIDs adds the "info" edge to the Info entity by IDs.
-func (_c *UserCreate) AddInfoIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("info", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (_c *UserCreate) AddRentalIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -120,6 +45,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

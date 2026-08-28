@@ -18,26 +18,26 @@ var F = struct {
 	ID entfield.Number[int]
 	// JoinedAt is the handle for the "joined_at" field.
 	JoinedAt entfield.Time
-	// UserID is the handle for the "user_id" field.
-	UserID entfield.Number[int]
-	// GroupID is the handle for the "group_id" field.
-	GroupID entfield.Number[int]
+	// UserID is the handle for the "user_id" field (backs the "user" edge).
+	UserID entfield.EdgeField[int]
+	// GroupID is the handle for the "group_id" field (backs the "group" edge).
+	GroupID entfield.EdgeField[int]
 }{
-	ID:       entfield.NewNumber[int](FieldID),
-	JoinedAt: entfield.NewTime(FieldJoinedAt),
-	UserID:   entfield.NewNumber[int](FieldUserID),
-	GroupID:  entfield.NewNumber[int](FieldGroupID),
+	ID:       entfield.NewNumber[int](FieldID, "id"),
+	JoinedAt: entfield.NewTime(FieldJoinedAt, "joined_at"),
+	UserID:   entfield.NewEdgeField[int](FieldUserID, "user"),
+	GroupID:  entfield.NewEdgeField[int](FieldGroupID, "group"),
 }
 
 // E holds typed edge handles for every edge of the UserGroup type.
 var E = struct {
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 	// Group is the handle for the "group" edge.
-	Group entfield.Edge[predicate.Group]
+	Group entfield.Edge[predicate.Group, int]
 }{
-	User:  entfield.NewEdge[predicate.User](newUserStep),
-	Group: entfield.NewEdge[predicate.Group](newGroupStep),
+	User:  entfield.NewEdge[predicate.User, int]("user", newUserStep),
+	Group: entfield.NewEdge[predicate.Group, int]("group", newGroupStep),
 }
 
 // And groups predicates with the AND operator between them.

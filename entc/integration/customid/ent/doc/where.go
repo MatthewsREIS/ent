@@ -20,22 +20,22 @@ var F = struct {
 	// Text is the handle for the "text" field.
 	Text entfield.String[string]
 }{
-	ID:   entfield.NewString[schema.DocID](FieldID),
-	Text: entfield.NewString[string](FieldText),
+	ID:   entfield.NewString[schema.DocID](FieldID, "id"),
+	Text: entfield.NewString[string](FieldText, "text"),
 }
 
 // E holds typed edge handles for every edge of the Doc type.
 var E = struct {
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.Doc]
+	Parent entfield.Edge[predicate.Doc, schema.DocID]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.Doc]
+	Children entfield.Edge[predicate.Doc, schema.DocID]
 	// Related is the handle for the "related" edge.
-	Related entfield.Edge[predicate.Doc]
+	Related entfield.Edge[predicate.Doc, schema.DocID]
 }{
-	Parent:   entfield.NewEdge[predicate.Doc](newParentStep),
-	Children: entfield.NewEdge[predicate.Doc](newChildrenStep),
-	Related:  entfield.NewEdge[predicate.Doc](newRelatedStep),
+	Parent:   entfield.NewEdge[predicate.Doc, schema.DocID]("parent", newParentStep),
+	Children: entfield.NewEdge[predicate.Doc, schema.DocID]("children", newChildrenStep),
+	Related:  entfield.NewEdge[predicate.Doc, schema.DocID]("related", newRelatedStep),
 }
 
 // And groups predicates with the AND operator between them.

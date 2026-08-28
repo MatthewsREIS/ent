@@ -27,8 +27,9 @@ type InfoMutationOption = func(*InfoMutation)
 // infoDescriptor describes Info's fields and edges
 // for the generic mutation runtime.
 var infoDescriptor = &entbuilder.Descriptor{
-	Name:   "Info",
-	IDType: reflect.TypeFor[int](),
+	Name:    "Info",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"content": {
 			Type:   reflect.TypeFor[json.RawMessage](),

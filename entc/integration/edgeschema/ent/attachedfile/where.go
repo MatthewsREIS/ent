@@ -18,26 +18,26 @@ var F = struct {
 	ID entfield.Number[int]
 	// AttachTime is the handle for the "attach_time" field.
 	AttachTime entfield.Time
-	// FID is the handle for the "f_id" field.
-	FID entfield.Number[int]
-	// ProcID is the handle for the "proc_id" field.
-	ProcID entfield.Number[int]
+	// FID is the handle for the "f_id" field (backs the "fi" edge).
+	FID entfield.EdgeField[int]
+	// ProcID is the handle for the "proc_id" field (backs the "proc" edge).
+	ProcID entfield.EdgeField[int]
 }{
-	ID:         entfield.NewNumber[int](FieldID),
-	AttachTime: entfield.NewTime(FieldAttachTime),
-	FID:        entfield.NewNumber[int](FieldFID),
-	ProcID:     entfield.NewNumber[int](FieldProcID),
+	ID:         entfield.NewNumber[int](FieldID, "id"),
+	AttachTime: entfield.NewTime(FieldAttachTime, "attach_time"),
+	FID:        entfield.NewEdgeField[int](FieldFID, "fi"),
+	ProcID:     entfield.NewEdgeField[int](FieldProcID, "proc"),
 }
 
 // E holds typed edge handles for every edge of the AttachedFile type.
 var E = struct {
 	// Fi is the handle for the "fi" edge.
-	Fi entfield.Edge[predicate.File]
+	Fi entfield.Edge[predicate.File, int]
 	// Proc is the handle for the "proc" edge.
-	Proc entfield.Edge[predicate.Process]
+	Proc entfield.Edge[predicate.Process, int]
 }{
-	Fi:   entfield.NewEdge[predicate.File](newFiStep),
-	Proc: entfield.NewEdge[predicate.Process](newProcStep),
+	Fi:   entfield.NewEdge[predicate.File, int]("fi", newFiStep),
+	Proc: entfield.NewEdge[predicate.Process, int]("proc", newProcStep),
 }
 
 // And groups predicates with the AND operator between them.

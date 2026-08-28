@@ -6,6 +6,25 @@
 		},
 		"edges": {
 			"Post": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/cascadelete/ent/comment",
+		"setters": {
+			"PostID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Text": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"post": {
@@ -16,6 +35,33 @@
 		"edges": {
 			"Author": true,
 			"Comments": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/cascadelete/ent/post",
+		"setters": {
+			"AuthorID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Comments": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Comment"
+			},
+			"Text": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"user": {
@@ -24,6 +70,25 @@
 		},
 		"edges": {
 			"Posts": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/cascadelete/ent/user",
+		"setters": {
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Posts": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Post"
+			}
 		}
 	}
 }

@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // TokenCreate is the builder for creating a Token entity.
 type TokenCreate struct {
 	Config
+	err      error
 	mutation *TokenMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -31,29 +33,12 @@ func NewTokenCreate(c Config, hooks []Hook, mutation *TokenMutation) *TokenCreat
 	return &TokenCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetBody sets the "body" field.
-func (_c *TokenCreate) SetBody(v string) *TokenCreate {
-	_ = _c.mutation.SetField("body", v)
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *TokenCreate) SetID(v sid.ID) *TokenCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *TokenCreate) SetNillableID(v *sid.ID) *TokenCreate {
-	if v != nil {
-		_c.SetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the TokenCreate builder. The first error from as is recorded and returned by Save.
+func (_c *TokenCreate) With(as ...entfield.Assignment) *TokenCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetAccountID sets the "account" edge to the Account entity by ID.
-func (_c *TokenCreate) SetAccountID(id sid.ID) *TokenCreate {
-	_ = _c.mutation.SetEdgeID("account", id)
 	return _c
 }
 
@@ -64,6 +49,9 @@ func (_c *TokenCreate) Mutation() *TokenMutation {
 
 // Save creates the Token in the database.
 func (_c *TokenCreate) Save(ctx context.Context) (*Token, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

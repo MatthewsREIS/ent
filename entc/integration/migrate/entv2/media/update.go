@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // MediaUpdate is the builder for updating Media entities.
 type MediaUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *MediaMutation
 }
@@ -36,63 +38,12 @@ func (_u *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
 	return _u
 }
 
-// SetSource sets the "source" field.
-func (_u *MediaUpdate) SetSource(v string) *MediaUpdate {
-	_ = _u.mutation.SetField("source", v)
-	return _u
-}
-
-// SetNillableSource sets the "source" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableSource(v *string) *MediaUpdate {
-	if v != nil {
-		_u.SetSource(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MediaUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *MediaUpdate) With(as ...entfield.Assignment) *MediaUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearSource clears the value of the "source" field.
-func (_u *MediaUpdate) ClearSource() *MediaUpdate {
-	_ = _u.mutation.ClearField("source")
-	return _u
-}
-
-// SetSourceURI sets the "source_uri" field.
-func (_u *MediaUpdate) SetSourceURI(v string) *MediaUpdate {
-	_ = _u.mutation.SetField("source_uri", v)
-	return _u
-}
-
-// SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableSourceURI(v *string) *MediaUpdate {
-	if v != nil {
-		_u.SetSourceURI(*v)
-	}
-	return _u
-}
-
-// ClearSourceURI clears the value of the "source_uri" field.
-func (_u *MediaUpdate) ClearSourceURI() *MediaUpdate {
-	_ = _u.mutation.ClearField("source_uri")
-	return _u
-}
-
-// SetText sets the "text" field.
-func (_u *MediaUpdate) SetText(v string) *MediaUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableText(v *string) *MediaUpdate {
-	if v != nil {
-		_u.SetText(*v)
-	}
-	return _u
-}
-
-// ClearText clears the value of the "text" field.
-func (_u *MediaUpdate) ClearText() *MediaUpdate {
-	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -103,6 +54,9 @@ func (_u *MediaUpdate) Mutation() *MediaMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MediaUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*MediaMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -171,6 +125,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type MediaUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *MediaMutation
 }
@@ -180,63 +135,12 @@ func NewMediaUpdateOne(c Config, hooks []Hook, mutation *MediaMutation) *MediaUp
 	return &MediaUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetSource sets the "source" field.
-func (_u *MediaUpdateOne) SetSource(v string) *MediaUpdateOne {
-	_ = _u.mutation.SetField("source", v)
-	return _u
-}
-
-// SetNillableSource sets the "source" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableSource(v *string) *MediaUpdateOne {
-	if v != nil {
-		_u.SetSource(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MediaUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *MediaUpdateOne) With(as ...entfield.Assignment) *MediaUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearSource clears the value of the "source" field.
-func (_u *MediaUpdateOne) ClearSource() *MediaUpdateOne {
-	_ = _u.mutation.ClearField("source")
-	return _u
-}
-
-// SetSourceURI sets the "source_uri" field.
-func (_u *MediaUpdateOne) SetSourceURI(v string) *MediaUpdateOne {
-	_ = _u.mutation.SetField("source_uri", v)
-	return _u
-}
-
-// SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableSourceURI(v *string) *MediaUpdateOne {
-	if v != nil {
-		_u.SetSourceURI(*v)
-	}
-	return _u
-}
-
-// ClearSourceURI clears the value of the "source_uri" field.
-func (_u *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
-	_ = _u.mutation.ClearField("source_uri")
-	return _u
-}
-
-// SetText sets the "text" field.
-func (_u *MediaUpdateOne) SetText(v string) *MediaUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableText(v *string) *MediaUpdateOne {
-	if v != nil {
-		_u.SetText(*v)
-	}
-	return _u
-}
-
-// ClearText clears the value of the "text" field.
-func (_u *MediaUpdateOne) ClearText() *MediaUpdateOne {
-	_ = _u.mutation.ClearField("text")
 	return _u
 }
 
@@ -260,6 +164,9 @@ func (_u *MediaUpdateOne) Select(field string, fields ...string) *MediaUpdateOne
 
 // Save executes the query and returns the updated Media entity.
 func (_u *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Media](ctx, &entbuilder.UpdateState[*MediaMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

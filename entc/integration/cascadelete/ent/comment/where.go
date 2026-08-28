@@ -18,20 +18,20 @@ var F = struct {
 	ID entfield.Number[int]
 	// Text is the handle for the "text" field.
 	Text entfield.String[string]
-	// PostID is the handle for the "post_id" field.
-	PostID entfield.Number[int]
+	// PostID is the handle for the "post_id" field (backs the "post" edge).
+	PostID entfield.EdgeField[int]
 }{
-	ID:     entfield.NewNumber[int](FieldID),
-	Text:   entfield.NewString[string](FieldText),
-	PostID: entfield.NewNumber[int](FieldPostID),
+	ID:     entfield.NewNumber[int](FieldID, "id"),
+	Text:   entfield.NewString[string](FieldText, "text"),
+	PostID: entfield.NewEdgeField[int](FieldPostID, "post"),
 }
 
 // E holds typed edge handles for every edge of the Comment type.
 var E = struct {
 	// Post is the handle for the "post" edge.
-	Post entfield.Edge[predicate.Post]
+	Post entfield.Edge[predicate.Post, int]
 }{
-	Post: entfield.NewEdge[predicate.Post](newPostStep),
+	Post: entfield.NewEdge[predicate.Post, int]("post", newPostStep),
 }
 
 // And groups predicates with the AND operator between them.

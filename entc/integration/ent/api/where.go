@@ -17,7 +17,7 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 }{
-	ID: entfield.NewNumber[int](FieldID),
+	ID: entfield.NewNumber[int](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the Api type.

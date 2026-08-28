@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // BlogCreate is the builder for creating a Blog entity.
 type BlogCreate struct {
 	Config
+	err      error
 	mutation *BlogMutation
 	hooks    []Hook
 }
@@ -29,21 +31,12 @@ func NewBlogCreate(c Config, hooks []Hook, mutation *BlogMutation) *BlogCreate {
 	return &BlogCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetOid sets the "oid" field.
-func (_c *BlogCreate) SetOid(v int) *BlogCreate {
-	_ = _c.mutation.SetField("oid", v)
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *BlogCreate) SetID(v int) *BlogCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// AddAdminIDs adds the "admins" edge to the User entity by IDs.
-func (_c *BlogCreate) AddAdminIDs(ids ...int) *BlogCreate {
-	_ = _c.mutation.AddEdgeIDs("admins", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the BlogCreate builder. The first error from as is recorded and returned by Save.
+func (_c *BlogCreate) With(as ...entfield.Assignment) *BlogCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -54,6 +47,9 @@ func (_c *BlogCreate) Mutation() *BlogMutation {
 
 // Save creates the Blog in the database.
 func (_c *BlogCreate) Save(ctx context.Context) (*Blog, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

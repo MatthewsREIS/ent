@@ -20,11 +20,13 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/spec"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // CardCreate is the builder for creating a Card entity.
 type CardCreate struct {
 	Config
+	err      error
 	mutation *CardMutation
 	hooks    []Hook
 }
@@ -34,85 +36,12 @@ func NewCardCreate(c Config, hooks []Hook, mutation *CardMutation) *CardCreate {
 	return &CardCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetCreateTime sets the "create_time" field.
-func (_c *CardCreate) SetCreateTime(v time.Time) *CardCreate {
-	_ = _c.mutation.SetField("create_time", v)
-	return _c
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (_c *CardCreate) SetNillableCreateTime(v *time.Time) *CardCreate {
-	if v != nil {
-		_c.SetCreateTime(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CardCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CardCreate) With(as ...entfield.Assignment) *CardCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (_c *CardCreate) SetUpdateTime(v time.Time) *CardCreate {
-	_ = _c.mutation.SetField("update_time", v)
-	return _c
-}
-
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (_c *CardCreate) SetNillableUpdateTime(v *time.Time) *CardCreate {
-	if v != nil {
-		_c.SetUpdateTime(*v)
-	}
-	return _c
-}
-
-// SetBalance sets the "balance" field.
-func (_c *CardCreate) SetBalance(v float64) *CardCreate {
-	_ = _c.mutation.SetField("balance", v)
-	return _c
-}
-
-// SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_c *CardCreate) SetNillableBalance(v *float64) *CardCreate {
-	if v != nil {
-		_c.SetBalance(*v)
-	}
-	return _c
-}
-
-// SetNumber sets the "number" field.
-func (_c *CardCreate) SetNumber(v string) *CardCreate {
-	_ = _c.mutation.SetField("number", v)
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *CardCreate) SetName(v string) *CardCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_c *CardCreate) SetNillableName(v *string) *CardCreate {
-	if v != nil {
-		_c.SetName(*v)
-	}
-	return _c
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *CardCreate) SetOwnerID(id string) *CardCreate {
-	_ = _c.mutation.SetEdgeID("owner", id)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_c *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
-	if id != nil {
-		_c = _c.SetOwnerID(*id)
-	}
-	return _c
-}
-
-// AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
-func (_c *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
-	_ = _c.mutation.AddEdgeIDs("spec", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -123,6 +52,9 @@ func (_c *CardCreate) Mutation() *CardMutation {
 
 // Save creates the Card in the database.
 func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }

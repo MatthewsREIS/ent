@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/config/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -36,43 +38,12 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdate) With(as ...entfield.Assignment) *UserUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearName clears the value of the "name" field.
-func (_u *UserUpdate) ClearName() *UserUpdate {
-	_ = _u.mutation.ClearField("name")
-	return _u
-}
-
-// SetLabel sets the "label" field.
-func (_u *UserUpdate) SetLabel(v string) *UserUpdate {
-	_ = _u.mutation.SetField("label", v)
-	return _u
-}
-
-// SetNillableLabel sets the "label" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableLabel(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetLabel(*v)
-	}
-	return _u
-}
-
-// ClearLabel clears the value of the "label" field.
-func (_u *UserUpdate) ClearLabel() *UserUpdate {
-	_ = _u.mutation.ClearField("label")
 	return _u
 }
 
@@ -83,6 +54,9 @@ func (_u *UserUpdate) Mutation() *UserMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -145,6 +119,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type UserUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -154,43 +129,12 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 	return &UserUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdateOne) With(as ...entfield.Assignment) *UserUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearName clears the value of the "name" field.
-func (_u *UserUpdateOne) ClearName() *UserUpdateOne {
-	_ = _u.mutation.ClearField("name")
-	return _u
-}
-
-// SetLabel sets the "label" field.
-func (_u *UserUpdateOne) SetLabel(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("label", v)
-	return _u
-}
-
-// SetNillableLabel sets the "label" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableLabel(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetLabel(*v)
-	}
-	return _u
-}
-
-// ClearLabel clears the value of the "label" field.
-func (_u *UserUpdateOne) ClearLabel() *UserUpdateOne {
-	_ = _u.mutation.ClearField("label")
 	return _u
 }
 
@@ -214,6 +158,9 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

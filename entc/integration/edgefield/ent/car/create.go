@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -19,6 +20,7 @@ import (
 // CarCreate is the builder for creating a Car entity.
 type CarCreate struct {
 	Config
+	err      error
 	mutation *CarMutation
 	hooks    []Hook
 }
@@ -28,37 +30,12 @@ func NewCarCreate(c Config, hooks []Hook, mutation *CarMutation) *CarCreate {
 	return &CarCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetNumber sets the "number" field.
-func (_c *CarCreate) SetNumber(v string) *CarCreate {
-	_ = _c.mutation.SetField("number", v)
-	return _c
-}
-
-// SetNillableNumber sets the "number" field if the given value is not nil.
-func (_c *CarCreate) SetNillableNumber(v *string) *CarCreate {
-	if v != nil {
-		_c.SetNumber(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CarCreate) With(as ...entfield.Assignment) *CarCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *CarCreate) SetID(v uuid.UUID) *CarCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *CarCreate) SetNillableID(v *uuid.UUID) *CarCreate {
-	if v != nil {
-		_c.SetID(*v)
-	}
-	return _c
-}
-
-// AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (_c *CarCreate) AddRentalIDs(ids ...int) *CarCreate {
-	_ = _c.mutation.AddEdgeIDs("rentals", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -69,6 +46,9 @@ func (_c *CarCreate) Mutation() *CarMutation {
 
 // Save creates the Car in the database.
 func (_c *CarCreate) Save(ctx context.Context) (*Car, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

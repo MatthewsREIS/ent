@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // MetadataUpdate is the builder for updating Metadata entities.
 type MetadataUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *MetadataMutation
 }
@@ -36,64 +38,12 @@ func (_u *MetadataUpdate) Where(ps ...predicate.Metadata) *MetadataUpdate {
 	return _u
 }
 
-// SetAge sets the "age" field.
-func (_u *MetadataUpdate) SetAge(v int) *MetadataUpdate {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *MetadataUpdate) SetNillableAge(v *int) *MetadataUpdate {
-	if v != nil {
-		_u.SetAge(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MetadataUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *MetadataUpdate) With(as ...entfield.Assignment) *MetadataUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *MetadataUpdate) AddAge(v int) *MetadataUpdate {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// SetParentID sets the "parent_id" field.
-func (_u *MetadataUpdate) SetParentID(v int) *MetadataUpdate {
-	_ = _u.mutation.SetEdgeID("parent", v)
-	return _u
-}
-
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *MetadataUpdate) SetNillableParentID(v *int) *MetadataUpdate {
-	if v != nil {
-		_u.SetParentID(*v)
-	}
-	return _u
-}
-
-// ClearParentID clears the value of the "parent_id" field.
-func (_u *MetadataUpdate) ClearParentID() *MetadataUpdate {
-	_ = _u.mutation.ClearEdge("parent")
-	return _u
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *MetadataUpdate) SetUserID(id int) *MetadataUpdate {
-	_ = _u.mutation.SetEdgeID("user", id)
-	return _u
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_u *MetadataUpdate) SetNillableUserID(id *int) *MetadataUpdate {
-	if id != nil {
-		_u = _u.SetUserID(*id)
-	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the Metadata entity by IDs.
-func (_u *MetadataUpdate) AddChildIDs(ids ...int) *MetadataUpdate {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -128,6 +78,9 @@ func (_u *MetadataUpdate) ClearParent() *MetadataUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MetadataUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*MetadataMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -288,6 +241,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type MetadataUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *MetadataMutation
 }
@@ -297,64 +251,12 @@ func NewMetadataUpdateOne(c Config, hooks []Hook, mutation *MetadataMutation) *M
 	return &MetadataUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_u *MetadataUpdateOne) SetAge(v int) *MetadataUpdateOne {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *MetadataUpdateOne) SetNillableAge(v *int) *MetadataUpdateOne {
-	if v != nil {
-		_u.SetAge(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MetadataUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *MetadataUpdateOne) With(as ...entfield.Assignment) *MetadataUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *MetadataUpdateOne) AddAge(v int) *MetadataUpdateOne {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// SetParentID sets the "parent_id" field.
-func (_u *MetadataUpdateOne) SetParentID(v int) *MetadataUpdateOne {
-	_ = _u.mutation.SetEdgeID("parent", v)
-	return _u
-}
-
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *MetadataUpdateOne) SetNillableParentID(v *int) *MetadataUpdateOne {
-	if v != nil {
-		_u.SetParentID(*v)
-	}
-	return _u
-}
-
-// ClearParentID clears the value of the "parent_id" field.
-func (_u *MetadataUpdateOne) ClearParentID() *MetadataUpdateOne {
-	_ = _u.mutation.ClearEdge("parent")
-	return _u
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_u *MetadataUpdateOne) SetUserID(id int) *MetadataUpdateOne {
-	_ = _u.mutation.SetEdgeID("user", id)
-	return _u
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_u *MetadataUpdateOne) SetNillableUserID(id *int) *MetadataUpdateOne {
-	if id != nil {
-		_u = _u.SetUserID(*id)
-	}
-	return _u
-}
-
-// AddChildIDs adds the "children" edge to the Metadata entity by IDs.
-func (_u *MetadataUpdateOne) AddChildIDs(ids ...int) *MetadataUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -402,6 +304,9 @@ func (_u *MetadataUpdateOne) Select(field string, fields ...string) *MetadataUpd
 
 // Save executes the query and returns the updated Metadata entity.
 func (_u *MetadataUpdateOne) Save(ctx context.Context) (*Metadata, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Metadata](ctx, &entbuilder.UpdateState[*MetadataMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

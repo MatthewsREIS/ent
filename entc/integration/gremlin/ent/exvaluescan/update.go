@@ -9,19 +9,19 @@ package exvaluescan
 import (
 	"context"
 	"errors"
-	"math/big"
-	"net/url"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // ExValueScanUpdate is the builder for updating ExValueScan entities.
 type ExValueScanUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *ExValueScanMutation
 }
@@ -37,93 +37,12 @@ func (_u *ExValueScanUpdate) Where(ps ...predicate.ExValueScan) *ExValueScanUpda
 	return _u
 }
 
-// SetBinary sets the "binary" field.
-func (_u *ExValueScanUpdate) SetBinary(v *url.URL) *ExValueScanUpdate {
-	_ = _u.mutation.SetField("binary", v)
-	return _u
-}
-
-// SetBinaryBytes sets the "binary_bytes" field.
-func (_u *ExValueScanUpdate) SetBinaryBytes(v *url.URL) *ExValueScanUpdate {
-	_ = _u.mutation.SetField("binary_bytes", v)
-	return _u
-}
-
-// SetBinaryOptional sets the "binary_optional" field.
-func (_u *ExValueScanUpdate) SetBinaryOptional(v *url.URL) *ExValueScanUpdate {
-	_ = _u.mutation.SetField("binary_optional", v)
-	return _u
-}
-
-// ClearBinaryOptional clears the value of the "binary_optional" field.
-func (_u *ExValueScanUpdate) ClearBinaryOptional() *ExValueScanUpdate {
-	_ = _u.mutation.ClearField("binary_optional")
-	return _u
-}
-
-// SetText sets the "text" field.
-func (_u *ExValueScanUpdate) SetText(v *big.Int) *ExValueScanUpdate {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetTextOptional sets the "text_optional" field.
-func (_u *ExValueScanUpdate) SetTextOptional(v *big.Int) *ExValueScanUpdate {
-	_ = _u.mutation.SetField("text_optional", v)
-	return _u
-}
-
-// ClearTextOptional clears the value of the "text_optional" field.
-func (_u *ExValueScanUpdate) ClearTextOptional() *ExValueScanUpdate {
-	_ = _u.mutation.ClearField("text_optional")
-	return _u
-}
-
-// SetBase64 sets the "base64" field.
-func (_u *ExValueScanUpdate) SetBase64(v string) *ExValueScanUpdate {
-	_ = _u.mutation.SetField("base64", v)
-	return _u
-}
-
-// SetNillableBase64 sets the "base64" field if the given value is not nil.
-func (_u *ExValueScanUpdate) SetNillableBase64(v *string) *ExValueScanUpdate {
-	if v != nil {
-		_u.SetBase64(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ExValueScanUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *ExValueScanUpdate) With(as ...entfield.Assignment) *ExValueScanUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetCustom sets the "custom" field.
-func (_u *ExValueScanUpdate) SetCustom(v string) *ExValueScanUpdate {
-	_ = _u.mutation.SetField("custom", v)
-	return _u
-}
-
-// SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_u *ExValueScanUpdate) SetNillableCustom(v *string) *ExValueScanUpdate {
-	if v != nil {
-		_u.SetCustom(*v)
-	}
-	return _u
-}
-
-// SetCustomOptional sets the "custom_optional" field.
-func (_u *ExValueScanUpdate) SetCustomOptional(v string) *ExValueScanUpdate {
-	_ = _u.mutation.SetField("custom_optional", v)
-	return _u
-}
-
-// SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (_u *ExValueScanUpdate) SetNillableCustomOptional(v *string) *ExValueScanUpdate {
-	if v != nil {
-		_u.SetCustomOptional(*v)
-	}
-	return _u
-}
-
-// ClearCustomOptional clears the value of the "custom_optional" field.
-func (_u *ExValueScanUpdate) ClearCustomOptional() *ExValueScanUpdate {
-	_ = _u.mutation.ClearField("custom_optional")
 	return _u
 }
 
@@ -134,6 +53,9 @@ func (_u *ExValueScanUpdate) Mutation() *ExValueScanMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ExValueScanUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
@@ -226,6 +148,7 @@ func (_u *ExValueScanUpdate) gremlin() *dsl.Traversal {
 type ExValueScanUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *ExValueScanMutation
 }
@@ -235,93 +158,12 @@ func NewExValueScanUpdateOne(c Config, hooks []Hook, mutation *ExValueScanMutati
 	return &ExValueScanUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetBinary sets the "binary" field.
-func (_u *ExValueScanUpdateOne) SetBinary(v *url.URL) *ExValueScanUpdateOne {
-	_ = _u.mutation.SetField("binary", v)
-	return _u
-}
-
-// SetBinaryBytes sets the "binary_bytes" field.
-func (_u *ExValueScanUpdateOne) SetBinaryBytes(v *url.URL) *ExValueScanUpdateOne {
-	_ = _u.mutation.SetField("binary_bytes", v)
-	return _u
-}
-
-// SetBinaryOptional sets the "binary_optional" field.
-func (_u *ExValueScanUpdateOne) SetBinaryOptional(v *url.URL) *ExValueScanUpdateOne {
-	_ = _u.mutation.SetField("binary_optional", v)
-	return _u
-}
-
-// ClearBinaryOptional clears the value of the "binary_optional" field.
-func (_u *ExValueScanUpdateOne) ClearBinaryOptional() *ExValueScanUpdateOne {
-	_ = _u.mutation.ClearField("binary_optional")
-	return _u
-}
-
-// SetText sets the "text" field.
-func (_u *ExValueScanUpdateOne) SetText(v *big.Int) *ExValueScanUpdateOne {
-	_ = _u.mutation.SetField("text", v)
-	return _u
-}
-
-// SetTextOptional sets the "text_optional" field.
-func (_u *ExValueScanUpdateOne) SetTextOptional(v *big.Int) *ExValueScanUpdateOne {
-	_ = _u.mutation.SetField("text_optional", v)
-	return _u
-}
-
-// ClearTextOptional clears the value of the "text_optional" field.
-func (_u *ExValueScanUpdateOne) ClearTextOptional() *ExValueScanUpdateOne {
-	_ = _u.mutation.ClearField("text_optional")
-	return _u
-}
-
-// SetBase64 sets the "base64" field.
-func (_u *ExValueScanUpdateOne) SetBase64(v string) *ExValueScanUpdateOne {
-	_ = _u.mutation.SetField("base64", v)
-	return _u
-}
-
-// SetNillableBase64 sets the "base64" field if the given value is not nil.
-func (_u *ExValueScanUpdateOne) SetNillableBase64(v *string) *ExValueScanUpdateOne {
-	if v != nil {
-		_u.SetBase64(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ExValueScanUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *ExValueScanUpdateOne) With(as ...entfield.Assignment) *ExValueScanUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// SetCustom sets the "custom" field.
-func (_u *ExValueScanUpdateOne) SetCustom(v string) *ExValueScanUpdateOne {
-	_ = _u.mutation.SetField("custom", v)
-	return _u
-}
-
-// SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_u *ExValueScanUpdateOne) SetNillableCustom(v *string) *ExValueScanUpdateOne {
-	if v != nil {
-		_u.SetCustom(*v)
-	}
-	return _u
-}
-
-// SetCustomOptional sets the "custom_optional" field.
-func (_u *ExValueScanUpdateOne) SetCustomOptional(v string) *ExValueScanUpdateOne {
-	_ = _u.mutation.SetField("custom_optional", v)
-	return _u
-}
-
-// SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (_u *ExValueScanUpdateOne) SetNillableCustomOptional(v *string) *ExValueScanUpdateOne {
-	if v != nil {
-		_u.SetCustomOptional(*v)
-	}
-	return _u
-}
-
-// ClearCustomOptional clears the value of the "custom_optional" field.
-func (_u *ExValueScanUpdateOne) ClearCustomOptional() *ExValueScanUpdateOne {
-	_ = _u.mutation.ClearField("custom_optional")
 	return _u
 }
 
@@ -345,6 +187,9 @@ func (_u *ExValueScanUpdateOne) Select(field string, fields ...string) *ExValueS
 
 // Save executes the query and returns the updated ExValueScan entity.
 func (_u *ExValueScanUpdateOne) Save(ctx context.Context) (*ExValueScan, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return WithHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 

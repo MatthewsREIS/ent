@@ -25,8 +25,9 @@ type CarMutationOption = func(*CarMutation)
 // carDescriptor describes Car's fields and edges
 // for the generic mutation runtime.
 var carDescriptor = &entbuilder.Descriptor{
-	Name:   "Car",
-	IDType: reflect.TypeFor[int](),
+	Name:    "Car",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"before_id": {
 			Type:     reflect.TypeFor[float64](),

@@ -18,18 +18,18 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[sid.ID]
 }{
-	ID: entfield.NewValue[sid.ID](FieldID),
+	ID: entfield.NewValue[sid.ID](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the IntSID type.
 var E = struct {
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.IntSID]
+	Parent entfield.Edge[predicate.IntSID, sid.ID]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.IntSID]
+	Children entfield.Edge[predicate.IntSID, sid.ID]
 }{
-	Parent:   entfield.NewEdge[predicate.IntSID](newParentStep),
-	Children: entfield.NewEdge[predicate.IntSID](newChildrenStep),
+	Parent:   entfield.NewEdge[predicate.IntSID, sid.ID]("parent", newParentStep),
+	Children: entfield.NewEdge[predicate.IntSID, sid.ID]("children", newChildrenStep),
 }
 
 // And groups predicates with the AND operator between them.

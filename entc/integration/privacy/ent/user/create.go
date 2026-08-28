@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	Config
+	err      error
 	mutation *UserMutation
 	hooks    []Hook
 }
@@ -28,35 +30,12 @@ func NewUserCreate(c Config, hooks []Hook, mutation *UserMutation) *UserCreate {
 	return &UserCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_c *UserCreate) SetName(v string) *UserCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(v uint) *UserCreate {
-	_ = _c.mutation.SetField("age", v)
-	return _c
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAge(v *uint) *UserCreate {
-	if v != nil {
-		_c.SetAge(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserCreate builder. The first error from as is recorded and returned by Save.
+func (_c *UserCreate) With(as ...entfield.Assignment) *UserCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (_c *UserCreate) AddTeamIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("teams", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (_c *UserCreate) AddTaskIDs(ids ...int) *UserCreate {
-	_ = _c.mutation.AddEdgeIDs("tasks", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -67,6 +46,9 @@ func (_c *UserCreate) Mutation() *UserMutation {
 
 // Save creates the User in the database.
 func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

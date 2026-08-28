@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *PetMutation
 }
@@ -36,23 +38,12 @@ func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return _u
 }
 
-// SetOwnerID sets the "owner_id" field.
-func (_u *PetUpdate) SetOwnerID(v int) *PetUpdate {
-	_ = _u.mutation.SetEdgeID("owner", v)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableOwnerID(v *int) *PetUpdate {
-	if v != nil {
-		_u.SetOwnerID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *PetUpdate) With(as ...entfield.Assignment) *PetUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearOwnerID clears the value of the "owner_id" field.
-func (_u *PetUpdate) ClearOwnerID() *PetUpdate {
-	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -69,6 +60,9 @@ func (_u *PetUpdate) ClearOwner() *PetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*PetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -148,6 +142,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type PetUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *PetMutation
 }
@@ -157,23 +152,12 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 	return &PetUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetOwnerID sets the "owner_id" field.
-func (_u *PetUpdateOne) SetOwnerID(v int) *PetUpdateOne {
-	_ = _u.mutation.SetEdgeID("owner", v)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableOwnerID(v *int) *PetUpdateOne {
-	if v != nil {
-		_u.SetOwnerID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *PetUpdateOne) With(as ...entfield.Assignment) *PetUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearOwnerID clears the value of the "owner_id" field.
-func (_u *PetUpdateOne) ClearOwnerID() *PetUpdateOne {
-	_ = _u.mutation.ClearEdge("owner")
 	return _u
 }
 
@@ -203,6 +187,9 @@ func (_u *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
 
 // Save executes the query and returns the updated Pet entity.
 func (_u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Pet](ctx, &entbuilder.UpdateState[*PetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

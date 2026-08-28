@@ -41,57 +41,57 @@ var F = struct {
 	// FilesCount is the handle for the "files_count" field.
 	FilesCount entfield.Number[int]
 }{
-	ID:          entfield.NewNumber[int](FieldID),
-	OptionalInt: entfield.NewNumber[int](FieldOptionalInt),
-	Age:         entfield.NewNumber[int](FieldAge),
-	Name:        entfield.NewString[string](FieldName),
-	Last:        entfield.NewString[string](FieldLast),
-	Nickname:    entfield.NewString[string](FieldNickname),
-	Address:     entfield.NewString[string](FieldAddress),
-	Phone:       entfield.NewString[string](FieldPhone),
-	Password:    entfield.NewString[string](FieldPassword),
-	Role:        entfield.NewEnum[Role](FieldRole),
-	Employment:  entfield.NewEnum[Employment](FieldEmployment),
-	SSOCert:     entfield.NewString[string](FieldSSOCert),
-	FilesCount:  entfield.NewNumber[int](FieldFilesCount),
+	ID:          entfield.NewNumber[int](FieldID, "id"),
+	OptionalInt: entfield.NewNumber[int](FieldOptionalInt, "optional_int"),
+	Age:         entfield.NewNumber[int](FieldAge, "age"),
+	Name:        entfield.NewString[string](FieldName, "name"),
+	Last:        entfield.NewString[string](FieldLast, "last"),
+	Nickname:    entfield.NewString[string](FieldNickname, "nickname"),
+	Address:     entfield.NewString[string](FieldAddress, "address"),
+	Phone:       entfield.NewString[string](FieldPhone, "phone"),
+	Password:    entfield.NewString[string](FieldPassword, "password"),
+	Role:        entfield.NewEnum[Role](FieldRole, "role"),
+	Employment:  entfield.NewEnum[Employment](FieldEmployment, "employment"),
+	SSOCert:     entfield.NewString[string](FieldSSOCert, "SSOCert"),
+	FilesCount:  entfield.NewNumber[int](FieldFilesCount, "files_count"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Card is the handle for the "card" edge.
-	Card entfield.Edge[predicate.Card]
+	Card entfield.Edge[predicate.Card, int]
 	// Pets is the handle for the "pets" edge.
-	Pets entfield.Edge[predicate.Pet]
+	Pets entfield.Edge[predicate.Pet, int]
 	// Files is the handle for the "files" edge.
-	Files entfield.Edge[predicate.File]
+	Files entfield.Edge[predicate.File, int]
 	// Groups is the handle for the "groups" edge.
-	Groups entfield.Edge[predicate.Group]
+	Groups entfield.Edge[predicate.Group, int]
 	// Friends is the handle for the "friends" edge.
-	Friends entfield.Edge[predicate.User]
+	Friends entfield.Edge[predicate.User, int]
 	// Followers is the handle for the "followers" edge.
-	Followers entfield.Edge[predicate.User]
+	Followers entfield.Edge[predicate.User, int]
 	// Following is the handle for the "following" edge.
-	Following entfield.Edge[predicate.User]
+	Following entfield.Edge[predicate.User, int]
 	// Team is the handle for the "team" edge.
-	Team entfield.Edge[predicate.Pet]
+	Team entfield.Edge[predicate.Pet, int]
 	// Spouse is the handle for the "spouse" edge.
-	Spouse entfield.Edge[predicate.User]
+	Spouse entfield.Edge[predicate.User, int]
 	// Children is the handle for the "children" edge.
-	Children entfield.Edge[predicate.User]
+	Children entfield.Edge[predicate.User, int]
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.User]
+	Parent entfield.Edge[predicate.User, int]
 }{
-	Card:      entfield.NewEdge[predicate.Card](newCardStep),
-	Pets:      entfield.NewEdge[predicate.Pet](newPetsStep),
-	Files:     entfield.NewEdge[predicate.File](newFilesStep),
-	Groups:    entfield.NewEdge[predicate.Group](newGroupsStep),
-	Friends:   entfield.NewEdge[predicate.User](newFriendsStep),
-	Followers: entfield.NewEdge[predicate.User](newFollowersStep),
-	Following: entfield.NewEdge[predicate.User](newFollowingStep),
-	Team:      entfield.NewEdge[predicate.Pet](newTeamStep),
-	Spouse:    entfield.NewEdge[predicate.User](newSpouseStep),
-	Children:  entfield.NewEdge[predicate.User](newChildrenStep),
-	Parent:    entfield.NewEdge[predicate.User](newParentStep),
+	Card:      entfield.NewEdge[predicate.Card, int]("card", newCardStep),
+	Pets:      entfield.NewEdge[predicate.Pet, int]("pets", newPetsStep),
+	Files:     entfield.NewEdge[predicate.File, int]("files", newFilesStep),
+	Groups:    entfield.NewEdge[predicate.Group, int]("groups", newGroupsStep),
+	Friends:   entfield.NewEdge[predicate.User, int]("friends", newFriendsStep),
+	Followers: entfield.NewEdge[predicate.User, int]("followers", newFollowersStep),
+	Following: entfield.NewEdge[predicate.User, int]("following", newFollowingStep),
+	Team:      entfield.NewEdge[predicate.Pet, int]("team", newTeamStep),
+	Spouse:    entfield.NewEdge[predicate.User, int]("spouse", newSpouseStep),
+	Children:  entfield.NewEdge[predicate.User, int]("children", newChildrenStep),
+	Parent:    entfield.NewEdge[predicate.User, int]("parent", newParentStep),
 }
 
 // And groups predicates with the AND operator between them.

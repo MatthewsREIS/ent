@@ -19,11 +19,13 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	Config
+	err      error
 	mutation *GroupMutation
 	hooks    []Hook
 }
@@ -33,81 +35,12 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 	return &GroupCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetActive sets the "active" field.
-func (_c *GroupCreate) SetActive(v bool) *GroupCreate {
-	_ = _c.mutation.SetField("active", v)
-	return _c
-}
-
-// SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableActive(v *bool) *GroupCreate {
-	if v != nil {
-		_c.SetActive(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupCreate builder. The first error from as is recorded and returned by Save.
+func (_c *GroupCreate) With(as ...entfield.Assignment) *GroupCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetExpire sets the "expire" field.
-func (_c *GroupCreate) SetExpire(v time.Time) *GroupCreate {
-	_ = _c.mutation.SetField("expire", v)
-	return _c
-}
-
-// SetType sets the "type" field.
-func (_c *GroupCreate) SetType(v string) *GroupCreate {
-	_ = _c.mutation.SetField("type", v)
-	return _c
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableType(v *string) *GroupCreate {
-	if v != nil {
-		_c.SetType(*v)
-	}
-	return _c
-}
-
-// SetMaxUsers sets the "max_users" field.
-func (_c *GroupCreate) SetMaxUsers(v int) *GroupCreate {
-	_ = _c.mutation.SetField("max_users", v)
-	return _c
-}
-
-// SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableMaxUsers(v *int) *GroupCreate {
-	if v != nil {
-		_c.SetMaxUsers(*v)
-	}
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *GroupCreate) SetName(v string) *GroupCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// AddFileIDs adds the "files" edge to the File entity by IDs.
-func (_c *GroupCreate) AddFileIDs(ids ...string) *GroupCreate {
-	_ = _c.mutation.AddEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddBlockedIDs adds the "blocked" edge to the User entity by IDs.
-func (_c *GroupCreate) AddBlockedIDs(ids ...string) *GroupCreate {
-	_ = _c.mutation.AddEdgeIDs("blocked", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_c *GroupCreate) AddUserIDs(ids ...string) *GroupCreate {
-	_ = _c.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
-	return _c
-}
-
-// SetInfoID sets the "info" edge to the GroupInfo entity by ID.
-func (_c *GroupCreate) SetInfoID(id string) *GroupCreate {
-	_ = _c.mutation.SetEdgeID("info", id)
 	return _c
 }
 
@@ -118,6 +51,9 @@ func (_c *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }

@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // AccountUpdate is the builder for updating Account entities.
 type AccountUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *AccountMutation
 }
@@ -37,23 +39,12 @@ func (_u *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
 	return _u
 }
 
-// SetEmail sets the "email" field.
-func (_u *AccountUpdate) SetEmail(v string) *AccountUpdate {
-	_ = _u.mutation.SetField("email", v)
-	return _u
-}
-
-// SetNillableEmail sets the "email" field if the given value is not nil.
-func (_u *AccountUpdate) SetNillableEmail(v *string) *AccountUpdate {
-	if v != nil {
-		_u.SetEmail(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the AccountUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *AccountUpdate) With(as ...entfield.Assignment) *AccountUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddTokenIDs adds the "token" edge to the Token entity by IDs.
-func (_u *AccountUpdate) AddTokenIDs(ids ...sid.ID) *AccountUpdate {
-	_ = _u.mutation.AddEdgeIDs("token", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -76,6 +67,9 @@ func (_u *AccountUpdate) RemoveTokenIDs(ids ...sid.ID) *AccountUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *AccountUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*AccountMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -187,6 +181,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type AccountUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *AccountMutation
 }
@@ -196,23 +191,12 @@ func NewAccountUpdateOne(c Config, hooks []Hook, mutation *AccountMutation) *Acc
 	return &AccountUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetEmail sets the "email" field.
-func (_u *AccountUpdateOne) SetEmail(v string) *AccountUpdateOne {
-	_ = _u.mutation.SetField("email", v)
-	return _u
-}
-
-// SetNillableEmail sets the "email" field if the given value is not nil.
-func (_u *AccountUpdateOne) SetNillableEmail(v *string) *AccountUpdateOne {
-	if v != nil {
-		_u.SetEmail(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the AccountUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *AccountUpdateOne) With(as ...entfield.Assignment) *AccountUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddTokenIDs adds the "token" edge to the Token entity by IDs.
-func (_u *AccountUpdateOne) AddTokenIDs(ids ...sid.ID) *AccountUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("token", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -248,6 +232,9 @@ func (_u *AccountUpdateOne) Select(field string, fields ...string) *AccountUpdat
 
 // Save executes the query and returns the updated Account entity.
 func (_u *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Account](ctx, &entbuilder.UpdateState[*AccountMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

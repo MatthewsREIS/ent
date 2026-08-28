@@ -23,10 +23,10 @@ var F = struct {
 	// Text is the handle for the "text" field.
 	Text entfield.String[string]
 }{
-	ID:        entfield.NewNumber[int](FieldID),
-	Source:    entfield.NewString[string](FieldSource),
-	SourceURI: entfield.NewString[string](FieldSourceURI),
-	Text:      entfield.NewString[string](FieldText),
+	ID:        entfield.NewNumber[int](FieldID, "id"),
+	Source:    entfield.NewString[string](FieldSource, "source"),
+	SourceURI: entfield.NewString[string](FieldSourceURI, "source_uri"),
+	Text:      entfield.NewString[string](FieldText, "text"),
 }
 
 // E holds typed edge handles for every edge of the Media type.

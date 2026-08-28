@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // MixinIDUpdate is the builder for updating MixinID entities.
 type MixinIDUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *MixinIDMutation
 }
@@ -36,30 +38,11 @@ func (_u *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
 	return _u
 }
 
-// SetSomeField sets the "some_field" field.
-func (_u *MixinIDUpdate) SetSomeField(v string) *MixinIDUpdate {
-	_ = _u.mutation.SetField("some_field", v)
-	return _u
-}
-
-// SetNillableSomeField sets the "some_field" field if the given value is not nil.
-func (_u *MixinIDUpdate) SetNillableSomeField(v *string) *MixinIDUpdate {
-	if v != nil {
-		_u.SetSomeField(*v)
-	}
-	return _u
-}
-
-// SetMixinField sets the "mixin_field" field.
-func (_u *MixinIDUpdate) SetMixinField(v string) *MixinIDUpdate {
-	_ = _u.mutation.SetField("mixin_field", v)
-	return _u
-}
-
-// SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
-func (_u *MixinIDUpdate) SetNillableMixinField(v *string) *MixinIDUpdate {
-	if v != nil {
-		_u.SetMixinField(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MixinIDUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *MixinIDUpdate) With(as ...entfield.Assignment) *MixinIDUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -71,6 +54,9 @@ func (_u *MixinIDUpdate) Mutation() *MixinIDMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *MixinIDUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*MixinIDMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -127,6 +113,7 @@ func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type MixinIDUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *MixinIDMutation
 }
@@ -136,30 +123,11 @@ func NewMixinIDUpdateOne(c Config, hooks []Hook, mutation *MixinIDMutation) *Mix
 	return &MixinIDUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetSomeField sets the "some_field" field.
-func (_u *MixinIDUpdateOne) SetSomeField(v string) *MixinIDUpdateOne {
-	_ = _u.mutation.SetField("some_field", v)
-	return _u
-}
-
-// SetNillableSomeField sets the "some_field" field if the given value is not nil.
-func (_u *MixinIDUpdateOne) SetNillableSomeField(v *string) *MixinIDUpdateOne {
-	if v != nil {
-		_u.SetSomeField(*v)
-	}
-	return _u
-}
-
-// SetMixinField sets the "mixin_field" field.
-func (_u *MixinIDUpdateOne) SetMixinField(v string) *MixinIDUpdateOne {
-	_ = _u.mutation.SetField("mixin_field", v)
-	return _u
-}
-
-// SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
-func (_u *MixinIDUpdateOne) SetNillableMixinField(v *string) *MixinIDUpdateOne {
-	if v != nil {
-		_u.SetMixinField(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MixinIDUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *MixinIDUpdateOne) With(as ...entfield.Assignment) *MixinIDUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -184,6 +152,9 @@ func (_u *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpdat
 
 // Save executes the query and returns the updated MixinID entity.
 func (_u *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[MixinID](ctx, &entbuilder.UpdateState[*MixinIDMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

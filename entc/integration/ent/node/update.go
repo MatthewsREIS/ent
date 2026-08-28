@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // NodeUpdate is the builder for updating Node entities.
 type NodeUpdate struct {
 	Config
+	err       error
 	hooks     []Hook
 	mutation  *NodeMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -38,69 +40,11 @@ func (_u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 	return _u
 }
 
-// SetValue sets the "value" field.
-func (_u *NodeUpdate) SetValue(v int) *NodeUpdate {
-	_ = _u.mutation.ResetField("value")
-	_ = _u.mutation.SetField("value", v)
-	return _u
-}
-
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *NodeUpdate) SetNillableValue(v *int) *NodeUpdate {
-	if v != nil {
-		_u.SetValue(*v)
-	}
-	return _u
-}
-
-// AddValue adds value to the "value" field.
-func (_u *NodeUpdate) AddValue(v int) *NodeUpdate {
-	_ = _u.mutation.AddField("value", v)
-	return _u
-}
-
-// ClearValue clears the value of the "value" field.
-func (_u *NodeUpdate) ClearValue() *NodeUpdate {
-	_ = _u.mutation.ClearField("value")
-	return _u
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *NodeUpdate) SetUpdatedAt(v time.Time) *NodeUpdate {
-	_ = _u.mutation.SetField("updated_at", v)
-	return _u
-}
-
-// ClearUpdatedAt clears the value of the "updated_at" field.
-func (_u *NodeUpdate) ClearUpdatedAt() *NodeUpdate {
-	_ = _u.mutation.ClearField("updated_at")
-	return _u
-}
-
-// SetPrevID sets the "prev" edge to the Node entity by ID.
-func (_u *NodeUpdate) SetPrevID(id int) *NodeUpdate {
-	_ = _u.mutation.SetEdgeID("prev", id)
-	return _u
-}
-
-// SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
-func (_u *NodeUpdate) SetNillablePrevID(id *int) *NodeUpdate {
-	if id != nil {
-		_u = _u.SetPrevID(*id)
-	}
-	return _u
-}
-
-// SetNextID sets the "next" edge to the Node entity by ID.
-func (_u *NodeUpdate) SetNextID(id int) *NodeUpdate {
-	_ = _u.mutation.SetEdgeID("next", id)
-	return _u
-}
-
-// SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
-func (_u *NodeUpdate) SetNillableNextID(id *int) *NodeUpdate {
-	if id != nil {
-		_u = _u.SetNextID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the NodeUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *NodeUpdate) With(as ...entfield.Assignment) *NodeUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -124,6 +68,9 @@ func (_u *NodeUpdate) ClearNext() *NodeUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *NodeUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	_u.defaults()
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*NodeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
@@ -264,6 +211,7 @@ func (_u *NodeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type NodeUpdateOne struct {
 	Config
 	fields    []string
+	err       error
 	hooks     []Hook
 	mutation  *NodeMutation
 	modifiers []func(*sql.UpdateBuilder)
@@ -274,69 +222,11 @@ func NewNodeUpdateOne(c Config, hooks []Hook, mutation *NodeMutation) *NodeUpdat
 	return &NodeUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetValue sets the "value" field.
-func (_u *NodeUpdateOne) SetValue(v int) *NodeUpdateOne {
-	_ = _u.mutation.ResetField("value")
-	_ = _u.mutation.SetField("value", v)
-	return _u
-}
-
-// SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *NodeUpdateOne) SetNillableValue(v *int) *NodeUpdateOne {
-	if v != nil {
-		_u.SetValue(*v)
-	}
-	return _u
-}
-
-// AddValue adds value to the "value" field.
-func (_u *NodeUpdateOne) AddValue(v int) *NodeUpdateOne {
-	_ = _u.mutation.AddField("value", v)
-	return _u
-}
-
-// ClearValue clears the value of the "value" field.
-func (_u *NodeUpdateOne) ClearValue() *NodeUpdateOne {
-	_ = _u.mutation.ClearField("value")
-	return _u
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (_u *NodeUpdateOne) SetUpdatedAt(v time.Time) *NodeUpdateOne {
-	_ = _u.mutation.SetField("updated_at", v)
-	return _u
-}
-
-// ClearUpdatedAt clears the value of the "updated_at" field.
-func (_u *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne {
-	_ = _u.mutation.ClearField("updated_at")
-	return _u
-}
-
-// SetPrevID sets the "prev" edge to the Node entity by ID.
-func (_u *NodeUpdateOne) SetPrevID(id int) *NodeUpdateOne {
-	_ = _u.mutation.SetEdgeID("prev", id)
-	return _u
-}
-
-// SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
-func (_u *NodeUpdateOne) SetNillablePrevID(id *int) *NodeUpdateOne {
-	if id != nil {
-		_u = _u.SetPrevID(*id)
-	}
-	return _u
-}
-
-// SetNextID sets the "next" edge to the Node entity by ID.
-func (_u *NodeUpdateOne) SetNextID(id int) *NodeUpdateOne {
-	_ = _u.mutation.SetEdgeID("next", id)
-	return _u
-}
-
-// SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
-func (_u *NodeUpdateOne) SetNillableNextID(id *int) *NodeUpdateOne {
-	if id != nil {
-		_u = _u.SetNextID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the NodeUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *NodeUpdateOne) With(as ...entfield.Assignment) *NodeUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -373,6 +263,9 @@ func (_u *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {
 
 // Save executes the query and returns the updated Node entity.
 func (_u *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	_u.defaults()
 	return entbuilder.RunUpdateOne[Node](ctx, &entbuilder.UpdateState[*NodeMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }

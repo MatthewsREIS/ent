@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // ZooUpdate is the builder for updating Zoo entities.
 type ZooUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *ZooMutation
 }
@@ -36,6 +38,15 @@ func (_u *ZooUpdate) Where(ps ...predicate.Zoo) *ZooUpdate {
 	return _u
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ZooUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *ZooUpdate) With(as ...entfield.Assignment) *ZooUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
+}
+
 // Mutation returns the ZooMutation object of the builder.
 func (_u *ZooUpdate) Mutation() *ZooMutation {
 	return _u.mutation
@@ -43,6 +54,9 @@ func (_u *ZooUpdate) Mutation() *ZooMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ZooUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*ZooMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -93,6 +107,7 @@ func (_u *ZooUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type ZooUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *ZooMutation
 }
@@ -100,6 +115,15 @@ type ZooUpdateOne struct {
 // NewZooUpdateOne returns a new ZooUpdateOne initialized with the given config, hooks, and mutation.
 func NewZooUpdateOne(c Config, hooks []Hook, mutation *ZooMutation) *ZooUpdateOne {
 	return &ZooUpdateOne{Config: c, hooks: hooks, mutation: mutation}
+}
+
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the ZooUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *ZooUpdateOne) With(as ...entfield.Assignment) *ZooUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
+	}
+	return _u
 }
 
 // Mutation returns the ZooMutation object of the builder.
@@ -122,6 +146,9 @@ func (_u *ZooUpdateOne) Select(field string, fields ...string) *ZooUpdateOne {
 
 // Save executes the query and returns the updated Zoo entity.
 func (_u *ZooUpdateOne) Save(ctx context.Context) (*Zoo, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Zoo](ctx, &entbuilder.UpdateState[*ZooMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

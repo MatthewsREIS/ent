@@ -19,16 +19,16 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Name: entfield.NewString[string](FieldName),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Name: entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the File type.
 var E = struct {
 	// Processes is the handle for the "processes" edge.
-	Processes entfield.Edge[predicate.Process]
+	Processes entfield.Edge[predicate.Process, int]
 }{
-	Processes: entfield.NewEdge[predicate.Process](newProcessesStep),
+	Processes: entfield.NewEdge[predicate.Process, int]("processes", newProcessesStep),
 }
 
 // And groups predicates with the AND operator between them.

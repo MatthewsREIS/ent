@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // RoleUserUpdate is the builder for updating RoleUser entities.
 type RoleUserUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *RoleUserMutation
 }
@@ -37,44 +39,11 @@ func (_u *RoleUserUpdate) Where(ps ...predicate.RoleUser) *RoleUserUpdate {
 	return _u
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *RoleUserUpdate) SetCreatedAt(v time.Time) *RoleUserUpdate {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *RoleUserUpdate) SetNillableCreatedAt(v *time.Time) *RoleUserUpdate {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
-// SetRoleID sets the "role_id" field.
-func (_u *RoleUserUpdate) SetRoleID(v int) *RoleUserUpdate {
-	_ = _u.mutation.SetEdgeID("role", v)
-	return _u
-}
-
-// SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_u *RoleUserUpdate) SetNillableRoleID(v *int) *RoleUserUpdate {
-	if v != nil {
-		_u.SetRoleID(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *RoleUserUpdate) SetUserID(v int) *RoleUserUpdate {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *RoleUserUpdate) SetNillableUserID(v *int) *RoleUserUpdate {
-	if v != nil {
-		_u.SetUserID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RoleUserUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *RoleUserUpdate) With(as ...entfield.Assignment) *RoleUserUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -98,6 +67,9 @@ func (_u *RoleUserUpdate) ClearUser() *RoleUserUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *RoleUserUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*RoleUserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -223,6 +195,7 @@ func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type RoleUserUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *RoleUserMutation
 }
@@ -232,44 +205,11 @@ func NewRoleUserUpdateOne(c Config, hooks []Hook, mutation *RoleUserMutation) *R
 	return &RoleUserUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (_u *RoleUserUpdateOne) SetCreatedAt(v time.Time) *RoleUserUpdateOne {
-	_ = _u.mutation.SetField("created_at", v)
-	return _u
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *RoleUserUpdateOne) SetNillableCreatedAt(v *time.Time) *RoleUserUpdateOne {
-	if v != nil {
-		_u.SetCreatedAt(*v)
-	}
-	return _u
-}
-
-// SetRoleID sets the "role_id" field.
-func (_u *RoleUserUpdateOne) SetRoleID(v int) *RoleUserUpdateOne {
-	_ = _u.mutation.SetEdgeID("role", v)
-	return _u
-}
-
-// SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_u *RoleUserUpdateOne) SetNillableRoleID(v *int) *RoleUserUpdateOne {
-	if v != nil {
-		_u.SetRoleID(*v)
-	}
-	return _u
-}
-
-// SetUserID sets the "user_id" field.
-func (_u *RoleUserUpdateOne) SetUserID(v int) *RoleUserUpdateOne {
-	_ = _u.mutation.SetEdgeID("user", v)
-	return _u
-}
-
-// SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *RoleUserUpdateOne) SetNillableUserID(v *int) *RoleUserUpdateOne {
-	if v != nil {
-		_u.SetUserID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the RoleUserUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *RoleUserUpdateOne) With(as ...entfield.Assignment) *RoleUserUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -306,6 +246,9 @@ func (_u *RoleUserUpdateOne) Select(field string, fields ...string) *RoleUserUpd
 
 // Save executes the query and returns the updated RoleUser entity.
 func (_u *RoleUserUpdateOne) Save(ctx context.Context) (*RoleUser, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[RoleUser](ctx, &entbuilder.UpdateState[*RoleUserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

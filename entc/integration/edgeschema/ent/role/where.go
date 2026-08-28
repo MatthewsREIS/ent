@@ -21,20 +21,20 @@ var F = struct {
 	// CreatedAt is the handle for the "created_at" field.
 	CreatedAt entfield.Time
 }{
-	ID:        entfield.NewNumber[int](FieldID),
-	Name:      entfield.NewString[string](FieldName),
-	CreatedAt: entfield.NewTime(FieldCreatedAt),
+	ID:        entfield.NewNumber[int](FieldID, "id"),
+	Name:      entfield.NewString[string](FieldName, "name"),
+	CreatedAt: entfield.NewTime(FieldCreatedAt, "created_at"),
 }
 
 // E holds typed edge handles for every edge of the Role type.
 var E = struct {
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 	// RolesUsers is the handle for the "roles_users" edge.
-	RolesUsers entfield.Edge[predicate.RoleUser]
+	RolesUsers entfield.Edge[predicate.RoleUser, struct{}]
 }{
-	User:       entfield.NewEdge[predicate.User](newUserStep),
-	RolesUsers: entfield.NewEdge[predicate.RoleUser](newRolesUsersStep),
+	User:       entfield.NewEdge[predicate.User, int]("user", newUserStep),
+	RolesUsers: entfield.NewEdge[predicate.RoleUser, struct{}]("roles_users", newRolesUsersStep),
 }
 
 // And groups predicates with the AND operator between them.

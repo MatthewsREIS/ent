@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // MetadataCreate is the builder for creating a Metadata entity.
 type MetadataCreate struct {
 	Config
+	err      error
 	mutation *MetadataMutation
 	hooks    []Hook
 }
@@ -28,57 +30,12 @@ func NewMetadataCreate(c Config, hooks []Hook, mutation *MetadataMutation) *Meta
 	return &MetadataCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_c *MetadataCreate) SetAge(v int) *MetadataCreate {
-	_ = _c.mutation.SetField("age", v)
-	return _c
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_c *MetadataCreate) SetNillableAge(v *int) *MetadataCreate {
-	if v != nil {
-		_c.SetAge(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the MetadataCreate builder. The first error from as is recorded and returned by Save.
+func (_c *MetadataCreate) With(as ...entfield.Assignment) *MetadataCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetParentID sets the "parent_id" field.
-func (_c *MetadataCreate) SetParentID(v int) *MetadataCreate {
-	_ = _c.mutation.SetEdgeID("parent", v)
-	return _c
-}
-
-// SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *MetadataCreate) SetNillableParentID(v *int) *MetadataCreate {
-	if v != nil {
-		_c.SetParentID(*v)
-	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *MetadataCreate) SetID(v int) *MetadataCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *MetadataCreate) SetUserID(id int) *MetadataCreate {
-	_ = _c.mutation.SetEdgeID("user", id)
-	return _c
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_c *MetadataCreate) SetNillableUserID(id *int) *MetadataCreate {
-	if id != nil {
-		_c = _c.SetUserID(*id)
-	}
-	return _c
-}
-
-// AddChildIDs adds the "children" edge to the Metadata entity by IDs.
-func (_c *MetadataCreate) AddChildIDs(ids ...int) *MetadataCreate {
-	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -89,6 +46,9 @@ func (_c *MetadataCreate) Mutation() *MetadataMutation {
 
 // Save creates the Metadata in the database.
 func (_c *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

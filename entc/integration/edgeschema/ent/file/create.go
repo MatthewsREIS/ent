@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // FileCreate is the builder for creating a File entity.
 type FileCreate struct {
 	Config
+	err      error
 	mutation *FileMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,15 +32,12 @@ func NewFileCreate(c Config, hooks []Hook, mutation *FileMutation) *FileCreate {
 	return &FileCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_c *FileCreate) SetName(v string) *FileCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// AddProcessIDs adds the "processes" edge to the Process entity by IDs.
-func (_c *FileCreate) AddProcessIDs(ids ...int) *FileCreate {
-	_ = _c.mutation.AddEdgeIDs("processes", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FileCreate builder. The first error from as is recorded and returned by Save.
+func (_c *FileCreate) With(as ...entfield.Assignment) *FileCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -49,6 +48,9 @@ func (_c *FileCreate) Mutation() *FileMutation {
 
 // Save creates the File in the database.
 func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

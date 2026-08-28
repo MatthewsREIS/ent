@@ -17,15 +17,15 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 }{
-	ID: entfield.NewNumber[int](FieldID),
+	ID: entfield.NewNumber[int](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the Spec type.
 var E = struct {
 	// Card is the handle for the "card" edge.
-	Card entfield.Edge[predicate.Card]
+	Card entfield.Edge[predicate.Card, int]
 }{
-	Card: entfield.NewEdge[predicate.Card](newCardStep),
+	Card: entfield.NewEdge[predicate.Card, int]("card", newCardStep),
 }
 
 // And groups predicates with the AND operator between them.

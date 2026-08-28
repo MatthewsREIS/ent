@@ -16,25 +16,25 @@ import (
 var F = struct {
 	// CreatedAt is the handle for the "created_at" field.
 	CreatedAt entfield.Time
-	// RoleID is the handle for the "role_id" field.
-	RoleID entfield.Number[int]
-	// UserID is the handle for the "user_id" field.
-	UserID entfield.Number[int]
+	// RoleID is the handle for the "role_id" field (backs the "role" edge).
+	RoleID entfield.EdgeField[int]
+	// UserID is the handle for the "user_id" field (backs the "user" edge).
+	UserID entfield.EdgeField[int]
 }{
-	CreatedAt: entfield.NewTime(FieldCreatedAt),
-	RoleID:    entfield.NewNumber[int](FieldRoleID),
-	UserID:    entfield.NewNumber[int](FieldUserID),
+	CreatedAt: entfield.NewTime(FieldCreatedAt, "created_at"),
+	RoleID:    entfield.NewEdgeField[int](FieldRoleID, "role"),
+	UserID:    entfield.NewEdgeField[int](FieldUserID, "user"),
 }
 
 // E holds typed edge handles for every edge of the RoleUser type.
 var E = struct {
 	// Role is the handle for the "role" edge.
-	Role entfield.Edge[predicate.Role]
+	Role entfield.Edge[predicate.Role, int]
 	// User is the handle for the "user" edge.
-	User entfield.Edge[predicate.User]
+	User entfield.Edge[predicate.User, int]
 }{
-	Role: entfield.NewEdge[predicate.Role](newRoleStep),
-	User: entfield.NewEdge[predicate.User](newUserStep),
+	Role: entfield.NewEdge[predicate.Role, int]("role", newRoleStep),
+	User: entfield.NewEdge[predicate.User, int]("user", newUserStep),
 }
 
 // And groups predicates with the AND operator between them.

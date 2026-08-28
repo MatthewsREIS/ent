@@ -9,6 +9,7 @@ package link
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"entgo.io/ent/runtime/entfield"
 )
@@ -17,8 +18,11 @@ import (
 var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[uuidc.UUIDC]
+	// LinkInformation is the handle for the "link_information" field.
+	LinkInformation entfield.JSON[map[string]schema.LinkInformation]
 }{
-	ID: entfield.NewValue[uuidc.UUIDC](FieldID),
+	ID:              entfield.NewValue[uuidc.UUIDC](FieldID, "id"),
+	LinkInformation: entfield.NewJSON[map[string]schema.LinkInformation]("link_information"),
 }
 
 // E holds typed edge handles for every edge of the Link type.

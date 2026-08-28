@@ -25,10 +25,11 @@ type ZooMutationOption = func(*ZooMutation)
 // zooDescriptor describes Zoo's fields and edges
 // for the generic mutation runtime.
 var zooDescriptor = &entbuilder.Descriptor{
-	Name:   "Zoo",
-	IDType: reflect.TypeFor[int](),
-	Fields: map[string]entbuilder.FieldSpec{},
-	Edges:  map[string]entbuilder.EdgeSpec{}}
+	Name:    "Zoo",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
+	Edges:   map[string]entbuilder.EdgeSpec{}}
 
 // NewZooMutation creates a new mutation for the Zoo entity.
 func NewZooMutation(c Config, op Op, opts ...ZooMutationOption) *ZooMutation {

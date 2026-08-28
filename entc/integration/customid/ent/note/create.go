@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // NoteCreate is the builder for creating a Note entity.
 type NoteCreate struct {
 	Config
+	err      error
 	mutation *NoteMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,51 +32,12 @@ func NewNoteCreate(c Config, hooks []Hook, mutation *NoteMutation) *NoteCreate {
 	return &NoteCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_c *NoteCreate) SetText(v string) *NoteCreate {
-	_ = _c.mutation.SetField("text", v)
-	return _c
-}
-
-// SetNillableText sets the "text" field if the given value is not nil.
-func (_c *NoteCreate) SetNillableText(v *string) *NoteCreate {
-	if v != nil {
-		_c.SetText(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the NoteCreate builder. The first error from as is recorded and returned by Save.
+func (_c *NoteCreate) With(as ...entfield.Assignment) *NoteCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetID sets the "id" field.
-func (_c *NoteCreate) SetID(v schema.NoteID) *NoteCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *NoteCreate) SetNillableID(v *schema.NoteID) *NoteCreate {
-	if v != nil {
-		_c.SetID(*v)
-	}
-	return _c
-}
-
-// SetParentID sets the "parent" edge to the Note entity by ID.
-func (_c *NoteCreate) SetParentID(id schema.NoteID) *NoteCreate {
-	_ = _c.mutation.SetEdgeID("parent", id)
-	return _c
-}
-
-// SetNillableParentID sets the "parent" edge to the Note entity by ID if the given value is not nil.
-func (_c *NoteCreate) SetNillableParentID(id *schema.NoteID) *NoteCreate {
-	if id != nil {
-		_c = _c.SetParentID(*id)
-	}
-	return _c
-}
-
-// AddChildIDs adds the "children" edge to the Note entity by IDs.
-func (_c *NoteCreate) AddChildIDs(ids ...schema.NoteID) *NoteCreate {
-	_ = _c.mutation.AddEdgeIDs("children", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -85,6 +48,9 @@ func (_c *NoteCreate) Mutation() *NoteMutation {
 
 // Save creates the Note in the database.
 func (_c *NoteCreate) Save(ctx context.Context) (*Note, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

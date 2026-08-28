@@ -41,9 +41,10 @@ var enttaskDescriptor = &entbuilder.Descriptor{
 			Nillable: true,
 		},
 		"created_at": {
-			Type:     reflect.TypeFor[time.Time](),
-			GoName:   "CreatedAt",
-			Nillable: true,
+			Type:      reflect.TypeFor[time.Time](),
+			GoName:    "CreatedAt",
+			Nillable:  true,
+			Immutable: true,
 		},
 		"name": {
 			Type:     reflect.TypeFor[string](),

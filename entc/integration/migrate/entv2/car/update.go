@@ -15,12 +15,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CarUpdate is the builder for updating Car entities.
 type CarUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *CarMutation
 }
@@ -36,29 +38,12 @@ func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *CarUpdate) SetName(v string) *CarUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CarUpdate) SetNillableName(v *string) *CarUpdate {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *CarUpdate) With(as ...entfield.Assignment) *CarUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearName clears the value of the "name" field.
-func (_u *CarUpdate) ClearName() *CarUpdate {
-	_ = _u.mutation.ClearField("name")
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *CarUpdate) SetOwnerID(id int) *CarUpdate {
-	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -75,6 +60,9 @@ func (_u *CarUpdate) ClearOwner() *CarUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -171,6 +159,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type CarUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *CarMutation
 }
@@ -180,29 +169,12 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 	return &CarUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_u *CarUpdateOne) SetName(v string) *CarUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CarUpdateOne) SetNillableName(v *string) *CarUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CarUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *CarUpdateOne) With(as ...entfield.Assignment) *CarUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// ClearName clears the value of the "name" field.
-func (_u *CarUpdateOne) ClearName() *CarUpdateOne {
-	_ = _u.mutation.ClearField("name")
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
-	_ = _u.mutation.SetEdgeID("owner", id)
 	return _u
 }
 
@@ -232,6 +204,9 @@ func (_u *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
 
 // Save executes the query and returns the updated Car entity.
 func (_u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Car](ctx, &entbuilder.UpdateState[*CarMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

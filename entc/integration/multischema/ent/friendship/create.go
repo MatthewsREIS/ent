@@ -14,12 +14,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // FriendshipCreate is the builder for creating a Friendship entity.
 type FriendshipCreate struct {
 	Config
+	err      error
 	mutation *FriendshipMutation
 	hooks    []Hook
 }
@@ -29,43 +31,12 @@ func NewFriendshipCreate(c Config, hooks []Hook, mutation *FriendshipMutation) *
 	return &FriendshipCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetWeight sets the "weight" field.
-func (_c *FriendshipCreate) SetWeight(v int) *FriendshipCreate {
-	_ = _c.mutation.SetField("weight", v)
-	return _c
-}
-
-// SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_c *FriendshipCreate) SetNillableWeight(v *int) *FriendshipCreate {
-	if v != nil {
-		_c.SetWeight(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FriendshipCreate builder. The first error from as is recorded and returned by Save.
+func (_c *FriendshipCreate) With(as ...entfield.Assignment) *FriendshipCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (_c *FriendshipCreate) SetCreatedAt(v time.Time) *FriendshipCreate {
-	_ = _c.mutation.SetField("created_at", v)
-	return _c
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *FriendshipCreate) SetNillableCreatedAt(v *time.Time) *FriendshipCreate {
-	if v != nil {
-		_c.SetCreatedAt(*v)
-	}
-	return _c
-}
-
-// SetUserID sets the "user_id" field.
-func (_c *FriendshipCreate) SetUserID(v int) *FriendshipCreate {
-	_ = _c.mutation.SetEdgeID("user", v)
-	return _c
-}
-
-// SetFriendID sets the "friend_id" field.
-func (_c *FriendshipCreate) SetFriendID(v int) *FriendshipCreate {
-	_ = _c.mutation.SetEdgeID("friend", v)
 	return _c
 }
 
@@ -76,6 +47,9 @@ func (_c *FriendshipCreate) Mutation() *FriendshipMutation {
 
 // Save creates the Friendship in the database.
 func (_c *FriendshipCreate) Save(ctx context.Context) (*Friendship, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

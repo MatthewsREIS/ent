@@ -13,12 +13,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GroupCreate is the builder for creating a Group entity.
 type GroupCreate struct {
 	Config
+	err      error
 	mutation *GroupMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -29,15 +31,12 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 	return &GroupCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetID sets the "id" field.
-func (_c *GroupCreate) SetID(v int) *GroupCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
-	_ = _c.mutation.AddEdgeIDs("users", entbuilder.ToAny(ids)...)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GroupCreate builder. The first error from as is recorded and returned by Save.
+func (_c *GroupCreate) With(as ...entfield.Assignment) *GroupCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -48,6 +47,9 @@ func (_c *GroupCreate) Mutation() *GroupMutation {
 
 // Save creates the Group in the database.
 func (_c *GroupCreate) Save(ctx context.Context) (*Group, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

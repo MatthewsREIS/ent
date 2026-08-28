@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // SessionCreate is the builder for creating a Session entity.
 type SessionCreate struct {
 	Config
+	err      error
 	mutation *SessionMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,30 +32,11 @@ func NewSessionCreate(c Config, hooks []Hook, mutation *SessionMutation) *Sessio
 	return &SessionCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetID sets the "id" field.
-func (_c *SessionCreate) SetID(v schema.ID) *SessionCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableID(v *schema.ID) *SessionCreate {
-	if v != nil {
-		_c.SetID(*v)
-	}
-	return _c
-}
-
-// SetDeviceID sets the "device" edge to the Device entity by ID.
-func (_c *SessionCreate) SetDeviceID(id schema.ID) *SessionCreate {
-	_ = _c.mutation.SetEdgeID("device", id)
-	return _c
-}
-
-// SetNillableDeviceID sets the "device" edge to the Device entity by ID if the given value is not nil.
-func (_c *SessionCreate) SetNillableDeviceID(id *schema.ID) *SessionCreate {
-	if id != nil {
-		_c = _c.SetDeviceID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the SessionCreate builder. The first error from as is recorded and returned by Save.
+func (_c *SessionCreate) With(as ...entfield.Assignment) *SessionCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -65,6 +48,9 @@ func (_c *SessionCreate) Mutation() *SessionMutation {
 
 // Save creates the Session in the database.
 func (_c *SessionCreate) Save(ctx context.Context) (*Session, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

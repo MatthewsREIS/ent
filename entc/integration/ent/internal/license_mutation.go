@@ -26,12 +26,14 @@ type LicenseMutationOption = func(*LicenseMutation)
 // licenseDescriptor describes License's fields and edges
 // for the generic mutation runtime.
 var licenseDescriptor = &entbuilder.Descriptor{
-	Name:   "License",
-	IDType: reflect.TypeFor[int](),
+	Name:    "License",
+	IDType:  reflect.TypeFor[int](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"create_time": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreateTime",
+			Type:      reflect.TypeFor[time.Time](),
+			GoName:    "CreateTime",
+			Immutable: true,
 		},
 		"update_time": {
 			Type:   reflect.TypeFor[time.Time](),

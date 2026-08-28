@@ -17,24 +17,24 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.String[string]
 }{
-	ID: entfield.NewString[string](FieldID),
+	ID: entfield.NewString[string](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the Pet type.
 var E = struct {
 	// Owner is the handle for the "owner" edge.
-	Owner entfield.Edge[predicate.User]
+	Owner entfield.Edge[predicate.User, int]
 	// Cars is the handle for the "cars" edge.
-	Cars entfield.Edge[predicate.Car]
+	Cars entfield.Edge[predicate.Car, int]
 	// Friends is the handle for the "friends" edge.
-	Friends entfield.Edge[predicate.Pet]
+	Friends entfield.Edge[predicate.Pet, string]
 	// BestFriend is the handle for the "best_friend" edge.
-	BestFriend entfield.Edge[predicate.Pet]
+	BestFriend entfield.Edge[predicate.Pet, string]
 }{
-	Owner:      entfield.NewEdge[predicate.User](newOwnerStep),
-	Cars:       entfield.NewEdge[predicate.Car](newCarsStep),
-	Friends:    entfield.NewEdge[predicate.Pet](newFriendsStep),
-	BestFriend: entfield.NewEdge[predicate.Pet](newBestFriendStep),
+	Owner:      entfield.NewEdge[predicate.User, int]("owner", newOwnerStep),
+	Cars:       entfield.NewEdge[predicate.Car, int]("cars", newCarsStep),
+	Friends:    entfield.NewEdge[predicate.Pet, string]("friends", newFriendsStep),
+	BestFriend: entfield.NewEdge[predicate.Pet, string]("best_friend", newBestFriendStep),
 }
 
 // And groups predicates with the AND operator between them.

@@ -25,9 +25,10 @@ type PetMutationOption = func(*PetMutation)
 // petDescriptor describes Pet's fields and edges
 // for the generic mutation runtime.
 var petDescriptor = &entbuilder.Descriptor{
-	Name:   "Pet",
-	IDType: reflect.TypeFor[string](),
-	Fields: map[string]entbuilder.FieldSpec{},
+	Name:    "Pet",
+	IDType:  reflect.TypeFor[string](),
+	IDField: "id",
+	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
 			Cardinality:  entbuilder.O2OUnique,

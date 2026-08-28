@@ -9,6 +9,41 @@
 		"edges": {
 			"Friend": true,
 			"User": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/versioned/friendship",
+		"setters": {
+			"CreatedAt": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"FriendID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UserID": {
+				"kind": "edgefield",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Weight": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"group": {
@@ -17,6 +52,25 @@
 		},
 		"edges": {
 			"Users": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/versioned/group",
+		"setters": {
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Users": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "User"
+			}
 		}
 	},
 	"pet": {
@@ -26,6 +80,25 @@
 		},
 		"edges": {
 			"Owner": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/versioned/pet",
+		"setters": {
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"OwnerID": {
+				"kind": "edgefield",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"user": {
@@ -39,6 +112,65 @@
 			"Friendships": true,
 			"Groups": true,
 			"Pets": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/multischema/versioned/user",
+		"setters": {
+			"Followers": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Follower"
+			},
+			"Following": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Following"
+			},
+			"Friends": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Friend"
+			},
+			"Friendships": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Friendship"
+			},
+			"Groups": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Group"
+			},
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Pets": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Pet"
+			}
 		}
 	}
 }

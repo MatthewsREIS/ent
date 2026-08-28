@@ -14,12 +14,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // OtherCreate is the builder for creating a Other entity.
 type OtherCreate struct {
 	Config
+	err      error
 	mutation *OtherMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -30,16 +32,11 @@ func NewOtherCreate(c Config, hooks []Hook, mutation *OtherMutation) *OtherCreat
 	return &OtherCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetID sets the "id" field.
-func (_c *OtherCreate) SetID(v sid.ID) *OtherCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (_c *OtherCreate) SetNillableID(v *sid.ID) *OtherCreate {
-	if v != nil {
-		_c.SetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the OtherCreate builder. The first error from as is recorded and returned by Save.
+func (_c *OtherCreate) With(as ...entfield.Assignment) *OtherCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -51,6 +48,9 @@ func (_c *OtherCreate) Mutation() *OtherMutation {
 
 // Save creates the Other in the database.
 func (_c *OtherCreate) Save(ctx context.Context) (*Other, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }

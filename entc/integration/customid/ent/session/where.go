@@ -18,15 +18,15 @@ var F = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[schema.ID]
 }{
-	ID: entfield.NewValue[schema.ID](FieldID),
+	ID: entfield.NewValue[schema.ID](FieldID, "id"),
 }
 
 // E holds typed edge handles for every edge of the Session type.
 var E = struct {
 	// Device is the handle for the "device" edge.
-	Device entfield.Edge[predicate.Device]
+	Device entfield.Edge[predicate.Device, schema.ID]
 }{
-	Device: entfield.NewEdge[predicate.Device](newDeviceStep),
+	Device: entfield.NewEdge[predicate.Device, schema.ID]("device", newDeviceStep),
 }
 
 // And groups predicates with the AND operator between them.

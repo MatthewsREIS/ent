@@ -21,12 +21,14 @@ import (
 	"entgo.io/ent/entc/integration/edgeschema/ent/usergroup"
 	"entgo.io/ent/entc/integration/edgeschema/ent/usertweet"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // UserUpdate is the builder for updating User entities.
 type UserUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -42,71 +44,12 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return _u
 }
 
-// SetName sets the "name" field.
-func (_u *UserUpdate) SetName(v string) *UserUpdate {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdate) With(as ...entfield.Assignment) *UserUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddRelativeIDs adds the "relatives" edge to the User entity by IDs.
-func (_u *UserUpdate) AddRelativeIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("relatives", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddLikedTweetIDs adds the "liked_tweets" edge to the Tweet entity by IDs.
-func (_u *UserUpdate) AddLikedTweetIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("liked_tweets", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_u *UserUpdate) AddTweetIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
-func (_u *UserUpdate) AddRoleIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("roles", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
-func (_u *UserUpdate) AddJoinedGroupIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("joined_groups", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
-func (_u *UserUpdate) AddFriendshipIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("friendships", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddUserTweetIDs adds the "user_tweets" edge to the UserTweet entity by IDs.
-func (_u *UserUpdate) AddUserTweetIDs(ids ...int) *UserUpdate {
-	_ = _u.mutation.AddEdgeIDs("user_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -225,6 +168,9 @@ func (_u *UserUpdate) RemoveUserTweetIDs(ids ...int) *UserUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -809,6 +755,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type UserUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *UserMutation
 }
@@ -818,71 +765,12 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 	return &UserUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
-	_ = _u.mutation.SetField("name", v)
-	return _u
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
-	if v != nil {
-		_u.SetName(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the UserUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *UserUpdateOne) With(as ...entfield.Assignment) *UserUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
-	return _u
-}
-
-// AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (_u *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("groups", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (_u *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("friends", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddRelativeIDs adds the "relatives" edge to the User entity by IDs.
-func (_u *UserUpdateOne) AddRelativeIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("relatives", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddLikedTweetIDs adds the "liked_tweets" edge to the Tweet entity by IDs.
-func (_u *UserUpdateOne) AddLikedTweetIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("liked_tweets", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (_u *UserUpdateOne) AddTweetIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("tweets", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
-func (_u *UserUpdateOne) AddRoleIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("roles", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
-func (_u *UserUpdateOne) AddJoinedGroupIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("joined_groups", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
-func (_u *UserUpdateOne) AddFriendshipIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("friendships", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// AddUserTweetIDs adds the "user_tweets" edge to the UserTweet entity by IDs.
-func (_u *UserUpdateOne) AddUserTweetIDs(ids ...int) *UserUpdateOne {
-	_ = _u.mutation.AddEdgeIDs("user_tweets", entbuilder.ToAny(ids)...)
 	return _u
 }
 
@@ -1014,6 +902,9 @@ func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
 
 // Save executes the query and returns the updated User entity.
 func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[User](ctx, &entbuilder.UpdateState[*UserMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

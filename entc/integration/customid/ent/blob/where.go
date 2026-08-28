@@ -22,23 +22,23 @@ var F = struct {
 	// Count is the handle for the "count" field.
 	Count entfield.Number[int]
 }{
-	ID:    entfield.NewValue[uuid.UUID](FieldID),
-	UUID:  entfield.NewValue[uuid.UUID](FieldUUID),
-	Count: entfield.NewNumber[int](FieldCount),
+	ID:    entfield.NewValue[uuid.UUID](FieldID, "id"),
+	UUID:  entfield.NewValue[uuid.UUID](FieldUUID, "uuid"),
+	Count: entfield.NewNumber[int](FieldCount, "count"),
 }
 
 // E holds typed edge handles for every edge of the Blob type.
 var E = struct {
 	// Parent is the handle for the "parent" edge.
-	Parent entfield.Edge[predicate.Blob]
+	Parent entfield.Edge[predicate.Blob, uuid.UUID]
 	// Links is the handle for the "links" edge.
-	Links entfield.Edge[predicate.Blob]
+	Links entfield.Edge[predicate.Blob, uuid.UUID]
 	// BlobLinks is the handle for the "blob_links" edge.
-	BlobLinks entfield.Edge[predicate.BlobLink]
+	BlobLinks entfield.Edge[predicate.BlobLink, struct{}]
 }{
-	Parent:    entfield.NewEdge[predicate.Blob](newParentStep),
-	Links:     entfield.NewEdge[predicate.Blob](newLinksStep),
-	BlobLinks: entfield.NewEdge[predicate.BlobLink](newBlobLinksStep),
+	Parent:    entfield.NewEdge[predicate.Blob, uuid.UUID]("parent", newParentStep),
+	Links:     entfield.NewEdge[predicate.Blob, uuid.UUID]("links", newLinksStep),
+	BlobLinks: entfield.NewEdge[predicate.BlobLink, struct{}]("blob_links", newBlobLinksStep),
 }
 
 // And groups predicates with the AND operator between them.

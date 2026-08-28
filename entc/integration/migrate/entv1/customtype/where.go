@@ -19,8 +19,8 @@ var F = struct {
 	// Custom is the handle for the "custom" field.
 	Custom entfield.String[string]
 }{
-	ID:     entfield.NewNumber[int](FieldID),
-	Custom: entfield.NewString[string](FieldCustom),
+	ID:     entfield.NewNumber[int](FieldID, "id"),
+	Custom: entfield.NewString[string](FieldCustom, "custom"),
 }
 
 // E holds typed edge handles for every edge of the CustomType type.

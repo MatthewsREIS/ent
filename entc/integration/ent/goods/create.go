@@ -13,12 +13,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // GoodsCreate is the builder for creating a Goods entity.
 type GoodsCreate struct {
 	Config
+	err      error
 	mutation *GoodsMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
@@ -29,6 +31,15 @@ func NewGoodsCreate(c Config, hooks []Hook, mutation *GoodsMutation) *GoodsCreat
 	return &GoodsCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the GoodsCreate builder. The first error from as is recorded and returned by Save.
+func (_c *GoodsCreate) With(as ...entfield.Assignment) *GoodsCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
+	return _c
+}
+
 // Mutation returns the GoodsMutation object of the builder.
 func (_c *GoodsCreate) Mutation() *GoodsMutation {
 	return _c.mutation
@@ -36,6 +47,9 @@ func (_c *GoodsCreate) Mutation() *GoodsMutation {
 
 // Save creates the Goods in the database.
 func (_c *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

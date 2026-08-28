@@ -12,6 +12,57 @@
 		},
 		"noBareEQ": {
 			"Status": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/privacy/ent/task",
+		"setters": {
+			"Description": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Owner": {
+				"kind": "edge",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": true,
+				"methodBase": ""
+			},
+			"Status": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Teams": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Team"
+			},
+			"Title": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"UUID": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			}
 		}
 	},
 	"team": {
@@ -21,6 +72,33 @@
 		"edges": {
 			"Tasks": true,
 			"Users": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/privacy/ent/team",
+		"setters": {
+			"Name": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Tasks": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Task"
+			},
+			"Users": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "User"
+			}
 		}
 	},
 	"user": {
@@ -31,6 +109,41 @@
 		"edges": {
 			"Tasks": true,
 			"Teams": true
+		},
+		"importPath": "entgo.io/ent/entc/integration/privacy/ent/user",
+		"setters": {
+			"Age": {
+				"kind": "field",
+				"nillable": true,
+				"canAdd": true,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Name": {
+				"kind": "field",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": ""
+			},
+			"Tasks": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Task"
+			},
+			"Teams": {
+				"kind": "edge",
+				"nillable": false,
+				"canAdd": false,
+				"canAppend": false,
+				"unique": false,
+				"methodBase": "Team"
+			}
 		}
 	}
 }

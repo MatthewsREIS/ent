@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // CommentCreate is the builder for creating a Comment entity.
 type CommentCreate struct {
 	Config
+	err      error
 	mutation *CommentMutation
 	hooks    []Hook
 }
@@ -28,15 +30,12 @@ func NewCommentCreate(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 	return &CommentCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetText sets the "text" field.
-func (_c *CommentCreate) SetText(v string) *CommentCreate {
-	_ = _c.mutation.SetField("text", v)
-	return _c
-}
-
-// SetPostID sets the "post_id" field.
-func (_c *CommentCreate) SetPostID(v int) *CommentCreate {
-	_ = _c.mutation.SetEdgeID("post", v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the CommentCreate builder. The first error from as is recorded and returned by Save.
+func (_c *CommentCreate) With(as ...entfield.Assignment) *CommentCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
+	}
 	return _c
 }
 
@@ -47,6 +46,9 @@ func (_c *CommentCreate) Mutation() *CommentMutation {
 
 // Save creates the Comment in the database.
 func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 

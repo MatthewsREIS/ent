@@ -21,20 +21,20 @@ var F = struct {
 	// Age is the handle for the "age" field.
 	Age entfield.Number[uint]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Name: entfield.NewString[string](FieldName),
-	Age:  entfield.NewNumber[uint](FieldAge),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Name: entfield.NewString[string](FieldName, "name"),
+	Age:  entfield.NewNumber[uint](FieldAge, "age"),
 }
 
 // E holds typed edge handles for every edge of the User type.
 var E = struct {
 	// Teams is the handle for the "teams" edge.
-	Teams entfield.Edge[predicate.Team]
+	Teams entfield.Edge[predicate.Team, int]
 	// Tasks is the handle for the "tasks" edge.
-	Tasks entfield.Edge[predicate.Task]
+	Tasks entfield.Edge[predicate.Task, int]
 }{
-	Teams: entfield.NewEdge[predicate.Team](newTeamsStep),
-	Tasks: entfield.NewEdge[predicate.Task](newTasksStep),
+	Teams: entfield.NewEdge[predicate.Team, int]("teams", newTeamsStep),
+	Tasks: entfield.NewEdge[predicate.Task, int]("tasks", newTasksStep),
 }
 
 // And groups predicates with the AND operator between them.

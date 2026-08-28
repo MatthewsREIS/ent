@@ -19,16 +19,16 @@ var F = struct {
 	// Oid is the handle for the "oid" field.
 	Oid entfield.Number[int]
 }{
-	ID:  entfield.NewNumber[int](FieldID),
-	Oid: entfield.NewNumber[int](FieldOid),
+	ID:  entfield.NewNumber[int](FieldID, "id"),
+	Oid: entfield.NewNumber[int](FieldOid, "oid"),
 }
 
 // E holds typed edge handles for every edge of the Blog type.
 var E = struct {
 	// Admins is the handle for the "admins" edge.
-	Admins entfield.Edge[predicate.User]
+	Admins entfield.Edge[predicate.User, int]
 }{
-	Admins: entfield.NewEdge[predicate.User](newAdminsStep),
+	Admins: entfield.NewEdge[predicate.User, int]("admins", newAdminsStep),
 }
 
 // And groups predicates with the AND operator between them.

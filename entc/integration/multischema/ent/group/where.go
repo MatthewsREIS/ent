@@ -21,16 +21,16 @@ var F = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
-	ID:   entfield.NewNumber[int](FieldID),
-	Name: entfield.NewString[string](FieldName),
+	ID:   entfield.NewNumber[int](FieldID, "id"),
+	Name: entfield.NewString[string](FieldName, "name"),
 }
 
 // E holds typed edge handles for every edge of the Group type.
 var E = struct {
 	// Users is the handle for the "users" edge.
-	Users entfield.Edge[predicate.User]
+	Users entfield.Edge[predicate.User, int]
 }{
-	Users: entfield.NewEdgeSteps[predicate.User](newUsersStep, []func(*sql.Selector, *sqlgraph.Step){
+	Users: entfield.NewEdgeSteps[predicate.User, int]("users", newUsersStep, []func(*sql.Selector, *sqlgraph.Step){
 		func(s *sql.Selector, step *sqlgraph.Step) {
 			schemaConfig := internal.SchemaConfigFromContext(s.Context())
 			step.To.Schema = schemaConfig.User

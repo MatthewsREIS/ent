@@ -26,8 +26,9 @@ type MixinIDMutationOption = func(*MixinIDMutation)
 // mixinidDescriptor describes MixinID's fields and edges
 // for the generic mutation runtime.
 var mixinidDescriptor = &entbuilder.Descriptor{
-	Name:   "MixinID",
-	IDType: reflect.TypeFor[uuid.UUID](),
+	Name:    "MixinID",
+	IDType:  reflect.TypeFor[uuid.UUID](),
+	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"some_field": {
 			Type:   reflect.TypeFor[string](),

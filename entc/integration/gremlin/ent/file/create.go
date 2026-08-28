@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/gremlin/graph/dsl"
@@ -20,11 +19,13 @@ import (
 	"entgo.io/ent/entc/integration/gremlin/ent/filetype"
 	"entgo.io/ent/entc/integration/gremlin/ent/user"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 )
 
 // FileCreate is the builder for creating a File entity.
 type FileCreate struct {
 	Config
+	err      error
 	mutation *FileMutation
 	hooks    []Hook
 }
@@ -34,141 +35,12 @@ func NewFileCreate(c Config, hooks []Hook, mutation *FileMutation) *FileCreate {
 	return &FileCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetSetID sets the "set_id" field.
-func (_c *FileCreate) SetSetID(v int) *FileCreate {
-	_ = _c.mutation.SetField("set_id", v)
-	return _c
-}
-
-// SetNillableSetID sets the "set_id" field if the given value is not nil.
-func (_c *FileCreate) SetNillableSetID(v *int) *FileCreate {
-	if v != nil {
-		_c.SetSetID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the FileCreate builder. The first error from as is recorded and returned by Save.
+func (_c *FileCreate) With(as ...entfield.Assignment) *FileCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
-	return _c
-}
-
-// SetSize sets the "size" field.
-func (_c *FileCreate) SetSize(v int) *FileCreate {
-	_ = _c.mutation.SetField("size", v)
-	return _c
-}
-
-// SetNillableSize sets the "size" field if the given value is not nil.
-func (_c *FileCreate) SetNillableSize(v *int) *FileCreate {
-	if v != nil {
-		_c.SetSize(*v)
-	}
-	return _c
-}
-
-// SetName sets the "name" field.
-func (_c *FileCreate) SetName(v string) *FileCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetUser sets the "user" field.
-func (_c *FileCreate) SetUser(v string) *FileCreate {
-	_ = _c.mutation.SetField("user", v)
-	return _c
-}
-
-// SetNillableUser sets the "user" field if the given value is not nil.
-func (_c *FileCreate) SetNillableUser(v *string) *FileCreate {
-	if v != nil {
-		_c.SetUser(*v)
-	}
-	return _c
-}
-
-// SetGroup sets the "group" field.
-func (_c *FileCreate) SetGroup(v string) *FileCreate {
-	_ = _c.mutation.SetField("group", v)
-	return _c
-}
-
-// SetNillableGroup sets the "group" field if the given value is not nil.
-func (_c *FileCreate) SetNillableGroup(v *string) *FileCreate {
-	if v != nil {
-		_c.SetGroup(*v)
-	}
-	return _c
-}
-
-// SetOp sets the "op" field.
-func (_c *FileCreate) SetOp(v bool) *FileCreate {
-	_ = _c.mutation.SetField("op", v)
-	return _c
-}
-
-// SetNillableOp sets the "op" field if the given value is not nil.
-func (_c *FileCreate) SetNillableOp(v *bool) *FileCreate {
-	if v != nil {
-		_c.SetOp(*v)
-	}
-	return _c
-}
-
-// SetFieldID sets the "field_id" field.
-func (_c *FileCreate) SetFieldID(v int) *FileCreate {
-	_ = _c.mutation.SetField("field_id", v)
-	return _c
-}
-
-// SetNillableFieldID sets the "field_id" field if the given value is not nil.
-func (_c *FileCreate) SetNillableFieldID(v *int) *FileCreate {
-	if v != nil {
-		_c.SetFieldID(*v)
-	}
-	return _c
-}
-
-// SetCreateTime sets the "create_time" field.
-func (_c *FileCreate) SetCreateTime(v time.Time) *FileCreate {
-	_ = _c.mutation.SetField("create_time", v)
-	return _c
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (_c *FileCreate) SetNillableCreateTime(v *time.Time) *FileCreate {
-	if v != nil {
-		_c.SetCreateTime(*v)
-	}
-	return _c
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_c *FileCreate) SetOwnerID(id string) *FileCreate {
-	_ = _c.mutation.SetEdgeID("owner", id)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_c *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
-	if id != nil {
-		_c = _c.SetOwnerID(*id)
-	}
-	return _c
-}
-
-// SetTypeID sets the "type" edge to the FileType entity by ID.
-func (_c *FileCreate) SetTypeID(id string) *FileCreate {
-	_ = _c.mutation.SetEdgeID("type", id)
-	return _c
-}
-
-// SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
-func (_c *FileCreate) SetNillableTypeID(id *string) *FileCreate {
-	if id != nil {
-		_c = _c.SetTypeID(*id)
-	}
-	return _c
-}
-
-// AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
-func (_c *FileCreate) AddFieldIDs(ids ...string) *FileCreate {
-	_ = _c.mutation.AddEdgeIDs("field", entbuilder.ToAny(ids)...)
 	return _c
 }
 
@@ -179,6 +51,9 @@ func (_c *FileCreate) Mutation() *FileMutation {
 
 // Save creates the File in the database.
 func (_c *FileCreate) Save(ctx context.Context) (*File, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }

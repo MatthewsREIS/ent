@@ -16,12 +16,14 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/template/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // PetUpdate is the builder for updating Pet entities.
 type PetUpdate struct {
 	Config
+	err      error
 	hooks    []Hook
 	mutation *PetMutation
 }
@@ -37,57 +39,11 @@ func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return _u
 }
 
-// SetAge sets the "age" field.
-func (_u *PetUpdate) SetAge(v int) *PetUpdate {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableAge(v *int) *PetUpdate {
-	if v != nil {
-		_u.SetAge(*v)
-	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *PetUpdate) AddAge(v int) *PetUpdate {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// SetLicensedAt sets the "licensed_at" field.
-func (_u *PetUpdate) SetLicensedAt(v time.Time) *PetUpdate {
-	_ = _u.mutation.SetField("licensed_at", v)
-	return _u
-}
-
-// SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableLicensedAt(v *time.Time) *PetUpdate {
-	if v != nil {
-		_u.SetLicensedAt(*v)
-	}
-	return _u
-}
-
-// ClearLicensedAt clears the value of the "licensed_at" field.
-func (_u *PetUpdate) ClearLicensedAt() *PetUpdate {
-	_ = _u.mutation.ClearField("licensed_at")
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *PetUpdate) SetOwnerID(id int) *PetUpdate {
-	_ = _u.mutation.SetEdgeID("owner", id)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_u *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
-	if id != nil {
-		_u = _u.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetUpdate builder. The first error from as is recorded and returned by Save.
+func (_u *PetUpdate) With(as ...entfield.Assignment) *PetUpdate {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -105,6 +61,9 @@ func (_u *PetUpdate) ClearOwner() *PetUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
+	if _u.err != nil {
+		return 0, _u.err
+	}
 	return entbuilder.RunUpdate(ctx, &entbuilder.UpdateState[*PetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 
@@ -197,6 +156,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 type PetUpdateOne struct {
 	Config
 	fields   []string
+	err      error
 	hooks    []Hook
 	mutation *PetMutation
 }
@@ -206,57 +166,11 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 	return &PetUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetAge sets the "age" field.
-func (_u *PetUpdateOne) SetAge(v int) *PetUpdateOne {
-	_ = _u.mutation.ResetField("age")
-	_ = _u.mutation.SetField("age", v)
-	return _u
-}
-
-// SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableAge(v *int) *PetUpdateOne {
-	if v != nil {
-		_u.SetAge(*v)
-	}
-	return _u
-}
-
-// AddAge adds value to the "age" field.
-func (_u *PetUpdateOne) AddAge(v int) *PetUpdateOne {
-	_ = _u.mutation.AddField("age", v)
-	return _u
-}
-
-// SetLicensedAt sets the "licensed_at" field.
-func (_u *PetUpdateOne) SetLicensedAt(v time.Time) *PetUpdateOne {
-	_ = _u.mutation.SetField("licensed_at", v)
-	return _u
-}
-
-// SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableLicensedAt(v *time.Time) *PetUpdateOne {
-	if v != nil {
-		_u.SetLicensedAt(*v)
-	}
-	return _u
-}
-
-// ClearLicensedAt clears the value of the "licensed_at" field.
-func (_u *PetUpdateOne) ClearLicensedAt() *PetUpdateOne {
-	_ = _u.mutation.ClearField("licensed_at")
-	return _u
-}
-
-// SetOwnerID sets the "owner" edge to the User entity by ID.
-func (_u *PetUpdateOne) SetOwnerID(id int) *PetUpdateOne {
-	_ = _u.mutation.SetEdgeID("owner", id)
-	return _u
-}
-
-// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
-	if id != nil {
-		_u = _u.SetOwnerID(*id)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetUpdateOne builder. The first error from as is recorded and returned by Save.
+func (_u *PetUpdateOne) With(as ...entfield.Assignment) *PetUpdateOne {
+	if _u.err == nil {
+		_u.err = entfield.Apply(_u.mutation, as...)
 	}
 	return _u
 }
@@ -287,6 +201,9 @@ func (_u *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
 
 // Save executes the query and returns the updated Pet entity.
 func (_u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
+	if _u.err != nil {
+		return nil, _u.err
+	}
 	return entbuilder.RunUpdateOne[Pet](ctx, &entbuilder.UpdateState[*PetMutation]{Hooks: _u.hooks, Mutation: _u.mutation}, _u.sqlSave)
 }
 

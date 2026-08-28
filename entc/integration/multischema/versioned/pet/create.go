@@ -13,12 +13,14 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
 // PetCreate is the builder for creating a Pet entity.
 type PetCreate struct {
 	Config
+	err      error
 	mutation *PetMutation
 	hooks    []Hook
 }
@@ -28,30 +30,11 @@ func NewPetCreate(c Config, hooks []Hook, mutation *PetMutation) *PetCreate {
 	return &PetCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// SetName sets the "name" field.
-func (_c *PetCreate) SetName(v string) *PetCreate {
-	_ = _c.mutation.SetField("name", v)
-	return _c
-}
-
-// SetNillableName sets the "name" field if the given value is not nil.
-func (_c *PetCreate) SetNillableName(v *string) *PetCreate {
-	if v != nil {
-		_c.SetName(*v)
-	}
-	return _c
-}
-
-// SetOwnerID sets the "owner_id" field.
-func (_c *PetCreate) SetOwnerID(v int) *PetCreate {
-	_ = _c.mutation.SetEdgeID("owner", v)
-	return _c
-}
-
-// SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_c *PetCreate) SetNillableOwnerID(v *int) *PetCreate {
-	if v != nil {
-		_c.SetOwnerID(*v)
+// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// to the PetCreate builder. The first error from as is recorded and returned by Save.
+func (_c *PetCreate) With(as ...entfield.Assignment) *PetCreate {
+	if _c.err == nil {
+		_c.err = entfield.Apply(_c.mutation, as...)
 	}
 	return _c
 }
@@ -63,6 +46,9 @@ func (_c *PetCreate) Mutation() *PetMutation {
 
 // Save creates the Pet in the database.
 func (_c *PetCreate) Save(ctx context.Context) (*Pet, error) {
+	if _c.err != nil {
+		return nil, _c.err
+	}
 	_c.defaults()
 	return WithHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
