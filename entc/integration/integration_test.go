@@ -32,6 +32,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent"
 	"entgo.io/ent/entc/integration/ent/card"
+	"entgo.io/ent/entc/integration/ent/comment"
 	"entgo.io/ent/entc/integration/ent/enttest"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/file"
@@ -186,7 +187,7 @@ var (
 func Sanity(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
-	usr := client.User.Create().SetName("foo").SetAge(20).SaveX(ctx)
+	usr := client.User.Create().With(user.F.Name.Set("foo"), user.F.Age.Set(20)).SaveX(ctx)
 	client.User.Update().ExecX(ctx)
 	client.User.UpdateOne(usr).ExecX(ctx)
 	require.Equal("foo", usr.Name)
@@ -195,17 +196,17 @@ func Sanity(t *testing.T, client *ent.Client) {
 	client.User.Query().OnlyX(ctx)
 	client.User.Delete().ExecX(ctx)
 	require.Empty(client.User.Query().AllX(ctx))
-	pt := client.Pet.Create().SetName("pedro").SaveX(ctx)
-	usr = client.User.Create().SetName("foo").SetAge(20).AddPetIDs(pt.ID).SaveX(ctx)
-	child := client.User.Create().SetName("bar").SetAge(20).AddChildIDs(usr.ID).SaveX(ctx)
-	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
-	grp := client.Group.Create().SetName("Github").SetExpire(time.Now()).AddUserIDs(usr.ID, child.ID).SetInfoID(inf.ID).SaveX(ctx)
+	pt := client.Pet.Create().With(pet.F.Name.Set("pedro")).SaveX(ctx)
+	usr = client.User.Create().With(user.F.Name.Set("foo"), user.F.Age.Set(20), user.E.Pets.AddIDs(pt.ID)).SaveX(ctx)
+	child := client.User.Create().With(user.F.Name.Set("bar"), user.F.Age.Set(20), user.E.Children.AddIDs(usr.ID)).SaveX(ctx)
+	inf := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc")).SaveX(ctx)
+	grp := client.Group.Create().With(group.F.Name.Set("Github"), group.F.Expire.Set(time.Now()), group.E.Users.AddIDs(usr.ID, child.ID), group.E.Info.SetID(inf.ID)).SaveX(ctx)
 	require.Equal(1, client.Group.Query().CountX(ctx))
 	require.Zero(client.Group.Query().Where(group.F.Active.EQ(false)).CountX(ctx))
 	require.Len(ent.QueryGroupUsers(client.Group, grp).AllX(ctx), 2)
 	ent.QueryUserGroups(client.User, usr).OnlyX(ctx)
 	ent.QueryUserGroups(client.User, child).OnlyX(ctx)
-	usr2 := client.User.Create().SetName("qux").SetAge(20).SetSpouseID(usr.ID).SaveX(ctx)
+	usr2 := client.User.Create().With(user.F.Name.Set("qux"), user.F.Age.Set(20), user.E.Spouse.SetID(usr.ID)).SaveX(ctx)
 	ent.QueryUserSpouse(client.User, usr2).OnlyX(ctx)
 	ent.QueryUserSpouse(client.User, usr).OnlyX(ctx)
 	require.Equal(usr.Name, ent.QueryPetOwnerFromQuery(ent.QueryUserPets(client.User, usr)).OnlyX(ctx).Name)
@@ -230,36 +231,36 @@ func Sanity(t *testing.T, client *ent.Client) {
 	require.Equal(child.Name, client.User.Query().Order(ent.Asc("name")).FirstX(ctx).Name)
 	require.Equal(usr2.Name, client.User.Query().Order(ent.Desc("name")).FirstX(ctx).Name)
 	// Update fields.
-	client.User.Update().Where(user.F.ID.EQ(child.ID)).SetName("Ariel").SaveX(ctx)
+	client.User.Update().Where(user.F.ID.EQ(child.ID)).With(user.F.Name.Set("Ariel")).SaveX(ctx)
 	client.User.Query().Where(user.F.Name.EQ("Ariel")).OnlyX(ctx)
 	// Update edges.
 	require.Empty(ent.QueryUserPets(client.User, child).AllX(ctx))
-	require.NoError(client.Pet.UpdateOne(pt).ClearOwner().Exec(ctx))
-	client.User.Update().Where(user.F.ID.EQ(child.ID)).AddPetIDs(pt.ID).SaveX(ctx)
+	require.NoError(client.Pet.UpdateOne(pt).With(pet.E.Owner.Clear()).Exec(ctx))
+	client.User.Update().Where(user.F.ID.EQ(child.ID)).With(user.E.Pets.AddIDs(pt.ID)).SaveX(ctx)
 	require.NotEmpty(ent.QueryUserPets(client.User, child).AllX(ctx))
-	client.User.Update().Where(user.F.ID.EQ(child.ID)).RemovePetIDs(pt.ID).SaveX(ctx)
+	client.User.Update().Where(user.F.ID.EQ(child.ID)).With(user.E.Pets.RemoveIDs(pt.ID)).SaveX(ctx)
 	require.Empty(ent.QueryUserPets(client.User, child).AllX(ctx))
 	// Remove edges.
-	client.User.Update().ClearSpouse().SaveX(ctx)
+	client.User.Update().With(user.E.Spouse.Clear()).SaveX(ctx)
 	require.Empty(client.User.Query().Where(user.E.Spouse.Has()).AllX(ctx))
-	client.User.Update().AddFriendIDs(child.ID).RemoveGroupIDs(grp.ID).Where(user.F.ID.EQ(usr.ID)).SaveX(ctx)
+	client.User.Update().With(user.E.Friends.AddIDs(child.ID), user.E.Groups.RemoveIDs(grp.ID)).Where(user.F.ID.EQ(usr.ID)).SaveX(ctx)
 	require.NotEmpty(ent.QueryUserGroups(client.User, child).AllX(ctx))
 	require.Empty(ent.QueryUserGroups(client.User, usr).AllX(ctx))
 	require.Len(ent.QueryUserFriends(client.User, child).AllX(ctx), 1)
 	require.Len(ent.QueryUserFriends(client.User, usr).AllX(ctx), 1)
 	// Update one node.
-	usr = client.User.UpdateOne(usr).SetName("baz").AddGroupIDs(grp.ID).SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.Name.Set("baz"), user.E.Groups.AddIDs(grp.ID)).SaveX(ctx)
 	require.Equal("baz", usr.Name)
 	require.NotEmpty(ent.QueryUserGroups(client.User, usr).AllX(ctx))
 	// Update unknown node.
-	err := client.User.UpdateOneID(usr.ID + math.MaxInt8).SetName("foo").Exec(ctx)
+	err := client.User.UpdateOneID(usr.ID + math.MaxInt8).With(user.F.Name.Set("foo")).Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsNotFound(err))
 	// Update a vertex with filter.
-	u := client.User.UpdateOneID(usr.ID).SetName("foo")
+	u := client.User.UpdateOneID(usr.ID).With(user.F.Name.Set("foo"))
 	u.Mutation().WhereP(user.F.Name.EQ(usr.Name))
 	require.NoError(u.Exec(ctx))
-	u = client.User.UpdateOneID(usr.ID).SetName("bar")
+	u = client.User.UpdateOneID(usr.ID).With(user.F.Name.Set("bar"))
 	u.Mutation().WhereP(user.F.Name.EQ("baz"))
 	require.Error(u.Exec(ctx))
 	require.True(ent.IsNotFound(err))
@@ -293,11 +294,11 @@ func Sanity(t *testing.T, client *ent.Client) {
 	fi, ok = reflect.TypeOf(ent.Card{}).FieldByName("Number")
 	require.True(ok)
 	require.Equal("-", fi.Tag.Get("json"))
-	client.User.Create().SetName("tarrence").SetAge(30).ExecX(ctx)
+	client.User.Create().With(user.F.Name.Set("tarrence"), user.F.Age.Set(30)).ExecX(ctx)
 
 	t.Run("StringPredicates", func(t *testing.T) {
 		client.Pet.Delete().ExecX(ctx)
-		a := client.Pet.Create().SetName("a%").SaveX(ctx)
+		a := client.Pet.Create().With(pet.F.Name.Set("a%")).SaveX(ctx)
 		require.True(client.Pet.Query().Where(pet.F.Name.HasPrefix("a%")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.F.Name.HasPrefix("%a%")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.Or(pet.F.Name.HasPrefix("%a%"), pet.F.Name.HasPrefix("%a%"))).ExistX(ctx))
@@ -308,7 +309,7 @@ func Sanity(t *testing.T, client *ent.Client) {
 		require.False(client.Pet.Query().Where(pet.F.Name.Contains("%a%")).ExistX(ctx))
 		require.True(client.Pet.Query().Where(pet.F.Name.ContainsFold("A%")).ExistX(ctx))
 
-		client.Pet.UpdateOne(a).SetName("a_\\").ExecX(ctx)
+		client.Pet.UpdateOne(a).With(pet.F.Name.Set("a_\\")).ExecX(ctx)
 		require.True(client.Pet.Query().Where(pet.F.Name.HasPrefix("a")).ExistX(ctx))
 		require.False(client.Pet.Query().Where(pet.F.Name.HasPrefix("%a")).ExistX(ctx))
 		require.True(client.Pet.Query().Where(pet.F.Name.HasPrefix("a_")).ExistX(ctx))
@@ -330,17 +331,14 @@ func Sanity(t *testing.T, client *ent.Client) {
 
 func Upsert(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetName("Ariel").SetAge(30).SetPhone("0000").SaveX(ctx)
+	u := client.User.Create().With(user.F.Name.Set("Ariel"), user.F.Age.Set(30), user.F.Phone.Set("0000")).SaveX(ctx)
 	require.Equal(t, "static", u.Address, "address was set by default func")
-	err := client.User.Create().SetName("Mashraki").SetAge(30).SetPhone("0000").Exec(ctx)
+	err := client.User.Create().With(user.F.Name.Set("Mashraki"), user.F.Age.Set(30), user.F.Phone.Set("0000")).Exec(ctx)
 	require.True(t, ent.IsConstraintError(err), "phone field is unique")
-	err = client.User.Create().SetName("Mashraki").SetAge(30).SetPhone("0000").OnConflict().Exec(ctx)
+	err = client.User.Create().With(user.F.Name.Set("Mashraki"), user.F.Age.Set(30), user.F.Phone.Set("0000")).OnConflict().Exec(ctx)
 	require.EqualError(t, err, "ent: missing options for UserCreate.OnConflict")
 
-	client.User.Create().
-		SetName("Mashraki").
-		SetAge(30).
-		SetPhone("0000").
+	client.User.Create().With(user.F.Name.Set("Mashraki"), user.F.Age.Set(30), user.F.Phone.Set("0000")).
 		OnConflict(
 			sql.ConflictColumns(user.FieldPhone),
 		).
@@ -350,10 +348,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 	u = client.User.GetX(ctx, u.ID)
 	require.Equal(t, "Mashraki", u.Name, "name was changed by the UPDATE clause")
 
-	id := client.User.Create().
-		SetName("Boring").
-		SetAge(33).
-		SetPhone("0000").
+	id := client.User.Create().With(user.F.Name.Set("Boring"), user.F.Age.Set(33), user.F.Phone.Set("0000")).
 		OnConflictColumns(user.FieldPhone).
 		// Override some fields with custom update.
 		Update(func(u *user.UserUpsert) {
@@ -369,10 +364,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, 33, u.Age, "age was modified by the UPDATE clause")
 	require.Equal(t, "localhost", u.Address, "address was modified by the UPDATE clause")
 
-	id = client.User.Create().
-		SetName("Boring").
-		SetAge(33).
-		SetPhone("0000").
+	id = client.User.Create().With(user.F.Name.Set("Boring"), user.F.Age.Set(33), user.F.Phone.Set("0000")).
 		OnConflictColumns(user.FieldPhone).
 		// Override some fields with custom update.
 		Add(user.FieldAge, -1).
@@ -381,8 +373,8 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, 32, u.Age, "age was modified by the UPDATE clause")
 
 	builders := []*user.UserCreate{
-		client.User.Create().SetName("A").SetAge(1).SetPhone("0000"), // Duplicate
-		client.User.Create().SetName("B").SetAge(1).SetPhone("1111"), // New row.
+		client.User.Create().With(user.F.Name.Set("A"), user.F.Age.Set(1), user.F.Phone.Set("0000")), // Duplicate
+		client.User.Create().With(user.F.Name.Set("B"), user.F.Age.Set(1), user.F.Phone.Set("1111")), // New row.
 	}
 	client.User.CreateBulk(builders...).
 		OnConflictColumns(user.FieldPhone).
@@ -395,42 +387,42 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, "B", users[1].Name)
 
 	// Setting primary key manually.
-	a := client.Item.Create().SetID("A").SaveX(ctx)
+	a := client.Item.Create().With(item.F.ID.Set("A")).SaveX(ctx)
 	require.Equal(t, "A", a.ID)
 	if strings.Contains(t.Name(), "MySQL") || strings.Contains(t.Name(), "Maria") {
 		// MySQL is skipped since it does not support the RETURNING clause. Maria is skipped
 		// as well, because there's no way to distinguish between MySQL and Maria at runtime.
-		client.Item.Create().SetID("A").OnConflict().Ignore().ExecX(ctx)
+		client.Item.Create().With(item.F.ID.Set("A")).OnConflict().Ignore().ExecX(ctx)
 		require.Equal(t, 1, client.Item.Query().CountX(ctx))
 		client.Item.Delete().ExecX(ctx)
 
 		// Primary key is set by a default function.
-		b := client.Item.Create().SetText("hello").SaveX(ctx)
+		b := client.Item.Create().With(item.F.Text.Set("hello")).SaveX(ctx)
 		require.NotZero(t, b.ID)
-		client.Item.Create().SetID(b.ID).SetText("world").OnConflict().UpdateNewValues().ExecX(ctx)
+		client.Item.Create().With(item.F.ID.Set(b.ID), item.F.Text.Set("world")).OnConflict().UpdateNewValues().ExecX(ctx)
 		cb := client.Item.Query().OnlyX(ctx)
 		require.Equal(t, cb.ID, b.ID)
 		require.Equal(t, "world", cb.Text)
 	} else {
-		aid := client.Item.Create().SetID("A").OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().IDX(ctx)
+		aid := client.Item.Create().With(item.F.ID.Set("A")).OnConflict(sql.ConflictColumns(item.FieldID)).Ignore().IDX(ctx)
 		require.Equal(t, a.ID, aid)
 		client.Item.Delete().ExecX(ctx)
 
 		// Primary key is set by a default function.
-		b := client.Item.Create().SetText("hello").SaveX(ctx)
+		b := client.Item.Create().With(item.F.Text.Set("hello")).SaveX(ctx)
 		require.NotZero(t, b.ID)
-		bid := client.Item.Create().SetID(b.ID).SetText("hello").OnConflictColumns(item.FieldText).Ignore().IDX(ctx)
+		bid := client.Item.Create().With(item.F.ID.Set(b.ID), item.F.Text.Set("hello")).OnConflictColumns(item.FieldText).Ignore().IDX(ctx)
 		require.Equal(t, b.ID, bid)
-		bid = client.Item.Create().SetText("hello").OnConflictColumns(item.FieldText).UpdateNewValues().IDX(ctx)
+		bid = client.Item.Create().With(item.F.Text.Set("hello")).OnConflictColumns(item.FieldText).UpdateNewValues().IDX(ctx)
 		require.Equal(t, bid, b.ID)
 		require.Equal(t, bid, client.Item.Query().OnlyIDX(ctx))
-		bid = client.Item.Create().SetID(bid).SetText("world").OnConflictColumns(item.FieldID).UpdateNewValues().IDX(ctx)
+		bid = client.Item.Create().With(item.F.ID.Set(bid), item.F.Text.Set("world")).OnConflictColumns(item.FieldID).UpdateNewValues().IDX(ctx)
 		require.Equal(t, bid, b.ID)
 		b = client.Item.Query().OnlyX(ctx)
 		require.Equal(t, bid, b.ID)
 		require.Equal(t, "world", b.Text)
 
-		client.Item.CreateBulk(client.Item.Create().SetID(bid).SetText("hello")).
+		client.Item.CreateBulk(client.Item.Create().With(item.F.ID.Set(bid), item.F.Text.Set("hello"))).
 			OnConflictColumns(item.FieldID).
 			Ignore().
 			ExecX(ctx)
@@ -438,16 +430,12 @@ func Upsert(t *testing.T, client *ent.Client) {
 	}
 
 	ts := time.Unix(1623279251, 0)
-	c1 := client.Card.Create().
-		SetNumber("102030").
-		SetCreateTime(ts).
-		SetUpdateTime(ts).
+	c1 := client.Card.Create().With(card.F.Number.Set("102030"), card.F.CreateTime.Set(ts), card.F.UpdateTime.Set(ts)).
 		SaveX(ctx)
 
 	// "DO UPDATE SET ... WHERE ..." does not support by MySQL.
 	if strings.Contains(t.Name(), "Postgres") || strings.Contains(t.Name(), "SQLite") {
-		err = client.Card.Create().
-			SetNumber(c1.Number).
+		err = client.Card.Create().With(card.F.Number.Set(c1.Number)).
 			OnConflict(
 				sql.ConflictColumns(card.FieldNumber),
 				sql.UpdateWhere(sql.NEQ(card.FieldCreateTime, ts)),
@@ -458,8 +446,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 		// returns true will be updated. That is, none.
 		require.True(t, errors.Is(err, stdsql.ErrNoRows))
 
-		id = client.Card.Create().
-			SetNumber(c1.Number).
+		id = client.Card.Create().With(card.F.Number.Set(c1.Number)).
 			OnConflict(
 				sql.ConflictColumns(card.FieldNumber),
 				sql.UpdateWhere(sql.EQ(card.FieldCreateTime, ts)),
@@ -467,8 +454,7 @@ func Upsert(t *testing.T, client *ent.Client) {
 			UpdateNewValues().
 			IDX(ctx)
 	} else {
-		id = client.Card.Create().
-			SetNumber(c1.Number).
+		id = client.Card.Create().With(card.F.Number.Set(c1.Number)).
 			OnConflictColumns(card.FieldNumber).
 			UpdateNewValues().
 			IDX(ctx)
@@ -480,8 +466,8 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.NotEqual(t, c1.UpdateTime.Unix(), c2.UpdateTime.Unix())
 
 	// Ensure immutable fields were not changed during bulk upsert.
-	l1 := client.License.Create().SetCreateTime(ts).SetUpdateTime(ts).SaveX(ctx)
-	client.License.CreateBulk(client.License.Create().SetID(l1.ID)).
+	l1 := client.License.Create().With(license.F.CreateTime.Set(ts), license.F.UpdateTime.Set(ts)).SaveX(ctx)
+	client.License.CreateBulk(client.License.Create().With(license.F.ID.Set(l1.ID))).
 		OnConflictColumns(license.FieldID).
 		UpdateNewValues().
 		ExecX(ctx)
@@ -489,11 +475,11 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, l1.CreateTime.Unix(), l2.CreateTime.Unix())
 	require.NotEqual(t, l1.UpdateTime.Unix(), l2.UpdateTime.Unix())
 
-	c3 := client.Card.Create().SetName("a8m").SetNumber("405060").SaveX(ctx)
-	client.Card.Create().SetNumber(c3.Number).OnConflictColumns(card.FieldNumber).Clear(card.FieldName).UpdateNewValues().ExecX(ctx)
+	c3 := client.Card.Create().With(card.F.Name.Set("a8m"), card.F.Number.Set("405060")).SaveX(ctx)
+	client.Card.Create().With(card.F.Number.Set(c3.Number)).OnConflictColumns(card.FieldNumber).Clear(card.FieldName).UpdateNewValues().ExecX(ctx)
 	require.Empty(t, client.Card.GetX(ctx, c3.ID).Name)
-	client.Card.UpdateOne(c3).SetName("a8m").ExecX(ctx)
-	client.Card.CreateBulk(client.Card.Create().SetNumber(c3.Number), client.Card.Create().SetNumber("708090").SetName("m8a")).
+	client.Card.UpdateOne(c3).With(card.F.Name.Set("a8m")).ExecX(ctx)
+	client.Card.CreateBulk(client.Card.Create().With(card.F.Number.Set(c3.Number)), client.Card.Create().With(card.F.Number.Set("708090"), card.F.Name.Set("m8a"))).
 		OnConflictColumns(card.FieldNumber).
 		UpdateNewValues().
 		ExecX(ctx)
@@ -501,11 +487,8 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.NotEmpty(t, client.Card.Query().Where(card.F.Number.EQ("708090")).OnlyX(ctx).Name, "new record should set their name")
 
 	// Conflict on a composite unique index.
-	t1 := client.Task.Create().SetName("todo1").SetOwner("a8m").SetPriority(task.PriorityLow).SaveX(ctx)
-	tid := client.Task.Create().
-		SetName("todo1").
-		SetOwner("a8m").
-		SetPriority(task.PriorityHigh).
+	t1 := client.Task.Create().With(enttask.F.Name.Set("todo1"), enttask.F.Owner.Set("a8m"), enttask.F.Priority.Set(task.PriorityLow)).SaveX(ctx)
+	tid := client.Task.Create().With(enttask.F.Name.Set("todo1"), enttask.F.Owner.Set("a8m"), enttask.F.Priority.Set(task.PriorityHigh)).
 		OnConflictColumns(enttask.FieldName, enttask.FieldOwner).
 		UpdateFields(enttask.FieldPriority).
 		IDX(ctx)
@@ -515,8 +498,8 @@ func Upsert(t *testing.T, client *ent.Client) {
 
 func Clone(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	f1 := client.File.Create().SetName("foo").SetSize(10).SaveX(ctx)
-	f2 := client.File.Create().SetName("foo").SetSize(20).SaveX(ctx)
+	f1 := client.File.Create().With(file.F.Name.Set("foo"), file.F.Size.Set(10)).SaveX(ctx)
+	f2 := client.File.Create().With(file.F.Name.Set("foo"), file.F.Size.Set(20)).SaveX(ctx)
 	base := client.File.Query().Where(file.F.Name.EQ("foo"))
 	require.Equal(t, f1.Size, base.Clone().Where(file.F.Size.EQ(f1.Size)).OnlyX(ctx).Size)
 	require.Equal(t, f2.Size, base.Clone().Where(file.F.Size.EQ(f2.Size)).OnlyX(ctx).Size)
@@ -532,7 +515,7 @@ func Paging(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
 	for i := 1; i <= 10; i++ {
-		client.User.Create().SetName(fmt.Sprintf("name-%d", i)).SetAge(i).SaveX(ctx)
+		client.User.Create().With(user.F.Name.Set(fmt.Sprintf("name-%d", i)), user.F.Age.Set(i)).SaveX(ctx)
 	}
 
 	require.Equal(10, client.User.Query().CountX(ctx))
@@ -557,14 +540,14 @@ func Select(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 
 	t.Log("select one field")
-	u := client.User.Create().SetName("foo").SetAge(30).SaveX(ctx)
+	u := client.User.Create().With(user.F.Name.Set("foo"), user.F.Age.Set(30)).SaveX(ctx)
 	name := client.User.
 		Query().
 		Where(user.F.ID.EQ(u.ID)).
 		Select(user.FieldName).
 		StringX(ctx)
 	require.Equal("foo", name)
-	client.User.Create().SetName("bar").SetAge(30).AddFriendIDs(u.ID).SaveX(ctx)
+	client.User.Create().With(user.F.Name.Set("bar"), user.F.Age.Set(30), user.E.Friends.AddIDs(u.ID)).SaveX(ctx)
 	t.Log("select one field with ordering")
 	names := client.User.
 		Query().
@@ -578,7 +561,7 @@ func Select(t *testing.T, client *ent.Client) {
 		Select(user.FieldName).
 		StringsX(ctx)
 	require.Equal([]string{"foo", "bar"}, names)
-	client.User.Create().SetName("baz").SetAge(30).SaveX(ctx)
+	client.User.Create().With(user.F.Name.Set("baz"), user.F.Age.Set(30)).SaveX(ctx)
 	names = client.User.
 		Query().
 		Order(ent.Asc(user.FieldName)).
@@ -616,20 +599,20 @@ func Select(t *testing.T, client *ent.Client) {
 			require.Zero(f.Age)
 		}
 	}
-	a8m := client.User.Create().SetName("Ariel").SetNickname("a8m").SetAge(30).SaveX(ctx)
+	a8m := client.User.Create().With(user.F.Name.Set("Ariel"), user.F.Nickname.Set("a8m"), user.F.Age.Set(30)).SaveX(ctx)
 	require.NotEmpty(a8m.ID)
 	require.NotEmpty(a8m.Age)
 	require.NotEmpty(a8m.Name)
 	require.NotEmpty(a8m.Nickname)
-	a8m = client.User.UpdateOne(a8m).SetAge(32).Select(user.FieldAge).SaveX(ctx)
+	a8m = client.User.UpdateOne(a8m).With(user.F.Age.Set(32)).Select(user.FieldAge).SaveX(ctx)
 	require.NotEmpty(a8m.ID)
 	require.NotEmpty(a8m.Age)
 	require.Empty(a8m.Name)
 	require.Empty(a8m.Nickname)
 
 	client.Pet.CreateBulk(
-		client.Pet.Create().SetName("a"),
-		client.Pet.Create().SetName("a"),
+		client.Pet.Create().With(pet.F.Name.Set("a")),
+		client.Pet.Create().With(pet.F.Name.Set("a")),
 	).ExecX(ctx)
 	names = client.Pet.Query().Select(pet.FieldName).StringsX(ctx)
 	require.Equal([]string{"a", "a"}, names)
@@ -638,13 +621,13 @@ func Select(t *testing.T, client *ent.Client) {
 	client.Pet.Delete().ExecX(ctx)
 
 	pets := client.Pet.CreateBulk(
-		client.Pet.Create().SetName("a"),
-		client.Pet.Create().SetName("b"),
-		client.Pet.Create().SetName("c"),
-		client.Pet.Create().SetName("b"),
+		client.Pet.Create().With(pet.F.Name.Set("a")),
+		client.Pet.Create().With(pet.F.Name.Set("b")),
+		client.Pet.Create().With(pet.F.Name.Set("c")),
+		client.Pet.Create().With(pet.F.Name.Set("b")),
 	).SaveX(ctx)
-	client.User.Create().SetName("foo").SetAge(20).AddPetIDs(pets[0].ID, pets[1].ID).SaveX(ctx)
-	client.User.Create().SetName("bar").SetAge(20).AddPetIDs(pets[2].ID, pets[3].ID).SaveX(ctx)
+	client.User.Create().With(user.F.Name.Set("foo"), user.F.Age.Set(20), user.E.Pets.AddIDs(pets[0].ID, pets[1].ID)).SaveX(ctx)
+	client.User.Create().With(user.F.Name.Set("bar"), user.F.Age.Set(20), user.E.Pets.AddIDs(pets[2].ID, pets[3].ID)).SaveX(ctx)
 	names = client.Pet.Query().Order(ent.Asc(pet.FieldID)).Select(pet.FieldName).StringsX(ctx)
 	require.Equal([]string{"a", "b", "c", "b"}, names)
 	names = client.Pet.Query().Order(ent.Asc(pet.FieldName)).Select(pet.FieldName).StringsX(ctx)
@@ -682,7 +665,7 @@ func Select(t *testing.T, client *ent.Client) {
 	require.Equal([]int{2, 2, 2, 2}, dlen)
 
 	for i := range pets {
-		client.Pet.UpdateOne(pets[i]).SetName(pets[i].Name + pets[i].Name).ExecX(ctx)
+		client.Pet.UpdateOne(pets[i]).With(pet.F.Name.Set(pets[i].Name + pets[i].Name)).ExecX(ctx)
 	}
 	n := client.Pet.Query().
 		Modify(func(s *sql.Selector) {
@@ -724,15 +707,15 @@ func Select(t *testing.T, client *ent.Client) {
 			ent.Group
 			UsersCount int `sql:"users_count"`
 		}
-		inf = client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
-		hub = client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfoID(inf.ID).AddUserIDs(a8m.ID).SaveX(ctx)
-		lab = client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfoID(inf.ID).AddUserIDs(func() []int {
+		inf = client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc")).SaveX(ctx)
+		hub = client.Group.Create().With(group.F.Name.Set("GitHub"), group.F.Expire.Set(time.Now()), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(a8m.ID)).SaveX(ctx)
+		lab = client.Group.Create().With(group.F.Name.Set("GitLab"), group.F.Expire.Set(time.Now()), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(func() []int {
 			ids := make([]int, len(users))
 			for i := range users {
 				ids[i] = users[i].ID
 			}
 			return ids
-		}()...).SaveX(ctx)
+		}()...)).SaveX(ctx)
 	)
 	client.Group.Query().
 		Order(ent.Asc(group.FieldID)).
@@ -767,7 +750,7 @@ func Select(t *testing.T, client *ent.Client) {
 	require.Equal(1, i)
 
 	// Select with join.
-	u = client.User.Create().SetName("crossworth").SetAge(28).SaveX(ctx)
+	u = client.User.Create().With(user.F.Name.Set("crossworth"), user.F.Age.Set(28)).SaveX(ctx)
 	id := client.User.
 		Query().
 		Where(func(s *sql.Selector) {
@@ -818,7 +801,7 @@ func Select(t *testing.T, client *ent.Client) {
 	}
 
 	// Update and scan.
-	require.NoError(client.Pet.Update().SetOptionalTime(time.Now()).Exec(ctx))
+	require.NoError(client.Pet.Update().With(pet.F.OptionalTime.Set(time.Now())).Exec(ctx))
 	pets = client.Pet.Query().
 		Modify(func(s *sql.Selector) {
 			s.AppendSelectAs("optional_time", as2)
@@ -839,11 +822,11 @@ func Select(t *testing.T, client *ent.Client) {
 
 func Aggregate(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	a8m := client.User.Create().SetAge(1).SetName("a8m").SaveX(ctx)
-	nat := client.User.Create().SetAge(1).SetName("nati").SetSpouseID(a8m.ID).SaveX(ctx)
+	a8m := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("a8m")).SaveX(ctx)
+	nat := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("nati"), user.E.Spouse.SetID(a8m.ID)).SaveX(ctx)
 	owners := []*ent.User{a8m, nat}
 	for i := 1; i <= 10; i++ {
-		client.Pet.Create().SetName(fmt.Sprintf("pet%d", i)).SetAge(float64(i)).SetOwnerID(owners[i%2].ID).SaveX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set(fmt.Sprintf("pet%d", i)), pet.F.Age.Set(float64(i)), pet.E.Owner.SetID(owners[i%2].ID)).SaveX(ctx)
 	}
 	s1 := client.Pet.Query().Aggregate(ent.Sum(pet.FieldAge)).IntX(ctx)
 	require.Equal(t, 55, s1)
@@ -914,11 +897,11 @@ func ExecQuery(t *testing.T, client *ent.Client) {
 func NillableRequired(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
-	client.Task.Create().SetName("Name").ExecX(ctx)
+	client.Task.Create().With(enttask.F.Name.Set("Name")).ExecX(ctx)
 	tk := client.Task.Query().OnlyX(ctx)
 	require.Empty(tk.Name, "Name is not selected by default")
 	require.NotNil(tk.CreatedAt, "field value should be populated by default by the database")
-	require.False(reflect.ValueOf(client.Task.UpdateOne(tk)).MethodByName("SetNillableCreatedAt").IsValid(), "immutable-nillable should not have SetNillable setter on update")
+	require.Error(client.Task.UpdateOne(tk).With(enttask.F.CreatedAt.Set(time.Now())).Exec(ctx), "immutable-nillable should reject a write on update")
 	tk = client.Task.Query().Select(enttask.FieldID, enttask.FieldPriority, enttask.FieldName).OnlyX(ctx)
 	require.Nil(tk.CreatedAt, "field should not be populated when it is not selected")
 	require.Equal("Name", tk.Name, "Name should be populated when selected manually")
@@ -927,10 +910,10 @@ func NillableRequired(t *testing.T, client *ent.Client) {
 func Predicate(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
-	f1 := client.File.Create().SetName("1").SetSize(10).SaveX(ctx)
-	f2 := client.File.Create().SetName("2").SetSize(20).SaveX(ctx)
-	f3 := client.File.Create().SetName("3").SetSize(30).SaveX(ctx)
-	f4 := client.File.Create().SetName("4").SetSize(40).SaveX(ctx)
+	f1 := client.File.Create().With(file.F.Name.Set("1"), file.F.Size.Set(10)).SaveX(ctx)
+	f2 := client.File.Create().With(file.F.Name.Set("2"), file.F.Size.Set(20)).SaveX(ctx)
+	f3 := client.File.Create().With(file.F.Name.Set("3"), file.F.Size.Set(30)).SaveX(ctx)
+	f4 := client.File.Create().With(file.F.Name.Set("4"), file.F.Size.Set(40)).SaveX(ctx)
 	files := client.File.Query().
 		Where(
 			file.Or(file.F.Name.EQ(f1.Name), file.And(file.F.Name.EQ(f2.Name), file.F.Size.EQ(f2.Size))),
@@ -975,19 +958,19 @@ func Predicate(t *testing.T, client *ent.Client) {
 	require.Zero(client.File.Query().Where(file.F.Group.NotNil()).CountX(ctx))
 	require.Equal(4, client.File.Query().Where(file.F.Group.IsNil()).CountX(ctx))
 
-	f1 = client.File.UpdateOne(f1).SetUser("a8m").SaveX(ctx)
+	f1 = client.File.UpdateOne(f1).With(file.F.User.Set("a8m")).SaveX(ctx)
 	require.NotNil(f1.User)
 	require.Equal("a8m", *f1.User)
 	require.Equal(3, client.File.Query().Where(file.F.User.IsNil()).CountX(ctx))
 	require.Equal(f1.Name, client.File.Query().Where(file.F.User.NotNil()).OnlyX(ctx).Name)
-	f5 := client.File.Create().SetName("5").SetSize(40).SetUser("mashraki").SaveX(ctx)
+	f5 := client.File.Create().With(file.F.Name.Set("5"), file.F.Size.Set(40), file.F.User.Set("mashraki")).SaveX(ctx)
 	require.NotNil(f5.User)
 	require.Equal("mashraki", *f5.User)
 	require.Equal(3, client.File.Query().Where(file.F.User.IsNil()).CountX(ctx))
 	require.Equal(2, client.File.Query().Where(file.F.User.NotNil()).CountX(ctx))
 
 	require.Equal(5, client.File.Query().Where(file.F.Group.IsNil()).CountX(ctx))
-	f4 = client.File.UpdateOne(f4).SetGroup("fbc").SaveX(ctx)
+	f4 = client.File.UpdateOne(f4).With(file.F.Group.Set("fbc")).SaveX(ctx)
 	require.Equal(1, client.File.Query().Where(file.F.Group.NotNil()).CountX(ctx))
 	require.Equal(4, client.File.Query().Where(file.F.Group.IsNil()).CountX(ctx))
 	require.Equal(
@@ -999,17 +982,17 @@ func Predicate(t *testing.T, client *ent.Client) {
 			CountX(ctx),
 	)
 
-	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
-	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfoID(inf.ID).SaveX(ctx)
-	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfoID(inf.ID).SetActive(false).SaveX(ctx)
+	inf := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc")).SaveX(ctx)
+	hub := client.Group.Create().With(group.F.Name.Set("GitHub"), group.F.Expire.Set(time.Now()), group.E.Info.SetID(inf.ID)).SaveX(ctx)
+	lab := client.Group.Create().With(group.F.Name.Set("GitLab"), group.F.Expire.Set(time.Now()), group.E.Info.SetID(inf.ID), group.F.Active.Set(false)).SaveX(ctx)
 	require.Equal(hub.ID, client.Group.Query().Where(group.F.Active.EQ(true)).OnlyIDX(ctx))
 	require.Equal(lab.ID, client.Group.Query().Where(group.F.Active.EQ(false)).OnlyIDX(ctx))
 	require.Equal(hub.ID, client.Group.Query().Where(group.F.Active.NEQ(false)).OnlyIDX(ctx))
 	require.Equal(lab.ID, client.Group.Query().Where(group.F.Active.NEQ(true)).OnlyIDX(ctx))
 
 	client.User.CreateBulk(
-		client.User.Create().SetAge(1).SetName("Ariel").SetNickname("A"),
-		client.User.Create().SetAge(1).SetName("Ariel").SetNickname("A%"),
+		client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("Ariel"), user.F.Nickname.Set("A")),
+		client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("Ariel"), user.F.Nickname.Set("A%")),
 	).ExecX(ctx)
 	a1 := client.User.Query().Where(sql.FieldsHasPrefix(user.FieldName, user.FieldNickname)).OnlyX(ctx)
 	require.Equal("A", a1.Nickname)
@@ -1021,22 +1004,22 @@ func AddValues(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
 	t.Log("add values to fields")
-	cmt := client.Comment.Create().SetUniqueInt(1).SetUniqueFloat(1).SaveX(ctx)
-	cmt = client.Comment.UpdateOne(cmt).AddUniqueInt(10).SaveX(ctx)
+	cmt := client.Comment.Create().With(comment.F.UniqueInt.Set(1), comment.F.UniqueFloat.Set(1)).SaveX(ctx)
+	cmt = client.Comment.UpdateOne(cmt).With(comment.F.UniqueInt.Add(10)).SaveX(ctx)
 	require.Equal(11, cmt.UniqueInt)
 	require.Equal(11, client.Comment.Query().OnlyX(ctx).UniqueInt, "should be updated in the database")
 	t.Log("add values to null fields")
-	cmt = client.Comment.UpdateOne(cmt).AddNillableInt(10).SaveX(ctx)
+	cmt = client.Comment.UpdateOne(cmt).With(comment.F.NillableInt.Add(10)).SaveX(ctx)
 	require.Equal(10, *cmt.NillableInt)
 
-	cmt1 := client.Comment.Create().SetUniqueInt(1).SetUniqueFloat(10).SaveX(ctx)
-	err := client.Comment.UpdateOne(cmt1).AddUniqueInt(10).Exec(ctx)
+	cmt1 := client.Comment.Create().With(comment.F.UniqueInt.Set(1), comment.F.UniqueFloat.Set(10)).SaveX(ctx)
+	err := client.Comment.UpdateOne(cmt1).With(comment.F.UniqueInt.Add(10)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
-	cmt1 = client.Comment.UpdateOne(cmt1).AddUniqueInt(20).AddNillableInt(20).SaveX(ctx)
+	cmt1 = client.Comment.UpdateOne(cmt1).With(comment.F.UniqueInt.Add(20), comment.F.NillableInt.Add(20)).SaveX(ctx)
 	require.Equal(21, cmt1.UniqueInt)
 	require.Equal(20, *cmt1.NillableInt)
 
-	cmt1 = client.Comment.UpdateOne(cmt1).AddUniqueInt(10).AddUniqueInt(-1).SaveX(ctx)
+	cmt1 = client.Comment.UpdateOne(cmt1).With(comment.F.UniqueInt.Add(10), comment.F.UniqueInt.Add(-1)).SaveX(ctx)
 	require.Equal(30, cmt1.UniqueInt)
 	require.Equal(30, client.Comment.GetX(ctx, cmt1.ID).UniqueInt)
 }
@@ -1045,14 +1028,14 @@ func Delete(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
 
-	nd := client.Node.Create().SetValue(1e3).SaveX(ctx)
+	nd := client.Node.Create().With(node.F.Value.Set(1e3)).SaveX(ctx)
 	err := client.Node.DeleteOneID(nd.ID).Exec(ctx)
 	require.NoError(err)
 	err = client.Node.DeleteOneID(nd.ID).Exec(ctx)
 	require.True(ent.IsNotFound(err))
 
 	for i := 0; i < 5; i++ {
-		client.Node.Create().SetValue(i).ExecX(ctx)
+		client.Node.Create().With(node.F.Value.Set(i)).ExecX(ctx)
 	}
 	affected, err := client.Node.Delete().Where(node.F.Value.GT(2)).Exec(ctx)
 	require.NoError(err)
@@ -1062,8 +1045,8 @@ func Delete(t *testing.T, client *ent.Client) {
 	require.NoError(err)
 	require.Equal(3, affected)
 
-	info := client.GroupInfo.Create().SetDesc("group info").SaveX(ctx)
-	hub := client.Group.Create().SetInfoID(info.ID).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).SaveX(ctx)
+	info := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("group info")).SaveX(ctx)
+	hub := client.Group.Create().With(group.E.Info.SetID(info.ID), group.F.Name.Set("GitHub"), group.F.Expire.Set(time.Now().Add(time.Hour))).SaveX(ctx)
 	err = client.GroupInfo.DeleteOne(info).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 
@@ -1079,16 +1062,14 @@ func Delete(t *testing.T, client *ent.Client) {
 		Where(group.F.Expire.LT(time.Now())).
 		Exec(ctx)
 	require.True(ent.IsNotFound(err))
-	client.Group.UpdateOne(hub).SetExpire(time.Now().Add(-time.Hour)).ExecX(ctx)
+	client.Group.UpdateOne(hub).With(group.F.Expire.Set(time.Now().Add(-time.Hour))).ExecX(ctx)
 	client.Group.DeleteOne(hub).
 		Where(group.F.Expire.LT(time.Now())).
 		ExecX(ctx)
 
 	// The behavior described above it also applied to UpdateOne.
-	hub = client.Group.Create().SetInfoID(info.ID).SetName("GitHub").SetExpire(time.Now().Add(time.Hour)).SaveX(ctx)
-	err = client.Group.UpdateOne(hub).
-		SetActive(false).
-		SetExpire(time.Time{}).
+	hub = client.Group.Create().With(group.E.Info.SetID(info.ID), group.F.Name.Set("GitHub"), group.F.Expire.Set(time.Now().Add(time.Hour))).SaveX(ctx)
+	err = client.Group.UpdateOne(hub).With(group.F.Active.Set(false), group.F.Expire.Set(time.Time{})).
 		Where(group.F.Expire.LT(time.Now())). // Expired.
 		Exec(ctx)
 	require.True(ent.IsNotFound(err))
@@ -1106,17 +1087,13 @@ func Relation(t *testing.T, client *ent.Client) {
 
 	t.Log("creating group info")
 	info = client.GroupInfo.
-		Create().
-		SetDesc("group info").
+		Create().With(groupinfo.F.Desc.Set("group info")).
 		SaveX(ctx)
 	t.Logf("group info created: %v", info)
 
 	t.Log("creating group")
 	grp := client.Group.
-		Create().
-		SetInfoID(info.ID).
-		SetName("Github").
-		SetExpire(time.Now().Add(time.Hour)).
+		Create().With(group.E.Info.SetID(info.ID), group.F.Name.Set("Github"), group.F.Expire.Set(time.Now().Add(time.Hour))).
 		SaveX(ctx)
 	require.NotZero(grp.ID)
 	require.Equal(grp.MaxUsers, 10)
@@ -1125,10 +1102,7 @@ func Relation(t *testing.T, client *ent.Client) {
 
 	t.Log("creating user")
 	usr := client.User.
-		Create().
-		SetAge(20).
-		SetName("a8m").
-		AddGroupIDs(grp.ID).
+		Create().With(user.F.Age.Set(20), user.F.Name.Set("a8m"), user.E.Groups.AddIDs(grp.ID)).
 		SaveX(ctx)
 	require.NotZero(usr.ID)
 	require.Equal(usr.Age, 20)
@@ -1146,19 +1120,19 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Equal(usr.ID, users[0])
 
 	t.Log("remove group edge")
-	client.User.UpdateOne(usr).RemoveGroupIDs(grp.ID).ExecX(ctx)
+	client.User.UpdateOne(usr).With(user.E.Groups.RemoveIDs(grp.ID)).ExecX(ctx)
 	require.Empty(ent.QueryGroupUsers(client.Group, grp).AllX(ctx))
 	require.Empty(ent.QueryUserGroups(client.User, usr).AllX(ctx))
 	t.Logf("add group edge")
-	client.User.UpdateOne(usr).AddGroupIDs(grp.ID).ExecX(ctx)
+	client.User.UpdateOne(usr).With(user.E.Groups.AddIDs(grp.ID)).ExecX(ctx)
 	require.NotEmpty(ent.QueryGroupUsers(client.Group, grp).AllX(ctx))
 	require.NotEmpty(ent.QueryUserGroups(client.User, usr).AllX(ctx))
 	t.Log("remove users inverse edge")
-	client.Group.UpdateOne(grp).RemoveUserIDs(usr.ID).ExecX(ctx)
+	client.Group.UpdateOne(grp).With(group.E.Users.RemoveIDs(usr.ID)).ExecX(ctx)
 	require.Empty(ent.QueryGroupUsers(client.Group, grp).AllX(ctx))
 	require.Empty(ent.QueryUserGroups(client.User, usr).AllX(ctx))
 	t.Logf("add group inverse edge")
-	client.Group.UpdateOne(grp).AddUserIDs(usr.ID).ExecX(ctx)
+	client.Group.UpdateOne(grp).With(group.E.Users.AddIDs(usr.ID)).ExecX(ctx)
 	require.NotEmpty(ent.QueryGroupUsers(client.Group, grp).AllX(ctx))
 	require.NotEmpty(ent.QueryUserGroups(client.User, usr).AllX(ctx))
 
@@ -1176,7 +1150,7 @@ func Relation(t *testing.T, client *ent.Client) {
 
 	t.Log("query spouse edge")
 	require.Zero(client.User.Query().Where(user.E.Spouse.Has()).CountX(ctx))
-	neta := client.User.Create().SetName("neta").SetAge(18).SetSpouseID(usr.ID).SaveX(ctx)
+	neta := client.User.Create().With(user.F.Name.Set("neta"), user.F.Age.Set(18), user.E.Spouse.SetID(usr.ID)).SaveX(ctx)
 	require.Equal(2, client.User.Query().Where(user.E.Spouse.Has()).CountX(ctx))
 
 	t.Log("check for singular error")
@@ -1186,27 +1160,27 @@ func Relation(t *testing.T, client *ent.Client) {
 	t.Log("query parent/children edges")
 	require.False(ent.QueryUserParent(client.User, usr).ExistX(ctx))
 	require.Empty(ent.QueryUserChildren(client.User, usr).AllX(ctx))
-	child := client.User.Create().SetName("pedro").SetAge(7).SetParentID(usr.ID).SaveX(ctx)
+	child := client.User.Create().With(user.F.Name.Set("pedro"), user.F.Age.Set(7), user.E.Parent.SetID(usr.ID)).SaveX(ctx)
 	require.Equal(usr.Name, ent.QueryUserParent(client.User, child).OnlyX(ctx).Name)
 	require.Equal(child.Name, ent.QueryUserChildren(client.User, usr).OnlyX(ctx).Name)
 	require.False(ent.QueryUserParent(client.User, usr).ExistX(ctx))
 
 	t.Log("clear parent edge")
-	brat := client.User.Create().SetName("brat").SetAge(19).SetParentID(usr.ID).SaveX(ctx)
+	brat := client.User.Create().With(user.F.Name.Set("brat"), user.F.Age.Set(19), user.E.Parent.SetID(usr.ID)).SaveX(ctx)
 	require.Equal(2, ent.QueryUserChildren(client.User, usr).CountX(ctx))
-	brat = client.User.UpdateOne(brat).ClearParent().SaveX(ctx)
-	err = client.User.UpdateOne(brat).ClearParent().Exec(ctx)
+	brat = client.User.UpdateOne(brat).With(user.E.Parent.Clear()).SaveX(ctx)
+	err = client.User.UpdateOne(brat).With(user.E.Parent.Clear()).Exec(ctx)
 	require.NoError(err)
 	require.False(ent.QueryUserParent(client.User, brat).ExistX(ctx))
 	require.Equal(1, ent.QueryUserChildren(client.User, usr).CountX(ctx))
 
 	t.Log("delete child clears edge")
-	brat = client.User.UpdateOne(brat).SetParentID(usr.ID).SaveX(ctx)
+	brat = client.User.UpdateOne(brat).With(user.E.Parent.SetID(usr.ID)).SaveX(ctx)
 	require.Equal(2, ent.QueryUserChildren(client.User, usr).CountX(ctx))
 	client.User.DeleteOne(brat).ExecX(ctx)
 	require.Equal(1, ent.QueryUserChildren(client.User, usr).CountX(ctx))
 
-	client.Group.UpdateOne(grp).AddBlockedIDs(neta.ID).ExecX(ctx)
+	client.Group.UpdateOne(grp).With(group.E.Blocked.AddIDs(neta.ID)).ExecX(ctx)
 	blocked := ent.QueryGroupBlocked(client.Group, ent.QueryUserGroups(client.User, usr).OnlyX(ctx)).OnlyX(ctx)
 	t.Log("blocked:", blocked)
 
@@ -1231,21 +1205,21 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Nil(uid)
 
 	t.Log("test validators")
-	err = client.Group.Create().SetInfoID(info.ID).SetType("a").SetName("Gituhb").SetExpire(time.Now().Add(time.Hour)).Exec(ctx)
+	err = client.Group.Create().With(group.E.Info.SetID(info.ID), group.F.Type.Set("a"), group.F.Name.Set("Gituhb"), group.F.Expire.Set(time.Now().Add(time.Hour))).Exec(ctx)
 	require.Error(err, "type validator failed")
-	err = client.Group.Create().SetInfoID(info.ID).SetType("pass").SetName("failed").SetExpire(time.Now().Add(time.Hour)).Exec(ctx)
+	err = client.Group.Create().With(group.E.Info.SetID(info.ID), group.F.Type.Set("pass"), group.F.Name.Set("failed"), group.F.Expire.Set(time.Now().Add(time.Hour))).Exec(ctx)
 	require.Error(err, "name validator failed")
 	var checkerr schema.CheckError
 	require.True(errors.As(err, &checkerr))
 	require.EqualError(err, `ent: validator failed for field "Group.name": last name must begin with uppercase`)
 	require.EqualError(checkerr, "last name must begin with uppercase")
-	err = client.Group.Create().SetInfoID(info.ID).SetType("pass").SetName("Github20").SetExpire(time.Now().Add(time.Hour)).Exec(ctx)
+	err = client.Group.Create().With(group.E.Info.SetID(info.ID), group.F.Type.Set("pass"), group.F.Name.Set("Github20"), group.F.Expire.Set(time.Now().Add(time.Hour))).Exec(ctx)
 	require.Error(err, "name validator failed")
-	err = client.Group.Create().SetInfoID(info.ID).SetType("pass").SetName("Github").SetMaxUsers(-1).SetExpire(time.Now().Add(time.Hour)).Exec(ctx)
+	err = client.Group.Create().With(group.E.Info.SetID(info.ID), group.F.Type.Set("pass"), group.F.Name.Set("Github"), group.F.MaxUsers.Set(-1), group.F.Expire.Set(time.Now().Add(time.Hour))).Exec(ctx)
 	require.Error(err, "max_users validator failed")
-	err = client.Group.Update().SetMaxUsers(-10).Exec(ctx)
+	err = client.Group.Update().With(group.F.MaxUsers.Set(-10)).Exec(ctx)
 	require.Error(err, "max_users validator failed")
-	err = client.Group.UpdateOne(grp).SetMaxUsers(-10).Exec(ctx)
+	err = client.Group.UpdateOne(grp).With(group.F.MaxUsers.Set(-10)).Exec(ctx)
 	require.Error(err, "max_users validator failed")
 	_, err = client.Group.Query().Select("unknown_field").String(ctx)
 	require.EqualError(err, "ent: invalid field \"unknown_field\" for query")
@@ -1286,7 +1260,7 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Equal(neta.Name, ent.QueryUserSpouseFromQuery(ent.QueryGroupUsersFromQuery(ent.QueryUserGroups(client.User, usr).Where(group.F.Name.EQ("Github")))).OnlyX(ctx).Name)
 	require.Empty(ent.QueryGroupInfoGroupsFromQuery(client.GroupInfo.Query().Where(groupinfo.F.Desc.EQ("group info"))).Where(group.F.Name.EQ("boring")).AllX(ctx))
 	require.Equal(child.Name, ent.QueryUserChildrenFromQuery(ent.QueryGroupUsersFromQuery(ent.QueryGroupInfoGroupsFromQuery(client.GroupInfo.Query().Where(groupinfo.F.Desc.EQ("group info"))).Where(group.F.Name.EQ("Github")))).FirstX(ctx).Name)
-	client.User.UpdateOne(neta).AddGroupIDs(grp.ID).ExecX(ctx)
+	client.User.UpdateOne(neta).With(user.E.Groups.AddIDs(grp.ID)).ExecX(ctx)
 	require.Equal(grp.ID, ent.QueryUserGroupsFromQuery(client.User.Query()).OnlyIDX(ctx))
 
 	t.Log("query using string predicate")
@@ -1312,9 +1286,9 @@ func Relation(t *testing.T, client *ent.Client) {
 	require.Zero(age)
 
 	t.Log("group-by two fields with aggregation")
-	client.User.Create().SetName(usr.Name).SetAge(usr.Age).ExecX(ctx)
-	client.User.Create().SetName(neta.Name).SetAge(neta.Age).ExecX(ctx)
-	child2 := client.User.Create().SetName(child.Name).SetAge(child.Age + 1).SaveX(ctx)
+	client.User.Create().With(user.F.Name.Set(usr.Name), user.F.Age.Set(usr.Age)).ExecX(ctx)
+	client.User.Create().With(user.F.Name.Set(neta.Name), user.F.Age.Set(neta.Age)).ExecX(ctx)
+	child2 := client.User.Create().With(user.F.Name.Set(child.Name), user.F.Age.Set(child.Age+1)).SaveX(ctx)
 	var v []struct {
 		Name  string `json:"name"`
 		Age   int    `json:"age"`
@@ -1358,12 +1332,12 @@ func Relation(t *testing.T, client *ent.Client) {
 	}
 
 	t.Log("group by a relation")
-	p1 := client.Pet.Create().SetName("a").SetAge(10).SaveX(ctx)
-	p2 := client.Pet.Create().SetName("b").SetAge(7).SaveX(ctx)
-	foo := client.User.Create().SetName("foo").SetAge(10).AddPetIDs(p1.ID, p2.ID).SaveX(ctx)
-	p3 := client.Pet.Create().SetName("c").SetAge(14).SaveX(ctx)
-	p4 := client.Pet.Create().SetName("d").SetAge(1).SaveX(ctx)
-	bar := client.User.Create().SetName("bar").SetAge(10).AddPetIDs(p3.ID, p4.ID).SaveX(ctx)
+	p1 := client.Pet.Create().With(pet.F.Name.Set("a"), pet.F.Age.Set(10)).SaveX(ctx)
+	p2 := client.Pet.Create().With(pet.F.Name.Set("b"), pet.F.Age.Set(7)).SaveX(ctx)
+	foo := client.User.Create().With(user.F.Name.Set("foo"), user.F.Age.Set(10), user.E.Pets.AddIDs(p1.ID, p2.ID)).SaveX(ctx)
+	p3 := client.Pet.Create().With(pet.F.Name.Set("c"), pet.F.Age.Set(14)).SaveX(ctx)
+	p4 := client.Pet.Create().With(pet.F.Name.Set("d"), pet.F.Age.Set(1)).SaveX(ctx)
+	bar := client.User.Create().With(user.F.Name.Set("bar"), user.F.Age.Set(10), user.E.Pets.AddIDs(p3.ID, p4.ID)).SaveX(ctx)
 
 	var v3 []struct {
 		ID      int
@@ -1416,24 +1390,24 @@ func Relation(t *testing.T, client *ent.Client) {
 
 func ClearFields(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	img := client.File.Create().SetName("foo").SetSize(100).SetUser("a8m").SetGroup("Github").SaveX(ctx)
+	img := client.File.Create().With(file.F.Name.Set("foo"), file.F.Size.Set(100), file.F.User.Set("a8m"), file.F.Group.Set("Github")).SaveX(ctx)
 
 	t.Log("clear one field")
-	img = client.File.UpdateOne(img).ClearUser().SaveX(ctx)
+	img = client.File.UpdateOne(img).With(file.F.User.Clear()).SaveX(ctx)
 	require.Nil(t, img.User)
 	img = client.File.Query().OnlyX(ctx)
 	require.Nil(t, img.User)
 	require.Equal(t, "Github", img.Group)
 
 	t.Log("clear many fields")
-	img = client.File.UpdateOne(img).ClearUser().ClearGroup().SaveX(ctx)
+	img = client.File.UpdateOne(img).With(file.F.User.Clear(), file.F.Group.Clear()).SaveX(ctx)
 	require.Nil(t, img.User)
 	img = client.File.Query().OnlyX(ctx)
 	require.Nil(t, img.User)
 	require.Empty(t, img.Group)
 
 	t.Log("revert previous set")
-	img = client.File.UpdateOne(img).SetUser("a8m").ClearUser().SaveX(ctx)
+	img = client.File.UpdateOne(img).With(file.F.User.Set("a8m"), file.F.User.Clear()).SaveX(ctx)
 	require.Nil(t, img.User)
 }
 
@@ -1441,80 +1415,80 @@ func ClearEdges(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 
 	t.Log("clear o2m edges")
-	ft := client.FileType.Create().SetName("photo").SaveX(ctx)
+	ft := client.FileType.Create().With(filetype.F.Name.Set("photo")).SaveX(ctx)
 	client.File.CreateBulk(
-		client.File.Create().SetName("A").SetSize(10).SetTypeID(ft.ID),
-		client.File.Create().SetName("B").SetSize(20).SetTypeID(ft.ID),
+		client.File.Create().With(file.F.Name.Set("A"), file.F.Size.Set(10), file.E.Type.SetID(ft.ID)),
+		client.File.Create().With(file.F.Name.Set("B"), file.F.Size.Set(20), file.E.Type.SetID(ft.ID)),
 	).ExecX(ctx)
 	require.NotZero(t, ent.QueryFileTypeFiles(client.FileType, ft).CountX(ctx))
-	ft = client.FileType.UpdateOne(ft).ClearFiles().SaveX(ctx)
+	ft = client.FileType.UpdateOne(ft).With(filetype.E.Files.Clear()).SaveX(ctx)
 	require.Zero(t, ent.QueryFileTypeFiles(client.FileType, ft).CountX(ctx))
 
 	t.Log("clear m2m edges")
-	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
-	nat := client.User.Create().SetName("nati").SetAge(28).SaveX(ctx)
-	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
-	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).SetInfoID(inf.ID).AddUserIDs(a8m.ID, nat.ID).SaveX(ctx)
-	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).SetInfoID(inf.ID).AddUserIDs(a8m.ID, nat.ID).SaveX(ctx)
+	a8m := client.User.Create().With(user.F.Name.Set("a8m"), user.F.Age.Set(30)).SaveX(ctx)
+	nat := client.User.Create().With(user.F.Name.Set("nati"), user.F.Age.Set(28)).SaveX(ctx)
+	inf := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc")).SaveX(ctx)
+	hub := client.Group.Create().With(group.F.Name.Set("GitHub"), group.F.Expire.Set(time.Now()), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(a8m.ID, nat.ID)).SaveX(ctx)
+	lab := client.Group.Create().With(group.F.Name.Set("GitLab"), group.F.Expire.Set(time.Now()), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(a8m.ID, nat.ID)).SaveX(ctx)
 	require.Equal(t, 2, ent.QueryUserGroups(client.User, a8m).CountX(ctx))
-	client.User.UpdateOne(a8m).ClearGroups().ExecX(ctx)
+	client.User.UpdateOne(a8m).With(user.E.Groups.Clear()).ExecX(ctx)
 	require.Zero(t, ent.QueryUserGroups(client.User, a8m).CountX(ctx))
-	err := client.Group.Update().AddUserIDs(a8m.ID).Exec(ctx)
+	err := client.Group.Update().With(group.E.Users.AddIDs(a8m.ID)).Exec(ctx)
 	require.NoError(t, err, "return the user-edge back to groups")
 	require.Equal(t, 2, ent.QueryUserGroups(client.User, a8m).CountX(ctx))
 
 	t.Log("clear m2m inverse-edges")
 	require.Equal(t, 2, ent.QueryGroupUsers(client.Group, hub).CountX(ctx))
-	hub = client.Group.UpdateOne(hub).ClearUsers().SaveX(ctx)
+	hub = client.Group.UpdateOne(hub).With(group.E.Users.Clear()).SaveX(ctx)
 	require.Zero(t, ent.QueryGroupUsers(client.Group, hub).CountX(ctx))
 	require.Equal(t, 2, ent.QueryGroupUsers(client.Group, lab).CountX(ctx))
-	client.Group.Update().ClearUsers().ExecX(ctx)
+	client.Group.Update().With(group.E.Users.Clear()).ExecX(ctx)
 	require.Zero(t, ent.QueryGroupUsers(client.Group, lab).CountX(ctx))
 	require.Zero(t, ent.QueryUserGroups(client.User, a8m).CountX(ctx))
 	require.Zero(t, ent.QueryUserGroups(client.User, nat).CountX(ctx))
 
 	t.Log("clear m2m bidi-edges")
 	friends := client.User.CreateBulk(
-		client.User.Create().SetName("f1").SetAge(30).AddFriendIDs(a8m.ID, nat.ID),
-		client.User.Create().SetName("f2").SetAge(30).AddFriendIDs(a8m.ID, nat.ID),
-		client.User.Create().SetName("f3").SetAge(30).AddFriendIDs(a8m.ID, nat.ID),
+		client.User.Create().With(user.F.Name.Set("f1"), user.F.Age.Set(30), user.E.Friends.AddIDs(a8m.ID, nat.ID)),
+		client.User.Create().With(user.F.Name.Set("f2"), user.F.Age.Set(30), user.E.Friends.AddIDs(a8m.ID, nat.ID)),
+		client.User.Create().With(user.F.Name.Set("f3"), user.F.Age.Set(30), user.E.Friends.AddIDs(a8m.ID, nat.ID)),
 	).SaveX(ctx)
 	for i := range friends {
 		require.Equal(t, 2, ent.QueryUserFriends(client.User, friends[i]).CountX(ctx))
 	}
 	require.Equal(t, 3, ent.QueryUserFriends(client.User, a8m).CountX(ctx))
 	require.Equal(t, 3, ent.QueryUserFriends(client.User, nat).CountX(ctx))
-	nat = client.User.UpdateOne(nat).ClearFriends().SaveX(ctx)
+	nat = client.User.UpdateOne(nat).With(user.E.Friends.Clear()).SaveX(ctx)
 	require.Zero(t, ent.QueryUserFriends(client.User, nat).CountX(ctx))
 	require.Equal(t, 3, ent.QueryUserFriends(client.User, a8m).CountX(ctx))
 	for i := range friends {
 		require.Equal(t, 1, ent.QueryUserFriends(client.User, friends[i]).CountX(ctx))
 	}
-	client.User.Update().ClearFriends().ExecX(ctx)
+	client.User.Update().With(user.E.Friends.Clear()).ExecX(ctx)
 	require.Zero(t, client.User.Query().Where(user.E.Friends.Has()).CountX(ctx))
 
 	t.Log("clear m2m inverse-bidi-edges")
-	a8m = client.User.UpdateOne(a8m).AddFollowingIDs(friends[0].ID, friends[1].ID, friends[2].ID).SaveX(ctx)
+	a8m = client.User.UpdateOne(a8m).With(user.E.Following.AddIDs(friends[0].ID, friends[1].ID, friends[2].ID)).SaveX(ctx)
 	require.Equal(t, 3, ent.QueryUserFollowing(client.User, a8m).CountX(ctx))
 	require.Zero(t, ent.QueryUserFollowers(client.User, a8m).CountX(ctx))
-	nat = client.User.UpdateOne(nat).AddFollowerIDs(friends[0].ID, friends[1].ID, friends[2].ID).SaveX(ctx)
+	nat = client.User.UpdateOne(nat).With(user.E.Followers.AddIDs(friends[0].ID, friends[1].ID, friends[2].ID)).SaveX(ctx)
 	require.Zero(t, ent.QueryUserFollowing(client.User, nat).CountX(ctx))
 	require.Equal(t, 3, ent.QueryUserFollowers(client.User, nat).CountX(ctx))
 	for i := range friends {
 		require.Equal(t, 1, ent.QueryUserFollowers(client.User, friends[i]).CountX(ctx))
 		require.Equal(t, 1, ent.QueryUserFollowing(client.User, friends[i]).CountX(ctx))
 	}
-	client.User.UpdateOne(nat).ClearFollowing().ExecX(ctx)
+	client.User.UpdateOne(nat).With(user.E.Following.Clear()).ExecX(ctx)
 	require.Equal(t, 3, ent.QueryUserFollowers(client.User, nat).CountX(ctx), "expect no effect on followers")
-	client.User.UpdateOne(nat).ClearFollowers().ExecX(ctx)
+	client.User.UpdateOne(nat).With(user.E.Followers.Clear()).ExecX(ctx)
 	require.Zero(t, ent.QueryUserFollowers(client.User, nat).CountX(ctx))
 	for i := range friends {
 		require.Equal(t, 1, ent.QueryUserFollowers(client.User, friends[i]).CountX(ctx), "expect no effect to followers")
 		require.Zero(t, ent.QueryUserFollowing(client.User, friends[i]).CountX(ctx))
 	}
-	client.User.UpdateOne(a8m).ClearFollowers().ExecX(ctx)
+	client.User.UpdateOne(a8m).With(user.E.Followers.Clear()).ExecX(ctx)
 	require.Equal(t, 3, ent.QueryUserFollowing(client.User, a8m).CountX(ctx), "expect no effect on following")
-	client.User.UpdateOne(a8m).ClearFollowing().ExecX(ctx)
+	client.User.UpdateOne(a8m).With(user.E.Following.Clear()).ExecX(ctx)
 	require.Zero(t, ent.QueryUserFollowing(client.User, a8m).CountX(ctx))
 	for i := range friends {
 		require.Zero(t, ent.QueryUserFollowers(client.User, friends[i]).CountX(ctx))
@@ -1522,11 +1496,11 @@ func ClearEdges(t *testing.T, client *ent.Client) {
 	}
 
 	t.Log("remove/clear and add edges")
-	a8m = client.User.UpdateOne(a8m).AddFollowingIDs(friends[0].ID, friends[1].ID).SaveX(ctx)
+	a8m = client.User.UpdateOne(a8m).With(user.E.Following.AddIDs(friends[0].ID, friends[1].ID)).SaveX(ctx)
 	require.Equal(t, []int{friends[0].ID, friends[1].ID}, ent.QueryUserFollowing(client.User, a8m).Order(ent.Asc(user.FieldID)).IDsX(ctx))
-	a8m = client.User.UpdateOne(a8m).RemoveFollowingIDs(friends[0].ID, friends[1].ID).AddFollowingIDs(friends[2].ID).SaveX(ctx)
+	a8m = client.User.UpdateOne(a8m).With(user.E.Following.RemoveIDs(friends[0].ID, friends[1].ID), user.E.Following.AddIDs(friends[2].ID)).SaveX(ctx)
 	require.Equal(t, friends[2].ID, ent.QueryUserFollowing(client.User, a8m).OnlyIDX(ctx))
-	a8m = client.User.UpdateOne(a8m).ClearFollowing().AddFollowingIDs(friends[0].ID).SaveX(ctx)
+	a8m = client.User.UpdateOne(a8m).With(user.E.Following.Clear(), user.E.Following.AddIDs(friends[0].ID)).SaveX(ctx)
 	require.Equal(t, friends[0].ID, ent.QueryUserFollowing(client.User, a8m).OnlyIDX(ctx))
 }
 
@@ -1535,103 +1509,103 @@ func UniqueConstraint(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 
 	t.Log("unique constraint violation on 1 field")
-	foo := client.User.Create().SetAge(1).SetName("foo").SetNickname("baz").SaveX(ctx)
-	_, err := client.User.Create().SetAge(1).SetName("bar").SetNickname("baz").Save(ctx)
+	foo := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("foo"), user.F.Nickname.Set("baz")).SaveX(ctx)
+	_, err := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("bar"), user.F.Nickname.Set("baz")).Save(ctx)
 	require.True(ent.IsConstraintError(err))
-	bar := client.User.Create().SetAge(1).SetName("bar").SetNickname("bar").SetPhone("1").SaveX(ctx)
+	bar := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("bar"), user.F.Nickname.Set("bar"), user.F.Phone.Set("1")).SaveX(ctx)
 
 	t.Log("unique constraint violation on 2 fields")
-	err = client.User.Create().SetAge(1).SetName("baz").SetNickname("bar").SetPhone("1").Exec(ctx)
+	err = client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("baz"), user.F.Nickname.Set("bar"), user.F.Phone.Set("1")).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
-	err = client.User.Create().SetAge(1).SetName("baz").SetNickname("qux").SetPhone("1").Exec(ctx)
+	err = client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("baz"), user.F.Nickname.Set("qux"), user.F.Phone.Set("1")).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
-	err = client.User.Create().SetAge(1).SetName("baz").SetNickname("bar").SetPhone("2").Exec(ctx)
+	err = client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("baz"), user.F.Nickname.Set("bar"), user.F.Phone.Set("2")).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
-	client.User.Create().SetAge(1).SetName("baz").SetNickname("qux").SetPhone("2").ExecX(ctx)
-	err = client.User.UpdateOne(foo).SetNickname("bar").SetPhone("1").Exec(ctx)
+	client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("baz"), user.F.Nickname.Set("qux"), user.F.Phone.Set("2")).ExecX(ctx)
+	err = client.User.UpdateOne(foo).With(user.F.Nickname.Set("bar"), user.F.Phone.Set("1")).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
-	err = client.User.UpdateOne(foo).SetNickname("bar").SetPhone("2").Exec(ctx)
+	err = client.User.UpdateOne(foo).With(user.F.Nickname.Set("bar"), user.F.Phone.Set("2")).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 	err = client.User.CreateBulk(
-		client.User.Create().SetAge(1).SetName("foo").SetNickname("baz"),
-		client.User.Create().SetAge(1).SetName("foo").SetNickname("baz"),
+		client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("foo"), user.F.Nickname.Set("baz")),
+		client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("foo"), user.F.Nickname.Set("baz")),
 	).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 
 	t.Log("o2o unique constraint on creation")
-	dan := client.User.Create().SetAge(1).SetName("dan").SetNickname("dan").SetSpouseID(foo.ID).SaveX(ctx)
+	dan := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("dan"), user.F.Nickname.Set("dan"), user.E.Spouse.SetID(foo.ID)).SaveX(ctx)
 	require.Equal(dan.Name, ent.QueryUserSpouse(client.User, foo).OnlyX(ctx).Name)
-	err = client.User.Create().SetAge(1).SetName("b").SetSpouseID(foo.ID).Exec(ctx)
+	err = client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("b"), user.E.Spouse.SetID(foo.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 
 	t.Log("o2m/m2o unique constraint on creation")
-	c1 := client.User.Create().SetAge(1).SetName("c1").SetNickname("c1").SetParentID(foo.ID).SaveX(ctx)
-	c2 := client.User.Create().SetAge(1).SetName("c2").SetNickname("c2").SetParentID(foo.ID).SaveX(ctx)
-	err = client.User.Create().SetAge(10).SetName("z").SetNickname("z").AddChildIDs(c1.ID).Exec(ctx)
+	c1 := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("c1"), user.F.Nickname.Set("c1"), user.E.Parent.SetID(foo.ID)).SaveX(ctx)
+	c2 := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("c2"), user.F.Nickname.Set("c2"), user.E.Parent.SetID(foo.ID)).SaveX(ctx)
+	err = client.User.Create().With(user.F.Age.Set(10), user.F.Name.Set("z"), user.F.Nickname.Set("z"), user.E.Children.AddIDs(c1.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err), "c1 already has a parent")
-	err = client.User.Create().SetAge(10).SetName("z").SetNickname("z").AddChildIDs(c2.ID).Exec(ctx)
+	err = client.User.Create().With(user.F.Age.Set(10), user.F.Name.Set("z"), user.F.Nickname.Set("z"), user.E.Children.AddIDs(c2.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err), "c2 already has a parent")
-	err = client.User.Create().SetAge(10).SetName("z").SetNickname("z").AddChildIDs(c1.ID, c2.ID).Exec(ctx)
+	err = client.User.Create().With(user.F.Age.Set(10), user.F.Name.Set("z"), user.F.Nickname.Set("z"), user.E.Children.AddIDs(c1.ID, c2.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 
-	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
-	grp := client.Group.Create().SetName("Github").SetExpire(time.Now()).SetInfoID(inf.ID).SaveX(ctx)
-	err = client.GroupInfo.Create().SetDesc("desc").AddGroupIDs(grp.ID).Exec(ctx)
+	inf := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc")).SaveX(ctx)
+	grp := client.Group.Create().With(group.F.Name.Set("Github"), group.F.Expire.Set(time.Now()), group.E.Info.SetID(inf.ID)).SaveX(ctx)
+	err = client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc"), groupinfo.E.Groups.AddIDs(grp.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 
-	p1 := client.Pet.Create().SetName("p1").SetOwnerID(foo.ID).SaveX(ctx)
-	p2 := client.Pet.Create().SetName("p2").SetOwnerID(foo.ID).SaveX(ctx)
-	err = client.User.Create().SetAge(10).SetName("new-owner").AddPetIDs(p1.ID, p2.ID).Exec(ctx)
+	p1 := client.Pet.Create().With(pet.F.Name.Set("p1"), pet.E.Owner.SetID(foo.ID)).SaveX(ctx)
+	p2 := client.Pet.Create().With(pet.F.Name.Set("p2"), pet.E.Owner.SetID(foo.ID)).SaveX(ctx)
+	err = client.User.Create().With(user.F.Age.Set(10), user.F.Name.Set("new-owner"), user.E.Pets.AddIDs(p1.ID, p2.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 
-	err = client.User.UpdateOne(c2).SetNickname(c1.Nickname).Exec(ctx)
+	err = client.User.UpdateOne(c2).With(user.F.Nickname.Set(c1.Nickname)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 
 	t.Log("o2o unique constraint on update")
-	err = client.User.UpdateOne(bar).SetSpouseID(foo.ID).Exec(ctx)
+	err = client.User.UpdateOne(bar).With(user.E.Spouse.SetID(foo.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
-	err = client.User.UpdateOne(foo).SetSpouseID(bar.ID).Exec(ctx)
+	err = client.User.UpdateOne(foo).With(user.E.Spouse.SetID(bar.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
-	client.User.UpdateOne(bar).ClearSpouse().ExecX(ctx)
-	client.User.UpdateOne(foo).ClearSpouse().SetSpouseID(bar.ID).ExecX(ctx)
+	client.User.UpdateOne(bar).With(user.E.Spouse.Clear()).ExecX(ctx)
+	client.User.UpdateOne(foo).With(user.E.Spouse.Clear(), user.E.Spouse.SetID(bar.ID)).ExecX(ctx)
 	require.False(ent.QueryUserSpouse(client.User, dan).ExistX(ctx))
 	require.Equal(bar.Name, ent.QueryUserSpouse(client.User, foo).OnlyX(ctx).Name)
 	require.Equal(foo.Name, ent.QueryUserSpouse(client.User, bar).OnlyX(ctx).Name)
 
 	t.Log("o2m unique constraint on update")
-	err = client.User.UpdateOne(bar).SetAge(1).SetName("new-owner").AddPetIDs(p1.ID).Exec(ctx)
+	err = client.User.UpdateOne(bar).With(user.F.Age.Set(1), user.F.Name.Set("new-owner"), user.E.Pets.AddIDs(p1.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
-	err = client.User.UpdateOne(bar).SetAge(1).SetName("new-owner").AddPetIDs(p1.ID, p2.ID).Exec(ctx)
+	err = client.User.UpdateOne(bar).With(user.F.Age.Set(1), user.F.Name.Set("new-owner"), user.E.Pets.AddIDs(p1.ID, p2.ID)).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 
 	t.Log("unique constraint violation when updating more than 1 vertex")
-	err = client.User.Update().SetNickname("yada").Exec(ctx)
+	err = client.User.Update().With(user.F.Nickname.Set("yada")).Exec(ctx)
 	require.True(ent.IsConstraintError(err))
 	require.False(client.User.Query().Where(user.F.Nickname.EQ("yada")).ExistX(ctx))
-	client.User.Update().Where(user.F.Nickname.EQ("dan")).SetNickname("yada").ExecX(ctx)
+	client.User.Update().Where(user.F.Nickname.EQ("dan")).With(user.F.Nickname.Set("yada")).ExecX(ctx)
 	require.False(client.User.Query().Where(user.F.Nickname.EQ("dan")).ExistX(ctx))
 	require.True(client.User.Query().Where(user.F.Nickname.EQ("yada")).ExistX(ctx))
 
 	t.Log("unique constraint on numeric fields")
-	cm1 := client.Comment.Create().SetUniqueInt(42).SetUniqueFloat(math.Pi).SaveX(ctx)
-	err = client.Comment.Create().SetUniqueInt(42).SetUniqueFloat(math.E).Exec(ctx)
+	cm1 := client.Comment.Create().With(comment.F.UniqueInt.Set(42), comment.F.UniqueFloat.Set(math.Pi)).SaveX(ctx)
+	err = client.Comment.Create().With(comment.F.UniqueInt.Set(42), comment.F.UniqueFloat.Set(math.E)).Exec(ctx)
 	require.Error(err)
-	err = client.Comment.Create().SetUniqueInt(7).SetUniqueFloat(math.Pi).Exec(ctx)
+	err = client.Comment.Create().With(comment.F.UniqueInt.Set(7), comment.F.UniqueFloat.Set(math.Pi)).Exec(ctx)
 	require.Error(err)
-	client.Comment.Create().SetUniqueInt(7).SetUniqueFloat(math.E).ExecX(ctx)
-	err = client.Comment.UpdateOne(cm1).SetUniqueInt(7).Exec(ctx)
+	client.Comment.Create().With(comment.F.UniqueInt.Set(7), comment.F.UniqueFloat.Set(math.E)).ExecX(ctx)
+	err = client.Comment.UpdateOne(cm1).With(comment.F.UniqueInt.Set(7)).Exec(ctx)
 	require.Error(err)
-	err = client.Comment.UpdateOne(cm1).SetUniqueFloat(math.E).Exec(ctx)
+	err = client.Comment.UpdateOne(cm1).With(comment.F.UniqueFloat.Set(math.E)).Exec(ctx)
 	require.Error(err)
 
 	t.Log("unique constraint on time fields")
 	now := time.Now()
-	client.File.Create().SetName("a").SetSize(10).SetCreateTime(now).ExecX(ctx)
-	err = client.File.Create().SetName("b").SetSize(20).SetCreateTime(now).Exec(ctx)
+	client.File.Create().With(file.F.Name.Set("a"), file.F.Size.Set(10), file.F.CreateTime.Set(now)).ExecX(ctx)
+	err = client.File.Create().With(file.F.Name.Set("b"), file.F.Size.Set(20), file.F.CreateTime.Set(now)).Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsConstraintError(err))
 	now = now.Add(time.Second)
-	client.File.Create().SetName("b").SetSize(20).SetCreateTime(now).ExecX(ctx)
+	client.File.Create().With(file.F.Name.Set("b"), file.F.Size.Set(20), file.F.CreateTime.Set(now)).ExecX(ctx)
 }
 
 type mocker struct{ mock.Mock }
@@ -1734,63 +1708,61 @@ func Tx(t *testing.T, client *ent.Client) {
 
 func DefaultValue(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	c1 := client.Card.Create().SetNumber("102030").SetName("Firstname Lastname").SaveX(ctx)
+	c1 := client.Card.Create().With(card.F.Number.Set("102030"), card.F.Name.Set("Firstname Lastname")).SaveX(ctx)
 	ctime, mtime := c1.CreateTime, c1.UpdateTime
 	require.False(t, ctime.IsZero())
 	require.False(t, mtime.IsZero())
-	c1 = client.Card.UpdateOne(c1).SetName("F Lastname").SaveX(ctx)
+	c1 = client.Card.UpdateOne(c1).With(card.F.Name.Set("F Lastname")).SaveX(ctx)
 	require.False(t, c1.CreateTime.IsZero())
 	require.False(t, c1.UpdateTime.IsZero())
 	require.False(t, mtime.Equal(c1.UpdateTime))
 
 	// Enum default value
 	usr := client.User.
-		Create().
-		SetAge(23).
-		SetName("dario").
+		Create().With(user.F.Age.Set(23), user.F.Name.Set("dario")).
 		SaveX(ctx)
 	require.Equal(t, usr.Role, user.Role("user"))
 
 	b := time.Now().Add(-time.Hour)
-	n1 := client.Node.Create().SetValue(1).SetUpdatedAt(b).SaveX(ctx)
+	n1 := client.Node.Create().With(node.F.Value.Set(1), node.F.UpdatedAt.Set(b)).SaveX(ctx)
 	require.NotNil(t, n1.UpdatedAt)
 	require.WithinDuration(t, b, *n1.UpdatedAt, time.Second)
-	n1 = client.Node.UpdateOne(n1).SetValue(2).SaveX(ctx)
+	n1 = client.Node.UpdateOne(n1).With(node.F.Value.Set(2)).SaveX(ctx)
 	require.NotNil(t, n1.UpdatedAt)
 	require.False(t, b.Equal(*n1.UpdatedAt))
 }
 
+// ImmutableValue used to check, via reflection, that Update/UpdateOne
+// builders had no Set<F>/SetNillable<F> method for an immutable field
+// (created_at, number) and did have one for a mutable field (name) — the
+// old per-field codegen enforced immutability structurally, by generating
+// Set<F> only on the create builder for an immutable field. Every builder
+// now shares the same F.<Field> handle surface regardless of mutability, so
+// that structural gate moved into entbuilder.Mutation.SetField et al
+// (rejecting a write to an Immutable-flagged field on an Update/UpdateOne
+// op) — checked here by asserting the write actually errors.
 func ImmutableValue(t *testing.T, client *ent.Client) {
-	tests := []struct {
-		name    string
-		updater func() any
-	}{
-		{
-			name: "Update",
-			updater: func() any {
-				return client.Card.Update()
-			},
-		},
-		{
-			name: "UpdateOne",
-			updater: func() any {
-				return client.Card.UpdateOne(client.Card.Create().SetNumber("42").SaveX(context.Background()))
-			},
-		},
-	}
-	for _, tc := range tests {
-		v := reflect.ValueOf(tc.updater())
-		require.False(t, v.MethodByName("SetCreatedAt").IsValid())
-		require.False(t, v.MethodByName("SetNillableCreatedAt").IsValid())
-		require.False(t, v.MethodByName("SetNumber").IsValid())
-		require.True(t, v.MethodByName("SetName").IsValid())
-	}
+	ctx := context.Background()
+	c := client.Card.Create().With(card.F.Number.Set("42")).SaveX(ctx)
+
+	err := client.Card.Update().With(card.F.Number.Set("43")).Exec(ctx)
+	require.Error(t, err)
+	err = client.Card.UpdateOne(c).With(card.F.Number.Set("43")).Exec(ctx)
+	require.Error(t, err)
+	err = client.Card.Update().With(card.F.CreateTime.Set(time.Now())).Exec(ctx)
+	require.Error(t, err)
+	err = client.Card.UpdateOne(c).With(card.F.CreateTime.Set(time.Now())).Exec(ctx)
+	require.Error(t, err)
+
+	// A mutable field still works on both builders.
+	client.Card.Update().With(card.F.Name.Set("updated")).ExecX(ctx)
+	client.Card.UpdateOne(c).With(card.F.Name.Set("updated-one")).ExecX(ctx)
 }
 
 func Sensitive(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
-	usr := client.User.Create().SetName("foo").SetAge(20).SetPassword("secret-password").SaveX(ctx)
+	usr := client.User.Create().With(user.F.Name.Set("foo"), user.F.Age.Set(20), user.F.Password.Set("secret-password")).SaveX(ctx)
 	require.Equal("secret-password", usr.Password)
 	require.Contains(usr.String(), "password=<sensitive>")
 	b, err := json.Marshal(usr)
@@ -1802,22 +1774,22 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	require := require.New(t)
 
-	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
-	nati := client.User.Create().SetName("nati").SetAge(28).SetSpouseID(a8m.ID).SaveX(ctx)
-	alex := client.User.Create().SetName("alexsn").SetAge(35).AddFriendIDs(a8m.ID).SaveX(ctx)
-	client.Pet.Create().SetName("xabi").ExecX(ctx)
-	client.Pet.Create().SetName("pedro").SetOwnerID(a8m.ID).SetTeamID(nati.ID).ExecX(ctx)
-	client.Card.Create().SetNumber("102030").SetOwnerID(a8m.ID).ExecX(ctx)
+	a8m := client.User.Create().With(user.F.Name.Set("a8m"), user.F.Age.Set(30)).SaveX(ctx)
+	nati := client.User.Create().With(user.F.Name.Set("nati"), user.F.Age.Set(28), user.E.Spouse.SetID(a8m.ID)).SaveX(ctx)
+	alex := client.User.Create().With(user.F.Name.Set("alexsn"), user.F.Age.Set(35), user.E.Friends.AddIDs(a8m.ID)).SaveX(ctx)
+	client.Pet.Create().With(pet.F.Name.Set("xabi")).ExecX(ctx)
+	client.Pet.Create().With(pet.F.Name.Set("pedro"), pet.E.Owner.SetID(a8m.ID), pet.E.Team.SetID(nati.ID)).ExecX(ctx)
+	client.Card.Create().With(card.F.Number.Set("102030"), card.E.Owner.SetID(a8m.ID)).ExecX(ctx)
 
-	inf := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx)
+	inf := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc")).SaveX(ctx)
 	files := ent.Files{
-		client.File.Create().SetName("a").SetSize(10).SaveX(ctx),
-		client.File.Create().SetName("b").SetSize(10).SaveX(ctx),
-		client.File.Create().SetName("c").SetSize(10).SaveX(ctx),
+		client.File.Create().With(file.F.Name.Set("a"), file.F.Size.Set(10)).SaveX(ctx),
+		client.File.Create().With(file.F.Name.Set("b"), file.F.Size.Set(10)).SaveX(ctx),
+		client.File.Create().With(file.F.Name.Set("c"), file.F.Size.Set(10)).SaveX(ctx),
 	}
-	typ := client.FileType.Create().SetName("type").AddFileIDs(fileIDs(files)...).SaveX(ctx)
-	hub := client.Group.Create().SetName("GitHub").SetExpire(time.Now()).AddUserIDs(alex.ID, a8m.ID).SetInfoID(inf.ID).SaveX(ctx)
-	lab := client.Group.Create().SetName("GitLab").SetExpire(time.Now()).AddUserIDs(nati.ID, a8m.ID).SetInfoID(inf.ID).AddFileIDs(fileIDs(files)...).SaveX(ctx)
+	typ := client.FileType.Create().With(filetype.F.Name.Set("type"), filetype.E.Files.AddIDs(fileIDs(files)...)).SaveX(ctx)
+	hub := client.Group.Create().With(group.F.Name.Set("GitHub"), group.F.Expire.Set(time.Now()), group.E.Users.AddIDs(alex.ID, a8m.ID), group.E.Info.SetID(inf.ID)).SaveX(ctx)
+	lab := client.Group.Create().With(group.F.Name.Set("GitLab"), group.F.Expire.Set(time.Now()), group.E.Users.AddIDs(nati.ID, a8m.ID), group.E.Info.SetID(inf.ID), group.E.Files.AddIDs(fileIDs(files)...)).SaveX(ctx)
 
 	t.Run("O2O", func(t *testing.T) {
 		users := ent.WithUserParent(ent.WithUserCard(ent.WithUserSpouse(client.User.
@@ -1973,14 +1945,14 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 	t.Run("LimitRows/O2M", func(t *testing.T) {
 		skip(t, "MySQL/5")
 		client.Pet.Delete().ExecX(ctx)
-		client.Pet.Create().SetName("nala").SetOwnerID(nati.ID).ExecX(ctx)
-		client.Pet.Create().SetName("xabi3").SetOwnerID(a8m.ID).ExecX(ctx)
-		client.Pet.Create().SetName("xabi2").SetOwnerID(a8m.ID).ExecX(ctx)
-		client.Pet.Create().SetName("xabi1").SetOwnerID(a8m.ID).ExecX(ctx)
-		client.Pet.Create().SetName("lola4").SetOwnerID(alex.ID).ExecX(ctx)
-		client.Pet.Create().SetName("lola3").SetOwnerID(alex.ID).ExecX(ctx)
-		client.Pet.Create().SetName("lola2").SetOwnerID(alex.ID).ExecX(ctx)
-		client.Pet.Create().SetName("lola1").SetOwnerID(alex.ID).ExecX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set("nala"), pet.E.Owner.SetID(nati.ID)).ExecX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set("xabi3"), pet.E.Owner.SetID(a8m.ID)).ExecX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set("xabi2"), pet.E.Owner.SetID(a8m.ID)).ExecX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set("xabi1"), pet.E.Owner.SetID(a8m.ID)).ExecX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set("lola4"), pet.E.Owner.SetID(alex.ID)).ExecX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set("lola3"), pet.E.Owner.SetID(alex.ID)).ExecX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set("lola2"), pet.E.Owner.SetID(alex.ID)).ExecX(ctx)
+		client.Pet.Create().With(pet.F.Name.Set("lola1"), pet.E.Owner.SetID(alex.ID)).ExecX(ctx)
 
 		users := ent.WithUserPets(client.User.Query()).Order(ent.Asc(user.FieldID)).AllX(ctx)
 		require.Len(users[0].Edges.Pets, 3)
@@ -2036,7 +2008,7 @@ func EagerLoading(t *testing.T, client *ent.Client) {
 		require.Len(users[2].Edges.Groups, 1)
 		require.Equal(users[2].Edges.Groups[0].Name, "GitHub")
 
-		client.Group.Create().SetName("BitBucket").SetExpire(time.Now()).AddUserIDs(alex.ID, a8m.ID).SetInfoID(inf.ID).SaveX(ctx)
+		client.Group.Create().With(group.F.Name.Set("BitBucket"), group.F.Expire.Set(time.Now()), group.E.Users.AddIDs(alex.ID, a8m.ID), group.E.Info.SetID(inf.ID)).SaveX(ctx)
 		users = ent.WithUserGroups(client.User.
 			Query(), func(q *ent.GroupQuery) {
 			q.Modify(limitRows(user.GroupsPrimaryKey[0], 1, group.FieldName))
@@ -2080,9 +2052,9 @@ func limitRows(partitionBy string, limit int, orderBy ...string) func(s *sql.Sel
 
 func NamedEagerLoading(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	a8m := client.User.Create().SetName("a8m").SetAge(30).SaveX(ctx)
-	p1 := client.Pet.Create().SetName("pet1").SetOwnerID(a8m.ID).SetTrained(true).SaveX(ctx)
-	p2 := client.Pet.Create().SetName("pet2").SetOwnerID(a8m.ID).SetTrained(false).SaveX(ctx)
+	a8m := client.User.Create().With(user.F.Name.Set("a8m"), user.F.Age.Set(30)).SaveX(ctx)
+	p1 := client.Pet.Create().With(pet.F.Name.Set("pet1"), pet.E.Owner.SetID(a8m.ID), pet.F.Trained.Set(true)).SaveX(ctx)
+	p2 := client.Pet.Create().With(pet.F.Name.Set("pet2"), pet.E.Owner.SetID(a8m.ID), pet.F.Trained.Set(false)).SaveX(ctx)
 
 	a8m = ent.WithNamedUserPets(ent.WithNamedUserPets(client.User.Query(),
 		"Trained", func(q *ent.PetQuery) { q.Where(pet.F.Trained.EQ(true)) }),
@@ -2180,7 +2152,7 @@ func Mutation(t *testing.T, client *ent.Client) {
 	}, name string) {
 		_ = ns.SetField("name", name)
 	}
-	ub := client.User.Create().SetAge(30)
+	ub := client.User.Create().With(user.F.Age.Set(30))
 	setName(ub.Mutation(), "a8m")
 	pb := client.Pet.Create()
 	setName(pb.Mutation(), "pedro")
@@ -2196,7 +2168,7 @@ func Mutation(t *testing.T, client *ent.Client) {
 			_ = m.SetField(user.FieldAge, 30)
 		}
 	}
-	uu := client.User.UpdateOne(a8m).AddPetIDs(pedro.ID)
+	uu := client.User.UpdateOne(a8m).With(user.E.Pets.AddIDs(pedro.ID))
 	ub = client.User.Create()
 	setUsers(ub.Mutation(), uu.Mutation())
 	a8m = uu.SaveX(ctx)
@@ -2204,14 +2176,14 @@ func Mutation(t *testing.T, client *ent.Client) {
 	require.Equal(t, "boring", a8m.Name)
 	require.Equal(t, "boring", usr.Name)
 
-	require.Equal(t, []int{usr.ID}, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).Mutation(), user.EdgeFriends))
-	require.Empty(t, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).RemoveFriendIDs(usr.ID).Mutation(), user.EdgeFriends))
-	require.Equal(t, []int{usr.ID}, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).RemoveFriendIDs(a8m.ID).Mutation(), user.EdgeFriends))
-	client.User.UpdateOne(a8m).AddFriendIDs(usr.ID).ExecX(ctx)
+	require.Equal(t, []int{usr.ID}, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).With(user.E.Friends.AddIDs(usr.ID)).Mutation(), user.EdgeFriends))
+	require.Empty(t, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).With(user.E.Friends.AddIDs(usr.ID), user.E.Friends.RemoveIDs(usr.ID)).Mutation(), user.EdgeFriends))
+	require.Equal(t, []int{usr.ID}, entbuilder.EdgeIDsAs[int](client.User.UpdateOne(a8m).With(user.E.Friends.AddIDs(usr.ID), user.E.Friends.RemoveIDs(a8m.ID)).Mutation(), user.EdgeFriends))
+	client.User.UpdateOne(a8m).With(user.E.Friends.AddIDs(usr.ID)).ExecX(ctx)
 
 	t.Run("IDs", func(t *testing.T) {
 		ids := client.User.Query().IDsX(ctx)
-		u := client.User.Update().Where(user.F.ID.In(ids...)).AddAge(1)
+		u := client.User.Update().Where(user.F.ID.In(ids...)).With(user.F.Age.Add(1))
 		mids, err := u.Mutation().IDs(ctx)
 		require.NoError(t, err)
 		// Order can change between the 2 queries.
@@ -2221,8 +2193,7 @@ func Mutation(t *testing.T, client *ent.Client) {
 		u.ExecX(ctx)
 
 		u = client.User.
-			Update().
-			AddAge(1).
+			Update().With(user.F.Age.Add(1)).
 			Where(user.F.Name.EQ(a8m.Name), user.E.Pets.Has(), user.E.Pets.HasWith(pet.F.Name.EQ(pedro.Name)))
 		mids, err = u.Mutation().IDs(ctx)
 		require.NoError(t, err)
@@ -2234,14 +2205,14 @@ func Mutation(t *testing.T, client *ent.Client) {
 	t.Run("Predicate", func(t *testing.T) {
 		updater := client.User.UpdateOne(a8m)
 		updater.Mutation().WhereP(user.F.Name.EQ(a8m.Name))
-		updater.SetName("mashraki")
+		updater.With(user.F.Name.Set("mashraki"))
 		a8m, err := updater.Save(ctx)
 		require.NoError(t, err, "predicate should not affect the returned object")
 		require.Equal(t, "mashraki", a8m.Name)
 
 		updater = client.User.UpdateOne(a8m)
 		updater.Mutation().WhereP(user.F.Name.EQ(a8m.Name + a8m.Name))
-		updater.SetName("a8m")
+		updater.With(user.F.Name.Set("a8m"))
 		a8m, err = updater.Save(ctx)
 		require.True(t, ent.IsNotFound(err))
 		require.Nil(t, a8m)
@@ -2260,17 +2231,17 @@ var (
 func CreateBulk(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	cards := client.Card.CreateBulk(
-		client.Card.Create().SetNumber("10").SetName("1st"),
-		client.Card.Create().SetNumber("20").SetName("2nd"),
-		client.Card.Create().SetNumber("30").SetName("3rd"),
+		client.Card.Create().With(card.F.Number.Set("10"), card.F.Name.Set("1st")),
+		client.Card.Create().With(card.F.Number.Set("20"), card.F.Name.Set("2nd")),
+		client.Card.Create().With(card.F.Number.Set("30"), card.F.Name.Set("3rd")),
 	).SaveX(ctx)
 	require.Equal(t, cards[0].ID, cards[1].ID-1)
 	require.Equal(t, cards[1].ID, cards[2].ID-1)
 
-	inf := client.GroupInfo.Create().SetDesc("group info").SaveX(ctx)
+	inf := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("group info")).SaveX(ctx)
 	names := []string{"GitHub", "GitLab"}
 	groups := client.Group.MapCreateBulk(names, func(c *group.GroupCreate, i int) {
-		c.SetName(names[i]).SetExpire(time.Now()).SetInfoID(inf.ID)
+		c.With(group.F.Name.Set(names[i]), group.F.Expire.Set(time.Now()), group.E.Info.SetID(inf.ID))
 	}).SaveX(ctx)
 	require.Equal(t, inf.ID, ent.QueryGroupInfo(client.Group, groups[0]).OnlyIDX(ctx))
 	require.Equal(t, inf.ID, ent.QueryGroupInfo(client.Group, groups[1]).OnlyIDX(ctx))
@@ -2301,8 +2272,8 @@ func CreateBulk(t *testing.T, client *ent.Client) {
 	)
 
 	users := client.User.CreateBulk(
-		client.User.Create().SetName("a8m").SetAge(20).AddGroupIDs(groupIDs(groups)...),
-		client.User.Create().SetName("nati").SetAge(20).SetCardID(cards[0].ID).AddGroupIDs(groups[0].ID),
+		client.User.Create().With(user.F.Name.Set("a8m"), user.F.Age.Set(20), user.E.Groups.AddIDs(groupIDs(groups)...)),
+		client.User.Create().With(user.F.Name.Set("nati"), user.F.Age.Set(20), user.E.Card.SetID(cards[0].ID), user.E.Groups.AddIDs(groups[0].ID)),
 	).SaveX(ctx)
 	require.Equal(t, 2, ent.QueryUserGroups(client.User, users[0]).CountX(ctx))
 	require.False(t, ent.QueryUserCard(client.User, users[0]).ExistX(ctx))
@@ -2314,9 +2285,9 @@ func CreateBulk(t *testing.T, client *ent.Client) {
 	require.Equal(t, "@nati", users[1].Nickname)
 
 	pets := client.Pet.CreateBulk(
-		client.Pet.Create().SetName("pedro").SetOwnerID(users[0].ID),
-		client.Pet.Create().SetName("xabi").SetOwnerID(users[1].ID),
-		client.Pet.Create().SetName("layla"),
+		client.Pet.Create().With(pet.F.Name.Set("pedro"), pet.E.Owner.SetID(users[0].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("xabi"), pet.E.Owner.SetID(users[1].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("layla")),
 	).SaveX(ctx)
 	require.Equal(t, "pedro", pets[0].Name)
 	require.Equal(t, users[0].ID, ent.QueryPetOwner(client.Pet, pets[0]).OnlyIDX(ctx))
@@ -2328,13 +2299,13 @@ func CreateBulk(t *testing.T, client *ent.Client) {
 
 func ConstraintChecks(t *testing.T, client *ent.Client) {
 	var cerr *ent.ConstraintError
-	err := client.Pet.Create().SetName("orphan").SetOwnerID(0).Exec(context.Background())
+	err := client.Pet.Create().With(pet.F.Name.Set("orphan"), pet.E.Owner.SetID(0)).Exec(context.Background())
 	require.True(t, errors.As(err, &cerr))
 	require.True(t, sqlgraph.IsForeignKeyConstraintError(err))
 	require.False(t, sqlgraph.IsUniqueConstraintError(err))
 
-	client.FileType.Create().SetName("a unique name").SaveX(context.Background())
-	err = client.FileType.Create().SetName("a unique name").Exec(context.Background())
+	client.FileType.Create().With(filetype.F.Name.Set("a unique name")).SaveX(context.Background())
+	err = client.FileType.Create().With(filetype.F.Name.Set("a unique name")).Exec(context.Background())
 	require.True(t, errors.As(err, &cerr))
 	require.False(t, sqlgraph.IsForeignKeyConstraintError(err))
 	require.True(t, sqlgraph.IsUniqueConstraintError(err))
@@ -2343,7 +2314,7 @@ func ConstraintChecks(t *testing.T, client *ent.Client) {
 func Lock(t *testing.T, client *ent.Client) {
 	skip(t, "SQLite", "MySQL/5", "Maria/10.2")
 	ctx := context.Background()
-	xabi := client.Pet.Create().SetName("Xabi").SaveX(ctx)
+	xabi := client.Pet.Create().With(pet.F.Name.Set("Xabi")).SaveX(ctx)
 
 	t.Run("ForUpdate", func(t *testing.T) {
 		tx1, err := client.Tx(ctx)
@@ -2369,7 +2340,7 @@ func Lock(t *testing.T, client *ent.Client) {
 			require.EqualValues(t, "Lock wait timeout exceeded; try restarting transaction", err.Message)
 		}
 		require.NoError(t, tx2.Rollback())
-		tx1.Pet.UpdateOne(p1).SetName("updated").ExecX(ctx)
+		tx1.Pet.UpdateOne(p1).With(pet.F.Name.Set("updated")).ExecX(ctx)
 		require.NoError(t, tx1.Commit())
 		tx3.Pet.Query().Where(pet.F.ID.EQ(xabi.ID)).ForUpdate().OnlyX(ctx)
 		require.NoError(t, tx3.Rollback())
@@ -2412,12 +2383,7 @@ func ExtValueScan(t *testing.T, client *ent.Client) {
 			require.Equal(t, custom, e.Custom)
 		}
 	}
-	ex := client.ExValueScan.Create().
-		SetText(big.NewInt(10)).
-		SetBinary(u).
-		SetBinaryBytes(u).
-		SetBase64("a8m").
-		SetCustom("atlasgo.io").
+	ex := client.ExValueScan.Create().With(exvaluescan.F.Text.Set(big.NewInt(10)), exvaluescan.F.Binary.Set(u), exvaluescan.F.BinaryBytes.Set(u), exvaluescan.F.Base64.Set("a8m"), exvaluescan.F.Custom.Set("atlasgo.io")).
 		SaveX(ctx)
 	check(ex, big.NewInt(10), u.String(), "a8m", "atlasgo.io", u)
 
@@ -2449,7 +2415,7 @@ func ExtValueScan(t *testing.T, client *ent.Client) {
 
 	// Update the values and ensure they are updated as expected.
 	u.Path = "/docs"
-	ex = client.ExValueScan.UpdateOne(ex).SetBinary(u).SetBinaryBytes(u).SetText(big.NewInt(20)).SetBase64("m8a").SetCustom("entgo.io").SaveX(ctx)
+	ex = client.ExValueScan.UpdateOne(ex).With(exvaluescan.F.Binary.Set(u), exvaluescan.F.BinaryBytes.Set(u), exvaluescan.F.Text.Set(big.NewInt(20)), exvaluescan.F.Base64.Set("m8a"), exvaluescan.F.Custom.Set("entgo.io")).SaveX(ctx)
 	check(ex, big.NewInt(20), u.String(), "m8a", "entgo.io", u)
 
 	// Check predicates.
@@ -2470,21 +2436,21 @@ func ExtValueScan(t *testing.T, client *ent.Client) {
 func OrderByFluent(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	users := client.User.CreateBulk(
-		client.User.Create().SetName("a").SetAge(1),
-		client.User.Create().SetName("b").SetAge(2),
-		client.User.Create().SetName("c").SetAge(3),
-		client.User.Create().SetName("d").SetAge(4),
-		client.User.Create().SetName("e").SetAge(5),
+		client.User.Create().With(user.F.Name.Set("a"), user.F.Age.Set(1)),
+		client.User.Create().With(user.F.Name.Set("b"), user.F.Age.Set(2)),
+		client.User.Create().With(user.F.Name.Set("c"), user.F.Age.Set(3)),
+		client.User.Create().With(user.F.Name.Set("d"), user.F.Age.Set(4)),
+		client.User.Create().With(user.F.Name.Set("e"), user.F.Age.Set(5)),
 	).SaveX(ctx)
 	pets := client.Pet.CreateBulk(
-		client.Pet.Create().SetName("aa").SetOwnerID(users[1].ID).SetAge(2),
-		client.Pet.Create().SetName("ab").SetOwnerID(users[1].ID).SetAge(2),
-		client.Pet.Create().SetName("ac").SetOwnerID(users[0].ID).SetAge(1),
-		client.Pet.Create().SetName("ba").SetOwnerID(users[0].ID).SetAge(1),
-		client.Pet.Create().SetName("bb").SetOwnerID(users[0].ID).SetAge(1),
-		client.Pet.Create().SetName("ca").SetOwnerID(users[2].ID).SetAge(10),
-		client.Pet.Create().SetName("d"),
-		client.Pet.Create().SetName("e"),
+		client.Pet.Create().With(pet.F.Name.Set("aa"), pet.E.Owner.SetID(users[1].ID), pet.F.Age.Set(2)),
+		client.Pet.Create().With(pet.F.Name.Set("ab"), pet.E.Owner.SetID(users[1].ID), pet.F.Age.Set(2)),
+		client.Pet.Create().With(pet.F.Name.Set("ac"), pet.E.Owner.SetID(users[0].ID), pet.F.Age.Set(1)),
+		client.Pet.Create().With(pet.F.Name.Set("ba"), pet.E.Owner.SetID(users[0].ID), pet.F.Age.Set(1)),
+		client.Pet.Create().With(pet.F.Name.Set("bb"), pet.E.Owner.SetID(users[0].ID), pet.F.Age.Set(1)),
+		client.Pet.Create().With(pet.F.Name.Set("ca"), pet.E.Owner.SetID(users[2].ID), pet.F.Age.Set(10)),
+		client.Pet.Create().With(pet.F.Name.Set("d")),
+		client.Pet.Create().With(pet.F.Name.Set("e")),
 	).SaveX(ctx)
 
 	t.Run("M2O", func(t *testing.T) {
@@ -2636,20 +2602,20 @@ func OrderByFluent(t *testing.T, client *ent.Client) {
 func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	users := client.User.CreateBulk(
-		client.User.Create().SetName("a").SetAge(1),
-		client.User.Create().SetName("b").SetAge(2),
-		client.User.Create().SetName("c").SetAge(3),
-		client.User.Create().SetName("d").SetAge(4),
+		client.User.Create().With(user.F.Name.Set("a"), user.F.Age.Set(1)),
+		client.User.Create().With(user.F.Name.Set("b"), user.F.Age.Set(2)),
+		client.User.Create().With(user.F.Name.Set("c"), user.F.Age.Set(3)),
+		client.User.Create().With(user.F.Name.Set("d"), user.F.Age.Set(4)),
 	).SaveX(ctx)
 	pets := client.Pet.CreateBulk(
-		client.Pet.Create().SetName("aa").SetOwnerID(users[0].ID),
-		client.Pet.Create().SetName("ab").SetOwnerID(users[0].ID),
-		client.Pet.Create().SetName("ac").SetOwnerID(users[0].ID),
-		client.Pet.Create().SetName("ba").SetOwnerID(users[1].ID),
-		client.Pet.Create().SetName("bb").SetOwnerID(users[1].ID),
-		client.Pet.Create().SetName("ca").SetOwnerID(users[2].ID),
-		client.Pet.Create().SetName("d"),
-		client.Pet.Create().SetName("e"),
+		client.Pet.Create().With(pet.F.Name.Set("aa"), pet.E.Owner.SetID(users[0].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("ab"), pet.E.Owner.SetID(users[0].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("ac"), pet.E.Owner.SetID(users[0].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("ba"), pet.E.Owner.SetID(users[1].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("bb"), pet.E.Owner.SetID(users[1].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("ca"), pet.E.Owner.SetID(users[2].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("d")),
+		client.Pet.Create().With(pet.F.Name.Set("e")),
 	).SaveX(ctx)
 	// O2M edge.
 	for _, tt := range []struct {
@@ -2698,13 +2664,13 @@ func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 			IDsX(ctx)
 		require.Equal(t, tt.ids, ids)
 	}
-	inf, exp := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx), time.Now()
+	inf, exp := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc")).SaveX(ctx), time.Now()
 	groups := client.Group.CreateBulk(
-		client.Group.Create().SetName("Group: 4 users").SetExpire(exp).SetInfoID(inf.ID).AddUserIDs(userIDs(users)...),
-		client.Group.Create().SetName("Group: 3 users").SetExpire(exp).SetInfoID(inf.ID).AddUserIDs(userIDs(users[:3])...),
-		client.Group.Create().SetName("Group: 2 users").SetExpire(exp).SetInfoID(inf.ID).AddUserIDs(userIDs(users[:2])...),
-		client.Group.Create().SetName("Group: 1 users").SetExpire(exp).SetInfoID(inf.ID).AddUserIDs(userIDs(users[:1])...),
-		client.Group.Create().SetName("Group: 0 users").SetExpire(exp).SetInfoID(inf.ID),
+		client.Group.Create().With(group.F.Name.Set("Group: 4 users"), group.F.Expire.Set(exp), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(userIDs(users)...)),
+		client.Group.Create().With(group.F.Name.Set("Group: 3 users"), group.F.Expire.Set(exp), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(userIDs(users[:3])...)),
+		client.Group.Create().With(group.F.Name.Set("Group: 2 users"), group.F.Expire.Set(exp), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(userIDs(users[:2])...)),
+		client.Group.Create().With(group.F.Name.Set("Group: 1 users"), group.F.Expire.Set(exp), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(userIDs(users[:1])...)),
+		client.Group.Create().With(group.F.Name.Set("Group: 0 users"), group.F.Expire.Set(exp), group.E.Info.SetID(inf.ID)),
 	).SaveX(ctx)
 	// M2M edge (inverse).
 	for _, tt := range []struct {
@@ -2784,20 +2750,20 @@ func OrderByEdgeCount(t *testing.T, client *ent.Client) {
 func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	users := client.User.CreateBulk(
-		client.User.Create().SetName("a").SetAge(1),
-		client.User.Create().SetName("b").SetAge(2),
-		client.User.Create().SetName("c").SetAge(3),
-		client.User.Create().SetName("d").SetAge(4),
+		client.User.Create().With(user.F.Name.Set("a"), user.F.Age.Set(1)),
+		client.User.Create().With(user.F.Name.Set("b"), user.F.Age.Set(2)),
+		client.User.Create().With(user.F.Name.Set("c"), user.F.Age.Set(3)),
+		client.User.Create().With(user.F.Name.Set("d"), user.F.Age.Set(4)),
 	).SaveX(ctx)
 	pets := client.Pet.CreateBulk(
-		client.Pet.Create().SetName("aa").SetAge(2).SetOwnerID(users[1].ID),
-		client.Pet.Create().SetName("ab").SetAge(2).SetOwnerID(users[1].ID),
-		client.Pet.Create().SetName("ac").SetAge(1).SetOwnerID(users[0].ID),
-		client.Pet.Create().SetName("ba").SetAge(1).SetOwnerID(users[0].ID),
-		client.Pet.Create().SetName("bb").SetAge(1).SetOwnerID(users[0].ID),
-		client.Pet.Create().SetName("ca").SetAge(3).SetOwnerID(users[2].ID),
-		client.Pet.Create().SetName("d"),
-		client.Pet.Create().SetName("e"),
+		client.Pet.Create().With(pet.F.Name.Set("aa"), pet.F.Age.Set(2), pet.E.Owner.SetID(users[1].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("ab"), pet.F.Age.Set(2), pet.E.Owner.SetID(users[1].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("ac"), pet.F.Age.Set(1), pet.E.Owner.SetID(users[0].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("ba"), pet.F.Age.Set(1), pet.E.Owner.SetID(users[0].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("bb"), pet.F.Age.Set(1), pet.E.Owner.SetID(users[0].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("ca"), pet.F.Age.Set(3), pet.E.Owner.SetID(users[2].ID)),
+		client.Pet.Create().With(pet.F.Name.Set("d")),
+		client.Pet.Create().With(pet.F.Name.Set("e")),
 	).SaveX(ctx)
 	// M2O edge (inverse).
 	// Order pets by their owner's name.
@@ -2859,13 +2825,13 @@ func OrderByEdgeTerms(t *testing.T, client *ent.Client) {
 		require.Equal(t, tt.ids, ids)
 	}
 
-	inf, exp := client.GroupInfo.Create().SetDesc("desc").SaveX(ctx), time.Now()
+	inf, exp := client.GroupInfo.Create().With(groupinfo.F.Desc.Set("desc")).SaveX(ctx), time.Now()
 	client.Group.CreateBulk(
-		client.Group.Create().SetName("Group: 4 users").SetExpire(exp).SetMaxUsers(40).SetInfoID(inf.ID).AddUserIDs(userIDs(users)...),
-		client.Group.Create().SetName("Group: 3 users").SetExpire(exp).SetMaxUsers(20).SetInfoID(inf.ID).AddUserIDs(userIDs(users[:3])...),
-		client.Group.Create().SetName("Group: 2 users").SetExpire(exp).SetMaxUsers(20).SetInfoID(inf.ID).AddUserIDs(userIDs(users[:2])...),
-		client.Group.Create().SetName("Group: 1 users").SetExpire(exp).SetMaxUsers(100).SetInfoID(inf.ID).AddUserIDs(userIDs(users[:1])...),
-		client.Group.Create().SetName("Group: 0 users").SetExpire(exp).SetInfoID(inf.ID),
+		client.Group.Create().With(group.F.Name.Set("Group: 4 users"), group.F.Expire.Set(exp), group.F.MaxUsers.Set(40), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(userIDs(users)...)),
+		client.Group.Create().With(group.F.Name.Set("Group: 3 users"), group.F.Expire.Set(exp), group.F.MaxUsers.Set(20), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(userIDs(users[:3])...)),
+		client.Group.Create().With(group.F.Name.Set("Group: 2 users"), group.F.Expire.Set(exp), group.F.MaxUsers.Set(20), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(userIDs(users[:2])...)),
+		client.Group.Create().With(group.F.Name.Set("Group: 1 users"), group.F.Expire.Set(exp), group.F.MaxUsers.Set(100), group.E.Info.SetID(inf.ID), group.E.Users.AddIDs(userIDs(users[:1])...)),
+		client.Group.Create().With(group.F.Name.Set("Group: 0 users"), group.F.Expire.Set(exp), group.E.Info.SetID(inf.ID)),
 	).ExecX(ctx)
 	// M2M edge.
 	for _, tt := range []struct {

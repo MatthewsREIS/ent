@@ -9,6 +9,9 @@ import (
 	"testing"
 
 	"entgo.io/ent/entc/integration/ent"
+	"entgo.io/ent/entc/integration/ent/file"
+	"entgo.io/ent/entc/integration/ent/filetype"
+	"entgo.io/ent/entc/integration/ent/user"
 
 	"github.com/stretchr/testify/require"
 )
@@ -17,55 +20,55 @@ func Indexes(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	require := require.New(t)
 	t.Log("prevent inserting 2 files with the same (name, user)")
-	f1, err := client.File.Create().SetName("foo").SetSize(10).SetUser("bar").Save(ctx)
+	f1, err := client.File.Create().With(file.F.Name.Set("foo"), file.F.Size.Set(10), file.F.User.Set("bar")).Save(ctx)
 	require.NoError(err)
 	require.Equal("foo", f1.Name)
 	require.Equal("bar", *f1.User)
-	f2, err := client.File.Create().SetName("foo").SetSize(10).SetUser("bar").Save(ctx)
+	f2, err := client.File.Create().With(file.F.Name.Set("foo"), file.F.Size.Set(10), file.F.User.Set("bar")).Save(ctx)
 	require.Nil(f2)
 	require.Error(err)
 	require.True(ent.IsConstraintError(err))
 
 	t.Log("deletion should allow recreation")
 	client.File.DeleteOne(f1).ExecX(ctx)
-	f3, err := client.File.Create().SetName("foo").SetSize(10).SetUser("bar").Save(ctx)
+	f3, err := client.File.Create().With(file.F.Name.Set("foo"), file.F.Size.Set(10), file.F.User.Set("bar")).Save(ctx)
 	require.NoError(err)
 	require.Equal("foo", f3.Name)
 	require.Equal("bar", *f3.User)
 
 	t.Log("allow inserting 2 files the same name, type and NULL user (optional field)")
-	png := client.FileType.Create().SetName("png").SaveX(ctx)
-	f4 := client.File.Create().SetName("foo").SetSize(10).SetTypeID(png.ID).SaveX(ctx)
-	f5 := client.File.Create().SetName("foo").SetSize(10).SetTypeID(png.ID).SaveX(ctx)
+	png := client.FileType.Create().With(filetype.F.Name.Set("png")).SaveX(ctx)
+	f4 := client.File.Create().With(file.F.Name.Set("foo"), file.F.Size.Set(10), file.E.Type.SetID(png.ID)).SaveX(ctx)
+	f5 := client.File.Create().With(file.F.Name.Set("foo"), file.F.Size.Set(10), file.E.Type.SetID(png.ID)).SaveX(ctx)
 
 	t.Log("index on edge sub-graph")
-	a8m := client.User.Create().SetName("a8m").SetAge(18).SaveX(ctx)
-	err = client.User.UpdateOne(a8m).AddFileIDs(f4.ID).Exec(ctx)
+	a8m := client.User.Create().With(user.F.Name.Set("a8m"), user.F.Age.Set(18)).SaveX(ctx)
+	err = client.User.UpdateOne(a8m).With(user.E.Files.AddIDs(f4.ID)).Exec(ctx)
 	require.NoError(err)
-	err = client.User.UpdateOne(a8m).AddFileIDs(f5.ID).Exec(ctx)
+	err = client.User.UpdateOne(a8m).With(user.E.Files.AddIDs(f5.ID)).Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsConstraintError(err), "cannot have 2 files with the same (name, type, owner)")
-	client.FileType.UpdateOne(png).RemoveFileIDs(f5.ID).ExecX(ctx)
-	err = client.User.UpdateOne(a8m).AddFileIDs(f5.ID).Exec(ctx)
+	client.FileType.UpdateOne(png).With(filetype.E.Files.RemoveIDs(f5.ID)).ExecX(ctx)
+	err = client.User.UpdateOne(a8m).With(user.E.Files.AddIDs(f5.ID)).Exec(ctx)
 	require.NoError(err)
-	err = client.FileType.UpdateOne(png).AddFileIDs(f5.ID).Exec(ctx)
+	err = client.FileType.UpdateOne(png).With(filetype.E.Files.AddIDs(f5.ID)).Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsConstraintError(err))
-	client.User.UpdateOne(a8m).RemoveFileIDs(f4.ID, f5.ID).ExecX(ctx)
-	client.FileType.UpdateOne(png).AddFileIDs(f5.ID).ExecX(ctx)
+	client.User.UpdateOne(a8m).With(user.E.Files.RemoveIDs(f4.ID, f5.ID)).ExecX(ctx)
+	client.FileType.UpdateOne(png).With(filetype.E.Files.AddIDs(f5.ID)).ExecX(ctx)
 
 	t.Log("prevent inserting duplicates files in the same insert")
-	err = client.User.UpdateOne(a8m).AddFileIDs(f4.ID, f5.ID).Exec(ctx)
+	err = client.User.UpdateOne(a8m).With(user.E.Files.AddIDs(f4.ID, f5.ID)).Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsConstraintError(err))
 	require.Zero(ent.QueryUserFiles(client.User, a8m).CountX(ctx))
 
 	t.Log("edge indexes should applied on the edge sub-graph")
-	nati := client.User.Create().SetName("nati").SetAge(18).AddFileIDs(f5.ID).SaveX(ctx)
-	err = client.User.UpdateOne(nati).AddFileIDs(f4.ID).Exec(ctx)
+	nati := client.User.Create().With(user.F.Name.Set("nati"), user.F.Age.Set(18), user.E.Files.AddIDs(f5.ID)).SaveX(ctx)
+	err = client.User.UpdateOne(nati).With(user.E.Files.AddIDs(f4.ID)).Exec(ctx)
 	require.Error(err)
 	require.True(ent.IsConstraintError(err))
-	err = client.User.UpdateOne(a8m).AddFileIDs(f4.ID).Exec(ctx)
+	err = client.User.UpdateOne(a8m).With(user.E.Files.AddIDs(f4.ID)).Exec(ctx)
 	require.NoError(err)
 
 	require.Equal(1, ent.QueryUserFiles(client.User, a8m).CountX(ctx))

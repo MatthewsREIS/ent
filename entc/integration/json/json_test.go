@@ -166,13 +166,13 @@ func TestSQLite(t *testing.T) {
 func Ints(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	ints := []int{1, 2, 3}
-	usr := client.User.Create().SetInts(ints).SaveX(ctx)
+	usr := client.User.Create().With(user.F.Ints.Set(ints)).SaveX(ctx)
 	require.Equal(t, ints, usr.Ints)
 	require.Equal(t, ints, client.User.GetX(ctx, usr.ID).Ints)
-	usr = client.User.UpdateOne(usr).SetInts(ints[:1]).SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.Ints.Set(ints[:1])).SaveX(ctx)
 	require.Equal(t, ints[:1], usr.Ints)
 	require.Equal(t, ints[:1], client.User.GetX(ctx, usr.ID).Ints)
-	usr = client.User.UpdateOne(usr).ClearInts().SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.Ints.Clear()).SaveX(ctx)
 	require.Empty(t, usr.Ints)
 	require.Empty(t, client.User.GetX(ctx, usr.ID).Ints)
 
@@ -180,14 +180,14 @@ func Ints(t *testing.T, client *ent.Client) {
 	require.Equal(t, []int{1, 2, 3}, usr.Ints)
 	usr = client.User.GetX(ctx, usr.ID)
 	require.Equal(t, []int{1, 2, 3}, usr.Ints)
-	usr = client.User.UpdateOne(usr).AppendInts([]int{4, 5, 6}).SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.Ints.Append([]int{4, 5, 6})).SaveX(ctx)
 	require.Equal(t, []int{1, 2, 3, 4, 5, 6}, usr.Ints)
 }
 
 func IntsValidate(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	xs := []int{1, 2, 3}
-	err := client.User.Create().SetIntsValidate(xs).Exec(ctx)
+	err := client.User.Create().With(user.F.IntsValidate.Set(xs)).Exec(ctx)
 	require.ErrorIs(t, err, schema.ErrValidate)
 	err = client.User.Create().Exec(ctx)
 	require.NoError(t, err, schema.ErrValidate)
@@ -196,13 +196,13 @@ func IntsValidate(t *testing.T, client *ent.Client) {
 func Floats(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	flts := []float64{1, 2, 3}
-	usr := client.User.Create().SetFloats(flts).SaveX(ctx)
+	usr := client.User.Create().With(user.F.Floats.Set(flts)).SaveX(ctx)
 	require.Equal(t, flts, usr.Floats)
 	require.Equal(t, flts, client.User.GetX(ctx, usr.ID).Floats)
-	usr = client.User.UpdateOne(usr).SetFloats(flts[:1]).SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.Floats.Set(flts[:1])).SaveX(ctx)
 	require.Equal(t, flts[:1], usr.Floats)
 	require.Equal(t, flts[:1], client.User.GetX(ctx, usr.ID).Floats)
-	usr = client.User.UpdateOne(usr).ClearFloats().SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.Floats.Clear()).SaveX(ctx)
 	require.Empty(t, usr.Floats)
 	require.Empty(t, client.User.GetX(ctx, usr.ID).Floats)
 }
@@ -210,7 +210,7 @@ func Floats(t *testing.T, client *ent.Client) {
 func FloatsValidate(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	xs := []float64{1, 2, 3}
-	err := client.User.Create().SetFloatsValidate(xs).Exec(ctx)
+	err := client.User.Create().With(user.F.FloatsValidate.Set(xs)).Exec(ctx)
 	require.ErrorIs(t, err, schema.ErrValidate)
 	err = client.User.Create().Exec(ctx)
 	require.NoError(t, err, schema.ErrValidate)
@@ -219,21 +219,21 @@ func FloatsValidate(t *testing.T, client *ent.Client) {
 func Strings(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	str := []string{"a", "b", "c"}
-	usr := client.User.Create().SetStrings(str).SaveX(ctx)
+	usr := client.User.Create().With(user.F.Strings.Set(str)).SaveX(ctx)
 	require.Equal(t, str, usr.Strings)
 	require.Equal(t, str, client.User.GetX(ctx, usr.ID).Strings)
-	usr = client.User.UpdateOne(usr).SetStrings(str[:1]).SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.Strings.Set(str[:1])).SaveX(ctx)
 	require.Equal(t, str[:1], usr.Strings)
 	require.Equal(t, str[:1], client.User.GetX(ctx, usr.ID).Strings)
 	require.Equal(t, 1, client.User.Query().Where(sql.FieldNotNull(user.FieldStrings)).CountX(ctx))
-	usr = client.User.UpdateOne(usr).ClearStrings().SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.Strings.Clear()).SaveX(ctx)
 	require.Empty(t, usr.Strings)
 	require.Empty(t, client.User.GetX(ctx, usr.ID).Strings)
 	require.Zero(t, client.User.Query().Where(sql.FieldNotNull(user.FieldStrings)).CountX(ctx))
 
 	t.Run("Modifier API", func(t *testing.T) {
 		// Append to an empty array.
-		client.User.UpdateOne(usr).SetStrings([]string{}).SetT(&schema.T{Ls: []string{}}).ExecX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Set([]string{}), user.F.T.Set(&schema.T{Ls: []string{}})).ExecX(ctx)
 		usr = client.User.UpdateOne(usr).Modify(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldStrings, []string{"foo"})
 			sqljson.Append(u, user.FieldT, []string{"foo"}, sqljson.Path("ls"))
@@ -242,8 +242,8 @@ func Strings(t *testing.T, client *ent.Client) {
 		require.Equal(t, []string{"foo"}, usr.T.Ls)
 
 		// Set a 'null' (or an undefined) value.
-		client.User.UpdateOne(usr).ClearStrings().ClearT().ExecX(ctx)
-		client.User.UpdateOne(usr).SetStrings(nil).SetT(&schema.T{Ls: nil}).ExecX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Clear(), user.F.T.Clear()).ExecX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Set(nil), user.F.T.Set(&schema.T{Ls: nil})).ExecX(ctx)
 		usr = client.User.GetX(ctx, usr.ID)
 		usr = client.User.UpdateOne(usr).Modify(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldStrings, []string{"foo"})
@@ -259,7 +259,7 @@ func Strings(t *testing.T, client *ent.Client) {
 		require.Equal(t, []string{"foo", "bar", "baz"}, usr.T.Ls)
 
 		// Set a NULL (or an undefined) value.
-		client.User.UpdateOne(usr).ClearStrings().ExecX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Clear()).ExecX(ctx)
 		usr = client.User.UpdateOne(usr).Modify(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldStrings, []string{"foo"})
 		}).SaveX(ctx)
@@ -268,31 +268,31 @@ func Strings(t *testing.T, client *ent.Client) {
 
 	t.Run("Fluent API", func(t *testing.T) {
 		// Append to an empty array.
-		client.User.UpdateOne(usr).SetStrings([]string{}).SetInts([]int{}).ExecX(ctx)
-		usr = client.User.UpdateOne(usr).AppendStrings([]string{"foo"}).AppendInts([]int{1}).SaveX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Set([]string{}), user.F.Ints.Set([]int{})).ExecX(ctx)
+		usr = client.User.UpdateOne(usr).With(user.F.Strings.Append([]string{"foo"}), user.F.Ints.Append([]int{1})).SaveX(ctx)
 		require.Equal(t, []int{1}, usr.Ints)
 		require.Equal(t, []string{"foo"}, usr.Strings)
 		usr = client.User.GetX(ctx, usr.ID)
 		require.Equal(t, []int{1}, usr.Ints)
 		require.Equal(t, []string{"foo"}, usr.Strings)
-		usr = client.User.UpdateOne(usr).AppendStrings([]string{"bar", "baz"}).AppendInts([]int{2, 3}).SaveX(ctx)
+		usr = client.User.UpdateOne(usr).With(user.F.Strings.Append([]string{"bar", "baz"}), user.F.Ints.Append([]int{2, 3})).SaveX(ctx)
 		require.Equal(t, []int{1, 2, 3}, usr.Ints)
 		require.Equal(t, []string{"foo", "bar", "baz"}, usr.Strings)
 
 		// Set a 'null' (or an undefined) value.
-		client.User.UpdateOne(usr).ClearStrings().SetInts(nil).SetDirs(nil).ExecX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Clear(), user.F.Ints.Set(nil), user.F.Dirs.Set(nil)).ExecX(ctx)
 		usr = client.User.GetX(ctx, usr.ID)
 		require.Empty(t, usr.Ints)
 		require.Empty(t, usr.Strings)
-		usr = client.User.UpdateOne(usr).AppendStrings([]string{"foo"}).AppendInts([]int{1}).SaveX(ctx)
+		usr = client.User.UpdateOne(usr).With(user.F.Strings.Append([]string{"foo"}), user.F.Ints.Append([]int{1})).SaveX(ctx)
 		require.Equal(t, []int{1}, usr.Ints)
 		require.Equal(t, []string{"foo"}, usr.Strings)
 
-		client.User.UpdateOne(usr).AppendStrings([]string{"bar"}).SetStrings([]string{"baz"}).ExecX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Append([]string{"bar"}), user.F.Strings.Set([]string{"baz"})).ExecX(ctx)
 		require.Equal(t, []string{"baz"}, client.User.GetX(ctx, usr.ID).Strings)
-		client.User.UpdateOne(usr).AppendStrings([]string{"bar"}).SetStrings([]string{"baz"}).ExecX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Append([]string{"bar"}), user.F.Strings.Set([]string{"baz"})).ExecX(ctx)
 		require.Equal(t, []string{"baz"}, client.User.GetX(ctx, usr.ID).Strings)
-		client.User.UpdateOne(usr).AppendStrings([]string{"bar"}).ClearStrings().AppendDirs([]http.Dir{"/etc", "/dev"}).ExecX(ctx)
+		client.User.UpdateOne(usr).With(user.F.Strings.Append([]string{"bar"}), user.F.Strings.Clear(), user.F.Dirs.Append([]http.Dir{"/etc", "/dev"})).ExecX(ctx)
 		usr = client.User.GetX(ctx, usr.ID)
 		require.Empty(t, usr.Strings)
 		require.Equal(t, []http.Dir{"/etc", "/dev"}, usr.Dirs)
@@ -302,7 +302,7 @@ func Strings(t *testing.T, client *ent.Client) {
 func StringsValidate(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	xs := []string{"a", "b", "c"}
-	err := client.User.Create().SetStringsValidate(xs).Exec(ctx)
+	err := client.User.Create().With(user.F.StringsValidate.Set(xs)).Exec(ctx)
 	require.ErrorIs(t, err, schema.ErrValidate)
 	err = client.User.Create().Exec(ctx)
 	require.NoError(t, err, schema.ErrValidate)
@@ -310,9 +310,9 @@ func StringsValidate(t *testing.T, client *ent.Client) {
 
 func Any(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
-	u := client.User.Create().SetUnknown("string").SaveX(ctx)
+	u := client.User.Create().With(user.F.Unknown.Set("string")).SaveX(ctx)
 	require.Equal(t, "string", u.Unknown)
-	u = client.User.UpdateOne(u).SetUnknown([]any{1, 2, 3}).SaveX(ctx)
+	u = client.User.UpdateOne(u).With(user.F.Unknown.Set([]any{1, 2, 3})).SaveX(ctx)
 	require.Equal(t, []any{1.0, 2.0, 3.0}, u.Unknown)
 	require.Equal(t, []any{1.0, 2.0, 3.0}, client.User.GetX(ctx, u.ID).Unknown)
 }
@@ -320,7 +320,7 @@ func Any(t *testing.T, client *ent.Client) {
 func RawMessage(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	raw := json.RawMessage("{}")
-	usr := client.User.Create().SetRaw(raw).SaveX(ctx)
+	usr := client.User.Create().With(user.F.Raw.Set(raw)).SaveX(ctx)
 	require.Equal(t, raw, usr.Raw)
 	require.Equal(t, raw, client.User.GetX(ctx, usr.ID).Raw)
 }
@@ -328,9 +328,9 @@ func RawMessage(t *testing.T, client *ent.Client) {
 func NetAddr(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	ip := net.ParseIP("127.0.0.1")
-	usr := client.User.Create().SetAddr(schema.Addr{Addr: &net.TCPAddr{IP: ip, Port: 80}}).SaveX(ctx)
+	usr := client.User.Create().With(user.F.Addr.Set(schema.Addr{Addr: &net.TCPAddr{IP: ip, Port: 80}})).SaveX(ctx)
 	require.Equal(t, "127.0.0.1:80", client.User.GetX(ctx, usr.ID).Addr.String())
-	client.User.UpdateOne(usr).SetAddr(schema.Addr{Addr: &net.UDPAddr{IP: ip, Port: 1812}}).ExecX(ctx)
+	client.User.UpdateOne(usr).With(user.F.Addr.Set(schema.Addr{Addr: &net.UDPAddr{IP: ip, Port: 1812}})).ExecX(ctx)
 	require.Equal(t, "127.0.0.1:1812", client.User.GetX(ctx, usr.ID).Addr.String())
 
 	// Ensure sensitive fields are not marshalled.
@@ -342,7 +342,7 @@ func NetAddr(t *testing.T, client *ent.Client) {
 func Dirs(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	dirs := []http.Dir{"dev", "usr"}
-	usr := client.User.Create().SetDirs(dirs).SaveX(ctx)
+	usr := client.User.Create().With(user.F.Dirs.Set(dirs)).SaveX(ctx)
 	require.Equal(t, dirs, usr.Dirs)
 	require.Equal(t, dirs, client.User.GetX(ctx, usr.ID).Dirs)
 
@@ -358,7 +358,7 @@ func URL(t *testing.T, client *ent.Client) {
 	require.Nil(t, usr.URL, "url field should be nil")
 	u, err := url.Parse("https://github.com/a8m")
 	require.NoError(t, err)
-	usr = client.User.Create().SetURL(u).SaveX(ctx)
+	usr = client.User.Create().With(user.F.URL.Set(u)).SaveX(ctx)
 	require.Equal(t, u, usr.URL)
 	require.Equal(t, u, client.User.GetX(ctx, usr.ID).URL)
 }
@@ -369,13 +369,13 @@ func URLs(t *testing.T, client *ent.Client) {
 	require.NoError(t, err)
 	u2, err := url.Parse("https://github.com/ent")
 	require.NoError(t, err)
-	usr := client.User.Create().SetURLs([]*url.URL{u1}).SaveX(ctx)
+	usr := client.User.Create().With(user.F.URLs.Set([]*url.URL{u1})).SaveX(ctx)
 	require.NoError(t, err)
 	require.Len(t, usr.URLs, 1)
 	require.Equal(t, u1, usr.URLs[0])
 	usr = client.User.GetX(ctx, usr.ID)
 	require.Equal(t, u1, usr.URLs[0])
-	usr = client.User.UpdateOne(usr).AppendURLs([]*url.URL{u2}).SaveX(ctx)
+	usr = client.User.UpdateOne(usr).With(user.F.URLs.Append([]*url.URL{u2})).SaveX(ctx)
 	require.Len(t, usr.URLs, 2)
 	require.Equal(t, u1, usr.URLs[0])
 	require.Equal(t, u2, usr.URLs[1])
@@ -390,8 +390,8 @@ func Predicates(t *testing.T, client *ent.Client) {
 	u2, err := url.Parse("ftp://a8m@github.com/ent")
 	require.NoError(t, err)
 	users, err := client.User.CreateBulk(
-		client.User.Create().SetURL(u1),
-		client.User.Create().SetURL(u2),
+		client.User.Create().With(user.F.URL.Set(u1)),
+		client.User.Create().With(user.F.URL.Set(u2)),
 	).Save(ctx)
 	require.NoError(t, err)
 	require.Len(t, users, 2)
@@ -462,8 +462,8 @@ func Predicates(t *testing.T, client *ent.Client) {
 
 	client.User.Delete().ExecX(ctx)
 	users, err = client.User.CreateBulk(
-		client.User.Create().SetT(&schema.T{I: 1, F: 1.1, T: &schema.T{I: 10}}),
-		client.User.Create().SetT(&schema.T{I: 2, F: 2.2, T: &schema.T{I: 20, T: &schema.T{I: 30}}}),
+		client.User.Create().With(user.F.T.Set(&schema.T{I: 1, F: 1.1, T: &schema.T{I: 10}})),
+		client.User.Create().With(user.F.T.Set(&schema.T{I: 2, F: 2.2, T: &schema.T{I: 20, T: &schema.T{I: 30}}})),
 	).Save(ctx)
 	require.NoError(t, err)
 	require.Len(t, users, 2)
@@ -493,9 +493,9 @@ func Predicates(t *testing.T, client *ent.Client) {
 
 	client.User.Delete().ExecX(ctx)
 	users, err = client.User.CreateBulk(
-		client.User.Create().SetInts([]int{1}),
-		client.User.Create().SetInts([]int{1, 2}).SetT(&schema.T{Li: []int{1, 2}, Ls: []string{"a"}}),
-		client.User.Create().SetInts([]int{1, 2, 3}).SetT(&schema.T{Li: []int{3, 4}, Ls: []string{"b"}}),
+		client.User.Create().With(user.F.Ints.Set([]int{1})),
+		client.User.Create().With(user.F.Ints.Set([]int{1, 2}), user.F.T.Set(&schema.T{Li: []int{1, 2}, Ls: []string{"a"}})),
+		client.User.Create().With(user.F.Ints.Set([]int{1, 2, 3}), user.F.T.Set(&schema.T{Li: []int{3, 4}, Ls: []string{"b"}})),
 	).Save(ctx)
 	require.NoError(t, err)
 
@@ -524,8 +524,8 @@ func Predicates(t *testing.T, client *ent.Client) {
 	t.Run("NullLiteral", func(t *testing.T) {
 		client.User.Delete().ExecX(ctx)
 		users := client.User.CreateBulk(
-			client.User.Create().SetURL(u1),
-			client.User.Create().SetURL(u2),
+			client.User.Create().With(user.F.URL.Set(u1)),
+			client.User.Create().With(user.F.URL.Set(u2)),
 		).SaveX(ctx)
 		require.Nil(t, users[0].URL.User)
 		require.NotNil(t, users[1].URL.User)
@@ -552,9 +552,9 @@ func Predicates(t *testing.T, client *ent.Client) {
 		require.NoError(t, err)
 		dirs := []http.Dir{"/dev/null"}
 		client.User.CreateBulk(
-			client.User.Create().SetURL(u),
-			client.User.Create().SetDirs(dirs),
-			client.User.Create().SetT(&schema.T{S: "foobar", Ls: []string{"foo", "bar"}}),
+			client.User.Create().With(user.F.URL.Set(u)),
+			client.User.Create().With(user.F.Dirs.Set(dirs)),
+			client.User.Create().With(user.F.T.Set(&schema.T{S: "foobar", Ls: []string{"foo", "bar"}})),
 		).ExecX(ctx)
 		require.NoError(t, err)
 
@@ -604,10 +604,10 @@ func Predicates(t *testing.T, client *ent.Client) {
 		client.User.Delete().ExecX(ctx)
 		client.User.CreateBulk(
 			client.User.Create(),
-			client.User.Create().SetT(&schema.T{}),
-			client.User.Create().SetT(&schema.T{M: map[string]any{}}),
-			client.User.Create().SetT(&schema.T{M: map[string]any{"a": nil}}),
-			client.User.Create().SetT(&schema.T{M: map[string]any{"a": map[string]any{"b": nil, "c": "c"}}}),
+			client.User.Create().With(user.F.T.Set(&schema.T{})),
+			client.User.Create().With(user.F.T.Set(&schema.T{M: map[string]any{}})),
+			client.User.Create().With(user.F.T.Set(&schema.T{M: map[string]any{"a": nil}})),
+			client.User.Create().With(user.F.T.Set(&schema.T{M: map[string]any{"a": map[string]any{"b": nil, "c": "c"}}})),
 		).ExecX(ctx)
 		require.NoError(t, err)
 
@@ -663,7 +663,7 @@ func Predicates(t *testing.T, client *ent.Client) {
 			}).
 			AllX(ctx)
 		require.Empty(t, users)
-		client.User.Create().SetT(&schema.T{B: true}).ExecX(ctx)
+		client.User.Create().With(user.F.T.Set(&schema.T{B: true})).ExecX(ctx)
 		u1 := client.User.Query().
 			Where(func(s *sql.Selector) {
 				s.Where(sqljson.ValueEQ(user.FieldT, true, sqljson.Path("b")))
@@ -677,9 +677,9 @@ func Order(t *testing.T, client *ent.Client) {
 	ctx := context.Background()
 	client.User.Delete().ExecX(ctx)
 	client.User.CreateBulk(
-		client.User.Create().SetT(&schema.T{I: 1, Li: []int{1, 1, 1}}),
-		client.User.Create().SetT(&schema.T{I: 2, Li: []int{2, 2}}),
-		client.User.Create().SetT(&schema.T{I: 3, Li: []int{3}}),
+		client.User.Create().With(user.F.T.Set(&schema.T{I: 1, Li: []int{1, 1, 1}})),
+		client.User.Create().With(user.F.T.Set(&schema.T{I: 2, Li: []int{2, 2}})),
+		client.User.Create().With(user.F.T.Set(&schema.T{I: 3, Li: []int{3}})),
 	).ExecX(ctx)
 
 	users := client.User.Query().

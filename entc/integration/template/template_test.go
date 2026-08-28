@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/template/ent"
+	"entgo.io/ent/entc/integration/template/ent/group"
 	"entgo.io/ent/entc/integration/template/ent/hook"
 	"entgo.io/ent/entc/integration/template/ent/migrate"
 	"entgo.io/ent/entc/integration/template/ent/pet"
@@ -40,9 +41,9 @@ func TestCustomTemplate(t *testing.T) {
 		})
 	})
 
-	p := client.Pet.Create().SetAge(1).SaveX(ctx)
-	u := client.User.Create().SetName("a8m").AddPetIDs(p.ID).SaveX(ctx)
-	g := client.Group.Create().SetMaxUsers(10).SaveX(ctx)
+	p := client.Pet.Create().With(pet.F.Age.Set(1)).SaveX(ctx)
+	u := client.User.Create().With(user.F.Name.Set("a8m"), user.E.Pets.AddIDs(p.ID)).SaveX(ctx)
+	g := client.Group.Create().With(group.F.MaxUsers.Set(10)).SaveX(ctx)
 
 	node, err := client.Node(ctx, p.ID)
 	require.NoError(t, err)

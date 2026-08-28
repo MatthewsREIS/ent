@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/config/ent"
 	"entgo.io/ent/entc/integration/config/ent/migrate"
 	"entgo.io/ent/entc/integration/config/ent/schema"
+	"entgo.io/ent/entc/integration/config/ent/user"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
@@ -32,7 +33,7 @@ func TestSchemaConfig(t *testing.T) {
 	ctx := context.Background()
 	client := ent.NewClient(ent.Driver(drv))
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
-	client.User.Create().SetID(1).SaveX(ctx)
+	client.User.Create().With(user.F.ID.Set(1)).SaveX(ctx)
 
 	// Check that the table was created with the given custom name.
 	table := schema.User{}.Annotations()[0].(entsql.Annotation).Table
@@ -84,7 +85,7 @@ func TestMySQL(t *testing.T) {
 			// Run schema creation.
 			require.NoError(t, client.Schema.Create(ctx))
 
-			u, err := client.User.Create().SetID(200).Save(ctx)
+			u, err := client.User.Create().With(user.F.ID.Set(200)).Save(ctx)
 			require.NoError(t, err)
 			assert.Equal(t, 200, u.ID)
 			_, err = client.User.Create().Save(ctx)
