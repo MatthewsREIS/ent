@@ -29,17 +29,17 @@ func (c *EscrowCreate) SetTags(v []string) *EscrowCreate          { return c }
 func (c *EscrowCreate) AppendTags(v []string) *EscrowCreate       { return c }
 func (c *EscrowCreate) SetStatusID(v int) *EscrowCreate           { return c }
 func (c *EscrowCreate) SetNillableStatusID(v *int) *EscrowCreate  { return c }
-func (c *EscrowCreate) AddParcelsIDs(vs ...int) *EscrowCreate     { return c }
+func (c *EscrowCreate) AddParcelIDs(vs ...int) *EscrowCreate      { return c }
 func (c *EscrowCreate) Save(ctx context.Context) (*Escrow, error) { return nil, nil }
 
 type EscrowUpdate struct{}
 
-func (u *EscrowUpdate) SetName(v string) *EscrowUpdate           { return u }
-func (u *EscrowUpdate) SetBio(v string) *EscrowUpdate            { return u }
-func (u *EscrowUpdate) Where(ps ...func()) *EscrowUpdate         { return u }
-func (u *EscrowUpdate) RemoveParcelsIDs(vs ...int) *EscrowUpdate { return u }
-func (u *EscrowUpdate) ClearParcels() *EscrowUpdate              { return u }
-func (u *EscrowUpdate) Save(ctx context.Context) (int, error)    { return 0, nil }
+func (u *EscrowUpdate) SetName(v string) *EscrowUpdate          { return u }
+func (u *EscrowUpdate) SetBio(v string) *EscrowUpdate           { return u }
+func (u *EscrowUpdate) Where(ps ...func()) *EscrowUpdate        { return u }
+func (u *EscrowUpdate) RemoveParcelIDs(vs ...int) *EscrowUpdate { return u }
+func (u *EscrowUpdate) ClearParcels() *EscrowUpdate             { return u }
+func (u *EscrowUpdate) Save(ctx context.Context) (int, error)   { return 0, nil }
 
 type EscrowUpdateOne struct{}
 

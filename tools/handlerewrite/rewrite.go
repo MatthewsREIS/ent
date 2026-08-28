@@ -64,6 +64,15 @@ type SetterEntry struct {
 	// true selects Set<Name>ID/SetNillable<Name>ID, false selects
 	// Add<Name>IDs/Remove<Name>IDs.
 	Unique bool `json:"unique"`
+	// MethodBase is the base token real entc codegen uses in the old
+	// Add<MethodBase>IDs/Remove<MethodBase>IDs method names for a
+	// non-unique edge (kind=edge, unique=false only) — the edge's
+	// StructField *singularized* (e.g. edge "Parcels" -> MethodBase
+	// "Parcel" -> "AddParcelIDs"), per entc/gen's Edge.MutationAdd/
+	// MutationRemove. Required for a real (Task-3-emitted) manifest;
+	// Set<Name>ID/SetNillable<Name>ID/Clear<Name> never singularize and so
+	// don't need it — they use Name (this entry's key) as-is.
+	MethodBase string `json:"methodBase"`
 }
 
 // Manifest maps an entity package's import name (e.g. "escrow") to its

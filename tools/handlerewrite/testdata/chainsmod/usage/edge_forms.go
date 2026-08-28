@@ -14,8 +14,12 @@ func edgeUniqueSetNillable(client *gen.Client, statusID *int) {
 	client.Escrow.Create().SetNillableStatusID(statusID)
 }
 
-func edgeNonUniqueAddRemove(client *gen.Client, ctx context.Context) {
-	client.Escrow.Update().RemoveParcelsIDs(1, 2).Save(ctx)
+func edgeNonUniqueAdd(client *gen.Client) {
+	client.Escrow.Create().AddParcelIDs(1, 2)
+}
+
+func edgeNonUniqueRemove(client *gen.Client, ctx context.Context) {
+	client.Escrow.Update().RemoveParcelIDs(1, 2).Save(ctx)
 }
 
 func edgeClearAndFieldClear(client *gen.Client) {

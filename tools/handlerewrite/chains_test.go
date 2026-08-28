@@ -64,8 +64,11 @@ func runChains(t *testing.T, manifest Manifest, prefixes []string, name string) 
 
 // chainsManifest is the common manifest for most chains-mode cases: an
 // "escrow" entity with fields Name (nillable), Bio, Score (canAdd), Tags
-// (canAppend), a unique edge Status (nillable), and a non-unique edge
-// Parcels.
+// (canAppend), a unique edge Status (nillable, StructField used as-is —
+// entc never singularizes Set<E>ID/SetNillable<E>ID), and a non-unique
+// edge Parcels whose old Add/RemoveIDs methods use the singularized
+// "Parcel" (entc's Edge.MutationAdd/MutationRemove; see MethodBase's
+// doc comment on SetterEntry in rewrite.go).
 var chainsManifest = Manifest{
 	"escrow": {
 		ImportPath: "example.com/chainsmod/gen/escrow",
@@ -75,7 +78,7 @@ var chainsManifest = Manifest{
 			"Score":   {Kind: "field", CanAdd: true},
 			"Tags":    {Kind: "field", CanAppend: true},
 			"Status":  {Kind: "edge", Unique: true, Nillable: true},
-			"Parcels": {Kind: "edge", Unique: false},
+			"Parcels": {Kind: "edge", Unique: false, MethodBase: "Parcel"},
 		},
 	},
 }
@@ -134,6 +137,10 @@ func TestChainsEdgeForms(t *testing.T) {
 	mustContainChanged(t, changed, "usage/edge_forms.go")
 	mustContain(t, got, `client.Escrow.UpdateOneID(1).With(escrow.E.Status.SetID(2))`)
 	mustContain(t, got, `client.Escrow.Create().With(escrow.E.Status.SetNillableID(statusID))`)
+	// Old methods AddParcelIDs/RemoveParcelIDs use the singularized
+	// "Parcel" (matching real entc codegen); the manifest's "Parcels" key
+	// (and E.Parcels handle) stays plural throughout.
+	mustContain(t, got, `client.Escrow.Create().With(escrow.E.Parcels.AddIDs(1, 2))`)
 	mustContain(t, got, `client.Escrow.Update().With(escrow.E.Parcels.RemoveIDs(1, 2)).Save(ctx)`)
 	mustContain(t, got, `client.Escrow.UpdateOneID(1).With(escrow.F.Bio.Clear())`)
 	mustContain(t, got, `client.Escrow.Update().With(escrow.E.Parcels.Clear())`)
