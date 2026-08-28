@@ -105,7 +105,7 @@ func TestMySQL(t *testing.T) {
 	require.Equal(t, "Pedro", names[0].Pet)
 
 	id := client.Group.Query().
-		Where(group.HasUsersWith(user.ID(a8m.ID))).
+		Where(group.E.Users.HasWith(user.F.ID.EQ(a8m.ID))).
 		Limit(1).
 		QueryUsers().
 		QueryPets().
@@ -116,14 +116,7 @@ func TestMySQL(t *testing.T) {
 		Update().
 		ClearUsers().
 		Where(
-			group.And(
-				group.Name(groups[0].Name),
-				group.HasUsersWith(
-					user.HasPetsWith(
-						pet.Name(pedro.Name),
-					),
-				),
-			),
+			group.And(group.F.Name.EQ(groups[0].Name), group.E.Users.HasWith(user.E.Pets.HasWith(pet.F.Name.EQ(pedro.Name)))),
 		).
 		SaveX(ctx)
 	require.Equal(t, 1, affected)
@@ -157,10 +150,10 @@ func TestMySQL(t *testing.T) {
 	el := client.User.Create().SetName("el").AddParentIDs(a8m.ID, nat.ID).SaveX(ctx)
 	jo := client.User.Create().SetName("be").AddParentIDs(a8m.ID, nat.ID).SaveX(ctx)
 
-	require.Equal(t, 3, client.User.Query().Where(user.HasParents()).CountX(ctx))
+	require.Equal(t, 3, client.User.Query().Where(user.E.Parents.Has()).CountX(ctx))
 	require.Equal(t, 3, client.User.QueryChildren(a8m).CountX(ctx))
 
-	sib := client.User.QueryParents(ta).QueryChildren().Where(user.NameNEQ(ta.Name)).AllX(ctx)
+	sib := client.User.QueryParents(ta).QueryChildren().Where(user.F.Name.NEQ(ta.Name)).AllX(ctx)
 	require.Len(t, sib, 2)
 	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == el.Name }))
 	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == jo.Name }))
@@ -230,7 +223,7 @@ func TestVersionedMigration(t *testing.T) {
 	require.Equal(t, "Pedro", names[0].Pet)
 
 	id := client.Group.Query().
-		Where(vgroup.HasUsersWith(vuser.ID(a8m.ID))).
+		Where(vgroup.E.Users.HasWith(vuser.F.ID.EQ(a8m.ID))).
 		Limit(1).
 		QueryUsers().
 		QueryPets().
@@ -241,13 +234,7 @@ func TestVersionedMigration(t *testing.T) {
 		Update().
 		ClearUsers().
 		Where(
-			vgroup.And(
-				vgroup.Name(groups[0].Name),
-				vgroup.HasUsersWith(
-					vuser.HasPetsWith(
-						vpet.Name(pedro.Name),
-					),
-				),
+			vgroup.And(vgroup.F.Name.EQ(groups[0].Name), vgroup.E.Users.HasWith(vuser.E.Pets.HasWith(vpet.F.Name.EQ(pedro.Name))),
 			),
 		).
 		SaveX(ctx)

@@ -32,7 +32,7 @@ func TestEdgeField(t *testing.T) {
 	a8m := client.User.Create().SaveX(ctx)
 	p1 := client.Pet.Create().SetOwnerID(a8m.ID).SaveX(ctx)
 	require.Equal(t, a8m.ID, p1.OwnerID)
-	f1 := client.Pet.Query().Where(pet.OwnerID(a8m.ID)).OnlyX(ctx)
+	f1 := client.Pet.Query().Where(pet.F.OwnerID.EQ(a8m.ID)).OnlyX(ctx)
 	require.Equal(t, p1.ID, f1.ID)
 	require.Equal(t, p1.OwnerID, f1.OwnerID)
 
@@ -45,11 +45,7 @@ func TestEdgeField(t *testing.T) {
 	c3 := client.User.Create().SetParentID(c2.ID).SaveX(ctx)
 	require.Equal(t,
 		client.User.Query().
-			Where(
-				user.HasParentWith(
-					user.ParentID(a8m.ID),
-				),
-			).OnlyIDX(ctx),
+			Where(user.E.Parent.HasWith(user.F.ParentID.EQ(a8m.ID))).OnlyIDX(ctx),
 		c3.ID,
 	)
 
@@ -102,7 +98,7 @@ func TestEdgeField(t *testing.T) {
 	require.NoError(t, err)
 	client.Rental.Create().SetUserID(a8m.ID).SetCarID(car2.ID).SetDate(dt).SaveX(ctx)
 	require.Equal(t, 2, ent.QueryRentalCarFromQuery(ent.QueryUserRentals(client.User, a8m)).CountX(ctx))
-	require.Equal(t, car2.ID, ent.QueryRentalCarFromQuery(ent.QueryUserRentals(client.User, a8m).Where(rental.DateLTE(dt))).OnlyIDX(ctx))
+	require.Equal(t, car2.ID, ent.QueryRentalCarFromQuery(ent.QueryUserRentals(client.User, a8m).Where(rental.F.Date.LTE(dt))).OnlyIDX(ctx))
 	_, err = client.Rental.Create().SetUserID(a8m.ID).SetCarID(car2.ID).SetDate(dt).Save(ctx)
 	require.Error(t, err)
 	require.True(t, ent.IsConstraintError(err))
@@ -111,7 +107,7 @@ func TestEdgeField(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		curr = client.Node.Create().SetPrevID(curr.ID).SetValue(curr.Value + 1).SaveX(ctx)
 	}
-	head := client.Node.Query().Where(node.Not(node.HasPrev())).OnlyX(ctx)
+	head := client.Node.Query().Where(node.Not(node.E.Prev.Has())).OnlyX(ctx)
 	for i := 0; i < 5; i++ {
 		curr = ent.QueryNodeNext(client.Node, head).OnlyX(ctx)
 		require.Equal(t, head.Value+1, curr.Value)
