@@ -170,6 +170,7 @@ var (
 		M2MTwoTypes,
 		DefaultValue,
 		ImmutableValue,
+		IDFieldImmutableOnUpdate,
 		Sensitive,
 		EagerLoading,
 		NamedEagerLoading,
@@ -1757,6 +1758,31 @@ func ImmutableValue(t *testing.T, client *ent.Client) {
 	// A mutable field still works on both builders.
 	client.Card.Update().With(card.F.Name.Set("updated")).ExecX(ctx)
 	client.Card.UpdateOne(c).With(card.F.Name.Set("updated-one")).ExecX(ctx)
+}
+
+// IDFieldImmutableOnUpdate guards against a silent-row-retargeting bug:
+// Item.ID is a user-defined field, so F.ID.Set(v) routes through the same
+// entbuilder.Mutation.SetField as any other field (old codegen made this
+// path structurally unreachable from an update builder — no SetID method
+// existed there at all). SetField must still reject it on Update/UpdateOne,
+// or an update's WHERE-row target (sqlSave reads it off the mutation) could
+// be silently swapped to a different row's ID.
+func IDFieldImmutableOnUpdate(t *testing.T, client *ent.Client) {
+	require := require.New(t)
+	ctx := context.Background()
+	a := client.Item.Create().With(item.F.ID.Set("a"), item.F.Text.Set("original")).SaveX(ctx)
+	client.Item.Create().With(item.F.ID.Set("b")).SaveX(ctx)
+
+	err := client.Item.Update().With(item.F.ID.Set("b")).Exec(ctx)
+	require.Error(err)
+	err = client.Item.UpdateOne(a).With(item.F.ID.Set("b")).Exec(ctx)
+	require.Error(err)
+
+	// Neither attempt moved anything: "a" is untouched, "b" untouched too.
+	got := client.Item.GetX(ctx, "a")
+	require.Equal("original", got.Text)
+	require.True(client.Item.Query().Where(item.F.ID.EQ("b")).ExistX(ctx))
+	require.Equal(2, client.Item.Query().CountX(ctx))
 }
 
 func Sensitive(t *testing.T, client *ent.Client) {

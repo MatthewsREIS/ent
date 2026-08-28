@@ -117,6 +117,40 @@ func TestMutation_IDTypedReturn(t *testing.T) {
 	require.Equal(t, 42, typed)
 }
 
+func idFieldDescriptor() *entbuilder.Descriptor {
+	desc := testDescriptor()
+	desc.IDField = "id"
+	return desc
+}
+
+// TestMutation_SetField_IDField_CreateRoutesToSetID guards the happy path:
+// a user-defined ID field's Set (F.ID.Set(v), routed through SetField like
+// any other field — see Descriptor.IDField) still works at create time.
+func TestMutation_SetField_IDField_CreateRoutesToSetID(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, idFieldDescriptor())
+	require.NoError(t, m.SetField("id", 7))
+	id, ok := m.ID()
+	require.True(t, ok)
+	require.Equal(t, 7, id)
+}
+
+// TestMutation_SetField_IDField_UpdateErrors is the regression test for the
+// silent-row-retargeting bug: old codegen made SetID structurally
+// unreachable from an update builder (no such method existed); now that
+// F.ID.Set reaches SetField like any other field, SetField must reject it
+// on Update/UpdateOne itself, or sqlSave's WHERE-row target (m.id) could be
+// silently swapped out from under an in-flight update.
+func TestMutation_SetField_IDField_UpdateErrors(t *testing.T) {
+	for _, op := range []ent.Op{ent.OpUpdate, ent.OpUpdateOne} {
+		m := entbuilder.NewMutation[testEntity, int](nil, op, idFieldDescriptor())
+		err := m.SetField("id", 7)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "immutable")
+		_, ok := m.ID()
+		require.False(t, ok, "a rejected SetField must not have moved m.id")
+	}
+}
+
 func TestMutation_IDs_RejectsNonUpdateDelete(t *testing.T) {
 	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, testDescriptor())
 	_, err := m.IDs(context.Background())

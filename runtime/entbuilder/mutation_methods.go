@@ -65,9 +65,17 @@ func (m *Mutation[T, I]) Field(name string) (ent.Value, bool) {
 //
 // A user-defined ID field (m.desc.IDField) is special-cased: it's never a
 // key in m.desc.Fields (see the Descriptor.IDField doc comment), so it's
-// routed to SetID instead of the generic m.fields bookkeeping below.
+// routed to SetID instead of the generic m.fields bookkeeping below. The ID
+// is always immutable on Update/UpdateOne — old codegen made this
+// structurally impossible (no SetID method on an update builder); F.ID.Set
+// now reaches here like any other field, so the same rejection checkImmutable
+// gives every other immutable field must be enforced here too, or
+// With(F.ID.Set(other)) on an update silently retargets sqlSave's WHERE row.
 func (m *Mutation[T, I]) SetField(name string, value ent.Value) error {
 	if m.desc.IDField != "" && name == m.desc.IDField {
+		if m.op.Is(ent.OpUpdate | ent.OpUpdateOne) {
+			return fmt.Errorf("entbuilder: %s field %s is immutable and cannot be updated", m.desc.Name, name)
+		}
 		id, ok := value.(I)
 		if !ok {
 			return fmt.Errorf("unexpected ID type %T for field %s (want %T)", value, name, id)
