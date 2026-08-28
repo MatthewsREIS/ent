@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -146,165 +145,68 @@ func (_c *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// LinkUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. link.FieldName).
+	LinkUpsert = entbuilder.Upsert
+
+	// LinkUpsertOne is the builder for "upsert"-ing one Link node.
+	LinkUpsertOne = entbuilder.UpsertOne[uuidc.UUIDC]
+
+	// LinkUpsertBulk is the builder for "upsert"-ing many Link nodes.
+	LinkUpsertBulk = entbuilder.UpsertBulk[uuidc.UUIDC]
+)
+
+var linkUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "LinkCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: true,
+	NumericID:     false,
+}
+
+func (_c *LinkCreate) upsertConfig() entbuilder.UpsertConfig[uuidc.UUIDC] {
+	return entbuilder.UpsertConfig[uuidc.UUIDC]{
+		Meta:     &linkUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (uuidc.UUIDC, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero uuidc.UUIDC
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		IDsSet: func() []bool {
+			_, ok := _c.mutation.ID()
+			return []bool{ok}
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Link.Create().
-//		SetLinkInformation(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.LinkUpsert) {
-//			SetLinkInformation(v+v).
+//			u.Set(link.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *LinkCreate) OnConflict(opts ...sql.ConflictOption) *LinkUpsertOne {
 	_c.conflict = opts
-	return &LinkUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Link.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *LinkCreate) OnConflictColumns(columns ...string) *LinkUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &LinkUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// LinkUpsertOne is the builder for "upsert"-ing
-	//  one Link node.
-	LinkUpsertOne struct {
-		create *LinkCreate
-	}
-
-	// LinkUpsert is the "OnConflict" setter.
-	LinkUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetLinkInformation sets the "link_information" field.
-func (u *LinkUpsert) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpsert {
-	u.Set(FieldLinkInformation, v)
-	return u
-}
-
-// UpdateLinkInformation sets the "link_information" field to the value that was provided on create.
-func (u *LinkUpsert) UpdateLinkInformation() *LinkUpsert {
-	u.SetExcluded(FieldLinkInformation)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
-// Using this option is equivalent to using:
-//
-//	client.Link.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(link.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *LinkUpsertOne) UpdateNewValues() *LinkUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(FieldID)
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Link.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *LinkUpsertOne) Ignore() *LinkUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *LinkUpsertOne) DoNothing() *LinkUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the LinkCreate.OnConflict
-// documentation for more info.
-func (u *LinkUpsertOne) Update(set func(*LinkUpsert)) *LinkUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&LinkUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetLinkInformation sets the "link_information" field.
-func (u *LinkUpsertOne) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpsertOne {
-	return u.Update(func(s *LinkUpsert) {
-		s.SetLinkInformation(v)
-	})
-}
-
-// UpdateLinkInformation sets the "link_information" field to the value that was provided on create.
-func (u *LinkUpsertOne) UpdateLinkInformation() *LinkUpsertOne {
-	return u.Update(func(s *LinkUpsert) {
-		s.UpdateLinkInformation()
-	})
-}
-
-// Exec executes the query.
-func (u *LinkUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for LinkCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *LinkUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *LinkUpsertOne) ID(ctx context.Context) (id uuidc.UUIDC, err error) {
-	if u.create.Drv.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: LinkUpsertOne.ID is not supported by MySQL driver. Use LinkUpsertOne.Exec instead")
-	}
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *LinkUpsertOne) IDX(ctx context.Context) uuidc.UUIDC {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // LinkCreateBulk is the builder for creating many Link entities in bulk.
@@ -403,130 +305,47 @@ func (_c *LinkCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *LinkCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[uuidc.UUIDC] {
+	return entbuilder.UpsertConfig[uuidc.UUIDC]{
+		Meta:     &linkUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		IDsSet: func() []bool {
+			set := make([]bool, len(_c.builders))
+			for i, b := range _c.builders {
+				_, set[i] = b.mutation.ID()
+			}
+			return set
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Link.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.LinkUpsert) {
-//			SetLinkInformation(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see LinkCreate.OnConflict).
 func (_c *LinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *LinkUpsertBulk {
 	_c.conflict = opts
-	return &LinkUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Link.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *LinkCreateBulk) OnConflictColumns(columns ...string) *LinkUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &LinkUpsertBulk{
-		create: _c,
-	}
-}
-
-// LinkUpsertBulk is the builder for "upsert"-ing
-// a bulk of Link nodes.
-type LinkUpsertBulk struct {
-	create *LinkCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Link.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(link.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *LinkUpsertBulk) UpdateNewValues() *LinkUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(FieldID)
-			}
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Link.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *LinkUpsertBulk) Ignore() *LinkUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *LinkUpsertBulk) DoNothing() *LinkUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the LinkCreateBulk.OnConflict
-// documentation for more info.
-func (u *LinkUpsertBulk) Update(set func(*LinkUpsert)) *LinkUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&LinkUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetLinkInformation sets the "link_information" field.
-func (u *LinkUpsertBulk) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpsertBulk {
-	return u.Update(func(s *LinkUpsert) {
-		s.SetLinkInformation(v)
-	})
-}
-
-// UpdateLinkInformation sets the "link_information" field to the value that was provided on create.
-func (u *LinkUpsertBulk) UpdateLinkInformation() *LinkUpsertBulk {
-	return u.Update(func(s *LinkUpsert) {
-		s.UpdateLinkInformation()
-	})
-}
-
-// Exec executes the query.
-func (u *LinkUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the LinkCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for LinkCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *LinkUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

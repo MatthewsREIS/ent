@@ -189,186 +189,53 @@ func ThroughDefaults(c Config) *sqlgraph.CreateSpec {
 	return spec
 }
 
+type (
+	// TweetLikeUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. tweetlike.FieldName).
+	TweetLikeUpsert = entbuilder.Upsert
+
+	// TweetLikeUpsertOne is the builder for "upsert"-ing one TweetLike node.
+	TweetLikeUpsertOne = entbuilder.UpsertOne[struct{}]
+
+	// TweetLikeUpsertBulk is the builder for "upsert"-ing many TweetLike nodes.
+	TweetLikeUpsertBulk = entbuilder.UpsertBulk[struct{}]
+)
+
+var tweetlikeUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:     "ent",
+	Builder: "TweetLikeCreate",
+}
+
+func (_c *TweetLikeCreate) upsertConfig() entbuilder.UpsertConfig[struct{}] {
+	return entbuilder.UpsertConfig[struct{}]{
+		Meta:     &tweetlikeUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.TweetLike.Create().
-//		SetLikedAt(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.TweetLikeUpsert) {
-//			SetLikedAt(v+v).
+//			u.Set(tweetlike.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *TweetLikeCreate) OnConflict(opts ...sql.ConflictOption) *TweetLikeUpsertOne {
 	_c.conflict = opts
-	return &TweetLikeUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.TweetLike.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *TweetLikeCreate) OnConflictColumns(columns ...string) *TweetLikeUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &TweetLikeUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// TweetLikeUpsertOne is the builder for "upsert"-ing
-	//  one TweetLike node.
-	TweetLikeUpsertOne struct {
-		create *TweetLikeCreate
-	}
-
-	// TweetLikeUpsert is the "OnConflict" setter.
-	TweetLikeUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetLikedAt sets the "liked_at" field.
-func (u *TweetLikeUpsert) SetLikedAt(v time.Time) *TweetLikeUpsert {
-	u.Set(FieldLikedAt, v)
-	return u
-}
-
-// UpdateLikedAt sets the "liked_at" field to the value that was provided on create.
-func (u *TweetLikeUpsert) UpdateLikedAt() *TweetLikeUpsert {
-	u.SetExcluded(FieldLikedAt)
-	return u
-}
-
-// SetUserID sets the "user_id" field.
-func (u *TweetLikeUpsert) SetUserID(v int) *TweetLikeUpsert {
-	u.Set(FieldUserID, v)
-	return u
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *TweetLikeUpsert) UpdateUserID() *TweetLikeUpsert {
-	u.SetExcluded(FieldUserID)
-	return u
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (u *TweetLikeUpsert) SetTweetID(v int) *TweetLikeUpsert {
-	u.Set(FieldTweetID, v)
-	return u
-}
-
-// UpdateTweetID sets the "tweet_id" field to the value that was provided on create.
-func (u *TweetLikeUpsert) UpdateTweetID() *TweetLikeUpsert {
-	u.SetExcluded(FieldTweetID)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.TweetLike.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *TweetLikeUpsertOne) UpdateNewValues() *TweetLikeUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.TweetLike.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *TweetLikeUpsertOne) Ignore() *TweetLikeUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *TweetLikeUpsertOne) DoNothing() *TweetLikeUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the TweetLikeCreate.OnConflict
-// documentation for more info.
-func (u *TweetLikeUpsertOne) Update(set func(*TweetLikeUpsert)) *TweetLikeUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&TweetLikeUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetLikedAt sets the "liked_at" field.
-func (u *TweetLikeUpsertOne) SetLikedAt(v time.Time) *TweetLikeUpsertOne {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.SetLikedAt(v)
-	})
-}
-
-// UpdateLikedAt sets the "liked_at" field to the value that was provided on create.
-func (u *TweetLikeUpsertOne) UpdateLikedAt() *TweetLikeUpsertOne {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.UpdateLikedAt()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *TweetLikeUpsertOne) SetUserID(v int) *TweetLikeUpsertOne {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *TweetLikeUpsertOne) UpdateUserID() *TweetLikeUpsertOne {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (u *TweetLikeUpsertOne) SetTweetID(v int) *TweetLikeUpsertOne {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.SetTweetID(v)
-	})
-}
-
-// UpdateTweetID sets the "tweet_id" field to the value that was provided on create.
-func (u *TweetLikeUpsertOne) UpdateTweetID() *TweetLikeUpsertOne {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.UpdateTweetID()
-	})
-}
-
-// Exec executes the query.
-func (u *TweetLikeUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for TweetLikeCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *TweetLikeUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // TweetLikeCreateBulk is the builder for creating many TweetLike entities in bulk.
@@ -466,148 +333,40 @@ func (_c *TweetLikeCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *TweetLikeCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[struct{}] {
+	return entbuilder.UpsertConfig[struct{}]{
+		Meta:     &tweetlikeUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.TweetLike.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.TweetLikeUpsert) {
-//			SetLikedAt(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see TweetLikeCreate.OnConflict).
 func (_c *TweetLikeCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetLikeUpsertBulk {
 	_c.conflict = opts
-	return &TweetLikeUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.TweetLike.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *TweetLikeCreateBulk) OnConflictColumns(columns ...string) *TweetLikeUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &TweetLikeUpsertBulk{
-		create: _c,
-	}
-}
-
-// TweetLikeUpsertBulk is the builder for "upsert"-ing
-// a bulk of TweetLike nodes.
-type TweetLikeUpsertBulk struct {
-	create *TweetLikeCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.TweetLike.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *TweetLikeUpsertBulk) UpdateNewValues() *TweetLikeUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.TweetLike.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *TweetLikeUpsertBulk) Ignore() *TweetLikeUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *TweetLikeUpsertBulk) DoNothing() *TweetLikeUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the TweetLikeCreateBulk.OnConflict
-// documentation for more info.
-func (u *TweetLikeUpsertBulk) Update(set func(*TweetLikeUpsert)) *TweetLikeUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&TweetLikeUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetLikedAt sets the "liked_at" field.
-func (u *TweetLikeUpsertBulk) SetLikedAt(v time.Time) *TweetLikeUpsertBulk {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.SetLikedAt(v)
-	})
-}
-
-// UpdateLikedAt sets the "liked_at" field to the value that was provided on create.
-func (u *TweetLikeUpsertBulk) UpdateLikedAt() *TweetLikeUpsertBulk {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.UpdateLikedAt()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *TweetLikeUpsertBulk) SetUserID(v int) *TweetLikeUpsertBulk {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *TweetLikeUpsertBulk) UpdateUserID() *TweetLikeUpsertBulk {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetTweetID sets the "tweet_id" field.
-func (u *TweetLikeUpsertBulk) SetTweetID(v int) *TweetLikeUpsertBulk {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.SetTweetID(v)
-	})
-}
-
-// UpdateTweetID sets the "tweet_id" field to the value that was provided on create.
-func (u *TweetLikeUpsertBulk) UpdateTweetID() *TweetLikeUpsertBulk {
-	return u.Update(func(s *TweetLikeUpsert) {
-		s.UpdateTweetID()
-	})
-}
-
-// Exec executes the query.
-func (u *TweetLikeUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the TweetLikeCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for TweetLikeCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *TweetLikeUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

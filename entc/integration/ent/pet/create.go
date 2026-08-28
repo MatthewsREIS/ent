@@ -278,334 +278,64 @@ func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// PetUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. pet.FieldName).
+	PetUpsert = entbuilder.Upsert
+
+	// PetUpsertOne is the builder for "upsert"-ing one Pet node.
+	PetUpsertOne = entbuilder.UpsertOne[int]
+
+	// PetUpsertBulk is the builder for "upsert"-ing many Pet nodes.
+	PetUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var petUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "PetCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *PetCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &petUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Pet.Create().
-//		SetAge(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.PetUpsert) {
-//			SetAge(v+v).
+//			u.Set(pet.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *PetCreate) OnConflict(opts ...sql.ConflictOption) *PetUpsertOne {
 	_c.conflict = opts
-	return &PetUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Pet.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *PetCreate) OnConflictColumns(columns ...string) *PetUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &PetUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// PetUpsertOne is the builder for "upsert"-ing
-	//  one Pet node.
-	PetUpsertOne struct {
-		create *PetCreate
-	}
-
-	// PetUpsert is the "OnConflict" setter.
-	PetUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetAge sets the "age" field.
-func (u *PetUpsert) SetAge(v float64) *PetUpsert {
-	u.Set(FieldAge, v)
-	return u
-}
-
-// UpdateAge sets the "age" field to the value that was provided on create.
-func (u *PetUpsert) UpdateAge() *PetUpsert {
-	u.SetExcluded(FieldAge)
-	return u
-}
-
-// AddAge adds v to the "age" field.
-func (u *PetUpsert) AddAge(v float64) *PetUpsert {
-	u.Add(FieldAge, v)
-	return u
-}
-
-// SetName sets the "name" field.
-func (u *PetUpsert) SetName(v string) *PetUpsert {
-	u.Set(FieldName, v)
-	return u
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *PetUpsert) UpdateName() *PetUpsert {
-	u.SetExcluded(FieldName)
-	return u
-}
-
-// SetUUID sets the "uuid" field.
-func (u *PetUpsert) SetUUID(v uuid.UUID) *PetUpsert {
-	u.Set(FieldUUID, v)
-	return u
-}
-
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *PetUpsert) UpdateUUID() *PetUpsert {
-	u.SetExcluded(FieldUUID)
-	return u
-}
-
-// ClearUUID clears the value of the "uuid" field.
-func (u *PetUpsert) ClearUUID() *PetUpsert {
-	u.SetNull(FieldUUID)
-	return u
-}
-
-// SetNickname sets the "nickname" field.
-func (u *PetUpsert) SetNickname(v string) *PetUpsert {
-	u.Set(FieldNickname, v)
-	return u
-}
-
-// UpdateNickname sets the "nickname" field to the value that was provided on create.
-func (u *PetUpsert) UpdateNickname() *PetUpsert {
-	u.SetExcluded(FieldNickname)
-	return u
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (u *PetUpsert) ClearNickname() *PetUpsert {
-	u.SetNull(FieldNickname)
-	return u
-}
-
-// SetTrained sets the "trained" field.
-func (u *PetUpsert) SetTrained(v bool) *PetUpsert {
-	u.Set(FieldTrained, v)
-	return u
-}
-
-// UpdateTrained sets the "trained" field to the value that was provided on create.
-func (u *PetUpsert) UpdateTrained() *PetUpsert {
-	u.SetExcluded(FieldTrained)
-	return u
-}
-
-// SetOptionalTime sets the "optional_time" field.
-func (u *PetUpsert) SetOptionalTime(v time.Time) *PetUpsert {
-	u.Set(FieldOptionalTime, v)
-	return u
-}
-
-// UpdateOptionalTime sets the "optional_time" field to the value that was provided on create.
-func (u *PetUpsert) UpdateOptionalTime() *PetUpsert {
-	u.SetExcluded(FieldOptionalTime)
-	return u
-}
-
-// ClearOptionalTime clears the value of the "optional_time" field.
-func (u *PetUpsert) ClearOptionalTime() *PetUpsert {
-	u.SetNull(FieldOptionalTime)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Pet.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *PetUpsertOne) UpdateNewValues() *PetUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Pet.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *PetUpsertOne) Ignore() *PetUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *PetUpsertOne) DoNothing() *PetUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the PetCreate.OnConflict
-// documentation for more info.
-func (u *PetUpsertOne) Update(set func(*PetUpsert)) *PetUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&PetUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetAge sets the "age" field.
-func (u *PetUpsertOne) SetAge(v float64) *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.SetAge(v)
-	})
-}
-
-// AddAge adds v to the "age" field.
-func (u *PetUpsertOne) AddAge(v float64) *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.AddAge(v)
-	})
-}
-
-// UpdateAge sets the "age" field to the value that was provided on create.
-func (u *PetUpsertOne) UpdateAge() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateAge()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *PetUpsertOne) SetName(v string) *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *PetUpsertOne) UpdateName() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateName()
-	})
-}
-
-// SetUUID sets the "uuid" field.
-func (u *PetUpsertOne) SetUUID(v uuid.UUID) *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.SetUUID(v)
-	})
-}
-
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *PetUpsertOne) UpdateUUID() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateUUID()
-	})
-}
-
-// ClearUUID clears the value of the "uuid" field.
-func (u *PetUpsertOne) ClearUUID() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.ClearUUID()
-	})
-}
-
-// SetNickname sets the "nickname" field.
-func (u *PetUpsertOne) SetNickname(v string) *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.SetNickname(v)
-	})
-}
-
-// UpdateNickname sets the "nickname" field to the value that was provided on create.
-func (u *PetUpsertOne) UpdateNickname() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateNickname()
-	})
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (u *PetUpsertOne) ClearNickname() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.ClearNickname()
-	})
-}
-
-// SetTrained sets the "trained" field.
-func (u *PetUpsertOne) SetTrained(v bool) *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.SetTrained(v)
-	})
-}
-
-// UpdateTrained sets the "trained" field to the value that was provided on create.
-func (u *PetUpsertOne) UpdateTrained() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateTrained()
-	})
-}
-
-// SetOptionalTime sets the "optional_time" field.
-func (u *PetUpsertOne) SetOptionalTime(v time.Time) *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.SetOptionalTime(v)
-	})
-}
-
-// UpdateOptionalTime sets the "optional_time" field to the value that was provided on create.
-func (u *PetUpsertOne) UpdateOptionalTime() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateOptionalTime()
-	})
-}
-
-// ClearOptionalTime clears the value of the "optional_time" field.
-func (u *PetUpsertOne) ClearOptionalTime() *PetUpsertOne {
-	return u.Update(func(s *PetUpsert) {
-		s.ClearOptionalTime()
-	})
-}
-
-// Exec executes the query.
-func (u *PetUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for PetCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *PetUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *PetUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *PetUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // PetCreateBulk is the builder for creating many Pet entities in bulk.
@@ -708,218 +438,40 @@ func (_c *PetCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *PetCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &petUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Pet.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.PetUpsert) {
-//			SetAge(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see PetCreate.OnConflict).
 func (_c *PetCreateBulk) OnConflict(opts ...sql.ConflictOption) *PetUpsertBulk {
 	_c.conflict = opts
-	return &PetUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Pet.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *PetCreateBulk) OnConflictColumns(columns ...string) *PetUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &PetUpsertBulk{
-		create: _c,
-	}
-}
-
-// PetUpsertBulk is the builder for "upsert"-ing
-// a bulk of Pet nodes.
-type PetUpsertBulk struct {
-	create *PetCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Pet.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *PetUpsertBulk) UpdateNewValues() *PetUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Pet.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *PetUpsertBulk) Ignore() *PetUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *PetUpsertBulk) DoNothing() *PetUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the PetCreateBulk.OnConflict
-// documentation for more info.
-func (u *PetUpsertBulk) Update(set func(*PetUpsert)) *PetUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&PetUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetAge sets the "age" field.
-func (u *PetUpsertBulk) SetAge(v float64) *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.SetAge(v)
-	})
-}
-
-// AddAge adds v to the "age" field.
-func (u *PetUpsertBulk) AddAge(v float64) *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.AddAge(v)
-	})
-}
-
-// UpdateAge sets the "age" field to the value that was provided on create.
-func (u *PetUpsertBulk) UpdateAge() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateAge()
-	})
-}
-
-// SetName sets the "name" field.
-func (u *PetUpsertBulk) SetName(v string) *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.SetName(v)
-	})
-}
-
-// UpdateName sets the "name" field to the value that was provided on create.
-func (u *PetUpsertBulk) UpdateName() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateName()
-	})
-}
-
-// SetUUID sets the "uuid" field.
-func (u *PetUpsertBulk) SetUUID(v uuid.UUID) *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.SetUUID(v)
-	})
-}
-
-// UpdateUUID sets the "uuid" field to the value that was provided on create.
-func (u *PetUpsertBulk) UpdateUUID() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateUUID()
-	})
-}
-
-// ClearUUID clears the value of the "uuid" field.
-func (u *PetUpsertBulk) ClearUUID() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.ClearUUID()
-	})
-}
-
-// SetNickname sets the "nickname" field.
-func (u *PetUpsertBulk) SetNickname(v string) *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.SetNickname(v)
-	})
-}
-
-// UpdateNickname sets the "nickname" field to the value that was provided on create.
-func (u *PetUpsertBulk) UpdateNickname() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateNickname()
-	})
-}
-
-// ClearNickname clears the value of the "nickname" field.
-func (u *PetUpsertBulk) ClearNickname() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.ClearNickname()
-	})
-}
-
-// SetTrained sets the "trained" field.
-func (u *PetUpsertBulk) SetTrained(v bool) *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.SetTrained(v)
-	})
-}
-
-// UpdateTrained sets the "trained" field to the value that was provided on create.
-func (u *PetUpsertBulk) UpdateTrained() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateTrained()
-	})
-}
-
-// SetOptionalTime sets the "optional_time" field.
-func (u *PetUpsertBulk) SetOptionalTime(v time.Time) *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.SetOptionalTime(v)
-	})
-}
-
-// UpdateOptionalTime sets the "optional_time" field to the value that was provided on create.
-func (u *PetUpsertBulk) UpdateOptionalTime() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.UpdateOptionalTime()
-	})
-}
-
-// ClearOptionalTime clears the value of the "optional_time" field.
-func (u *PetUpsertBulk) ClearOptionalTime() *PetUpsertBulk {
-	return u.Update(func(s *PetUpsert) {
-		s.ClearOptionalTime()
-	})
-}
-
-// Exec executes the query.
-func (u *PetUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the PetCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for PetCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *PetUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

@@ -8,7 +8,6 @@ package node
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -191,217 +190,64 @@ func (_c *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// NodeUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. node.FieldName).
+	NodeUpsert = entbuilder.Upsert
+
+	// NodeUpsertOne is the builder for "upsert"-ing one Node node.
+	NodeUpsertOne = entbuilder.UpsertOne[int]
+
+	// NodeUpsertBulk is the builder for "upsert"-ing many Node nodes.
+	NodeUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var nodeUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "NodeCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *NodeCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &nodeUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Node.Create().
-//		SetValue(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.NodeUpsert) {
-//			SetValue(v+v).
+//			u.Set(node.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *NodeCreate) OnConflict(opts ...sql.ConflictOption) *NodeUpsertOne {
 	_c.conflict = opts
-	return &NodeUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Node.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *NodeCreate) OnConflictColumns(columns ...string) *NodeUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &NodeUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// NodeUpsertOne is the builder for "upsert"-ing
-	//  one Node node.
-	NodeUpsertOne struct {
-		create *NodeCreate
-	}
-
-	// NodeUpsert is the "OnConflict" setter.
-	NodeUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetValue sets the "value" field.
-func (u *NodeUpsert) SetValue(v int) *NodeUpsert {
-	u.Set(FieldValue, v)
-	return u
-}
-
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *NodeUpsert) UpdateValue() *NodeUpsert {
-	u.SetExcluded(FieldValue)
-	return u
-}
-
-// AddValue adds v to the "value" field.
-func (u *NodeUpsert) AddValue(v int) *NodeUpsert {
-	u.Add(FieldValue, v)
-	return u
-}
-
-// ClearValue clears the value of the "value" field.
-func (u *NodeUpsert) ClearValue() *NodeUpsert {
-	u.SetNull(FieldValue)
-	return u
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (u *NodeUpsert) SetUpdatedAt(v time.Time) *NodeUpsert {
-	u.Set(FieldUpdatedAt, v)
-	return u
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *NodeUpsert) UpdateUpdatedAt() *NodeUpsert {
-	u.SetExcluded(FieldUpdatedAt)
-	return u
-}
-
-// ClearUpdatedAt clears the value of the "updated_at" field.
-func (u *NodeUpsert) ClearUpdatedAt() *NodeUpsert {
-	u.SetNull(FieldUpdatedAt)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Node.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *NodeUpsertOne) UpdateNewValues() *NodeUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Node.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *NodeUpsertOne) Ignore() *NodeUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *NodeUpsertOne) DoNothing() *NodeUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the NodeCreate.OnConflict
-// documentation for more info.
-func (u *NodeUpsertOne) Update(set func(*NodeUpsert)) *NodeUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&NodeUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetValue sets the "value" field.
-func (u *NodeUpsertOne) SetValue(v int) *NodeUpsertOne {
-	return u.Update(func(s *NodeUpsert) {
-		s.SetValue(v)
-	})
-}
-
-// AddValue adds v to the "value" field.
-func (u *NodeUpsertOne) AddValue(v int) *NodeUpsertOne {
-	return u.Update(func(s *NodeUpsert) {
-		s.AddValue(v)
-	})
-}
-
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *NodeUpsertOne) UpdateValue() *NodeUpsertOne {
-	return u.Update(func(s *NodeUpsert) {
-		s.UpdateValue()
-	})
-}
-
-// ClearValue clears the value of the "value" field.
-func (u *NodeUpsertOne) ClearValue() *NodeUpsertOne {
-	return u.Update(func(s *NodeUpsert) {
-		s.ClearValue()
-	})
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (u *NodeUpsertOne) SetUpdatedAt(v time.Time) *NodeUpsertOne {
-	return u.Update(func(s *NodeUpsert) {
-		s.SetUpdatedAt(v)
-	})
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *NodeUpsertOne) UpdateUpdatedAt() *NodeUpsertOne {
-	return u.Update(func(s *NodeUpsert) {
-		s.UpdateUpdatedAt()
-	})
-}
-
-// ClearUpdatedAt clears the value of the "updated_at" field.
-func (u *NodeUpsertOne) ClearUpdatedAt() *NodeUpsertOne {
-	return u.Update(func(s *NodeUpsert) {
-		s.ClearUpdatedAt()
-	})
-}
-
-// Exec executes the query.
-func (u *NodeUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for NodeCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *NodeUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *NodeUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *NodeUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // NodeCreateBulk is the builder for creating many Node entities in bulk.
@@ -503,155 +349,40 @@ func (_c *NodeCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *NodeCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &nodeUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Node.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.NodeUpsert) {
-//			SetValue(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see NodeCreate.OnConflict).
 func (_c *NodeCreateBulk) OnConflict(opts ...sql.ConflictOption) *NodeUpsertBulk {
 	_c.conflict = opts
-	return &NodeUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Node.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *NodeCreateBulk) OnConflictColumns(columns ...string) *NodeUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &NodeUpsertBulk{
-		create: _c,
-	}
-}
-
-// NodeUpsertBulk is the builder for "upsert"-ing
-// a bulk of Node nodes.
-type NodeUpsertBulk struct {
-	create *NodeCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Node.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *NodeUpsertBulk) UpdateNewValues() *NodeUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Node.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *NodeUpsertBulk) Ignore() *NodeUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *NodeUpsertBulk) DoNothing() *NodeUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the NodeCreateBulk.OnConflict
-// documentation for more info.
-func (u *NodeUpsertBulk) Update(set func(*NodeUpsert)) *NodeUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&NodeUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetValue sets the "value" field.
-func (u *NodeUpsertBulk) SetValue(v int) *NodeUpsertBulk {
-	return u.Update(func(s *NodeUpsert) {
-		s.SetValue(v)
-	})
-}
-
-// AddValue adds v to the "value" field.
-func (u *NodeUpsertBulk) AddValue(v int) *NodeUpsertBulk {
-	return u.Update(func(s *NodeUpsert) {
-		s.AddValue(v)
-	})
-}
-
-// UpdateValue sets the "value" field to the value that was provided on create.
-func (u *NodeUpsertBulk) UpdateValue() *NodeUpsertBulk {
-	return u.Update(func(s *NodeUpsert) {
-		s.UpdateValue()
-	})
-}
-
-// ClearValue clears the value of the "value" field.
-func (u *NodeUpsertBulk) ClearValue() *NodeUpsertBulk {
-	return u.Update(func(s *NodeUpsert) {
-		s.ClearValue()
-	})
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (u *NodeUpsertBulk) SetUpdatedAt(v time.Time) *NodeUpsertBulk {
-	return u.Update(func(s *NodeUpsert) {
-		s.SetUpdatedAt(v)
-	})
-}
-
-// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
-func (u *NodeUpsertBulk) UpdateUpdatedAt() *NodeUpsertBulk {
-	return u.Update(func(s *NodeUpsert) {
-		s.UpdateUpdatedAt()
-	})
-}
-
-// ClearUpdatedAt clears the value of the "updated_at" field.
-func (u *NodeUpsertBulk) ClearUpdatedAt() *NodeUpsertBulk {
-	return u.Update(func(s *NodeUpsert) {
-		s.ClearUpdatedAt()
-	})
-}
-
-// Exec executes the query.
-func (u *NodeUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the NodeCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for NodeCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *NodeUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

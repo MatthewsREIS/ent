@@ -216,238 +216,53 @@ func ThroughDefaults(c Config) *sqlgraph.CreateSpec {
 	return spec
 }
 
+type (
+	// RelationshipUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. relationship.FieldName).
+	RelationshipUpsert = entbuilder.Upsert
+
+	// RelationshipUpsertOne is the builder for "upsert"-ing one Relationship node.
+	RelationshipUpsertOne = entbuilder.UpsertOne[struct{}]
+
+	// RelationshipUpsertBulk is the builder for "upsert"-ing many Relationship nodes.
+	RelationshipUpsertBulk = entbuilder.UpsertBulk[struct{}]
+)
+
+var relationshipUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:     "ent",
+	Builder: "RelationshipCreate",
+}
+
+func (_c *RelationshipCreate) upsertConfig() entbuilder.UpsertConfig[struct{}] {
+	return entbuilder.UpsertConfig[struct{}]{
+		Meta:     &relationshipUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Relationship.Create().
-//		SetWeight(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.RelationshipUpsert) {
-//			SetWeight(v+v).
+//			u.Set(relationship.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *RelationshipCreate) OnConflict(opts ...sql.ConflictOption) *RelationshipUpsertOne {
 	_c.conflict = opts
-	return &RelationshipUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Relationship.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *RelationshipCreate) OnConflictColumns(columns ...string) *RelationshipUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &RelationshipUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// RelationshipUpsertOne is the builder for "upsert"-ing
-	//  one Relationship node.
-	RelationshipUpsertOne struct {
-		create *RelationshipCreate
-	}
-
-	// RelationshipUpsert is the "OnConflict" setter.
-	RelationshipUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetWeight sets the "weight" field.
-func (u *RelationshipUpsert) SetWeight(v int) *RelationshipUpsert {
-	u.Set(FieldWeight, v)
-	return u
-}
-
-// UpdateWeight sets the "weight" field to the value that was provided on create.
-func (u *RelationshipUpsert) UpdateWeight() *RelationshipUpsert {
-	u.SetExcluded(FieldWeight)
-	return u
-}
-
-// AddWeight adds v to the "weight" field.
-func (u *RelationshipUpsert) AddWeight(v int) *RelationshipUpsert {
-	u.Add(FieldWeight, v)
-	return u
-}
-
-// SetUserID sets the "user_id" field.
-func (u *RelationshipUpsert) SetUserID(v int) *RelationshipUpsert {
-	u.Set(FieldUserID, v)
-	return u
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *RelationshipUpsert) UpdateUserID() *RelationshipUpsert {
-	u.SetExcluded(FieldUserID)
-	return u
-}
-
-// SetRelativeID sets the "relative_id" field.
-func (u *RelationshipUpsert) SetRelativeID(v int) *RelationshipUpsert {
-	u.Set(FieldRelativeID, v)
-	return u
-}
-
-// UpdateRelativeID sets the "relative_id" field to the value that was provided on create.
-func (u *RelationshipUpsert) UpdateRelativeID() *RelationshipUpsert {
-	u.SetExcluded(FieldRelativeID)
-	return u
-}
-
-// SetInfoID sets the "info_id" field.
-func (u *RelationshipUpsert) SetInfoID(v int) *RelationshipUpsert {
-	u.Set(FieldInfoID, v)
-	return u
-}
-
-// UpdateInfoID sets the "info_id" field to the value that was provided on create.
-func (u *RelationshipUpsert) UpdateInfoID() *RelationshipUpsert {
-	u.SetExcluded(FieldInfoID)
-	return u
-}
-
-// ClearInfoID clears the value of the "info_id" field.
-func (u *RelationshipUpsert) ClearInfoID() *RelationshipUpsert {
-	u.SetNull(FieldInfoID)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Relationship.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *RelationshipUpsertOne) UpdateNewValues() *RelationshipUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Relationship.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *RelationshipUpsertOne) Ignore() *RelationshipUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *RelationshipUpsertOne) DoNothing() *RelationshipUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the RelationshipCreate.OnConflict
-// documentation for more info.
-func (u *RelationshipUpsertOne) Update(set func(*RelationshipUpsert)) *RelationshipUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&RelationshipUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetWeight sets the "weight" field.
-func (u *RelationshipUpsertOne) SetWeight(v int) *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.SetWeight(v)
-	})
-}
-
-// AddWeight adds v to the "weight" field.
-func (u *RelationshipUpsertOne) AddWeight(v int) *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.AddWeight(v)
-	})
-}
-
-// UpdateWeight sets the "weight" field to the value that was provided on create.
-func (u *RelationshipUpsertOne) UpdateWeight() *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.UpdateWeight()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *RelationshipUpsertOne) SetUserID(v int) *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *RelationshipUpsertOne) UpdateUserID() *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetRelativeID sets the "relative_id" field.
-func (u *RelationshipUpsertOne) SetRelativeID(v int) *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.SetRelativeID(v)
-	})
-}
-
-// UpdateRelativeID sets the "relative_id" field to the value that was provided on create.
-func (u *RelationshipUpsertOne) UpdateRelativeID() *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.UpdateRelativeID()
-	})
-}
-
-// SetInfoID sets the "info_id" field.
-func (u *RelationshipUpsertOne) SetInfoID(v int) *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.SetInfoID(v)
-	})
-}
-
-// UpdateInfoID sets the "info_id" field to the value that was provided on create.
-func (u *RelationshipUpsertOne) UpdateInfoID() *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.UpdateInfoID()
-	})
-}
-
-// ClearInfoID clears the value of the "info_id" field.
-func (u *RelationshipUpsertOne) ClearInfoID() *RelationshipUpsertOne {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.ClearInfoID()
-	})
-}
-
-// Exec executes the query.
-func (u *RelationshipUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for RelationshipCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *RelationshipUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // RelationshipCreateBulk is the builder for creating many Relationship entities in bulk.
@@ -545,176 +360,40 @@ func (_c *RelationshipCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *RelationshipCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[struct{}] {
+	return entbuilder.UpsertConfig[struct{}]{
+		Meta:     &relationshipUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Relationship.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.RelationshipUpsert) {
-//			SetWeight(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see RelationshipCreate.OnConflict).
 func (_c *RelationshipCreateBulk) OnConflict(opts ...sql.ConflictOption) *RelationshipUpsertBulk {
 	_c.conflict = opts
-	return &RelationshipUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Relationship.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *RelationshipCreateBulk) OnConflictColumns(columns ...string) *RelationshipUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &RelationshipUpsertBulk{
-		create: _c,
-	}
-}
-
-// RelationshipUpsertBulk is the builder for "upsert"-ing
-// a bulk of Relationship nodes.
-type RelationshipUpsertBulk struct {
-	create *RelationshipCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Relationship.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *RelationshipUpsertBulk) UpdateNewValues() *RelationshipUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Relationship.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *RelationshipUpsertBulk) Ignore() *RelationshipUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *RelationshipUpsertBulk) DoNothing() *RelationshipUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the RelationshipCreateBulk.OnConflict
-// documentation for more info.
-func (u *RelationshipUpsertBulk) Update(set func(*RelationshipUpsert)) *RelationshipUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&RelationshipUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetWeight sets the "weight" field.
-func (u *RelationshipUpsertBulk) SetWeight(v int) *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.SetWeight(v)
-	})
-}
-
-// AddWeight adds v to the "weight" field.
-func (u *RelationshipUpsertBulk) AddWeight(v int) *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.AddWeight(v)
-	})
-}
-
-// UpdateWeight sets the "weight" field to the value that was provided on create.
-func (u *RelationshipUpsertBulk) UpdateWeight() *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.UpdateWeight()
-	})
-}
-
-// SetUserID sets the "user_id" field.
-func (u *RelationshipUpsertBulk) SetUserID(v int) *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.SetUserID(v)
-	})
-}
-
-// UpdateUserID sets the "user_id" field to the value that was provided on create.
-func (u *RelationshipUpsertBulk) UpdateUserID() *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.UpdateUserID()
-	})
-}
-
-// SetRelativeID sets the "relative_id" field.
-func (u *RelationshipUpsertBulk) SetRelativeID(v int) *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.SetRelativeID(v)
-	})
-}
-
-// UpdateRelativeID sets the "relative_id" field to the value that was provided on create.
-func (u *RelationshipUpsertBulk) UpdateRelativeID() *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.UpdateRelativeID()
-	})
-}
-
-// SetInfoID sets the "info_id" field.
-func (u *RelationshipUpsertBulk) SetInfoID(v int) *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.SetInfoID(v)
-	})
-}
-
-// UpdateInfoID sets the "info_id" field to the value that was provided on create.
-func (u *RelationshipUpsertBulk) UpdateInfoID() *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.UpdateInfoID()
-	})
-}
-
-// ClearInfoID clears the value of the "info_id" field.
-func (u *RelationshipUpsertBulk) ClearInfoID() *RelationshipUpsertBulk {
-	return u.Update(func(s *RelationshipUpsert) {
-		s.ClearInfoID()
-	})
-}
-
-// Exec executes the query.
-func (u *RelationshipUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the RelationshipCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for RelationshipCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *RelationshipUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

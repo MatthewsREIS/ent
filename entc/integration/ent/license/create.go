@@ -162,163 +162,69 @@ func (_c *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// LicenseUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. license.FieldName).
+	LicenseUpsert = entbuilder.Upsert
+
+	// LicenseUpsertOne is the builder for "upsert"-ing one License node.
+	LicenseUpsertOne = entbuilder.UpsertOne[int]
+
+	// LicenseUpsertBulk is the builder for "upsert"-ing many License nodes.
+	LicenseUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var licenseUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "LicenseCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: true,
+	NumericID:     true,
+	Immutable:     []string{FieldCreateTime},
+}
+
+func (_c *LicenseCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &licenseUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		IDsSet: func() []bool {
+			_, ok := _c.mutation.ID()
+			return []bool{ok}
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.License.Create().
-//		SetCreateTime(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.LicenseUpsert) {
-//			SetCreateTime(v+v).
+//			u.Set(license.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *LicenseCreate) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertOne {
 	_c.conflict = opts
-	return &LicenseUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.License.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *LicenseCreate) OnConflictColumns(columns ...string) *LicenseUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &LicenseUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// LicenseUpsertOne is the builder for "upsert"-ing
-	//  one License node.
-	LicenseUpsertOne struct {
-		create *LicenseCreate
-	}
-
-	// LicenseUpsert is the "OnConflict" setter.
-	LicenseUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetUpdateTime sets the "update_time" field.
-func (u *LicenseUpsert) SetUpdateTime(v time.Time) *LicenseUpsert {
-	u.Set(FieldUpdateTime, v)
-	return u
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *LicenseUpsert) UpdateUpdateTime() *LicenseUpsert {
-	u.SetExcluded(FieldUpdateTime)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
-// Using this option is equivalent to using:
-//
-//	client.License.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(license.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *LicenseUpsertOne) UpdateNewValues() *LicenseUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(FieldID)
-		}
-		if _, exists := u.create.mutation.Field(FieldCreateTime); exists {
-			s.SetIgnore(FieldCreateTime)
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.License.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *LicenseUpsertOne) Ignore() *LicenseUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *LicenseUpsertOne) DoNothing() *LicenseUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the LicenseCreate.OnConflict
-// documentation for more info.
-func (u *LicenseUpsertOne) Update(set func(*LicenseUpsert)) *LicenseUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&LicenseUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (u *LicenseUpsertOne) SetUpdateTime(v time.Time) *LicenseUpsertOne {
-	return u.Update(func(s *LicenseUpsert) {
-		s.SetUpdateTime(v)
-	})
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *LicenseUpsertOne) UpdateUpdateTime() *LicenseUpsertOne {
-	return u.Update(func(s *LicenseUpsert) {
-		s.UpdateUpdateTime()
-	})
-}
-
-// Exec executes the query.
-func (u *LicenseUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for LicenseCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *LicenseUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *LicenseUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *LicenseUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // LicenseCreateBulk is the builder for creating many License entities in bulk.
@@ -421,133 +327,47 @@ func (_c *LicenseCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *LicenseCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &licenseUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		IDsSet: func() []bool {
+			set := make([]bool, len(_c.builders))
+			for i, b := range _c.builders {
+				_, set[i] = b.mutation.ID()
+			}
+			return set
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.License.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.LicenseUpsert) {
-//			SetCreateTime(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see LicenseCreate.OnConflict).
 func (_c *LicenseCreateBulk) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertBulk {
 	_c.conflict = opts
-	return &LicenseUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.License.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *LicenseCreateBulk) OnConflictColumns(columns ...string) *LicenseUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &LicenseUpsertBulk{
-		create: _c,
-	}
-}
-
-// LicenseUpsertBulk is the builder for "upsert"-ing
-// a bulk of License nodes.
-type LicenseUpsertBulk struct {
-	create *LicenseCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.License.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(license.FieldID)
-//			}),
-//		).
-//		Exec(ctx)
-func (u *LicenseUpsertBulk) UpdateNewValues() *LicenseUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(FieldID)
-			}
-			if _, exists := b.mutation.Field(FieldCreateTime); exists {
-				s.SetIgnore(FieldCreateTime)
-			}
-		}
-	}))
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.License.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *LicenseUpsertBulk) Ignore() *LicenseUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *LicenseUpsertBulk) DoNothing() *LicenseUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the LicenseCreateBulk.OnConflict
-// documentation for more info.
-func (u *LicenseUpsertBulk) Update(set func(*LicenseUpsert)) *LicenseUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&LicenseUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (u *LicenseUpsertBulk) SetUpdateTime(v time.Time) *LicenseUpsertBulk {
-	return u.Update(func(s *LicenseUpsert) {
-		s.SetUpdateTime(v)
-	})
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *LicenseUpsertBulk) UpdateUpdateTime() *LicenseUpsertBulk {
-	return u.Update(func(s *LicenseUpsert) {
-		s.UpdateUpdateTime()
-	})
-}
-
-// Exec executes the query.
-func (u *LicenseUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the LicenseCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for LicenseCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *LicenseUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }

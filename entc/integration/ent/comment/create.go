@@ -193,373 +193,64 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+type (
+	// CommentUpsert is the "OnConflict" setter; columns are addressed
+	// by their field constants (e.g. comment.FieldName).
+	CommentUpsert = entbuilder.Upsert
+
+	// CommentUpsertOne is the builder for "upsert"-ing one Comment node.
+	CommentUpsertOne = entbuilder.UpsertOne[int]
+
+	// CommentUpsertBulk is the builder for "upsert"-ing many Comment nodes.
+	CommentUpsertBulk = entbuilder.UpsertBulk[int]
+)
+
+var commentUpsertMeta = entbuilder.UpsertMeta{
+	Pkg:           "ent",
+	Builder:       "CommentCreate",
+	IDColumn:      FieldID,
+	UserDefinedID: false,
+	NumericID:     true,
+}
+
+func (_c *CommentCreate) upsertConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &commentUpsertMeta,
+		Conflict: &_c.conflict,
+		Exec:     _c.Exec,
+		SaveID: func(ctx context.Context) (int, error) {
+			node, err := _c.Save(ctx)
+			if err != nil {
+				var zero int
+				return zero, err
+			}
+			return node.ID, nil
+		},
+		Mutations: func() []entbuilder.FieldReader {
+			return []entbuilder.FieldReader{_c.mutation}
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
 //	client.Comment.Create().
-//		SetUniqueInt(v).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
+//		OnConflict(sql.ResolveWithNewValues()).
 //		Update(func(u *ent.CommentUpsert) {
-//			SetUniqueInt(v+v).
+//			u.Set(comment.FieldX, v)
 //		}).
 //		Exec(ctx)
 func (_c *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOne {
 	_c.conflict = opts
-	return &CommentUpsertOne{
-		create: _c,
-	}
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Comment.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *CommentCreate) OnConflictColumns(columns ...string) *CommentUpsertOne {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &CommentUpsertOne{
-		create: _c,
-	}
-}
-
-type (
-	// CommentUpsertOne is the builder for "upsert"-ing
-	//  one Comment node.
-	CommentUpsertOne struct {
-		create *CommentCreate
-	}
-
-	// CommentUpsert is the "OnConflict" setter.
-	CommentUpsert struct {
-		*sql.UpdateSet
-	}
-)
-
-// SetUniqueInt sets the "unique_int" field.
-func (u *CommentUpsert) SetUniqueInt(v int) *CommentUpsert {
-	u.Set(FieldUniqueInt, v)
-	return u
-}
-
-// UpdateUniqueInt sets the "unique_int" field to the value that was provided on create.
-func (u *CommentUpsert) UpdateUniqueInt() *CommentUpsert {
-	u.SetExcluded(FieldUniqueInt)
-	return u
-}
-
-// AddUniqueInt adds v to the "unique_int" field.
-func (u *CommentUpsert) AddUniqueInt(v int) *CommentUpsert {
-	u.Add(FieldUniqueInt, v)
-	return u
-}
-
-// SetUniqueFloat sets the "unique_float" field.
-func (u *CommentUpsert) SetUniqueFloat(v float64) *CommentUpsert {
-	u.Set(FieldUniqueFloat, v)
-	return u
-}
-
-// UpdateUniqueFloat sets the "unique_float" field to the value that was provided on create.
-func (u *CommentUpsert) UpdateUniqueFloat() *CommentUpsert {
-	u.SetExcluded(FieldUniqueFloat)
-	return u
-}
-
-// AddUniqueFloat adds v to the "unique_float" field.
-func (u *CommentUpsert) AddUniqueFloat(v float64) *CommentUpsert {
-	u.Add(FieldUniqueFloat, v)
-	return u
-}
-
-// SetNillableInt sets the "nillable_int" field.
-func (u *CommentUpsert) SetNillableInt(v int) *CommentUpsert {
-	u.Set(FieldNillableInt, v)
-	return u
-}
-
-// UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
-func (u *CommentUpsert) UpdateNillableInt() *CommentUpsert {
-	u.SetExcluded(FieldNillableInt)
-	return u
-}
-
-// AddNillableInt adds v to the "nillable_int" field.
-func (u *CommentUpsert) AddNillableInt(v int) *CommentUpsert {
-	u.Add(FieldNillableInt, v)
-	return u
-}
-
-// ClearNillableInt clears the value of the "nillable_int" field.
-func (u *CommentUpsert) ClearNillableInt() *CommentUpsert {
-	u.SetNull(FieldNillableInt)
-	return u
-}
-
-// SetTable sets the "table" field.
-func (u *CommentUpsert) SetTable(v string) *CommentUpsert {
-	u.Set(FieldTable, v)
-	return u
-}
-
-// UpdateTable sets the "table" field to the value that was provided on create.
-func (u *CommentUpsert) UpdateTable() *CommentUpsert {
-	u.SetExcluded(FieldTable)
-	return u
-}
-
-// ClearTable clears the value of the "table" field.
-func (u *CommentUpsert) ClearTable() *CommentUpsert {
-	u.SetNull(FieldTable)
-	return u
-}
-
-// SetDir sets the "dir" field.
-func (u *CommentUpsert) SetDir(v schemadir.Dir) *CommentUpsert {
-	u.Set(FieldDir, v)
-	return u
-}
-
-// UpdateDir sets the "dir" field to the value that was provided on create.
-func (u *CommentUpsert) UpdateDir() *CommentUpsert {
-	u.SetExcluded(FieldDir)
-	return u
-}
-
-// ClearDir clears the value of the "dir" field.
-func (u *CommentUpsert) ClearDir() *CommentUpsert {
-	u.SetNull(FieldDir)
-	return u
-}
-
-// SetClient sets the "client" field.
-func (u *CommentUpsert) SetClient(v string) *CommentUpsert {
-	u.Set(FieldClient, v)
-	return u
-}
-
-// UpdateClient sets the "client" field to the value that was provided on create.
-func (u *CommentUpsert) UpdateClient() *CommentUpsert {
-	u.SetExcluded(FieldClient)
-	return u
-}
-
-// ClearClient clears the value of the "client" field.
-func (u *CommentUpsert) ClearClient() *CommentUpsert {
-	u.SetNull(FieldClient)
-	return u
-}
-
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.Comment.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *CommentUpsertOne) UpdateNewValues() *CommentUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Comment.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
-func (u *CommentUpsertOne) Ignore() *CommentUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *CommentUpsertOne) DoNothing() *CommentUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the CommentCreate.OnConflict
-// documentation for more info.
-func (u *CommentUpsertOne) Update(set func(*CommentUpsert)) *CommentUpsertOne {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&CommentUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetUniqueInt sets the "unique_int" field.
-func (u *CommentUpsertOne) SetUniqueInt(v int) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetUniqueInt(v)
-	})
-}
-
-// AddUniqueInt adds v to the "unique_int" field.
-func (u *CommentUpsertOne) AddUniqueInt(v int) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.AddUniqueInt(v)
-	})
-}
-
-// UpdateUniqueInt sets the "unique_int" field to the value that was provided on create.
-func (u *CommentUpsertOne) UpdateUniqueInt() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateUniqueInt()
-	})
-}
-
-// SetUniqueFloat sets the "unique_float" field.
-func (u *CommentUpsertOne) SetUniqueFloat(v float64) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetUniqueFloat(v)
-	})
-}
-
-// AddUniqueFloat adds v to the "unique_float" field.
-func (u *CommentUpsertOne) AddUniqueFloat(v float64) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.AddUniqueFloat(v)
-	})
-}
-
-// UpdateUniqueFloat sets the "unique_float" field to the value that was provided on create.
-func (u *CommentUpsertOne) UpdateUniqueFloat() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateUniqueFloat()
-	})
-}
-
-// SetNillableInt sets the "nillable_int" field.
-func (u *CommentUpsertOne) SetNillableInt(v int) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetNillableInt(v)
-	})
-}
-
-// AddNillableInt adds v to the "nillable_int" field.
-func (u *CommentUpsertOne) AddNillableInt(v int) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.AddNillableInt(v)
-	})
-}
-
-// UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
-func (u *CommentUpsertOne) UpdateNillableInt() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateNillableInt()
-	})
-}
-
-// ClearNillableInt clears the value of the "nillable_int" field.
-func (u *CommentUpsertOne) ClearNillableInt() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearNillableInt()
-	})
-}
-
-// SetTable sets the "table" field.
-func (u *CommentUpsertOne) SetTable(v string) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetTable(v)
-	})
-}
-
-// UpdateTable sets the "table" field to the value that was provided on create.
-func (u *CommentUpsertOne) UpdateTable() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateTable()
-	})
-}
-
-// ClearTable clears the value of the "table" field.
-func (u *CommentUpsertOne) ClearTable() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearTable()
-	})
-}
-
-// SetDir sets the "dir" field.
-func (u *CommentUpsertOne) SetDir(v schemadir.Dir) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetDir(v)
-	})
-}
-
-// UpdateDir sets the "dir" field to the value that was provided on create.
-func (u *CommentUpsertOne) UpdateDir() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateDir()
-	})
-}
-
-// ClearDir clears the value of the "dir" field.
-func (u *CommentUpsertOne) ClearDir() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearDir()
-	})
-}
-
-// SetClient sets the "client" field.
-func (u *CommentUpsertOne) SetClient(v string) *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetClient(v)
-	})
-}
-
-// UpdateClient sets the "client" field to the value that was provided on create.
-func (u *CommentUpsertOne) UpdateClient() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateClient()
-	})
-}
-
-// ClearClient clears the value of the "client" field.
-func (u *CommentUpsertOne) ClearClient() *CommentUpsertOne {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearClient()
-	})
-}
-
-// Exec executes the query.
-func (u *CommentUpsertOne) Exec(ctx context.Context) error {
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for CommentCreate.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *CommentUpsertOne) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
-}
-
-// Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *CommentUpsertOne) ID(ctx context.Context) (id int, err error) {
-	node, err := u.create.Save(ctx)
-	if err != nil {
-		return id, err
-	}
-	return node.ID, nil
-}
-
-// IDX is like ID, but panics if an error occurs.
-func (u *CommentUpsertOne) IDX(ctx context.Context) int {
-	id, err := u.ID(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return id
+	return entbuilder.NewUpsertOne(_c.upsertConfig())
 }
 
 // CommentCreateBulk is the builder for creating many Comment entities in bulk.
@@ -661,239 +352,40 @@ func (_c *CommentCreateBulk) ExecX(ctx context.Context) {
 	}
 }
 
+func (_c *CommentCreateBulk) upsertBulkConfig() entbuilder.UpsertConfig[int] {
+	return entbuilder.UpsertConfig[int]{
+		Meta:     &commentUpsertMeta,
+		Conflict: &_c.conflict,
+		Err:      func() error { return _c.err },
+		ChildConflict: func() int {
+			for i, b := range _c.builders {
+				if len(b.conflict) != 0 {
+					return i
+				}
+			}
+			return -1
+		},
+		Exec: _c.Exec,
+		Mutations: func() []entbuilder.FieldReader {
+			ms := make([]entbuilder.FieldReader, len(_c.builders))
+			for i, b := range _c.builders {
+				ms[i] = b.mutation
+			}
+			return ms
+		},
+		Dialect: func() string { return _c.Drv.Dialect() },
+	}
+}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.Comment.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.CommentUpsert) {
-//			SetUniqueInt(v+v).
-//		}).
-//		Exec(ctx)
+// of the `INSERT` statement (see CommentCreate.OnConflict).
 func (_c *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUpsertBulk {
 	_c.conflict = opts
-	return &CommentUpsertBulk{
-		create: _c,
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.Comment.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
+// OnConflictColumns calls `OnConflict` and configures the columns as conflict target.
 func (_c *CommentCreateBulk) OnConflictColumns(columns ...string) *CommentUpsertBulk {
 	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
-	return &CommentUpsertBulk{
-		create: _c,
-	}
-}
-
-// CommentUpsertBulk is the builder for "upsert"-ing
-// a bulk of Comment nodes.
-type CommentUpsertBulk struct {
-	create *CommentCreateBulk
-}
-
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.Comment.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-func (u *CommentUpsertBulk) UpdateNewValues() *CommentUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	return u
-}
-
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.Comment.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-func (u *CommentUpsertBulk) Ignore() *CommentUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
-	return u
-}
-
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
-func (u *CommentUpsertBulk) DoNothing() *CommentUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.DoNothing())
-	return u
-}
-
-// Update allows overriding fields `UPDATE` values. See the CommentCreateBulk.OnConflict
-// documentation for more info.
-func (u *CommentUpsertBulk) Update(set func(*CommentUpsert)) *CommentUpsertBulk {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&CommentUpsert{UpdateSet: update})
-	}))
-	return u
-}
-
-// SetUniqueInt sets the "unique_int" field.
-func (u *CommentUpsertBulk) SetUniqueInt(v int) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetUniqueInt(v)
-	})
-}
-
-// AddUniqueInt adds v to the "unique_int" field.
-func (u *CommentUpsertBulk) AddUniqueInt(v int) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.AddUniqueInt(v)
-	})
-}
-
-// UpdateUniqueInt sets the "unique_int" field to the value that was provided on create.
-func (u *CommentUpsertBulk) UpdateUniqueInt() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateUniqueInt()
-	})
-}
-
-// SetUniqueFloat sets the "unique_float" field.
-func (u *CommentUpsertBulk) SetUniqueFloat(v float64) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetUniqueFloat(v)
-	})
-}
-
-// AddUniqueFloat adds v to the "unique_float" field.
-func (u *CommentUpsertBulk) AddUniqueFloat(v float64) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.AddUniqueFloat(v)
-	})
-}
-
-// UpdateUniqueFloat sets the "unique_float" field to the value that was provided on create.
-func (u *CommentUpsertBulk) UpdateUniqueFloat() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateUniqueFloat()
-	})
-}
-
-// SetNillableInt sets the "nillable_int" field.
-func (u *CommentUpsertBulk) SetNillableInt(v int) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetNillableInt(v)
-	})
-}
-
-// AddNillableInt adds v to the "nillable_int" field.
-func (u *CommentUpsertBulk) AddNillableInt(v int) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.AddNillableInt(v)
-	})
-}
-
-// UpdateNillableInt sets the "nillable_int" field to the value that was provided on create.
-func (u *CommentUpsertBulk) UpdateNillableInt() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateNillableInt()
-	})
-}
-
-// ClearNillableInt clears the value of the "nillable_int" field.
-func (u *CommentUpsertBulk) ClearNillableInt() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearNillableInt()
-	})
-}
-
-// SetTable sets the "table" field.
-func (u *CommentUpsertBulk) SetTable(v string) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetTable(v)
-	})
-}
-
-// UpdateTable sets the "table" field to the value that was provided on create.
-func (u *CommentUpsertBulk) UpdateTable() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateTable()
-	})
-}
-
-// ClearTable clears the value of the "table" field.
-func (u *CommentUpsertBulk) ClearTable() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearTable()
-	})
-}
-
-// SetDir sets the "dir" field.
-func (u *CommentUpsertBulk) SetDir(v schemadir.Dir) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetDir(v)
-	})
-}
-
-// UpdateDir sets the "dir" field to the value that was provided on create.
-func (u *CommentUpsertBulk) UpdateDir() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateDir()
-	})
-}
-
-// ClearDir clears the value of the "dir" field.
-func (u *CommentUpsertBulk) ClearDir() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearDir()
-	})
-}
-
-// SetClient sets the "client" field.
-func (u *CommentUpsertBulk) SetClient(v string) *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.SetClient(v)
-	})
-}
-
-// UpdateClient sets the "client" field to the value that was provided on create.
-func (u *CommentUpsertBulk) UpdateClient() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.UpdateClient()
-	})
-}
-
-// ClearClient clears the value of the "client" field.
-func (u *CommentUpsertBulk) ClearClient() *CommentUpsertBulk {
-	return u.Update(func(s *CommentUpsert) {
-		s.ClearClient()
-	})
-}
-
-// Exec executes the query.
-func (u *CommentUpsertBulk) Exec(ctx context.Context) error {
-	if u.create.err != nil {
-		return u.create.err
-	}
-	for i, b := range u.create.builders {
-		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the CommentCreateBulk instead", i)
-		}
-	}
-	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for CommentCreateBulk.OnConflict")
-	}
-	return u.create.Exec(ctx)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (u *CommentUpsertBulk) ExecX(ctx context.Context) {
-	if err := u.create.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewUpsertBulk(_c.upsertBulkConfig())
 }
