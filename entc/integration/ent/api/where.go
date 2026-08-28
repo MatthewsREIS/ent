@@ -9,52 +9,20 @@ package api
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id int) predicate.Api {
-	return predicate.Api(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Api type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Number[int]
+}{
+	ID: entfield.NewNumber[int](FieldID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Api {
-	return predicate.Api(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Api {
-	return predicate.Api(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Api {
-	return predicate.Api(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Api {
-	return predicate.Api(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Api {
-	return predicate.Api(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Api {
-	return predicate.Api(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Api {
-	return predicate.Api(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Api {
-	return predicate.Api(sql.FieldLTE(FieldID, id))
-}
+// E holds typed edge handles for every edge of the Api type.
+var E = struct {
+}{}
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Api) predicate.Api {

@@ -9,7 +9,7 @@ package license
 import (
 	"time"
 
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -52,21 +52,7 @@ var (
 )
 
 // OrderOption defines the ordering options for the License queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByCreateTime orders the results by the create_time field.
-func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
-}
-
-// ByUpdateTime orders the results by the update_time field.
-func ByUpdateTime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUpdateTime, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
 // comment from another template.

@@ -99,7 +99,7 @@ func (c *ProcessClient) DeleteOne(_m *Process) *ProcessDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ProcessClient) DeleteOneID(id int) *ProcessDeleteOne {
 	mutation := NewProcessMutation(c.Config, OpDeleteOne, WithProcessID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewProcessDeleteOne(NewProcessDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *ProcessClient) Query() *ProcessQuery {
 
 // Get returns a Process entity by its id.
 func (c *ProcessClient) Get(ctx context.Context, id int) (*Process, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

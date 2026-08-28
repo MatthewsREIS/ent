@@ -99,7 +99,7 @@ func (c *ZooClient) DeleteOne(_m *Zoo) *ZooDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ZooClient) DeleteOneID(id int) *ZooDeleteOne {
 	mutation := NewZooMutation(c.Config, OpDeleteOne, WithZooID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewZooDeleteOne(NewZooDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *ZooClient) Query() *ZooQuery {
 
 // Get returns a Zoo entity by its id.
 func (c *ZooClient) Get(ctx context.Context, id int) (*Zoo, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

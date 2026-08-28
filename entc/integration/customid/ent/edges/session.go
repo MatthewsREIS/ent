@@ -37,7 +37,7 @@ func LoadSessionDevice(ctx context.Context, query *device.DeviceQuery, nodes []*
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(device.IDIn(ids...))
+	query.Where(device.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

@@ -100,7 +100,7 @@ func (c *SessionClient) DeleteOne(_m *Session) *SessionDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *SessionClient) DeleteOneID(id schema.ID) *SessionDeleteOne {
 	mutation := NewSessionMutation(c.Config, OpDeleteOne, WithSessionID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewSessionDeleteOne(NewSessionDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *SessionClient) Query() *SessionQuery {
 
 // Get returns a Session entity by its id.
 func (c *SessionClient) Get(ctx context.Context, id schema.ID) (*Session, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

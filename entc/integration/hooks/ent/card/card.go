@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -90,44 +90,9 @@ var (
 )
 
 // OrderOption defines the ordering options for the Card queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
-// ByNumber orders the results by the number field.
-func ByNumber(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldNumber, opts...).ToFunc()
-}
-
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
-}
-
-// ByInHook orders the results by the in_hook field.
-func ByInHook(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldInHook, opts...).ToFunc()
-}
-
-// ByExpiredAt orders the results by the expired_at field.
-func ByExpiredAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldExpiredAt, opts...).ToFunc()
-}
-
-// ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newOwnerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

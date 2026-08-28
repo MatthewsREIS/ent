@@ -1,0 +1,132 @@
+{
+	"account": {
+		"fields": {
+			"Email": true
+		},
+		"edges": {
+			"Token": true
+		}
+	},
+	"blob": {
+		"fields": {
+			"Count": true,
+			"UUID": true
+		},
+		"edges": {
+			"BlobLinks": true,
+			"Links": true,
+			"Parent": true
+		}
+	},
+	"bloblink": {
+		"fields": {
+			"BlobID": true,
+			"CreatedAt": true,
+			"LinkID": true
+		},
+		"edges": {
+			"Blob": true,
+			"Link": true
+		}
+	},
+	"car": {
+		"fields": {
+			"AfterID": true,
+			"BeforeID": true,
+			"Model": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"device": {
+		"fields": {},
+		"edges": {
+			"ActiveSession": true,
+			"Sessions": true
+		}
+	},
+	"doc": {
+		"fields": {
+			"Text": true
+		},
+		"edges": {
+			"Children": true,
+			"Parent": true,
+			"Related": true
+		}
+	},
+	"group": {
+		"fields": {},
+		"edges": {
+			"Users": true
+		}
+	},
+	"intsid": {
+		"fields": {},
+		"edges": {
+			"Children": true,
+			"Parent": true
+		}
+	},
+	"link": {
+		"fields": {},
+		"edges": {}
+	},
+	"mixinid": {
+		"fields": {
+			"MixinField": true,
+			"SomeField": true
+		},
+		"edges": {}
+	},
+	"note": {
+		"fields": {
+			"Text": true
+		},
+		"edges": {
+			"Children": true,
+			"Parent": true
+		}
+	},
+	"other": {
+		"fields": {},
+		"edges": {}
+	},
+	"pet": {
+		"fields": {},
+		"edges": {
+			"BestFriend": true,
+			"Cars": true,
+			"Friends": true,
+			"Owner": true
+		}
+	},
+	"revision": {
+		"fields": {},
+		"edges": {}
+	},
+	"session": {
+		"fields": {},
+		"edges": {
+			"Device": true
+		}
+	},
+	"token": {
+		"fields": {
+			"Body": true
+		},
+		"edges": {
+			"Account": true
+		}
+	},
+	"user": {
+		"fields": {},
+		"edges": {
+			"Children": true,
+			"Groups": true,
+			"Parent": true,
+			"Pets": true
+		}
+	}
+}

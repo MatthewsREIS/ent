@@ -8,151 +8,33 @@ package grouptag
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the GroupTag type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Number[int]
+	// TagID is the handle for the "tag_id" field.
+	TagID entfield.Number[int]
+	// GroupID is the handle for the "group_id" field.
+	GroupID entfield.Number[int]
+}{
+	ID:      entfield.NewNumber[int](FieldID),
+	TagID:   entfield.NewNumber[int](FieldTagID),
+	GroupID: entfield.NewNumber[int](FieldGroupID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldLTE(FieldID, id))
-}
-
-// TagID applies equality check predicate on the "tag_id" field. It's identical to TagIDEQ.
-func TagID(v int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldEQ(FieldTagID, v))
-}
-
-// GroupID applies equality check predicate on the "group_id" field. It's identical to GroupIDEQ.
-func GroupID(v int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldEQ(FieldGroupID, v))
-}
-
-// TagIDEQ applies the EQ predicate on the "tag_id" field.
-func TagIDEQ(v int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldEQ(FieldTagID, v))
-}
-
-// TagIDNEQ applies the NEQ predicate on the "tag_id" field.
-func TagIDNEQ(v int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldNEQ(FieldTagID, v))
-}
-
-// TagIDIn applies the In predicate on the "tag_id" field.
-func TagIDIn(vs ...int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldIn(FieldTagID, vs...))
-}
-
-// TagIDNotIn applies the NotIn predicate on the "tag_id" field.
-func TagIDNotIn(vs ...int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldNotIn(FieldTagID, vs...))
-}
-
-// GroupIDEQ applies the EQ predicate on the "group_id" field.
-func GroupIDEQ(v int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldEQ(FieldGroupID, v))
-}
-
-// GroupIDNEQ applies the NEQ predicate on the "group_id" field.
-func GroupIDNEQ(v int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldNEQ(FieldGroupID, v))
-}
-
-// GroupIDIn applies the In predicate on the "group_id" field.
-func GroupIDIn(vs ...int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldIn(FieldGroupID, vs...))
-}
-
-// GroupIDNotIn applies the NotIn predicate on the "group_id" field.
-func GroupIDNotIn(vs ...int) predicate.GroupTag {
-	return predicate.GroupTag(sql.FieldNotIn(FieldGroupID, vs...))
-}
-
-// HasTag applies the HasEdge predicate on the "tag" edge.
-func HasTag() predicate.GroupTag {
-	return predicate.GroupTag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, TagTable, TagColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTagWith applies the HasEdge predicate on the "tag" edge with a given conditions (other predicates).
-func HasTagWith(preds ...predicate.Tag) predicate.GroupTag {
-	return predicate.GroupTag(
-		func(s *sql.Selector) {
-			step := newTagStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
-}
-
-// HasGroup applies the HasEdge predicate on the "group" edge.
-func HasGroup() predicate.GroupTag {
-	return predicate.GroupTag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, GroupTable, GroupColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
-func HasGroupWith(preds ...predicate.Group) predicate.GroupTag {
-	return predicate.GroupTag(
-		func(s *sql.Selector) {
-			step := newGroupStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
+// E holds typed edge handles for every edge of the GroupTag type.
+var E = struct {
+	// Tag is the handle for the "tag" edge.
+	Tag entfield.Edge[predicate.Tag]
+	// Group is the handle for the "group" edge.
+	Group entfield.Edge[predicate.Group]
+}{
+	Tag:   entfield.NewEdge[predicate.Tag](newTagStep),
+	Group: entfield.NewEdge[predicate.Group](newGroupStep),
 }
 
 // And groups predicates with the AND operator between them.

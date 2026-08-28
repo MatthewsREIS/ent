@@ -7,7 +7,7 @@
 package conversion
 
 import (
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -62,54 +62,5 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Conversion queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByInt8ToString orders the results by the int8_to_string field.
-func ByInt8ToString(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldInt8ToString, opts...).ToFunc()
-}
-
-// ByUint8ToString orders the results by the uint8_to_string field.
-func ByUint8ToString(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUint8ToString, opts...).ToFunc()
-}
-
-// ByInt16ToString orders the results by the int16_to_string field.
-func ByInt16ToString(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldInt16ToString, opts...).ToFunc()
-}
-
-// ByUint16ToString orders the results by the uint16_to_string field.
-func ByUint16ToString(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUint16ToString, opts...).ToFunc()
-}
-
-// ByInt32ToString orders the results by the int32_to_string field.
-func ByInt32ToString(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldInt32ToString, opts...).ToFunc()
-}
-
-// ByUint32ToString orders the results by the uint32_to_string field.
-func ByUint32ToString(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUint32ToString, opts...).ToFunc()
-}
-
-// ByInt64ToString orders the results by the int64_to_string field.
-func ByInt64ToString(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldInt64ToString, opts...).ToFunc()
-}
-
-// ByUint64ToString orders the results by the uint64_to_string field.
-func ByUint64ToString(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUint64ToString, opts...).ToFunc()
-}
+type OrderOption = entfield.Order

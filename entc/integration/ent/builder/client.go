@@ -99,7 +99,7 @@ func (c *BuilderClient) DeleteOne(_m *Builder) *BuilderDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *BuilderClient) DeleteOneID(id int) *BuilderDeleteOne {
 	mutation := NewBuilderMutation(c.Config, OpDeleteOne, WithBuilderID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewBuilderDeleteOne(NewBuilderDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *BuilderClient) Query() *BuilderQuery {
 
 // Get returns a Builder entity by its id.
 func (c *BuilderClient) Get(ctx context.Context, id int) (*Builder, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

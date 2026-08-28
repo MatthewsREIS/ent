@@ -36,7 +36,7 @@ func LoadCarOwner(ctx context.Context, query *pet.PetQuery, nodes []*car.Car) er
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(pet.IDIn(ids...))
+	query.Where(pet.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

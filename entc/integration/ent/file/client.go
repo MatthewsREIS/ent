@@ -99,7 +99,7 @@ func (c *FileClient) DeleteOne(_m *File) *FileDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	mutation := NewFileMutation(c.Config, OpDeleteOne, WithFileID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewFileDeleteOne(NewFileDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *FileClient) Query() *FileQuery {
 
 // Get returns a File entity by its id.
 func (c *FileClient) Get(ctx context.Context, id int) (*File, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

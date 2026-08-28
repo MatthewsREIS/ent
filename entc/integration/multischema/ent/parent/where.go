@@ -8,179 +8,36 @@ package parent
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id int) predicate.Parent {
-	return predicate.Parent(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Parent type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Number[int]
+	// ByAdoption is the handle for the "by_adoption" field.
+	ByAdoption entfield.Bool[bool]
+	// UserID is the handle for the "user_id" field.
+	UserID entfield.Number[int]
+	// ParentID is the handle for the "parent_id" field.
+	ParentID entfield.Number[int]
+}{
+	ID:         entfield.NewNumber[int](FieldID),
+	ByAdoption: entfield.NewBool[bool](FieldByAdoption),
+	UserID:     entfield.NewNumber[int](FieldUserID),
+	ParentID:   entfield.NewNumber[int](FieldParentID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Parent {
-	return predicate.Parent(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Parent {
-	return predicate.Parent(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Parent {
-	return predicate.Parent(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Parent {
-	return predicate.Parent(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Parent {
-	return predicate.Parent(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Parent {
-	return predicate.Parent(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Parent {
-	return predicate.Parent(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Parent {
-	return predicate.Parent(sql.FieldLTE(FieldID, id))
-}
-
-// ByAdoption applies equality check predicate on the "by_adoption" field. It's identical to ByAdoptionEQ.
-func ByAdoption(v bool) predicate.Parent {
-	return predicate.Parent(sql.FieldEQ(FieldByAdoption, v))
-}
-
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int) predicate.Parent {
-	return predicate.Parent(sql.FieldEQ(FieldUserID, v))
-}
-
-// ParentID applies equality check predicate on the "parent_id" field. It's identical to ParentIDEQ.
-func ParentID(v int) predicate.Parent {
-	return predicate.Parent(sql.FieldEQ(FieldParentID, v))
-}
-
-// ByAdoptionEQ applies the EQ predicate on the "by_adoption" field.
-func ByAdoptionEQ(v bool) predicate.Parent {
-	return predicate.Parent(sql.FieldEQ(FieldByAdoption, v))
-}
-
-// ByAdoptionNEQ applies the NEQ predicate on the "by_adoption" field.
-func ByAdoptionNEQ(v bool) predicate.Parent {
-	return predicate.Parent(sql.FieldNEQ(FieldByAdoption, v))
-}
-
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int) predicate.Parent {
-	return predicate.Parent(sql.FieldEQ(FieldUserID, v))
-}
-
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int) predicate.Parent {
-	return predicate.Parent(sql.FieldNEQ(FieldUserID, v))
-}
-
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int) predicate.Parent {
-	return predicate.Parent(sql.FieldIn(FieldUserID, vs...))
-}
-
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int) predicate.Parent {
-	return predicate.Parent(sql.FieldNotIn(FieldUserID, vs...))
-}
-
-// ParentIDEQ applies the EQ predicate on the "parent_id" field.
-func ParentIDEQ(v int) predicate.Parent {
-	return predicate.Parent(sql.FieldEQ(FieldParentID, v))
-}
-
-// ParentIDNEQ applies the NEQ predicate on the "parent_id" field.
-func ParentIDNEQ(v int) predicate.Parent {
-	return predicate.Parent(sql.FieldNEQ(FieldParentID, v))
-}
-
-// ParentIDIn applies the In predicate on the "parent_id" field.
-func ParentIDIn(vs ...int) predicate.Parent {
-	return predicate.Parent(sql.FieldIn(FieldParentID, vs...))
-}
-
-// ParentIDNotIn applies the NotIn predicate on the "parent_id" field.
-func ParentIDNotIn(vs ...int) predicate.Parent {
-	return predicate.Parent(sql.FieldNotIn(FieldParentID, vs...))
-}
-
-// HasChild applies the HasEdge predicate on the "child" edge.
-func HasChild() predicate.Parent {
-	return predicate.Parent(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ChildTable, ChildColumn),
-		)
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Parent
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasChildWith applies the HasEdge predicate on the "child" edge with a given conditions (other predicates).
-func HasChildWith(preds ...predicate.User) predicate.Parent {
-	return predicate.Parent(
-		func(s *sql.Selector) {
-			step := newChildStep()
-			schemaConfig := internal.SchemaConfigFromContext(s.Context())
-			step.To.Schema = schemaConfig.User
-			step.Edge.Schema = schemaConfig.Parent
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
-}
-
-// HasParent applies the HasEdge predicate on the "parent" edge.
-func HasParent() predicate.Parent {
-	return predicate.Parent(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ParentTable, ParentColumn),
-		)
-		schemaConfig := internal.SchemaConfigFromContext(s.Context())
-		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.Parent
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
-func HasParentWith(preds ...predicate.User) predicate.Parent {
-	return predicate.Parent(
-		func(s *sql.Selector) {
-			step := newParentStep()
-			schemaConfig := internal.SchemaConfigFromContext(s.Context())
-			step.To.Schema = schemaConfig.User
-			step.Edge.Schema = schemaConfig.Parent
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
+// E holds typed edge handles for every edge of the Parent type.
+var E = struct {
+	// Child is the handle for the "child" edge.
+	Child entfield.Edge[predicate.User]
+	// Parent is the handle for the "parent" edge.
+	Parent entfield.Edge[predicate.User]
+}{
+	Child:  entfield.NewEdge[predicate.User](newChildStep),
+	Parent: entfield.NewEdge[predicate.User](newParentStep),
 }
 
 // And groups predicates with the AND operator between them.

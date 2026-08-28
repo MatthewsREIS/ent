@@ -18,6 +18,7 @@ const (
 )
 
 // OrderOption defines the ordering options for the Builder queries.
+
 type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

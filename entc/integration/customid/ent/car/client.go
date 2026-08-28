@@ -99,7 +99,7 @@ func (c *CarClient) DeleteOne(_m *Car) *CarDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 	mutation := NewCarMutation(c.Config, OpDeleteOne, WithCarID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewCarDeleteOne(NewCarDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *CarClient) Query() *CarQuery {
 
 // Get returns a Car entity by its id.
 func (c *CarClient) Get(ctx context.Context, id int) (*Car, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

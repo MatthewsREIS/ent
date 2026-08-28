@@ -38,7 +38,7 @@ func LoadIntSIDParent(ctx context.Context, query *intsid.IntSIDQuery, nodes []*i
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(intsid.IDIn(ids...))
+	query.Where(intsid.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

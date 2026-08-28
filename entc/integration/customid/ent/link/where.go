@@ -10,52 +10,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Link type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Value[uuidc.UUIDC]
+}{
+	ID: entfield.NewValue[uuidc.UUIDC](FieldID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uuidc.UUIDC) predicate.Link {
-	return predicate.Link(sql.FieldLTE(FieldID, id))
-}
+// E holds typed edge handles for every edge of the Link type.
+var E = struct {
+}{}
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Link) predicate.Link {

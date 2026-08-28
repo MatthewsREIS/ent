@@ -99,7 +99,7 @@ func (c *APIClient) DeleteOne(_m *Api) *APIDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *APIClient) DeleteOneID(id int) *APIDeleteOne {
 	mutation := NewAPIMutation(c.Config, OpDeleteOne, WithApiID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewAPIDeleteOne(NewAPIDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *APIClient) Query() *APIQuery {
 
 // Get returns a Api entity by its id.
 func (c *APIClient) Get(ctx context.Context, id int) (*Api, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

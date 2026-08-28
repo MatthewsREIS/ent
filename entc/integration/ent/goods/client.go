@@ -99,7 +99,7 @@ func (c *GoodsClient) DeleteOne(_m *Goods) *GoodsDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GoodsClient) DeleteOneID(id int) *GoodsDeleteOne {
 	mutation := NewGoodsMutation(c.Config, OpDeleteOne, WithGoodsID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewGoodsDeleteOne(NewGoodsDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *GoodsClient) Query() *GoodsQuery {
 
 // Get returns a Goods entity by its id.
 func (c *GoodsClient) Get(ctx context.Context, id int) (*Goods, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

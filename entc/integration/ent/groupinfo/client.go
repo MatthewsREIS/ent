@@ -99,7 +99,7 @@ func (c *GroupInfoClient) DeleteOne(_m *GroupInfo) *GroupInfoDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupInfoClient) DeleteOneID(id int) *GroupInfoDeleteOne {
 	mutation := NewGroupInfoMutation(c.Config, OpDeleteOne, WithGroupInfoID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewGroupInfoDeleteOne(NewGroupInfoDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *GroupInfoClient) Query() *GroupInfoQuery {
 
 // Get returns a GroupInfo entity by its id.
 func (c *GroupInfoClient) Get(ctx context.Context, id int) (*GroupInfo, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

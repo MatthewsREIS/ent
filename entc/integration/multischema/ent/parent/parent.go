@@ -7,8 +7,8 @@
 package parent
 
 import (
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -68,41 +68,9 @@ var (
 )
 
 // OrderOption defines the ordering options for the Parent queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
-// ByByAdoption orders the results by the by_adoption field.
-func ByByAdoption(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldByAdoption, opts...).ToFunc()
-}
-
-// ByUserID orders the results by the user_id field.
-func ByUserID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUserID, opts...).ToFunc()
-}
-
-// ByParentID orders the results by the parent_id field.
-func ByParentID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldParentID, opts...).ToFunc()
-}
-
-// ByChildField orders the results by child field.
-func ByChildField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newChildStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByParentField orders the results by parent field.
-func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newParentStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newChildStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

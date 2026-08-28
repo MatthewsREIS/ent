@@ -1,0 +1,62 @@
+{
+	"cleanuser": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {}
+	},
+	"friendship": {
+		"fields": {
+			"CreatedAt": true,
+			"FriendID": true,
+			"UserID": true,
+			"Weight": true
+		},
+		"edges": {
+			"Friend": true,
+			"User": true
+		}
+	},
+	"group": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Users": true
+		}
+	},
+	"parent": {
+		"fields": {
+			"ByAdoption": true,
+			"ParentID": true,
+			"UserID": true
+		},
+		"edges": {
+			"Child": true,
+			"Parent": true
+		}
+	},
+	"pet": {
+		"fields": {
+			"Name": true,
+			"OwnerID": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Children": true,
+			"Friends": true,
+			"Friendships": true,
+			"Groups": true,
+			"ParentHood": true,
+			"Parents": true,
+			"Pets": true
+		}
+	}
+}

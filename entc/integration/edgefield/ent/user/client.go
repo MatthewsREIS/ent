@@ -99,7 +99,7 @@ func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	mutation := NewUserMutation(c.Config, OpDeleteOne, WithUserID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewUserDeleteOne(NewUserDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *UserClient) Query() *UserQuery {
 
 // Get returns a User entity by its id.
 func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

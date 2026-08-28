@@ -7,8 +7,8 @@
 package comment
 
 import (
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -51,29 +51,9 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Comment queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
-// ByText orders the results by the text field.
-func ByText(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldText, opts...).ToFunc()
-}
-
-// ByPostID orders the results by the post_id field.
-func ByPostID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPostID, opts...).ToFunc()
-}
-
-// ByPostField orders the results by post field.
-func ByPostField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPostStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newPostStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

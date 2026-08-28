@@ -34,7 +34,7 @@ func LoadBlobLinkBlob(ctx context.Context, query *blob.BlobQuery, nodes []*blobl
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(blob.IDIn(ids...))
+	query.Where(blob.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func LoadBlobLinkLink(ctx context.Context, query *blob.BlobQuery, nodes []*blobl
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(blob.IDIn(ids...))
+	query.Where(blob.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

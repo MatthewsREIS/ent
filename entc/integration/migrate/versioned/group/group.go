@@ -7,7 +7,7 @@
 package group
 
 import (
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -38,14 +38,5 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Group queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
+type OrderOption = entfield.Order

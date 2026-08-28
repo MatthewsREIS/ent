@@ -7,8 +7,8 @@
 package user
 
 import (
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -105,115 +105,9 @@ var (
 )
 
 // OrderOption defines the ordering options for the User queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByPetsCount orders the results by pets count.
-func ByPetsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPetsStep(), opts...)
-	}
-}
-
-// ByPets orders the results by pets terms.
-func ByPets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPetsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByGroupsCount orders the results by groups count.
-func ByGroupsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newGroupsStep(), opts...)
-	}
-}
-
-// ByGroups orders the results by groups terms.
-func ByGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByFriendsCount orders the results by friends count.
-func ByFriendsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newFriendsStep(), opts...)
-	}
-}
-
-// ByFriends orders the results by friends terms.
-func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newFriendsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByParentsCount orders the results by parents count.
-func ByParentsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newParentsStep(), opts...)
-	}
-}
-
-// ByParents orders the results by parents terms.
-func ByParents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newParentsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByChildrenCount orders the results by children count.
-func ByChildrenCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newChildrenStep(), opts...)
-	}
-}
-
-// ByChildren orders the results by children terms.
-func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByFriendshipsCount orders the results by friendships count.
-func ByFriendshipsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newFriendshipsStep(), opts...)
-	}
-}
-
-// ByFriendships orders the results by friendships terms.
-func ByFriendships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newFriendshipsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByParentHoodCount orders the results by parent_hood count.
-func ByParentHoodCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newParentHoodStep(), opts...)
-	}
-}
-
-// ByParentHood orders the results by parent_hood terms.
-func ByParentHood(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newParentHoodStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newPetsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

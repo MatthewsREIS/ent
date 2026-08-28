@@ -99,7 +99,7 @@ func (c *PetClient) DeleteOne(_m *Pet) *PetDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	mutation := NewPetMutation(c.Config, OpDeleteOne, WithPetID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewPetDeleteOne(NewPetDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *PetClient) Query() *PetQuery {
 
 // Get returns a Pet entity by its id.
 func (c *PetClient) Get(ctx context.Context, id int) (*Pet, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

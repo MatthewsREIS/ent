@@ -100,7 +100,7 @@ func (c *LinkClient) DeleteOne(_m *Link) *LinkDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *LinkClient) DeleteOneID(id uuidc.UUIDC) *LinkDeleteOne {
 	mutation := NewLinkMutation(c.Config, OpDeleteOne, WithLinkID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewLinkDeleteOne(NewLinkDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *LinkClient) Query() *LinkQuery {
 
 // Get returns a Link entity by its id.
 func (c *LinkClient) Get(ctx context.Context, id uuidc.UUIDC) (*Link, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

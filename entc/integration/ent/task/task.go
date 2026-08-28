@@ -9,8 +9,8 @@ package enttask
 import (
 	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -77,46 +77,7 @@ var (
 )
 
 // OrderOption defines the ordering options for the Task queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByPriority orders the results by the priority field.
-func ByPriority(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPriority, opts...).ToFunc()
-}
-
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
-}
-
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByOwner orders the results by the owner field.
-func ByOwner(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOwner, opts...).ToFunc()
-}
-
-// ByOrder orders the results by the order field.
-func ByOrder(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOrder, opts...).ToFunc()
-}
-
-// ByOrderOption orders the results by the order_option field.
-func ByOrderOption(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOrderOption, opts...).ToFunc()
-}
-
-// ByOp orders the results by the op field.
-func ByOp(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOp, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
 // comment from another template.

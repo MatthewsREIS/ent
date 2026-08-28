@@ -39,7 +39,7 @@ func LoadPetOwner(ctx context.Context, query *user.UserQuery, nodes []*pet.Pet) 
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(user.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -338,7 +338,7 @@ func LoadPetBestFriend(ctx context.Context, query *pet.PetQuery, nodes []*pet.Pe
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(pet.IDIn(ids...))
+	query.Where(pet.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

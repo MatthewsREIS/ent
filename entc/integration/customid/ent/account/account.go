@@ -7,9 +7,9 @@
 package account
 
 import (
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -56,31 +56,9 @@ var (
 )
 
 // OrderOption defines the ordering options for the Account queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
-// ByEmail orders the results by the email field.
-func ByEmail(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldEmail, opts...).ToFunc()
-}
-
-// ByTokenCount orders the results by token count.
-func ByTokenCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTokenStep(), opts...)
-	}
-}
-
-// ByToken orders the results by token terms.
-func ByToken(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTokenStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newTokenStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

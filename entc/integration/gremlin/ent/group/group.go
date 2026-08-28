@@ -57,6 +57,7 @@ var (
 )
 
 // OrderOption defines the ordering options for the Group queries.
+
 type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

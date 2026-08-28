@@ -7,9 +7,9 @@
 package link
 
 import (
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -47,9 +47,5 @@ var (
 )
 
 // OrderOption defines the ordering options for the Link queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
+type OrderOption = entfield.Order

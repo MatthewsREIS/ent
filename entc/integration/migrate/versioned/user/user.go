@@ -7,7 +7,7 @@
 package user
 
 import (
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -49,24 +49,5 @@ var (
 )
 
 // OrderOption defines the ordering options for the User queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByAge orders the results by the age field.
-func ByAge(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAge, opts...).ToFunc()
-}
-
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByAddress orders the results by the address field.
-func ByAddress(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAddress, opts...).ToFunc()
-}
+type OrderOption = entfield.Order

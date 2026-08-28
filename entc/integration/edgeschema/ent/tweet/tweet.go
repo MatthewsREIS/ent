@@ -7,8 +7,8 @@
 package tweet
 
 import (
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -99,101 +99,9 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Tweet queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
-// ByText orders the results by the text field.
-func ByText(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldText, opts...).ToFunc()
-}
-
-// ByLikedUsersCount orders the results by liked_users count.
-func ByLikedUsersCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLikedUsersStep(), opts...)
-	}
-}
-
-// ByLikedUsers orders the results by liked_users terms.
-func ByLikedUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLikedUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByUserCount orders the results by user count.
-func ByUserCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUserStep(), opts...)
-	}
-}
-
-// ByUser orders the results by user terms.
-func ByUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByTagsCount orders the results by tags count.
-func ByTagsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTagsStep(), opts...)
-	}
-}
-
-// ByTags orders the results by tags terms.
-func ByTags(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTagsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByLikesCount orders the results by likes count.
-func ByLikesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLikesStep(), opts...)
-	}
-}
-
-// ByLikes orders the results by likes terms.
-func ByLikes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLikesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByTweetUserCount orders the results by tweet_user count.
-func ByTweetUserCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTweetUserStep(), opts...)
-	}
-}
-
-// ByTweetUser orders the results by tweet_user terms.
-func ByTweetUser(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTweetUserStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByTweetTagsCount orders the results by tweet_tags count.
-func ByTweetTagsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTweetTagsStep(), opts...)
-	}
-}
-
-// ByTweetTags orders the results by tweet_tags terms.
-func ByTweetTags(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTweetTagsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newLikedUsersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

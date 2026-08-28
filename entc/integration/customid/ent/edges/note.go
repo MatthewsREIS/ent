@@ -38,7 +38,7 @@ func LoadNoteParent(ctx context.Context, query *note.NoteQuery, nodes []*note.No
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(note.IDIn(ids...))
+	query.Where(note.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

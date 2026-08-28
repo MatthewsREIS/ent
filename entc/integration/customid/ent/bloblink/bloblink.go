@@ -9,8 +9,8 @@ package bloblink
 import (
 	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -69,36 +69,9 @@ var (
 )
 
 // OrderOption defines the ordering options for the BlobLink queries.
-type OrderOption func(*sql.Selector)
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
-// ByBlobID orders the results by the blob_id field.
-func ByBlobID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldBlobID, opts...).ToFunc()
-}
-
-// ByLinkID orders the results by the link_id field.
-func ByLinkID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLinkID, opts...).ToFunc()
-}
-
-// ByBlobField orders the results by blob field.
-func ByBlobField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newBlobStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByLinkField orders the results by link field.
-func ByLinkField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLinkStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newBlobStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, BlobColumn),

@@ -99,7 +99,7 @@ func (c *ParentClient) DeleteOne(_m *Parent) *ParentDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ParentClient) DeleteOneID(id int) *ParentDeleteOne {
 	mutation := NewParentMutation(c.Config, OpDeleteOne, WithParentID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewParentDeleteOne(NewParentDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *ParentClient) Query() *ParentQuery {
 
 // Get returns a Parent entity by its id.
 func (c *ParentClient) Get(ctx context.Context, id int) (*Parent, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

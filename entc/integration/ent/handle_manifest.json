@@ -1,0 +1,283 @@
+{
+	"api": {
+		"fields": {},
+		"edges": {}
+	},
+	"builder": {
+		"fields": {},
+		"edges": {}
+	},
+	"card": {
+		"fields": {
+			"Balance": true,
+			"CreateTime": true,
+			"Name": true,
+			"Number": true,
+			"UpdateTime": true
+		},
+		"edges": {
+			"Owner": true,
+			"Spec": true
+		}
+	},
+	"comment": {
+		"fields": {
+			"Client": true,
+			"NillableInt": true,
+			"Table": true,
+			"UniqueFloat": true,
+			"UniqueInt": true
+		},
+		"edges": {},
+		"noBareEQ": {
+			"Table": true
+		}
+	},
+	"exvaluescan": {
+		"fields": {
+			"Base64": true,
+			"Binary": true,
+			"BinaryBytes": true,
+			"BinaryOptional": true,
+			"Custom": true,
+			"CustomOptional": true,
+			"Text": true,
+			"TextOptional": true
+		},
+		"edges": {}
+	},
+	"fieldtype": {
+		"fields": {
+			"Active": true,
+			"BigInt": true,
+			"Datetime": true,
+			"Decimal": true,
+			"Deleted": true,
+			"DeletedAt": true,
+			"Dir": true,
+			"Duration": true,
+			"IP": true,
+			"Int": true,
+			"Int16": true,
+			"Int32": true,
+			"Int64": true,
+			"Int8": true,
+			"Link": true,
+			"LinkOther": true,
+			"LinkOtherFunc": true,
+			"MAC": true,
+			"Ndir": true,
+			"NilPair": true,
+			"NillableInt": true,
+			"NillableInt16": true,
+			"NillableInt32": true,
+			"NillableInt64": true,
+			"NillableInt8": true,
+			"NillableUUID": true,
+			"NullActive": true,
+			"NullFloat": true,
+			"NullInt64": true,
+			"NullLink": true,
+			"NullStr": true,
+			"OptionalFloat": true,
+			"OptionalFloat32": true,
+			"OptionalInt": true,
+			"OptionalInt16": true,
+			"OptionalInt32": true,
+			"OptionalInt64": true,
+			"OptionalInt8": true,
+			"OptionalUUID": true,
+			"OptionalUint": true,
+			"OptionalUint16": true,
+			"OptionalUint32": true,
+			"OptionalUint64": true,
+			"OptionalUint8": true,
+			"Pair": true,
+			"Password": true,
+			"PasswordOther": true,
+			"Priority": true,
+			"RawData": true,
+			"Role": true,
+			"SchemaFloat": true,
+			"SchemaFloat32": true,
+			"SchemaInt": true,
+			"SchemaInt64": true,
+			"SchemaInt8": true,
+			"Sensitive": true,
+			"State": true,
+			"Str": true,
+			"StringArray": true,
+			"StringScanner": true,
+			"Text": true,
+			"Triple": true,
+			"ValidateOptionalInt32": true,
+			"Vstring": true
+		},
+		"edges": {},
+		"noBareEQ": {
+			"Priority": true,
+			"Role": true,
+			"State": true
+		}
+	},
+	"file": {
+		"fields": {
+			"CreateTime": true,
+			"FieldID": true,
+			"Group": true,
+			"Name": true,
+			"Op": true,
+			"SetID": true,
+			"Size": true,
+			"User": true
+		},
+		"edges": {
+			"Field": true,
+			"Owner": true,
+			"Type": true
+		},
+		"noBareEQ": {
+			"FieldID": true
+		}
+	},
+	"filetype": {
+		"fields": {
+			"Name": true,
+			"State": true,
+			"Type": true
+		},
+		"edges": {
+			"Files": true
+		},
+		"noBareEQ": {
+			"State": true,
+			"Type": true
+		}
+	},
+	"goods": {
+		"fields": {},
+		"edges": {}
+	},
+	"group": {
+		"fields": {
+			"Active": true,
+			"Expire": true,
+			"MaxUsers": true,
+			"Name": true,
+			"Type": true
+		},
+		"edges": {
+			"Blocked": true,
+			"Files": true,
+			"Info": true,
+			"Users": true
+		}
+	},
+	"groupinfo": {
+		"fields": {
+			"Desc": true,
+			"MaxUsers": true
+		},
+		"edges": {
+			"Groups": true
+		}
+	},
+	"item": {
+		"fields": {
+			"Text": true
+		},
+		"edges": {}
+	},
+	"license": {
+		"fields": {
+			"CreateTime": true,
+			"UpdateTime": true
+		},
+		"edges": {}
+	},
+	"node": {
+		"fields": {
+			"UpdatedAt": true,
+			"Value": true
+		},
+		"edges": {
+			"Next": true,
+			"Prev": true
+		},
+		"noBareEQ": {
+			"Value": true
+		}
+	},
+	"pc": {
+		"fields": {},
+		"edges": {}
+	},
+	"pet": {
+		"fields": {
+			"Age": true,
+			"Name": true,
+			"Nickname": true,
+			"OptionalTime": true,
+			"Trained": true,
+			"UUID": true
+		},
+		"edges": {
+			"Owner": true,
+			"Team": true
+		}
+	},
+	"spec": {
+		"fields": {},
+		"edges": {
+			"Card": true
+		}
+	},
+	"task": {
+		"fields": {
+			"CreatedAt": true,
+			"Name": true,
+			"Op": true,
+			"Order": true,
+			"OrderOption": true,
+			"Owner": true,
+			"Priority": true
+		},
+		"edges": {},
+		"noBareEQ": {
+			"OrderOption": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Address": true,
+			"Age": true,
+			"Employment": true,
+			"FilesCount": true,
+			"Last": true,
+			"Name": true,
+			"Nickname": true,
+			"OptionalInt": true,
+			"Password": true,
+			"Phone": true,
+			"Role": true,
+			"SSOCert": true
+		},
+		"edges": {
+			"Card": true,
+			"Children": true,
+			"Files": true,
+			"Followers": true,
+			"Following": true,
+			"Friends": true,
+			"Groups": true,
+			"Parent": true,
+			"Pets": true,
+			"Spouse": true,
+			"Team": true
+		},
+		"noBareEQ": {
+			"Employment": true,
+			"Role": true
+		}
+	}
+}

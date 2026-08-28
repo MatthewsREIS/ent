@@ -1,0 +1,12 @@
+{
+	"user": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Followers": true,
+			"Following": true,
+			"Spouse": true
+		}
+	}
+}

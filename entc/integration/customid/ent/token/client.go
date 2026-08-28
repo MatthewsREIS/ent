@@ -100,7 +100,7 @@ func (c *TokenClient) DeleteOne(_m *Token) *TokenDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TokenClient) DeleteOneID(id sid.ID) *TokenDeleteOne {
 	mutation := NewTokenMutation(c.Config, OpDeleteOne, WithTokenID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewTokenDeleteOne(NewTokenDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *TokenClient) Query() *TokenQuery {
 
 // Get returns a Token entity by its id.
 func (c *TokenClient) Get(ctx context.Context, id sid.ID) (*Token, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

@@ -34,7 +34,7 @@ func LoadUserGroupUser(ctx context.Context, query *user.UserQuery, nodes []*user
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(user.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func LoadUserGroupGroup(ctx context.Context, query *group.GroupQuery, nodes []*u
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(group.IDIn(ids...))
+	query.Where(group.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

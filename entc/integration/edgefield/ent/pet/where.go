@@ -8,112 +8,27 @@ package pet
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Pet type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Number[int]
+	// OwnerID is the handle for the "owner_id" field.
+	OwnerID entfield.Number[int]
+}{
+	ID:      entfield.NewNumber[int](FieldID),
+	OwnerID: entfield.NewNumber[int](FieldOwnerID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Pet {
-	return predicate.Pet(sql.FieldLTE(FieldID, id))
-}
-
-// OwnerID applies equality check predicate on the "owner_id" field. It's identical to OwnerIDEQ.
-func OwnerID(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldOwnerID, v))
-}
-
-// OwnerIDEQ applies the EQ predicate on the "owner_id" field.
-func OwnerIDEQ(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldEQ(FieldOwnerID, v))
-}
-
-// OwnerIDNEQ applies the NEQ predicate on the "owner_id" field.
-func OwnerIDNEQ(v int) predicate.Pet {
-	return predicate.Pet(sql.FieldNEQ(FieldOwnerID, v))
-}
-
-// OwnerIDIn applies the In predicate on the "owner_id" field.
-func OwnerIDIn(vs ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldIn(FieldOwnerID, vs...))
-}
-
-// OwnerIDNotIn applies the NotIn predicate on the "owner_id" field.
-func OwnerIDNotIn(vs ...int) predicate.Pet {
-	return predicate.Pet(sql.FieldNotIn(FieldOwnerID, vs...))
-}
-
-// OwnerIDIsNil applies the IsNil predicate on the "owner_id" field.
-func OwnerIDIsNil() predicate.Pet {
-	return predicate.Pet(sql.FieldIsNull(FieldOwnerID))
-}
-
-// OwnerIDNotNil applies the NotNil predicate on the "owner_id" field.
-func OwnerIDNotNil() predicate.Pet {
-	return predicate.Pet(sql.FieldNotNull(FieldOwnerID))
-}
-
-// HasOwner applies the HasEdge predicate on the "owner" edge.
-func HasOwner() predicate.Pet {
-	return predicate.Pet(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasOwnerWith applies the HasEdge predicate on the "owner" edge with a given conditions (other predicates).
-func HasOwnerWith(preds ...predicate.User) predicate.Pet {
-	return predicate.Pet(
-		func(s *sql.Selector) {
-			step := newOwnerStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
+// E holds typed edge handles for every edge of the Pet type.
+var E = struct {
+	// Owner is the handle for the "owner" edge.
+	Owner entfield.Edge[predicate.User]
+}{
+	Owner: entfield.NewEdge[predicate.User](newOwnerStep),
 }
 
 // And groups predicates with the AND operator between them.

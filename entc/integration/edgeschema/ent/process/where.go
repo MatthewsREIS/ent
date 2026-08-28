@@ -8,101 +8,27 @@ package process
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id int) predicate.Process {
-	return predicate.Process(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Process type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Number[int]
+}{
+	ID: entfield.NewNumber[int](FieldID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Process {
-	return predicate.Process(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Process {
-	return predicate.Process(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Process {
-	return predicate.Process(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Process {
-	return predicate.Process(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Process {
-	return predicate.Process(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Process {
-	return predicate.Process(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Process {
-	return predicate.Process(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Process {
-	return predicate.Process(sql.FieldLTE(FieldID, id))
-}
-
-// HasFiles applies the HasEdge predicate on the "files" edge.
-func HasFiles() predicate.Process {
-	return predicate.Process(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, FilesTable, FilesPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasFilesWith applies the HasEdge predicate on the "files" edge with a given conditions (other predicates).
-func HasFilesWith(preds ...predicate.File) predicate.Process {
-	return predicate.Process(
-		func(s *sql.Selector) {
-			step := newFilesStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
-}
-
-// HasAttachedFiles applies the HasEdge predicate on the "attached_files" edge.
-func HasAttachedFiles() predicate.Process {
-	return predicate.Process(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, AttachedFilesTable, AttachedFilesColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasAttachedFilesWith applies the HasEdge predicate on the "attached_files" edge with a given conditions (other predicates).
-func HasAttachedFilesWith(preds ...predicate.AttachedFile) predicate.Process {
-	return predicate.Process(
-		func(s *sql.Selector) {
-			step := newAttachedFilesStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
+// E holds typed edge handles for every edge of the Process type.
+var E = struct {
+	// Files is the handle for the "files" edge.
+	Files entfield.Edge[predicate.File]
+	// AttachedFiles is the handle for the "attached_files" edge.
+	AttachedFiles entfield.Edge[predicate.AttachedFile]
+}{
+	Files:         entfield.NewEdge[predicate.File](newFilesStep),
+	AttachedFiles: entfield.NewEdge[predicate.AttachedFile](newAttachedFilesStep),
 }
 
 // And groups predicates with the AND operator between them.

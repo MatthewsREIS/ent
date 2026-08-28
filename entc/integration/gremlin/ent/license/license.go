@@ -33,6 +33,7 @@ var (
 )
 
 // OrderOption defines the ordering options for the License queries.
+
 type OrderOption func(*dsl.Traversal)
 
 // comment from another template.

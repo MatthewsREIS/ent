@@ -7,7 +7,7 @@
 package media
 
 import (
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -44,24 +44,5 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Media queries.
-type OrderOption func(*sql.Selector)
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// BySource orders the results by the source field.
-func BySource(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSource, opts...).ToFunc()
-}
-
-// BySourceURI orders the results by the source_uri field.
-func BySourceURI(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSourceURI, opts...).ToFunc()
-}
-
-// ByText orders the results by the text field.
-func ByText(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldText, opts...).ToFunc()
-}
+type OrderOption = entfield.Order

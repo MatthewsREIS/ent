@@ -35,7 +35,7 @@ func LoadRentalUser(ctx context.Context, query *user.UserQuery, nodes []*rental.
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(user.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func LoadRentalCar(ctx context.Context, query *car.CarQuery, nodes []*rental.Ren
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(car.IDIn(ids...))
+	query.Where(car.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

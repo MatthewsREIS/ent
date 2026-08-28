@@ -35,7 +35,7 @@ func LoadMetadataUser(ctx context.Context, query *user.UserQuery, nodes []*metad
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(user.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -262,7 +262,7 @@ func LoadMetadataParent(ctx context.Context, query *metadata.MetadataQuery, node
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(metadata.IDIn(ids...))
+	query.Where(metadata.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

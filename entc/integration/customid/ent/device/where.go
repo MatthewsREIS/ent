@@ -8,102 +8,28 @@ package device
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Device type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Value[schema.ID]
+}{
+	ID: entfield.NewValue[schema.ID](FieldID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id schema.ID) predicate.Device {
-	return predicate.Device(sql.FieldLTE(FieldID, id))
-}
-
-// HasActiveSession applies the HasEdge predicate on the "active_session" edge.
-func HasActiveSession() predicate.Device {
-	return predicate.Device(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, ActiveSessionTable, ActiveSessionColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasActiveSessionWith applies the HasEdge predicate on the "active_session" edge with a given conditions (other predicates).
-func HasActiveSessionWith(preds ...predicate.Session) predicate.Device {
-	return predicate.Device(
-		func(s *sql.Selector) {
-			step := newActiveSessionStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
-}
-
-// HasSessions applies the HasEdge predicate on the "sessions" edge.
-func HasSessions() predicate.Device {
-	return predicate.Device(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SessionsTable, SessionsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasSessionsWith applies the HasEdge predicate on the "sessions" edge with a given conditions (other predicates).
-func HasSessionsWith(preds ...predicate.Session) predicate.Device {
-	return predicate.Device(
-		func(s *sql.Selector) {
-			step := newSessionsStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
+// E holds typed edge handles for every edge of the Device type.
+var E = struct {
+	// ActiveSession is the handle for the "active_session" edge.
+	ActiveSession entfield.Edge[predicate.Session]
+	// Sessions is the handle for the "sessions" edge.
+	Sessions entfield.Edge[predicate.Session]
+}{
+	ActiveSession: entfield.NewEdge[predicate.Session](newActiveSessionStep),
+	Sessions:      entfield.NewEdge[predicate.Session](newSessionsStep),
 }
 
 // And groups predicates with the AND operator between them.

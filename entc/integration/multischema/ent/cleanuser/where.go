@@ -9,77 +9,20 @@ package cleanuser
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldEQ(FieldName, v))
+// F holds typed predicate/order handles for every comparable field of the CleanUser type.
+var F = struct {
+	// Name is the handle for the "name" field.
+	Name entfield.String[string]
+}{
+	Name: entfield.NewString[string](FieldName),
 }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldEQ(FieldName, v))
-}
-
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldNEQ(FieldName, v))
-}
-
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldIn(FieldName, vs...))
-}
-
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldNotIn(FieldName, vs...))
-}
-
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldGT(FieldName, v))
-}
-
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldGTE(FieldName, v))
-}
-
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldLT(FieldName, v))
-}
-
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldLTE(FieldName, v))
-}
-
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldContains(FieldName, v))
-}
-
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldHasPrefix(FieldName, v))
-}
-
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.CleanUser {
-	return predicate.CleanUser(sql.FieldContainsFold(FieldName, v))
-}
+// E holds typed edge handles for every edge of the CleanUser type.
+var E = struct {
+}{}
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.CleanUser) predicate.CleanUser {
