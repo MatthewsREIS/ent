@@ -172,6 +172,16 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 	for i := range {{ $receiver }}.builders {
 		func(i int, root context.Context) {
 			builder := {{ $receiver }}.builders[i]
+			{{- /* Surface a With() Apply error recorded on this builder (setter.tmpl);
+			       otherwise defaults()/check() below run over a partially-applied
+			       mutation and the row gets created with the failed assignment
+			       silently missing. */}}
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			{{- if $.HasDefault }}
 				builder.defaults()
 			{{- end }}
