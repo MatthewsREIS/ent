@@ -81,37 +81,23 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 			_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
 		}
 	{{- end }}
+	entbuilder.ApplyCreateSpec({{ $mutation }}, _node, _spec, {{ if $.FeatureEnabled "sql/schemaconfig" }}internal.SchemaOf({{ $receiver }}.Config){{ else }}nil{{ end }}, {{ template "dialect/sql/throughdefaults" . }})
+	{{- /* HasValueScanner fields are excluded from ApplyCreateSpec's SetField
+	      (see runtime/entbuilder.FieldSpec.HasValueScanner) — this residual
+	      block converts them via the field's ValueFunc first, same as the
+	      pre-applier unroll. node population itself (unaffected by
+	      HasValueScanner) already happened above. Empty range for every
+	      field/entity in this fork's corpus today. */}}
 	{{- range $f := $.MutationFields }}
-		if value, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); ok {
-			{{- if $f.HasValueScanner }}
+		{{- if $f.HasValueScanner }}
+			if value, ok := entbuilder.GetField[{{ trimPackage $f.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $f.Name }}); ok {
 				vv, err := {{ trimPackage $f.ValueFunc $.Package }}(value)
 				if err != nil {
 					return nil, nil, err
 				}
 				_spec.SetField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, vv)
-			{{- else }}
-				_spec.SetField({{ $.PackageQualifier }}{{ $f.Constant }}, field.{{ $f.Type.ConstName }}, value)
-			{{- end }}
-			_node.{{ $f.StructField }} = {{ if $f.NillableValue }}&{{ end }}value
-		}
-	{{- end }}
-	{{- range $e := $.EdgesWithID }}
-		if nodes := entbuilder.EdgeIDsAs[{{ trimPackage $e.Type.ID.Type.String $.Package }}]({{ $mutation }}, {{ printf "%q" $e.Name }}); len(nodes) > 0 {
-			{{- with extend $ "Edge" $e "Nodes" true "Zero" "nil" }}
-				{{ template "dialect/sql/defedge" . }}{{/* defined in sql/update.tmpl */}}
-			{{- end }}
-			{{- if $e.OwnFK }}
-				{{- $fk := $e.ForeignKey }}
-				{{- if $.Scope.InSubPackage }}
-					{{- if eq (pascal $fk.StructField) $fk.StructField }}
-						_node.{{ $fk.StructField }} = {{ if $fk.Field.Nillable }}&{{ end }}nodes[0]
-					{{- end }}
-				{{- else }}
-					_node.Set{{ pascal $fk.StructField }}(nodes[0])
-				{{- end }}
-			{{- end }}
-			_spec.Edges = append(_spec.Edges, edge)
-		}
+			}
+		{{- end }}
 	{{- end }}
 	return _node, _spec{{ if $.HasValueScanner }}, nil{{ end }}
 }

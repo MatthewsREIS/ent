@@ -81,6 +81,9 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- if eq $n.Storage.Name "sql" }}
 			Column:  {{ $f.StorageKey | printf "%q" }},
 			SQLType: field.{{ $f.Type.ConstName }},
+			{{- if $f.HasValueScanner }}
+			HasValueScanner: true,
+			{{- end }}
 			{{- end }}
 		},
 		{{- end }}
@@ -109,6 +112,16 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- end }}
 			TargetIDColumn:  {{ $e.Type.ID.StorageKey | printf "%q" }},
 			TargetIDSQLType: field.{{ $e.Type.ID.Type.ConstName }},
+			{{- if $e.OwnFK }}
+			{{- /* Mirrors create.tmpl's $e.OwnFK node-assignment guard verbatim
+			      (InSubPackage is always true in this fork's codegen — see
+			      entc/gen/graph.go's typeScope construction — so only that
+			      branch is ever reachable). */}}
+			{{- $fk := $e.ForeignKey }}
+			{{- if eq (pascal $fk.StructField) $fk.StructField }}
+			NodeField: {{ $fk.StructField | printf "%q" }},
+			{{- end }}
+			{{- end }}
 			{{- if $n.FeatureEnabled "sql/schemaconfig" }}
 			{{- /* Mirrors schemaconfig.tmpl's "dialect/sql/defedge/spec/schemaconfig"
 			      $schema derivation verbatim — the literal SchemaConfig struct-field

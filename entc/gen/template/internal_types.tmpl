@@ -26,6 +26,9 @@ import (
 	{{- if $.Config.FeatureEnabled "entql" }}
 	"entgo.io/ent/runtime/entbuilder"
 	{{- end }}
+	{{- if $.FeatureEnabled "sql/schemaconfig" }}
+	"reflect"
+	{{- end }}
 	{{- end }}
 	{{- /* Additional dependencies injected to config. */}}
 	{{- $deps := list }}{{ with $.Config.Annotations }}{{ $deps = $.Config.Annotations.Dependencies }}{{ end }}
@@ -430,6 +433,22 @@ func (s *Selector) ScanX(ctx context.Context, v any) {
 		return v
 	}
 {{ end }}
+
+{{- if $.FeatureEnabled "sql/schemaconfig" }}
+
+// SchemaOf returns a schemaOf resolver over c's SchemaConfig, for
+// ApplyUpdateSpec/ApplyCreateSpec's per-entity/per-edge Schema resolution
+// (see runtime/entbuilder.Descriptor.SchemaKey / EdgeSpec.SchemaKey — both
+// hold a SchemaConfig struct-field name, resolved here by reflection since
+// entbuilder can't import the generated SchemaConfig type).
+func SchemaOf(c Config) func(string) string {
+	sc := c.SchemaConfig()
+	rv := reflect.ValueOf(sc)
+	return func(key string) string {
+		return rv.FieldByName(key).String()
+	}
+}
+{{- end }}
 
 {{- if $.Config.FeatureEnabled "entql" }}
 
