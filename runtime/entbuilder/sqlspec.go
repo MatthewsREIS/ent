@@ -46,10 +46,13 @@ func ApplyUpdateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.UpdateSpec, sch
 	// independent AddModifier), so the resulting spec doesn't depend on the
 	// order fields/edges are visited in.
 	for name, f := range desc.Fields {
-		if v, ok := m.Field(name); ok {
+		// HasValueScanner fields are left to a small residual block the
+		// template keeps for them (converts via the field's ValueFunc
+		// before SetField/AddField) — see FieldSpec.HasValueScanner.
+		if v, ok := m.Field(name); ok && !f.HasValueScanner {
 			spec.SetField(f.Column, f.SQLType, v)
 		}
-		if v, ok := m.AddedField(name); ok {
+		if v, ok := m.AddedField(name); ok && !f.HasValueScanner {
 			spec.AddField(f.Column, f.SQLType, v)
 		}
 		if v, ok := m.AppendedField(name); ok {
@@ -99,20 +102,37 @@ func ApplyUpdateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.UpdateSpec, sch
 	}
 }
 
-// ApplyCreateSpec copies the field/edge state recorded on m onto spec,
-// reproducing the create-side shapes createSpec() used to unroll: SetField
-// per set field, and one Add-only edge append per populated edge (a create
-// has nothing to clear or remove). See entc/integration/ent/*/create.go's
-// createSpec for the generated shape this mirrors.
-func ApplyCreateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.CreateSpec, schemaOf func(key string) string) {
+// ApplyCreateSpec copies the field/edge state recorded on m onto spec and
+// node, reproducing the create-side shapes createSpec() used to unroll:
+//
+//   - Fields: SetField per set field (skipped for a HasValueScanner field —
+//     see FieldSpec.HasValueScanner), and node.<GoName> is always assigned
+//     the raw mutation value, pointer-wrapped if the struct field is a
+//     pointer and the mutation value isn't (NillableValue fields) — matching
+//     `_node.<Field> = value` / `= &value` in createSpec()'s unroll.
+//   - Edges: one Add-only edge append per populated edge (a create has
+//     nothing to clear or remove); when the edge owns its FK column
+//     (EdgeSpec.NodeField != ""), also assigns node.<NodeField> = nodes[0]
+//     (pointer-wrapped the same way), matching the `$e.OwnFK` block.
+//
+// See entc/integration/ent/*/create.go's createSpec for the generated shape
+// this mirrors, and entc/integration/edgefield/ent/pet/create.go for the
+// OwnFK node-field-assignment case.
+func ApplyCreateSpec[T, I any](m *Mutation[T, I], node *T, spec *sqlgraph.CreateSpec, schemaOf func(key string) string) {
 	desc := m.desc
 	if schemaOf != nil && desc.SchemaKey != "" {
 		spec.Schema = schemaOf(desc.SchemaKey)
 	}
+	nv := reflect.ValueOf(node).Elem()
 	for name, f := range desc.Fields {
-		if v, ok := m.Field(name); ok {
+		v, ok := m.Field(name)
+		if !ok {
+			continue
+		}
+		if !f.HasValueScanner {
 			spec.SetField(f.Column, f.SQLType, v)
 		}
+		setNodeField(nv, f.GoName, v)
 	}
 	for name, e := range desc.Edges {
 		nodes := m.EdgeIDs(name)
@@ -136,7 +156,31 @@ func ApplyCreateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.CreateSpec, sch
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		spec.Edges = append(spec.Edges, edge)
+		if e.NodeField != "" {
+			setNodeField(nv, e.NodeField, nodes[0])
+		}
 	}
+}
+
+// setNodeField reflects v onto the exported struct field named goName on
+// nv (an addressable struct value), wrapping v in a pointer first if the
+// destination field is a pointer type and v isn't already one. No-ops for
+// an unknown field name (fails safe rather than panicking).
+func setNodeField(nv reflect.Value, goName string, v any) {
+	if goName == "" || v == nil {
+		return
+	}
+	fv := nv.FieldByName(goName)
+	if !fv.IsValid() {
+		return
+	}
+	rv := reflect.ValueOf(v)
+	if fv.Kind() == reflect.Ptr && rv.Kind() != reflect.Ptr {
+		p := reflect.New(rv.Type())
+		p.Elem().Set(rv)
+		rv = p
+	}
+	fv.Set(rv)
 }
 
 // sliceToAny converts a boxed slice value (e.g. []string, []int) to []any by

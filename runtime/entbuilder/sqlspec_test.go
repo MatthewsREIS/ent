@@ -17,10 +17,13 @@ import (
 
 // thingEnt is the fixture entity type for sqlspec tests.
 type thingEnt struct {
-	ID    int
-	Count int
-	Note  string
-	Tags  []string // JSON list field, for the Append path.
+	ID      int
+	Count   int
+	Note    string
+	Tags    []string // JSON list field, for the Append path.
+	OwnerID int      // OwnFK node-field-assignment target for the "owner" edge.
+	Coupon  *string  // NillableValue node-field-assignment target.
+	Code    string   // HasValueScanner field's node-field-assignment target.
 }
 
 func thingDescriptor() *entbuilder.Descriptor {
@@ -32,11 +35,13 @@ func thingDescriptor() *entbuilder.Descriptor {
 			"count":  {Type: reflect.TypeFor[int](), GoName: "Count", Numeric: true, Column: "count", SQLType: field.TypeInt},
 			"note":   {Type: reflect.TypeFor[string](), GoName: "Note", Nillable: true, Column: "note_col", SQLType: field.TypeString},
 			"labels": {Type: reflect.TypeFor[[]string](), GoName: "Tags", Nillable: true, Column: "labels", SQLType: field.TypeJSON},
+			"coupon": {Type: reflect.TypeFor[string](), GoName: "Coupon", Nillable: true, Column: "coupon", SQLType: field.TypeString},
+			"code":   {Type: reflect.TypeFor[string](), GoName: "Code", Column: "code", SQLType: field.TypeString, HasValueScanner: true},
 		},
 		Edges: map[string]entbuilder.EdgeSpec{
 			"owner": {Cardinality: entbuilder.O2OUnique, Target: "User", TargetIDType: reflect.TypeFor[int](),
 				Rel: sqlgraph.M2O, StorageTable: "things", StorageColumns: []string{"thing_owner"},
-				TargetIDColumn: "id", TargetIDSQLType: field.TypeInt, SchemaKey: "User"},
+				TargetIDColumn: "id", TargetIDSQLType: field.TypeInt, SchemaKey: "User", NodeField: "OwnerID"},
 			"tags": {Cardinality: entbuilder.M2M, Target: "Tag", TargetIDType: reflect.TypeFor[int](),
 				Rel: sqlgraph.M2M, StorageTable: "thing_tags", StorageColumns: []string{"thing_id", "tag_id"},
 				TargetIDColumn: "id", TargetIDSQLType: field.TypeInt},
@@ -130,6 +135,21 @@ func TestApplyUpdateSpec_AppendedJSON(t *testing.T) {
 	require.Len(t, spec.Modifiers, 1)
 }
 
+// TestApplyUpdateSpec_HasValueScanner covers FieldSpec.HasValueScanner: the
+// applier must not call spec.SetField for such a field, leaving it to the
+// template's residual per-field block (which converts via the field's
+// ValueFunc first) — see the doc comment on FieldSpec.HasValueScanner.
+func TestApplyUpdateSpec_HasValueScanner(t *testing.T) {
+	desc := thingDescriptor()
+	m := entbuilder.NewMutation[thingEnt, int](nil, ent.OpUpdateOne, desc)
+	require.NoError(t, m.SetField("code", "xyz"))
+
+	spec := sqlgraph.NewUpdateSpec("things", []string{"id"}, sqlgraph.NewFieldSpec("id", field.TypeInt))
+	ApplyUpdateSpecNoSchema(m, spec)
+
+	require.Empty(t, spec.Fields.Set)
+}
+
 // TestApplyUpdateSpec_SchemaOf covers multischema resolution: Node.Schema
 // from Descriptor.SchemaKey, and each edge's Schema from EdgeSpec.SchemaKey
 // (only "owner" declares one), matching multischema/ent/user/update.go's
@@ -171,7 +191,8 @@ func TestApplyCreateSpec(t *testing.T) {
 	require.NoError(t, m.AddEdgeIDs("tags", 10, 11))
 
 	spec := sqlgraph.NewCreateSpec("things", sqlgraph.NewFieldSpec("id", field.TypeInt))
-	entbuilder.ApplyCreateSpec(m, spec, nil)
+	node := &thingEnt{}
+	entbuilder.ApplyCreateSpec(m, node, spec, nil)
 
 	require.Len(t, spec.Fields, 1)
 	require.Equal(t, "count", spec.Fields[0].Column)
@@ -189,6 +210,55 @@ func TestApplyCreateSpec(t *testing.T) {
 			t.Fatalf("unexpected edge table %q", e.Table)
 		}
 	}
+
+	// Fields: node.<GoName> is always assigned the raw mutation value,
+	// matching createSpec()'s `_node.Count = value` unroll.
+	require.Equal(t, 5, node.Count)
+	// Edges: an OwnFK edge (NodeField != "") also assigns node.<NodeField>
+	// = nodes[0], matching the `$e.OwnFK` block (e.g.
+	// entc/integration/edgefield/ent/pet/create.go's `_node.OwnerID =
+	// nodes[0]`). "tags" has no NodeField (M2M, doesn't own an FK) so it's
+	// unaffected.
+	require.Equal(t, 3, node.OwnerID)
+}
+
+// TestApplyCreateSpec_NodeFieldPointerWrap covers the NillableValue case:
+// the mutation value is a plain string, but the entity struct field is
+// *string, so ApplyCreateSpec must wrap it in a pointer — matching
+// createSpec()'s `_node.LicensedAt = &value` unroll (see
+// entc/integration/template/ent/pet/create.go:115).
+func TestApplyCreateSpec_NodeFieldPointerWrap(t *testing.T) {
+	desc := thingDescriptor()
+	m := entbuilder.NewMutation[thingEnt, int](nil, ent.OpCreate, desc)
+	require.NoError(t, m.SetField("coupon", "SAVE10"))
+
+	spec := sqlgraph.NewCreateSpec("things", sqlgraph.NewFieldSpec("id", field.TypeInt))
+	node := &thingEnt{}
+	entbuilder.ApplyCreateSpec(m, node, spec, nil)
+
+	require.NotNil(t, node.Coupon)
+	require.Equal(t, "SAVE10", *node.Coupon)
+}
+
+// TestApplyCreateSpec_HasValueScanner covers FieldSpec.HasValueScanner:
+// ApplyCreateSpec must NOT call spec.SetField for such a field (the
+// generated createSpec() keeps a residual block that does the ValueFunc
+// conversion + SetField itself — calling SetField twice for the same
+// column would emit a broken duplicate SQL assignment), but node
+// population still uses the raw mutation value unconditionally, matching
+// createSpec()'s `_node.StructField = value` line which runs regardless of
+// $f.HasValueScanner.
+func TestApplyCreateSpec_HasValueScanner(t *testing.T) {
+	desc := thingDescriptor()
+	m := entbuilder.NewMutation[thingEnt, int](nil, ent.OpCreate, desc)
+	require.NoError(t, m.SetField("code", "abc"))
+
+	spec := sqlgraph.NewCreateSpec("things", sqlgraph.NewFieldSpec("id", field.TypeInt))
+	node := &thingEnt{}
+	entbuilder.ApplyCreateSpec(m, node, spec, nil)
+
+	require.Empty(t, spec.Fields)
+	require.Equal(t, "abc", node.Code)
 }
 
 // ApplyUpdateSpecNoSchema is a thin wrapper so tests that don't exercise

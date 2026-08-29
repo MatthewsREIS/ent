@@ -58,6 +58,16 @@ type FieldSpec struct {
 	// SQLType is the schema/field type enum passed to
 	// sqlgraph.*Spec.SetField/AddField/ClearField.
 	SQLType field.Type
+
+	// HasValueScanner marks a field declared with an external ValueScanner
+	// (schema/field's Field.ValueScanner option). ApplyUpdateSpec/
+	// ApplyCreateSpec skip SetField/AddField for such a field — the
+	// generated sqlSave/createSpec keeps a small residual block that
+	// converts the mutation value via the field's ValueFunc before calling
+	// SetField/AddField itself (see dialect/sql/{update,create}.tmpl).
+	// Unrelated to node-struct population (ApplyCreateSpec always writes
+	// the raw mutation value there, matching the pre-refactor unroll).
+	HasValueScanner bool
 }
 
 // EdgeSpec describes an edge on an entity.
@@ -110,6 +120,14 @@ type EdgeSpec struct {
 	// true edges (followers, children) against entc/integration/ent/user/
 	// update.go's per-edge Inverse: true/false lines — identical set.
 	SchemaKey string
+
+	// NodeField is the exported struct field name to populate on the
+	// entity struct at create time (e.g. "UserID") when this edge owns its
+	// foreign-key column — mirrors create.tmpl's `$e.OwnFK` block. Empty
+	// for edges that don't own an FK column (M2M, or the non-owning side
+	// of an O2M/O2O), in which case ApplyCreateSpec does nothing beyond
+	// appending the sqlgraph.EdgeSpec.
+	NodeField string
 }
 
 // IDColumnSpec is a single SQL column/type pair. Used for Descriptor.CompositeID
