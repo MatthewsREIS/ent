@@ -445,7 +445,11 @@ func SchemaOf(c Config) func(string) string {
 	sc := c.SchemaConfig()
 	rv := reflect.ValueOf(sc)
 	return func(key string) string {
-		return rv.FieldByName(key).String()
+		f := rv.FieldByName(key)
+		if !f.IsValid() {
+			panic("internal: unknown SchemaConfig field " + key + " for " + rv.Type().String())
+		}
+		return f.String()
 	}
 }
 {{- end }}
