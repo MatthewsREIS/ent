@@ -5,7 +5,9 @@
 package entbuilder
 
 import (
+	"fmt"
 	"reflect"
+	"sort"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -48,11 +50,14 @@ func ApplyUpdateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.UpdateSpec, sch
 			}
 		}
 	}
-	// Map iteration order is nondeterministic; each field/edge below writes
-	// an independent entry into spec.Fields.*/spec.Edges.* (or an
-	// independent AddModifier), so the resulting spec doesn't depend on the
-	// order fields/edges are visited in.
-	for name, f := range desc.Fields {
+	// desc.Fields/desc.Edges are maps: Go randomizes map iteration order per
+	// run, so visiting them directly produces a different SET/INSERT column
+	// (or edge Add/Clear) order on every call — churning prepared-statement
+	// caches and making SQL-text assertions/logs nondeterministic. Sorting
+	// the keys first fixes a stable (if arbitrary) order; exact
+	// pre-refactor source order is not required, only stability is.
+	for _, name := range sortedKeys(desc.Fields) {
+		f := desc.Fields[name]
 		// HasValueScanner fields are left to a small residual block the
 		// template keeps for them (converts via the field's ValueFunc
 		// before SetField/AddField) — see FieldSpec.HasValueScanner.
@@ -72,7 +77,8 @@ func ApplyUpdateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.UpdateSpec, sch
 			spec.ClearField(f.Column, f.SQLType)
 		}
 	}
-	for name, e := range desc.Edges {
+	for _, name := range sortedKeys(desc.Edges) {
+		e := desc.Edges[name]
 		build := func() *sqlgraph.EdgeSpec {
 			edge := &sqlgraph.EdgeSpec{
 				Rel:     e.Rel,
@@ -137,7 +143,8 @@ func ApplyCreateSpec[T, I any](m *Mutation[T, I], node *T, spec *sqlgraph.Create
 		spec.Schema = schemaOf(desc.SchemaKey)
 	}
 	nv := reflect.ValueOf(node).Elem()
-	for name, f := range desc.Fields {
+	for _, name := range sortedKeys(desc.Fields) {
+		f := desc.Fields[name]
 		v, ok := m.Field(name)
 		if !ok {
 			continue
@@ -147,7 +154,8 @@ func ApplyCreateSpec[T, I any](m *Mutation[T, I], node *T, spec *sqlgraph.Create
 		}
 		setNodeField(nv, f.GoName, v)
 	}
-	for name, e := range desc.Edges {
+	for _, name := range sortedKeys(desc.Edges) {
+		e := desc.Edges[name]
 		nodes := m.EdgeIDs(name)
 		if len(nodes) == 0 {
 			continue
@@ -179,17 +187,35 @@ func ApplyCreateSpec[T, I any](m *Mutation[T, I], node *T, spec *sqlgraph.Create
 	}
 }
 
+// sortedKeys returns m's keys in sorted order, for deterministic iteration
+// over a Descriptor's Fields/Edges maps (see ApplyUpdateSpec/ApplyCreateSpec).
+func sortedKeys[V any](m map[string]V) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 // setNodeField reflects v onto the exported struct field named goName on
 // nv (an addressable struct value), wrapping v in a pointer first if the
-// destination field is a pointer type and v isn't already one. No-ops for
-// an unknown field name (fails safe rather than panicking).
+// destination field is a pointer type and v isn't already one. Panics for
+// an unknown field name: goName is always sourced from FieldSpec.GoName,
+// generated to match the entity struct exactly, so a mismatch here means
+// the descriptor and struct have drifted apart — a generated-code
+// invariant violation, not a runtime condition to fail safe on (the
+// pre-refactor unroll of this assignment, `_node.<Field> = value`, was
+// compile-checked; silently no-opping would leave the struct field at its
+// zero value while the DB row is written correctly, the hardest class of
+// bug to trace back).
 func setNodeField(nv reflect.Value, goName string, v any) {
 	if goName == "" || v == nil {
 		return
 	}
 	fv := nv.FieldByName(goName)
 	if !fv.IsValid() {
-		return
+		panic(fmt.Sprintf("entbuilder: unknown struct field %s on %s", goName, nv.Type()))
 	}
 	rv := reflect.ValueOf(v)
 	if fv.Kind() == reflect.Ptr && rv.Kind() != reflect.Ptr {

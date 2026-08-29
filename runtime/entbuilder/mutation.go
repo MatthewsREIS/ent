@@ -48,7 +48,22 @@ type FieldSpec struct {
 	// Sensitive marks a field whose value FormatEntity always redacts as
 	// "<sensitive>", mirroring field.Sensitive().
 	Sensitive bool
-	// Nillable allows ClearField to operate on this field.
+	// Nillable means two different things depending on which Descriptor
+	// collection this FieldSpec came from — both correct for their one
+	// consumer, but not interchangeable:
+	//   - In Descriptor.Fields (this collection): "clearable" —
+	//     Optional() || Nillable() in the schema — and ClearField (see
+	//     mutation_methods.go) rejects a clear when this is false. An
+	//     Optional()-not-Nillable() field is still clearable (matching the
+	//     old ClearX() builder method), which is why it's an OR here.
+	//   - In Descriptor.ScanFields (a different collection of FieldSpec,
+	//     see scan.go): "the entity struct field is a pointer" — Nillable()
+	//     alone. scan.go's wrapNull and FormatEntity's nil-check both read
+	//     it with this meaning, and FormatEntity calls fv.IsNil() on the
+	//     strength of it (guarded by a reflect.Kind check — see FormatEntity
+	//     — since a Fields-shaped spec reaching there would otherwise panic
+	//     on a non-pointer field).
+	// Never treat a spec from one collection as if it came from the other.
 	Nillable bool
 	// Numeric allows AddField to operate on this field (increment/decrement).
 	Numeric bool

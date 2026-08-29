@@ -37,6 +37,45 @@ func TestMutation_AddEdgeIDs_M2M(t *testing.T) {
 	require.ElementsMatch(t, []ent.Value{1, 2, 3}, added)
 }
 
+// TestMutation_EdgeIDs_Deterministic covers W2: m.edges[edge] is a set
+// (map[any]struct{}), so without sorting, EdgeIDs' returned order — which
+// drives the VALUES row order of an M2M join-table INSERT — would vary from
+// call to call. Same failure mode as C1 (see sqlspec_test.go's
+// TestApplyUpdateSpec_Deterministic), one level down: within a single edge
+// rather than across fields/edges.
+func TestMutation_EdgeIDs_Deterministic(t *testing.T) {
+	var want []any
+	for i := 0; i < 50; i++ {
+		m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, edgeTestDescriptor())
+		require.NoError(t, m.AddEdgeIDs("teams", 5, 3, 1, 4, 2))
+		got := m.EdgeIDs("teams")
+		if i == 0 {
+			want = got
+			require.ElementsMatch(t, []any{1, 2, 3, 4, 5}, want)
+			continue
+		}
+		require.Equal(t, want, got, "iteration %d: EdgeIDs order drifted", i)
+	}
+}
+
+// TestMutation_RemovedEdgeIDs_Deterministic is EdgeIDs_Deterministic's
+// RemovedEdgeIDs counterpart.
+func TestMutation_RemovedEdgeIDs_Deterministic(t *testing.T) {
+	var want []any
+	for i := 0; i < 50; i++ {
+		m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, edgeTestDescriptor())
+		require.NoError(t, m.AddEdgeIDs("teams", 5, 3, 1, 4, 2))
+		require.NoError(t, m.RemoveEdgeIDs("teams", 5, 3, 1, 4, 2))
+		got := m.RemovedEdgeIDs("teams")
+		if i == 0 {
+			want = got
+			require.ElementsMatch(t, []any{1, 2, 3, 4, 5}, want)
+			continue
+		}
+		require.Equal(t, want, got, "iteration %d: RemovedEdgeIDs order drifted", i)
+	}
+}
+
 func TestMutation_RemoveEdgeIDs_M2M(t *testing.T) {
 	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, edgeTestDescriptor())
 	require.NoError(t, m.AddEdgeIDs("teams", 1, 2, 3))

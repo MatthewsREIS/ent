@@ -17,10 +17,13 @@ import (
 )
 
 // Delete is the generic builder for deleting T entities. Every generated
-// <Entity>Delete collapses onto an alias `entbuilder.Delete[T, I]` (mirrors
-// stage 1's UpsertOne[ID] alias precedent: every entity sharing the same Go
-// ID type shares one Delete[T, I] instantiation, a deliberate cross-entity
-// type collapse carried forward from that precedent, not re-debated here).
+// <Entity>Delete collapses onto an alias `entbuilder.Delete[T, I]` — e.g.
+// `type UserDelete = entbuilder.Delete[User, int]` — instead of a hand-
+// unrolled per-entity struct (mirrors stage 1's UpsertOne[ID] alias
+// precedent for generic-builder collapse in general). Unlike that
+// precedent, T here is the entity type, so each entity still gets its own
+// instantiation; only the *shape* (no separate per-entity struct/methods)
+// collapses, not the type across entities sharing an ID type.
 //
 // Table/IDColumn/IDSQLType/SchemaKey are read off mutation's own *Descriptor
 // (see mutation.go) — unlike the older per-entity sqlExec bodies this

@@ -313,6 +313,78 @@ func TestApplyCreateSpec_ThroughDefaults(t *testing.T) {
 	require.NotNil(t, spec.Edges[0].Target.NewFields)
 }
 
+// TestApplyUpdateSpec_Deterministic covers C1: desc.Fields/desc.Edges are
+// maps, so without sorting the keys, the SET column order (and edge
+// Add/Clear order) would vary from call to call within the same process —
+// Go randomizes map iteration start per range statement, not per map
+// instance, so reusing the same descriptor across iterations still exposes
+// it. Build the same mutation from scratch every iteration and assert the
+// resulting spec's field/edge order never drifts from the first.
+func TestApplyUpdateSpec_Deterministic(t *testing.T) {
+	desc := thingDescriptor()
+	var wantFields, wantEdges []string
+	for i := 0; i < 50; i++ {
+		m := entbuilder.NewMutation[thingEnt, int](nil, ent.OpUpdateOne, desc)
+		require.NoError(t, m.SetField("count", 3))
+		require.NoError(t, m.SetField("coupon", "SAVE10"))
+		require.NoError(t, m.ClearField("note"))
+		require.NoError(t, m.SetEdgeID("owner", 7))
+		require.NoError(t, m.AddEdgeIDs("tags", 1, 2))
+
+		spec := sqlgraph.NewUpdateSpec("things", []string{"id", "count", "coupon", "note_col"},
+			sqlgraph.NewFieldSpec("id", field.TypeInt))
+		ApplyUpdateSpecNoSchema(m, spec)
+
+		gotFields := make([]string, len(spec.Fields.Set))
+		for j, f := range spec.Fields.Set {
+			gotFields[j] = f.Column
+		}
+		gotEdges := make([]string, len(spec.Edges.Add))
+		for j, e := range spec.Edges.Add {
+			gotEdges[j] = e.Table
+		}
+		if i == 0 {
+			wantFields, wantEdges = gotFields, gotEdges
+			continue
+		}
+		require.Equal(t, wantFields, gotFields, "iteration %d: SET column order drifted", i)
+		require.Equal(t, wantEdges, gotEdges, "iteration %d: edge Add order drifted", i)
+	}
+}
+
+// TestApplyCreateSpec_Deterministic is TestApplyUpdateSpec_Deterministic's
+// create-side counterpart.
+func TestApplyCreateSpec_Deterministic(t *testing.T) {
+	desc := thingDescriptor()
+	var wantFields, wantEdges []string
+	for i := 0; i < 50; i++ {
+		m := entbuilder.NewMutation[thingEnt, int](nil, ent.OpCreate, desc)
+		require.NoError(t, m.SetField("count", 3))
+		require.NoError(t, m.SetField("coupon", "SAVE10"))
+		require.NoError(t, m.SetEdgeID("owner", 7))
+		require.NoError(t, m.AddEdgeIDs("tags", 1, 2))
+
+		spec := sqlgraph.NewCreateSpec("things", sqlgraph.NewFieldSpec("id", field.TypeInt))
+		node := &thingEnt{}
+		entbuilder.ApplyCreateSpec(m, node, spec, nil, nil)
+
+		gotFields := make([]string, len(spec.Fields))
+		for j, f := range spec.Fields {
+			gotFields[j] = f.Column
+		}
+		gotEdges := make([]string, len(spec.Edges))
+		for j, e := range spec.Edges {
+			gotEdges[j] = e.Table
+		}
+		if i == 0 {
+			wantFields, wantEdges = gotFields, gotEdges
+			continue
+		}
+		require.Equal(t, wantFields, gotFields, "iteration %d: INSERT column order drifted", i)
+		require.Equal(t, wantEdges, gotEdges, "iteration %d: edge order drifted", i)
+	}
+}
+
 // ApplyUpdateSpecNoSchema is a thin wrapper so tests that don't exercise
 // multischema resolution don't need to pass a nil func literal at every
 // call site.

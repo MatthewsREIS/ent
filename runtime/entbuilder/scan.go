@@ -355,9 +355,15 @@ func (p *fieldPlan) assignBasic(ev reflect.Value, value any) error {
 		return p.writeDirect(ev, reflect.ValueOf(v.Float64))
 	default:
 		// sql.UnknownType or some other passthrough cell landed on a
-		// recognized column (e.g. a modifier overriding it) — ignore,
-		// matching the generated code's behavior of only handling the
-		// types it itself asked ScanValues to produce.
+		// recognized column (e.g. a modifier overriding it). Unreachable in
+		// practice — ScanTargets always pairs this column with one of the
+		// sql.Null*/[]byte cells above, per newBasicCell, so AssignRow only
+		// ever sees what it asked for. Note this is NOT what the old
+		// generated decode block did: it returned
+		// fmt.Errorf("unexpected type %T for field %s", ...) for exactly
+		// this case (see the deleted internal_model.tmpl decode block).
+		// Ignoring here rather than erroring is a deliberate call for an
+		// unreachable path, not a claim of behavioral parity.
 		return nil
 	}
 }
@@ -416,6 +422,18 @@ func convertTo(value reflect.Value, target reflect.Type) (reflect.Value, error) 
 	}
 }
 
+// isNilableKind reports whether k is a kind reflect.Value.IsNil accepts
+// (Chan/Func/Interface/Map/Ptr/Slice/UnsafePointer) — calling IsNil on any
+// other kind panics.
+func isNilableKind(k reflect.Kind) bool {
+	switch k {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice, reflect.UnsafePointer:
+		return true
+	default:
+		return false
+	}
+}
+
 // FormatEntity reproduces the generated String() method's output exactly:
 // "Name(id=1, field=value, ...)", redacting Sensitive fields as
 // "<sensitive>", formatting a plain time.Time field with time.ANSIC, and
@@ -446,7 +464,13 @@ func FormatEntity(desc *Descriptor, entity any) string {
 			continue
 		}
 		fv := rv.Field(f.StructIndex)
-		if f.Nillable {
+		// f.Nillable means "pointer struct field" in this (ScanFields)
+		// collection — see FieldSpec.Nillable's doc comment. IsNil panics
+		// on a non-nilable kind, so guard by kind rather than trusting the
+		// bit: this is the one place a Fields-shaped spec (where Nillable
+		// means "clearable" and doesn't imply a pointer struct field) could
+		// otherwise reach IsNil and panic.
+		if f.Nillable && isNilableKind(fv.Kind()) {
 			if fv.IsNil() {
 				continue
 			}
