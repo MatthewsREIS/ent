@@ -933,3 +933,317 @@ discovered here:
   `gemini/.worktrees/codegen-reduction` for user review and commit. Nothing
   was committed in gemini or contrib by this stage — only this results
   document, in the fork worktree.
+
+## Stage 3: Reflection-Based Scan/Assign/String + Descriptor Dedupe (entql dropped in gemini)
+
+Generated `sqlSave`/`createSpec` bodies are now generic
+(`entbuilder.ApplyUpdateSpec`/`ApplyCreateSpec`, driven off each entity's
+`Descriptor`); `ScanValues`/`AssignValues`/`String` delegate to a runtime
+reflection scanner instead of per-entity generated switch statements; delete
+builders are generic `entbuilder.Delete[T, I]` aliases (stage 5 of the fork
+plan); and the fork now builds one shared `sqlgraph.Schema` off each
+entity's descriptor instead of per-entity stub-graph literals — moot for
+gemini specifically, since Task 6's investigation (`task-6-report.md`)
+found gemini's only two entql consumers dead code (the mixin that called
+them, `DealTeamScopedMixin`, was deleted a year ago when gemini's privacy
+layer moved to Postgres RLS) and ruled **GO** on dropping the `entql`
+feature outright rather than rebuilding them onto the shared graph. This
+task migrates gemini onto that fork, executes the entql ruling gemini-side,
+and re-measures.
+
+### Benchmark commands
+
+Same three entrypoints as every prior stage:
+
+```bash
+# LOC
+cd models && find gen -name '*.go' -print0 | xargs -0 cat | wc -l
+
+# generation time + peak RSS
+MREIS_CODEGEN_ALLOW_WATCHER=1 /usr/bin/time -v task generate-go   # from api/
+
+# clean build time + peak RSS
+go clean -cache && /usr/bin/time -v go build ./...                # in models/
+```
+
+### Results
+
+Baseline is Stage 2b's post-fix-wave settled numbers (LOC 1,395,043; gen
+126.0s/3.2 GB; build 72.9s/~3.0 GB), same gemini worktree lineage.
+
+| Metric | Before (Stage 2b) | After (Stage 3) | Delta |
+|---|---|---|---|
+| Generated LOC (`models/gen`) | 1,395,043 | 1,049,567 | **-345,476 (-24.8%)** |
+| Generation wall time | 126.0s | 106.3s | -19.7s (-15.6%) |
+| Generation peak RSS | 3.2 GB (3,312,820 KB) | 3.04 GB (3,189,264 KB) | -3.7% (flat-to-down) |
+| Clean build wall time | 72.9s | 67.0s | -5.9s (-8.1%) |
+| Clean build peak RSS | ~3.0 GB (3,164,820 KB) | 3.1-3.45 GB (3,257,848-3,614,892 KB) | up, see note |
+
+Measurement history:
+
+1. **LOC**: single count, deterministic (`find`/`cat`/`wc -l` over the
+   regenerated `models/gen` tree) — 1,049,567.
+2. **Generation**: two consistent runs — an informal check right after
+   applying the entql feature-flag removal (106.57s wall, 3.0 GB) and the
+   formal benchmark pass taken after the full test suite, on a box that had
+   settled to load average 0.97/2.91/3.08 (1/5/15-min) at the start
+   (106.32s wall, 3,189,264 KB peak). Both agree closely; no confound.
+3. **Clean build**: first pass ran immediately after the generation
+   benchmark, at load average 4.57 climbing to 6.00 — above the "wait for
+   <2" bar, so treated as potentially confounded per the 2b three-pass
+   protocol and re-run. A second pass, taken after waiting for load to
+   settle back under 2 (1.59/3.73/3.53), landed within 0.16s of the first
+   (66.96s vs. 66.80s) and at a similar-to-higher peak RSS (3,257,848 KB
+   vs. 3,614,892 KB — the *quieter* run used *more* memory, the opposite of
+   what ambient contention would predict). Conclusion: the elevated 1-min
+   load average on the first pass was very likely an echo of the build's
+   own 958-965% CPU utilization rather than third-party contention on this
+   shared box (nothing else was consuming meaningful CPU in a `ps`
+   snapshot taken mid-spike) — both passes are reported as consistent
+   evidence, and the wall-clock delta above uses the second (quieter) pass.
+
+Reading: LOC is the big, unambiguous win this stage (-24.8%, cumulative
+-51.9% vs Stage 1's original per-entity scan/assign/delete/upsert/mutate
+surface) — the reflection-based scanner and generic `Delete[T, I]` alias
+remove the last large per-entity method bodies (`ScanValues`,
+`AssignValues`, `String`, and every per-entity delete builder). Generation
+time *dropped* this stage (-15.6%) rather than continuing stage 2's upward
+trend — plausible, since this stage is pure deletion (no new per-field
+template logic was added the way stage 2b's `With`/`F`/`E` machinery added
+decision logic per field); the local-replace-from-source measurement
+artifact 2a/2b documented still applies and would depress the *absolute*
+gen-wall number for every stage equally, so the *direction* of this
+stage's improvement should still be real. Clean build time also improved
+(-8.1%) — consistent with dropping ~345K lines of monomorphic per-entity
+methods, though build peak RSS moved the other way (up from the ~3.0 GB
+baseline to a 3.1-3.45 GB range) — plausibly the reflection scanner's
+`reflect.Type`/generic-instantiation-heavy code is denser per line for the
+compiler than the deleted straight-line setter/getter bodies it replaced,
+mirroring 2b's own build-RSS discussion. Net across all three stages
+measured on gemini: LOC 1,577,213 → 1,049,567 (-33.5% cumulative), build
+72.9s → 67.0s (first improvement in build wall since Stage 1), generation
+memory holds at the ~3.0-3.2 GB plateau every stage after Stage 1 has
+landed on.
+
+### Migration
+
+**Template sweep** (brief's Step 1): grepped every file under
+`models/templates/` and `models/extensions/*/templates/` for
+`\.Clear[A-Z]\w*\(\)`/`\.Remove[A-Z]\w*IDs\(` on update-builder receivers,
+and for `schemaGraph`/`SchemaGraph`/`NodeIndex`/`entql` references anywhere
+in template or extension Go source. **Zero hits** — 2b's own migration
+already moved every extension emitter onto the `With(F.../E...)` handle
+forms, so nothing in gemini's template surface still emits the deleted
+edge-mutator methods or reaches into an entql-only symbol. The one action
+this step actually required: delete `models/templates/delete_modifier_compat.tmpl`
+(a leftover stage-5-era shim defining the now-nonexistent
+`dialect/sql/delete/spec/modify` template hook with an already-`{{if
+false}}`-disabled body). It had no separate registration line to remove —
+gemini's `entc.go` loads every file in `models/templates/` via
+`entc.TemplateDir("templates")`, so deleting the file is the whole fix.
+
+**entql ruling execution** (brief's Step 3, Task 6's GO ruling): re-ran
+Task 6's zero-caller grep against gemini's current `HEAD` per its own
+"re-check before deleting" caveat — still zero callers outside
+`models/schema/utils.go` itself. Applied the exact change list:
+
+1. `models/entc.go` — dropped `"entql"` from `entc.FeatureNames(...)` and
+   `gen.SplitInclude("entql*")` from `entc.Split(...)`.
+2. `models/schema/utils.go` — deleted `IsUserOnEntityDealTeamPredicate` and
+   `IsUserOnDealTeamPredicate` outright (dead code, zero callers), along
+   with the now-unused `entql`/`sql`/`sqlgraph` imports and the
+   `proposalEdge`/`listingEdge`/`escrowEdge` consts.
+3. Regenerated. **334 stale `entql*.go` files did not disappear on their
+   own** — `go generate` only writes what the current feature set asks
+   for, it doesn't clean up files a prior generation with `entql` enabled
+   left behind, and `models/gen` is entirely gitignored in gemini so `git
+   status` never had a chance to show them as deleted the way the brief
+   anticipated. Deleted them by hand (`find models/gen -iname '*entql*'
+   -delete`); confirmed 0 remain after every subsequent regen. Also lost,
+   as predicted: `internal.SchemaGraph`/`internal.NodeIndex` and the
+   per-entity `XFilter`/`NewXFilterForMutation` facade aliases (all
+   unreferenced once `utils.go` no longer needs them).
+4. No fallout at the two `Filter()` call sites Task 6 flagged
+   (`api/resolvers/closed_leases_invoices_summary.resolvers.go`,
+   its integration test) — confirmed independent of entql (they call
+   entgql's `WhereInput.Filter()`).
+
+**Rewriter pass** (brief's Step 2/4): built `handlerewrite` from the fork,
+ran `-chains` per module (`./schema/... ./dealhooks/...` from `models/`,
+`./...` from `api/` and `workers/`) against the freshly-regenerated
+`handle_manifest.json`. **Zero automated rewrites** in `models` and
+`workers`; in `api` the tool correctly flagged, but could not
+type-check-and-rewrite, exactly **one** call-site pattern duplicated across
+two files — both instances of `TaskUpdateOne.ClearContactPhoneNumber()`
+(the `contact_phone_number` edge), in `api/resolvers/task.resolvers.go`
+(inside an `else if` branch: `upd = upd.ClearContactPhoneNumber()`) and its
+matching integration test
+(`api/integration/task/task_contact_phone_number_trigger_integration_test.go`,
+a plain chain). Both are the **conditional-reassignment miss class** 2b's
+report already named (the tool folds an initial fluent chain but not a
+later `builder = builder.ClearX()` reassignment) — hand-fixed to
+`upd.With(task.E.ContactPhoneNumber.Clear())` / `.With(task.E.ContactPhoneNumber.Clear())`
+respectively. This confirms the brief's prediction almost exactly: a small
+worklist, because 2b's rewriter pass already migrated nearly everything
+else in gemini onto the `With(E...)` forms.
+
+**Nondeterministic field/edge iteration order broke three gemini unit-test
+files' `sqlmock` assertions** — not predicted by the brief, but predicted
+by the branch's own ledger (`.superpowers/sdd/.../progress.md`:
+*"`ApplyUpdateSpec`/`ApplyCreateSpec` iterate `Descriptor.Fields` (a
+MAP) → SET/INSERT column order is nondeterministic per call... it broke
+gemini's sqlmock arg-order expectations (Task 7 empirically hit it;
+loosened those tests to `AnyArg` with explanatory comments — harmless
+either way)"*), and this task did hit it exactly as anticipated: `go test
+./schema/...` in `models` failed 9 tests across `escrow_seller_representation_close_hook_test.go`,
+`ownership_primary_contact_hook_test.go`, and `wrike_task_test.go`, each
+asserting a fixed argument order for a multi-column `INSERT`/`UPDATE` that
+the generic entbuilder path now emits in Go's randomized map-iteration
+order (confirmed empirically: re-running the same test showed a different
+column order — and a different failure — on 3 consecutive runs). Fixed by
+loosening every affected `WithArgs(...)` position that falls inside a
+shuffled field or edge block to `sqlmock.AnyArg()` (with a comment
+explaining why), while leaving the deterministic parts (query-text regexes,
+single-arg `WHERE id = ?` lookups, and multi-id `IN (...)` lists built from
+an ordered slice rather than a map) exactly as they were; re-ran the
+affected tests 4+ consecutive times post-fix with no failures. The ledger
+also records a **planned but not-yet-applied fork-side fix** (sort
+field/edge names before iteration in both appliers, for deterministic SQL
+text / prepared-statement plan-cache health under `lib/pq`) — verified
+absent from this fork's `runtime/entbuilder/{create,update,sqlspec}.go` at
+this task's `HEAD` (no `sort.` calls over `desc.Fields`/`desc.Edges`
+anywhere); flagged below as a concern rather than implemented here, since
+it's fork-side work outside this task's gemini-migration scope.
+
+### Semantic deviations
+
+Carried forward from the fork's own task ledger
+(`.superpowers/sdd/2026-08-28-stage3-reflection-dedupe/`), re-verified
+against gemini where applicable:
+
+- **Delete-builder cross-entity type collapse** (Task 5) — same upsert
+  precedent as Stage 1: `UserDelete = entbuilder.Delete[User, int]` and any
+  other entity sharing `int`'s ID type are the same generic instantiation.
+  No gemini call site depends on `UserDelete` and e.g. `PetDelete` being
+  distinct types.
+- **SQL delete extension-template hooks unreachable** (Task 5) —
+  `dialect/sql/delete/{additional,spec,fields/additional}/*` hooks were
+  removed because a type alias can't gain extension methods; gemini's own
+  `delete_modifier_compat.tmpl` (this task's deletion, above) is direct
+  confirmation gemini never used that hook for anything live (its body was
+  already `{{if false}}`-disabled before this task touched it).
+- **`Modify()` unconditional on delete builders** (Task 5) — every entity's
+  generic `Delete[T, I]` exposes `Modify()` regardless of the `sql/modifier`
+  feature flag; harmless widening, no gemini call site is affected either
+  way.
+- **Hook-accessor sugar deferred (YAGNI)** — not built this stage; nothing
+  in gemini's ~90-LOC-per-entity hook call sites needed it (re-examined per
+  the plan's self-review, no whale left to shrink).
+- **entql feature dropped in gemini** — Task 6's dead-code ruling, executed
+  in full this task (see Migration above): the two helpers deleted outright
+  rather than rebuilt onto the shared `internal.SchemaGraph`, since that
+  graph is itself entql-gated and nothing calls the helpers.
+- **Scanner interface shape** (Task 4) — `Descriptor.ScanFields` ranges all
+  fields (not just mutation-settable ones, since edge-owned exposed fields
+  must still scan); `FKColumns` is `[]FieldSpec` routed through generated
+  setter methods; `AssignRow`'s unknown-callback path handles
+  `selectValues`/FK fallback. No gemini schema field hits the documented
+  edge cases (external `ValueScanner`, non-`Number`-kind custom-`GoType`
+  `Add`, string-typed edge-field column) that would expose a capability
+  loss from this shape.
+- **edgeschema codegen non-idempotency** (Task 5 follow-up note,
+  pre-existing) — reproduced independent of this task on a clean pre-Task-5
+  tree; two consecutive `go generate` runs can shift privacy `Policy`/
+  `Hooks` wiring before settling. Not gemini-specific (gemini doesn't use
+  edgeschema) and not touched by this migration.
+- **Deprecated `entbuilder` delete shims retained** (Task 5) —
+  `DeleteDescriptor`/`DeleteIDDescriptor`/`BuildDeleteSpec`/`DeleteState`/
+  `RunDelete` were restored as deprecated compat shims for `examples/`
+  (frozen by the stage-1 restore rule) and any stale pre-Task-5 generated
+  code; gemini's own regenerated code doesn't call them (confirmed: gemini
+  builds and tests clean with the shims present but unused).
+- **Nondeterministic field/edge map-iteration order** (new this task, see
+  Migration above) — semantically harmless (every field/edge writes an
+  independent spec entry) but produces unstable SQL text across calls and
+  broke 3 gemini test files' positional `sqlmock` assertions; fixed
+  gemini-side, fork-side deterministic-ordering fix still pending (see
+  Concerns).
+
+### Test results
+
+- `go build`/`go vet ./...` clean in all three gemini modules (`models`,
+  `api` — including every `api/integration/*` package touched by the
+  targeted runs below plus a full `go vet ./...` sweep, `workers` — root +
+  `jobs`), matching 2b's fully-clean bar. The one advisory `go vet`
+  composites warning in generated code (`models/gen/gql_node.go:21`,
+  `&NotFoundError{"node"}` unkeyed fields) is the same pre-existing,
+  cosmetic, contrib-template-owned warning 2b already documented — not
+  introduced by this stage.
+- `go test ./...` in `models/` — all packages pass, including
+  `models/schema` (the package with the sqlmock-brittleness fix above; ran
+  4 additional times after the fix with no failures, confirming the fix
+  holds across the map-iteration nondeterminism it's meant to tolerate).
+- `go test -p 2 -parallel 4 ./...` in `workers/` — all pass (`workers` root
+  + `workers/jobs`), same parallelism cap 2b needed for the shared
+  IntegreSQL/Postgres testcontainer pool.
+- `task test-integration -- -run OnConflict -count=1` — **47 tests, 47
+  passing** (same count as every prior stage).
+- `task test-integration -- ./integration/ent_resolvers/... -count=1` —
+  **286 tests, 285 passing, 1 pre-existing skip, 0 failures** (same count
+  as every prior stage).
+- `task test-integration -- ./integration/transaction/... -count=1` —
+  **117 tests, 117 passing, 0 failures** (write-heavy, matches 2b's
+  post-follow-up count).
+- `task test-integration -- ./integration/contact/... -count=1` — **109
+  tests, 109 passing, 0 failures** (write-heavy, matches 2b's count).
+- `task test-integration -- ./integration/chatter/... -count=1` — **66
+  tests, 66 passing, 0 failures** — the brief's "scanner proof" pick
+  (eager-loading-heavy), exercising `AssignRow`'s reflection path across
+  every loaded edge without incident.
+- `task test-integration -- ./integration/box/... -count=1` — **89 tests,
+  89 passing, 0 failures** — the entql-drop-is-inert proof (found via
+  `grep -rln "DealTeam" api/integration --include='*_test.go'`; `box`
+  includes `box_folder_rls_integration_test.go` and
+  `box_folder_rls_edge_cases_integration_test.go`, which exercise the
+  Postgres-RLS-based deal-team scoping that replaced the entql-era
+  `DealTeamScopedMixin` a year before this task). A clean pass here is
+  exactly the empirical confirmation Task 6's ruling asked for.
+
+### Concerns / follow-ups for the user
+
+- **Fork-side deterministic-ordering fix is still pending.** The branch's
+  own ledger records the map-iteration-order gap as a controller-confirmed
+  issue with a planned fix ("sort field/edge names before iteration in both
+  appliers") slated for "the final review/fix wave" — not yet present at
+  this task's fork `HEAD` (`e4e70e61d`). Until it lands, every consumer of
+  this fork (not just gemini) will see nondeterministic SQL column order
+  from `ApplyCreateSpec`/`ApplyUpdateSpec`, which is harmless for
+  correctness but real for prepared-statement plan-cache churn under
+  `lib/pq` and for anyone diffing SQL logs/audits. Gemini's own exposure
+  (3 brittle unit-test files) is fixed; this note is for the fork itself.
+- **Build-benchmark load-average anomaly, resolved.** The first clean-build
+  pass ran at 1-min load 4.57 (above the "<2" bar) immediately after the
+  generation benchmark; a second pass after the load genuinely settled
+  landed within 0.16s of the first, at *higher* peak RSS despite the
+  quieter box — strong evidence the elevated load reading was an echo of
+  the build's own near-1000%-CPU utilization decaying through the 1-minute
+  load-average window, not third-party contention. Both numbers are
+  reported in Results for transparency; the second (quieter) pass is used
+  for the delta.
+- **Generation-wall measurement still carries the local-replace-from-source
+  artifact** 2a/2b documented (`go run entc.go` rebuilds the fork from
+  source under a `replace` directive every invocation, instead of pulling a
+  cached module) — this depresses the absolute gen-wall number for every
+  stage measured this way; the stage-over-stage *direction* (this stage
+  improved) should still be trustworthy since the artifact applies equally
+  to the before/after numbers.
+- Remaining: gemini-side changes this task made (2 entql-ruling edits in
+  `models/entc.go`/`models/schema/utils.go`, 1 template deletion, 2
+  rewriter-miss hand-fixes on the `ContactPhoneNumber` edge, 3 test-file
+  sqlmock-brittleness fixes, plus the full regen) are intentionally left
+  uncommitted in `gemini/.worktrees/codegen-reduction` for user review and
+  commit, per this stage's own instructions — 660 files changed (659
+  modified, 1 deleted: `models/templates/delete_modifier_compat.tmpl`),
+  6,914 insertions(+), 15,191 deletions(-) per `git diff --stat`. Nothing
+  was committed in gemini or contrib by this stage — only this results
+  document, in the fork worktree.
