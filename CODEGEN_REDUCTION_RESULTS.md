@@ -1240,16 +1240,20 @@ against gemini where applicable:
 
 ### Concerns / follow-ups for the user
 
-- **Fork-side deterministic-ordering fix is still pending.** The branch's
-  own ledger records the map-iteration-order gap as a controller-confirmed
-  issue with a planned fix ("sort field/edge names before iteration in both
-  appliers") slated for "the final review/fix wave" — not yet present at
-  this task's fork `HEAD` (`e4e70e61d`). Until it lands, every consumer of
-  this fork (not just gemini) will see nondeterministic SQL column order
-  from `ApplyCreateSpec`/`ApplyUpdateSpec`, which is harmless for
-  correctness but real for prepared-statement plan-cache churn under
-  `lib/pq` and for anyone diffing SQL logs/audits. Gemini's own exposure
-  (3 brittle unit-test files) is fixed; this note is for the fork itself.
+- **Fork-side deterministic-ordering fix: LANDED** (final-review fix wave,
+  commit `2063754ce`): `ApplyUpdateSpec`/`ApplyCreateSpec` now sort field
+  and edge names before iteration, and `EdgeIDs`/`RemovedEdgeIDs` sort node
+  IDs within an edge — SQL statement text is deterministic again, pinned by
+  50-iteration determinism tests. The same wave hardened `FormatEntity`
+  against a non-pointer-Nillable panic, made the generated `SchemaOf` panic
+  loudly on an unknown SchemaConfig key instead of yielding
+  `"<invalid Value>"` (schemaconfig-gated — gemini has that feature off, so
+  its pending regen delta from this wave is nil), and applied four minor
+  robustness/doc fixes. Since the ordering fix lives in the shared runtime,
+  gemini picks it up immediately through its `replace` directive with no
+  regen; its three sqlmock test files could optionally restore literal
+  positional args now that order is stable (the value-set matchers they use
+  remain correct either way).
 - **Build-benchmark load-average anomaly, resolved.** The first clean-build
   pass ran at 1-min load 4.57 (above the "<2" bar) immediately after the
   generation benchmark; a second pass after the load genuinely settled
