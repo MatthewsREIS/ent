@@ -7,15 +7,14 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -88,81 +87,15 @@ func (e PetEdges) OwnerOrErr() (*User, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Pet) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "trained":
-			values[i] = new(sql.NullBool)
-		case "age":
-			values[i] = new(sql.NullFloat64)
-		case "id", "name", "nickname":
-			values[i] = new(sql.NullString)
-		case "optional_time":
-			values[i] = new(sql.NullTime)
-		case "uuid":
-			values[i] = new(uuid.UUID)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(petDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Pet fields.
 func (_m *Pet) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
-			}
-		case "age":
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field age", values[i])
-			} else if value.Valid {
-				_m.Age = value.Float64
-			}
-		case "name":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		case "uuid":
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field uuid", values[i])
-			} else if value != nil {
-				_m.UUID = *value
-			}
-		case "nickname":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field nickname", values[i])
-			} else if value.Valid {
-				_m.Nickname = value.String
-			}
-		case "trained":
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field trained", values[i])
-			} else if value.Valid {
-				_m.Trained = value.Bool
-			}
-		case "optional_time":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field optional_time", values[i])
-			} else if value.Valid {
-				_m.OptionalTime = value.Time
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(petDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Pet.
@@ -184,28 +117,7 @@ func (_m *Pet) Unwrap() *Pet {
 
 // String implements the fmt.Stringer.
 func (_m *Pet) String() string {
-	var builder strings.Builder
-	builder.WriteString("Pet(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Age))
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("uuid=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UUID))
-	builder.WriteString(", ")
-	builder.WriteString("nickname=")
-	builder.WriteString(_m.Nickname)
-	builder.WriteString(", ")
-	builder.WriteString("trained=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Trained))
-	builder.WriteString(", ")
-	builder.WriteString("optional_time=")
-	builder.WriteString(_m.OptionalTime.Format(time.ANSIC))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(petDescriptor, _m)
 }
 
 // Pets is a parsable slice of Pet.

@@ -35,8 +35,10 @@ var zooDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDColumn:   "id",
+	IDSQLType:  field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns:  []entbuilder.FieldSpec{}}
 
 // NewZooMutation creates a new mutation for the Zoo entity.
 func NewZooMutation(c Config, op Op, opts ...ZooMutationOption) *ZooMutation {

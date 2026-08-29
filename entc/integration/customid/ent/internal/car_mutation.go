@@ -76,6 +76,38 @@ var carDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "before_id",
+			Name:        "before_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[float64](),
+			SQLType:     field.TypeFloat64,
+		},
+		{
+			Column:      "after_id",
+			Name:        "after_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[float64](),
+			SQLType:     field.TypeFloat64,
+		},
+		{
+			Column:      "model",
+			Name:        "model",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "pet_cars",
+			GoName:      "SetPetCars",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"before_id": field.TypeFloat64,
 		"after_id":  field.TypeFloat64,

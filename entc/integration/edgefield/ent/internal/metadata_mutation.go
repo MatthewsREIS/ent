@@ -83,7 +83,24 @@ var metadataDescriptor = &entbuilder.Descriptor{
 		"parent_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "age",
+			Name:        "age",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "parent_id",
+			Name:        "parent_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewMetadataMutation creates a new mutation for the Metadata entity.
 func NewMetadataMutation(c Config, op Op, opts ...MetadataMutationOption) *MetadataMutation {

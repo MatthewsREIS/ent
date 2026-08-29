@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Relationship is the model entity for the Relationship schema.
@@ -92,55 +90,15 @@ func (e RelationshipEdges) InfoOrErr() (*RelationshipInfo, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Relationship) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "weight", "user_id", "relative_id", "info_id":
-			values[i] = new(sql.NullInt64)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(relationshipDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Relationship fields.
 func (_m *Relationship) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "weight":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field weight", values[i])
-			} else if value.Valid {
-				_m.Weight = int(value.Int64)
-			}
-		case "user_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value.Valid {
-				_m.UserID = int(value.Int64)
-			}
-		case "relative_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field relative_id", values[i])
-			} else if value.Valid {
-				_m.RelativeID = int(value.Int64)
-			}
-		case "info_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field info_id", values[i])
-			} else if value.Valid {
-				_m.InfoID = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(relationshipDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Relationship.
@@ -162,21 +120,7 @@ func (_m *Relationship) Unwrap() *Relationship {
 
 // String implements the fmt.Stringer.
 func (_m *Relationship) String() string {
-	var builder strings.Builder
-	builder.WriteString("Relationship(")
-	builder.WriteString("weight=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Weight))
-	builder.WriteString(", ")
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
-	builder.WriteString(", ")
-	builder.WriteString("relative_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.RelativeID))
-	builder.WriteString(", ")
-	builder.WriteString("info_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.InfoID))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(relationshipDescriptor, _m)
 }
 
 // Relationships is a parsable slice of Relationship.

@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -88,60 +86,15 @@ func (e BlobEdges) BlobLinksOrErr() ([]*BlobLink, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Blob) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "count":
-			values[i] = new(sql.NullInt64)
-		case "id", "uuid":
-			values[i] = new(uuid.UUID)
-		case "blob_parent": // blob_parent
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(blobDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Blob fields.
 func (_m *Blob) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				_m.ID = *value
-			}
-		case "uuid":
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field uuid", values[i])
-			} else if value != nil {
-				_m.UUID = *value
-			}
-		case "count":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field count", values[i])
-			} else if value.Valid {
-				_m.Count = int(value.Int64)
-			}
-		case "blob_parent":
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field blob_parent", values[i])
-			} else if value.Valid {
-				_m.blob_parent = new(uuid.UUID)
-				*_m.blob_parent = *value.S.(*uuid.UUID)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(blobDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Blob.
@@ -173,16 +126,7 @@ func (_m *Blob) Unwrap() *Blob {
 
 // String implements the fmt.Stringer.
 func (_m *Blob) String() string {
-	var builder strings.Builder
-	builder.WriteString("Blob(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("uuid=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UUID))
-	builder.WriteString(", ")
-	builder.WriteString("count=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Count))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(blobDescriptor, _m)
 }
 
 // Blobs is a parsable slice of Blob.

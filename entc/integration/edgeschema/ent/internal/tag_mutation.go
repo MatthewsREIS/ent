@@ -89,6 +89,16 @@ var tagDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "value",
+			Name:        "value",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"value": field.TypeString,
 	},

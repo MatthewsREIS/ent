@@ -76,6 +76,30 @@ var parentDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "by_adoption",
+			Name:        "by_adoption",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[bool](),
+			SQLType:     field.TypeBool,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "parent_id",
+			Name:        "parent_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	SchemaKey: "Parent"}
 
 // NewParentMutation creates a new mutation for the Parent entity.

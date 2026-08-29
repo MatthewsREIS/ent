@@ -7,14 +7,13 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // UserGroup is the model entity for the UserGroup schema.
@@ -80,57 +79,15 @@ func (e UserGroupEdges) GroupOrErr() (*Group, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*UserGroup) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id", "user_id", "group_id":
-			values[i] = new(sql.NullInt64)
-		case "joined_at":
-			values[i] = new(sql.NullTime)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(usergroupDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the UserGroup fields.
 func (_m *UserGroup) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "joined_at":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field joined_at", values[i])
-			} else if value.Valid {
-				_m.JoinedAt = value.Time
-			}
-		case "user_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value.Valid {
-				_m.UserID = int(value.Int64)
-			}
-		case "group_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field group_id", values[i])
-			} else if value.Valid {
-				_m.GroupID = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(usergroupDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the UserGroup.
@@ -152,19 +109,7 @@ func (_m *UserGroup) Unwrap() *UserGroup {
 
 // String implements the fmt.Stringer.
 func (_m *UserGroup) String() string {
-	var builder strings.Builder
-	builder.WriteString("UserGroup(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("joined_at=")
-	builder.WriteString(_m.JoinedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
-	builder.WriteString(", ")
-	builder.WriteString("group_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.GroupID))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(usergroupDescriptor, _m)
 }
 
 // UserGroups is a parsable slice of UserGroup.

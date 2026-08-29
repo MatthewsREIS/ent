@@ -49,8 +49,18 @@ var sessionDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:    "id",
-	IDSQLType:   field.TypeBytes,
+	IDColumn:   "id",
+	IDSQLType:  field.TypeBytes,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "device_sessions",
+			GoName:      "SetDeviceSessions",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[schema.ID](),
+			SQLType:     field.TypeBytes,
+		},
+	},
 	GraphFields: map[string]field.Type{},
 	GraphEdges: map[string]entbuilder.EdgeSpec{
 		"device": {

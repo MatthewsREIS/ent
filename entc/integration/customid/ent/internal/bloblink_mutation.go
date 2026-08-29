@@ -67,6 +67,30 @@ var bloblinkDescriptor = &entbuilder.Descriptor{
 		"blob_id",
 		"link_id",
 	},
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "created_at",
+			Name:        "created_at",
+			StructIndex: 1,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "blob_id",
+			Name:        "blob_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+		{
+			Column:      "link_id",
+			Name:        "link_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"created_at": field.TypeTime,
 		"blob_id":    field.TypeUUID,

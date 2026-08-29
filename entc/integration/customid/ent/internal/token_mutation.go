@@ -59,6 +59,24 @@ var tokenDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeOther,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "body",
+			Name:        "body",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "account_token",
+			GoName:      "SetAccountToken",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[sid.ID](),
+			SQLType:     field.TypeOther,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"body": field.TypeString,
 	},

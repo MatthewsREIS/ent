@@ -70,6 +70,30 @@ var filetypeDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "type",
+			Name:        "type",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[FileTypeType](),
+			SQLType:     field.TypeEnum,
+		},
+		{
+			Column:      "state",
+			Name:        "state",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[FileTypeState](),
+			SQLType:     field.TypeEnum,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"name":  field.TypeString,
 		"type":  field.TypeEnum,

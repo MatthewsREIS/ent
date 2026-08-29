@@ -57,7 +57,17 @@ var blogDescriptor = &entbuilder.Descriptor{
 		"oid",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "oid",
+			Name:        "oid",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewBlogMutation creates a new mutation for the Blog entity.
 func NewBlogMutation(c Config, op Op, opts ...BlogMutationOption) *BlogMutation {

@@ -91,6 +91,45 @@ var taskDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "title",
+			Name:        "title",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "description",
+			Name:        "description",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "status",
+			Name:        "status",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[TaskStatus](),
+			SQLType:     field.TypeEnum,
+		},
+		{
+			Column:      "uuid",
+			Name:        "uuid",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_tasks",
+			GoName:      "SetUserTasks",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"title":       field.TypeString,
 		"description": field.TypeString,

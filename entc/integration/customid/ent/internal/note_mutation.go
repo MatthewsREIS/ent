@@ -70,6 +70,24 @@ var noteDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeString,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "text",
+			Name:        "text",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "note_children",
+			GoName:      "SetNoteChildren",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[schema.NoteID](),
+			SQLType:     field.TypeString,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"text": field.TypeString,
 	},

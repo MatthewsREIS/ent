@@ -7,14 +7,13 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Card is the model entity for the Card schema.
@@ -72,80 +71,15 @@ func (e CardEdges) OwnerOrErr() (*User, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Card) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			values[i] = new(sql.NullInt64)
-		case "number", "name", "in_hook":
-			values[i] = new(sql.NullString)
-		case "created_at", "expired_at":
-			values[i] = new(sql.NullTime)
-		case "user_cards": // user_cards
-			values[i] = new(sql.NullInt64)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(cardDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
 func (_m *Card) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "number":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field number", values[i])
-			} else if value.Valid {
-				_m.Number = value.String
-			}
-		case "name":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		case "created_at":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				_m.CreatedAt = value.Time
-			}
-		case "in_hook":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field in_hook", values[i])
-			} else if value.Valid {
-				_m.InHook = value.String
-			}
-		case "expired_at":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field expired_at", values[i])
-			} else if value.Valid {
-				_m.ExpiredAt = value.Time
-			}
-		case "user_cards":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_cards", value)
-			} else if value.Valid {
-				_m.user_cards = new(int)
-				*_m.user_cards = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(cardDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Card.
@@ -177,25 +111,7 @@ func (_m *Card) Unwrap() *Card {
 
 // String implements the fmt.Stringer.
 func (_m *Card) String() string {
-	var builder strings.Builder
-	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("number=")
-	builder.WriteString(_m.Number)
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("in_hook=")
-	builder.WriteString(_m.InHook)
-	builder.WriteString(", ")
-	builder.WriteString("expired_at=")
-	builder.WriteString(_m.ExpiredAt.Format(time.ANSIC))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(cardDescriptor, _m)
 }
 
 // Cards is a parsable slice of Card.

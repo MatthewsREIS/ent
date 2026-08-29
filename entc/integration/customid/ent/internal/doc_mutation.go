@@ -81,6 +81,24 @@ var docDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeString,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "text",
+			Name:        "text",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "doc_children",
+			GoName:      "SetDocChildren",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[schema.DocID](),
+			SQLType:     field.TypeString,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"text": field.TypeString,
 	},

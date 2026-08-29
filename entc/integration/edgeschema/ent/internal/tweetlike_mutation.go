@@ -65,6 +65,30 @@ var tweetlikeDescriptor = &entbuilder.Descriptor{
 		"user_id",
 		"tweet_id",
 	},
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "liked_at",
+			Name:        "liked_at",
+			StructIndex: 1,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "tweet_id",
+			Name:        "tweet_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"liked_at": field.TypeTime,
 		"user_id":  field.TypeInt,

@@ -7,14 +7,12 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Spec is the model entity for the Spec schema.
@@ -59,37 +57,15 @@ func (e SpecEdges) CardOrErr() ([]*Card, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Spec) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			values[i] = new(sql.NullString)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(specDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Spec fields.
 func (_m *Spec) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(specDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Spec.
@@ -111,11 +87,7 @@ func (_m *Spec) Unwrap() *Spec {
 
 // String implements the fmt.Stringer.
 func (_m *Spec) String() string {
-	var builder strings.Builder
-	builder.WriteString("Spec(")
-	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(specDescriptor, _m)
 }
 
 // Specs is a parsable slice of Spec.

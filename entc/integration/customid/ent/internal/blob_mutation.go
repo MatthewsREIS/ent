@@ -78,6 +78,31 @@ var blobDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeUUID,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "uuid",
+			Name:        "uuid",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+		{
+			Column:      "count",
+			Name:        "count",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "blob_parent",
+			GoName:      "SetBlobParent",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"uuid":  field.TypeUUID,
 		"count": field.TypeInt,

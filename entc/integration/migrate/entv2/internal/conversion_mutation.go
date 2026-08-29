@@ -108,7 +108,73 @@ var conversionDescriptor = &entbuilder.Descriptor{
 		"uint64_to_string",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "int8_to_string",
+			Name:        "int8_to_string",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "uint8_to_string",
+			Name:        "uint8_to_string",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "int16_to_string",
+			Name:        "int16_to_string",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "uint16_to_string",
+			Name:        "uint16_to_string",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "int32_to_string",
+			Name:        "int32_to_string",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "uint32_to_string",
+			Name:        "uint32_to_string",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "int64_to_string",
+			Name:        "int64_to_string",
+			StructIndex: 9,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "uint64_to_string",
+			Name:        "uint64_to_string",
+			StructIndex: 10,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewConversionMutation creates a new mutation for the Conversion entity.
 func NewConversionMutation(c Config, op Op, opts ...ConversionMutationOption) *ConversionMutation {

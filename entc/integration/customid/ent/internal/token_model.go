@@ -7,14 +7,12 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Token is the model entity for the Token schema.
@@ -64,54 +62,15 @@ func (e TokenEdges) AccountOrErr() (*Account, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Token) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			values[i] = new(sid.ID)
-		case "body":
-			values[i] = new(sql.NullString)
-		case "account_token": // account_token
-			values[i] = &sql.NullScanner{S: new(sid.ID)}
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(tokenDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Token fields.
 func (_m *Token) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*sid.ID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				_m.ID = *value
-			}
-		case "body":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field body", values[i])
-			} else if value.Valid {
-				_m.Body = value.String
-			}
-		case "account_token":
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field account_token", values[i])
-			} else if value.Valid {
-				_m.account_token = new(sid.ID)
-				*_m.account_token = *value.S.(*sid.ID)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(tokenDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Token.
@@ -143,13 +102,7 @@ func (_m *Token) Unwrap() *Token {
 
 // String implements the fmt.Stringer.
 func (_m *Token) String() string {
-	var builder strings.Builder
-	builder.WriteString("Token(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("body=")
-	builder.WriteString(_m.Body)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(tokenDescriptor, _m)
 }
 
 // Tokens is a parsable slice of Token.

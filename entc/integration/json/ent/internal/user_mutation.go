@@ -144,7 +144,102 @@ var userDescriptor = &entbuilder.Descriptor{
 		"unknown",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "t",
+			Name:        "t",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[*schema.T](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "url",
+			Name:        "url",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[*url.URL](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "urls",
+			Name:        "URLs",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[[]*url.URL](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "raw",
+			Name:        "raw",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[json.RawMessage](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "dirs",
+			Name:        "dirs",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[[]http.Dir](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "ints",
+			Name:        "ints",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[[]int](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "floats",
+			Name:        "floats",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[[]float64](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "strings",
+			Name:        "strings",
+			StructIndex: 9,
+			Type:        reflect.TypeFor[[]string](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "ints_validate",
+			Name:        "ints_validate",
+			StructIndex: 10,
+			Type:        reflect.TypeFor[[]int](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "floats_validate",
+			Name:        "floats_validate",
+			StructIndex: 11,
+			Type:        reflect.TypeFor[[]float64](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "strings_validate",
+			Name:        "strings_validate",
+			StructIndex: 12,
+			Type:        reflect.TypeFor[[]string](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "addr",
+			Name:        "addr",
+			StructIndex: 13,
+			Type:        reflect.TypeFor[schema.Addr](),
+			SQLType:     field.TypeJSON,
+			Sensitive:   true,
+		},
+		{
+			Column:      "unknown",
+			Name:        "unknown",
+			StructIndex: 14,
+			Type:        reflect.TypeFor[any](),
+			SQLType:     field.TypeJSON,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

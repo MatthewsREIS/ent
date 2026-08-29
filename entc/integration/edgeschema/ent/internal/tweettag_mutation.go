@@ -75,6 +75,30 @@ var tweettagDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeUUID,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "added_at",
+			Name:        "added_at",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "tag_id",
+			Name:        "tag_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "tweet_id",
+			Name:        "tweet_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"added_at": field.TypeTime,
 		"tag_id":   field.TypeInt,

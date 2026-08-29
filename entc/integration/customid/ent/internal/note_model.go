@@ -7,14 +7,12 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Note is the model entity for the Note schema.
@@ -75,52 +73,15 @@ func (e NoteEdges) ChildrenOrErr() ([]*Note, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Note) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id", "text":
-			values[i] = new(sql.NullString)
-		case "note_children": // note_children
-			values[i] = new(sql.NullString)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(noteDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Note fields.
 func (_m *Note) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = schema.NoteID(value.String)
-			}
-		case "text":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field text", values[i])
-			} else if value.Valid {
-				_m.Text = value.String
-			}
-		case "note_children":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field note_children", values[i])
-			} else if value.Valid {
-				_m.note_children = new(schema.NoteID)
-				*_m.note_children = schema.NoteID(value.String)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(noteDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Note.
@@ -152,13 +113,7 @@ func (_m *Note) Unwrap() *Note {
 
 // String implements the fmt.Stringer.
 func (_m *Note) String() string {
-	var builder strings.Builder
-	builder.WriteString("Note(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("text=")
-	builder.WriteString(_m.Text)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(noteDescriptor, _m)
 }
 
 // Notes is a parsable slice of Note.

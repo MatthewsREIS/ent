@@ -44,7 +44,17 @@ var customtypeDescriptor = &entbuilder.Descriptor{
 		"custom",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "custom",
+			Name:        "custom",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewCustomTypeMutation creates a new mutation for the CustomType entity.
 func NewCustomTypeMutation(c Config, op Op, opts ...CustomTypeMutationOption) *CustomTypeMutation {

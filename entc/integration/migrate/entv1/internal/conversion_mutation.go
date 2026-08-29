@@ -116,7 +116,73 @@ var conversionDescriptor = &entbuilder.Descriptor{
 		"uint64_to_string",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "int8_to_string",
+			Name:        "int8_to_string",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int8](),
+			SQLType:     field.TypeInt8,
+		},
+		{
+			Column:      "uint8_to_string",
+			Name:        "uint8_to_string",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[uint8](),
+			SQLType:     field.TypeUint8,
+		},
+		{
+			Column:      "int16_to_string",
+			Name:        "int16_to_string",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[int16](),
+			SQLType:     field.TypeInt16,
+		},
+		{
+			Column:      "uint16_to_string",
+			Name:        "uint16_to_string",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[uint16](),
+			SQLType:     field.TypeUint16,
+		},
+		{
+			Column:      "int32_to_string",
+			Name:        "int32_to_string",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[int32](),
+			SQLType:     field.TypeInt32,
+		},
+		{
+			Column:      "uint32_to_string",
+			Name:        "uint32_to_string",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[uint32](),
+			SQLType:     field.TypeUint32,
+		},
+		{
+			Column:      "int64_to_string",
+			Name:        "int64_to_string",
+			StructIndex: 9,
+			Type:        reflect.TypeFor[int64](),
+			SQLType:     field.TypeInt64,
+		},
+		{
+			Column:      "uint64_to_string",
+			Name:        "uint64_to_string",
+			StructIndex: 10,
+			Type:        reflect.TypeFor[uint64](),
+			SQLType:     field.TypeUint64,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewConversionMutation creates a new mutation for the Conversion entity.
 func NewConversionMutation(c Config, op Op, opts ...ConversionMutationOption) *ConversionMutation {

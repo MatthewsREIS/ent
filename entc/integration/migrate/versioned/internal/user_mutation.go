@@ -59,7 +59,31 @@ var userDescriptor = &entbuilder.Descriptor{
 		"address",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "age",
+			Name:        "age",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int32](),
+			SQLType:     field.TypeInt32,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "address",
+			Name:        "address",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

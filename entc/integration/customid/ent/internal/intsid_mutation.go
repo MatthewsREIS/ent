@@ -60,8 +60,18 @@ var intsidDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:    "id",
-	IDSQLType:   field.TypeInt64,
+	IDColumn:   "id",
+	IDSQLType:  field.TypeInt64,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "int_sid_parent",
+			GoName:      "SetIntSidParent",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[sid.ID](),
+			SQLType:     field.TypeInt64,
+		},
+	},
 	GraphFields: map[string]field.Type{},
 	GraphEdges: map[string]entbuilder.EdgeSpec{
 		"parent": {

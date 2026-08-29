@@ -77,7 +77,31 @@ var rentalDescriptor = &entbuilder.Descriptor{
 		"car_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "date",
+			Name:        "date",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "car_id",
+			Name:        "car_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewRentalMutation creates a new mutation for the Rental entity.
 func NewRentalMutation(c Config, op Op, opts ...RentalMutationOption) *RentalMutation {

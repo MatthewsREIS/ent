@@ -119,7 +119,54 @@ var userDescriptor = &entbuilder.Descriptor{
 		"active",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "version",
+			Name:        "version",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "worth",
+			Name:        "worth",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[uint](),
+			SQLType:     field.TypeUint,
+		},
+		{
+			Column:      "password",
+			Name:        "password",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+			Sensitive:   true,
+		},
+		{
+			Column:      "active",
+			Name:        "active",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[bool](),
+			SQLType:     field.TypeBool,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_best_friend",
+			GoName:      "SetUserBestFriend",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

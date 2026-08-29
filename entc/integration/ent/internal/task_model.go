@@ -7,16 +7,14 @@
 package internal
 
 import (
-	"encoding/json"
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/schema/task"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Task is the model entity for the Task schema.
@@ -48,94 +46,15 @@ type Task struct {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Task) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "priorities":
-			values[i] = new([]byte)
-		case "id", "priority", "order", "order_option":
-			values[i] = new(sql.NullInt64)
-		case "name", "owner", "op":
-			values[i] = new(sql.NullString)
-		case "created_at":
-			values[i] = new(sql.NullTime)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(enttaskDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Task fields.
 func (_m *Task) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "priority":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field priority", values[i])
-			} else if value.Valid {
-				_m.Priority = task.Priority(value.Int64)
-			}
-		case "priorities":
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field priorities", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Priorities); err != nil {
-					return fmt.Errorf("unmarshal field priorities: %w", err)
-				}
-			}
-		case "created_at":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				_m.CreatedAt = new(time.Time)
-				*_m.CreatedAt = value.Time
-			}
-		case "name":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		case "owner":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field owner", values[i])
-			} else if value.Valid {
-				_m.Owner = value.String
-			}
-		case "order":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field order", values[i])
-			} else if value.Valid {
-				_m.Order = int(value.Int64)
-			}
-		case "order_option":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field order_option", values[i])
-			} else if value.Valid {
-				_m.OrderOption = int(value.Int64)
-			}
-		case "op":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field op", values[i])
-			} else if value.Valid {
-				_m.Op = value.String
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(enttaskDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Task.
@@ -157,36 +76,7 @@ func (_m *Task) Unwrap() *Task {
 
 // String implements the fmt.Stringer.
 func (_m *Task) String() string {
-	var builder strings.Builder
-	builder.WriteString("Task(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("priority=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Priority))
-	builder.WriteString(", ")
-	builder.WriteString("priorities=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Priorities))
-	builder.WriteString(", ")
-	if v := _m.CreatedAt; v != nil {
-		builder.WriteString("created_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("owner=")
-	builder.WriteString(_m.Owner)
-	builder.WriteString(", ")
-	builder.WriteString("order=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Order))
-	builder.WriteString(", ")
-	builder.WriteString("order_option=")
-	builder.WriteString(fmt.Sprintf("%v", _m.OrderOption))
-	builder.WriteString(", ")
-	builder.WriteString("op=")
-	builder.WriteString(_m.Op)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(enttaskDescriptor, _m)
 }
 
 // Tasks is a parsable slice of Task.

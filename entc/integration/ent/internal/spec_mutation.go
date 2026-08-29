@@ -48,6 +48,8 @@ var specDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:    "id",
 	IDSQLType:   field.TypeInt,
+	ScanFields:  []entbuilder.FieldSpec{},
+	FKColumns:   []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{},
 	GraphEdges: map[string]entbuilder.EdgeSpec{
 		"card": {

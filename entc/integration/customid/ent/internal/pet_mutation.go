@@ -80,8 +80,25 @@ var petDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:    "id",
-	IDSQLType:   field.TypeString,
+	IDColumn:   "id",
+	IDSQLType:  field.TypeString,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "pet_best_friend",
+			GoName:      "SetPetBestFriend",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "user_pets",
+			GoName:      "SetUserPets",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
 	GraphFields: map[string]field.Type{},
 	GraphEdges: map[string]entbuilder.EdgeSpec{
 		"owner": {

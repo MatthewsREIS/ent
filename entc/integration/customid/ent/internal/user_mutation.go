@@ -79,8 +79,18 @@ var userDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"oid",
 	},
-	IDColumn:    "oid",
-	IDSQLType:   field.TypeInt,
+	IDColumn:   "oid",
+	IDSQLType:  field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_children",
+			GoName:      "SetUserChildren",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
 	GraphFields: map[string]field.Type{},
 	GraphEdges: map[string]entbuilder.EdgeSpec{
 		"groups": {

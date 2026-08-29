@@ -119,6 +119,53 @@ var groupDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "active",
+			Name:        "active",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[bool](),
+			SQLType:     field.TypeBool,
+		},
+		{
+			Column:      "expire",
+			Name:        "expire",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "type",
+			Name:        "type",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+			Nillable:    true,
+		},
+		{
+			Column:      "max_users",
+			Name:        "max_users",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "group_info",
+			GoName:      "SetGroupInfo",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"active":    field.TypeBool,
 		"expire":    field.TypeTime,

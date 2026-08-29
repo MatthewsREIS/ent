@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // User is the model entity for the User schema.
@@ -130,131 +128,15 @@ func (s UserState) String() string {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*User) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "blob":
-			values[i] = new([]byte)
-		case "oid", "age":
-			values[i] = new(sql.NullInt64)
-		case "name", "description", "nickname", "address", "renamed", "old_token", "state", "status", "workplace", "drop_optional":
-			values[i] = new(sql.NullString)
-		case "user_children": // user_children
-			values[i] = new(sql.NullInt64)
-		case "user_spouse": // user_spouse
-			values[i] = new(sql.NullInt64)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(userDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
 func (_m *User) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "oid":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "age":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field age", values[i])
-			} else if value.Valid {
-				_m.Age = int32(value.Int64)
-			}
-		case "name":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		case "description":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field description", values[i])
-			} else if value.Valid {
-				_m.Description = value.String
-			}
-		case "nickname":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field nickname", values[i])
-			} else if value.Valid {
-				_m.Nickname = value.String
-			}
-		case "address":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field address", values[i])
-			} else if value.Valid {
-				_m.Address = value.String
-			}
-		case "renamed":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field renamed", values[i])
-			} else if value.Valid {
-				_m.Renamed = value.String
-			}
-		case "old_token":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field old_token", values[i])
-			} else if value.Valid {
-				_m.OldToken = value.String
-			}
-		case "blob":
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field blob", values[i])
-			} else if value != nil {
-				_m.Blob = *value
-			}
-		case "state":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field state", values[i])
-			} else if value.Valid {
-				_m.State = UserState(value.String)
-			}
-		case "status":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field status", values[i])
-			} else if value.Valid {
-				_m.Status = value.String
-			}
-		case "workplace":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field workplace", values[i])
-			} else if value.Valid {
-				_m.Workplace = value.String
-			}
-		case "drop_optional":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field drop_optional", values[i])
-			} else if value.Valid {
-				_m.DropOptional = value.String
-			}
-		case "user_children":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_children", value)
-			} else if value.Valid {
-				_m.user_children = new(int)
-				*_m.user_children = int(value.Int64)
-			}
-		case "user_spouse":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
-			} else if value.Valid {
-				_m.user_spouse = new(int)
-				*_m.user_spouse = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(userDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the User.
@@ -296,46 +178,7 @@ func (_m *User) Unwrap() *User {
 
 // String implements the fmt.Stringer.
 func (_m *User) String() string {
-	var builder strings.Builder
-	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Age))
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("description=")
-	builder.WriteString(_m.Description)
-	builder.WriteString(", ")
-	builder.WriteString("nickname=")
-	builder.WriteString(_m.Nickname)
-	builder.WriteString(", ")
-	builder.WriteString("address=")
-	builder.WriteString(_m.Address)
-	builder.WriteString(", ")
-	builder.WriteString("renamed=")
-	builder.WriteString(_m.Renamed)
-	builder.WriteString(", ")
-	builder.WriteString("old_token=")
-	builder.WriteString(_m.OldToken)
-	builder.WriteString(", ")
-	builder.WriteString("blob=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Blob))
-	builder.WriteString(", ")
-	builder.WriteString("state=")
-	builder.WriteString(fmt.Sprintf("%v", _m.State))
-	builder.WriteString(", ")
-	builder.WriteString("status=")
-	builder.WriteString(_m.Status)
-	builder.WriteString(", ")
-	builder.WriteString("workplace=")
-	builder.WriteString(_m.Workplace)
-	builder.WriteString(", ")
-	builder.WriteString("drop_optional=")
-	builder.WriteString(_m.DropOptional)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(userDescriptor, _m)
 }
 
 // Users is a parsable slice of User.

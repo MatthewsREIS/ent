@@ -13,13 +13,11 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 	{{- if $.HasValueScanner }}
 		"entgo.io/ent/schema/field"
 	{{- end }}
@@ -187,128 +185,24 @@ type {{ $slice }} []*{{ $.Name }}
 
 {{/*
 Internal model decode template.
-Inlines field/edge name strings instead of referencing sub-package constants.
+ScanValues/AssignValues/Value delegate to the descriptor-driven reflection
+scanner in runtime/entbuilder/scan.go — see the task-4 report for the full
+conversion rule table these three bodies are equivalent to.
 */}}
 {{ define "internal/model/decode" }}
 {{ $receiver := $.Receiver }}
 
-{{ $ctypes := dict }}
-{{ if $.HasOneFieldID }}
-	{{ $idscantype := $.ID.NewScanType }}
-	{{ $ctypes = set $ctypes $idscantype (list $.ID.StorageKey) }}
-{{ end }}
-{{ range $f := $.Fields }}
-	{{- if $f.HasValueScanner }}
-		{{- continue }}
-	{{- end }}
-	{{ $names := list }}
-	{{ if hasKey $ctypes $f.NewScanType }}
-		{{ $names = get $ctypes $f.NewScanType }}
-	{{ end }}
-	{{ $names = append $names $f.StorageKey }}
-	{{ $ctypes = set $ctypes $f.NewScanType $names }}
-{{ end }}
-
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*{{ $.Name }}) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-			{{- range $type, $columns := $ctypes }}
-				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }} "{{ $c }}"{{ end }}:
-					values[i] = {{ $type }}
-			{{- end }}
-			{{- range $f := $.Fields }}
-				{{- if $f.HasValueScanner }}
-					case "{{ $f.StorageKey }}":
-					values[i] = {{ $.Name }}ValueScanner.{{ $f.StructField }}.ScanValue()
-				{{- end }}
-			{{- end }}
-			{{- if eq $.Storage.Name "sql" }}
-				{{- range $i, $fk := $.UnexportedForeignKeys }}
-					{{- $f := $fk.Field }}
-					case "{{ $f.StorageKey }}": // {{ $fk.StructField }}
-						values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
-				{{- end }}
-			{{- end }}
-			default:
-				values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets({{ $.Package }}Descriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the {{ $.Name }} fields.
 func ({{ $receiver }} *{{ $.Name }}) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		{{- if $.HasOneFieldID }}
-			case "{{ $.ID.StorageKey }}":
-				{{- if or $.ID.IsString $.ID.IsBytes $.ID.HasGoType }}
-					{{- with extend $ "Idx" "i" "Field" $.ID "Rec" $receiver }}
-						{{ template "dialect/sql/decode/field" . }}
-					{{- end }}
-				{{- else }}
-					value, ok := values[i].(*sql.NullInt64)
-					if !ok {
-						return fmt.Errorf("unexpected type %T for field id", value)
-					}
-					{{ $receiver }}.ID = {{ $.ID.Type }}(value.Int64)
-				{{- end }}
-		{{- end }}
-		{{- range  $f := $.Fields }}
-			case "{{ $f.StorageKey }}":
-				{{- if and ($f.IsEnum) (not $f.HasGoType) }}
-					{{- $enumType := printf "%s%s" $.Name (trimPackage $f.Type.String $.Package) }}
-					if value, ok := values[i].(*sql.NullString); !ok {
-						return fmt.Errorf("unexpected type %T for field {{ $f.Name }}", values[i])
-					} else if value.Valid {
-						{{- if $f.NillableValue }}
-						enumValue := {{ $enumType }}(value.String)
-						{{ $receiver }}.{{ $f.StructField }} = &enumValue
-						{{- else }}
-						{{ $receiver }}.{{ $f.StructField }} = {{ $enumType }}(value.String)
-						{{- end }}
-					}
-				{{- else if $f.HasValueScanner }}
-					if value, err := {{ $.Name }}ValueScanner.{{ $f.StructField }}.FromValue(values[i]); err != nil {
-						return err
-					} else {
-						{{ $receiver }}.{{ $f.StructField }} = value
-					}
-				{{- else }}
-					{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver }}
-						{{ template "dialect/sql/decode/field" . }}
-					{{- end }}
-				{{- end }}
-		{{- end }}
-		{{- if eq $.Storage.Name "sql" }}
-			{{- range $i, $fk := $.UnexportedForeignKeys }}
-				{{- $f := $fk.Field }}
-				case {{ if $fk.UserDefined }}"{{ $.ID.StorageKey }}"{{ else }}"{{ $f.StorageKey }}"{{ end }}:
-					{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsBytes $f.HasGoType)) }}
-						{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
-							{{ template "dialect/sql/decode/field" . }}
-						{{- end }}
-					{{- else }}
-						if value, ok := values[i].(*sql.NullInt64); !ok {
-							return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
-						} else if value.Valid {
-							{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
-							{{ if and $f.Nillable (not $f.Type.Nillable) }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
-						}
-					{{- end }}
-			{{- end }}
-		{{- end }}
-		default:
-			{{ $receiver }}.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow({{ $.Package }}Descriptor, {{ $receiver }}, columns, values, func(c string, v any) {
+		{{ $receiver }}.selectValues.Set(c, v)
+	})
 }
 
 // {{ $.ValueName }} returns the ent.Value that was dynamically selected and assigned to the {{ $.Name }}.

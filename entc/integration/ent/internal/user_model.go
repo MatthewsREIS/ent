@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // User is the model entity for the User schema.
@@ -224,138 +222,15 @@ func (s UserEmployment) String() string {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*User) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id", "optional_int", "age", "files_count":
-			values[i] = new(sql.NullInt64)
-		case "name", "last", "nickname", "address", "phone", "password", "role", "employment", "sso_cert":
-			values[i] = new(sql.NullString)
-		case "group_blocked": // group_blocked
-			values[i] = new(sql.NullInt64)
-		case "user_spouse": // user_spouse
-			values[i] = new(sql.NullInt64)
-		case "user_parent": // user_parent
-			values[i] = new(sql.NullInt64)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(userDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
 func (_m *User) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "optional_int":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field optional_int", values[i])
-			} else if value.Valid {
-				_m.OptionalInt = int(value.Int64)
-			}
-		case "age":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field age", values[i])
-			} else if value.Valid {
-				_m.Age = int(value.Int64)
-			}
-		case "name":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		case "last":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field last", values[i])
-			} else if value.Valid {
-				_m.Last = value.String
-			}
-		case "nickname":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field nickname", values[i])
-			} else if value.Valid {
-				_m.Nickname = value.String
-			}
-		case "address":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field address", values[i])
-			} else if value.Valid {
-				_m.Address = value.String
-			}
-		case "phone":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field phone", values[i])
-			} else if value.Valid {
-				_m.Phone = value.String
-			}
-		case "password":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field password", values[i])
-			} else if value.Valid {
-				_m.Password = value.String
-			}
-		case "role":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field role", values[i])
-			} else if value.Valid {
-				_m.Role = UserRole(value.String)
-			}
-		case "employment":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field employment", values[i])
-			} else if value.Valid {
-				_m.Employment = UserEmployment(value.String)
-			}
-		case "sso_cert":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field SSOCert", values[i])
-			} else if value.Valid {
-				_m.SSOCert = value.String
-			}
-		case "files_count":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field files_count", values[i])
-			} else if value.Valid {
-				_m.FilesCount = int(value.Int64)
-			}
-		case "group_blocked":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field group_blocked", value)
-			} else if value.Valid {
-				_m.group_blocked = new(int)
-				*_m.group_blocked = int(value.Int64)
-			}
-		case "user_spouse":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
-			} else if value.Valid {
-				_m.user_spouse = new(int)
-				*_m.user_spouse = int(value.Int64)
-			}
-		case "user_parent":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_parent", value)
-			} else if value.Valid {
-				_m.user_parent = new(int)
-				*_m.user_parent = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(userDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the User.
@@ -407,45 +282,7 @@ func (_m *User) Unwrap() *User {
 
 // String implements the fmt.Stringer.
 func (_m *User) String() string {
-	var builder strings.Builder
-	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("optional_int=")
-	builder.WriteString(fmt.Sprintf("%v", _m.OptionalInt))
-	builder.WriteString(", ")
-	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Age))
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("last=")
-	builder.WriteString(_m.Last)
-	builder.WriteString(", ")
-	builder.WriteString("nickname=")
-	builder.WriteString(_m.Nickname)
-	builder.WriteString(", ")
-	builder.WriteString("address=")
-	builder.WriteString(_m.Address)
-	builder.WriteString(", ")
-	builder.WriteString("phone=")
-	builder.WriteString(_m.Phone)
-	builder.WriteString(", ")
-	builder.WriteString("password=<sensitive>")
-	builder.WriteString(", ")
-	builder.WriteString("role=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Role))
-	builder.WriteString(", ")
-	builder.WriteString("employment=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Employment))
-	builder.WriteString(", ")
-	builder.WriteString("SSOCert=")
-	builder.WriteString(_m.SSOCert)
-	builder.WriteString(", ")
-	builder.WriteString("files_count=")
-	builder.WriteString(fmt.Sprintf("%v", _m.FilesCount))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(userDescriptor, _m)
 }
 
 // NamedPets returns the Pets named value or an error if the edge was not

@@ -59,7 +59,17 @@ var infoDescriptor = &entbuilder.Descriptor{
 		"content",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "content",
+			Name:        "content",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[json.RawMessage](),
+			SQLType:     field.TypeJSON,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewInfoMutation creates a new mutation for the Info entity.
 func NewInfoMutation(c Config, op Op, opts ...InfoMutationOption) *InfoMutation {

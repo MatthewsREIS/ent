@@ -53,6 +53,23 @@ var mixinidDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeUUID,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "some_field",
+			Name:        "some_field",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "mixin_field",
+			Name:        "mixin_field",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"some_field":  field.TypeString,
 		"mixin_field": field.TypeString,

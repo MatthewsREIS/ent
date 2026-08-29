@@ -65,6 +65,30 @@ var roleuserDescriptor = &entbuilder.Descriptor{
 		"role_id",
 		"user_id",
 	},
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "created_at",
+			Name:        "created_at",
+			StructIndex: 1,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "role_id",
+			Name:        "role_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"created_at": field.TypeTime,
 		"role_id":    field.TypeInt,

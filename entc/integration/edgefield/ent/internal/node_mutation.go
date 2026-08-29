@@ -70,7 +70,24 @@ var nodeDescriptor = &entbuilder.Descriptor{
 		"prev_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "value",
+			Name:        "value",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "prev_id",
+			Name:        "prev_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewNodeMutation creates a new mutation for the Node entity.
 func NewNodeMutation(c Config, op Op, opts ...NodeMutationOption) *NodeMutation {

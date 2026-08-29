@@ -78,6 +78,32 @@ var nodeDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "value",
+			Name:        "value",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "updated_at",
+			Name:        "updated_at",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+			Nillable:    true,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "node_next",
+			GoName:      "SetNodeNext",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"value":      field.TypeInt,
 		"updated_at": field.TypeTime,

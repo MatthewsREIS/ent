@@ -47,6 +47,16 @@ var linkDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeUUID,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "link_information",
+			Name:        "link_information",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[map[string]schema.LinkInformation](),
+			SQLType:     field.TypeJSON,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"link_information": field.TypeJSON,
 	},

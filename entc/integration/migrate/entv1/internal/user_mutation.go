@@ -174,7 +174,109 @@ var userDescriptor = &entbuilder.Descriptor{
 		"drop_optional",
 	},
 	IDColumn:  "oid",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "age",
+			Name:        "age",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int32](),
+			SQLType:     field.TypeInt32,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "description",
+			Name:        "description",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "nickname",
+			Name:        "nickname",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "address",
+			Name:        "address",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "renamed",
+			Name:        "renamed",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "old_token",
+			Name:        "old_token",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "blob",
+			Name:        "blob",
+			StructIndex: 9,
+			Type:        reflect.TypeFor[[]byte](),
+			SQLType:     field.TypeBytes,
+		},
+		{
+			Column:      "state",
+			Name:        "state",
+			StructIndex: 10,
+			Type:        reflect.TypeFor[UserState](),
+			SQLType:     field.TypeEnum,
+		},
+		{
+			Column:      "status",
+			Name:        "status",
+			StructIndex: 11,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "workplace",
+			Name:        "workplace",
+			StructIndex: 12,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "drop_optional",
+			Name:        "drop_optional",
+			StructIndex: 13,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_children",
+			GoName:      "SetUserChildren",
+			StructIndex: 15,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "user_spouse",
+			GoName:      "SetUserSpouse",
+			StructIndex: 16,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

@@ -69,7 +69,24 @@ var postDescriptor = &entbuilder.Descriptor{
 		"author_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "text",
+			Name:        "text",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "author_id",
+			Name:        "author_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewPostMutation creates a new mutation for the Post entity.
 func NewPostMutation(c Config, op Op, opts ...PostMutationOption) *PostMutation {

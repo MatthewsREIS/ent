@@ -78,6 +78,37 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 		"relative_id",
 		"info_id",
 	},
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "weight",
+			Name:        "weight",
+			StructIndex: 1,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "relative_id",
+			Name:        "relative_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "info_id",
+			Name:        "info_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"weight":      field.TypeInt,
 		"user_id":     field.TypeInt,

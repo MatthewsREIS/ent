@@ -58,7 +58,17 @@ var carDescriptor = &entbuilder.Descriptor{
 		"number",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeUUID}
+	IDSQLType: field.TypeUUID,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "number",
+			Name:        "number",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewCarMutation creates a new mutation for the Car entity.
 func NewCarMutation(c Config, op Op, opts ...CarMutationOption) *CarMutation {

@@ -160,6 +160,52 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 	IDColumn:  {{ $n.ID.StorageKey | printf "%q" }},
 	IDSQLType: field.{{ $n.ID.Type.ConstName }},
 	{{- end }}
+	{{- /* Struct-index bases mirror internal_model.tmpl's struct emission
+	      order exactly: Config is always field 0, a single-field ID (when
+	      present) is always field 1, then $n.Fields in order, then Edges
+	      (one field, if any), then $n.UnexportedForeignKeys in order. */}}
+	{{- $structBase := 1 }}{{ if $n.HasOneFieldID }}{{ $structBase = 2 }}{{ end }}
+	ScanFields: []entbuilder.FieldSpec{
+		{{- /* Deliberately ranges $n.Fields (every schema field, in struct
+		      order), not $n.MutationFields: Fields above excludes a field
+		      an edge exclusively owns (IsEdgeField), but the struct still
+		      holds it as a plain exported field (e.g. edge-schema
+		      Relationship.UserID) that ScanTargets/AssignRow/FormatEntity
+		      must still cover. See Descriptor.ScanFields' doc comment. */}}
+		{{- range $i, $f := $n.Fields }}
+		{
+			Column:      {{ $f.StorageKey | printf "%q" }},
+			Name:        {{ $f.Name | printf "%q" }},
+			StructIndex: {{ add $structBase $i }},
+			Type:        reflect.TypeFor[{{ if and ($f.IsEnum) (not $f.HasGoType) }}{{ $n.Name }}{{ trimPackage $f.Type.String $n.Package }}{{ else }}{{ $f.Type }}{{ end }}](),
+			SQLType:     field.{{ $f.Type.ConstName }},
+			{{- if $f.Nillable }}
+			Nillable: true,
+			{{- end }}
+			{{- if $f.Sensitive }}
+			Sensitive: true,
+			{{- end }}
+			{{- if $f.HasValueScanner }}
+			HasValueScanner: true,
+			ScanValue: func() any { return {{ $n.Name }}ValueScanner.{{ $f.StructField }}.ScanValue() },
+			FromValue: func(v any) (any, error) { return {{ $n.Name }}ValueScanner.{{ $f.StructField }}.FromValue(v) },
+			{{- end }}
+		},
+		{{- end }}
+	},
+	{{- $fkBase := add $structBase (len $n.Fields) }}{{ if $n.Edges }}{{ $fkBase = add $fkBase 1 }}{{ end }}
+	FKColumns: []entbuilder.FieldSpec{
+		{{- range $i, $fk := $n.UnexportedForeignKeys }}
+		{{- $f := $fk.Field }}
+		{
+			Column:      {{ $f.StorageKey | printf "%q" }},
+			GoName:      {{ printf "Set%s" (pascal $fk.StructField) | printf "%q" }},
+			StructIndex: {{ add $fkBase $i }},
+			Type:        reflect.TypeFor[{{ $f.Type }}](),
+			SQLType:     field.{{ $f.Type.ConstName }},
+		},
+		{{- end }}
+	},
 	{{- if $n.FeatureEnabled "sql/schemaconfig" }}
 	SchemaKey: {{ $n.Name | printf "%q" }},
 	{{- end }}

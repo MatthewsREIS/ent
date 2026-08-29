@@ -7,15 +7,12 @@
 package internal
 
 import (
-	"encoding/json"
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Comment is the model entity for the Comment schema.
@@ -41,82 +38,15 @@ type Comment struct {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Comment) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "dir":
-			values[i] = new([]byte)
-		case "unique_float":
-			values[i] = new(sql.NullFloat64)
-		case "id", "unique_int", "nillable_int":
-			values[i] = new(sql.NullInt64)
-		case "table", "client":
-			values[i] = new(sql.NullString)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(commentDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Comment fields.
 func (_m *Comment) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "unique_int":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field unique_int", values[i])
-			} else if value.Valid {
-				_m.UniqueInt = int(value.Int64)
-			}
-		case "unique_float":
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field unique_float", values[i])
-			} else if value.Valid {
-				_m.UniqueFloat = value.Float64
-			}
-		case "nillable_int":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field nillable_int", values[i])
-			} else if value.Valid {
-				_m.NillableInt = new(int)
-				*_m.NillableInt = int(value.Int64)
-			}
-		case "table":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field table", values[i])
-			} else if value.Valid {
-				_m.Table = value.String
-			}
-		case "dir":
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field dir", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.Dir); err != nil {
-					return fmt.Errorf("unmarshal field dir: %w", err)
-				}
-			}
-		case "client":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field client", values[i])
-			} else if value.Valid {
-				_m.Client = value.String
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(commentDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Comment.
@@ -138,30 +68,7 @@ func (_m *Comment) Unwrap() *Comment {
 
 // String implements the fmt.Stringer.
 func (_m *Comment) String() string {
-	var builder strings.Builder
-	builder.WriteString("Comment(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("unique_int=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UniqueInt))
-	builder.WriteString(", ")
-	builder.WriteString("unique_float=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UniqueFloat))
-	builder.WriteString(", ")
-	if v := _m.NillableInt; v != nil {
-		builder.WriteString("nillable_int=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	builder.WriteString("table=")
-	builder.WriteString(_m.Table)
-	builder.WriteString(", ")
-	builder.WriteString("dir=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Dir))
-	builder.WriteString(", ")
-	builder.WriteString("client=")
-	builder.WriteString(_m.Client)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(commentDescriptor, _m)
 }
 
 // Comments is a parsable slice of Comment.

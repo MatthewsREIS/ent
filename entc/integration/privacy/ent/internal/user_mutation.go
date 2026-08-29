@@ -76,6 +76,23 @@ var userDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "age",
+			Name:        "age",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[uint](),
+			SQLType:     field.TypeUint,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"name": field.TypeString,
 		"age":  field.TypeUint,

@@ -58,6 +58,16 @@ var accountDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeOther,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "email",
+			Name:        "email",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
 	GraphFields: map[string]field.Type{
 		"email": field.TypeString,
 	},

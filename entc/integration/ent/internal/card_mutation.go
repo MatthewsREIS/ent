@@ -101,6 +101,52 @@ var cardDescriptor = &entbuilder.Descriptor{
 	},
 	IDColumn:  "id",
 	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "create_time",
+			Name:        "create_time",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "update_time",
+			Name:        "update_time",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "balance",
+			Name:        "balance",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[float64](),
+			SQLType:     field.TypeFloat64,
+		},
+		{
+			Column:      "number",
+			Name:        "number",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_card",
+			GoName:      "SetUserCard",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
 	GraphFields: map[string]field.Type{
 		"create_time": field.TypeTime,
 		"update_time": field.TypeTime,
