@@ -89,7 +89,7 @@ func (_u *LicenseUpdate) ExecX(ctx context.Context) {
 func (_u *LicenseUpdate) defaults() {
 	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); !ok {
 		v := UpdateDefaultUpdateTime()
-		_ = _u.mutation.SetField("update_time", v)
+		_ = _u.mutation.SetFieldDefault("update_time", v)
 	}
 }
 
@@ -201,7 +201,7 @@ func (_u *LicenseUpdateOne) ExecX(ctx context.Context) {
 func (_u *LicenseUpdateOne) defaults() {
 	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); !ok {
 		v := UpdateDefaultUpdateTime()
-		_ = _u.mutation.SetField("update_time", v)
+		_ = _u.mutation.SetFieldDefault("update_time", v)
 	}
 }
 

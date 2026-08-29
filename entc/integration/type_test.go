@@ -146,6 +146,14 @@ func Types(t *testing.T, client *ent.Client) {
 	require.EqualValues(100, ft.Duration, "UpdateDefault sets the value to 100ns")
 	require.False(ft.DeletedAt.Time.IsZero())
 
+	// I1 regression: Bool[T].Set/Bytes[T].Set must pass the field's declared
+	// GoType (schema.Status, net.IP), not a bare bool/[]byte — boxing the
+	// converted primitive trips entbuilder.Mutation.SetField's reflect.TypeOf
+	// check and these fields become unsettable.
+	ft = client.FieldType.UpdateOne(ft).With(fieldtype.F.Active.Set(schema.Status(true)), fieldtype.F.IP.Set(net.IP("10.0.0.1"))).SaveX(ctx)
+	require.EqualValues(true, ft.Active)
+	require.Equal(net.IP("10.0.0.1").String(), ft.IP.String())
+
 	err = client.Task.CreateBulk(
 		client.Task.Create().With(enttask.F.Priority.Set(task.PriorityLow)),
 		client.Task.Create().With(enttask.F.Priority.Set(task.PriorityMid)),

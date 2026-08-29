@@ -33,7 +33,7 @@ var F = struct {
 	// Phone is the handle for the "phone" field.
 	Phone entfield.String[string]
 	// Buffer is the handle for the "buffer" field.
-	Buffer entfield.Bytes
+	Buffer entfield.Bytes[[]byte]
 	// Title is the handle for the "title" field.
 	Title entfield.String[string]
 	// NewName is the handle for the "new_name" field.
@@ -41,7 +41,7 @@ var F = struct {
 	// NewToken is the handle for the "new_token" field.
 	NewToken entfield.String[string]
 	// Blob is the handle for the "blob" field.
-	Blob entfield.Bytes
+	Blob entfield.Bytes[[]byte]
 	// State is the handle for the "state" field.
 	State entfield.Enum[State]
 	// Status is the handle for the "status" field.
@@ -68,11 +68,11 @@ var F = struct {
 	Description:  entfield.NewString[string](FieldDescription, "description"),
 	Nickname:     entfield.NewString[string](FieldNickname, "nickname"),
 	Phone:        entfield.NewString[string](FieldPhone, "phone"),
-	Buffer:       entfield.NewBytes(FieldBuffer, "buffer"),
+	Buffer:       entfield.NewBytes[[]byte](FieldBuffer, "buffer"),
 	Title:        entfield.NewString[string](FieldTitle, "title"),
 	NewName:      entfield.NewString[string](FieldNewName, "new_name"),
 	NewToken:     entfield.NewString[string](FieldNewToken, "new_token"),
-	Blob:         entfield.NewBytes(FieldBlob, "blob"),
+	Blob:         entfield.NewBytes[[]byte](FieldBlob, "blob"),
 	State:        entfield.NewEnum[State](FieldState, "state"),
 	Status:       entfield.NewEnum[Status](FieldStatus, "status"),
 	Workplace:    entfield.NewString[string](FieldWorkplace, "workplace"),

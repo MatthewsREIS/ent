@@ -322,6 +322,12 @@ func (_c *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupMutation)

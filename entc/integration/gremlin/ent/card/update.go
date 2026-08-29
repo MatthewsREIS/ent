@@ -110,7 +110,7 @@ func (_u *CardUpdate) ExecX(ctx context.Context) {
 func (_u *CardUpdate) defaults() {
 	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); !ok {
 		v := UpdateDefaultUpdateTime()
-		_ = _u.mutation.SetField("update_time", v)
+		_ = _u.mutation.SetFieldDefault("update_time", v)
 	}
 }
 
@@ -302,7 +302,7 @@ func (_u *CardUpdateOne) ExecX(ctx context.Context) {
 func (_u *CardUpdateOne) defaults() {
 	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "update_time"); !ok {
 		v := UpdateDefaultUpdateTime()
-		_ = _u.mutation.SetField("update_time", v)
+		_ = _u.mutation.SetFieldDefault("update_time", v)
 	}
 }
 

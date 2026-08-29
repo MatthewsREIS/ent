@@ -7,6 +7,7 @@
 package fieldtype
 
 import (
+	"net"
 	"net/http"
 	"time"
 
@@ -111,11 +112,11 @@ var F = struct {
 	// DeletedAt is the handle for the "deleted_at" field.
 	DeletedAt entfield.Value[*sql.NullTime]
 	// RawData is the handle for the "raw_data" field.
-	RawData entfield.Bytes
+	RawData entfield.Bytes[[]byte]
 	// Sensitive is the handle for the "sensitive" field.
-	Sensitive entfield.Bytes
+	Sensitive entfield.Bytes[[]byte]
 	// IP is the handle for the "ip" field.
-	IP entfield.Bytes
+	IP entfield.Bytes[net.IP]
 	// NullInt64 is the handle for the "null_int64" field.
 	NullInt64 entfield.Value[*sql.NullInt64]
 	// SchemaInt is the handle for the "schema_int" field.
@@ -198,9 +199,9 @@ var F = struct {
 	NullActive:            entfield.NewBool[schema.Status](FieldNullActive, "null_active"),
 	Deleted:               entfield.NewValue[*sql.NullBool](FieldDeleted, "deleted"),
 	DeletedAt:             entfield.NewValue[*sql.NullTime](FieldDeletedAt, "deleted_at"),
-	RawData:               entfield.NewBytes(FieldRawData, "raw_data"),
-	Sensitive:             entfield.NewBytes(FieldSensitive, "sensitive"),
-	IP:                    entfield.NewBytes(FieldIP, "ip"),
+	RawData:               entfield.NewBytes[[]byte](FieldRawData, "raw_data"),
+	Sensitive:             entfield.NewBytes[[]byte](FieldSensitive, "sensitive"),
+	IP:                    entfield.NewBytes[net.IP](FieldIP, "ip"),
 	NullInt64:             entfield.NewValue[*sql.NullInt64](FieldNullInt64, "null_int64"),
 	SchemaInt:             entfield.NewNumber[schema.Int](FieldSchemaInt, "schema_int"),
 	SchemaInt8:            entfield.NewNumber[schema.Int8](FieldSchemaInt8, "schema_int8"),

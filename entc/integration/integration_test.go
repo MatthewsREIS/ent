@@ -2275,6 +2275,22 @@ func CreateBulk(t *testing.T, client *ent.Client) {
 	_, err := client.Group.MapCreateBulk(1, nil).Save(ctx)
 	require.Error(t, err)
 
+	// CreateBulk.Save must surface a per-builder With() error (C1 regression):
+	// user.E.Pets.SetID is invalid on the non-unique "pets" edge (SetEdgeID
+	// requires a unique edge), so the builder records that error on its err
+	// field at chain time. Old codegen made this a compile error (no SetPetID
+	// on UserCreate); now it must fail loudly at Save with nothing created,
+	// not silently create the row with the failed and every later assignment
+	// dropped.
+	usersBefore := client.User.Query().CountX(ctx)
+	_, err = client.User.CreateBulk(
+		client.User.Create().With(user.F.Name.Set("ok"), user.F.Age.Set(1)),
+		client.User.Create().With(user.F.Name.Set("bulk"), user.F.Age.Set(1), user.E.Pets.SetID(1), user.F.Nickname.Set("dropped")),
+	).Save(ctx)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "SetEdgeID requires a unique edge")
+	require.Equal(t, usersBefore, client.User.Query().CountX(ctx), "a failing builder in the batch must create nothing")
+
 	// OnConflict on a bulk builder created from an error (e.g. wrong-type
 	// MapCreateBulk input) must not panic on the nil driver when building
 	// the upsert config; the original error should still surface.

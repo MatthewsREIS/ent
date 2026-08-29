@@ -95,15 +95,15 @@ func (_u *FieldTypeUpdate) ExecX(ctx context.Context) {
 func (_u *FieldTypeUpdate) defaults() {
 	if _, ok := entbuilder.GetField[int64](_u.mutation, "int64"); !ok {
 		v := UpdateDefaultInt64()
-		_ = _u.mutation.SetField("int64", v)
+		_ = _u.mutation.SetFieldDefault("int64", v)
 	}
 	if _, ok := entbuilder.GetField[time.Duration](_u.mutation, "duration"); !ok && !_u.mutation.FieldCleared("duration") {
 		v := UpdateDefaultDuration()
-		_ = _u.mutation.SetField("duration", v)
+		_ = _u.mutation.SetFieldDefault("duration", v)
 	}
 	if _, ok := entbuilder.GetField[*sql.NullTime](_u.mutation, "deleted_at"); !ok && !_u.mutation.FieldCleared("deleted_at") {
 		v := UpdateDefaultDeletedAt()
-		_ = _u.mutation.SetField("deleted_at", v)
+		_ = _u.mutation.SetFieldDefault("deleted_at", v)
 	}
 }
 
@@ -754,15 +754,15 @@ func (_u *FieldTypeUpdateOne) ExecX(ctx context.Context) {
 func (_u *FieldTypeUpdateOne) defaults() {
 	if _, ok := entbuilder.GetField[int64](_u.mutation, "int64"); !ok {
 		v := UpdateDefaultInt64()
-		_ = _u.mutation.SetField("int64", v)
+		_ = _u.mutation.SetFieldDefault("int64", v)
 	}
 	if _, ok := entbuilder.GetField[time.Duration](_u.mutation, "duration"); !ok && !_u.mutation.FieldCleared("duration") {
 		v := UpdateDefaultDuration()
-		_ = _u.mutation.SetField("duration", v)
+		_ = _u.mutation.SetFieldDefault("duration", v)
 	}
 	if _, ok := entbuilder.GetField[*sql.NullTime](_u.mutation, "deleted_at"); !ok && !_u.mutation.FieldCleared("deleted_at") {
 		v := UpdateDefaultDeletedAt()
-		_ = _u.mutation.SetField("deleted_at", v)
+		_ = _u.mutation.SetFieldDefault("deleted_at", v)
 	}
 }
 

@@ -101,7 +101,7 @@ func (_u *NodeUpdate) ExecX(ctx context.Context) {
 func (_u *NodeUpdate) defaults() {
 	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "updated_at"); !ok && !_u.mutation.FieldCleared("updated_at") {
 		v := UpdateDefaultUpdatedAt()
-		_ = _u.mutation.SetField("updated_at", v)
+		_ = _u.mutation.SetFieldDefault("updated_at", v)
 	}
 }
 
@@ -296,7 +296,7 @@ func (_u *NodeUpdateOne) ExecX(ctx context.Context) {
 func (_u *NodeUpdateOne) defaults() {
 	if _, ok := entbuilder.GetField[time.Time](_u.mutation, "updated_at"); !ok && !_u.mutation.FieldCleared("updated_at") {
 		v := UpdateDefaultUpdatedAt()
-		_ = _u.mutation.SetField("updated_at", v)
+		_ = _u.mutation.SetFieldDefault("updated_at", v)
 	}
 }
 

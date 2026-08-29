@@ -42,6 +42,7 @@ var rentalDescriptor = &entbuilder.Descriptor{
 			TargetIDType: reflect.TypeFor[int](),
 			Inverse:      true,
 			Field:        "user_id",
+			Immutable:    true,
 		},
 		"car": {
 			Cardinality:  entbuilder.O2OUnique,
@@ -49,6 +50,7 @@ var rentalDescriptor = &entbuilder.Descriptor{
 			TargetIDType: reflect.TypeFor[uuid.UUID](),
 			Inverse:      true,
 			Field:        "car_id",
+			Immutable:    true,
 		},
 	}}
 

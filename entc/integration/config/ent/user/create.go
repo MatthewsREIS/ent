@@ -146,6 +146,12 @@ func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
+			if builder.err != nil {
+				mutators[i] = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
+					return nil, builder.err
+				})
+				return
+			}
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)
 				if !ok {

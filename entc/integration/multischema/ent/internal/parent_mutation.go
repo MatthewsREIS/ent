@@ -39,12 +39,14 @@ var parentDescriptor = &entbuilder.Descriptor{
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
 			Field:        "user_id",
+			Immutable:    true,
 		},
 		"parent": {
 			Cardinality:  entbuilder.O2OUnique,
 			Target:       "User",
 			TargetIDType: reflect.TypeFor[int](),
 			Field:        "parent_id",
+			Immutable:    true,
 		},
 	}}
 

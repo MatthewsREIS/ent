@@ -31,7 +31,7 @@ var F = struct {
 	// OldToken is the handle for the "old_token" field.
 	OldToken entfield.String[string]
 	// Blob is the handle for the "blob" field.
-	Blob entfield.Bytes
+	Blob entfield.Bytes[[]byte]
 	// State is the handle for the "state" field.
 	State entfield.Enum[State]
 	// Status is the handle for the "status" field.
@@ -49,7 +49,7 @@ var F = struct {
 	Address:      entfield.NewString[string](FieldAddress, "address"),
 	Renamed:      entfield.NewString[string](FieldRenamed, "renamed"),
 	OldToken:     entfield.NewString[string](FieldOldToken, "old_token"),
-	Blob:         entfield.NewBytes(FieldBlob, "blob"),
+	Blob:         entfield.NewBytes[[]byte](FieldBlob, "blob"),
 	State:        entfield.NewEnum[State](FieldState, "state"),
 	Status:       entfield.NewString[string](FieldStatus, "status"),
 	Workplace:    entfield.NewString[string](FieldWorkplace, "workplace"),

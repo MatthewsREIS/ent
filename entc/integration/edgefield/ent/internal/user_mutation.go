@@ -41,6 +41,7 @@ var userDescriptor = &entbuilder.Descriptor{
 			TargetIDType: reflect.TypeFor[int](),
 			Inverse:      true,
 			Field:        "parent_id",
+			Immutable:    true,
 		},
 		"children": {
 			Cardinality:  entbuilder.O2M,
