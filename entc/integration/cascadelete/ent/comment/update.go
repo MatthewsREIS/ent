@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -50,12 +49,6 @@ func (_u *CommentUpdate) With(as ...entfield.Assignment) *CommentUpdate {
 // Mutation returns the CommentMutation object of the builder.
 func (_u *CommentUpdate) Mutation() *CommentMutation {
 	return _u.mutation
-}
-
-// ClearPost clears the "post" edge to the Post entity.
-func (_u *CommentUpdate) ClearPost() *CommentUpdate {
-	_ = _u.mutation.ClearEdge("post")
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -101,45 +94,7 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-	}
-	if _u.mutation.EdgeCleared("post") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   PostTable,
-			Columns: []string{PostColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("post"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   PostTable,
-			Columns: []string{PostColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -178,12 +133,6 @@ func (_u *CommentUpdateOne) With(as ...entfield.Assignment) *CommentUpdateOne {
 // Mutation returns the CommentMutation object of the builder.
 func (_u *CommentUpdateOne) Mutation() *CommentMutation {
 	return _u.mutation
-}
-
-// ClearPost clears the "post" edge to the Post entity.
-func (_u *CommentUpdateOne) ClearPost() *CommentUpdateOne {
-	_ = _u.mutation.ClearEdge("post")
-	return _u
 }
 
 // Where appends a list predicates to the CommentUpdate builder.
@@ -259,45 +208,7 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-	}
-	if _u.mutation.EdgeCleared("post") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   PostTable,
-			Columns: []string{PostColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("post"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   PostTable,
-			Columns: []string{PostColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Comment{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

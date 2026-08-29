@@ -101,18 +101,7 @@ func (_c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 		_node = &Media{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := entbuilder.GetField[string](_c.mutation, "source"); ok {
-		_spec.SetField(FieldSource, field.TypeString, value)
-		_node.Source = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "source_uri"); ok {
-		_spec.SetField(FieldSourceURI, field.TypeString, value)
-		_node.SourceURI = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-		_node.Text = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

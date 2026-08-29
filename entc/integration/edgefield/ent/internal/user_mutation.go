@@ -54,6 +54,7 @@ var userDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"parent_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "ParentID",
 		},
 		"children": {
 			Cardinality:     entbuilder.O2M,
@@ -76,6 +77,7 @@ var userDescriptor = &entbuilder.Descriptor{
 			Bidi:            true,
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "SpouseID",
 		},
 		"card": {
 			Cardinality:     entbuilder.O2OUnique,

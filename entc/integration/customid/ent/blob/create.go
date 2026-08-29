@@ -139,53 +139,14 @@ func (_c *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "uuid"); ok {
-		_spec.SetField(FieldUUID, field.TypeUUID, value)
-		_node.UUID = value
-	}
-	if value, ok := entbuilder.GetField[int](_c.mutation, "count"); ok {
-		_spec.SetField(FieldCount, field.TypeInt, value)
-		_node.Count = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "parent"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   ParentTable,
-			Columns: []string{ParentColumn},
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil,
+		map[string]func() []*sqlgraph.FieldSpec{
+			"links": func() []*sqlgraph.FieldSpec {
+				specE := bloblink.ThroughDefaults(_c.Config)
+				fields := specE.Fields
+				return fields
 			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "links"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   LinksTable,
-			Columns: LinksPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := bloblink.ThroughDefaults(_c.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+		})
 	return _node, _spec
 }
 

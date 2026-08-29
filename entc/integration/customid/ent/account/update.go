@@ -11,10 +11,8 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
@@ -51,18 +49,6 @@ func (_u *AccountUpdate) With(as ...entfield.Assignment) *AccountUpdate {
 // Mutation returns the AccountMutation object of the builder.
 func (_u *AccountUpdate) Mutation() *AccountMutation {
 	return _u.mutation
-}
-
-// ClearToken clears all "token" edges to the Token entity.
-func (_u *AccountUpdate) ClearToken() *AccountUpdate {
-	_ = _u.mutation.ClearEdge("token")
-	return _u
-}
-
-// RemoveTokenIDs removes the "token" edge to Token entities by IDs.
-func (_u *AccountUpdate) RemoveTokenIDs(ids ...sid.ID) *AccountUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("token", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -110,61 +96,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeOther))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "email"); ok {
-		_spec.SetField(FieldEmail, field.TypeString, value)
-	}
-	if _u.mutation.EdgeCleared("token") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   TokenTable,
-			Columns: []string{TokenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeOther),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("token"); len(nodes) > 0 && !_u.mutation.EdgeCleared("token") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   TokenTable,
-			Columns: []string{TokenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeOther),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("token"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   TokenTable,
-			Columns: []string{TokenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeOther),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -203,18 +135,6 @@ func (_u *AccountUpdateOne) With(as ...entfield.Assignment) *AccountUpdateOne {
 // Mutation returns the AccountMutation object of the builder.
 func (_u *AccountUpdateOne) Mutation() *AccountMutation {
 	return _u.mutation
-}
-
-// ClearToken clears all "token" edges to the Token entity.
-func (_u *AccountUpdateOne) ClearToken() *AccountUpdateOne {
-	_ = _u.mutation.ClearEdge("token")
-	return _u
-}
-
-// RemoveTokenIDs removes the "token" edge to Token entities by IDs.
-func (_u *AccountUpdateOne) RemoveTokenIDs(ids ...sid.ID) *AccountUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("token", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the AccountUpdate builder.
@@ -292,61 +212,7 @@ func (_u *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err er
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "email"); ok {
-		_spec.SetField(FieldEmail, field.TypeString, value)
-	}
-	if _u.mutation.EdgeCleared("token") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   TokenTable,
-			Columns: []string{TokenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeOther),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("token"); len(nodes) > 0 && !_u.mutation.EdgeCleared("token") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   TokenTable,
-			Columns: []string{TokenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeOther),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("token"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   TokenTable,
-			Columns: []string{TokenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeOther),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Account{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -50,24 +49,6 @@ func (_u *RelationshipUpdate) With(as ...entfield.Assignment) *RelationshipUpdat
 // Mutation returns the RelationshipMutation object of the builder.
 func (_u *RelationshipUpdate) Mutation() *RelationshipMutation {
 	return _u.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (_u *RelationshipUpdate) ClearUser() *RelationshipUpdate {
-	_ = _u.mutation.ClearEdge("user")
-	return _u
-}
-
-// ClearRelative clears the "relative" edge to the User entity.
-func (_u *RelationshipUpdate) ClearRelative() *RelationshipUpdate {
-	_ = _u.mutation.ClearEdge("relative")
-	return _u
-}
-
-// ClearInfo clears the "info" edge to the RelationshipInfo entity.
-func (_u *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
-	_ = _u.mutation.ClearEdge("info")
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -116,107 +97,7 @@ func (_u *RelationshipUpdate) sqlSave(ctx context.Context) (_node int, err error
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(FieldRelativeID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "weight"); ok {
-		_spec.SetField(FieldWeight, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("weight"); ok {
-		value := added.(int)
-		_spec.AddField(FieldWeight, field.TypeInt, value)
-	}
-	if _u.mutation.EdgeCleared("user") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   UserTable,
-			Columns: []string{UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   UserTable,
-			Columns: []string{UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("relative") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   RelativeTable,
-			Columns: []string{RelativeColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("relative"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   RelativeTable,
-			Columns: []string{RelativeColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("info") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   InfoTable,
-			Columns: []string{InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("info"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   InfoTable,
-			Columns: []string{InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -255,24 +136,6 @@ func (_u *RelationshipUpdateOne) With(as ...entfield.Assignment) *RelationshipUp
 // Mutation returns the RelationshipMutation object of the builder.
 func (_u *RelationshipUpdateOne) Mutation() *RelationshipMutation {
 	return _u.mutation
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (_u *RelationshipUpdateOne) ClearUser() *RelationshipUpdateOne {
-	_ = _u.mutation.ClearEdge("user")
-	return _u
-}
-
-// ClearRelative clears the "relative" edge to the User entity.
-func (_u *RelationshipUpdateOne) ClearRelative() *RelationshipUpdateOne {
-	_ = _u.mutation.ClearEdge("relative")
-	return _u
-}
-
-// ClearInfo clears the "info" edge to the RelationshipInfo entity.
-func (_u *RelationshipUpdateOne) ClearInfo() *RelationshipUpdateOne {
-	_ = _u.mutation.ClearEdge("info")
-	return _u
 }
 
 // Where appends a list predicates to the RelationshipUpdate builder.
@@ -353,107 +216,7 @@ func (_u *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relationsh
 			_spec.Node.Columns[i] = f
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "weight"); ok {
-		_spec.SetField(FieldWeight, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("weight"); ok {
-		value := added.(int)
-		_spec.AddField(FieldWeight, field.TypeInt, value)
-	}
-	if _u.mutation.EdgeCleared("user") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   UserTable,
-			Columns: []string{UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   UserTable,
-			Columns: []string{UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("relative") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   RelativeTable,
-			Columns: []string{RelativeColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("relative"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   RelativeTable,
-			Columns: []string{RelativeColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("info") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   InfoTable,
-			Columns: []string{InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("info"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   InfoTable,
-			Columns: []string{InfoColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Relationship{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

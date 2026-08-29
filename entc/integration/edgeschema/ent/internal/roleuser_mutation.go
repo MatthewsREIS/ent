@@ -44,6 +44,7 @@ var roleuserDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"role_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "RoleID",
 		},
 		"user": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -55,6 +56,7 @@ var roleuserDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"user_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 	},
 	Table: "role_users",

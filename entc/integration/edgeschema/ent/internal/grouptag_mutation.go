@@ -41,6 +41,7 @@ var grouptagDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"tag_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "TagID",
 		},
 		"group": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -52,6 +53,7 @@ var grouptagDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"group_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "GroupID",
 		},
 	},
 	Table: "group_tags",

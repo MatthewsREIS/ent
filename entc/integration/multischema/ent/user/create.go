@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
@@ -118,143 +119,19 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	)
 	schemaConfig := _c.Config.SchemaConfig()
 	_spec.Schema = schemaConfig.User
-	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "pets"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   PetsTable,
-			Columns: []string{PetsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, internal.SchemaOf(_c.Config),
+		map[string]func() []*sqlgraph.FieldSpec{
+			"friends": func() []*sqlgraph.FieldSpec {
+				specE := friendship.ThroughDefaults(_c.Config)
+				fields := specE.Fields
+				return fields
 			},
-		}
-		edge.Schema = _c.Config.SchemaConfig().Pet
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "groups"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   GroupsTable,
-			Columns: GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			"children": func() []*sqlgraph.FieldSpec {
+				specE := parent.ThroughDefaults(_c.Config)
+				fields := specE.Fields
+				return fields
 			},
-		}
-		edge.Schema = _c.Config.SchemaConfig().GroupUsers
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friends"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   FriendsTable,
-			Columns: FriendsPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _c.Config.SchemaConfig().Friendship
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := friendship.ThroughDefaults(_c.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "parents"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   ParentsTable,
-			Columns: ParentsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _c.Config.SchemaConfig().UserChildren
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "children"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   ChildrenTable,
-			Columns: ChildrenPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _c.Config.SchemaConfig().Parent
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := parent.ThroughDefaults(_c.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "friendships"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   FriendshipsTable,
-			Columns: []string{FriendshipsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _c.Config.SchemaConfig().Friendship
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "parent_hood"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   ParentHoodTable,
-			Columns: []string{ParentHoodColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _c.Config.SchemaConfig().Parent
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+		})
 	return _node, _spec
 }
 

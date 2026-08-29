@@ -54,18 +54,6 @@ func (_u *FileTypeUpdate) Mutation() *FileTypeMutation {
 	return _u.mutation
 }
 
-// ClearFiles clears all "files" edges to the File entity.
-func (_u *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
-	_ = _u.mutation.ClearEdge("files")
-	return _u
-}
-
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (_u *FileTypeUpdate) RemoveFileIDs(ids ...string) *FileTypeUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -208,18 +196,6 @@ func (_u *FileTypeUpdateOne) With(as ...entfield.Assignment) *FileTypeUpdateOne 
 // Mutation returns the FileTypeMutation object of the builder.
 func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation {
 	return _u.mutation
-}
-
-// ClearFiles clears all "files" edges to the File entity.
-func (_u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
-	_ = _u.mutation.ClearEdge("files")
-	return _u
-}
-
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (_u *FileTypeUpdateOne) RemoveFileIDs(ids ...string) *FileTypeUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.

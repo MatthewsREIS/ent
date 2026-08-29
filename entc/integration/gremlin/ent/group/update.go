@@ -55,48 +55,6 @@ func (_u *GroupUpdate) Mutation() *GroupMutation {
 	return _u.mutation
 }
 
-// ClearFiles clears all "files" edges to the File entity.
-func (_u *GroupUpdate) ClearFiles() *GroupUpdate {
-	_ = _u.mutation.ClearEdge("files")
-	return _u
-}
-
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (_u *GroupUpdate) RemoveFileIDs(ids ...string) *GroupUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// ClearBlocked clears all "blocked" edges to the User entity.
-func (_u *GroupUpdate) ClearBlocked() *GroupUpdate {
-	_ = _u.mutation.ClearEdge("blocked")
-	return _u
-}
-
-// RemoveBlockedIDs removes the "blocked" edge to User entities by IDs.
-func (_u *GroupUpdate) RemoveBlockedIDs(ids ...string) *GroupUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("blocked", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// ClearUsers clears all "users" edges to the User entity.
-func (_u *GroupUpdate) ClearUsers() *GroupUpdate {
-	_ = _u.mutation.ClearEdge("users")
-	return _u
-}
-
-// RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (_u *GroupUpdate) RemoveUserIDs(ids ...string) *GroupUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("users", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// ClearInfo clears the "info" edge to the GroupInfo entity.
-func (_u *GroupUpdate) ClearInfo() *GroupUpdate {
-	_ = _u.mutation.ClearEdge("info")
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -287,48 +245,6 @@ func (_u *GroupUpdateOne) With(as ...entfield.Assignment) *GroupUpdateOne {
 // Mutation returns the GroupMutation object of the builder.
 func (_u *GroupUpdateOne) Mutation() *GroupMutation {
 	return _u.mutation
-}
-
-// ClearFiles clears all "files" edges to the File entity.
-func (_u *GroupUpdateOne) ClearFiles() *GroupUpdateOne {
-	_ = _u.mutation.ClearEdge("files")
-	return _u
-}
-
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (_u *GroupUpdateOne) RemoveFileIDs(ids ...string) *GroupUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// ClearBlocked clears all "blocked" edges to the User entity.
-func (_u *GroupUpdateOne) ClearBlocked() *GroupUpdateOne {
-	_ = _u.mutation.ClearEdge("blocked")
-	return _u
-}
-
-// RemoveBlockedIDs removes the "blocked" edge to User entities by IDs.
-func (_u *GroupUpdateOne) RemoveBlockedIDs(ids ...string) *GroupUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("blocked", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// ClearUsers clears all "users" edges to the User entity.
-func (_u *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
-	_ = _u.mutation.ClearEdge("users")
-	return _u
-}
-
-// RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (_u *GroupUpdateOne) RemoveUserIDs(ids ...string) *GroupUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("users", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// ClearInfo clears the "info" edge to the GroupInfo entity.
-func (_u *GroupUpdateOne) ClearInfo() *GroupUpdateOne {
-	_ = _u.mutation.ClearEdge("info")
-	return _u
 }
 
 // Where appends a list predicates to the GroupUpdate builder.

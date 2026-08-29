@@ -143,38 +143,7 @@ func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := entbuilder.GetField[task.Priority](_c.mutation, "priority"); ok {
-		_spec.SetField(FieldPriority, field.TypeInt, value)
-		_node.Priority = value
-	}
-	if value, ok := entbuilder.GetField[map[string]task.Priority](_c.mutation, "priorities"); ok {
-		_spec.SetField(FieldPriorities, field.TypeJSON, value)
-		_node.Priorities = value
-	}
-	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = &value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "owner"); ok {
-		_spec.SetField(FieldOwner, field.TypeString, value)
-		_node.Owner = value
-	}
-	if value, ok := entbuilder.GetField[int](_c.mutation, "order"); ok {
-		_spec.SetField(FieldOrder, field.TypeInt, value)
-		_node.Order = value
-	}
-	if value, ok := entbuilder.GetField[int](_c.mutation, "order_option"); ok {
-		_spec.SetField(FieldOrderOption, field.TypeInt, value)
-		_node.OrderOption = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "op"); ok {
-		_spec.SetField(FieldOp, field.TypeString, value)
-		_node.Op = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

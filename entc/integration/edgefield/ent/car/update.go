@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -52,18 +51,6 @@ func (_u *CarUpdate) Mutation() *CarMutation {
 	return _u.mutation
 }
 
-// ClearRentals clears all "rentals" edges to the Rental entity.
-func (_u *CarUpdate) ClearRentals() *CarUpdate {
-	_ = _u.mutation.ClearEdge("rentals")
-	return _u
-}
-
-// RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
-func (_u *CarUpdate) RemoveRentalIDs(ids ...int) *CarUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("rentals", entbuilder.ToAny(ids)...)
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -96,64 +83,7 @@ func (_u *CarUpdate) ExecX(ctx context.Context) {
 
 func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "number"); ok {
-		_spec.SetField(FieldNumber, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("number") {
-		_spec.ClearField(FieldNumber, field.TypeString)
-	}
-	if _u.mutation.EdgeCleared("rentals") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   RentalsTable,
-			Columns: []string{RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("rentals"); len(nodes) > 0 && !_u.mutation.EdgeCleared("rentals") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   RentalsTable,
-			Columns: []string{RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("rentals"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   RentalsTable,
-			Columns: []string{RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -192,18 +122,6 @@ func (_u *CarUpdateOne) With(as ...entfield.Assignment) *CarUpdateOne {
 // Mutation returns the CarMutation object of the builder.
 func (_u *CarUpdateOne) Mutation() *CarMutation {
 	return _u.mutation
-}
-
-// ClearRentals clears all "rentals" edges to the Rental entity.
-func (_u *CarUpdateOne) ClearRentals() *CarUpdateOne {
-	_ = _u.mutation.ClearEdge("rentals")
-	return _u
-}
-
-// RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
-func (_u *CarUpdateOne) RemoveRentalIDs(ids ...int) *CarUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("rentals", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the CarUpdate builder.
@@ -268,64 +186,7 @@ func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "number"); ok {
-		_spec.SetField(FieldNumber, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("number") {
-		_spec.ClearField(FieldNumber, field.TypeString)
-	}
-	if _u.mutation.EdgeCleared("rentals") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   RentalsTable,
-			Columns: []string{RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("rentals"); len(nodes) > 0 && !_u.mutation.EdgeCleared("rentals") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   RentalsTable,
-			Columns: []string{RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("rentals"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   RentalsTable,
-			Columns: []string{RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Car{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

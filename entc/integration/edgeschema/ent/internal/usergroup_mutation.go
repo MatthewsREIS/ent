@@ -49,6 +49,7 @@ var usergroupDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"user_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 		"group": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -60,6 +61,7 @@ var usergroupDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"group_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "GroupID",
 		},
 	},
 	Table: "user_groups",

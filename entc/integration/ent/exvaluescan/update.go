@@ -93,13 +93,7 @@ func (_u *ExValueScanUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Ex
 
 func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "binary"); ok {
 		vv, err := ValueScanner.Binary.Value(value)
 		if err != nil {
@@ -121,9 +115,6 @@ func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (_node int, err error)
 		}
 		_spec.SetField(FieldBinaryOptional, field.TypeString, vv)
 	}
-	if _u.mutation.FieldCleared("binary_optional") {
-		_spec.ClearField(FieldBinaryOptional, field.TypeString)
-	}
 	if value, ok := entbuilder.GetField[*big.Int](_u.mutation, "text"); ok {
 		vv, err := ValueScanner.Text.Value(value)
 		if err != nil {
@@ -137,9 +128,6 @@ func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (_node int, err error)
 			return 0, err
 		}
 		_spec.SetField(FieldTextOptional, field.TypeString, vv)
-	}
-	if _u.mutation.FieldCleared("text_optional") {
-		_spec.ClearField(FieldTextOptional, field.TypeString)
 	}
 	if value, ok := entbuilder.GetField[string](_u.mutation, "base64"); ok {
 		vv, err := ValueScanner.Base64.Value(value)
@@ -161,9 +149,6 @@ func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (_node int, err error)
 			return 0, err
 		}
 		_spec.SetField(FieldCustomOptional, field.TypeString, vv)
-	}
-	if _u.mutation.FieldCleared("custom_optional") {
-		_spec.ClearField(FieldCustomOptional, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
@@ -275,13 +260,7 @@ func (_u *ExValueScanUpdateOne) sqlSave(ctx context.Context) (_node *ExValueScan
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "binary"); ok {
 		vv, err := ValueScanner.Binary.Value(value)
 		if err != nil {
@@ -303,9 +282,6 @@ func (_u *ExValueScanUpdateOne) sqlSave(ctx context.Context) (_node *ExValueScan
 		}
 		_spec.SetField(FieldBinaryOptional, field.TypeString, vv)
 	}
-	if _u.mutation.FieldCleared("binary_optional") {
-		_spec.ClearField(FieldBinaryOptional, field.TypeString)
-	}
 	if value, ok := entbuilder.GetField[*big.Int](_u.mutation, "text"); ok {
 		vv, err := ValueScanner.Text.Value(value)
 		if err != nil {
@@ -319,9 +295,6 @@ func (_u *ExValueScanUpdateOne) sqlSave(ctx context.Context) (_node *ExValueScan
 			return nil, err
 		}
 		_spec.SetField(FieldTextOptional, field.TypeString, vv)
-	}
-	if _u.mutation.FieldCleared("text_optional") {
-		_spec.ClearField(FieldTextOptional, field.TypeString)
 	}
 	if value, ok := entbuilder.GetField[string](_u.mutation, "base64"); ok {
 		vv, err := ValueScanner.Base64.Value(value)
@@ -343,9 +316,6 @@ func (_u *ExValueScanUpdateOne) sqlSave(ctx context.Context) (_node *ExValueScan
 			return nil, err
 		}
 		_spec.SetField(FieldCustomOptional, field.TypeString, vv)
-	}
-	if _u.mutation.FieldCleared("custom_optional") {
-		_spec.ClearField(FieldCustomOptional, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &ExValueScan{Config: _u.Config}

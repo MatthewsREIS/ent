@@ -49,6 +49,7 @@ var attachedfileDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"f_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "FID",
 		},
 		"proc": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -60,6 +61,7 @@ var attachedfileDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"proc_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "ProcID",
 		},
 	},
 	Table: "attached_files",

@@ -48,6 +48,7 @@ var postDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"author_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "AuthorID",
 		},
 	},
 	Table: "posts",

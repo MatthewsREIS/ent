@@ -120,26 +120,7 @@ func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "number"); ok {
-		_spec.SetField(FieldNumber, field.TypeString, value)
-		_node.Number = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "rentals"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   RentalsTable,
-			Columns: []string{RentalsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

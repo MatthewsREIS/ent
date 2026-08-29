@@ -44,6 +44,7 @@ var tweetlikeDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"tweet_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "TweetID",
 		},
 		"user": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -55,6 +56,7 @@ var tweetlikeDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"user_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 	},
 	Table: "tweet_likes",

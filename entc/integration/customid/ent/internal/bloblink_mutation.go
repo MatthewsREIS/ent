@@ -46,6 +46,7 @@ var bloblinkDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"blob_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeUUID,
+			NodeField:       "BlobID",
 		},
 		"link": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -57,6 +58,7 @@ var bloblinkDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"link_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeUUID,
+			NodeField:       "LinkID",
 		},
 	},
 	Table: "blob_links",

@@ -57,6 +57,7 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"user_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 			SchemaKey:       "Friendship",
 		},
 		"friend": {
@@ -70,6 +71,7 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"friend_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "FriendID",
 			SchemaKey:       "Friendship",
 		},
 	},

@@ -57,6 +57,7 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"user_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 		"friend": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -69,6 +70,7 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"friend_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "FriendID",
 		},
 	},
 	Table: "friendships",

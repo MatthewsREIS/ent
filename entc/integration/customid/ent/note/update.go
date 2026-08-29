@@ -11,10 +11,8 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
-	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
@@ -53,24 +51,6 @@ func (_u *NoteUpdate) Mutation() *NoteMutation {
 	return _u.mutation
 }
 
-// ClearParent clears the "parent" edge to the Note entity.
-func (_u *NoteUpdate) ClearParent() *NoteUpdate {
-	_ = _u.mutation.ClearEdge("parent")
-	return _u
-}
-
-// ClearChildren clears all "children" edges to the Note entity.
-func (_u *NoteUpdate) ClearChildren() *NoteUpdate {
-	_ = _u.mutation.ClearEdge("children")
-	return _u
-}
-
-// RemoveChildIDs removes the "children" edge to Note entities by IDs.
-func (_u *NoteUpdate) RemoveChildIDs(ids ...schema.NoteID) *NoteUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *NoteUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -103,93 +83,7 @@ func (_u *NoteUpdate) ExecX(ctx context.Context) {
 
 func (_u *NoteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("text") {
-		_spec.ClearField(FieldText, field.TypeString)
-	}
-	if _u.mutation.EdgeCleared("parent") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   ParentTable,
-			Columns: []string{ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("parent"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   ParentTable,
-			Columns: []string{ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("children") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   ChildrenTable,
-			Columns: []string{ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("children"); len(nodes) > 0 && !_u.mutation.EdgeCleared("children") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   ChildrenTable,
-			Columns: []string{ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("children"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   ChildrenTable,
-			Columns: []string{ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -228,24 +122,6 @@ func (_u *NoteUpdateOne) With(as ...entfield.Assignment) *NoteUpdateOne {
 // Mutation returns the NoteMutation object of the builder.
 func (_u *NoteUpdateOne) Mutation() *NoteMutation {
 	return _u.mutation
-}
-
-// ClearParent clears the "parent" edge to the Note entity.
-func (_u *NoteUpdateOne) ClearParent() *NoteUpdateOne {
-	_ = _u.mutation.ClearEdge("parent")
-	return _u
-}
-
-// ClearChildren clears all "children" edges to the Note entity.
-func (_u *NoteUpdateOne) ClearChildren() *NoteUpdateOne {
-	_ = _u.mutation.ClearEdge("children")
-	return _u
-}
-
-// RemoveChildIDs removes the "children" edge to Note entities by IDs.
-func (_u *NoteUpdateOne) RemoveChildIDs(ids ...schema.NoteID) *NoteUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("children", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the NoteUpdate builder.
@@ -310,93 +186,7 @@ func (_u *NoteUpdateOne) sqlSave(ctx context.Context) (_node *Note, err error) {
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("text") {
-		_spec.ClearField(FieldText, field.TypeString)
-	}
-	if _u.mutation.EdgeCleared("parent") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   ParentTable,
-			Columns: []string{ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("parent"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   ParentTable,
-			Columns: []string{ParentColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("children") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   ChildrenTable,
-			Columns: []string{ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("children"); len(nodes) > 0 && !_u.mutation.EdgeCleared("children") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   ChildrenTable,
-			Columns: []string{ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("children"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   ChildrenTable,
-			Columns: []string{ChildrenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Note{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

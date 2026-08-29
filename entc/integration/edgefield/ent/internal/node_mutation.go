@@ -50,6 +50,7 @@ var nodeDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"prev_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "PrevID",
 		},
 		"next": {
 			Cardinality:     entbuilder.O2OUnique,

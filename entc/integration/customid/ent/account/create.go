@@ -132,26 +132,7 @@ func (_c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "email"); ok {
-		_spec.SetField(FieldEmail, field.TypeString, value)
-		_node.Email = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[sid.ID](_c.mutation, "token"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   TokenTable,
-			Columns: []string{TokenColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeOther),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

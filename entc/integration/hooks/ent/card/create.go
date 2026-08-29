@@ -136,42 +136,7 @@ func (_c *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 		_node = &Card{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := entbuilder.GetField[string](_c.mutation, "number"); ok {
-		_spec.SetField(FieldNumber, field.TypeString, value)
-		_node.Number = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "in_hook"); ok {
-		_spec.SetField(FieldInHook, field.TypeString, value)
-		_node.InHook = value
-	}
-	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "expired_at"); ok {
-		_spec.SetField(FieldExpiredAt, field.TypeTime, value)
-		_node.ExpiredAt = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

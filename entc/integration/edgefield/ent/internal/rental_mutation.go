@@ -52,6 +52,7 @@ var rentalDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"user_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 		"car": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -65,6 +66,7 @@ var rentalDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"car_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeUUID,
+			NodeField:       "CarID",
 		},
 	},
 	Table: "rentals",

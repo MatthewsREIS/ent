@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/predicate"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
@@ -92,55 +91,7 @@ func (_u *CommentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Commen
 
 func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "unique_int"); ok {
-		_spec.SetField(FieldUniqueInt, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("unique_int"); ok {
-		value := added.(int)
-		_spec.AddField(FieldUniqueInt, field.TypeInt, value)
-	}
-	if value, ok := entbuilder.GetField[float64](_u.mutation, "unique_float"); ok {
-		_spec.SetField(FieldUniqueFloat, field.TypeFloat64, value)
-	}
-	if added, ok := _u.mutation.AddedField("unique_float"); ok {
-		value := added.(float64)
-		_spec.AddField(FieldUniqueFloat, field.TypeFloat64, value)
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "nillable_int"); ok {
-		_spec.SetField(FieldNillableInt, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("nillable_int"); ok {
-		value := added.(int)
-		_spec.AddField(FieldNillableInt, field.TypeInt, value)
-	}
-	if _u.mutation.FieldCleared("nillable_int") {
-		_spec.ClearField(FieldNillableInt, field.TypeInt)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "table"); ok {
-		_spec.SetField(FieldTable, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("table") {
-		_spec.ClearField(FieldTable, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[schemadir.Dir](_u.mutation, "dir"); ok {
-		_spec.SetField(FieldDir, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("dir") {
-		_spec.ClearField(FieldDir, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "client"); ok {
-		_spec.SetField(FieldClient, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("client") {
-		_spec.ClearField(FieldClient, field.TypeString)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -251,55 +202,7 @@ func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err er
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "unique_int"); ok {
-		_spec.SetField(FieldUniqueInt, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("unique_int"); ok {
-		value := added.(int)
-		_spec.AddField(FieldUniqueInt, field.TypeInt, value)
-	}
-	if value, ok := entbuilder.GetField[float64](_u.mutation, "unique_float"); ok {
-		_spec.SetField(FieldUniqueFloat, field.TypeFloat64, value)
-	}
-	if added, ok := _u.mutation.AddedField("unique_float"); ok {
-		value := added.(float64)
-		_spec.AddField(FieldUniqueFloat, field.TypeFloat64, value)
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "nillable_int"); ok {
-		_spec.SetField(FieldNillableInt, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("nillable_int"); ok {
-		value := added.(int)
-		_spec.AddField(FieldNillableInt, field.TypeInt, value)
-	}
-	if _u.mutation.FieldCleared("nillable_int") {
-		_spec.ClearField(FieldNillableInt, field.TypeInt)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "table"); ok {
-		_spec.SetField(FieldTable, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("table") {
-		_spec.ClearField(FieldTable, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[schemadir.Dir](_u.mutation, "dir"); ok {
-		_spec.SetField(FieldDir, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("dir") {
-		_spec.ClearField(FieldDir, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "client"); ok {
-		_spec.SetField(FieldClient, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("client") {
-		_spec.ClearField(FieldClient, field.TypeString)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Comment{Config: _u.Config}
 	_spec.Assign = _node.AssignValues

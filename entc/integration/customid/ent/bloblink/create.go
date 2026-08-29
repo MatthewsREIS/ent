@@ -16,8 +16,6 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
-	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // BlobLinkCreate is the builder for creating a BlobLink entity.
@@ -121,44 +119,7 @@ func (_c *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, nil)
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "blob"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   BlobTable,
-			Columns: []string{BlobColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.BlobID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "link"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   LinkTable,
-			Columns: []string{LinkColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.LinkID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

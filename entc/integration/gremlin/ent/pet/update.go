@@ -53,18 +53,6 @@ func (_u *PetUpdate) Mutation() *PetMutation {
 	return _u.mutation
 }
 
-// ClearTeam clears the "team" edge to the User entity.
-func (_u *PetUpdate) ClearTeam() *PetUpdate {
-	_ = _u.mutation.ClearEdge("team")
-	return _u
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -217,18 +205,6 @@ func (_u *PetUpdateOne) With(as ...entfield.Assignment) *PetUpdateOne {
 // Mutation returns the PetMutation object of the builder.
 func (_u *PetUpdateOne) Mutation() *PetMutation {
 	return _u.mutation
-}
-
-// ClearTeam clears the "team" edge to the User entity.
-func (_u *PetUpdateOne) ClearTeam() *PetUpdateOne {
-	_ = _u.mutation.ClearEdge("team")
-	return _u
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
 }
 
 // Where appends a list predicates to the PetUpdate builder.

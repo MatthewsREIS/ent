@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -84,99 +83,7 @@ func (_u *ConversionUpdate) ExecX(ctx context.Context) {
 
 func (_u *ConversionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("name") {
-		_spec.ClearField(FieldName, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[int8](_u.mutation, "int8_to_string"); ok {
-		_spec.SetField(FieldInt8ToString, field.TypeInt8, value)
-	}
-	if added, ok := _u.mutation.AddedField("int8_to_string"); ok {
-		value := added.(int8)
-		_spec.AddField(FieldInt8ToString, field.TypeInt8, value)
-	}
-	if _u.mutation.FieldCleared("int8_to_string") {
-		_spec.ClearField(FieldInt8ToString, field.TypeInt8)
-	}
-	if value, ok := entbuilder.GetField[uint8](_u.mutation, "uint8_to_string"); ok {
-		_spec.SetField(FieldUint8ToString, field.TypeUint8, value)
-	}
-	if added, ok := _u.mutation.AddedField("uint8_to_string"); ok {
-		value := added.(uint8)
-		_spec.AddField(FieldUint8ToString, field.TypeUint8, value)
-	}
-	if _u.mutation.FieldCleared("uint8_to_string") {
-		_spec.ClearField(FieldUint8ToString, field.TypeUint8)
-	}
-	if value, ok := entbuilder.GetField[int16](_u.mutation, "int16_to_string"); ok {
-		_spec.SetField(FieldInt16ToString, field.TypeInt16, value)
-	}
-	if added, ok := _u.mutation.AddedField("int16_to_string"); ok {
-		value := added.(int16)
-		_spec.AddField(FieldInt16ToString, field.TypeInt16, value)
-	}
-	if _u.mutation.FieldCleared("int16_to_string") {
-		_spec.ClearField(FieldInt16ToString, field.TypeInt16)
-	}
-	if value, ok := entbuilder.GetField[uint16](_u.mutation, "uint16_to_string"); ok {
-		_spec.SetField(FieldUint16ToString, field.TypeUint16, value)
-	}
-	if added, ok := _u.mutation.AddedField("uint16_to_string"); ok {
-		value := added.(uint16)
-		_spec.AddField(FieldUint16ToString, field.TypeUint16, value)
-	}
-	if _u.mutation.FieldCleared("uint16_to_string") {
-		_spec.ClearField(FieldUint16ToString, field.TypeUint16)
-	}
-	if value, ok := entbuilder.GetField[int32](_u.mutation, "int32_to_string"); ok {
-		_spec.SetField(FieldInt32ToString, field.TypeInt32, value)
-	}
-	if added, ok := _u.mutation.AddedField("int32_to_string"); ok {
-		value := added.(int32)
-		_spec.AddField(FieldInt32ToString, field.TypeInt32, value)
-	}
-	if _u.mutation.FieldCleared("int32_to_string") {
-		_spec.ClearField(FieldInt32ToString, field.TypeInt32)
-	}
-	if value, ok := entbuilder.GetField[uint32](_u.mutation, "uint32_to_string"); ok {
-		_spec.SetField(FieldUint32ToString, field.TypeUint32, value)
-	}
-	if added, ok := _u.mutation.AddedField("uint32_to_string"); ok {
-		value := added.(uint32)
-		_spec.AddField(FieldUint32ToString, field.TypeUint32, value)
-	}
-	if _u.mutation.FieldCleared("uint32_to_string") {
-		_spec.ClearField(FieldUint32ToString, field.TypeUint32)
-	}
-	if value, ok := entbuilder.GetField[int64](_u.mutation, "int64_to_string"); ok {
-		_spec.SetField(FieldInt64ToString, field.TypeInt64, value)
-	}
-	if added, ok := _u.mutation.AddedField("int64_to_string"); ok {
-		value := added.(int64)
-		_spec.AddField(FieldInt64ToString, field.TypeInt64, value)
-	}
-	if _u.mutation.FieldCleared("int64_to_string") {
-		_spec.ClearField(FieldInt64ToString, field.TypeInt64)
-	}
-	if value, ok := entbuilder.GetField[uint64](_u.mutation, "uint64_to_string"); ok {
-		_spec.SetField(FieldUint64ToString, field.TypeUint64, value)
-	}
-	if added, ok := _u.mutation.AddedField("uint64_to_string"); ok {
-		value := added.(uint64)
-		_spec.AddField(FieldUint64ToString, field.TypeUint64, value)
-	}
-	if _u.mutation.FieldCleared("uint64_to_string") {
-		_spec.ClearField(FieldUint64ToString, field.TypeUint64)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -279,99 +186,7 @@ func (_u *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion, 
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("name") {
-		_spec.ClearField(FieldName, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[int8](_u.mutation, "int8_to_string"); ok {
-		_spec.SetField(FieldInt8ToString, field.TypeInt8, value)
-	}
-	if added, ok := _u.mutation.AddedField("int8_to_string"); ok {
-		value := added.(int8)
-		_spec.AddField(FieldInt8ToString, field.TypeInt8, value)
-	}
-	if _u.mutation.FieldCleared("int8_to_string") {
-		_spec.ClearField(FieldInt8ToString, field.TypeInt8)
-	}
-	if value, ok := entbuilder.GetField[uint8](_u.mutation, "uint8_to_string"); ok {
-		_spec.SetField(FieldUint8ToString, field.TypeUint8, value)
-	}
-	if added, ok := _u.mutation.AddedField("uint8_to_string"); ok {
-		value := added.(uint8)
-		_spec.AddField(FieldUint8ToString, field.TypeUint8, value)
-	}
-	if _u.mutation.FieldCleared("uint8_to_string") {
-		_spec.ClearField(FieldUint8ToString, field.TypeUint8)
-	}
-	if value, ok := entbuilder.GetField[int16](_u.mutation, "int16_to_string"); ok {
-		_spec.SetField(FieldInt16ToString, field.TypeInt16, value)
-	}
-	if added, ok := _u.mutation.AddedField("int16_to_string"); ok {
-		value := added.(int16)
-		_spec.AddField(FieldInt16ToString, field.TypeInt16, value)
-	}
-	if _u.mutation.FieldCleared("int16_to_string") {
-		_spec.ClearField(FieldInt16ToString, field.TypeInt16)
-	}
-	if value, ok := entbuilder.GetField[uint16](_u.mutation, "uint16_to_string"); ok {
-		_spec.SetField(FieldUint16ToString, field.TypeUint16, value)
-	}
-	if added, ok := _u.mutation.AddedField("uint16_to_string"); ok {
-		value := added.(uint16)
-		_spec.AddField(FieldUint16ToString, field.TypeUint16, value)
-	}
-	if _u.mutation.FieldCleared("uint16_to_string") {
-		_spec.ClearField(FieldUint16ToString, field.TypeUint16)
-	}
-	if value, ok := entbuilder.GetField[int32](_u.mutation, "int32_to_string"); ok {
-		_spec.SetField(FieldInt32ToString, field.TypeInt32, value)
-	}
-	if added, ok := _u.mutation.AddedField("int32_to_string"); ok {
-		value := added.(int32)
-		_spec.AddField(FieldInt32ToString, field.TypeInt32, value)
-	}
-	if _u.mutation.FieldCleared("int32_to_string") {
-		_spec.ClearField(FieldInt32ToString, field.TypeInt32)
-	}
-	if value, ok := entbuilder.GetField[uint32](_u.mutation, "uint32_to_string"); ok {
-		_spec.SetField(FieldUint32ToString, field.TypeUint32, value)
-	}
-	if added, ok := _u.mutation.AddedField("uint32_to_string"); ok {
-		value := added.(uint32)
-		_spec.AddField(FieldUint32ToString, field.TypeUint32, value)
-	}
-	if _u.mutation.FieldCleared("uint32_to_string") {
-		_spec.ClearField(FieldUint32ToString, field.TypeUint32)
-	}
-	if value, ok := entbuilder.GetField[int64](_u.mutation, "int64_to_string"); ok {
-		_spec.SetField(FieldInt64ToString, field.TypeInt64, value)
-	}
-	if added, ok := _u.mutation.AddedField("int64_to_string"); ok {
-		value := added.(int64)
-		_spec.AddField(FieldInt64ToString, field.TypeInt64, value)
-	}
-	if _u.mutation.FieldCleared("int64_to_string") {
-		_spec.ClearField(FieldInt64ToString, field.TypeInt64)
-	}
-	if value, ok := entbuilder.GetField[uint64](_u.mutation, "uint64_to_string"); ok {
-		_spec.SetField(FieldUint64ToString, field.TypeUint64, value)
-	}
-	if added, ok := _u.mutation.AddedField("uint64_to_string"); ok {
-		value := added.(uint64)
-		_spec.AddField(FieldUint64ToString, field.TypeUint64, value)
-	}
-	if _u.mutation.FieldCleared("uint64_to_string") {
-		_spec.ClearField(FieldUint64ToString, field.TypeUint64)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Conversion{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

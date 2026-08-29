@@ -131,14 +131,7 @@ func (_c *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); ok {
-		_spec.SetField(FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
-	}
-	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "update_time"); ok {
-		_spec.SetField(FieldUpdateTime, field.TypeTime, value)
-		_node.UpdateTime = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

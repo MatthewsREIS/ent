@@ -51,6 +51,7 @@ var tweettagDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"tag_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "TagID",
 		},
 		"tweet": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -62,6 +63,7 @@ var tweettagDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"tweet_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "TweetID",
 		},
 	},
 	Table: "tweet_tags",

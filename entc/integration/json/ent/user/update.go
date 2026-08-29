@@ -8,17 +8,12 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
-	"net/url"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/entc/integration/json/ent/predicate"
-	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
@@ -119,133 +114,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[*schema.T](_u.mutation, "t"); ok {
-		_spec.SetField(FieldT, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("t") {
-		_spec.ClearField(FieldT, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "url"); ok {
-		_spec.SetField(FieldURL, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("url") {
-		_spec.ClearField(FieldURL, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]*url.URL](_u.mutation, "URLs"); ok {
-		_spec.SetField(FieldURLs, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("URLs"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldURLs, value.([]*url.URL))
-		})
-	}
-	if _u.mutation.FieldCleared("URLs") {
-		_spec.ClearField(FieldURLs, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[json.RawMessage](_u.mutation, "raw"); ok {
-		_spec.SetField(FieldRaw, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("raw"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldRaw, value.(json.RawMessage))
-		})
-	}
-	if _u.mutation.FieldCleared("raw") {
-		_spec.ClearField(FieldRaw, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]http.Dir](_u.mutation, "dirs"); ok {
-		_spec.SetField(FieldDirs, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("dirs"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldDirs, value.([]http.Dir))
-		})
-	}
-	if value, ok := entbuilder.GetField[[]int](_u.mutation, "ints"); ok {
-		_spec.SetField(FieldInts, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("ints"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldInts, value.([]int))
-		})
-	}
-	if _u.mutation.FieldCleared("ints") {
-		_spec.ClearField(FieldInts, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]float64](_u.mutation, "floats"); ok {
-		_spec.SetField(FieldFloats, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("floats"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldFloats, value.([]float64))
-		})
-	}
-	if _u.mutation.FieldCleared("floats") {
-		_spec.ClearField(FieldFloats, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]string](_u.mutation, "strings"); ok {
-		_spec.SetField(FieldStrings, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("strings"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldStrings, value.([]string))
-		})
-	}
-	if _u.mutation.FieldCleared("strings") {
-		_spec.ClearField(FieldStrings, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]int](_u.mutation, "ints_validate"); ok {
-		_spec.SetField(FieldIntsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("ints_validate"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldIntsValidate, value.([]int))
-		})
-	}
-	if _u.mutation.FieldCleared("ints_validate") {
-		_spec.ClearField(FieldIntsValidate, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]float64](_u.mutation, "floats_validate"); ok {
-		_spec.SetField(FieldFloatsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("floats_validate"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldFloatsValidate, value.([]float64))
-		})
-	}
-	if _u.mutation.FieldCleared("floats_validate") {
-		_spec.ClearField(FieldFloatsValidate, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]string](_u.mutation, "strings_validate"); ok {
-		_spec.SetField(FieldStringsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("strings_validate"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldStringsValidate, value.([]string))
-		})
-	}
-	if _u.mutation.FieldCleared("strings_validate") {
-		_spec.ClearField(FieldStringsValidate, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[schema.Addr](_u.mutation, "addr"); ok {
-		_spec.SetField(FieldAddr, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("addr") {
-		_spec.ClearField(FieldAddr, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[any](_u.mutation, "unknown"); ok {
-		_spec.SetField(FieldUnknown, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("unknown") {
-		_spec.ClearField(FieldUnknown, field.TypeJSON)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -379,133 +248,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[*schema.T](_u.mutation, "t"); ok {
-		_spec.SetField(FieldT, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("t") {
-		_spec.ClearField(FieldT, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[*url.URL](_u.mutation, "url"); ok {
-		_spec.SetField(FieldURL, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("url") {
-		_spec.ClearField(FieldURL, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]*url.URL](_u.mutation, "URLs"); ok {
-		_spec.SetField(FieldURLs, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("URLs"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldURLs, value.([]*url.URL))
-		})
-	}
-	if _u.mutation.FieldCleared("URLs") {
-		_spec.ClearField(FieldURLs, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[json.RawMessage](_u.mutation, "raw"); ok {
-		_spec.SetField(FieldRaw, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("raw"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldRaw, value.(json.RawMessage))
-		})
-	}
-	if _u.mutation.FieldCleared("raw") {
-		_spec.ClearField(FieldRaw, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]http.Dir](_u.mutation, "dirs"); ok {
-		_spec.SetField(FieldDirs, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("dirs"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldDirs, value.([]http.Dir))
-		})
-	}
-	if value, ok := entbuilder.GetField[[]int](_u.mutation, "ints"); ok {
-		_spec.SetField(FieldInts, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("ints"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldInts, value.([]int))
-		})
-	}
-	if _u.mutation.FieldCleared("ints") {
-		_spec.ClearField(FieldInts, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]float64](_u.mutation, "floats"); ok {
-		_spec.SetField(FieldFloats, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("floats"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldFloats, value.([]float64))
-		})
-	}
-	if _u.mutation.FieldCleared("floats") {
-		_spec.ClearField(FieldFloats, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]string](_u.mutation, "strings"); ok {
-		_spec.SetField(FieldStrings, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("strings"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldStrings, value.([]string))
-		})
-	}
-	if _u.mutation.FieldCleared("strings") {
-		_spec.ClearField(FieldStrings, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]int](_u.mutation, "ints_validate"); ok {
-		_spec.SetField(FieldIntsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("ints_validate"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldIntsValidate, value.([]int))
-		})
-	}
-	if _u.mutation.FieldCleared("ints_validate") {
-		_spec.ClearField(FieldIntsValidate, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]float64](_u.mutation, "floats_validate"); ok {
-		_spec.SetField(FieldFloatsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("floats_validate"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldFloatsValidate, value.([]float64))
-		})
-	}
-	if _u.mutation.FieldCleared("floats_validate") {
-		_spec.ClearField(FieldFloatsValidate, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[[]string](_u.mutation, "strings_validate"); ok {
-		_spec.SetField(FieldStringsValidate, field.TypeJSON, value)
-	}
-	if value, ok := _u.mutation.AppendedField("strings_validate"); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, FieldStringsValidate, value.([]string))
-		})
-	}
-	if _u.mutation.FieldCleared("strings_validate") {
-		_spec.ClearField(FieldStringsValidate, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[schema.Addr](_u.mutation, "addr"); ok {
-		_spec.SetField(FieldAddr, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("addr") {
-		_spec.ClearField(FieldAddr, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[any](_u.mutation, "unknown"); ok {
-		_spec.SetField(FieldUnknown, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("unknown") {
-		_spec.ClearField(FieldUnknown, field.TypeJSON)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &User{Config: _u.Config}
 	_spec.Assign = _node.AssignValues

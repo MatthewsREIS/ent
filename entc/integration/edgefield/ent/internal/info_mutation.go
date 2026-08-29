@@ -50,6 +50,7 @@ var infoDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "ID",
 		},
 	},
 	Table: "infos",

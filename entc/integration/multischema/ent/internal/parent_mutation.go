@@ -49,6 +49,7 @@ var parentDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"user_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 			SchemaKey:       "Parent",
 		},
 		"parent": {
@@ -62,6 +63,7 @@ var parentDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"parent_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "ParentID",
 			SchemaKey:       "Parent",
 		},
 	},

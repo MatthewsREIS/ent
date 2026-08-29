@@ -50,6 +50,7 @@ var metadataDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "ID",
 		},
 		"children": {
 			Cardinality:     entbuilder.O2M,
@@ -72,6 +73,7 @@ var metadataDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"parent_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "ParentID",
 		},
 	},
 	Table: "metadata",

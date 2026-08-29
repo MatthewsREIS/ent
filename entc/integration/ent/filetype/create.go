@@ -137,34 +137,7 @@ func (_c *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := entbuilder.GetField[Type](_c.mutation, "type"); ok {
-		_spec.SetField(FieldType, field.TypeEnum, value)
-		_node.Type = value
-	}
-	if value, ok := entbuilder.GetField[State](_c.mutation, "state"); ok {
-		_spec.SetField(FieldState, field.TypeEnum, value)
-		_node.State = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "files"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: []string{FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

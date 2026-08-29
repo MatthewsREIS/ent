@@ -10,9 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -51,18 +49,6 @@ func (_u *RoleUserUpdate) With(as ...entfield.Assignment) *RoleUserUpdate {
 // Mutation returns the RoleUserMutation object of the builder.
 func (_u *RoleUserUpdate) Mutation() *RoleUserMutation {
 	return _u.mutation
-}
-
-// ClearRole clears the "role" edge to the Role entity.
-func (_u *RoleUserUpdate) ClearRole() *RoleUserUpdate {
-	_ = _u.mutation.ClearEdge("role")
-	return _u
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (_u *RoleUserUpdate) ClearUser() *RoleUserUpdate {
-	_ = _u.mutation.ClearEdge("user")
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -111,74 +97,7 @@ func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(FieldRoleID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.EdgeCleared("role") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   RoleTable,
-			Columns: []string{RoleColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("role"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   RoleTable,
-			Columns: []string{RoleColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("user") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   UserTable,
-			Columns: []string{UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   UserTable,
-			Columns: []string{UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -217,18 +136,6 @@ func (_u *RoleUserUpdateOne) With(as ...entfield.Assignment) *RoleUserUpdateOne 
 // Mutation returns the RoleUserMutation object of the builder.
 func (_u *RoleUserUpdateOne) Mutation() *RoleUserMutation {
 	return _u.mutation
-}
-
-// ClearRole clears the "role" edge to the Role entity.
-func (_u *RoleUserUpdateOne) ClearRole() *RoleUserUpdateOne {
-	_ = _u.mutation.ClearEdge("role")
-	return _u
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (_u *RoleUserUpdateOne) ClearUser() *RoleUserUpdateOne {
-	_ = _u.mutation.ClearEdge("user")
-	return _u
 }
 
 // Where appends a list predicates to the RoleUserUpdate builder.
@@ -309,74 +216,7 @@ func (_u *RoleUserUpdateOne) sqlSave(ctx context.Context) (_node *RoleUser, err 
 			_spec.Node.Columns[i] = f
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.EdgeCleared("role") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   RoleTable,
-			Columns: []string{RoleColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("role"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   RoleTable,
-			Columns: []string{RoleColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("user") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   UserTable,
-			Columns: []string{UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("user"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   UserTable,
-			Columns: []string{UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &RoleUser{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

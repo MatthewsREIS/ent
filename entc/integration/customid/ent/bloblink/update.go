@@ -10,9 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -52,18 +50,6 @@ func (_u *BlobLinkUpdate) With(as ...entfield.Assignment) *BlobLinkUpdate {
 // Mutation returns the BlobLinkMutation object of the builder.
 func (_u *BlobLinkUpdate) Mutation() *BlobLinkMutation {
 	return _u.mutation
-}
-
-// ClearBlob clears the "blob" edge to the Blob entity.
-func (_u *BlobLinkUpdate) ClearBlob() *BlobLinkUpdate {
-	_ = _u.mutation.ClearEdge("blob")
-	return _u
-}
-
-// ClearLink clears the "link" edge to the Blob entity.
-func (_u *BlobLinkUpdate) ClearLink() *BlobLinkUpdate {
-	_ = _u.mutation.ClearEdge("link")
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -112,74 +98,7 @@ func (_u *BlobLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldBlobID, field.TypeUUID), sqlgraph.NewFieldSpec(FieldLinkID, field.TypeUUID))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.EdgeCleared("blob") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   BlobTable,
-			Columns: []string{BlobColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("blob"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   BlobTable,
-			Columns: []string{BlobColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("link") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   LinkTable,
-			Columns: []string{LinkColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("link"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   LinkTable,
-			Columns: []string{LinkColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -218,18 +137,6 @@ func (_u *BlobLinkUpdateOne) With(as ...entfield.Assignment) *BlobLinkUpdateOne 
 // Mutation returns the BlobLinkMutation object of the builder.
 func (_u *BlobLinkUpdateOne) Mutation() *BlobLinkMutation {
 	return _u.mutation
-}
-
-// ClearBlob clears the "blob" edge to the Blob entity.
-func (_u *BlobLinkUpdateOne) ClearBlob() *BlobLinkUpdateOne {
-	_ = _u.mutation.ClearEdge("blob")
-	return _u
-}
-
-// ClearLink clears the "link" edge to the Blob entity.
-func (_u *BlobLinkUpdateOne) ClearLink() *BlobLinkUpdateOne {
-	_ = _u.mutation.ClearEdge("link")
-	return _u
 }
 
 // Where appends a list predicates to the BlobLinkUpdate builder.
@@ -310,74 +217,7 @@ func (_u *BlobLinkUpdateOne) sqlSave(ctx context.Context) (_node *BlobLink, err 
 			_spec.Node.Columns[i] = f
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-	}
-	if _u.mutation.EdgeCleared("blob") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   BlobTable,
-			Columns: []string{BlobColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("blob"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   BlobTable,
-			Columns: []string{BlobColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("link") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   LinkTable,
-			Columns: []string{LinkColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("link"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   LinkTable,
-			Columns: []string{LinkColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &BlobLink{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

@@ -50,6 +50,7 @@ var cardDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"owner_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "OwnerID",
 		},
 	},
 	Table: "cards",

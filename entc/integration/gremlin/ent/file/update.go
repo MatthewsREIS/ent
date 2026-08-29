@@ -56,30 +56,6 @@ func (_u *FileUpdate) Mutation() *FileMutation {
 	return _u.mutation
 }
 
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *FileUpdate) ClearOwner() *FileUpdate {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
-}
-
-// ClearType clears the "type" edge to the FileType entity.
-func (_u *FileUpdate) ClearType() *FileUpdate {
-	_ = _u.mutation.ClearEdge("type")
-	return _u
-}
-
-// ClearFieldEdge clears all "field" edges to the FieldType entity.
-func (_u *FileUpdate) ClearFieldEdge() *FileUpdate {
-	_ = _u.mutation.ClearEdge("field")
-	return _u
-}
-
-// RemoveFieldIDs removes the "field" edge to FieldType entities by IDs.
-func (_u *FileUpdate) RemoveFieldIDs(ids ...string) *FileUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("field", entbuilder.ToAny(ids)...)
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FileUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -282,30 +258,6 @@ func (_u *FileUpdateOne) With(as ...entfield.Assignment) *FileUpdateOne {
 // Mutation returns the FileMutation object of the builder.
 func (_u *FileUpdateOne) Mutation() *FileMutation {
 	return _u.mutation
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *FileUpdateOne) ClearOwner() *FileUpdateOne {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
-}
-
-// ClearType clears the "type" edge to the FileType entity.
-func (_u *FileUpdateOne) ClearType() *FileUpdateOne {
-	_ = _u.mutation.ClearEdge("type")
-	return _u
-}
-
-// ClearFieldEdge clears all "field" edges to the FieldType entity.
-func (_u *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
-	_ = _u.mutation.ClearEdge("field")
-	return _u
-}
-
-// RemoveFieldIDs removes the "field" edge to FieldType entities by IDs.
-func (_u *FileUpdateOne) RemoveFieldIDs(ids ...string) *FileUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("field", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the FileUpdate builder.

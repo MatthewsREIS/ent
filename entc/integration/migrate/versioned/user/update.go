@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/versioned/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -97,29 +96,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int32](_u.mutation, "age"); ok {
-		_spec.SetField(FieldAge, field.TypeInt32, value)
-	}
-	if added, ok := _u.mutation.AddedField("age"); ok {
-		value := added.(int32)
-		_spec.AddField(FieldAge, field.TypeInt32, value)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "address"); ok {
-		_spec.SetField(FieldAddress, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("address") {
-		_spec.ClearField(FieldAddress, field.TypeString)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -235,29 +212,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int32](_u.mutation, "age"); ok {
-		_spec.SetField(FieldAge, field.TypeInt32, value)
-	}
-	if added, ok := _u.mutation.AddedField("age"); ok {
-		value := added.(int32)
-		_spec.AddField(FieldAge, field.TypeInt32, value)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "address"); ok {
-		_spec.SetField(FieldAddress, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("address") {
-		_spec.ClearField(FieldAddress, field.TypeString)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &User{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

@@ -49,6 +49,7 @@ var postDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"author_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "AuthorID",
 		},
 		"comments": {
 			Cardinality:     entbuilder.O2M,

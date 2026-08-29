@@ -49,6 +49,7 @@ var petDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"owner_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "OwnerID",
 			SchemaKey:       "Pet",
 		},
 	},

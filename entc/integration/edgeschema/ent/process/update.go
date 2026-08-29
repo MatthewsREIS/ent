@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/attachedfile"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
@@ -53,30 +52,6 @@ func (_u *ProcessUpdate) Mutation() *ProcessMutation {
 	return _u.mutation
 }
 
-// ClearFiles clears all "files" edges to the File entity.
-func (_u *ProcessUpdate) ClearFiles() *ProcessUpdate {
-	_ = _u.mutation.ClearEdge("files")
-	return _u
-}
-
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (_u *ProcessUpdate) RemoveFileIDs(ids ...int) *ProcessUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// ClearAttachedFiles clears all "attached_files" edges to the AttachedFile entity.
-func (_u *ProcessUpdate) ClearAttachedFiles() *ProcessUpdate {
-	_ = _u.mutation.ClearEdge("attached_files")
-	return _u
-}
-
-// RemoveAttachedFileIDs removes the "attached_files" edge to AttachedFile entities by IDs.
-func (_u *ProcessUpdate) RemoveAttachedFileIDs(ids ...int) *ProcessUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *ProcessUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -109,124 +84,14 @@ func (_u *ProcessUpdate) ExecX(ctx context.Context) {
 
 func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if _u.mutation.EdgeCleared("files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: FilesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil,
+		map[string]func() []*sqlgraph.FieldSpec{
+			"files": func() []*sqlgraph.FieldSpec {
+				specE := attachedfile.ThroughDefaults(_u.Config)
+				fields := specE.Fields
+				return fields
 			},
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := attachedfile.ThroughDefaults(_u.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: FilesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := attachedfile.ThroughDefaults(_u.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: FilesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := attachedfile.ThroughDefaults(_u.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("attached_files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   AttachedFilesTable,
-			Columns: []string{AttachedFilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("attached_files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("attached_files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   AttachedFilesTable,
-			Columns: []string{AttachedFilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("attached_files"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   AttachedFilesTable,
-			Columns: []string{AttachedFilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+		})
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -265,30 +130,6 @@ func (_u *ProcessUpdateOne) With(as ...entfield.Assignment) *ProcessUpdateOne {
 // Mutation returns the ProcessMutation object of the builder.
 func (_u *ProcessUpdateOne) Mutation() *ProcessMutation {
 	return _u.mutation
-}
-
-// ClearFiles clears all "files" edges to the File entity.
-func (_u *ProcessUpdateOne) ClearFiles() *ProcessUpdateOne {
-	_ = _u.mutation.ClearEdge("files")
-	return _u
-}
-
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (_u *ProcessUpdateOne) RemoveFileIDs(ids ...int) *ProcessUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
-// ClearAttachedFiles clears all "attached_files" edges to the AttachedFile entity.
-func (_u *ProcessUpdateOne) ClearAttachedFiles() *ProcessUpdateOne {
-	_ = _u.mutation.ClearEdge("attached_files")
-	return _u
-}
-
-// RemoveAttachedFileIDs removes the "attached_files" edge to AttachedFile entities by IDs.
-func (_u *ProcessUpdateOne) RemoveAttachedFileIDs(ids ...int) *ProcessUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("attached_files", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the ProcessUpdate builder.
@@ -353,124 +194,14 @@ func (_u *ProcessUpdateOne) sqlSave(ctx context.Context) (_node *Process, err er
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if _u.mutation.EdgeCleared("files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: FilesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil,
+		map[string]func() []*sqlgraph.FieldSpec{
+			"files": func() []*sqlgraph.FieldSpec {
+				specE := attachedfile.ThroughDefaults(_u.Config)
+				fields := specE.Fields
+				return fields
 			},
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := attachedfile.ThroughDefaults(_u.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: FilesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := attachedfile.ThroughDefaults(_u.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: FilesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := attachedfile.ThroughDefaults(_u.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("attached_files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   AttachedFilesTable,
-			Columns: []string{AttachedFilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("attached_files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("attached_files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   AttachedFilesTable,
-			Columns: []string{AttachedFilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("attached_files"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   AttachedFilesTable,
-			Columns: []string{AttachedFilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+		})
 	_node = &Process{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

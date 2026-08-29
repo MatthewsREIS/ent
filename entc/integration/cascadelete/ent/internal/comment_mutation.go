@@ -49,6 +49,7 @@ var commentDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"post_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "PostID",
 		},
 	},
 	Table: "comments",

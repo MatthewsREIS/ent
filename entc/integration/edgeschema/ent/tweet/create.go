@@ -19,7 +19,6 @@ import (
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // TweetCreate is the builder for creating a Tweet entity.
@@ -112,114 +111,27 @@ func (_c *TweetCreate) createSpec() (*Tweet, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-		_node.Text = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "liked_users"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   LikedUsersTable,
-			Columns: LikedUsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil,
+		map[string]func() []*sqlgraph.FieldSpec{
+			"liked_users": func() []*sqlgraph.FieldSpec {
+				specE := tweetlike.ThroughDefaults(_c.Config)
+				fields := specE.Fields
+				return fields
 			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := tweetlike.ThroughDefaults(_c.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "user"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   UserTable,
-			Columns: UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			"user": func() []*sqlgraph.FieldSpec {
+				specE := usertweet.ThroughDefaults(_c.Config)
+				fields := specE.Fields
+				return fields
 			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := usertweet.ThroughDefaults(_c.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tags"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   TagsTable,
-			Columns: TagsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+			"tags": func() []*sqlgraph.FieldSpec {
+				specE := tweettag.ThroughDefaults(_c.Config)
+				fields := specE.Fields
+				if specE.ID.Value != nil {
+					fields = append(fields, specE.ID)
+				}
+				return fields
 			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := tweettag.ThroughDefaults(_c.Config)
-			fields := specE.Fields
-			if specE.ID.Value != nil {
-				fields = append(fields, specE.ID)
-			}
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tweet_user"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   TweetUserTable,
-			Columns: []string{TweetUserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[uuid.UUID](_c.mutation, "tweet_tags"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   TweetTagsTable,
-			Columns: []string{TweetTagsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeUUID),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+		})
 	return _node, _spec
 }
 

@@ -44,6 +44,7 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"user_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 		"relative": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -55,6 +56,7 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"relative_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "RelativeID",
 		},
 		"info": {
 			Cardinality:     entbuilder.O2OUnique,
@@ -66,6 +68,7 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 			StorageColumns:  []string{"info_id"},
 			TargetIDColumn:  "id",
 			TargetIDSQLType: field.TypeInt,
+			NodeField:       "InfoID",
 		},
 	},
 	Table: "relationships",

@@ -118,81 +118,14 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "users"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   UsersTable,
-			Columns: UsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil,
+		map[string]func() []*sqlgraph.FieldSpec{
+			"users": func() []*sqlgraph.FieldSpec {
+				specE := usergroup.ThroughDefaults(_c.Config)
+				fields := specE.Fields
+				return fields
 			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		newFieldsE := func() []*sqlgraph.FieldSpec {
-			specE := usergroup.ThroughDefaults(_c.Config)
-			fields := specE.Fields
-			return fields
-		}
-		edge.Target.Fields = newFieldsE()
-		edge.Target.NewFields = newFieldsE
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "tags"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   TagsTable,
-			Columns: TagsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "joined_users"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   JoinedUsersTable,
-			Columns: []string{JoinedUsersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "group_tags"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: true,
-			Table:   GroupTagsTable,
-			Columns: []string{GroupTagsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+		})
 	return _node, _spec
 }
 

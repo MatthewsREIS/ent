@@ -17,7 +17,6 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/p"
 	"entgo.io/ent/entc/integration/gremlin/ent/group"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 )
 
@@ -52,18 +51,6 @@ func (_u *GroupInfoUpdate) With(as ...entfield.Assignment) *GroupInfoUpdate {
 // Mutation returns the GroupInfoMutation object of the builder.
 func (_u *GroupInfoUpdate) Mutation() *GroupInfoMutation {
 	return _u.mutation
-}
-
-// ClearGroups clears all "groups" edges to the Group entity.
-func (_u *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
-	_ = _u.mutation.ClearEdge("groups")
-	return _u
-}
-
-// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
-func (_u *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -186,18 +173,6 @@ func (_u *GroupInfoUpdateOne) With(as ...entfield.Assignment) *GroupInfoUpdateOn
 // Mutation returns the GroupInfoMutation object of the builder.
 func (_u *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
 	return _u.mutation
-}
-
-// ClearGroups clears all "groups" edges to the Group entity.
-func (_u *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
-	_ = _u.mutation.ClearEdge("groups")
-	return _u
-}
-
-// RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
-func (_u *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("groups", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the GroupInfoUpdate builder.

@@ -54,12 +54,6 @@ func (_u *PetUpdate) Mutation() *PetMutation {
 	return _u.mutation
 }
 
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *PetUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -98,47 +92,7 @@ func (_u *PetUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PetUpdate 
 
 func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if _u.mutation.EdgeCleared("owner") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _u.Config.SchemaConfig().Pet
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _u.Config.SchemaConfig().Pet
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, internal.SchemaOf(_u.Config), nil)
 	schemaConfig := _u.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Pet
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
@@ -182,12 +136,6 @@ func (_u *PetUpdateOne) With(as ...entfield.Assignment) *PetUpdateOne {
 // Mutation returns the PetMutation object of the builder.
 func (_u *PetUpdateOne) Mutation() *PetMutation {
 	return _u.mutation
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
 }
 
 // Where appends a list predicates to the PetUpdate builder.
@@ -258,47 +206,7 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if _u.mutation.EdgeCleared("owner") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _u.Config.SchemaConfig().Pet
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		edge.Schema = _u.Config.SchemaConfig().Pet
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, internal.SchemaOf(_u.Config), nil)
 	schemaConfig := _u.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Pet
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)

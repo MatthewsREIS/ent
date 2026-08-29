@@ -101,10 +101,7 @@ func (_c *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 		_node = &CustomType{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := entbuilder.GetField[string](_c.mutation, "custom"); ok {
-		_spec.SetField(FieldCustom, field.TypeString, value)
-		_node.Custom = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

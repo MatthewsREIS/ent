@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -84,19 +83,7 @@ func (_u *MixinIDUpdate) ExecX(ctx context.Context) {
 
 func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "some_field"); ok {
-		_spec.SetField(FieldSomeField, field.TypeString, value)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "mixin_field"); ok {
-		_spec.SetField(FieldMixinField, field.TypeString, value)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -199,19 +186,7 @@ func (_u *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err er
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "some_field"); ok {
-		_spec.SetField(FieldSomeField, field.TypeString, value)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "mixin_field"); ok {
-		_spec.SetField(FieldMixinField, field.TypeString, value)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &MixinID{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

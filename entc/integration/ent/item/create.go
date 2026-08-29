@@ -132,10 +132,7 @@ func (_c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-		_node.Text = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

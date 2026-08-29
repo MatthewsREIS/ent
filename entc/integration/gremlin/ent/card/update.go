@@ -57,24 +57,6 @@ func (_u *CardUpdate) Mutation() *CardMutation {
 	return _u.mutation
 }
 
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *CardUpdate) ClearOwner() *CardUpdate {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
-}
-
-// ClearSpec clears all "spec" edges to the Spec entity.
-func (_u *CardUpdate) ClearSpec() *CardUpdate {
-	_ = _u.mutation.ClearEdge("spec")
-	return _u
-}
-
-// RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
-func (_u *CardUpdate) RemoveSpecIDs(ids ...string) *CardUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("spec", entbuilder.ToAny(ids)...)
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *CardUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -234,24 +216,6 @@ func (_u *CardUpdateOne) With(as ...entfield.Assignment) *CardUpdateOne {
 // Mutation returns the CardMutation object of the builder.
 func (_u *CardUpdateOne) Mutation() *CardMutation {
 	return _u.mutation
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *CardUpdateOne) ClearOwner() *CardUpdateOne {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
-}
-
-// ClearSpec clears all "spec" edges to the Spec entity.
-func (_u *CardUpdateOne) ClearSpec() *CardUpdateOne {
-	_ = _u.mutation.ClearEdge("spec")
-	return _u
-}
-
-// RemoveSpecIDs removes the "spec" edge to Spec entities by IDs.
-func (_u *CardUpdateOne) RemoveSpecIDs(ids ...string) *CardUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("spec", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the CardUpdate builder.
