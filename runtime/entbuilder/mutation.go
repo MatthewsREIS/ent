@@ -31,11 +31,23 @@ const (
 
 // FieldSpec describes a scalar field on an entity.
 type FieldSpec struct {
-	// Type is the expected Go type for SetField validation.
+	// Type is the expected Go type for SetField validation. For scan/assign
+	// purposes (see scan.go) this is also the field's registered GoType:
+	// the struct field itself is this type, or a pointer to it when
+	// Nillable is set and this type isn't already a pointer (mirrors
+	// entc/gen's Field.NillableValue).
 	Type reflect.Type
 	// GoName is the exported struct field name on the entity type
 	// (e.g. "Title"). Used by OldField to read the field via reflect.
 	GoName string
+	// Name is the schema-declared field name (e.g. "SSOCert"), which can
+	// differ from Column (the SQL storage key, usually a lowercased/snake
+	// form). Used only by FormatEntity, which reproduces String()'s
+	// "name=value" segments keyed by this exact schema name.
+	Name string
+	// Sensitive marks a field whose value FormatEntity always redacts as
+	// "<sensitive>", mirroring field.Sensitive().
+	Sensitive bool
 	// Nillable allows ClearField to operate on this field.
 	Nillable bool
 	// Numeric allows AddField to operate on this field (increment/decrement).
@@ -68,6 +80,23 @@ type FieldSpec struct {
 	// Unrelated to node-struct population (ApplyCreateSpec always writes
 	// the raw mutation value there, matching the pre-refactor unroll).
 	HasValueScanner bool
+
+	// StructIndex is the index of this field in the entity struct (as
+	// returned by reflect.Type.Field), used by ScanTargets/AssignRow/
+	// FormatEntity to locate the field via reflect without per-entity
+	// generated code. The zero value (0) is never a real field index —
+	// struct index 0 is always the embedded Config — so it safely doubles
+	// as "unset" for hand-built FieldSpecs in tests.
+	StructIndex int
+	// ScanValue/FromValue back a field declared with an external
+	// ValueScanner (HasValueScanner true): ScanValue returns the
+	// intermediate field.ValueScanner passed to rows.Scan, and FromValue
+	// converts the scanned intermediate back to the field's Go value.
+	// Both nil for every other field. Generated as closures over the
+	// entity's package-level "<Entity>ValueScanner" var (see
+	// internal_model.tmpl), erasing the field.TypeValueScanner[T] generic.
+	ScanValue func() any
+	FromValue func(any) (any, error)
 }
 
 // EdgeSpec describes an edge on an entity.
@@ -200,6 +229,44 @@ type Descriptor struct {
 	// Target, all of which are well-defined regardless of the target's ID
 	// shape, so this is the full edge set unfiltered by target ID type.
 	GraphEdges map[string]EdgeSpec
+
+	// ScanFields lists every SQL column scanned/assigned by ScanTargets/
+	// AssignRow/FormatEntity, in schema-declaration order (matching the
+	// entity struct's field order — required for FormatEntity's String()
+	// output to match byte-for-byte). This is deliberately NOT the same
+	// set as Fields: Fields is scoped to entbuilder.Mutation (excludes a
+	// field that an edge exclusively owns via IsEdgeField, since those are
+	// set through edge methods, not SetField), but the struct still holds
+	// them as regular exported fields (e.g. edge-schema Relationship.
+	// UserID) that scan/assign/String must still handle. ScanFields is the
+	// unfiltered superset instead.
+	//
+	// Deviates from the task-4 brief, which described reusing Fields
+	// directly for scan/assign — Fields' mutation-scoped filtering makes
+	// that unsound for edge-schema entities exposing an edge-owned field.
+	ScanFields []FieldSpec
+
+	// FKColumns holds one FieldSpec per unexported foreign-key struct
+	// field (e.g. User.user_spouse) — the fields entc/gen calls
+	// UnexportedForeignKeys, scanned only when eager-loading appends
+	// their columns (query.go's Fetch ForeignKeys... columns). Never
+	// included in FormatEntity's output (unexported FKs aren't printed by
+	// the pre-refactor String() either).
+	//
+	// Deviates from the task-4 brief's `FKColumns []string`: a bare column
+	// name can't drive scan-cell construction on its own — StructIndex,
+	// SQLType and Type (the neighbor's ID type) are needed too, so each
+	// entry reuses the full FieldSpec shape instead.
+	FKColumns []FieldSpec
+
+	// scanPlans caches the by-column scan/assign plan built from
+	// ScanFields/FKColumns/the ID column (see scan.go). Built lazily
+	// (once, on first ScanTargets/AssignRow/FormatEntity call) since it
+	// requires reflect work over ScanFields that's wasteful to redo per
+	// query, and Descriptor is a package-init-time literal with no
+	// constructor call to hook.
+	scanOnce  sync.Once
+	scanPlans map[string]*fieldPlan
 }
 
 // Mutation is the single generic mutation type used by every entity.
