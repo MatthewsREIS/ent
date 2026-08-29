@@ -486,3 +486,357 @@ does not compile test files and would have missed both).
   handful of hand-fixed call sites listed above) are intentionally left
   uncommitted in `gemini/.worktrees/codegen-reduction` for user review and
   commit. Nothing was committed in gemini or contrib by this task.
+
+## Stage 2b: Assignment Handles (`With(F.X.Set(...), E.X.SetID(...), ...)`)
+
+Completes stage 2: every per-field/per-edge builder setter (`SetX`,
+`SetNillableX`, `AddX`/`AppendX`, `ClearX`, and the edge `SetXID`/
+`SetNillableXID`/`AddXIDs`/`RemoveXIDs`/`ClearX` family) is gone from
+generated builders. The replacement is a single `With(as
+...entfield.Assignment) *XCreate/XUpdate/XUpdateOne` method per builder,
+fed by the same `F`/`E` handles Stage 2a introduced for predicates/order —
+`F.<Field>.Set(v)`/`.SetNillable(p)`/`.Add(v)`/`.Append(v)`/`.Clear()`,
+`E.<Edge>.SetID(v)`/`.SetNillableID(p)`/`.AddIDs(vs...)`/`.RemoveIDs(vs...)`/
+`.Clear()`. JSON fields now live in `F` too (`entfield.NewJSON`); an FK
+column exposed as its own field (e.g. `ContactID` backing the `contact`
+edge) gets an `entfield.EdgeField` under `F` that routes to the edge
+internally — only edges with **no** matching FK-column field (`RecordType`,
+`Seller`, `BrokerOfRecord`, `CapitalMarketsAgent`, …) use the plain
+`E.<Edge>.SetID(...)` form. Measured the same way as 2a: against the
+`gemini` app, this fork's largest real-world consumer.
+
+### Benchmark commands
+
+Same entrypoints as Stage 1/2a:
+
+```bash
+# LOC
+cd models && find gen -name '*.go' -print0 | xargs -0 cat | wc -l
+
+# generation time + peak RSS
+task api:generate-go
+
+# clean build time + peak RSS
+go clean -cache && /usr/bin/time -v go build ./...   # in models/
+```
+
+### Results
+
+**Baseline is Stage 2a's recorded quiet-machine numbers** (LOC 1,577,213;
+gen 112.4s/3.2 GB; clean build 63.8s/3.17 GB) — same worktree as 2a (no
+environment/commit confound this round, unlike 2a vs Stage 1).
+
+| Metric | Before (Stage 2a, quiet-machine) | After (Stage 2b, local-replace) | Delta |
+|---|---|---|---|
+| Generated LOC (`models/gen`) | 1,577,213 | 1,393,985 | **-183,228 (-11.6%)** |
+| Generation wall time | 112.4s | 134.84s | +22.4s (+19.9%) |
+| Generation peak RSS | 3.2 GB | 3.2 GB | flat |
+| Clean build wall time | 63.8s | 103.63s | +39.8s (+62.4%) |
+| Clean build peak RSS | 3.17 GB | 3.09 GB | -0.08 GB (-2.5%) |
+
+Single-run measurements on a shared box (not averaged), same caveats as
+prior stages, **and this round had no quiet-machine re-measurement pass**
+(unlike 2a's follow-up) — the wall-time deltas above should not be taken as
+a clean attribution to the codegen change alone. The generation-time
+increase is plausible on its face (the `With`/`F`/`E`-handle emission adds
+per-field decision logic to `setter.tmpl` where the old codegen just
+stamped out one setter method per field), but the clean-build wall-time
+jump (+62%) is large enough, and RSS flat-to-down, that it's more likely
+dominated by concurrent load on the shared dev box during this run (heavy
+Docker/Postgres/testcontainers activity from the test phase ran on the same
+machine shortly before this benchmark) than by the `With(...)`-call-site
+surface itself — that surface is *smaller* per call site than the deleted
+per-field methods it replaces. Re-measure on a quiet machine before reading
+the clean-build delta as real.
+
+### Migration
+
+Built the rewriter fresh from the fork worktree
+(`go build -o handlerewrite ./tools/handlerewrite`) and ran it in `-chains`
+mode separately per Go module (each module's own `go.mod` scopes its
+`go/packages` load):
+
+```
+handlerewrite -manifest models/gen/handle_manifest.json \
+  -pkgprefix github.com/MatthewsREIS/gemini/models/gen/ \
+  -chains ./schema/...        # from models/    — 21 files
+  -chains ./dealhooks/...     # from models/    —  3 files
+  -chains ./...                # from api/       — 397 files
+  -chains ./...                # from workers/   —  46 files
+```
+
+467 non-generated `.go` files rewritten across the four modules; **zero
+ambiguity refusals** this round (no `SetNillable<X>` collisions between a
+plain `<X>` field and a `Nillable<X>` field anywhere in gemini's schema).
+The tool correctly resolved the F-vs-E routing for every FK-column-backed
+edge it touched (verified against the generated `where.go` handle structs
+throughout), including cases this session's own hand-fixes initially got
+wrong (see below) — the manifest-driven tool is more reliable than manual
+inference for that specific judgment call.
+
+**Template fixes** (the "~11 known" emitters the brief called out, all
+found and fixed; a fresh sweep of every `models/extensions/*/templates` and
+`models/templates` file for `.Set[A-Z]`/`.Clear[A-Z]`/`.Add[A-Z]`/
+`SetNillable` turned up no further offenders beyond this list):
+
+- `models/templates/entcontext.tmpl` — user email/okta-id update chain,
+  Okta-field-sync closures (rewritten from per-field `setter func(string)
+  *UserUpdateOne` to `assign func(string) entfield.Assignment`, batched into
+  one `With(assignments...)`), office-user upsert.
+- `models/extensions/entfake/fake.tmpl` — per-field fake-data setter loop
+  → per-field `create.With(pkg.F.X.Set(...))` (nillable and non-nillable
+  branches).
+- `models/extensions/entmerge/templates/merge_go.tmpl` — pre-clear/create
+  chains for merge; also required a **non-template** fix in
+  `entmerge/extension.go` (added `EntityPackage` to `MergeConfig`, sourced
+  from `entc/gen.Type.Package()` — a method, not a field, so the template's
+  `{{ .Package }}` auto-call needed an explicit `()` in the plain-Go
+  `extension.go` caller) so the template has an import path for the F/E
+  handles.
+- `models/extensions/enthubspot/templates/outbound_workers.tmpl`,
+  `inbound_workflow_association_workers.tmpl`, `inbound_standard_workers.tmpl`,
+  `owner_discovery.tmpl` — HubSpot-ID store/clear chains, association-junction
+  creates (edge-name-derived, not field-derived — reverted an initial
+  over-complicated approach back to the simpler `F.<FieldToStructField>.Set`
+  form once the field/edge distinction below was nailed down).
+- `models/extensions/enthubspot/templates/outbound_workers_test.tmpl`,
+  `inbound_workflow_association_workers_test.tmpl`,
+  `sync_initial_associations_test.tmpl` — the three fixed-shape (non-`$node`-
+  looped) HubSpot integration-test templates; `sync_initial_associations_test.tmpl`
+  alone had ~35 `Create()`/`UpdateOne()` chains across ContactList/Contact/
+  ContactListContact, machine-transformed with a small one-off Python script
+  driven by a field→(kind,name) table rather than hand-edited one at a time.
+
+**A same-name-shadow hazard is baked into HubSpot's test-template package
+convention specifically**: several of these templates create entities named
+`contact`/`contactList` while importing the `contact`/`contactlist` F/E
+packages under their bare names — every `x, err := pkg.Entity.Create()`
+declaration is safe (Go's short-var-decl scope begins *after* the
+declaring statement, so the RHS still sees the package), but a *second*
+`With(pkg.F...)` call reusing an already-declared identically-named local
+is not. Fixed via a second aliased import of the same package
+(`contactfield "…/gen/contact"`) scoped to just the ambiguous call sites,
+leaving the bulk of same-file, same-line-declared usages untouched.
+
+**Rewriter miss classes** (hand-fixed; none were data-corrupting, all were
+either compile errors — safe — or, in one case below, silently wrong code
+caught immediately by the type checker):
+
+1. **Conditional reassignment after the initial chain** (by far the most
+   common miss, dozens of sites across `models/schema`, `models/dealhooks`,
+   `api/resolvers`, `api/cmd`, and `workers`). `-chains` folds the *initial*
+   fluent `Create()`/`UpdateOne(...).With(...)` chain correctly, but a
+   later `builder = builder.SetX(v)` inside an `if`/`else` (a very common
+   idiom for optional-field carry-over in this codebase's `convert_*`
+   resolvers) is a separate statement the tool doesn't touch. Fixed by hand
+   as `builder = builder.With(pkg.F.X.Set(v))` at each site;
+   `api/resolvers/convert_escrow.resolvers.go`,
+   `convert_helpers.go`, and `convert_proposal_helpers.go` alone accounted
+   for ~90 of these (large Escrow/Listing/Proposal→Deal/Transaction field
+   carry-over resolvers with dozens of `if src.X != nil { builder =
+   builder.SetNillableX(...) }` blocks each).
+2. **Local variable/parameter shadows the field-handle package** — the
+   exact hazard Stage 2a's results doc flagged as needing a real
+   block-scope fix before 2b trusted the rewriter at a larger scale. It
+   recurred, but not from the *rewriter* mis-firing this time (0
+   corruptions from the tool itself) — it showed up in **hand-written code
+   the rewriter correctly left alone** because the shadow made the call
+   site a plain builder-method call, not a chain: a range-loop variable
+   `contact`/`company`, a function parameter `listing *gen.Listing`, or a
+   `:=`-declared local `marketing`/`app`/`user`/`workspace` already in
+   scope when a *later* statement needed `pkg.F`/`pkg.E`. Fixed per-site by
+   renaming the local (preferred — no import changes) or, where the name
+   was load-bearing across many call sites in the same function/file,
+   adding a second aliased import of the same package scoped to the
+   colliding lines only (Go permits importing one path under two names in
+   the same file). Representative sites:
+   `api/cmd/generate/generate_data.go` (`contact`/`company` loop vars),
+   `api/resolvers/listing.resolvers.go` (`listing *gen.Listing` local,
+   renamed to `lst` for the whole function), `api/resolvers/listing_workflow.go`
+   (`listing` parameter, renamed to `lst`), `api/testharness/fixtures/auth.go`
+   (`user` parameter, renamed to `u`), `workers/okta_workers_test.go` /
+   `workers/app_share_worker_test.go` / `workers/workspace_branch_cleanup_hook_test.go`
+   (aliased second imports).
+3. **Function-parameter/type-param receivers** — a builder passed through
+   as `*gen.XUpdateOne` (the plain top-level-package type alias, not the
+   entity subpackage) with `SetX` calls inside the callee; same underlying
+   cause as #2 (the parameter name matches or the type doesn't carry enough
+   context for the tool's static pass) but worth naming separately since
+   it's a signature shape, not a shadow. `models/schema/property_field_selection_hooks.go`,
+   `api/scim/apply.go`.
+4. **A standalone builder-method call reached through a function call
+   expression**, not a plain variable — `create().SetUserID(...)` where
+   `create` is itself a `func() *gen.DealTeamCreate` parameter
+   (`models/schema/deal_owner_runtime.go`). The chain-folding pass needs a
+   simple identifier or selector on the left to recognize a chain; a call
+   expression receiver falls outside that.
+
+**One transcription bug this session made and self-corrected via compiler
+feedback**, worth flagging as a gotcha for future migrators rather than a
+rewriter defect: the first pass through several hand-fixed edge-adjacent
+sites (`officeuser.Office`/`.User`, `contactlistcontact.ContactList`/
+`.Contact`, `contactlist.CreatedBy`) used the edge form
+(`E.<Edge>.SetID(...)`) by analogy with genuinely edge-only relations, but
+these particular columns are *field*-backed (`OfficeID`, `UserID`,
+`ContactListID`, `ContactID`, `CreatedByID` all have their own `F` handle
+of type `entfield.EdgeField`, which is the form that mirrors the deleted
+`SetOfficeID`/`SetContactID`/etc. setters exactly). `go build` caught every
+instance immediately (`E.<Edge>.SetID` doesn't exist when the manifest only
+generated the `F`-form `EdgeField` for a column, or vice versa) — nothing
+shipped wrong, but the failure mode is silent-until-compile, not a rewriter
+warning, so it's easy to get backwards by analogy alone. Rule of thumb: if
+the old codegen's method was literally `Set<Something>ID(...)`, check the
+package's `where.go` `F` struct for a field of that exact name before
+reaching for `E`.
+
+**Immutability + ID-write runtime enforcement (Task 3's structural→runtime
+move): zero collisions.** No hook, extension template, or hand-written call
+site in gemini calls `m.SetField`/`m.ClearField` on an immutable field
+during an update op, and none write the ID field on an update op — the new
+runtime guard closed on nothing (grep-confirmed before the full test pass,
+then confirmed again by 0 unexpected failures in `go test`/integration
+runs).
+
+**Left un-migrated, by scope decision, not a blocker**: 21 of the ~85
+`api` test packages (mostly `api/integration/*`) still fail to `go vet`
+(compile) — every failure is one of miss-classes 1–2 above, just not
+hand-fixed this round given the volume (199 files still contained
+`Set[A-Z]`/`Clear[A-Z]`/`AddXIDs`-shaped text after the rewriter pass,
+against 283 files the rewriter *did* successfully migrate in `api/integration`
+alone). All packages this task's brief actually requires to run —
+`models`, `workers`, `api/resolvers`, `api/scim`, `api/crexiimport`,
+`api/cmd/generate`, `api/hubspot_email_recipients`, `api/hubspot_email_stats`,
+`api/testharness`, and the integration packages `chatter`, `office`,
+`pinned`, `ringcentral`, `soft_delete`, `timeline`, `ent_resolvers`, and
+`contact` — are clean and passing. `contact` stood in for the brief's
+"contact or transaction" write-heavy pick since `api/integration/transaction`
+is one of the 21 still-broken packages (`transaction_total_outstanding_integration_test.go`,
+miss-class 1). Broken package list: `app`, `app_data`, `box`, `commission`,
+`contract`, `dashboard`, `dataimport`, `deal`, `email`, `escrow`,
+`marketing`, `misc`, `offer`, `property`, `scopes`, `search`, `sendgrid`,
+`tloxp`, `transaction`, `workspace_git_token`, `wrike`.
+
+### Semantic deviations
+
+All deviations recorded in stage 2a's section still hold at gemini scale;
+this stage's own deviations, all inherited rulings from Tasks 1–3 of the
+2b plan and re-verified against the real consumer app rather than newly
+discovered here:
+
+- **Clear-on-all-handles.** Every `F`/`E` handle exposes `.Clear()`
+  regardless of whether the underlying field/edge is nullable at the schema
+  level — a deliberate simplification (one method shape for every handle)
+  over the old codegen's nullable-only `ClearX` emission. No gemini call
+  site clears a non-nullable field/edge (would fail at the DB/constraint
+  layer exactly as before), so this is additive surface, not a narrowing.
+- **`Number[T].Set` is Reset-then-Set, not a raw overwrite** — matches the
+  old codegen's create-path semantics exactly; harmless on create, and on
+  update it means a `Set` after an `Add`/`AppendX` in the same `With(...)`
+  call list keeps last-write-wins ordering by argument position (verified:
+  no gemini call site relies on `Add` position after `Set` in the same
+  assignment list).
+- **Typed-value `Set`, no implicit string conversion** — `F.<Enum>.Set(v)`
+  takes the enum's declared Go type directly; nothing in gemini's schema
+  hits the `BasicType`-conversion-loss deviation stage 2a already recorded
+  (no non-`Valuer` custom time/`Stringer`-string/array-bytes `GoType`
+  field exists in this app, confirmed by grep as in 2a).
+- **`(col, name)` split for `StorageKey`-diverging fields** carries a real
+  assignment-side case in gemini (`file.fsize`-shaped columns, per Task 3's
+  note) — confirmed no gemini schema has a field whose Go name and SQL
+  column name diverge in a way that would have silently written to the
+  wrong column under the old single-string scheme; nothing to migrate here
+  beyond what generation already produces correctly.
+- **Immutability + update-op ID-write enforcement moved from structural
+  (deleted setter didn't exist) to runtime (`entbuilder` checks
+  `FieldSpec.Immutable` / `Descriptor.IDField` in `SetField`/`AddField`/
+  `AppendField`/`ClearField` and rejects ID writes on `OpUpdate`/
+  `OpUpdateOne`)** — see the "zero collisions" note above; this is the
+  deviation the brief specifically flagged to watch for extension/hook
+  breakage, and none materialized.
+- **`Number[T].Add` cannot express a negative delta on an unsigned field**
+  (permanent narrowing vs. the old codegen, which took a signed delta on
+  any numeric column) — no gemini schema field hits this (grep-confirmed:
+  every unsigned numeric column in gemini's schema is only ever `Set`, not
+  `Add`, in both old call sites and the migrated ones).
+- **`With(...)` defers the first assignment error to `Save`** rather than
+  panicking or erroring mid-chain — matches every gemini call site's
+  existing error-handling shape (`_, err := builder.Save(ctx); if err !=
+  nil { ... }`), so this is transparent to every consumer.
+- **Contrib's monolithic `mutation_input.tmpl`** (the `entgql` sibling of
+  the per-field-emitting template Task 2 fixed) was already found and fixed
+  in Task 4 (`contrib` `72a92819`, routing through the generic
+  `entbuilder.Mutation` `SetField`/`SetEdgeID` API instead of the deleted
+  per-field mutation methods) — this task's full gemini regen is the
+  validation pass for that fix, and it passes (`ent_resolvers`'s 286 tests
+  exercise the GraphQL mutation-input path directly).
+- **Gremlin "zero diff" claim, tightened wording**: Task 3's migration
+  produced Immutable markers on internal mutation files with no behavioral
+  change to any already-broken line (gremlin generation in this fork is
+  pre-existing-broken for unrelated reasons, per Task 3's note) — this
+  gemini regen doesn't exercise gremlin at all (gemini is SQL-only), so
+  there is nothing further to confirm or contradict here.
+
+### Test results
+
+- `go vet ./...` (build + `_test.go` type-check) clean in `models/` (all
+  packages) and `workers/` (root + `jobs`, including every `_test.go`).
+- `go vet` clean in the specific `api` packages this task's tests exercise:
+  `resolvers`, `scim`, `crexiimport`, `cmd/generate`,
+  `hubspot_email_recipients`, `hubspot_email_stats`, `testharness`, and
+  integration packages `chatter`, `office`, `pinned`, `ringcentral`,
+  `soft_delete`, `timeline`, `ent_resolvers`, `contact`. (21 other `api`
+  integration packages remain broken — see Migration above; not required by
+  this task's test list.)
+- `go test ./...` in `models/` — 27 tested packages, all pass.
+- `go test ./...` in `workers/` (root + `jobs`) — all pass, **but only under
+  restricted parallelism** (`-p 2 -parallel 4`); the default unbounded
+  parallelism overwhelmed the shared dev box's IntegreSQL/Postgres
+  testcontainer pool (`pq: could not write block ... wrote only 4096 of
+  8192 bytes` — a Postgres I/O error from resource contention, not a code
+  defect) and produced ~75 spurious failures that all pass individually and
+  under the tuned run. `api:test-integration`'s own Taskfile comment
+  already flags this exact tuning need for the IntegreSQL pool; `workers/`
+  has no equivalent task-level tuning and needs a matching `-p`/`-parallel`
+  cap if it's to be run unattended.
+- `task api:test-integration -- -run 'OnConflict' -count=1` — **47 tests,
+  47 passing** (same count as Stage 1 and Stage 2a).
+- `task api:test-integration -- ./integration/ent_resolvers/... -count=1`
+  — **286 tests, 285 passing, 1 pre-existing skip, 0 failures** (same count
+  as Stage 2a).
+- `task api:test-integration -- ./integration/contact/... -count=1`
+  (write-heavy package per this task's brief — 2b changes every write
+  path) — **109 tests, 109 passing, 0 failures**.
+
+### Concerns / follow-ups for the user
+
+- **Clean-build wall-time delta (+62.4%) needs a quiet-machine
+  re-measurement** before treating it as a real regression from the
+  codegen change — this round ran the benchmark on a box with recent heavy
+  Docker/testcontainers/Postgres load from the test phase, unlike 2a's
+  later quiet-machine recheck. Generation-time (+19.9%) and both RSS
+  numbers (flat/-2.5%) are more plausibly real and small.
+- **21 `api/integration/*` test packages left broken** (listed above,
+  under Migration) — same two miss classes as everything else this round,
+  just not hand-fixed given the volume (199 files still had leftover
+  builder-setter text after the rewriter pass). None of them are on this
+  task's required test list, but a follow-up pass mechanically applying the
+  same two fixes (conditional-reassignment-after-declaration,
+  shadow-rename-or-alias-import) across the remaining files would close
+  the gap — there's no new pattern to discover, just volume.
+- **The rewriter's cross-sibling-closure shadowing guard** (flagged by 2a
+  as needing real block-scope tracking before 2b trusted it at scale) did
+  not produce any *rewriter* corruption this round — 0 ambiguity refusals,
+  0 observed mis-rewrites, and the tool's own F/E routing choices were
+  verified correct throughout. The shadowing hazard that did recur this
+  round was a different (adjacent) failure mode: hand-written code where a
+  local variable already shadowed the package, which the tool correctly
+  declined to touch (leaving a plain compile error, not silently wrong
+  code) — see miss class 2 above. Tightening the guard remains worthwhile
+  for the *false-shadowing* case 2a found, but this round found no evidence
+  it under-fired.
+- Remaining: gemini-side changes (11 template fixes incl. one supporting
+  `extension.go` change, 467 rewriter-migrated files, and the hand-fixed
+  miss-class sites documented above) are intentionally left uncommitted in
+  `gemini/.worktrees/codegen-reduction` for user review and commit. Nothing
+  was committed in gemini or contrib by this task — only this results
+  document was committed, in the fork worktree.
