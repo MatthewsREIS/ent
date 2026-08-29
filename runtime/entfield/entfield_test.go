@@ -74,6 +74,22 @@ func TestTimeAndBoolAndValue(t *testing.T) {
 	require.Contains(t, q, `"id" <> $1`)
 }
 
+// TestBytesOps guards Bytes[T]'s predicate behavior across the Bytes ->
+// Bytes[T ~[]byte] generic conversion (I1): predicates must still compare
+// against the raw []byte column value regardless of T.
+func TestBytesOps(t *testing.T) {
+	raw := entfield.NewBytes[[]byte]("payload", "payload")
+	q, args := render(t, raw.EQ([]byte("hi")))
+	require.Contains(t, q, `"payload" = $1`)
+	require.Equal(t, []any{[]byte("hi")}, args)
+
+	type IP []byte
+	ip := entfield.NewBytes[IP]("ip", "ip")
+	q, args = render(t, ip.EQ(IP{127, 0, 0, 1}))
+	require.Contains(t, q, `"ip" = $1`)
+	require.Equal(t, []any{[]byte{127, 0, 0, 1}}, args)
+}
+
 func TestOrders(t *testing.T) {
 	name := entfield.NewString[string]("name", "name")
 	s := sql.Dialect(dialect.Postgres).Select("*").From(sql.Table("users"))

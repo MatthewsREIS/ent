@@ -461,9 +461,11 @@ func (f Bool[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
-// Set assigns v to the field.
+// Set assigns v to the field. Passes v as-is (T, not bool(v)) — same
+// reasoning as String[T].Set: the mutation descriptor expects the field's
+// declared Go type, not a bare bool.
 func (f Bool[T]) Set(v T) Assignment {
-	return func(m Mutable) error { return m.SetField(f.name, bool(v)) }
+	return func(m Mutable) error { return m.SetField(f.name, v) }
 }
 
 // SetNillable assigns *v when non-nil; no-op otherwise.
@@ -867,92 +869,105 @@ func (f Value[T]) Clear() Assignment {
 	return func(m Mutable) error { return m.ClearField(f.name) }
 }
 
-// Bytes is a handle for byte slice fields. See String's doc comment for why
-// col and name are kept separate.
-type Bytes struct {
+// Bytes is a generic handle for byte-slice fields (plain []byte or a
+// GoType like net.IP). See String's doc comment for why col and name are
+// kept separate. Predicates operate on the []byte column value regardless
+// of T — converting at the predicate boundary is the same pattern String[T]
+// uses for its string(v) conversions.
+type Bytes[T ~[]byte] struct {
 	col, name string
 }
 
 // NewBytes creates a new Bytes handle for the given column/field name.
-func NewBytes(col, name string) Bytes {
-	return Bytes{col: col, name: name}
+func NewBytes[T ~[]byte](col, name string) Bytes[T] {
+	return Bytes[T]{col: col, name: name}
 }
 
 // Column returns the column name.
-func (f Bytes) Column() string { return f.col }
+func (f Bytes[T]) Column() string { return f.col }
 
 // EQ returns a predicate for equality.
-func (f Bytes) EQ(v []byte) P {
-	return sql.FieldEQ(f.col, v)
+func (f Bytes[T]) EQ(v T) P {
+	return sql.FieldEQ(f.col, []byte(v))
 }
 
 // NEQ returns a predicate for inequality.
-func (f Bytes) NEQ(v []byte) P {
-	return sql.FieldNEQ(f.col, v)
+func (f Bytes[T]) NEQ(v T) P {
+	return sql.FieldNEQ(f.col, []byte(v))
 }
 
 // In returns a predicate for membership.
-func (f Bytes) In(vs ...[]byte) P {
-	return sql.FieldIn(f.col, vs...)
+func (f Bytes[T]) In(vs ...T) P {
+	v := make([]any, len(vs))
+	for i, val := range vs {
+		v[i] = []byte(val)
+	}
+	return sql.FieldIn(f.col, v...)
 }
 
 // NotIn returns a predicate for non-membership.
-func (f Bytes) NotIn(vs ...[]byte) P {
-	return sql.FieldNotIn(f.col, vs...)
+func (f Bytes[T]) NotIn(vs ...T) P {
+	v := make([]any, len(vs))
+	for i, val := range vs {
+		v[i] = []byte(val)
+	}
+	return sql.FieldNotIn(f.col, v...)
 }
 
 // GT returns a predicate for greater than.
-func (f Bytes) GT(v []byte) P {
-	return sql.FieldGT(f.col, v)
+func (f Bytes[T]) GT(v T) P {
+	return sql.FieldGT(f.col, []byte(v))
 }
 
 // GTE returns a predicate for greater than or equal.
-func (f Bytes) GTE(v []byte) P {
-	return sql.FieldGTE(f.col, v)
+func (f Bytes[T]) GTE(v T) P {
+	return sql.FieldGTE(f.col, []byte(v))
 }
 
 // LT returns a predicate for less than.
-func (f Bytes) LT(v []byte) P {
-	return sql.FieldLT(f.col, v)
+func (f Bytes[T]) LT(v T) P {
+	return sql.FieldLT(f.col, []byte(v))
 }
 
 // LTE returns a predicate for less than or equal.
-func (f Bytes) LTE(v []byte) P {
-	return sql.FieldLTE(f.col, v)
+func (f Bytes[T]) LTE(v T) P {
+	return sql.FieldLTE(f.col, []byte(v))
 }
 
 // Order returns an ordering by this field.
-func (f Bytes) Order(opts ...sql.OrderTermOption) Order {
+func (f Bytes[T]) Order(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(f.col, opts...).ToFunc()
 }
 
 // Asc returns an ascending ordering by this field.
-func (f Bytes) Asc() Order {
+func (f Bytes[T]) Asc() Order {
 	return f.Order()
 }
 
 // Desc returns a descending ordering by this field.
-func (f Bytes) Desc() Order {
+func (f Bytes[T]) Desc() Order {
 	return f.Order(sql.OrderDesc())
 }
 
 // IsNil returns a predicate for checking NULL values.
-func (f Bytes) IsNil() P {
+func (f Bytes[T]) IsNil() P {
 	return sql.FieldIsNull(f.col)
 }
 
 // NotNil returns a predicate for checking non-NULL values.
-func (f Bytes) NotNil() P {
+func (f Bytes[T]) NotNil() P {
 	return sql.FieldNotNull(f.col)
 }
 
-// Set assigns v to the field.
-func (f Bytes) Set(v []byte) Assignment {
+// Set assigns v to the field, passing v as-is (T, not []byte(v)) — same
+// reasoning as String[T].Set: the mutation descriptor expects the field's
+// declared Go type (e.g. net.IP), not a bare []byte.
+func (f Bytes[T]) Set(v T) Assignment {
 	return func(m Mutable) error { return m.SetField(f.name, v) }
 }
 
 // SetNillable assigns *v when non-nil; no-op otherwise.
-func (f Bytes) SetNillable(v *[]byte) Assignment {
+func (f Bytes[T]) SetNillable(v *T) Assignment {
 	return func(m Mutable) error {
 		if v == nil {
 			return nil
@@ -963,6 +978,6 @@ func (f Bytes) SetNillable(v *[]byte) Assignment {
 
 // Clear clears the field.
 // ponytail: exposed on all handles; non-optional misuse surfaces at save/DB.
-func (f Bytes) Clear() Assignment {
+func (f Bytes[T]) Clear() Assignment {
 	return func(m Mutable) error { return m.ClearField(f.name) }
 }

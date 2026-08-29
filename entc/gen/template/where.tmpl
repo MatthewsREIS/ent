@@ -22,7 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 		{{- if $.HasOneFieldID }}
 			{{- $kind := $.ID.HandleKind }}
 			// ID is the handle for the id field.
-			ID entfield.{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}
+			ID entfield.{{ $kind }}{{ if not (eq $kind "Time") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}
 		{{- end }}
 		{{- range $f := $.Fields }}
 			{{- $edgeName := $f.EdgeName }}
@@ -35,13 +35,13 @@ in the LICENSE file in the root directory of this source tree.
 				{{ $f.StructField }} entfield.JSON[{{ $f.Type }}]
 			{{- else if $kind }}
 				// {{ $f.StructField }} is the handle for the {{ quote $f.Name }} field.
-				{{ $f.StructField }} entfield.{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}
+				{{ $f.StructField }} entfield.{{ $kind }}{{ if not (eq $kind "Time") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}
 			{{- end }}
 		{{- end }}
 	}{
 		{{- if $.HasOneFieldID }}
 			{{- $kind := $.ID.HandleKind }}
-			ID: entfield.New{{ $kind }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}({{ $.ID.Constant }}, {{ printf "%q" $.ID.Name }}),
+			ID: entfield.New{{ $kind }}{{ if not (eq $kind "Time") }}[{{ if eq $kind "Enum" }}{{ trimPackage $.ID.Type.String $.Package }}{{ else }}{{ $.ID.Type }}{{ end }}]{{ end }}({{ $.ID.Constant }}, {{ printf "%q" $.ID.Name }}),
 		{{- end }}
 		{{- range $f := $.Fields }}
 			{{- $edgeName := $f.EdgeName }}
@@ -62,7 +62,7 @@ in the LICENSE file in the root directory of this source tree.
 				({{ printf "%q" $f.Name }}) is the schema-declared field name, used
 				by assignment methods to route into entbuilder.Mutation — see
 				entfield.String's doc comment. */}}
-				{{ $f.StructField }}: entfield.New{{ $kind }}{{ if $f.HasValueScanner }}Scan{{ end }}{{ if not (eq $kind "Time" "Bytes") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}({{ $f.Constant }}, {{ printf "%q" $f.Name }}{{ if $f.HasValueScanner }}, func(v {{ $f.Type }}) (driver.Value, error) { return ValueScanner.{{ $f.StructField }}.Value(v) }{{ end }}),
+				{{ $f.StructField }}: entfield.New{{ $kind }}{{ if $f.HasValueScanner }}Scan{{ end }}{{ if not (eq $kind "Time") }}[{{ if eq $kind "Enum" }}{{ trimPackage $f.Type.String $.Package }}{{ else }}{{ $f.Type }}{{ end }}]{{ end }}({{ $f.Constant }}, {{ printf "%q" $f.Name }}{{ if $f.HasValueScanner }}, func(v {{ $f.Type }}) (driver.Value, error) { return ValueScanner.{{ $f.StructField }}.Value(v) }{{ end }}),
 			{{- end }}
 		{{- end }}
 	}

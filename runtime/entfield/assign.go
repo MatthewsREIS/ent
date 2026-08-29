@@ -79,6 +79,13 @@ func (f JSON[T]) Clear() Assignment {
 // Value; assignments route through the edge itself, matching the old
 // setter.tmpl's EdgeField semantics.
 type EdgeField[T any] struct {
+	// Value is embedded for its predicate/order methods (column-based) only.
+	// Do not call Value.Set/Value.SetNillable/Value.Clear directly on an
+	// EdgeField — that bypasses edge routing entirely (writes m.fields under
+	// the column name via SetField instead of going through
+	// SetEdgeID/ClearEdge) and, for a StorageKey-diverging edge-field, uses
+	// the wrong mutation key. Always use EdgeField's own Set/SetNillable/
+	// Clear below, which shadow Value's and route through the edge.
 	Value[T]
 	edge string
 }

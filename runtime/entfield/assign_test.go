@@ -122,6 +122,32 @@ func TestEnumSetPreservesDeclaredType(t *testing.T) {
 	require.Equal(t, []op{{"SetField", "status", Status("active")}}, rec.ops)
 }
 
+// TestBoolSetPreservesDeclaredType guards against reintroducing a bool(v)
+// conversion in Bool[T].Set (I1): a GoType-backed bool field's mutation
+// descriptor type-checks the set value's dynamic type against the field's
+// declared Go type, so boxing a converted bare bool trips that check at
+// Save time — reproduced against fieldtype.active in entc/integration.
+func TestBoolSetPreservesDeclaredType(t *testing.T) {
+	type Status bool
+	rec := &recorder{}
+	active := entfield.NewBool[Status]("active", "active")
+	require.NoError(t, entfield.Apply(rec, active.Set(Status(true))))
+	require.Equal(t, []op{{"SetField", "active", Status(true)}}, rec.ops)
+}
+
+// TestBytesSetPreservesDeclaredType is I1's Bytes counterpart: Bytes must be
+// generic (Bytes[T ~[]byte]) so a GoType-backed bytes field (e.g. net.IP)
+// reaches SetField with its declared type, not a bare []byte — reproduced
+// against fieldtype.ip in entc/integration.
+func TestBytesSetPreservesDeclaredType(t *testing.T) {
+	type IP []byte
+	rec := &recorder{}
+	ip := entfield.NewBytes[IP]("ip", "ip")
+	v := IP{127, 0, 0, 1}
+	require.NoError(t, entfield.Apply(rec, ip.Set(v)))
+	require.Equal(t, []op{{"SetField", "ip", v}}, rec.ops)
+}
+
 func TestJSONAppendAndSet(t *testing.T) {
 	rec := &recorder{}
 	tags := entfield.NewJSON[[]string]("tags")

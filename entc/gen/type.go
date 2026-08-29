@@ -1798,9 +1798,9 @@ func (f Field) HandleKind() string {
 			return "Time"
 		}
 	case f.Type.Type == field.TypeBytes:
-		// Only a Slice kind is assignable to entfield.Bytes' non-generic
-		// []byte parameters. An Array-kind GoType (e.g. `type ID [64]byte`)
-		// is not assignable to []byte and falls through to Value below.
+		// Only a Slice kind satisfies entfield.Bytes[T]'s T ~[]byte
+		// constraint. An Array-kind GoType (e.g. `type ID [64]byte`) does
+		// not satisfy it and falls through to Value below.
 		if !f.HasGoType() || kind() == reflect.Slice {
 			return "Bytes"
 		}
