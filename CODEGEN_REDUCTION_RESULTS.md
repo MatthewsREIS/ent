@@ -1002,9 +1002,11 @@ Measurement history:
    snapshot taken mid-spike) — both passes are reported as consistent
    evidence, and the wall-clock delta above uses the second (quieter) pass.
 
-Reading: LOC is the big, unambiguous win this stage (-24.8%, cumulative
--51.9% vs Stage 1's original per-entity scan/assign/delete/upsert/mutate
-surface) — the reflection-based scanner and generic `Delete[T, I]` alias
+Reading: LOC is the big, unambiguous win this stage (-24.8%, **-48.4%
+cumulative vs Stage 1's original 2,035,883-line baseline** — the only
+whole-codebase LOC figure this document ever gives: (2,035,883 -
+1,049,567) / 2,035,883 = 48.44%) — the reflection-based scanner and generic
+`Delete[T, I]` alias
 remove the last large per-entity method bodies (`ScanValues`,
 `AssignValues`, `String`, and every per-entity delete builder). Generation
 time *dropped* this stage (-15.6%) rather than continuing stage 2's upward
@@ -1019,11 +1021,14 @@ methods, though build peak RSS moved the other way (up from the ~3.0 GB
 baseline to a 3.1-3.45 GB range) — plausibly the reflection scanner's
 `reflect.Type`/generic-instantiation-heavy code is denser per line for the
 compiler than the deleted straight-line setter/getter bodies it replaced,
-mirroring 2b's own build-RSS discussion. Net across all three stages
-measured on gemini: LOC 1,577,213 → 1,049,567 (-33.5% cumulative), build
-72.9s → 67.0s (first improvement in build wall since Stage 1), generation
-memory holds at the ~3.0-3.2 GB plateau every stage after Stage 1 has
-landed on.
+mirroring 2b's own build-RSS discussion. Separately, since Stage 2a's own
+recorded LOC (1,577,213 — the baseline Stage 2b measured against, distinct
+from and smaller than Stage 1's 2,035,883): LOC 1,577,213 → 1,049,567 is
+**-33.5%** across Stage 2b + Stage 3 combined (not "all three stages" —
+Stage 1 and 2a's own reductions are already baked into that 1,577,213
+starting point). Build time: 72.9s → 67.0s is the first improvement in
+build wall since Stage 1; generation memory holds at the ~3.0-3.2 GB
+plateau every stage after Stage 1 has landed on.
 
 ### Migration
 
@@ -1100,12 +1105,26 @@ either way)"*), and this task did hit it exactly as anticipated: `go test
 asserting a fixed argument order for a multi-column `INSERT`/`UPDATE` that
 the generic entbuilder path now emits in Go's randomized map-iteration
 order (confirmed empirically: re-running the same test showed a different
-column order — and a different failure — on 3 consecutive runs). Fixed by
-loosening every affected `WithArgs(...)` position that falls inside a
-shuffled field or edge block to `sqlmock.AnyArg()` (with a comment
-explaining why), while leaving the deterministic parts (query-text regexes,
-single-arg `WHERE id = ?` lookups, and multi-id `IN (...)` lists built from
-an ordered slice rather than a map) exactly as they were; re-ran the
+column order — and a different failure — on 3 consecutive runs). **First
+fix attempt** (blanket `sqlmock.AnyArg()` on every position inside a
+shuffled block) made the suite pass but, per a review round on this task,
+lost more real regression coverage than the accompanying comments claimed:
+`wrike_task_test.go`'s 8 tests ended up with no assertion at all of the
+boolean their own docstrings say they verify (`photography_ordered`), and
+the `ownership_*`/`escrow_seller_*` tests' comments overstated what the
+downstream `properties_view` lookup actually checks (FK propagation only,
+not `role`/`contact_role`/`primary_contact`). **Fixed properly**: replaced
+the blanket `AnyArg()` with a small `sqlmock.Argument` matcher
+(`timeOrTrue`/`valueAmong`, one per file) that accepts either a
+`time.Time` or one of a fixed set of expected literals, applied to every
+position in a shuffled block — this still tolerates the block's internal
+reordering while asserting the *values* actually written: a regression
+that flips `photography_ordered` to `false`, or writes the wrong
+`contact_role`/`primary_contact`/`role`/edge-FK literal, now fails the
+mock again, which blanket `AnyArg()` could not catch. Deterministic parts
+(query-text regexes, single-arg `WHERE id = ?` lookups, and multi-id
+`IN (...)` lists built from an ordered slice rather than a map) were left
+as literals throughout, unchanged by either fix attempt. Re-ran the
 affected tests 4+ consecutive times post-fix with no failures. The ledger
 also records a **planned but not-yet-applied fork-side fix** (sort
 field/edge names before iteration in both appliers, for deterministic SQL
@@ -1113,7 +1132,10 @@ text / prepared-statement plan-cache health under `lib/pq`) — verified
 absent from this fork's `runtime/entbuilder/{create,update,sqlspec}.go` at
 this task's `HEAD` (no `sort.` calls over `desc.Fields`/`desc.Edges`
 anywhere); flagged below as a concern rather than implemented here, since
-it's fork-side work outside this task's gemini-migration scope.
+it's fork-side work outside this task's gemini-migration scope. Once that
+fork-side fix lands, these matcher-based tests could be tightened further
+to assert exact column-to-value pairing, though the matcher approach
+already restores real value-level coverage without needing it.
 
 ### Semantic deviations
 
@@ -1132,6 +1154,13 @@ against gemini where applicable:
   `delete_modifier_compat.tmpl` (this task's deletion, above) is direct
   confirmation gemini never used that hook for anything live (its body was
   already `{{if false}}`-disabled before this task touched it).
+- **`dialect/sql/defedge/spec/*` extension point unreachable** (Task 3,
+  distinct from Task 5's SQL-delete hooks above) — the edge-spec-building
+  path Task 3's generic `ApplyCreateSpec`/`ApplyUpdateSpec` replaced no
+  longer calls through this extension-template hook; verified gemini has no
+  extension or hand-written template that hooks it, so nothing gemini-side
+  depended on it. Ledger-mandated doc note (`progress.md`'s Task 3 line:
+  "defedge extension-point loss (doc note for results doc)").
 - **`Modify()` unconditional on delete builders** (Task 5) — every entity's
   generic `Delete[T, I]` exposes `Modify()` regardless of the `sql/modifier`
   feature flag; harmless widening, no gemini call site is affected either
@@ -1240,10 +1269,13 @@ against gemini where applicable:
 - Remaining: gemini-side changes this task made (2 entql-ruling edits in
   `models/entc.go`/`models/schema/utils.go`, 1 template deletion, 2
   rewriter-miss hand-fixes on the `ContactPhoneNumber` edge, 3 test-file
-  sqlmock-brittleness fixes, plus the full regen) are intentionally left
-  uncommitted in `gemini/.worktrees/codegen-reduction` for user review and
-  commit, per this stage's own instructions — 660 files changed (659
-  modified, 1 deleted: `models/templates/delete_modifier_compat.tmpl`),
-  6,914 insertions(+), 15,191 deletions(-) per `git diff --stat`. Nothing
+  sqlmock-coverage fixes — restored order-independent value assertions via a
+  custom `sqlmock.Argument` matcher rather than blanket `AnyArg()`, after a
+  review round found the initial loosening lost more real coverage than
+  documented — plus the full regen) are intentionally left uncommitted in
+  `gemini/.worktrees/codegen-reduction` for user review and commit, per this
+  stage's own instructions — 660 files changed (659 modified, 1 deleted:
+  `models/templates/delete_modifier_compat.tmpl`), 6,994 insertions(+),
+  15,209 deletions(-) per `git diff --stat`. Nothing
   was committed in gemini or contrib by this stage — only this results
   document, in the fork worktree.
