@@ -73,7 +73,7 @@ func (m *Mutation[T, I]) Field(name string) (ent.Value, bool) {
 // With(F.ID.Set(other)) on an update silently retargets sqlSave's WHERE row.
 func (m *Mutation[T, I]) SetField(name string, value ent.Value) error {
 	if m.desc.IDField != "" && name == m.desc.IDField {
-		if m.op.Is(ent.OpUpdate | ent.OpUpdateOne) {
+		if !m.op.Is(ent.OpCreate) {
 			return fmt.Errorf("entbuilder: %s field %s is immutable and cannot be updated", m.desc.Name, name)
 		}
 		id, ok := value.(I)
@@ -100,6 +100,29 @@ func (m *Mutation[T, I]) SetField(name string, value ent.Value) error {
 	// Clearing a previously-cleared field re-set should drop the cleared marker.
 	delete(m.cleared, name)
 	// Setting a field should override any prior append for the same field.
+	delete(m.appended, name)
+	return nil
+}
+
+// SetFieldDefault sets the value for the given field like SetField, but
+// without the Immutable rejection. For use by generated defaults() only: an
+// Immutable()+UpdateDefault() field must still receive its computed
+// update-default on Update/UpdateOne even though a direct user write to it
+// is rejected by SetField/checkImmutable. Do not call this from anywhere
+// else — it bypasses the immutability guard entirely.
+func (m *Mutation[T, I]) SetFieldDefault(name string, value ent.Value) error {
+	spec, ok := m.desc.Fields[name]
+	if !ok {
+		return fmt.Errorf("unknown %s field %s", m.desc.Name, name)
+	}
+	if value != nil && spec.Type.Kind() != reflect.Interface && reflect.TypeOf(value) != spec.Type {
+		return fmt.Errorf("unexpected type %T for field %s (want %s)", value, name, spec.Type)
+	}
+	if m.fields == nil {
+		m.fields = make(map[string]any)
+	}
+	m.fields[name] = value
+	delete(m.cleared, name)
 	delete(m.appended, name)
 	return nil
 }
@@ -320,11 +343,27 @@ func (m *Mutation[T, I]) AppendField(name string, value ent.Value) error {
 	return nil
 }
 
+// checkEdgeImmutable rejects a write to an immutable edge on an Update/
+// UpdateOne mutation (Create is unaffected). Mirrors checkImmutable for
+// fields; see EdgeSpec.Immutable's doc comment for why the old per-edge
+// codegen enforced this structurally and entbuilder must enforce it here
+// instead now that E.<Edge> and F.<EdgeField> handles are shared across
+// every builder type.
+func (m *Mutation[T, I]) checkEdgeImmutable(spec EdgeSpec, edge string) error {
+	if spec.Immutable && m.op.Is(ent.OpUpdate|ent.OpUpdateOne) {
+		return fmt.Errorf("entbuilder: %s edge %s is immutable and cannot be updated", m.desc.Name, edge)
+	}
+	return nil
+}
+
 // AddEdgeIDs adds neighbor IDs to the given edge.
 func (m *Mutation[T, I]) AddEdgeIDs(edge string, ids ...any) error {
 	spec, ok := m.desc.Edges[edge]
 	if !ok {
 		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	if err := m.checkEdgeImmutable(spec, edge); err != nil {
+		return err
 	}
 	for _, id := range ids {
 		if id != nil && reflect.TypeOf(id) != spec.TargetIDType {
@@ -349,6 +388,9 @@ func (m *Mutation[T, I]) RemoveEdgeIDs(edge string, ids ...any) error {
 	spec, ok := m.desc.Edges[edge]
 	if !ok {
 		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	if err := m.checkEdgeImmutable(spec, edge); err != nil {
+		return err
 	}
 	if spec.Cardinality == O2OUnique {
 		return fmt.Errorf("entbuilder: RemoveEdgeIDs not supported on unique edge %s; use ClearEdge", edge)
@@ -378,6 +420,9 @@ func (m *Mutation[T, I]) SetEdgeID(edge string, id any) error {
 	spec, ok := m.desc.Edges[edge]
 	if !ok {
 		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	if err := m.checkEdgeImmutable(spec, edge); err != nil {
+		return err
 	}
 	if spec.Cardinality != O2OUnique {
 		return fmt.Errorf("entbuilder: SetEdgeID requires a unique edge; %s is %v", edge, spec.Cardinality)
@@ -429,8 +474,12 @@ func (m *Mutation[T, I]) RemovedEdgeIDs(edge string) []any {
 
 // ClearEdge marks the edge as cleared.
 func (m *Mutation[T, I]) ClearEdge(edge string) error {
-	if _, ok := m.desc.Edges[edge]; !ok {
+	spec, ok := m.desc.Edges[edge]
+	if !ok {
 		return fmt.Errorf("unknown %s edge %s", m.desc.Name, edge)
+	}
+	if err := m.checkEdgeImmutable(spec, edge); err != nil {
+		return err
 	}
 	if m.cleared == nil {
 		m.cleared = make(map[string]struct{})

@@ -63,6 +63,12 @@ type EdgeSpec struct {
 	// not exposed as a field). Migration tools read this to rewrite
 	// `m.SetField("X_id", v)` to `m.SetEdgeID("X", v)`.
 	Field string
+	// Immutable blocks SetEdgeID/AddEdgeIDs/RemoveEdgeIDs/ClearEdge on an
+	// Update/UpdateOne mutation, mirroring FieldSpec.Immutable. entfield's
+	// E.<Edge> and F.<EdgeField> handles both route through these methods
+	// (see EdgeField[T].Set/Clear in runtime/entfield), so this one gate
+	// covers both surfaces.
+	Immutable bool
 }
 
 // Descriptor is the static, package-init-time descriptor for one entity.

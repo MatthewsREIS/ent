@@ -139,9 +139,12 @@ func TestMutation_SetField_IDField_CreateRoutesToSetID(t *testing.T) {
 // unreachable from an update builder (no such method existed); now that
 // F.ID.Set reaches SetField like any other field, SetField must reject it
 // on Update/UpdateOne itself, or sqlSave's WHERE-row target (m.id) could be
-// silently swapped out from under an in-flight update.
+// silently swapped out from under an in-flight update. I3 widened the gate
+// to reject on every non-Create op (Delete/DeleteOne included), fail-closed,
+// since a user-defined ID is never a m.desc.Fields key and previously erred
+// "unknown field" there; this test covers both op families.
 func TestMutation_SetField_IDField_UpdateErrors(t *testing.T) {
-	for _, op := range []ent.Op{ent.OpUpdate, ent.OpUpdateOne} {
+	for _, op := range []ent.Op{ent.OpUpdate, ent.OpUpdateOne, ent.OpDelete, ent.OpDeleteOne} {
 		m := entbuilder.NewMutation[testEntity, int](nil, op, idFieldDescriptor())
 		err := m.SetField("id", 7)
 		require.Error(t, err)
@@ -233,6 +236,97 @@ func TestMutation_ResetField_ClearsAppended(t *testing.T) {
 	require.NoError(t, m.ResetField("tags"))
 	_, ok = m.AppendedField("tags")
 	require.False(t, ok)
+}
+
+func immutableEdgeDescriptor() *entbuilder.Descriptor {
+	return &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{},
+		Edges: map[string]entbuilder.EdgeSpec{
+			"owner": {Cardinality: entbuilder.O2OUnique, Target: "User", TargetIDType: reflect.TypeFor[int](), Immutable: true},
+			"teams": {Cardinality: entbuilder.M2M, Target: "Team", TargetIDType: reflect.TypeFor[int](), Immutable: true},
+		},
+	}
+}
+
+// TestMutation_SetEdgeID_ImmutableOnUpdate is C1's regression test: old
+// codegen enforced immutable edges structurally (no Set<E>ID on an update
+// builder); now that E.<Edge>.SetID/F.<EdgeField>.Set both reach SetEdgeID
+// like any other builder method, SetEdgeID must reject on Update/UpdateOne
+// itself, or the write silently no-ops (mutation accepts it, sqlSave never
+// reads it — proved against edgeschema.Friendship in the final review).
+func TestMutation_SetEdgeID_ImmutableOnUpdate(t *testing.T) {
+	for _, op := range []ent.Op{ent.OpUpdate, ent.OpUpdateOne} {
+		m := entbuilder.NewMutation[testEntity, int](nil, op, immutableEdgeDescriptor())
+		err := m.SetEdgeID("owner", 7)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "immutable")
+		_, ok := m.EdgeID("owner")
+		require.False(t, ok, "a rejected SetEdgeID must not have recorded a neighbor")
+	}
+}
+
+// TestMutation_SetEdgeID_ImmutableOnCreate confirms Create is unaffected —
+// an immutable edge is still settable once, at creation, mirroring
+// FieldSpec.Immutable's Create/Update split.
+func TestMutation_SetEdgeID_ImmutableOnCreate(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpCreate, immutableEdgeDescriptor())
+	require.NoError(t, m.SetEdgeID("owner", 7))
+	id, ok := m.EdgeID("owner")
+	require.True(t, ok)
+	require.Equal(t, 7, id)
+}
+
+func TestMutation_AddEdgeIDs_ImmutableOnUpdate(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, immutableEdgeDescriptor())
+	err := m.AddEdgeIDs("teams", 1, 2)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "immutable")
+	require.Empty(t, m.EdgeIDs("teams"))
+}
+
+func TestMutation_RemoveEdgeIDs_ImmutableOnUpdate(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, immutableEdgeDescriptor())
+	err := m.RemoveEdgeIDs("teams", 1)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "immutable")
+}
+
+func TestMutation_ClearEdge_ImmutableOnUpdate(t *testing.T) {
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdate, immutableEdgeDescriptor())
+	err := m.ClearEdge("owner")
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "immutable")
+	require.False(t, m.EdgeCleared("owner"))
+}
+
+// TestMutation_SetFieldDefault_ImmutableUpdateDefault is I2's regression
+// test: an Immutable()+UpdateDefault() field's computed update-default must
+// still land via the defaults() path (SetFieldDefault, which skips
+// checkImmutable), while a direct user write to the same field through
+// SetField on an update op must still be rejected.
+func TestMutation_SetFieldDefault_ImmutableUpdateDefault(t *testing.T) {
+	desc := &entbuilder.Descriptor{
+		Name:   "TestEntity",
+		IDType: reflect.TypeFor[int](),
+		Fields: map[string]entbuilder.FieldSpec{
+			"updated_at": {Type: reflect.TypeFor[string](), GoName: "UpdatedAt", Immutable: true},
+		},
+		Edges: map[string]entbuilder.EdgeSpec{},
+	}
+	m := entbuilder.NewMutation[testEntity, int](nil, ent.OpUpdateOne, desc)
+
+	// defaults() path: SetFieldDefault bypasses checkImmutable.
+	require.NoError(t, m.SetFieldDefault("updated_at", "now"))
+	v, ok := m.Field("updated_at")
+	require.True(t, ok)
+	require.Equal(t, "now", v)
+
+	// direct user write: SetField still rejects on the same immutable field.
+	err := m.SetField("updated_at", "user-supplied")
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "immutable")
 }
 
 // Compile-time check; will fail to compile if interface drifts.

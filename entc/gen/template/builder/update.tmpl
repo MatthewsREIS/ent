@@ -258,7 +258,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 						}
 					{{- end }}
 					v := {{ $.PackageQualifier }}{{ $f.UpdateDefaultName }}()
-					_ = {{ $mutation }}.SetField({{ printf "%q" $f.Name }}, v)
+					{{- /* SetFieldDefault, not SetField: an Immutable()+UpdateDefault()
+					field's computed default must still land even though checkImmutable
+					rejects a direct user SetField on Update/UpdateOne. */}}
+					_ = {{ $mutation }}.SetFieldDefault({{ printf "%q" $f.Name }}, v)
 				}
 			{{- end }}
 		{{- end }}

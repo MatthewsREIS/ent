@@ -88,6 +88,9 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- with $e.Field }}
 			Field: {{ .Name | printf "%q" }},
 			{{- end }}
+			{{- if $e.Immutable }}
+			Immutable: true,
+			{{- end }}
 		},
 		{{- end }}
 	},
