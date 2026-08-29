@@ -907,10 +907,29 @@ discovered here:
   code) — see miss class 2 above. Tightening the guard remains worthwhile
   for the *false-shadowing* case 2a found, but this round found no evidence
   it under-fired.
+- **Final-review fix wave, validated end to end.** The whole-branch review
+  found two Criticals (immutable-edge writes silently dropped on update;
+  `CreateBulk.Save` discarding a builder's `With()` error) and three
+  Importants (GoType-backed bool/bytes fields unsettable; Immutable+
+  UpdateDefault defaults dropped; IDField gate not covering delete ops) —
+  all fixed (commits `0cb74cf2d..405379e23`), unit- and integration-tested,
+  and the four failing `entc/integration` sub-trees were verified (via a
+  throwaway worktree at the branch base) to fail identically before this
+  branch — zero new breakage. Gemini was then regenerated against the fixed
+  fork: all three modules vet clean, `transaction` 117/117 passes again,
+  and generated LOC settles at **1,395,043** (the C1 edge-`Immutable`
+  markers and C2 bulk guard add ~1k lines; the stage delta remains −11.5%,
+  cumulative −31.5%).
+- **One advisory `go vet` composites warning in generated code**
+  (`models/gen/gql_node.go:21`: `&NotFoundError{"node"}` uses unkeyed
+  fields): this fork aliases `NotFoundError = internal.NotFoundError`, so
+  contrib's unchanged `node.tmpl` literal is now a composite of an imported
+  struct. Cosmetic; fix belongs in contrib's template (keyed literal) when
+  the contrib branch is next touched.
 - Remaining: gemini-side changes (11 template fixes incl. one supporting
   `extension.go` change, 467 rewriter-migrated files, the hand-fixed
-  miss-class sites documented above, and the 42-file follow-up pass) are
-  intentionally left uncommitted in `gemini/.worktrees/codegen-reduction`
-  for user review and commit — 656 changed files, +6,859/−15,132 lines in
-  the worktree total. Nothing was committed in gemini or contrib by this
-  stage — only this results document, in the fork worktree.
+  miss-class sites documented above, the 42-file follow-up pass, and the
+  post-fix-wave regen) are intentionally left uncommitted in
+  `gemini/.worktrees/codegen-reduction` for user review and commit. Nothing
+  was committed in gemini or contrib by this stage — only this results
+  document, in the fork worktree.
