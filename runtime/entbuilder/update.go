@@ -143,8 +143,8 @@ func RunUpdateOne[T any, M ent.Mutation](
 // WithHooks helper that ent codegen has emitted: builds the chain in reverse
 // (so the first registered hook wraps outermost), then invokes it.
 //
-// Shared between RunUpdate / RunUpdateOne (this file) and RunDelete
-// (delete.go in Task 6) — keep package-private so it's an implementation detail.
+// Shared between RunUpdate / RunUpdateOne (this file) and Delete/DeleteOne's
+// Exec (delete.go) — keep package-private so it's an implementation detail.
 func runMutate[V ent.Value, M ent.Mutation](
 	ctx context.Context,
 	hooks []ent.Hook,
