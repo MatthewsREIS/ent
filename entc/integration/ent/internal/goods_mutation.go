@@ -34,8 +34,10 @@ var goodsDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	GraphFields: map[string]field.Type{},
+	GraphEdges:  map[string]entbuilder.EdgeSpec{}}
 
 // NewGoodsMutation creates a new mutation for the Goods entity.
 func NewGoodsMutation(c Config, op Op, opts ...GoodsMutationOption) *GoodsMutation {

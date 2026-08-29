@@ -70,7 +70,26 @@ var attachedfileDescriptor = &entbuilder.Descriptor{
 		"proc_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"attach_time": field.TypeTime,
+		"f_id":        field.TypeInt,
+		"proc_id":     field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"fi": {
+			Target:         "File",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "attached_files",
+			StorageColumns: []string{"f_id"},
+		},
+		"proc": {
+			Target:         "Process",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "attached_files",
+			StorageColumns: []string{"proc_id"},
+		},
+	}}
 
 // NewAttachedFileMutation creates a new mutation for the AttachedFile entity.
 func NewAttachedFileMutation(c Config, op Op, opts ...AttachedFileMutationOption) *AttachedFileMutation {

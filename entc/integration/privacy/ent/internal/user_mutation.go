@@ -75,7 +75,25 @@ var userDescriptor = &entbuilder.Descriptor{
 		"age",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"name": field.TypeString,
+		"age":  field.TypeUint,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"teams": {
+			Target:         "Team",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "user_teams",
+			StorageColumns: []string{"user_id", "team_id"},
+		},
+		"tasks": {
+			Target:         "Task",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "tasks",
+			StorageColumns: []string{"user_tasks"},
+		},
+	}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

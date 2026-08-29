@@ -64,6 +64,29 @@ var bloblinkDescriptor = &entbuilder.Descriptor{
 		"created_at",
 		"blob_id",
 		"link_id",
+	},
+	GraphFields: map[string]field.Type{
+		"created_at": field.TypeTime,
+		"blob_id":    field.TypeUUID,
+		"link_id":    field.TypeUUID,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"blob": {
+			Target:         "Blob",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "blob_links",
+			StorageColumns: []string{"blob_id"},
+		},
+		"link": {
+			Target:         "Blob",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "blob_links",
+			StorageColumns: []string{"link_id"},
+		},
+	},
+	CompositeID: []entbuilder.IDColumnSpec{
+		{Column: "blob_id", SQLType: field.TypeUUID},
+		{Column: "link_id", SQLType: field.TypeUUID},
 	}}
 
 // NewBlobLinkMutation creates a new mutation for the BlobLink entity.

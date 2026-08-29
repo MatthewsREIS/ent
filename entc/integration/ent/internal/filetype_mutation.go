@@ -69,7 +69,20 @@ var filetypeDescriptor = &entbuilder.Descriptor{
 		"state",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"name":  field.TypeString,
+		"type":  field.TypeEnum,
+		"state": field.TypeEnum,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"files": {
+			Target:         "File",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "files",
+			StorageColumns: []string{"file_type_files"},
+		},
+	}}
 
 // NewFileTypeMutation creates a new mutation for the FileType entity.
 func NewFileTypeMutation(c Config, op Op, opts ...FileTypeMutationOption) *FileTypeMutation {

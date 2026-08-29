@@ -34,8 +34,10 @@ var builderDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	GraphFields: map[string]field.Type{},
+	GraphEdges:  map[string]entbuilder.EdgeSpec{}}
 
 // NewBuilderMutation creates a new mutation for the Builder entity.
 func NewBuilderMutation(c Config, op Op, opts ...BuilderMutationOption) *BuilderMutation {

@@ -75,7 +75,21 @@ var carDescriptor = &entbuilder.Descriptor{
 		"model",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"before_id": field.TypeFloat64,
+		"after_id":  field.TypeFloat64,
+		"model":     field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"owner": {
+			Target:         "Pet",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "cars",
+			StorageColumns: []string{"pet_cars"},
+		},
+	}}
 
 // NewCarMutation creates a new mutation for the Car entity.
 func NewCarMutation(c Config, op Op, opts ...CarMutationOption) *CarMutation {

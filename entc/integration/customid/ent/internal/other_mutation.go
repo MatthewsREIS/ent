@@ -36,8 +36,10 @@ var otherDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeOther}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeOther,
+	GraphFields: map[string]field.Type{},
+	GraphEdges:  map[string]entbuilder.EdgeSpec{}}
 
 // NewOtherMutation creates a new mutation for the Other entity.
 func NewOtherMutation(c Config, op Op, opts ...OtherMutationOption) *OtherMutation {

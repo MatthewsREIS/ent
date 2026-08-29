@@ -62,6 +62,29 @@ var tweetlikeDescriptor = &entbuilder.Descriptor{
 		"liked_at",
 		"user_id",
 		"tweet_id",
+	},
+	GraphFields: map[string]field.Type{
+		"liked_at": field.TypeTime,
+		"user_id":  field.TypeInt,
+		"tweet_id": field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"tweet": {
+			Target:         "Tweet",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"tweet_id"},
+		},
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"user_id"},
+		},
+	},
+	CompositeID: []entbuilder.IDColumnSpec{
+		{Column: "user_id", SQLType: field.TypeInt},
+		{Column: "tweet_id", SQLType: field.TypeInt},
 	}}
 
 // NewTweetLikeMutation creates a new mutation for the TweetLike entity.

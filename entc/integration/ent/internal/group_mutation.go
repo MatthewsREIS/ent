@@ -118,7 +118,41 @@ var groupDescriptor = &entbuilder.Descriptor{
 		"name",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"active":    field.TypeBool,
+		"expire":    field.TypeTime,
+		"type":      field.TypeString,
+		"max_users": field.TypeInt,
+		"name":      field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"files": {
+			Target:         "File",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "files",
+			StorageColumns: []string{"group_files"},
+		},
+		"blocked": {
+			Target:         "User",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "users",
+			StorageColumns: []string{"group_blocked"},
+		},
+		"users": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "user_groups",
+			StorageColumns: []string{"user_id", "group_id"},
+		},
+		"info": {
+			Target:         "GroupInfo",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "groups",
+			StorageColumns: []string{"group_info"},
+		},
+	}}
 
 // NewGroupMutation creates a new mutation for the Group entity.
 func NewGroupMutation(c Config, op Op, opts ...GroupMutationOption) *GroupMutation {

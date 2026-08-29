@@ -70,7 +70,26 @@ var usertweetDescriptor = &entbuilder.Descriptor{
 		"tweet_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"created_at": field.TypeTime,
+		"user_id":    field.TypeInt,
+		"tweet_id":   field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "user_tweets",
+			StorageColumns: []string{"user_id"},
+		},
+		"tweet": {
+			Target:         "Tweet",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "user_tweets",
+			StorageColumns: []string{"tweet_id"},
+		},
+	}}
 
 // NewUserTweetMutation creates a new mutation for the UserTweet entity.
 func NewUserTweetMutation(c Config, op Op, opts ...UserTweetMutationOption) *UserTweetMutation {

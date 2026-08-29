@@ -136,7 +136,39 @@ var fileDescriptor = &entbuilder.Descriptor{
 		"create_time",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"set_id":      field.TypeInt,
+		"fsize":       field.TypeInt,
+		"name":        field.TypeString,
+		"user":        field.TypeString,
+		"group":       field.TypeString,
+		"op":          field.TypeBool,
+		"field_id":    field.TypeInt,
+		"create_time": field.TypeTime,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"owner": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "files",
+			StorageColumns: []string{"user_files"},
+		},
+		"type": {
+			Target:         "FileType",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "files",
+			StorageColumns: []string{"file_type_files"},
+		},
+		"field": {
+			Target:         "FieldType",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "field_types",
+			StorageColumns: []string{"file_field"},
+		},
+	}}
 
 // NewFileMutation creates a new mutation for the File entity.
 func NewFileMutation(c Config, op Op, opts ...FileMutationOption) *FileMutation {

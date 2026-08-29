@@ -100,7 +100,30 @@ var cardDescriptor = &entbuilder.Descriptor{
 		"name",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"create_time": field.TypeTime,
+		"update_time": field.TypeTime,
+		"balance":     field.TypeFloat64,
+		"number":      field.TypeString,
+		"name":        field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"owner": {
+			Target:         "User",
+			Rel:            sqlgraph.O2O,
+			Inverse:        true,
+			StorageTable:   "cards",
+			StorageColumns: []string{"user_card"},
+		},
+		"spec": {
+			Target:         "Spec",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "spec_card",
+			StorageColumns: []string{"spec_id", "card_id"},
+		},
+	}}
 
 // NewCardMutation creates a new mutation for the Card entity.
 func NewCardMutation(c Config, op Op, opts ...CardMutationOption) *CardMutation {

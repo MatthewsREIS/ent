@@ -49,8 +49,18 @@ var sessionDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeBytes}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeBytes,
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"device": {
+			Target:         "Device",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "sessions",
+			StorageColumns: []string{"device_sessions"},
+		},
+	}}
 
 // NewSessionMutation creates a new mutation for the Session entity.
 func NewSessionMutation(c Config, op Op, opts ...SessionMutationOption) *SessionMutation {

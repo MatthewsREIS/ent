@@ -61,7 +61,25 @@ var grouptagDescriptor = &entbuilder.Descriptor{
 		"group_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"tag_id":   field.TypeInt,
+		"group_id": field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"tag": {
+			Target:         "Tag",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "group_tags",
+			StorageColumns: []string{"tag_id"},
+		},
+		"group": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "group_tags",
+			StorageColumns: []string{"group_id"},
+		},
+	}}
 
 // NewGroupTagMutation creates a new mutation for the GroupTag entity.
 func NewGroupTagMutation(c Config, op Op, opts ...GroupTagMutationOption) *GroupTagMutation {

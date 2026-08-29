@@ -53,7 +53,12 @@ var licenseDescriptor = &entbuilder.Descriptor{
 		"update_time",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"create_time": field.TypeTime,
+		"update_time": field.TypeTime,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewLicenseMutation creates a new mutation for the License entity.
 func NewLicenseMutation(c Config, op Op, opts ...LicenseMutationOption) *LicenseMutation {

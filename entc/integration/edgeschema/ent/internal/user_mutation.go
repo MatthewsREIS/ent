@@ -140,7 +140,92 @@ var userDescriptor = &entbuilder.Descriptor{
 		"name",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"name": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"groups": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "user_groups",
+			StorageColumns: []string{"user_id", "group_id"},
+		},
+		"friends": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "friendships",
+			StorageColumns: []string{"user_id", "friend_id"},
+			Bidi:           true,
+		},
+		"relatives": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "relationships",
+			StorageColumns: []string{"user_id", "relative_id"},
+			Bidi:           true,
+		},
+		"liked_tweets": {
+			Target:         "Tweet",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"user_id", "tweet_id"},
+		},
+		"tweets": {
+			Target:         "Tweet",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "user_tweets",
+			StorageColumns: []string{"user_id", "tweet_id"},
+		},
+		"roles": {
+			Target:         "Role",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"user_id", "role_id"},
+		},
+		"joined_groups": {
+			Target:         "UserGroup",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "user_groups",
+			StorageColumns: []string{"user_id"},
+		},
+		"friendships": {
+			Target:         "Friendship",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "friendships",
+			StorageColumns: []string{"user_id"},
+		},
+		"relationship": {
+			Target:         "Relationship",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "relationships",
+			StorageColumns: []string{"user_id"},
+		},
+		"likes": {
+			Target:         "TweetLike",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"user_id"},
+		},
+		"user_tweets": {
+			Target:         "UserTweet",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "user_tweets",
+			StorageColumns: []string{"user_id"},
+		},
+		"roles_users": {
+			Target:         "RoleUser",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"user_id"},
+		},
+	}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

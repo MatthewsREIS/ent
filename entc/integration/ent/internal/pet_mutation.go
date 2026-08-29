@@ -108,7 +108,31 @@ var petDescriptor = &entbuilder.Descriptor{
 		"optional_time",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"age":           field.TypeFloat64,
+		"name":          field.TypeString,
+		"uuid":          field.TypeUUID,
+		"nickname":      field.TypeString,
+		"trained":       field.TypeBool,
+		"optional_time": field.TypeTime,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"team": {
+			Target:         "User",
+			Rel:            sqlgraph.O2O,
+			Inverse:        true,
+			StorageTable:   "pet",
+			StorageColumns: []string{"user_team"},
+		},
+		"owner": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "pet",
+			StorageColumns: []string{"user_pets"},
+		},
+	}}
 
 // NewPetMutation creates a new mutation for the Pet entity.
 func NewPetMutation(c Config, op Op, opts ...PetMutationOption) *PetMutation {

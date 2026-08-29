@@ -86,7 +86,16 @@ var commentDescriptor = &entbuilder.Descriptor{
 		"client",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"unique_int":   field.TypeInt,
+		"unique_float": field.TypeFloat64,
+		"nillable_int": field.TypeInt,
+		"table":        field.TypeString,
+		"dir":          field.TypeJSON,
+		"client":       field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewCommentMutation creates a new mutation for the Comment entity.
 func NewCommentMutation(c Config, op Op, opts ...CommentMutationOption) *CommentMutation {

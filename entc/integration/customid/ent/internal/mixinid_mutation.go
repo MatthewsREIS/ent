@@ -52,7 +52,12 @@ var mixinidDescriptor = &entbuilder.Descriptor{
 		"mixin_field",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeUUID}
+	IDSQLType: field.TypeUUID,
+	GraphFields: map[string]field.Type{
+		"some_field":  field.TypeString,
+		"mixin_field": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewMixinIDMutation creates a new mutation for the MixinID entity.
 func NewMixinIDMutation(c Config, op Op, opts ...MixinIDMutationOption) *MixinIDMutation {

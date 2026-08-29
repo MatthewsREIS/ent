@@ -34,8 +34,10 @@ var pcDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	GraphFields: map[string]field.Type{},
+	GraphEdges:  map[string]entbuilder.EdgeSpec{}}
 
 // NewPCMutation creates a new mutation for the PC entity.
 func NewPCMutation(c Config, op Op, opts ...PCMutationOption) *PCMutation {

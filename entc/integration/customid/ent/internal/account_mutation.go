@@ -57,7 +57,18 @@ var accountDescriptor = &entbuilder.Descriptor{
 		"email",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeOther}
+	IDSQLType: field.TypeOther,
+	GraphFields: map[string]field.Type{
+		"email": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"token": {
+			Target:         "Token",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "tokens",
+			StorageColumns: []string{"account_token"},
+		},
+	}}
 
 // NewAccountMutation creates a new mutation for the Account entity.
 func NewAccountMutation(c Config, op Op, opts ...AccountMutationOption) *AccountMutation {

@@ -58,8 +58,23 @@ var deviceDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeBytes}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeBytes,
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"active_session": {
+			Target:         "Session",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "devices",
+			StorageColumns: []string{"device_active_session"},
+		},
+		"sessions": {
+			Target:         "Session",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "sessions",
+			StorageColumns: []string{"device_sessions"},
+		},
+	}}
 
 // NewDeviceMutation creates a new mutation for the Device entity.
 func NewDeviceMutation(c Config, op Op, opts ...DeviceMutationOption) *DeviceMutation {

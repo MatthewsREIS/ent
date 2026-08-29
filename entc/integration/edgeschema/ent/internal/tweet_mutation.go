@@ -101,7 +101,54 @@ var tweetDescriptor = &entbuilder.Descriptor{
 		"text",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"text": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"liked_users": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"user_id", "tweet_id"},
+		},
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "user_tweets",
+			StorageColumns: []string{"user_id", "tweet_id"},
+		},
+		"tags": {
+			Target:         "Tag",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tag_id", "tweet_id"},
+		},
+		"likes": {
+			Target:         "TweetLike",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"tweet_id"},
+		},
+		"tweet_user": {
+			Target:         "UserTweet",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "user_tweets",
+			StorageColumns: []string{"tweet_id"},
+		},
+		"tweet_tags": {
+			Target:         "TweetTag",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tweet_id"},
+		},
+	}}
 
 // NewTweetMutation creates a new mutation for the Tweet entity.
 func NewTweetMutation(c Config, op Op, opts ...TweetMutationOption) *TweetMutation {

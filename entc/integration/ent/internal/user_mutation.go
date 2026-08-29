@@ -246,7 +246,93 @@ var userDescriptor = &entbuilder.Descriptor{
 		"files_count",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"optional_int": field.TypeInt,
+		"age":          field.TypeInt,
+		"name":         field.TypeString,
+		"last":         field.TypeString,
+		"nickname":     field.TypeString,
+		"address":      field.TypeString,
+		"phone":        field.TypeString,
+		"password":     field.TypeString,
+		"role":         field.TypeEnum,
+		"employment":   field.TypeEnum,
+		"sso_cert":     field.TypeString,
+		"files_count":  field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"card": {
+			Target:         "Card",
+			Rel:            sqlgraph.O2O,
+			StorageTable:   "cards",
+			StorageColumns: []string{"user_card"},
+		},
+		"pets": {
+			Target:         "Pet",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "pet",
+			StorageColumns: []string{"user_pets"},
+		},
+		"files": {
+			Target:         "File",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "files",
+			StorageColumns: []string{"user_files"},
+		},
+		"groups": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "user_groups",
+			StorageColumns: []string{"user_id", "group_id"},
+		},
+		"friends": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "user_friends",
+			StorageColumns: []string{"user_id", "friend_id"},
+			Bidi:           true,
+		},
+		"followers": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "user_following",
+			StorageColumns: []string{"user_id", "follower_id"},
+		},
+		"following": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "user_following",
+			StorageColumns: []string{"user_id", "follower_id"},
+		},
+		"team": {
+			Target:         "Pet",
+			Rel:            sqlgraph.O2O,
+			StorageTable:   "pet",
+			StorageColumns: []string{"user_team"},
+		},
+		"spouse": {
+			Target:         "User",
+			Rel:            sqlgraph.O2O,
+			StorageTable:   "users",
+			StorageColumns: []string{"user_spouse"},
+			Bidi:           true,
+		},
+		"children": {
+			Target:         "User",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "users",
+			StorageColumns: []string{"user_parent"},
+		},
+		"parent": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "users",
+			StorageColumns: []string{"user_parent"},
+		},
+	}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

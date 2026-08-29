@@ -80,7 +80,32 @@ var docDescriptor = &entbuilder.Descriptor{
 		"text",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeString}
+	IDSQLType: field.TypeString,
+	GraphFields: map[string]field.Type{
+		"text": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"parent": {
+			Target:         "Doc",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "docs",
+			StorageColumns: []string{"doc_children"},
+		},
+		"children": {
+			Target:         "Doc",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "docs",
+			StorageColumns: []string{"doc_children"},
+		},
+		"related": {
+			Target:         "Doc",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "doc_related",
+			StorageColumns: []string{"doc_id", "related_id"},
+			Bidi:           true,
+		},
+	}}
 
 // NewDocMutation creates a new mutation for the Doc entity.
 func NewDocMutation(c Config, op Op, opts ...DocMutationOption) *DocMutation {

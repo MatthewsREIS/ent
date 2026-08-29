@@ -80,7 +80,27 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 		"friend_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"weight":     field.TypeInt,
+		"created_at": field.TypeTime,
+		"user_id":    field.TypeInt,
+		"friend_id":  field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "friendships",
+			StorageColumns: []string{"user_id"},
+		},
+		"friend": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "friendships",
+			StorageColumns: []string{"friend_id"},
+		},
+	}}
 
 // NewFriendshipMutation creates a new mutation for the Friendship entity.
 func NewFriendshipMutation(c Config, op Op, opts ...FriendshipMutationOption) *FriendshipMutation {

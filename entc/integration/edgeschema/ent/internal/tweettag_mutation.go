@@ -72,7 +72,26 @@ var tweettagDescriptor = &entbuilder.Descriptor{
 		"tweet_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeUUID}
+	IDSQLType: field.TypeUUID,
+	GraphFields: map[string]field.Type{
+		"added_at": field.TypeTime,
+		"tag_id":   field.TypeInt,
+		"tweet_id": field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"tag": {
+			Target:         "Tag",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tag_id"},
+		},
+		"tweet": {
+			Target:         "Tweet",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tweet_id"},
+		},
+	}}
 
 // NewTweetTagMutation creates a new mutation for the TweetTag entity.
 func NewTweetTagMutation(c Config, op Op, opts ...TweetTagMutationOption) *TweetTagMutation {

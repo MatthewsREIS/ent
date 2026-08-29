@@ -43,7 +43,11 @@ var relationshipinfoDescriptor = &entbuilder.Descriptor{
 		"text",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"text": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewRelationshipInfoMutation creates a new mutation for the RelationshipInfo entity.
 func NewRelationshipInfoMutation(c Config, op Op, opts ...RelationshipInfoMutationOption) *RelationshipInfoMutation {

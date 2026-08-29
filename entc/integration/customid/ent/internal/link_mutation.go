@@ -46,7 +46,11 @@ var linkDescriptor = &entbuilder.Descriptor{
 		"link_information",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeUUID}
+	IDSQLType: field.TypeUUID,
+	GraphFields: map[string]field.Type{
+		"link_information": field.TypeJSON,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewLinkMutation creates a new mutation for the Link entity.
 func NewLinkMutation(c Config, op Op, opts ...LinkMutationOption) *LinkMutation {

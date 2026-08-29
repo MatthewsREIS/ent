@@ -74,6 +74,36 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 		"user_id",
 		"relative_id",
 		"info_id",
+	},
+	GraphFields: map[string]field.Type{
+		"weight":      field.TypeInt,
+		"user_id":     field.TypeInt,
+		"relative_id": field.TypeInt,
+		"info_id":     field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "relationships",
+			StorageColumns: []string{"user_id"},
+		},
+		"relative": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "relationships",
+			StorageColumns: []string{"relative_id"},
+		},
+		"info": {
+			Target:         "RelationshipInfo",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "relationships",
+			StorageColumns: []string{"info_id"},
+		},
+	},
+	CompositeID: []entbuilder.IDColumnSpec{
+		{Column: "user_id", SQLType: field.TypeInt},
+		{Column: "relative_id", SQLType: field.TypeInt},
 	}}
 
 // NewRelationshipMutation creates a new mutation for the Relationship entity.

@@ -69,7 +69,25 @@ var noteDescriptor = &entbuilder.Descriptor{
 		"text",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeString}
+	IDSQLType: field.TypeString,
+	GraphFields: map[string]field.Type{
+		"text": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"parent": {
+			Target:         "Note",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "notes",
+			StorageColumns: []string{"note_children"},
+		},
+		"children": {
+			Target:         "Note",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "notes",
+			StorageColumns: []string{"note_children"},
+		},
+	}}
 
 // NewNoteMutation creates a new mutation for the Note entity.
 func NewNoteMutation(c Config, op Op, opts ...NoteMutationOption) *NoteMutation {

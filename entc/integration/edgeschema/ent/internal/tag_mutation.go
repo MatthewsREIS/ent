@@ -88,7 +88,38 @@ var tagDescriptor = &entbuilder.Descriptor{
 		"value",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"value": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"tweets": {
+			Target:         "Tweet",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tag_id", "tweet_id"},
+		},
+		"groups": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "group_tags",
+			StorageColumns: []string{"tag_id", "group_id"},
+		},
+		"tweet_tags": {
+			Target:         "TweetTag",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tag_id"},
+		},
+		"group_tags": {
+			Target:         "GroupTag",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "group_tags",
+			StorageColumns: []string{"tag_id"},
+		},
+	}}
 
 // NewTagMutation creates a new mutation for the Tag entity.
 func NewTagMutation(c Config, op Op, opts ...TagMutationOption) *TagMutation {

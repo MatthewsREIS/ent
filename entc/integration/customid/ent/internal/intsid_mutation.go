@@ -60,8 +60,25 @@ var intsidDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeInt64}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt64,
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"parent": {
+			Target:         "IntSID",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "int_si_ds",
+			StorageColumns: []string{"int_sid_parent"},
+			Bidi:           true,
+		},
+		"children": {
+			Target:         "IntSID",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "int_si_ds",
+			StorageColumns: []string{"int_sid_parent"},
+		},
+	}}
 
 // NewIntSIDMutation creates a new mutation for the IntSID entity.
 func NewIntSIDMutation(c Config, op Op, opts ...IntSIDMutationOption) *IntSIDMutation {

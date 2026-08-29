@@ -64,7 +64,20 @@ var groupinfoDescriptor = &entbuilder.Descriptor{
 		"max_users",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"desc":      field.TypeString,
+		"max_users": field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"groups": {
+			Target:         "Group",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "groups",
+			StorageColumns: []string{"group_info"},
+		},
+	}}
 
 // NewGroupInfoMutation creates a new mutation for the GroupInfo entity.
 func NewGroupInfoMutation(c Config, op Op, opts ...GroupInfoMutationOption) *GroupInfoMutation {

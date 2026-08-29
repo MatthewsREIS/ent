@@ -98,7 +98,18 @@ var exvaluescanDescriptor = &entbuilder.Descriptor{
 		"custom_optional",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"binary":          field.TypeString,
+		"binary_bytes":    field.TypeBytes,
+		"binary_optional": field.TypeString,
+		"text":            field.TypeString,
+		"text_optional":   field.TypeString,
+		"base64":          field.TypeString,
+		"custom":          field.TypeString,
+		"custom_optional": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewExValueScanMutation creates a new mutation for the ExValueScan entity.
 func NewExValueScanMutation(c Config, op Op, opts ...ExValueScanMutationOption) *ExValueScanMutation {

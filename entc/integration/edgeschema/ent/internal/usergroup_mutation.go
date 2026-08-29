@@ -70,7 +70,26 @@ var usergroupDescriptor = &entbuilder.Descriptor{
 		"group_id",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"joined_at": field.TypeTime,
+		"user_id":   field.TypeInt,
+		"group_id":  field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "user_groups",
+			StorageColumns: []string{"user_id"},
+		},
+		"group": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "user_groups",
+			StorageColumns: []string{"group_id"},
+		},
+	}}
 
 // NewUserGroupMutation creates a new mutation for the UserGroup entity.
 func NewUserGroupMutation(c Config, op Op, opts ...UserGroupMutationOption) *UserGroupMutation {

@@ -62,6 +62,29 @@ var roleuserDescriptor = &entbuilder.Descriptor{
 		"created_at",
 		"role_id",
 		"user_id",
+	},
+	GraphFields: map[string]field.Type{
+		"created_at": field.TypeTime,
+		"role_id":    field.TypeInt,
+		"user_id":    field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"role": {
+			Target:         "Role",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"role_id"},
+		},
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"user_id"},
+		},
+	},
+	CompositeID: []entbuilder.IDColumnSpec{
+		{Column: "user_id", SQLType: field.TypeInt},
+		{Column: "role_id", SQLType: field.TypeInt},
 	}}
 
 // NewRoleUserMutation creates a new mutation for the RoleUser entity.

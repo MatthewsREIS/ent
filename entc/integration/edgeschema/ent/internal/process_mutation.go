@@ -57,8 +57,24 @@ var processDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"files": {
+			Target:         "File",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "attached_files",
+			StorageColumns: []string{"proc_id", "f_id"},
+		},
+		"attached_files": {
+			Target:         "AttachedFile",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "attached_files",
+			StorageColumns: []string{"proc_id"},
+		},
+	}}
 
 // NewProcessMutation creates a new mutation for the Process entity.
 func NewProcessMutation(c Config, op Op, opts ...ProcessMutationOption) *ProcessMutation {

@@ -64,7 +64,27 @@ var roleDescriptor = &entbuilder.Descriptor{
 		"created_at",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"name":       field.TypeString,
+		"created_at": field.TypeTime,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"user_id", "role_id"},
+		},
+		"roles_users": {
+			Target:         "RoleUser",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"role_id"},
+		},
+	}}
 
 // NewRoleMutation creates a new mutation for the Role entity.
 func NewRoleMutation(c Config, op Op, opts ...RoleMutationOption) *RoleMutation {

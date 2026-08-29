@@ -103,7 +103,18 @@ var enttaskDescriptor = &entbuilder.Descriptor{
 		"op",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"priority":     field.TypeInt,
+		"priorities":   field.TypeJSON,
+		"created_at":   field.TypeTime,
+		"name":         field.TypeString,
+		"owner":        field.TypeString,
+		"order":        field.TypeInt,
+		"order_option": field.TypeInt,
+		"op":           field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewTaskMutation creates a new mutation for the Task entity.
 func NewTaskMutation(c Config, op Op, opts ...TaskMutationOption) *TaskMutation {

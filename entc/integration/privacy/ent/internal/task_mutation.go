@@ -90,7 +90,28 @@ var taskDescriptor = &entbuilder.Descriptor{
 		"uuid",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"title":       field.TypeString,
+		"description": field.TypeString,
+		"status":      field.TypeEnum,
+		"uuid":        field.TypeUUID,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"teams": {
+			Target:         "Team",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "task_teams",
+			StorageColumns: []string{"task_id", "team_id"},
+		},
+		"owner": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "tasks",
+			StorageColumns: []string{"user_tasks"},
+		},
+	}}
 
 // NewTaskMutation creates a new mutation for the Task entity.
 func NewTaskMutation(c Config, op Op, opts ...TaskMutationOption) *TaskMutation {

@@ -67,7 +67,26 @@ var teamDescriptor = &entbuilder.Descriptor{
 		"name",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"name": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"tasks": {
+			Target:         "Task",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "task_teams",
+			StorageColumns: []string{"task_id", "team_id"},
+		},
+		"users": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "user_teams",
+			StorageColumns: []string{"user_id", "team_id"},
+		},
+	}}
 
 // NewTeamMutation creates a new mutation for the Team entity.
 func NewTeamMutation(c Config, op Op, opts ...TeamMutationOption) *TeamMutation {

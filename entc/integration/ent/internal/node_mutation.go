@@ -77,7 +77,26 @@ var nodeDescriptor = &entbuilder.Descriptor{
 		"updated_at",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDSQLType: field.TypeInt,
+	GraphFields: map[string]field.Type{
+		"value":      field.TypeInt,
+		"updated_at": field.TypeTime,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"prev": {
+			Target:         "Node",
+			Rel:            sqlgraph.O2O,
+			Inverse:        true,
+			StorageTable:   "nodes",
+			StorageColumns: []string{"node_next"},
+		},
+		"next": {
+			Target:         "Node",
+			Rel:            sqlgraph.O2O,
+			StorageTable:   "nodes",
+			StorageColumns: []string{"node_next"},
+		},
+	}}
 
 // NewNodeMutation creates a new mutation for the Node entity.
 func NewNodeMutation(c Config, op Op, opts ...NodeMutationOption) *NodeMutation {

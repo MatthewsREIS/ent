@@ -46,8 +46,17 @@ var specDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeInt}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"card": {
+			Target:         "Card",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "spec_card",
+			StorageColumns: []string{"spec_id", "card_id"},
+		},
+	}}
 
 // NewSpecMutation creates a new mutation for the Spec entity.
 func NewSpecMutation(c Config, op Op, opts ...SpecMutationOption) *SpecMutation {

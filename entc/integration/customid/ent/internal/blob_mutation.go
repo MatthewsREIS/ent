@@ -77,7 +77,34 @@ var blobDescriptor = &entbuilder.Descriptor{
 		"count",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeUUID}
+	IDSQLType: field.TypeUUID,
+	GraphFields: map[string]field.Type{
+		"uuid":  field.TypeUUID,
+		"count": field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"parent": {
+			Target:         "Blob",
+			Rel:            sqlgraph.O2O,
+			StorageTable:   "blobs",
+			StorageColumns: []string{"blob_parent"},
+			Bidi:           true,
+		},
+		"links": {
+			Target:         "Blob",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "blob_links",
+			StorageColumns: []string{"blob_id", "link_id"},
+			Bidi:           true,
+		},
+		"blob_links": {
+			Target:         "BlobLink",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "blob_links",
+			StorageColumns: []string{"blob_id"},
+		},
+	}}
 
 // NewBlobMutation creates a new mutation for the Blob entity.
 func NewBlobMutation(c Config, op Op, opts ...BlobMutationOption) *BlobMutation {

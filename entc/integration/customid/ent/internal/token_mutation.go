@@ -58,7 +58,19 @@ var tokenDescriptor = &entbuilder.Descriptor{
 		"body",
 	},
 	IDColumn:  "id",
-	IDSQLType: field.TypeOther}
+	IDSQLType: field.TypeOther,
+	GraphFields: map[string]field.Type{
+		"body": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"account": {
+			Target:         "Account",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "tokens",
+			StorageColumns: []string{"account_token"},
+		},
+	}}
 
 // NewTokenMutation creates a new mutation for the Token entity.
 func NewTokenMutation(c Config, op Op, opts ...TokenMutationOption) *TokenMutation {

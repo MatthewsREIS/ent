@@ -35,8 +35,10 @@ var revisionDescriptor = &entbuilder.Descriptor{
 	TableColumns: []string{
 		"id",
 	},
-	IDColumn:  "id",
-	IDSQLType: field.TypeString}
+	IDColumn:    "id",
+	IDSQLType:   field.TypeString,
+	GraphFields: map[string]field.Type{},
+	GraphEdges:  map[string]entbuilder.EdgeSpec{}}
 
 // NewRevisionMutation creates a new mutation for the Revision entity.
 func NewRevisionMutation(c Config, op Op, opts ...RevisionMutationOption) *RevisionMutation {
