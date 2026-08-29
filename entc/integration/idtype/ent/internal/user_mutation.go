@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/idtype/ent/predicate"
 )
@@ -29,28 +31,53 @@ var userDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[uint64](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"spouse": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[uint64](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[uint64](),
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "users",
+			StorageColumns:  []string{"user_spouse"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUint64,
 		},
 		"followers": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[uint64](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[uint64](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "user_following",
+			StorageColumns:  []string{"user_id", "follower_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUint64,
 		},
 		"following": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[uint64](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[uint64](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "user_following",
+			StorageColumns:  []string{"user_id", "follower_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUint64,
 		},
-	}}
+	},
+	Table: "users",
+	TableColumns: []string{
+		"id",
+		"name",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeUint64}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

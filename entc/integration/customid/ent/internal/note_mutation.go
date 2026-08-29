@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -34,21 +36,40 @@ var noteDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Text",
 			Nillable: true,
+			Column:   "text",
+			SQLType:  field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Note",
-			TargetIDType: reflect.TypeFor[schema.NoteID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Note",
+			TargetIDType:    reflect.TypeFor[schema.NoteID](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "notes",
+			StorageColumns:  []string{"note_children"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
 		"children": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Note",
-			TargetIDType: reflect.TypeFor[schema.NoteID](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Note",
+			TargetIDType:    reflect.TypeFor[schema.NoteID](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "notes",
+			StorageColumns:  []string{"note_children"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
-	}}
+	},
+	Table: "notes",
+	TableColumns: []string{
+		"id",
+		"text",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeString}
 
 // NewNoteMutation creates a new mutation for the Note entity.
 func NewNoteMutation(c Config, op Op, opts ...NoteMutationOption) *NoteMutation {

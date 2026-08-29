@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
@@ -32,17 +34,34 @@ var intsidDescriptor = &entbuilder.Descriptor{
 	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "IntSID",
-			TargetIDType: reflect.TypeFor[sid.ID](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "IntSID",
+			TargetIDType:    reflect.TypeFor[sid.ID](),
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "int_si_ds",
+			StorageColumns:  []string{"int_sid_parent"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt64,
 		},
 		"children": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "IntSID",
-			TargetIDType: reflect.TypeFor[sid.ID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "IntSID",
+			TargetIDType:    reflect.TypeFor[sid.ID](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "int_si_ds",
+			StorageColumns:  []string{"int_sid_parent"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt64,
 		},
-	}}
+	},
+	Table: "int_si_ds",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt64}
 
 // NewIntSIDMutation creates a new mutation for the IntSID entity.
 func NewIntSIDMutation(c Config, op Op, opts ...IntSIDMutationOption) *IntSIDMutation {

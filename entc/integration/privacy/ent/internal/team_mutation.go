@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 )
@@ -29,24 +31,43 @@ var teamDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"tasks": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Task",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "Task",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "task_teams",
+			StorageColumns:  []string{"task_id", "team_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"users": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "user_teams",
+			StorageColumns:  []string{"user_id", "team_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "teams",
+	TableColumns: []string{
+		"id",
+		"name",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewTeamMutation creates a new mutation for the Team entity.
 func NewTeamMutation(c Config, op Op, opts ...TeamMutationOption) *TeamMutation {

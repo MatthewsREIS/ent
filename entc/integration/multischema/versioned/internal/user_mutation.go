@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/multischema/versioned/predicate"
 )
@@ -29,45 +31,92 @@ var userDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"pets": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Pet",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Pet",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "pets",
+			StorageColumns:  []string{"owner_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "Pet",
 		},
 		"groups": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Group",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "Group",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "group_users",
+			StorageColumns:  []string{"group_id", "user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "GroupUsers",
 		},
 		"friends": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "friendships",
+			StorageColumns:  []string{"user_id", "friend_id"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "Friendship",
 		},
 		"followers": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "user_following",
+			StorageColumns:  []string{"user_id", "follower_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "UserFollowing",
 		},
 		"following": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "user_following",
+			StorageColumns:  []string{"user_id", "follower_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "UserFollowing",
 		},
 		"friendships": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Friendship",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "Friendship",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "friendships",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "Friendship",
 		},
-	}}
+	},
+	Table: "users",
+	TableColumns: []string{
+		"id",
+		"name",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	SchemaKey: "User"}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

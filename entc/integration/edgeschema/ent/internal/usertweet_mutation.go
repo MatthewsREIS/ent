@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,24 +32,45 @@ var usertweetDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"created_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreatedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "CreatedAt",
+			Column:  "created_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "user_tweets",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"tweet": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Tweet",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "tweet_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Tweet",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "tweet_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "user_tweets",
+			StorageColumns:  []string{"tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "user_tweets",
+	TableColumns: []string{
+		"id",
+		"created_at",
+		"user_id",
+		"tweet_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewUserTweetMutation creates a new mutation for the UserTweet entity.
 func NewUserTweetMutation(c Config, op Op, opts ...UserTweetMutationOption) *UserTweetMutation {

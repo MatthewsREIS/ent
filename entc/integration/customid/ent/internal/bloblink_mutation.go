@@ -10,7 +10,9 @@ import (
 	"reflect"
 	"time"
 
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"github.com/google/uuid"
 )
@@ -27,23 +29,41 @@ var bloblinkDescriptor = &entbuilder.Descriptor{
 	Name: "BlobLink",
 	Fields: map[string]entbuilder.FieldSpec{
 		"created_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreatedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "CreatedAt",
+			Column:  "created_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"blob": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Blob",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
-			Field:        "blob_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Blob",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Field:           "blob_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "blob_links",
+			StorageColumns:  []string{"blob_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
 		},
 		"link": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Blob",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
-			Field:        "link_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Blob",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Field:           "link_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "blob_links",
+			StorageColumns:  []string{"link_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
 		},
+	},
+	Table: "blob_links",
+	TableColumns: []string{
+		"created_at",
+		"blob_id",
+		"link_id",
 	}}
 
 // NewBlobLinkMutation creates a new mutation for the BlobLink entity.

@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -34,62 +36,107 @@ var fileDescriptor = &entbuilder.Descriptor{
 			GoName:   "SetID",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "set_id",
+			SQLType:  field.TypeInt,
 		},
 		"size": {
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Size",
 			Numeric: true,
+			Column:  "fsize",
+			SQLType: field.TypeInt,
 		},
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 		"user": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "User",
 			Nillable: true,
+			Column:   "user",
+			SQLType:  field.TypeString,
 		},
 		"group": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Group",
 			Nillable: true,
+			Column:   "group",
+			SQLType:  field.TypeString,
 		},
 		"op": {
 			Type:     reflect.TypeFor[bool](),
 			GoName:   "Op",
 			Nillable: true,
+			Column:   "op",
+			SQLType:  field.TypeBool,
 		},
 		"field_id": {
 			Type:     reflect.TypeFor[int](),
 			GoName:   "FieldID",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "field_id",
+			SQLType:  field.TypeInt,
 		},
 		"create_time": {
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "CreateTime",
 			Nillable: true,
+			Column:   "create_time",
+			SQLType:  field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "files",
+			StorageColumns:  []string{"user_files"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"type": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "FileType",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "FileType",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "files",
+			StorageColumns:  []string{"file_type_files"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"field": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "FieldType",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "FieldType",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "field_types",
+			StorageColumns:  []string{"file_field"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "files",
+	TableColumns: []string{
+		"id",
+		"set_id",
+		"fsize",
+		"name",
+		"user",
+		"group",
+		"op",
+		"field_id",
+		"create_time",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewFileMutation creates a new mutation for the File entity.
 func NewFileMutation(c Config, op Op, opts ...FileMutationOption) *FileMutation {

@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -34,26 +36,51 @@ var docDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Text",
 			Nillable: true,
+			Column:   "text",
+			SQLType:  field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Doc",
-			TargetIDType: reflect.TypeFor[schema.DocID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Doc",
+			TargetIDType:    reflect.TypeFor[schema.DocID](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "docs",
+			StorageColumns:  []string{"doc_children"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
 		"children": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Doc",
-			TargetIDType: reflect.TypeFor[schema.DocID](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Doc",
+			TargetIDType:    reflect.TypeFor[schema.DocID](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "docs",
+			StorageColumns:  []string{"doc_children"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
 		"related": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Doc",
-			TargetIDType: reflect.TypeFor[schema.DocID](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Doc",
+			TargetIDType:    reflect.TypeFor[schema.DocID](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "doc_related",
+			StorageColumns:  []string{"doc_id", "related_id"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
-	}}
+	},
+	Table: "docs",
+	TableColumns: []string{
+		"id",
+		"text",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeString}
 
 // NewDocMutation creates a new mutation for the Doc entity.
 func NewDocMutation(c Config, op Op, opts ...DocMutationOption) *DocMutation {

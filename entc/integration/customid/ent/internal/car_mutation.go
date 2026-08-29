@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 )
@@ -34,26 +36,46 @@ var carDescriptor = &entbuilder.Descriptor{
 			GoName:   "BeforeID",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "before_id",
+			SQLType:  field.TypeFloat64,
 		},
 		"after_id": {
 			Type:     reflect.TypeFor[float64](),
 			GoName:   "AfterID",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "after_id",
+			SQLType:  field.TypeFloat64,
 		},
 		"model": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Model",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Model",
+			Column:  "model",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Pet",
-			TargetIDType: reflect.TypeFor[string](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Pet",
+			TargetIDType:    reflect.TypeFor[string](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "cars",
+			StorageColumns:  []string{"pet_cars"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
-	}}
+	},
+	Table: "cars",
+	TableColumns: []string{
+		"id",
+		"before_id",
+		"after_id",
+		"model",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewCarMutation creates a new mutation for the Car entity.
 func NewCarMutation(c Config, op Op, opts ...CarMutationOption) *CarMutation {

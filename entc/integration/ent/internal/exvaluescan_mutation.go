@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"math/big"
 	"net/url"
@@ -32,42 +33,72 @@ var exvaluescanDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"binary": {
-			Type:   reflect.TypeFor[*url.URL](),
-			GoName: "Binary",
+			Type:    reflect.TypeFor[*url.URL](),
+			GoName:  "Binary",
+			Column:  "binary",
+			SQLType: field.TypeString,
 		},
 		"binary_bytes": {
-			Type:   reflect.TypeFor[*url.URL](),
-			GoName: "BinaryBytes",
+			Type:    reflect.TypeFor[*url.URL](),
+			GoName:  "BinaryBytes",
+			Column:  "binary_bytes",
+			SQLType: field.TypeBytes,
 		},
 		"binary_optional": {
 			Type:     reflect.TypeFor[*url.URL](),
 			GoName:   "BinaryOptional",
 			Nillable: true,
+			Column:   "binary_optional",
+			SQLType:  field.TypeString,
 		},
 		"text": {
-			Type:   reflect.TypeFor[*big.Int](),
-			GoName: "Text",
+			Type:    reflect.TypeFor[*big.Int](),
+			GoName:  "Text",
+			Column:  "text",
+			SQLType: field.TypeString,
 		},
 		"text_optional": {
 			Type:     reflect.TypeFor[*big.Int](),
 			GoName:   "TextOptional",
 			Nillable: true,
+			Column:   "text_optional",
+			SQLType:  field.TypeString,
 		},
 		"base64": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Base64",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Base64",
+			Column:  "base64",
+			SQLType: field.TypeString,
 		},
 		"custom": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Custom",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Custom",
+			Column:  "custom",
+			SQLType: field.TypeString,
 		},
 		"custom_optional": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "CustomOptional",
 			Nillable: true,
+			Column:   "custom_optional",
+			SQLType:  field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "ex_value_scans",
+	TableColumns: []string{
+		"id",
+		"binary",
+		"binary_bytes",
+		"binary_optional",
+		"text",
+		"text_optional",
+		"base64",
+		"custom",
+		"custom_optional",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewExValueScanMutation creates a new mutation for the ExValueScan entity.
 func NewExValueScanMutation(c Config, op Op, opts ...ExValueScanMutationOption) *ExValueScanMutation {

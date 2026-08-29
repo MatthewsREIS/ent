@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"github.com/google/uuid"
@@ -31,28 +33,49 @@ var rentalDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"date": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "Date",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "Date",
+			Column:  "date",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
-			Field:        "user_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Field:           "user_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "rentals",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"car": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Car",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
-			Inverse:      true,
-			Field:        "car_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Car",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Inverse:         true,
+			Field:           "car_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "rentals",
+			StorageColumns:  []string{"car_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
 		},
-	}}
+	},
+	Table: "rentals",
+	TableColumns: []string{
+		"id",
+		"date",
+		"user_id",
+		"car_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewRentalMutation creates a new mutation for the Rental entity.
 func NewRentalMutation(c Config, op Op, opts ...RentalMutationOption) *RentalMutation {

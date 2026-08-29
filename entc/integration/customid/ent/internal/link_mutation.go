@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -32,11 +33,20 @@ var linkDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"link_information": {
-			Type:   reflect.TypeFor[map[string]schema.LinkInformation](),
-			GoName: "LinkInformation",
+			Type:    reflect.TypeFor[map[string]schema.LinkInformation](),
+			GoName:  "LinkInformation",
+			Column:  "link_information",
+			SQLType: field.TypeJSON,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "links",
+	TableColumns: []string{
+		"id",
+		"link_information",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeUUID}
 
 // NewLinkMutation creates a new mutation for the Link entity.
 func NewLinkMutation(c Config, op Op, opts ...LinkMutationOption) *LinkMutation {

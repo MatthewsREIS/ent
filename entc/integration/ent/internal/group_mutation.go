@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -30,52 +32,93 @@ var groupDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"active": {
-			Type:   reflect.TypeFor[bool](),
-			GoName: "Active",
+			Type:    reflect.TypeFor[bool](),
+			GoName:  "Active",
+			Column:  "active",
+			SQLType: field.TypeBool,
 		},
 		"expire": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "Expire",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "Expire",
+			Column:  "expire",
+			SQLType: field.TypeTime,
 		},
 		"type": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Type",
 			Nillable: true,
+			Column:   "type",
+			SQLType:  field.TypeString,
 		},
 		"max_users": {
 			Type:     reflect.TypeFor[int](),
 			GoName:   "MaxUsers",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "max_users",
+			SQLType:  field.TypeInt,
 		},
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"files": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "File",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "File",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "files",
+			StorageColumns:  []string{"group_files"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"blocked": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "users",
+			StorageColumns:  []string{"group_blocked"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"users": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "user_groups",
+			StorageColumns:  []string{"user_id", "group_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"info": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "GroupInfo",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "GroupInfo",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "groups",
+			StorageColumns:  []string{"group_info"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "groups",
+	TableColumns: []string{
+		"id",
+		"active",
+		"expire",
+		"type",
+		"max_users",
+		"name",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewGroupMutation creates a new mutation for the Group entity.
 func NewGroupMutation(c Config, op Op, opts ...GroupMutationOption) *GroupMutation {

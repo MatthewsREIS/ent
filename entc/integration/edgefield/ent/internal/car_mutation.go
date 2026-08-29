@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"github.com/google/uuid"
@@ -34,15 +36,29 @@ var carDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Number",
 			Nillable: true,
+			Column:   "number",
+			SQLType:  field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"rentals": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Rental",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Rental",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "rentals",
+			StorageColumns:  []string{"car_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "cars",
+	TableColumns: []string{
+		"id",
+		"number",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeUUID}
 
 // NewCarMutation creates a new mutation for the Car entity.
 func NewCarMutation(c Config, op Op, opts ...CarMutationOption) *CarMutation {

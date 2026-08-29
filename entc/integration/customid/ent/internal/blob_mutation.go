@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"github.com/google/uuid"
@@ -31,27 +33,51 @@ var blobDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"uuid": {
-			Type:   reflect.TypeFor[uuid.UUID](),
-			GoName: "UUID",
+			Type:    reflect.TypeFor[uuid.UUID](),
+			GoName:  "UUID",
+			Column:  "uuid",
+			SQLType: field.TypeUUID,
 		},
 		"count": {
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Count",
 			Numeric: true,
+			Column:  "count",
+			SQLType: field.TypeInt,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Blob",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Blob",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "blobs",
+			StorageColumns:  []string{"blob_parent"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
 		},
 		"links": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Blob",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Blob",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "blob_links",
+			StorageColumns:  []string{"blob_id", "link_id"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
 		},
-	}}
+	},
+	Table: "blobs",
+	TableColumns: []string{
+		"id",
+		"uuid",
+		"count",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeUUID}
 
 // NewBlobMutation creates a new mutation for the Blob entity.
 func NewBlobMutation(c Config, op Op, opts ...BlobMutationOption) *BlobMutation {

@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 )
@@ -32,17 +34,32 @@ var cardDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Number",
 			Nillable: true,
+			Column:   "number",
+			SQLType:  field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
-			Field:        "owner_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Field:           "owner_id",
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "cards",
+			StorageColumns:  []string{"owner_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "cards",
+	TableColumns: []string{
+		"id",
+		"number",
+		"owner_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewCardMutation creates a new mutation for the Card entity.
 func NewCardMutation(c Config, op Op, opts ...CardMutationOption) *CardMutation {

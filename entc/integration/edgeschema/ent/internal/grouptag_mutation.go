@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,18 +32,36 @@ var grouptagDescriptor = &entbuilder.Descriptor{
 	Fields: map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"tag": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Tag",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "tag_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Tag",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "tag_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "group_tags",
+			StorageColumns:  []string{"tag_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"group": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Group",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "group_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Group",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "group_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "group_tags",
+			StorageColumns:  []string{"group_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "group_tags",
+	TableColumns: []string{
+		"id",
+		"tag_id",
+		"group_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewGroupTagMutation creates a new mutation for the GroupTag entity.
 func NewGroupTagMutation(c Config, op Op, opts ...GroupTagMutationOption) *GroupTagMutation {

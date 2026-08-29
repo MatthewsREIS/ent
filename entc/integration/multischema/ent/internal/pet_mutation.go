@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 )
@@ -29,19 +31,36 @@ var petDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
-			Field:        "owner_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Field:           "owner_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "pets",
+			StorageColumns:  []string{"owner_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "Pet",
 		},
-	}}
+	},
+	Table: "pets",
+	TableColumns: []string{
+		"id",
+		"name",
+		"owner_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	SchemaKey: "Pet"}
 
 // NewPetMutation creates a new mutation for the Pet entity.
 func NewPetMutation(c Config, op Op, opts ...PetMutationOption) *PetMutation {

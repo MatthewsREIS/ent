@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -34,13 +35,25 @@ var licenseDescriptor = &entbuilder.Descriptor{
 			Type:      reflect.TypeFor[time.Time](),
 			GoName:    "CreateTime",
 			Immutable: true,
+			Column:    "create_time",
+			SQLType:   field.TypeTime,
 		},
 		"update_time": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "UpdateTime",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "UpdateTime",
+			Column:  "update_time",
+			SQLType: field.TypeTime,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "licenses",
+	TableColumns: []string{
+		"id",
+		"create_time",
+		"update_time",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewLicenseMutation creates a new mutation for the License entity.
 func NewLicenseMutation(c Config, op Op, opts ...LicenseMutationOption) *LicenseMutation {

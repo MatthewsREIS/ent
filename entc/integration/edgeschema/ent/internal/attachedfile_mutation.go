@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,24 +32,45 @@ var attachedfileDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"attach_time": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "AttachTime",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "AttachTime",
+			Column:  "attach_time",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"fi": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "File",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "f_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "File",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "f_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "attached_files",
+			StorageColumns:  []string{"f_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"proc": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Process",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "proc_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Process",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "proc_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "attached_files",
+			StorageColumns:  []string{"proc_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "attached_files",
+	TableColumns: []string{
+		"id",
+		"attach_time",
+		"f_id",
+		"proc_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewAttachedFileMutation creates a new mutation for the AttachedFile entity.
 func NewAttachedFileMutation(c Config, op Op, opts ...AttachedFileMutationOption) *AttachedFileMutation {

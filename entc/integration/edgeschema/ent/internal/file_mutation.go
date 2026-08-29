@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -29,18 +31,32 @@ var fileDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"processes": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Process",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "Process",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "attached_files",
+			StorageColumns:  []string{"proc_id", "f_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "files",
+	TableColumns: []string{
+		"id",
+		"name",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewFileMutation creates a new mutation for the File entity.
 func NewFileMutation(c Config, op Op, opts ...FileMutationOption) *FileMutation {

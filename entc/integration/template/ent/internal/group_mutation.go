@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/template/ent/predicate"
 )
@@ -32,9 +33,18 @@ var groupDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "MaxUsers",
 			Numeric: true,
+			Column:  "max_users",
+			SQLType: field.TypeInt,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "groups",
+	TableColumns: []string{
+		"id",
+		"max_users",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewGroupMutation creates a new mutation for the Group entity.
 func NewGroupMutation(c Config, op Op, opts ...GroupMutationOption) *GroupMutation {

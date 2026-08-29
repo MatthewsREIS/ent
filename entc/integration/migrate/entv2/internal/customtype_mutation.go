@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 )
@@ -33,19 +34,34 @@ var customtypeDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Custom",
 			Nillable: true,
+			Column:   "custom",
+			SQLType:  field.TypeString,
 		},
 		"tz0": {
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "Tz0",
 			Nillable: true,
+			Column:   "tz0",
+			SQLType:  field.TypeTime,
 		},
 		"tz3": {
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "Tz3",
 			Nillable: true,
+			Column:   "tz3",
+			SQLType:  field.TypeTime,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "custom_types",
+	TableColumns: []string{
+		"id",
+		"custom",
+		"tz0",
+		"tz3",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewCustomTypeMutation creates a new mutation for the CustomType entity.
 func NewCustomTypeMutation(c Config, op Op, opts ...CustomTypeMutationOption) *CustomTypeMutation {

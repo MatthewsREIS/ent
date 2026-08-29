@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 )
@@ -31,27 +33,55 @@ var petDescriptor = &entbuilder.Descriptor{
 	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "pets",
+			StorageColumns:  []string{"user_pets"},
+			TargetIDColumn:  "oid",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"cars": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Car",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Car",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "cars",
+			StorageColumns:  []string{"pet_cars"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"friends": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Pet",
-			TargetIDType: reflect.TypeFor[string](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Pet",
+			TargetIDType:    reflect.TypeFor[string](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "pet_friends",
+			StorageColumns:  []string{"pet_id", "friend_id"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
 		"best_friend": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Pet",
-			TargetIDType: reflect.TypeFor[string](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Pet",
+			TargetIDType:    reflect.TypeFor[string](),
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "pets",
+			StorageColumns:  []string{"pet_best_friend"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
-	}}
+	},
+	Table: "pets",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeString}
 
 // NewPetMutation creates a new mutation for the Pet entity.
 func NewPetMutation(c Config, op Op, opts ...PetMutationOption) *PetMutation {

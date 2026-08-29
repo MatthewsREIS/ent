@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 )
@@ -29,19 +31,34 @@ var commentDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"text": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Text",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Text",
+			Column:  "text",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"post": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Post",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
-			Field:        "post_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Post",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Field:           "post_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "comments",
+			StorageColumns:  []string{"post_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "comments",
+	TableColumns: []string{
+		"id",
+		"text",
+		"post_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewCommentMutation creates a new mutation for the Comment entity.
 func NewCommentMutation(c Config, op Op, opts ...CommentMutationOption) *CommentMutation {

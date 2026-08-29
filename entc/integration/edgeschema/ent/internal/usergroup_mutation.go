@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,24 +32,45 @@ var usergroupDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"joined_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "JoinedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "JoinedAt",
+			Column:  "joined_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "user_groups",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"group": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Group",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "group_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Group",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "group_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "user_groups",
+			StorageColumns:  []string{"group_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "user_groups",
+	TableColumns: []string{
+		"id",
+		"joined_at",
+		"user_id",
+		"group_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewUserGroupMutation creates a new mutation for the UserGroup entity.
 func NewUserGroupMutation(c Config, op Op, opts ...UserGroupMutationOption) *UserGroupMutation {

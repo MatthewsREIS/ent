@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -28,7 +29,13 @@ var goodsDescriptor = &entbuilder.Descriptor{
 	Name:   "Goods",
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{},
-	Edges:  map[string]entbuilder.EdgeSpec{}}
+	Edges:  map[string]entbuilder.EdgeSpec{},
+	Table:  "goods",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewGoodsMutation creates a new mutation for the Goods entity.
 func NewGoodsMutation(c Config, op Op, opts ...GoodsMutationOption) *GoodsMutation {

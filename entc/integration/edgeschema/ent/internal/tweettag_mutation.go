@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"github.com/google/uuid"
@@ -32,24 +34,45 @@ var tweettagDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"added_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "AddedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "AddedAt",
+			Column:  "added_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"tag": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Tag",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "tag_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Tag",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "tag_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "tweet_tags",
+			StorageColumns:  []string{"tag_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"tweet": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Tweet",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "tweet_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Tweet",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "tweet_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "tweet_tags",
+			StorageColumns:  []string{"tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "tweet_tags",
+	TableColumns: []string{
+		"id",
+		"added_at",
+		"tag_id",
+		"tweet_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeUUID}
 
 // NewTweetTagMutation creates a new mutation for the TweetTag entity.
 func NewTweetTagMutation(c Config, op Op, opts ...TweetTagMutationOption) *TweetTagMutation {

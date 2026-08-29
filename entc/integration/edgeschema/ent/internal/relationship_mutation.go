@@ -9,7 +9,9 @@ package internal
 import (
 	"reflect"
 
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 )
 
 // RelationshipMutation is an alias for entbuilder.Mutation parameterised by Relationship.
@@ -27,27 +29,51 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Weight",
 			Numeric: true,
+			Column:  "weight",
+			SQLType: field.TypeInt,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "relationships",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"relative": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "relative_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "relative_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "relationships",
+			StorageColumns:  []string{"relative_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"info": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "RelationshipInfo",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "info_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "RelationshipInfo",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "info_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "relationships",
+			StorageColumns:  []string{"info_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
+	},
+	Table: "relationships",
+	TableColumns: []string{
+		"weight",
+		"user_id",
+		"relative_id",
+		"info_id",
 	}}
 
 // NewRelationshipMutation creates a new mutation for the Relationship entity.

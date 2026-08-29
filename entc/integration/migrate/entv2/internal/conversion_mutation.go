@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 )
@@ -32,49 +33,82 @@ var conversionDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Name",
 			Nillable: true,
+			Column:   "name",
+			SQLType:  field.TypeString,
 		},
 		"int8_to_string": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Int8ToString",
 			Nillable: true,
+			Column:   "int8_to_string",
+			SQLType:  field.TypeString,
 		},
 		"uint8_to_string": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Uint8ToString",
 			Nillable: true,
+			Column:   "uint8_to_string",
+			SQLType:  field.TypeString,
 		},
 		"int16_to_string": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Int16ToString",
 			Nillable: true,
+			Column:   "int16_to_string",
+			SQLType:  field.TypeString,
 		},
 		"uint16_to_string": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Uint16ToString",
 			Nillable: true,
+			Column:   "uint16_to_string",
+			SQLType:  field.TypeString,
 		},
 		"int32_to_string": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Int32ToString",
 			Nillable: true,
+			Column:   "int32_to_string",
+			SQLType:  field.TypeString,
 		},
 		"uint32_to_string": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Uint32ToString",
 			Nillable: true,
+			Column:   "uint32_to_string",
+			SQLType:  field.TypeString,
 		},
 		"int64_to_string": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Int64ToString",
 			Nillable: true,
+			Column:   "int64_to_string",
+			SQLType:  field.TypeString,
 		},
 		"uint64_to_string": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Uint64ToString",
 			Nillable: true,
+			Column:   "uint64_to_string",
+			SQLType:  field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "conversions",
+	TableColumns: []string{
+		"id",
+		"name",
+		"int8_to_string",
+		"uint8_to_string",
+		"int16_to_string",
+		"uint16_to_string",
+		"int32_to_string",
+		"uint32_to_string",
+		"int64_to_string",
+		"uint64_to_string",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewConversionMutation creates a new mutation for the Conversion entity.
 func NewConversionMutation(c Config, op Op, opts ...ConversionMutationOption) *ConversionMutation {

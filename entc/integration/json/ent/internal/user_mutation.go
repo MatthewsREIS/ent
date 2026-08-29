@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"encoding/json"
 	"net/http"
@@ -37,68 +38,113 @@ var userDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[*schema.T](),
 			GoName:   "T",
 			Nillable: true,
+			Column:   "t",
+			SQLType:  field.TypeJSON,
 		},
 		"url": {
 			Type:     reflect.TypeFor[*url.URL](),
 			GoName:   "URL",
 			Nillable: true,
+			Column:   "url",
+			SQLType:  field.TypeJSON,
 		},
 		"URLs": {
 			Type:     reflect.TypeFor[[]*url.URL](),
 			GoName:   "URLs",
 			Nillable: true,
+			Column:   "urls",
+			SQLType:  field.TypeJSON,
 		},
 		"raw": {
 			Type:     reflect.TypeFor[json.RawMessage](),
 			GoName:   "Raw",
 			Nillable: true,
+			Column:   "raw",
+			SQLType:  field.TypeJSON,
 		},
 		"dirs": {
-			Type:   reflect.TypeFor[[]http.Dir](),
-			GoName: "Dirs",
+			Type:    reflect.TypeFor[[]http.Dir](),
+			GoName:  "Dirs",
+			Column:  "dirs",
+			SQLType: field.TypeJSON,
 		},
 		"ints": {
 			Type:     reflect.TypeFor[[]int](),
 			GoName:   "Ints",
 			Nillable: true,
+			Column:   "ints",
+			SQLType:  field.TypeJSON,
 		},
 		"floats": {
 			Type:     reflect.TypeFor[[]float64](),
 			GoName:   "Floats",
 			Nillable: true,
+			Column:   "floats",
+			SQLType:  field.TypeJSON,
 		},
 		"strings": {
 			Type:     reflect.TypeFor[[]string](),
 			GoName:   "Strings",
 			Nillable: true,
+			Column:   "strings",
+			SQLType:  field.TypeJSON,
 		},
 		"ints_validate": {
 			Type:     reflect.TypeFor[[]int](),
 			GoName:   "IntsValidate",
 			Nillable: true,
+			Column:   "ints_validate",
+			SQLType:  field.TypeJSON,
 		},
 		"floats_validate": {
 			Type:     reflect.TypeFor[[]float64](),
 			GoName:   "FloatsValidate",
 			Nillable: true,
+			Column:   "floats_validate",
+			SQLType:  field.TypeJSON,
 		},
 		"strings_validate": {
 			Type:     reflect.TypeFor[[]string](),
 			GoName:   "StringsValidate",
 			Nillable: true,
+			Column:   "strings_validate",
+			SQLType:  field.TypeJSON,
 		},
 		"addr": {
 			Type:     reflect.TypeFor[schema.Addr](),
 			GoName:   "Addr",
 			Nillable: true,
+			Column:   "addr",
+			SQLType:  field.TypeJSON,
 		},
 		"unknown": {
 			Type:     reflect.TypeFor[any](),
 			GoName:   "Unknown",
 			Nillable: true,
+			Column:   "unknown",
+			SQLType:  field.TypeJSON,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "users",
+	TableColumns: []string{
+		"id",
+		"t",
+		"url",
+		"urls",
+		"raw",
+		"dirs",
+		"ints",
+		"floats",
+		"strings",
+		"ints_validate",
+		"floats_validate",
+		"strings_validate",
+		"addr",
+		"unknown",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

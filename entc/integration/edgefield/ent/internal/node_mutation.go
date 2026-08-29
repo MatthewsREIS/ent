@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 )
@@ -32,22 +34,42 @@ var nodeDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Value",
 			Numeric: true,
+			Column:  "value",
+			SQLType: field.TypeInt,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"prev": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Node",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
-			Field:        "prev_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Node",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Field:           "prev_id",
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "nodes",
+			StorageColumns:  []string{"prev_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"next": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Node",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Node",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "nodes",
+			StorageColumns:  []string{"prev_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "nodes",
+	TableColumns: []string{
+		"id",
+		"value",
+		"prev_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewNodeMutation creates a new mutation for the Node entity.
 func NewNodeMutation(c Config, op Op, opts ...NodeMutationOption) *NodeMutation {

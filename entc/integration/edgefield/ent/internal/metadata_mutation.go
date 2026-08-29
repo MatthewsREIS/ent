@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 )
@@ -33,28 +35,53 @@ var metadataDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Age",
 			Numeric: true,
+			Column:  "age",
+			SQLType: field.TypeInt,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "metadata",
+			StorageColumns:  []string{"id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"children": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Metadata",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "Metadata",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "metadata",
+			StorageColumns:  []string{"parent_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Metadata",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "parent_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Metadata",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "parent_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "metadata",
+			StorageColumns:  []string{"parent_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "metadata",
+	TableColumns: []string{
+		"id",
+		"age",
+		"parent_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewMetadataMutation creates a new mutation for the Metadata entity.
 func NewMetadataMutation(c Config, op Op, opts ...MetadataMutationOption) *MetadataMutation {

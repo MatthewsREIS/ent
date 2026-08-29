@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/hooks/ent/predicate"
 )
@@ -33,34 +35,60 @@ var cardDescriptor = &entbuilder.Descriptor{
 			Type:      reflect.TypeFor[string](),
 			GoName:    "Number",
 			Immutable: true,
+			Column:    "number",
+			SQLType:   field.TypeString,
 		},
 		"name": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Name",
 			Nillable: true,
+			Column:   "name",
+			SQLType:  field.TypeString,
 		},
 		"created_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreatedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "CreatedAt",
+			Column:  "created_at",
+			SQLType: field.TypeTime,
 		},
 		"in_hook": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "InHook",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "InHook",
+			Column:  "in_hook",
+			SQLType: field.TypeString,
 		},
 		"expired_at": {
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "ExpiredAt",
 			Nillable: true,
+			Column:   "expired_at",
+			SQLType:  field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "cards",
+			StorageColumns:  []string{"user_cards"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "cards",
+	TableColumns: []string{
+		"id",
+		"number",
+		"name",
+		"created_at",
+		"in_hook",
+		"expired_at",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewCardMutation creates a new mutation for the Card entity.
 func NewCardMutation(c Config, op Op, opts ...CardMutationOption) *CardMutation {

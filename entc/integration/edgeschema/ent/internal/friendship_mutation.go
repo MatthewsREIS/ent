@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -33,28 +35,52 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Weight",
 			Numeric: true,
+			Column:  "weight",
+			SQLType: field.TypeInt,
 		},
 		"created_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreatedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "CreatedAt",
+			Column:  "created_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "friendships",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"friend": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "friend_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "friend_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "friendships",
+			StorageColumns:  []string{"friend_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "friendships",
+	TableColumns: []string{
+		"id",
+		"weight",
+		"created_at",
+		"user_id",
+		"friend_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewFriendshipMutation creates a new mutation for the Friendship entity.
 func NewFriendshipMutation(c Config, op Op, opts ...FriendshipMutationOption) *FriendshipMutation {

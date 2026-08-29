@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"github.com/google/uuid"
@@ -34,45 +36,79 @@ var petDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[float64](),
 			GoName:  "Age",
 			Numeric: true,
+			Column:  "age",
+			SQLType: field.TypeFloat64,
 		},
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 		"uuid": {
 			Type:     reflect.TypeFor[uuid.UUID](),
 			GoName:   "UUID",
 			Nillable: true,
+			Column:   "uuid",
+			SQLType:  field.TypeUUID,
 		},
 		"nickname": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Nickname",
 			Nillable: true,
+			Column:   "nickname",
+			SQLType:  field.TypeString,
 		},
 		"trained": {
-			Type:   reflect.TypeFor[bool](),
-			GoName: "Trained",
+			Type:    reflect.TypeFor[bool](),
+			GoName:  "Trained",
+			Column:  "trained",
+			SQLType: field.TypeBool,
 		},
 		"optional_time": {
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "OptionalTime",
 			Nillable: true,
+			Column:   "optional_time",
+			SQLType:  field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"team": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "pet",
+			StorageColumns:  []string{"user_team"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "pet",
+			StorageColumns:  []string{"user_pets"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "pet",
+	TableColumns: []string{
+		"id",
+		"age",
+		"name",
+		"uuid",
+		"nickname",
+		"trained",
+		"optional_time",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewPetMutation creates a new mutation for the Pet entity.
 func NewPetMutation(c Config, op Op, opts ...PetMutationOption) *PetMutation {

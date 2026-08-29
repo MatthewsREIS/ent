@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -28,7 +29,13 @@ var builderDescriptor = &entbuilder.Descriptor{
 	Name:   "Builder",
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{},
-	Edges:  map[string]entbuilder.EdgeSpec{}}
+	Edges:  map[string]entbuilder.EdgeSpec{},
+	Table:  "builders",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewBuilderMutation creates a new mutation for the Builder entity.
 func NewBuilderMutation(c Config, op Op, opts ...BuilderMutationOption) *BuilderMutation {

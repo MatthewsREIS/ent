@@ -18,7 +18,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	{{- if eq $.Storage.Name "sql" }}
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
+	{{- else }}
+	"entgo.io/ent/runtime/entbuilder"
+	{{- end }}
 
 	"{{ $.Config.Package }}/predicate"
 	{{- /* Import field types, but skip entity sub-packages to avoid cycles (enums defined in internal). */ -}}
@@ -73,6 +79,10 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- if $f.Immutable }}
 			Immutable: true,
 			{{- end }}
+			{{- if eq $n.Storage.Name "sql" }}
+			Column:  {{ $f.StorageKey | printf "%q" }},
+			SQLType: field.{{ $f.Type.ConstName }},
+			{{- end }}
 		},
 		{{- end }}
 	},
@@ -91,9 +101,57 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- if $e.Immutable }}
 			Immutable: true,
 			{{- end }}
+			{{- if eq $n.Storage.Name "sql" }}
+			Rel:            sqlgraph.{{ $e.Rel.Type }},
+			StorageTable:   {{ $e.Rel.Table | printf "%q" }},
+			StorageColumns: []string{ {{- range $i, $c := $e.Rel.Columns }}{{ if $i }}, {{ end }}{{ $c | printf "%q" }}{{- end }} },
+			{{- if $e.Bidi }}
+			Bidi: true,
+			{{- end }}
+			TargetIDColumn:  {{ $e.Type.ID.StorageKey | printf "%q" }},
+			TargetIDSQLType: field.{{ $e.Type.ID.Type.ConstName }},
+			{{- if $n.FeatureEnabled "sql/schemaconfig" }}
+			{{- /* Mirrors schemaconfig.tmpl's "dialect/sql/defedge/spec/schemaconfig"
+			      $schema derivation verbatim — the literal SchemaConfig struct-field
+			      name resolved at runtime by schemaOf(desc.Edges[name].SchemaKey). */}}
+			{{- $schema := $e.Type.Name }}
+			{{- if $e.OwnFK }}
+				{{- $schema = $n.Name }}
+			{{- else if $e.M2M }}
+				{{- if $e.Through }}
+					{{- $schema = $e.Through.Name }}
+				{{- else if $e.Inverse }}
+					{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
+				{{- else }}
+					{{- $schema = print $n.Name $e.StructField }}
+				{{- end }}
+			{{- end }}
+			SchemaKey: {{ $schema | printf "%q" }},
+			{{- end }}
+			{{- end }}
 		},
 		{{- end }}
 	},
+	{{- if eq $n.Storage.Name "sql" }}
+	Table: {{ $n.Table | printf "%q" }},
+	TableColumns: []string{
+		{{- with $n.HasOneFieldID }}
+		{{ $n.ID.StorageKey | printf "%q" }},
+		{{- end }}
+		{{- range $f := $n.Fields }}
+		{{- if not $f.IsDeprecated }}
+		{{ $f.StorageKey | printf "%q" }},
+		{{- end }}
+		{{- end }}
+	},
+	{{- with $n.HasOneFieldID }}
+	IDColumn:  {{ $n.ID.StorageKey | printf "%q" }},
+	IDSQLType: field.{{ $n.ID.Type.ConstName }},
+	{{- end }}
+	{{- if $n.FeatureEnabled "sql/schemaconfig" }}
+	SchemaKey: {{ $n.Name | printf "%q" }},
+	{{- end }}
+	{{- end }}
 	{{- /* OldValueFn / IDsFn intentionally omitted: the entity client (e.g. *ent.Client.Task)
 	      that owns Get/Query is not reachable from internal.Config. Per-mutation closures wired
 	      via With{{ $n.Name }}ID / With{{ $n.Name }}IDsFunc supply the same plumbing through

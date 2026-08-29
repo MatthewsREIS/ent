@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
@@ -31,18 +33,32 @@ var tokenDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"body": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Body",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Body",
+			Column:  "body",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"account": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Account",
-			TargetIDType: reflect.TypeFor[sid.ID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Account",
+			TargetIDType:    reflect.TypeFor[sid.ID](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "tokens",
+			StorageColumns:  []string{"account_token"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeOther,
 		},
-	}}
+	},
+	Table: "tokens",
+	TableColumns: []string{
+		"id",
+		"body",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeOther}
 
 // NewTokenMutation creates a new mutation for the Token entity.
 func NewTokenMutation(c Config, op Op, opts ...TokenMutationOption) *TokenMutation {

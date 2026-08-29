@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 )
@@ -29,26 +31,50 @@ var parentDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"by_adoption": {
-			Type:   reflect.TypeFor[bool](),
-			GoName: "ByAdoption",
+			Type:    reflect.TypeFor[bool](),
+			GoName:  "ByAdoption",
+			Column:  "by_adoption",
+			SQLType: field.TypeBool,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"child": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "parents",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "Parent",
 		},
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "parent_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "parent_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "parents",
+			StorageColumns:  []string{"parent_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			SchemaKey:       "Parent",
 		},
-	}}
+	},
+	Table: "parents",
+	TableColumns: []string{
+		"id",
+		"by_adoption",
+		"user_id",
+		"parent_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	SchemaKey: "Parent"}
 
 // NewParentMutation creates a new mutation for the Parent entity.
 func NewParentMutation(c Config, op Op, opts ...ParentMutationOption) *ParentMutation {

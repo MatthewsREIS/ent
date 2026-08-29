@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -33,41 +35,72 @@ var cardDescriptor = &entbuilder.Descriptor{
 			Type:      reflect.TypeFor[time.Time](),
 			GoName:    "CreateTime",
 			Immutable: true,
+			Column:    "create_time",
+			SQLType:   field.TypeTime,
 		},
 		"update_time": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "UpdateTime",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "UpdateTime",
+			Column:  "update_time",
+			SQLType: field.TypeTime,
 		},
 		"balance": {
 			Type:    reflect.TypeFor[float64](),
 			GoName:  "Balance",
 			Numeric: true,
+			Column:  "balance",
+			SQLType: field.TypeFloat64,
 		},
 		"number": {
 			Type:      reflect.TypeFor[string](),
 			GoName:    "Number",
 			Immutable: true,
+			Column:    "number",
+			SQLType:   field.TypeString,
 		},
 		"name": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Name",
 			Nillable: true,
+			Column:   "name",
+			SQLType:  field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "cards",
+			StorageColumns:  []string{"user_card"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"spec": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Spec",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "Spec",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "spec_card",
+			StorageColumns:  []string{"spec_id", "card_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "cards",
+	TableColumns: []string{
+		"id",
+		"create_time",
+		"update_time",
+		"balance",
+		"number",
+		"name",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewCardMutation creates a new mutation for the Card entity.
 func NewCardMutation(c Config, op Op, opts ...CardMutationOption) *CardMutation {

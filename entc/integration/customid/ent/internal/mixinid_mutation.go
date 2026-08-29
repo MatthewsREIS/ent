@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"github.com/google/uuid"
@@ -31,15 +32,27 @@ var mixinidDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"some_field": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "SomeField",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "SomeField",
+			Column:  "some_field",
+			SQLType: field.TypeString,
 		},
 		"mixin_field": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "MixinField",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "MixinField",
+			Column:  "mixin_field",
+			SQLType: field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "mixin_ids",
+	TableColumns: []string{
+		"id",
+		"some_field",
+		"mixin_field",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeUUID}
 
 // NewMixinIDMutation creates a new mutation for the MixinID entity.
 func NewMixinIDMutation(c Config, op Op, opts ...MixinIDMutationOption) *MixinIDMutation {

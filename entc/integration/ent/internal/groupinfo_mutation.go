@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -29,23 +31,40 @@ var groupinfoDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"desc": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Desc",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Desc",
+			Column:  "desc",
+			SQLType: field.TypeString,
 		},
 		"max_users": {
 			Type:    reflect.TypeFor[int](),
 			GoName:  "MaxUsers",
 			Numeric: true,
+			Column:  "max_users",
+			SQLType: field.TypeInt,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"groups": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Group",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "Group",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "groups",
+			StorageColumns:  []string{"group_info"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "group_infos",
+	TableColumns: []string{
+		"id",
+		"desc",
+		"max_users",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewGroupInfoMutation creates a new mutation for the GroupInfo entity.
 func NewGroupInfoMutation(c Config, op Op, opts ...GroupInfoMutationOption) *GroupInfoMutation {

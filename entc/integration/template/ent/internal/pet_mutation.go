@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/template/ent/predicate"
 )
@@ -33,21 +35,38 @@ var petDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Age",
 			Numeric: true,
+			Column:  "age",
+			SQLType: field.TypeInt,
 		},
 		"licensed_at": {
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "LicensedAt",
 			Nillable: true,
+			Column:   "licensed_at",
+			SQLType:  field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "pets",
+			StorageColumns:  []string{"user_pets"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "pets",
+	TableColumns: []string{
+		"id",
+		"age",
+		"licensed_at",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt}
 
 // NewPetMutation creates a new mutation for the Pet entity.
 func NewPetMutation(c Config, op Op, opts ...PetMutationOption) *PetMutation {
