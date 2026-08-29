@@ -690,22 +690,32 @@ caught immediately by the type checker):
    expression receiver falls outside that.
 
 **One transcription bug this session made and self-corrected via compiler
-feedback**, worth flagging as a gotcha for future migrators rather than a
-rewriter defect: the first pass through several hand-fixed edge-adjacent
-sites (`officeuser.Office`/`.User`, `contactlistcontact.ContactList`/
-`.Contact`, `contactlist.CreatedBy`) used the edge form
-(`E.<Edge>.SetID(...)`) by analogy with genuinely edge-only relations, but
-these particular columns are *field*-backed (`OfficeID`, `UserID`,
-`ContactListID`, `ContactID`, `CreatedByID` all have their own `F` handle
-of type `entfield.EdgeField`, which is the form that mirrors the deleted
-`SetOfficeID`/`SetContactID`/etc. setters exactly). `go build` caught every
-instance immediately (`E.<Edge>.SetID` doesn't exist when the manifest only
-generated the `F`-form `EdgeField` for a column, or vice versa) — nothing
-shipped wrong, but the failure mode is silent-until-compile, not a rewriter
-warning, so it's easy to get backwards by analogy alone. Rule of thumb: if
-the old codegen's method was literally `Set<Something>ID(...)`, check the
-package's `where.go` `F` struct for a field of that exact name before
-reaching for `E`.
+feedback**, worth flagging as a style gotcha for future migrators — **not**
+a compiler safety net, per the final whole-branch review's M7 finding: the
+first pass through several hand-fixed edge-adjacent sites
+(`officeuser.Office`/`.User`, `contactlistcontact.ContactList`/`.Contact`,
+`contactlist.CreatedBy`) used the edge form (`E.<Edge>.SetID(...)`) by
+analogy with genuinely edge-only relations, when these particular columns
+are *field*-backed (`OfficeID`, `UserID`, `ContactListID`, `ContactID`,
+`CreatedByID` all have their own `F` handle of type `entfield.EdgeField`,
+mirroring the deleted `SetOfficeID`/`SetContactID`/etc. setters exactly).
+This session's `go build` did catch every instance immediately — but not
+because `E.<Edge>.SetID` doesn't exist for an `F`-only column. It exists
+either way: `where.tmpl` emits an `E` entry for **every** edge regardless of
+whether the manifest also emitted the `F`-form `EdgeField`
+(`entc/integration/edgeschema/ent/friendship/where.go` carries both
+`F.UserID` and `E.User` for the same FK column), and both forms route
+through the same `SetEdgeID` call — they are interchangeable, not
+type-distinct. What actually failed to build in this codebase was
+incidental: gemini's `-chains` manifest happened to omit the `F`-form for
+these specific columns for an unrelated reason, so only `E` compiled there.
+On a schema where both forms are manifested (the common case, per the
+integration corpus above), guessing wrong between `E.<Edge>.SetID` and
+`F.<EdgeField>.Set` is **not** a compile error — both compile and both
+write the same edge. Rule of thumb: if the old codegen's method was
+literally `Set<Something>ID(...)`, reach for the package's `where.go` `F`
+struct for style consistency with the old call site, not because `E` would
+fail to compile.
 
 **Immutability + ID-write runtime enforcement (Task 3's structural→runtime
 move): zero collisions.** No hook, extension template, or hand-written call
@@ -754,7 +764,21 @@ discovered here:
   level — a deliberate simplification (one method shape for every handle)
   over the old codegen's nullable-only `ClearX` emission. No gemini call
   site clears a non-nullable field/edge (would fail at the DB/constraint
-  layer exactly as before), so this is additive surface, not a narrowing.
+  layer exactly as before). For a plain non-nullable field/edge this is
+  additive surface, not a narrowing — but the final whole-branch review's
+  C1 finding caught a real gap this claim missed: **immutable** edges had
+  no runtime enforcement at all (`EdgeSpec` lacked the `Immutable` flag
+  `FieldSpec` already carried), so `E.<Edge>.SetID`/`.Clear()` and the
+  matching `F.<EdgeField>.Set` on an `Update`/`UpdateOne` builder compiled,
+  returned a `nil` error from `Save`, and wrote nothing — a silent no-op,
+  not a DB/constraint-layer failure. Fixed in the post-review wave:
+  `EdgeSpec.Immutable` plus a `checkEdgeImmutable` guard in
+  `SetEdgeID`/`AddEdgeIDs`/`RemoveEdgeIDs`/`ClearEdge` now reject the write
+  on `Update`/`UpdateOne` with a loud error, mirroring `checkImmutable` on
+  the field side. Net effect vs the old codegen: strictly better on
+  enforcement *location* (a runtime error at `Save`, always reachable, vs a
+  compile error only where the old per-edge setter was structurally
+  omitted) and the same on *outcome* (the write is rejected either way).
 - **`Number[T].Set` is Reset-then-Set, not a raw overwrite** — matches the
   old codegen's create-path semantics exactly; harmless on create, and on
   update it means a `Set` after an `Add`/`AppendX` in the same `With(...)`
@@ -801,6 +825,28 @@ discovered here:
   pre-existing-broken for unrelated reasons, per Task 3's note) — this
   gemini regen doesn't exercise gremlin at all (gemini is SQL-only), so
   there is nothing further to confirm or contradict here.
+- **String-typed edge-field columns lose string predicates** (recorded from
+  the final whole-branch review's I4 finding). `where.tmpl` resolves any
+  edge-backed FK column to `entfield.EdgeField[T]` before checking its
+  underlying kind, and `EdgeField`'s predicate surface is the embedded
+  `Value[T]` — method-for-method identical to `Number[T]` for a
+  numeric/UUID FK column, but a *string*-typed FK column loses
+  `Contains`/`HasPrefix`/`HasSuffix`/`EqualFold`/`ContainsFold`, which 2a's
+  `String[T]` handle would have given it. Compile-error class (a call site
+  using one of those methods on such a column simply won't build), and zero
+  occurrences across both the integration corpus (40 `EdgeField` handles,
+  all numeric/UUID) and gemini's schema.
+- **Custom-GoType numeric-ish fields lose `Add` entirely** (recorded from
+  the review's M3 finding). The manifest's `canAdd` gates on
+  `HandleKind() == "Number"`; a field that supports `AddField` via
+  `implementsAdder()` (a custom `GoType` with its own `Add` method, not a
+  plain numeric kind) resolves to a non-`Number` handle, so `canAdd` is
+  `false`, the old `Add<F>` setter is deleted from the manifest, and no
+  `entfield` handle offers a replacement — the rewriter correctly leaves
+  such a call site alone (compile error, safe direction), but the
+  capability itself is gone with no substitute. Not present in the
+  integration corpus (histogram: 85 `Number`-kind `canAdd` fields, 0
+  non-`Number`) or gemini's schema.
 
 ### Test results
 
