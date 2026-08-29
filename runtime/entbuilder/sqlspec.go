@@ -29,7 +29,14 @@ import (
 // schemaOf resolves a Descriptor/EdgeSpec.SchemaKey to a runtime schema name
 // for multischema apps; pass nil for single-schema apps (SchemaKey is then
 // never read).
-func ApplyUpdateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.UpdateSpec, schemaOf func(key string) string) {
+//
+// throughDefaults supplies, per edge name, a factory for the through
+// (edge-schema) entity's default field values — mirrors the generated
+// `newFieldsE`/`edge.Target.NewFields` wiring for a Through edge whose
+// schema has default fields (see entc/integration/multischema/ent/user/
+// update.go's "friends"/"children" edges); pass nil, or omit an edge's
+// entry, for edges with no such defaults (the vast majority).
+func ApplyUpdateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.UpdateSpec, schemaOf func(key string) string, throughDefaults map[string]func() []*sqlgraph.FieldSpec) {
 	desc := m.desc
 	if schemaOf != nil && desc.SchemaKey != "" {
 		spec.Node.Schema = schemaOf(desc.SchemaKey)
@@ -80,6 +87,10 @@ func ApplyUpdateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.UpdateSpec, sch
 			if schemaOf != nil && e.SchemaKey != "" {
 				edge.Schema = schemaOf(e.SchemaKey)
 			}
+			if nf, ok := throughDefaults[name]; ok {
+				edge.Target.Fields = nf()
+				edge.Target.NewFields = nf
+			}
 			return edge
 		}
 		if m.EdgeCleared(name) {
@@ -118,7 +129,9 @@ func ApplyUpdateSpec[T, I any](m *Mutation[T, I], spec *sqlgraph.UpdateSpec, sch
 // See entc/integration/ent/*/create.go's createSpec for the generated shape
 // this mirrors, and entc/integration/edgefield/ent/pet/create.go for the
 // OwnFK node-field-assignment case.
-func ApplyCreateSpec[T, I any](m *Mutation[T, I], node *T, spec *sqlgraph.CreateSpec, schemaOf func(key string) string) {
+//
+// throughDefaults is as documented on ApplyUpdateSpec.
+func ApplyCreateSpec[T, I any](m *Mutation[T, I], node *T, spec *sqlgraph.CreateSpec, schemaOf func(key string) string, throughDefaults map[string]func() []*sqlgraph.FieldSpec) {
 	desc := m.desc
 	if schemaOf != nil && desc.SchemaKey != "" {
 		spec.Schema = schemaOf(desc.SchemaKey)
@@ -151,6 +164,10 @@ func ApplyCreateSpec[T, I any](m *Mutation[T, I], node *T, spec *sqlgraph.Create
 		}
 		if schemaOf != nil && e.SchemaKey != "" {
 			edge.Schema = schemaOf(e.SchemaKey)
+		}
+		if nf, ok := throughDefaults[name]; ok {
+			edge.Target.Fields = nf()
+			edge.Target.NewFields = nf
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)

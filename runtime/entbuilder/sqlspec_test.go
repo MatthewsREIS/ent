@@ -163,7 +163,7 @@ func TestApplyUpdateSpec_SchemaOf(t *testing.T) {
 
 	spec := sqlgraph.NewUpdateSpec("things", []string{"id"}, sqlgraph.NewFieldSpec("id", field.TypeInt))
 	schemaOf := func(key string) string { return "alt_" + key }
-	entbuilder.ApplyUpdateSpec(m, spec, schemaOf)
+	entbuilder.ApplyUpdateSpec(m, spec, schemaOf, nil)
 
 	require.Equal(t, "alt_Thing", spec.Node.Schema)
 	require.Len(t, spec.Edges.Add, 2)
@@ -179,6 +179,36 @@ func TestApplyUpdateSpec_SchemaOf(t *testing.T) {
 	}
 }
 
+// TestApplyUpdateSpec_ThroughDefaults covers a Through (edge-schema) edge
+// whose schema declares default field values — the applier must wire
+// edge.Target.Fields/NewFields from the supplied per-edge factory, matching
+// entc/integration/multischema/ent/user/update.go's "friends"/"children"
+// `newFieldsE`/`edge.Target.NewFields` shape. The factory is called once
+// per build() invocation (so Clear and Add specs for the same edge each
+// get their own defaults, per NewFields' factory contract), and edges with
+// no entry in the map are unaffected.
+func TestApplyUpdateSpec_ThroughDefaults(t *testing.T) {
+	desc := thingDescriptor()
+	m := entbuilder.NewMutation[thingEnt, int](nil, ent.OpUpdateOne, desc)
+	require.NoError(t, m.AddEdgeIDs("tags", 1))
+
+	spec := sqlgraph.NewUpdateSpec("things", []string{"id"}, sqlgraph.NewFieldSpec("id", field.TypeInt))
+	calls := 0
+	td := map[string]func() []*sqlgraph.FieldSpec{
+		"tags": func() []*sqlgraph.FieldSpec {
+			calls++
+			return []*sqlgraph.FieldSpec{sqlgraph.NewFieldSpec("weight", field.TypeInt)}
+		},
+	}
+	entbuilder.ApplyUpdateSpec(m, spec, nil, td)
+
+	require.Len(t, spec.Edges.Add, 1)
+	require.Equal(t, 1, calls)
+	require.Len(t, spec.Edges.Add[0].Target.Fields, 1)
+	require.Equal(t, "weight", spec.Edges.Add[0].Target.Fields[0].Column)
+	require.NotNil(t, spec.Edges.Add[0].Target.NewFields)
+}
+
 // TestApplyCreateSpec covers createSpec()'s shape (see
 // entc/integration/ent/user/create.go:153-384): SetField per set field,
 // and one Add-only edge append per populated edge (no Clear/Remove on
@@ -192,7 +222,7 @@ func TestApplyCreateSpec(t *testing.T) {
 
 	spec := sqlgraph.NewCreateSpec("things", sqlgraph.NewFieldSpec("id", field.TypeInt))
 	node := &thingEnt{}
-	entbuilder.ApplyCreateSpec(m, node, spec, nil)
+	entbuilder.ApplyCreateSpec(m, node, spec, nil, nil)
 
 	require.Len(t, spec.Fields, 1)
 	require.Equal(t, "count", spec.Fields[0].Column)
@@ -234,7 +264,7 @@ func TestApplyCreateSpec_NodeFieldPointerWrap(t *testing.T) {
 
 	spec := sqlgraph.NewCreateSpec("things", sqlgraph.NewFieldSpec("id", field.TypeInt))
 	node := &thingEnt{}
-	entbuilder.ApplyCreateSpec(m, node, spec, nil)
+	entbuilder.ApplyCreateSpec(m, node, spec, nil, nil)
 
 	require.NotNil(t, node.Coupon)
 	require.Equal(t, "SAVE10", *node.Coupon)
@@ -255,15 +285,37 @@ func TestApplyCreateSpec_HasValueScanner(t *testing.T) {
 
 	spec := sqlgraph.NewCreateSpec("things", sqlgraph.NewFieldSpec("id", field.TypeInt))
 	node := &thingEnt{}
-	entbuilder.ApplyCreateSpec(m, node, spec, nil)
+	entbuilder.ApplyCreateSpec(m, node, spec, nil, nil)
 
 	require.Empty(t, spec.Fields)
 	require.Equal(t, "abc", node.Code)
+}
+
+// TestApplyCreateSpec_ThroughDefaults mirrors
+// TestApplyUpdateSpec_ThroughDefaults for the create-side wiring (see
+// entc/integration/multischema/ent/user/create.go's "friends" edge).
+func TestApplyCreateSpec_ThroughDefaults(t *testing.T) {
+	desc := thingDescriptor()
+	m := entbuilder.NewMutation[thingEnt, int](nil, ent.OpCreate, desc)
+	require.NoError(t, m.AddEdgeIDs("tags", 1))
+
+	spec := sqlgraph.NewCreateSpec("things", sqlgraph.NewFieldSpec("id", field.TypeInt))
+	node := &thingEnt{}
+	td := map[string]func() []*sqlgraph.FieldSpec{
+		"tags": func() []*sqlgraph.FieldSpec {
+			return []*sqlgraph.FieldSpec{sqlgraph.NewFieldSpec("weight", field.TypeInt)}
+		},
+	}
+	entbuilder.ApplyCreateSpec(m, node, spec, nil, td)
+
+	require.Len(t, spec.Edges, 1)
+	require.Len(t, spec.Edges[0].Target.Fields, 1)
+	require.NotNil(t, spec.Edges[0].Target.NewFields)
 }
 
 // ApplyUpdateSpecNoSchema is a thin wrapper so tests that don't exercise
 // multischema resolution don't need to pass a nil func literal at every
 // call site.
 func ApplyUpdateSpecNoSchema(m *entbuilder.Mutation[thingEnt, int], spec *sqlgraph.UpdateSpec) {
-	entbuilder.ApplyUpdateSpec(m, spec, nil)
+	entbuilder.ApplyUpdateSpec(m, spec, nil, nil)
 }
