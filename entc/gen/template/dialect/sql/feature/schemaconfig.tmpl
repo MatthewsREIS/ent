@@ -104,17 +104,12 @@ func (c *Config) SetSchemaConfig(config SchemaConfig) {
 	{{- end }}
 {{- end }}
 
-{{- define "dialect/sql/delete/spec/ctxschemaconfig" }}
-	{{- template "dialect/sql/spec/ctxschemaconfig" $ }}
-{{- end }}
-
-{{- define "dialect/sql/delete/descriptor/schemaconfig" }}
-    {{- if $.FeatureEnabled "sql/schemaconfig" }}
-        Schema: func(cfg config, _ *{{ $.MutationName }}) (string, bool) {
-            return cfg.schemaConfig.{{ $.Name }}, true
-        },
-    {{- end }}
-{{- end }}
+{{- /* The delete builder no longer generates a per-entity sqlExec for SQL
+storage (see dialect/sql/delete.tmpl) — schema resolution is wired directly
+into entbuilder.NewDelete's schemaOf/ctxSchema arguments via internal.SchemaOf
+and internal.NewSchemaConfigContext, so "dialect/sql/delete/spec/
+ctxschemaconfig" and "dialect/sql/delete/descriptor/schemaconfig" (the latter
+was already unreferenced before this change) have no caller left. */}}
 
 {{- define "dialect/sql/update/spec/ctxschemaconfig" }}
 	{{- template "dialect/sql/spec/ctxschemaconfig" $ }}

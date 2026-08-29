@@ -7,96 +7,25 @@
 package file
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // FileDelete is the builder for deleting a File entity.
-type FileDelete struct {
-	Config
-	hooks    []Hook
-	mutation *FileMutation
-}
+type FileDelete = entbuilder.Delete[File, int]
+
+// FileDeleteOne is the builder for deleting a single File entity.
+type FileDeleteOne = entbuilder.DeleteOne[File, int]
 
 // NewFileDelete returns a new FileDelete initialized with the given config, hooks, and mutation.
 func NewFileDelete(c Config, hooks []Hook, mutation *FileMutation) *FileDelete {
-	return &FileDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the FileDelete builder.
-func (_d *FileDelete) Where(ps ...predicate.File) *FileDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *FileDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*FileMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *FileDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *FileDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// FileDeleteOne is the builder for deleting a single File entity.
-type FileDeleteOne struct {
-	_d *FileDelete
+	return entbuilder.NewDelete[File, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewFileDeleteOne returns a new FileDeleteOne wrapping the given FileDelete.
 func NewFileDeleteOne(d *FileDelete) *FileDeleteOne {
-	return &FileDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the FileDelete builder.
-func (_d *FileDeleteOne) Where(ps ...predicate.File) *FileDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *FileDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *FileDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

@@ -7,96 +7,25 @@
 package group
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // GroupDelete is the builder for deleting a Group entity.
-type GroupDelete struct {
-	Config
-	hooks    []Hook
-	mutation *GroupMutation
-}
+type GroupDelete = entbuilder.Delete[Group, int]
+
+// GroupDeleteOne is the builder for deleting a single Group entity.
+type GroupDeleteOne = entbuilder.DeleteOne[Group, int]
 
 // NewGroupDelete returns a new GroupDelete initialized with the given config, hooks, and mutation.
 func NewGroupDelete(c Config, hooks []Hook, mutation *GroupMutation) *GroupDelete {
-	return &GroupDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the GroupDelete builder.
-func (_d *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *GroupDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*GroupMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *GroupDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *GroupDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// GroupDeleteOne is the builder for deleting a single Group entity.
-type GroupDeleteOne struct {
-	_d *GroupDelete
+	return entbuilder.NewDelete[Group, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewGroupDeleteOne returns a new GroupDeleteOne wrapping the given GroupDelete.
 func NewGroupDeleteOne(d *GroupDelete) *GroupDeleteOne {
-	return &GroupDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the GroupDelete builder.
-func (_d *GroupDeleteOne) Where(ps ...predicate.Group) *GroupDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *GroupDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *GroupDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

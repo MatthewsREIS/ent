@@ -7,96 +7,26 @@
 package link
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // LinkDelete is the builder for deleting a Link entity.
-type LinkDelete struct {
-	Config
-	hooks    []Hook
-	mutation *LinkMutation
-}
+type LinkDelete = entbuilder.Delete[Link, uuidc.UUIDC]
+
+// LinkDeleteOne is the builder for deleting a single Link entity.
+type LinkDeleteOne = entbuilder.DeleteOne[Link, uuidc.UUIDC]
 
 // NewLinkDelete returns a new LinkDelete initialized with the given config, hooks, and mutation.
 func NewLinkDelete(c Config, hooks []Hook, mutation *LinkMutation) *LinkDelete {
-	return &LinkDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the LinkDelete builder.
-func (_d *LinkDelete) Where(ps ...predicate.Link) *LinkDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *LinkDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*LinkMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *LinkDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *LinkDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// LinkDeleteOne is the builder for deleting a single Link entity.
-type LinkDeleteOne struct {
-	_d *LinkDelete
+	return entbuilder.NewDelete[Link, uuidc.UUIDC](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewLinkDeleteOne returns a new LinkDeleteOne wrapping the given LinkDelete.
 func NewLinkDeleteOne(d *LinkDelete) *LinkDeleteOne {
-	return &LinkDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the LinkDelete builder.
-func (_d *LinkDeleteOne) Where(ps ...predicate.Link) *LinkDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *LinkDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *LinkDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

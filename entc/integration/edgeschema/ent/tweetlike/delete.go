@@ -7,95 +7,25 @@
 package tweetlike
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TweetLikeDelete is the builder for deleting a TweetLike entity.
-type TweetLikeDelete struct {
-	Config
-	hooks    []Hook
-	mutation *TweetLikeMutation
-}
+type TweetLikeDelete = entbuilder.Delete[TweetLike, any]
+
+// TweetLikeDeleteOne is the builder for deleting a single TweetLike entity.
+type TweetLikeDeleteOne = entbuilder.DeleteOne[TweetLike, any]
 
 // NewTweetLikeDelete returns a new TweetLikeDelete initialized with the given config, hooks, and mutation.
 func NewTweetLikeDelete(c Config, hooks []Hook, mutation *TweetLikeMutation) *TweetLikeDelete {
-	return &TweetLikeDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the TweetLikeDelete builder.
-func (_d *TweetLikeDelete) Where(ps ...predicate.TweetLike) *TweetLikeDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *TweetLikeDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*TweetLikeMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *TweetLikeDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *TweetLikeDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, nil)
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// TweetLikeDeleteOne is the builder for deleting a single TweetLike entity.
-type TweetLikeDeleteOne struct {
-	_d *TweetLikeDelete
+	return entbuilder.NewDelete[TweetLike, any](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewTweetLikeDeleteOne returns a new TweetLikeDeleteOne wrapping the given TweetLikeDelete.
 func NewTweetLikeDeleteOne(d *TweetLikeDelete) *TweetLikeDeleteOne {
-	return &TweetLikeDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the TweetLikeDelete builder.
-func (_d *TweetLikeDeleteOne) Where(ps ...predicate.TweetLike) *TweetLikeDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *TweetLikeDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *TweetLikeDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

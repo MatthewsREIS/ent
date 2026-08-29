@@ -7,96 +7,25 @@
 package metadata
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // MetadataDelete is the builder for deleting a Metadata entity.
-type MetadataDelete struct {
-	Config
-	hooks    []Hook
-	mutation *MetadataMutation
-}
+type MetadataDelete = entbuilder.Delete[Metadata, int]
+
+// MetadataDeleteOne is the builder for deleting a single Metadata entity.
+type MetadataDeleteOne = entbuilder.DeleteOne[Metadata, int]
 
 // NewMetadataDelete returns a new MetadataDelete initialized with the given config, hooks, and mutation.
 func NewMetadataDelete(c Config, hooks []Hook, mutation *MetadataMutation) *MetadataDelete {
-	return &MetadataDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the MetadataDelete builder.
-func (_d *MetadataDelete) Where(ps ...predicate.Metadata) *MetadataDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *MetadataDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*MetadataMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *MetadataDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *MetadataDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// MetadataDeleteOne is the builder for deleting a single Metadata entity.
-type MetadataDeleteOne struct {
-	_d *MetadataDelete
+	return entbuilder.NewDelete[Metadata, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewMetadataDeleteOne returns a new MetadataDeleteOne wrapping the given MetadataDelete.
 func NewMetadataDeleteOne(d *MetadataDelete) *MetadataDeleteOne {
-	return &MetadataDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the MetadataDelete builder.
-func (_d *MetadataDeleteOne) Where(ps ...predicate.Metadata) *MetadataDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *MetadataDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *MetadataDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

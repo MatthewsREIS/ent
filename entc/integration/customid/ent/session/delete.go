@@ -7,96 +7,26 @@
 package session
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // SessionDelete is the builder for deleting a Session entity.
-type SessionDelete struct {
-	Config
-	hooks    []Hook
-	mutation *SessionMutation
-}
+type SessionDelete = entbuilder.Delete[Session, schema.ID]
+
+// SessionDeleteOne is the builder for deleting a single Session entity.
+type SessionDeleteOne = entbuilder.DeleteOne[Session, schema.ID]
 
 // NewSessionDelete returns a new SessionDelete initialized with the given config, hooks, and mutation.
 func NewSessionDelete(c Config, hooks []Hook, mutation *SessionMutation) *SessionDelete {
-	return &SessionDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the SessionDelete builder.
-func (_d *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *SessionDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*SessionMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *SessionDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *SessionDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeBytes))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// SessionDeleteOne is the builder for deleting a single Session entity.
-type SessionDeleteOne struct {
-	_d *SessionDelete
+	return entbuilder.NewDelete[Session, schema.ID](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewSessionDeleteOne returns a new SessionDeleteOne wrapping the given SessionDelete.
 func NewSessionDeleteOne(d *SessionDelete) *SessionDeleteOne {
-	return &SessionDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the SessionDelete builder.
-func (_d *SessionDeleteOne) Where(ps ...predicate.Session) *SessionDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *SessionDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *SessionDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

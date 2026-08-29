@@ -7,96 +7,25 @@
 package info
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // InfoDelete is the builder for deleting a Info entity.
-type InfoDelete struct {
-	Config
-	hooks    []Hook
-	mutation *InfoMutation
-}
+type InfoDelete = entbuilder.Delete[Info, int]
+
+// InfoDeleteOne is the builder for deleting a single Info entity.
+type InfoDeleteOne = entbuilder.DeleteOne[Info, int]
 
 // NewInfoDelete returns a new InfoDelete initialized with the given config, hooks, and mutation.
 func NewInfoDelete(c Config, hooks []Hook, mutation *InfoMutation) *InfoDelete {
-	return &InfoDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the InfoDelete builder.
-func (_d *InfoDelete) Where(ps ...predicate.Info) *InfoDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *InfoDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*InfoMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *InfoDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *InfoDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// InfoDeleteOne is the builder for deleting a single Info entity.
-type InfoDeleteOne struct {
-	_d *InfoDelete
+	return entbuilder.NewDelete[Info, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewInfoDeleteOne returns a new InfoDeleteOne wrapping the given InfoDelete.
 func NewInfoDeleteOne(d *InfoDelete) *InfoDeleteOne {
-	return &InfoDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the InfoDelete builder.
-func (_d *InfoDeleteOne) Where(ps ...predicate.Info) *InfoDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *InfoDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *InfoDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

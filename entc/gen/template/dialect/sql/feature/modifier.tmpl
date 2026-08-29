@@ -91,30 +91,8 @@ in the LICENSE file in the root directory of this source tree.
     {{- end }}
 {{- end -}}
 
-{{/* Template for adding the "modifiers" field to the delete builder. */}}
-{{ define "dialect/sql/delete/fields/additional/modify" -}}
-    {{- if $.FeatureEnabled "sql/modifier" }}
-        modifiers []func(*sql.DeleteBuilder)
-    {{- end }}
-{{- end -}}
-
-{{/* A template for adding the Modify method to the delete builder. */}}
-{{ define "dialect/sql/delete/additional/modify" }}
-    {{ if $.FeatureEnabled "sql/modifier" }}
-        {{ $builder := pascal $.Scope.Builder }}
-        {{ $receiver := $.Scope.Receiver }}
-        // Modify adds a statement modifier for attaching custom logic to the DELETE statement.
-        func ({{ $receiver }} *{{ $builder }}) Modify(modifiers ...func(d *sql.DeleteBuilder)) *{{ $builder }} {
-            {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, modifiers...)
-            return {{ $receiver }}
-        }
-    {{ end }}
-{{ end }}
-
-{{/* Template for passing the modifiers to the sqlgraph.DeleteSpec. */}}
-{{ define "dialect/sql/delete/spec/modify" }}
-    {{- if $.FeatureEnabled "sql/modifier" }}
-        {{- $receiver := $.Scope.Receiver }}
-        _spec.AddModifiers({{ $receiver }}.modifiers...)
-    {{- end }}
-{{- end -}}
+{{/* The delete builder no longer generates a per-entity struct for SQL
+storage (see dialect/sql/delete.tmpl) — entbuilder.Delete[T, I] always
+carries a modifiers slice and a Modify method, so these three extension
+points ("fields/additional/modify", "additional/modify", "spec/modify") that
+used to gate them on the "sql/modifier" feature have no caller left. */}}

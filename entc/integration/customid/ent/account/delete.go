@@ -7,96 +7,26 @@
 package account
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // AccountDelete is the builder for deleting a Account entity.
-type AccountDelete struct {
-	Config
-	hooks    []Hook
-	mutation *AccountMutation
-}
+type AccountDelete = entbuilder.Delete[Account, sid.ID]
+
+// AccountDeleteOne is the builder for deleting a single Account entity.
+type AccountDeleteOne = entbuilder.DeleteOne[Account, sid.ID]
 
 // NewAccountDelete returns a new AccountDelete initialized with the given config, hooks, and mutation.
 func NewAccountDelete(c Config, hooks []Hook, mutation *AccountMutation) *AccountDelete {
-	return &AccountDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the AccountDelete builder.
-func (_d *AccountDelete) Where(ps ...predicate.Account) *AccountDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *AccountDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*AccountMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *AccountDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *AccountDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeOther))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// AccountDeleteOne is the builder for deleting a single Account entity.
-type AccountDeleteOne struct {
-	_d *AccountDelete
+	return entbuilder.NewDelete[Account, sid.ID](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewAccountDeleteOne returns a new AccountDeleteOne wrapping the given AccountDelete.
 func NewAccountDeleteOne(d *AccountDelete) *AccountDeleteOne {
-	return &AccountDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the AccountDelete builder.
-func (_d *AccountDeleteOne) Where(ps ...predicate.Account) *AccountDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *AccountDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *AccountDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

@@ -7,96 +7,26 @@
 package token
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // TokenDelete is the builder for deleting a Token entity.
-type TokenDelete struct {
-	Config
-	hooks    []Hook
-	mutation *TokenMutation
-}
+type TokenDelete = entbuilder.Delete[Token, sid.ID]
+
+// TokenDeleteOne is the builder for deleting a single Token entity.
+type TokenDeleteOne = entbuilder.DeleteOne[Token, sid.ID]
 
 // NewTokenDelete returns a new TokenDelete initialized with the given config, hooks, and mutation.
 func NewTokenDelete(c Config, hooks []Hook, mutation *TokenMutation) *TokenDelete {
-	return &TokenDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the TokenDelete builder.
-func (_d *TokenDelete) Where(ps ...predicate.Token) *TokenDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *TokenDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*TokenMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *TokenDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *TokenDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeOther))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// TokenDeleteOne is the builder for deleting a single Token entity.
-type TokenDeleteOne struct {
-	_d *TokenDelete
+	return entbuilder.NewDelete[Token, sid.ID](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewTokenDeleteOne returns a new TokenDeleteOne wrapping the given TokenDelete.
 func NewTokenDeleteOne(d *TokenDelete) *TokenDeleteOne {
-	return &TokenDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the TokenDelete builder.
-func (_d *TokenDeleteOne) Where(ps ...predicate.Token) *TokenDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *TokenDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *TokenDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

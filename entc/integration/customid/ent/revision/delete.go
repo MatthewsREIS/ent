@@ -7,96 +7,25 @@
 package revision
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // RevisionDelete is the builder for deleting a Revision entity.
-type RevisionDelete struct {
-	Config
-	hooks    []Hook
-	mutation *RevisionMutation
-}
+type RevisionDelete = entbuilder.Delete[Revision, string]
+
+// RevisionDeleteOne is the builder for deleting a single Revision entity.
+type RevisionDeleteOne = entbuilder.DeleteOne[Revision, string]
 
 // NewRevisionDelete returns a new RevisionDelete initialized with the given config, hooks, and mutation.
 func NewRevisionDelete(c Config, hooks []Hook, mutation *RevisionMutation) *RevisionDelete {
-	return &RevisionDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the RevisionDelete builder.
-func (_d *RevisionDelete) Where(ps ...predicate.Revision) *RevisionDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *RevisionDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*RevisionMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *RevisionDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *RevisionDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// RevisionDeleteOne is the builder for deleting a single Revision entity.
-type RevisionDeleteOne struct {
-	_d *RevisionDelete
+	return entbuilder.NewDelete[Revision, string](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewRevisionDeleteOne returns a new RevisionDeleteOne wrapping the given RevisionDelete.
 func NewRevisionDeleteOne(d *RevisionDelete) *RevisionDeleteOne {
-	return &RevisionDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the RevisionDelete builder.
-func (_d *RevisionDeleteOne) Where(ps ...predicate.Revision) *RevisionDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *RevisionDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *RevisionDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

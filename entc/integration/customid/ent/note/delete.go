@@ -7,96 +7,26 @@
 package note
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // NoteDelete is the builder for deleting a Note entity.
-type NoteDelete struct {
-	Config
-	hooks    []Hook
-	mutation *NoteMutation
-}
+type NoteDelete = entbuilder.Delete[Note, schema.NoteID]
+
+// NoteDeleteOne is the builder for deleting a single Note entity.
+type NoteDeleteOne = entbuilder.DeleteOne[Note, schema.NoteID]
 
 // NewNoteDelete returns a new NoteDelete initialized with the given config, hooks, and mutation.
 func NewNoteDelete(c Config, hooks []Hook, mutation *NoteMutation) *NoteDelete {
-	return &NoteDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the NoteDelete builder.
-func (_d *NoteDelete) Where(ps ...predicate.Note) *NoteDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *NoteDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*NoteMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *NoteDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *NoteDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeString))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// NoteDeleteOne is the builder for deleting a single Note entity.
-type NoteDeleteOne struct {
-	_d *NoteDelete
+	return entbuilder.NewDelete[Note, schema.NoteID](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewNoteDeleteOne returns a new NoteDeleteOne wrapping the given NoteDelete.
 func NewNoteDeleteOne(d *NoteDelete) *NoteDeleteOne {
-	return &NoteDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the NoteDelete builder.
-func (_d *NoteDeleteOne) Where(ps ...predicate.Note) *NoteDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *NoteDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *NoteDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }
