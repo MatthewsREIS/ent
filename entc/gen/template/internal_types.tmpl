@@ -23,6 +23,9 @@ import (
 	{{- if eq $.Storage.Name "sql" }}
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	{{- if $.Config.FeatureEnabled "entql" }}
+	"entgo.io/ent/runtime/entbuilder"
+	{{- end }}
 	{{- end }}
 	{{- /* Additional dependencies injected to config. */}}
 	{{- $deps := list }}{{ with $.Config.Annotations }}{{ $deps = $.Config.Annotations.Dependencies }}{{ end }}
@@ -427,6 +430,25 @@ func (s *Selector) ScanX(ctx context.Context, v any) {
 		return v
 	}
 {{ end }}
+
+{{- if $.Config.FeatureEnabled "entql" }}
+
+// SchemaGraph holds the runtime schema graph for entql predicate evaluation,
+// built once from every entity's descriptor — the shared replacement for
+// what used to be a per-entity schemaGraph literal (a real self node plus a
+// stub node per distinct edge-target type) in each entity's shared.go.
+var SchemaGraph = entbuilder.BuildSchemaGraph([]*entbuilder.Descriptor{
+	{{- range $n := $.Nodes }}
+	{{ $n.Package }}Descriptor,
+	{{- end }}
+})
+
+// NodeIndex returns the index of the node with the given type name in
+// SchemaGraph.Nodes, or -1 if not found.
+func NodeIndex(typ string) int {
+	return entbuilder.NodeIndex(SchemaGraph, typ)
+}
+{{- end }}
 
 {{- end }}
 

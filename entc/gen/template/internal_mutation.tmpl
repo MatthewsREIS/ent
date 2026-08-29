@@ -8,6 +8,8 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "internal/mutation" }}
 
+{{ $n := $ }}
+
 {{ with extend $ "Package" "internal" }}
 	{{ template "header" . }}
 {{ end }}
@@ -18,12 +20,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	{{- if eq $.Storage.Name "sql" }}
+	"entgo.io/ent/runtime/entbuilder"
+	{{- if eq $n.Storage.Name "sql" }}
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
-	{{- else }}
-	"entgo.io/ent/runtime/entbuilder"
 	{{- end }}
 
 	"{{ $.Config.Package }}/predicate"
@@ -41,7 +41,6 @@ import (
 	{{- end }}
 )
 
-{{ $n := $ }}
 {{ $mutation := $n.MutationName }}
 
 {{- /* IDType: the second type parameter on entbuilder.Mutation[T, I]. For
@@ -150,6 +149,41 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 	{{- end }}
 	{{- if $n.FeatureEnabled "sql/schemaconfig" }}
 	SchemaKey: {{ $n.Name | printf "%q" }},
+	{{- end }}
+	{{- if $n.FeatureEnabled "entql" }}
+	{{- /* GraphFields/GraphEdges/CompositeID feed BuildSchemaGraph (the
+	      shared entql schema graph in internal/types.go) — a superset of
+	      Fields/Edges above, which are scoped to what mutation Set/Add/
+	      Clear needs. See runtime/entbuilder.Descriptor's doc comments on
+	      these three fields for exactly what/why each one adds. */}}
+	GraphFields: map[string]field.Type{
+		{{- range $f := $n.Fields }}
+		{{ $f.StorageKey | printf "%q" }}: field.{{ $f.Type.ConstName }},
+		{{- end }}
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		{{- range $e := $n.Edges }}
+		{{ $e.Name | printf "%q" }}: {
+			Target: {{ $e.Type.Name | printf "%q" }},
+			Rel:    sqlgraph.{{ $e.Rel.Type }},
+			{{- if $e.Inverse }}
+			Inverse: true,
+			{{- end }}
+			StorageTable:   {{ $e.Rel.Table | printf "%q" }},
+			StorageColumns: []string{ {{- range $i, $c := $e.Rel.Columns }}{{ if $i }}, {{ end }}{{ $c | printf "%q" }}{{- end }} },
+			{{- if $e.Bidi }}
+			Bidi: true,
+			{{- end }}
+		},
+		{{- end }}
+	},
+	{{- if not $n.HasOneFieldID }}
+	CompositeID: []entbuilder.IDColumnSpec{
+		{{- range $id := $n.EdgeSchema.ID }}
+		{Column: {{ $id.StorageKey | printf "%q" }}, SQLType: field.{{ $id.Type.ConstName }}},
+		{{- end }}
+	},
+	{{- end }}
 	{{- end }}
 	{{- end }}
 	{{- /* OldValueFn / IDsFn intentionally omitted: the entity client (e.g. *ent.Client.Task)

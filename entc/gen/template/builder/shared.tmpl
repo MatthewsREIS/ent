@@ -26,10 +26,6 @@ import (
 	{{- end }}
 
 	"entgo.io/ent"
-	{{- if and (eq $.Storage.Name "sql") ($.Config.FeatureEnabled "entql") }}
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/schema/field"
-	{{- end }}
 
 	"{{ $.Config.Package }}/internal"
 )
@@ -192,105 +188,12 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 
 {{- if $.Config.FeatureEnabled "entql" }}
 
-// schemaGraph holds this entity's schema for entql predicate evaluation.
-// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
-// string literals (sibling sub-packages cannot be imported from a leaf).
-// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
-// join table, including the SQL "FROM <target_table>" sub-selects emitted
-// by HasNeighborsWith. Cross-edge entql field predicates against sibling
-// entity columns are out of scope at the sub-package boundary; generated
-// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
-// closures directly to the SQL selector and never reads stub.Fields.
-var schemaGraph = func() *sqlgraph.Schema {
-	{{- /* Deduplicate edge target Types: an entity can have multiple edges
-	       pointing at the same neighbor (e.g., owner + reviewer → User).
-	       We key dedupe on Type.Name but keep the *Type around so we can
-	       emit Table / Columns / ID metadata into the stub NodeSpec. */}}
-	{{- $stubs := dict $.Name true }}
-	{{- $stubTypes := list }}
-	{{- range $e := $.Edges }}
-	{{- if not (hasKey $stubs $e.Type.Name) }}
-	{{- $stubs = set $stubs $e.Type.Name true }}
-	{{- $stubTypes = append $stubTypes $e.Type }}
-	{{- end }}
-	{{- end }}
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, {{ add 1 (len $stubTypes) }})}
-	graph.Nodes[0] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table:   Table,
-			Columns: Columns,
-			{{- if $.HasOneFieldID }}
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.{{ $.ID.Type.ConstName }},
-				Column: {{ $.ID.Constant }},
-			},
-			{{- else }}
-			CompositeID: []*sqlgraph.FieldSpec{
-				{{- range $id := $.EdgeSchema.ID }}
-				{Type: field.{{ $id.Type.ConstName }}, Column: {{ $id.Constant }}},
-				{{- end }}
-			},
-			{{- end }}
-		},
-		Type: "{{ $.Name }}",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			{{- range $f := $.Fields }}
-			{{ $f.Constant }}: {Type: field.{{ $f.Type.ConstName }}, Column: {{ $f.Constant }}},
-			{{- end }}
-		},
-	}
-	{{- range $i, $t := $stubTypes }}
-	graph.Nodes[{{ add 1 $i }}] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table: "{{ $t.Table }}",
-			Columns: []string{
-				{{- if $t.HasOneFieldID }}
-				"{{ $t.ID.StorageKey }}",
-				{{- end }}
-				{{- range $f := $t.Fields }}
-				{{- if not $f.IsDeprecated }}
-				"{{ $f.StorageKey }}",
-				{{- end }}
-				{{- end }}
-			},
-			{{- if $t.HasOneFieldID }}
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.{{ $t.ID.Type.ConstName }},
-				Column: "{{ $t.ID.StorageKey }}",
-			},
-			{{- else }}
-			CompositeID: []*sqlgraph.FieldSpec{
-				{{- range $idf := $t.EdgeSchema.ID }}
-				{Type: field.{{ $idf.Type.ConstName }}, Column: "{{ $idf.StorageKey }}"},
-				{{- end }}
-			},
-			{{- end }}
-		},
-		Type: "{{ $t.Name }}",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			{{- range $f := $t.Fields }}
-			"{{ $f.StorageKey }}": {Type: field.{{ $f.Type.ConstName }}, Column: "{{ $f.StorageKey }}"},
-			{{- end }}
-		},
-	}
-	{{- end }}
-	{{- range $e := $.Edges }}
-	graph.MustAddE(
-		"{{ $e.Name }}",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.{{ $e.Rel.Type }},
-			Inverse: {{ $e.IsInverse }},
-			Table:   {{ $e.TableConstant }},
-			Columns: {{ if $e.M2M }}{{ $e.PKConstant }}{{ else }}[]string{ {{ $e.ColumnConstant }} }{{ end }},
-			Bidi:    {{ $e.Bidi }},
-		},
-		"{{ $.Name }}",
-		"{{ $e.Type.Name }}",
-	)
-	{{- end }}
-	return graph
-}()
+// schemaGraph holds the runtime schema for entql predicate evaluation. It's
+// one shared *sqlgraph.Schema built once from every entity's descriptor
+// (internal.SchemaGraph) — every entity aliases it under this name so the
+// entql template (dialect/sql/entql_type.tmpl) doesn't need to know the
+// difference between this and the pre-Task-2 per-entity literal it replaces.
+var schemaGraph = internal.SchemaGraph
 {{- end }}
 
 {{- end }}
