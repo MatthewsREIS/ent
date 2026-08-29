@@ -71,9 +71,19 @@ type fixtureEntity struct {
 	SensitiveField   string
 	ExternalField    fixtureExternal
 	fkField          *int
+	fkStringField    *string
+	fkScannerField   *fixtureScanner
 }
 
 func (e *fixtureEntity) SetFK(v int) { e.fkField = &v }
+
+// fkStringField/fkScannerField cover an FK target whose ID isn't a plain
+// int — a string ID (row 7's basic-kind dispatch) and a UUID-style
+// Scanner-implementing GoType ID (row 3/4's custom-kind dispatch) —
+// exercising the FK "write via setter" path for both, not just the
+// all-numeric targets every real fixture in the fork happens to use.
+func (e *fixtureEntity) SetFKString(v string)          { e.fkStringField = &v }
+func (e *fixtureEntity) SetFKScanner(v fixtureScanner) { e.fkScannerField = &v }
 
 // fixtureDescriptor builds the Descriptor for fixtureEntity, one FieldSpec
 // per rule-table row under test.
@@ -110,6 +120,10 @@ func fixtureDescriptor() *Descriptor {
 		},
 		FKColumns: []FieldSpec{
 			{Column: "fk_col", SQLType: field.TypeInt, Type: reflect.TypeOf(0), GoName: "SetFK"},
+			// Non-numeric FK targets (review-task4.md finding #3): a plain
+			// string ID and a UUID-style Scanner GoType ID.
+			{Column: "fk_string_col", SQLType: field.TypeString, Type: reflect.TypeOf(""), GoName: "SetFKString"},
+			{Column: "fk_scanner_col", SQLType: field.TypeString, Type: reflect.TypeOf(fixtureScanner{}), GoName: "SetFKScanner"},
 		},
 	}
 }
@@ -337,6 +351,38 @@ func TestAssignRow_ForeignKeyColumn(t *testing.T) {
 	}
 }
 
+// TestAssignRow_ForeignKeyColumn_StringTarget covers an FK whose target ID
+// is a string (row 7's basic-kind dispatch), not the all-numeric targets
+// every real fixture in this fork happens to use (review-task4.md finding
+// #3).
+func TestAssignRow_ForeignKeyColumn_StringTarget(t *testing.T) {
+	desc := fixtureDescriptor()
+	e := &fixtureEntity{}
+	scanAndAssign(t, desc, e, []string{"fk_string_col"}, func(cells []any) {
+		cells[0].(*stdsql.NullString).String, cells[0].(*stdsql.NullString).Valid = "usr-42", true
+	})
+	if e.fkStringField == nil || *e.fkStringField != "usr-42" {
+		t.Errorf("fkStringField = %v, want *%q", e.fkStringField, "usr-42")
+	}
+}
+
+// TestAssignRow_ForeignKeyColumn_ScannerGoTypeTarget covers an FK whose
+// target ID is a UUID-style GoType implementing sql.Scanner/driver.Valuer
+// (row 3/4's custom-kind dispatch), the other non-numeric shape
+// review-task4.md finding #3 flagged as unexercised.
+func TestAssignRow_ForeignKeyColumn_ScannerGoTypeTarget(t *testing.T) {
+	desc := fixtureDescriptor()
+	e := &fixtureEntity{}
+	scanAndAssign(t, desc, e, []string{"fk_scanner_col"}, func(cells []any) {
+		if err := cells[0].(*fixtureScanner).Scan("uuid-like-value"); err != nil {
+			t.Fatal(err)
+		}
+	})
+	if e.fkScannerField == nil || e.fkScannerField.V != "uuid-like-value" {
+		t.Errorf("fkScannerField = %+v, want &{uuid-like-value}", e.fkScannerField)
+	}
+}
+
 func TestAssignRow_UnknownColumnPassthrough(t *testing.T) {
 	desc := fixtureDescriptor()
 	e := &fixtureEntity{}
@@ -405,3 +451,181 @@ func TestFormatEntity_NillableNilFieldSkipsSegmentNotSeparator(t *testing.T) {
 
 func fmtBytes(b []byte) string { return fmt.Sprintf("%v", b) }
 func fmtJSON(v any) string     { return fmt.Sprintf("%v", v) }
+
+// --- review-task4.md finding #2: pointer-shaped GoType without .Nillable() ---
+//
+// A field whose registered GoType is itself a pointer (e.g. FieldType.
+// LinkOther, GoType(&schema.Link{})) but that has no schema-level
+// .Nillable() call is printed by the real generated String() via a raw,
+// UNGUARDED %v on the pointer — never skipped, even when nil — unlike a
+// true Nillable field, which skips the whole "name=value" segment when
+// nil. This is the one rule-table row FormatEntity's shared fixture above
+// doesn't cover directly; isolated here instead of folded into
+// fixtureEntity to avoid touching every test that builds a "want" string
+// against the full fixtureDescriptor.
+
+type ptrGoTypeEntity struct {
+	_     struct{}
+	ID    int
+	Field *fixtureScanner
+}
+
+func ptrGoTypeDescriptor() *Descriptor {
+	return &Descriptor{
+		Name:      "PtrGoType",
+		IDColumn:  "id",
+		IDSQLType: field.TypeInt,
+		IDType:    reflect.TypeOf(0),
+		ScanFields: []FieldSpec{
+			// Type is the pointer *fixtureScanner itself (mirrors
+			// GoType(&schema.Link{})); Nillable is left false (mirrors no
+			// .Nillable() call in the schema).
+			{Column: "field", Name: "field", SQLType: field.TypeString, Type: reflect.TypeOf(&fixtureScanner{}), StructIndex: 2},
+		},
+	}
+}
+
+func TestFormatEntity_PointerGoTypeWithoutNillableFlag(t *testing.T) {
+	desc := ptrGoTypeDescriptor()
+
+	// Non-nil: printed via raw %v on the pointer (Go's fmt shows "&{V}"
+	// for a pointer-to-struct), same as the real LinkOther case.
+	e := &ptrGoTypeEntity{ID: 1, Field: &fixtureScanner{V: "raw"}}
+	got := FormatEntity(desc, e)
+	want := fmt.Sprintf("PtrGoType(id=1, field=%v)", e.Field)
+	if got != want {
+		t.Errorf("FormatEntity =\n%q\nwant\n%q", got, want)
+	}
+
+	// Nil: NOT skipped (that's the whole point — no .Nillable() means no
+	// nil-guard), unlike a Nillable field's nil case.
+	e2 := &ptrGoTypeEntity{ID: 1}
+	got2 := FormatEntity(desc, e2)
+	want2 := "PtrGoType(id=1, field=<nil>)"
+	if got2 != want2 {
+		t.Errorf("FormatEntity (nil) =\n%q\nwant\n%q", got2, want2)
+	}
+}
+
+// --- review-task4.md finding #1: golden literal anchored to real old output ---
+//
+// Both fixtures/wants below are transcribed by hand-executing the actual
+// pre-task-4 generated String() body against the same field values, not
+// produced by calling FormatEntity, fmtBytes/fmtJSON, or any other shared
+// helper — an independent oracle, not a tautology.
+
+// goldenUser mirrors entc/integration/ent/internal/user_model.go's real
+// field set exactly (git show cf61174fb:entc/integration/ent/internal/user_model.go,
+// struct at the top of the file and String() at lines ~408-448).
+type goldenUser struct {
+	_           struct{}
+	ID          int
+	OptionalInt int
+	Age         int
+	Name        string
+	Last        string
+	Nickname    string
+	Address     string
+	Phone       string
+	Password    string
+	Role        fixtureEnum
+	Employment  fixtureEnum
+	SSOCert     string
+	FilesCount  int
+}
+
+func goldenUserDescriptor() *Descriptor {
+	return &Descriptor{
+		Name: "User", IDColumn: "id", IDSQLType: field.TypeInt, IDType: reflect.TypeOf(0),
+		ScanFields: []FieldSpec{
+			{Column: "optional_int", Name: "optional_int", SQLType: field.TypeInt, Type: reflect.TypeOf(0), StructIndex: 2},
+			{Column: "age", Name: "age", SQLType: field.TypeInt, Type: reflect.TypeOf(0), StructIndex: 3},
+			{Column: "name", Name: "name", SQLType: field.TypeString, Type: reflect.TypeOf(""), StructIndex: 4},
+			{Column: "last", Name: "last", SQLType: field.TypeString, Type: reflect.TypeOf(""), StructIndex: 5},
+			{Column: "nickname", Name: "nickname", SQLType: field.TypeString, Type: reflect.TypeOf(""), StructIndex: 6},
+			{Column: "address", Name: "address", SQLType: field.TypeString, Type: reflect.TypeOf(""), StructIndex: 7},
+			{Column: "phone", Name: "phone", SQLType: field.TypeString, Type: reflect.TypeOf(""), StructIndex: 8},
+			{Column: "password", Name: "password", Sensitive: true, StructIndex: 9},
+			{Column: "role", Name: "role", SQLType: field.TypeEnum, Type: reflect.TypeOf(fixtureEnum("")), StructIndex: 10},
+			{Column: "employment", Name: "employment", SQLType: field.TypeEnum, Type: reflect.TypeOf(fixtureEnum("")), StructIndex: 11},
+			{Column: "SSOCert", Name: "SSOCert", SQLType: field.TypeString, Type: reflect.TypeOf(""), StructIndex: 12},
+			{Column: "files_count", Name: "files_count", SQLType: field.TypeInt, Type: reflect.TypeOf(0), StructIndex: 13},
+		},
+	}
+}
+
+func TestFormatEntity_GoldenRealUserOutput(t *testing.T) {
+	desc := goldenUserDescriptor()
+	e := &goldenUser{
+		ID: 1, OptionalInt: 2, Age: 30, Name: "Ariel", Last: "Mashraki",
+		Nickname: "a8m", Address: "1 Rd", Phone: "555", Password: "topsecret",
+		Role: "admin", Employment: "full_time", SSOCert: "cert-1", FilesCount: 4,
+	}
+	got := FormatEntity(desc, e)
+	// Copied verbatim from the real old body's WriteString sequence (id,
+	// optional_int, age, name, last, nickname, address, phone,
+	// password=<sensitive>, role, employment, SSOCert, files_count) with
+	// the values above substituted in by hand.
+	want := "User(id=1, optional_int=2, age=30, name=Ariel, last=Mashraki, " +
+		"nickname=a8m, address=1 Rd, phone=555, password=<sensitive>, " +
+		"role=admin, employment=full_time, SSOCert=cert-1, files_count=4)"
+	if got != want {
+		t.Errorf("FormatEntity =\n%q\nwant (real cf61174fb User.String() output)\n%q", got, want)
+	}
+}
+
+// goldenFieldTypeSubset transcribes a real subset of
+// entc/integration/ent/internal/fieldtype_model.go's fields — the
+// nillable_int/datetime/password/strings cases (git show
+// cf61174fb:entc/integration/ent/internal/fieldtype_model.go, lines
+// 719-722, 774-776, 792-793, 885-887) — covering the nillable-nil, time,
+// and slice/JSON shapes the goldenUser test above has none of.
+type goldenFieldTypeSubset struct {
+	_           struct{}
+	ID          int
+	NillableInt *int
+	Datetime    time.Time
+	Password    string
+	Strings     []string
+}
+
+func goldenFieldTypeDescriptor() *Descriptor {
+	return &Descriptor{
+		Name: "FieldType", IDColumn: "id", IDSQLType: field.TypeInt, IDType: reflect.TypeOf(0),
+		ScanFields: []FieldSpec{
+			{Column: "nillable_int", Name: "nillable_int", SQLType: field.TypeInt, Type: reflect.TypeOf(0), Nillable: true, StructIndex: 2},
+			{Column: "datetime", Name: "datetime", SQLType: field.TypeTime, Type: reflect.TypeOf(time.Time{}), StructIndex: 3},
+			{Column: "password", Name: "password", Sensitive: true, StructIndex: 4},
+			{Column: "strings", Name: "strings", SQLType: field.TypeJSON, Type: reflect.TypeOf([]string(nil)), StructIndex: 5},
+		},
+	}
+}
+
+func TestFormatEntity_GoldenRealFieldTypeSubset(t *testing.T) {
+	desc := goldenFieldTypeDescriptor()
+	dt := time.Date(2024, 1, 2, 3, 4, 5, 0, time.UTC)
+
+	t.Run("nillable_int nil", func(t *testing.T) {
+		e := &goldenFieldTypeSubset{ID: 1, Datetime: dt, Password: "pw", Strings: []string{"a", "b"}}
+		got := FormatEntity(desc, e)
+		// Real code: `if v := _m.NillableInt; v != nil { ... }` never runs
+		// when nil, so the "nillable_int=" segment is entirely omitted —
+		// but the positional separator either side of it still fires.
+		want := "FieldType(id=1, , datetime=" + dt.Format(time.ANSIC) +
+			", password=<sensitive>, strings=" + fmt.Sprintf("%v", []string{"a", "b"}) + ")"
+		if got != want {
+			t.Errorf("FormatEntity =\n%q\nwant (real cf61174fb FieldType.String() fragment)\n%q", got, want)
+		}
+	})
+
+	t.Run("nillable_int set", func(t *testing.T) {
+		n := 7
+		e := &goldenFieldTypeSubset{ID: 1, NillableInt: &n, Datetime: dt, Password: "pw", Strings: []string{"a"}}
+		got := FormatEntity(desc, e)
+		want := "FieldType(id=1, nillable_int=7, datetime=" + dt.Format(time.ANSIC) +
+			", password=<sensitive>, strings=" + fmt.Sprintf("%v", []string{"a"}) + ")"
+		if got != want {
+			t.Errorf("FormatEntity =\n%q\nwant (real cf61174fb FieldType.String() fragment)\n%q", got, want)
+		}
+	})
+}
