@@ -11,6 +11,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 )
 
 // Cardinality classifies an edge.
@@ -48,6 +50,14 @@ type FieldSpec struct {
 	// entfield's F.<Field> handles are shared across every builder type, so
 	// that structural gate is gone and this replaces it.
 	Immutable bool
+
+	// Column is the SQL column name backing this field. Zero value ("")
+	// means "not emitted" — old descriptors (or non-SQL dialects) are
+	// unaffected; ApplyUpdateSpec/ApplyCreateSpec are SQL-only consumers.
+	Column string
+	// SQLType is the schema/field type enum passed to
+	// sqlgraph.*Spec.SetField/AddField/ClearField.
+	SQLType field.Type
 }
 
 // EdgeSpec describes an edge on an entity.
@@ -69,6 +79,37 @@ type EdgeSpec struct {
 	// (see EdgeField[T].Set/Clear in runtime/entfield), so this one gate
 	// covers both surfaces.
 	Immutable bool
+
+	// Rel is the sqlgraph relation kind (O2O/O2M/M2O/M2M) for this edge.
+	Rel sqlgraph.Rel
+	// StorageTable is the sqlgraph table name: the neighbor's table for
+	// FK edges, or the join table for M2M edges. Named "Storage" (not
+	// "Table") to avoid confusion with Descriptor.Table.
+	StorageTable string
+	// StorageColumns holds the relation column(s): one FK column for
+	// O2O/O2M/M2O edges, or the two join-table columns (owner, reference)
+	// for M2M edges — mirrors gen.Relation.Columns verbatim.
+	StorageColumns []string
+	// Bidi mirrors sqlgraph.EdgeSpec.Bidi (bidirectional self-reference,
+	// e.g. User.friends).
+	Bidi bool
+	// TargetIDColumn is the neighbor's ID column name.
+	TargetIDColumn string
+	// TargetIDSQLType is the neighbor's ID field.Type.
+	TargetIDSQLType field.Type
+	// SchemaKey is the SchemaConfig struct-field name used to resolve this
+	// edge's sqlgraph.EdgeSpec.Schema at runtime (via the ApplyUpdateSpec/
+	// ApplyCreateSpec schemaOf callback); "" for single-schema apps.
+	//
+	// Deliberately not duplicating sqlgraph.EdgeSpec.Inverse as a separate
+	// "StorageInverse" field: entc/gen's Edge.IsInverse() (used by
+	// update.tmpl to set EdgeSpec.Inverse) and the graph-level Inverse
+	// field above (used by internal_mutation.tmpl) are both exactly
+	// `e.Inverse != ""` — the same boolean, computed from the same source.
+	// Verified by diffing generated internal/user_mutation.go's Inverse:
+	// true edges (followers, children) against entc/integration/ent/user/
+	// update.go's per-edge Inverse: true/false lines — identical set.
+	SchemaKey string
 }
 
 // Descriptor is the static, package-init-time descriptor for one entity.
@@ -98,6 +139,20 @@ type Descriptor struct {
 	// IDsFn implements IDs(ctx) for Update/Delete mutations.
 	// Returns []any (mutation type-asserts to the entity's actual ID slice).
 	IDsFn func(ctx context.Context, c any, preds ...func(*sql.Selector)) ([]any, error)
+
+	// Table is the SQL table name for this entity. Zero value ("") means
+	// "not emitted" (non-SQL dialects, or old descriptors).
+	Table string
+	// TableColumns is the full column list for this table, including the
+	// ID column first (when the entity has a single-field ID).
+	TableColumns []string
+	// IDColumn is the ID column name; empty for composite/edge-schema IDs.
+	IDColumn string
+	// IDSQLType is the ID field's field.Type; zero value for composite IDs.
+	IDSQLType field.Type
+	// SchemaKey is the SchemaConfig struct-field name used to resolve
+	// sqlgraph.NodeSpec.Schema at runtime; "" for single-schema apps.
+	SchemaKey string
 }
 
 // Mutation is the single generic mutation type used by every entity.
