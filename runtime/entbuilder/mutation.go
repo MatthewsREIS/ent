@@ -112,6 +112,15 @@ type EdgeSpec struct {
 	SchemaKey string
 }
 
+// IDColumnSpec is a single SQL column/type pair. Used for Descriptor.CompositeID
+// on edge-schema entities whose ID is a composite of multiple columns, where a
+// single IDColumn/IDSQLType pair (sized for a single-field ID) can't represent
+// it.
+type IDColumnSpec struct {
+	Column  string
+	SQLType field.Type
+}
+
 // Descriptor is the static, package-init-time descriptor for one entity.
 // One *Descriptor instance per entity, shared across all Mutation[T] of
 // that entity.
@@ -153,6 +162,26 @@ type Descriptor struct {
 	// SchemaKey is the SchemaConfig struct-field name used to resolve
 	// sqlgraph.NodeSpec.Schema at runtime; "" for single-schema apps.
 	SchemaKey string
+	// CompositeID holds the ID column/type pairs for an entity whose ID is
+	// composite (edge-schema entities with HasOneFieldID false); empty for
+	// single-field-ID entities, which use IDColumn/IDSQLType instead.
+	CompositeID []IDColumnSpec
+
+	// GraphFields lists every SQL column on this entity, keyed by storage
+	// column name — including edge-owning FK fields that Fields excludes
+	// (see internal_mutation.tmpl's MutationFields, which drops IsEdgeField
+	// fields since they're set via edge methods, not field methods). Used
+	// only by BuildSchemaGraph's node.Fields map, which entql field lookups
+	// key by storage name regardless of whether the field backs an edge.
+	GraphFields map[string]field.Type
+	// GraphEdges lists every edge on this entity for BuildSchemaGraph,
+	// including edges to composite-ID targets that Edges excludes (Edges is
+	// scoped to mutation Add/Set/Clear, which needs a typed TargetIDColumn/
+	// TargetIDSQLType that a composite-ID target doesn't have). A schema-
+	// graph edge only needs Rel/Inverse/StorageTable/StorageColumns/Bidi/
+	// Target, all of which are well-defined regardless of the target's ID
+	// shape, so this is the full edge set unfiltered by target ID type.
+	GraphEdges map[string]EdgeSpec
 }
 
 // Mutation is the single generic mutation type used by every entity.
