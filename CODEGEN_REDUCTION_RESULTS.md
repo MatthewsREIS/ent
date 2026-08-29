@@ -526,28 +526,46 @@ go clean -cache && /usr/bin/time -v go build ./...   # in models/
 gen 112.4s/3.2 GB; clean build 63.8s/3.17 GB) — same worktree as 2a (no
 environment/commit confound this round, unlike 2a vs Stage 1).
 
-| Metric | Before (Stage 2a, quiet-machine) | After (Stage 2b, local-replace) | Delta |
+| Metric | Before (Stage 2a, quiet-machine) | After (Stage 2b, re-measured) | Delta |
 |---|---|---|---|
 | Generated LOC (`models/gen`) | 1,577,213 | 1,393,985 | **-183,228 (-11.6%)** |
-| Generation wall time | 112.4s | 134.84s | +22.4s (+19.9%) |
-| Generation peak RSS | 3.2 GB | 3.2 GB | flat |
-| Clean build wall time | 63.8s | 103.63s | +39.8s (+62.4%) |
-| Clean build peak RSS | 3.17 GB | 3.09 GB | -0.08 GB (-2.5%) |
+| Generation wall time | 112.4s | 126.0s | +13.6s (+12.1%) |
+| Generation peak RSS | 3.2 GB | 3.2 GB (3,312,820 KB) | flat |
+| Clean build wall time | 63.8s | 72.9s | +9.1s (+14.2%) |
+| Clean build peak RSS | 3.17 GB | ~3.0 GB (3,164,820 KB) | flat-to-down |
 
-Single-run measurements on a shared box (not averaged), same caveats as
-prior stages, **and this round had no quiet-machine re-measurement pass**
-(unlike 2a's follow-up) — the wall-time deltas above should not be taken as
-a clean attribution to the codegen change alone. The generation-time
-increase is plausible on its face (the `With`/`F`/`E`-handle emission adds
-per-field decision logic to `setter.tmpl` where the old codegen just
-stamped out one setter method per field), but the clean-build wall-time
-jump (+62%) is large enough, and RSS flat-to-down, that it's more likely
-dominated by concurrent load on the shared dev box during this run (heavy
-Docker/Postgres/testcontainers activity from the test phase ran on the same
-machine shortly before this benchmark) than by the `With(...)`-call-site
-surface itself — that surface is *smaller* per call site than the deleted
-per-field methods it replaces. Re-measure on a quiet machine before reading
-the clean-build delta as real.
+Measurement history for this row, in the order taken (all single runs on
+the shared dev box, not averaged):
+
+1. **First pass (discarded as load-confounded)**: gen 134.8s, build 103.6s
+   (+62% build wall) — taken immediately after the heavy Docker/Postgres/
+   testcontainers test phase on the same box.
+2. **Second pass (also discarded)**: gen 155.2s, build 79.9s — load average
+   was still 7–14 at start (residual test-phase churn).
+3. **Third pass (the table numbers)**: taken after waiting for load to
+   settle to ~2–3, test containers idle but resident. This is the best
+   measurement available this round, comparable to (though not quite as
+   idle as) 2a's quiet-machine recheck.
+
+Reading: the generation-time increase (+12%) is plausibly real — the
+`With`/`F`/`E`-handle emission adds per-field decision logic to
+`setter.tmpl` where the old codegen just stamped out one setter method per
+field. The clean-build increase (+14%) showed the same direction across
+all three runs, so some of it is likely real too, despite the 11.6% LOC
+drop — the deleted per-field setter methods were among the cheapest lines
+in the package to compile (tiny monomorphic methods), while what remains
+is denser per line. Both RSS numbers are effectively flat (the earlier
+"3.09 GB" figure in this section's first draft was a mis-conversion of
+3,164,552 KB, which is the same ~3.0–3.2 GB plateau every 2b run landed
+on). Net across stage 2 as a whole vs the Stage 1 numbers, generation
+memory is the big win (9.1 GB → 3.2 GB) and LOC is down 31.5% cumulative;
+wall-clock times have not improved: clean build is ~62→73s (+18%, part
+environment), and generation ~60→126s — though most of that gen-wall gap
+is the local-replace measurement artifact 2a already documented (`go run
+entc.go` rebuilds the fork from source under a `replace` directive instead
+of pulling a cached module; re-check against a pushed pseudo-version).
+The compile-time payoff, if it comes, is expected from the later stages'
+further LOC removal rather than from stage 2's per-line densification.
 
 ### Migration
 
@@ -697,18 +715,26 @@ runtime guard closed on nothing (grep-confirmed before the full test pass,
 then confirmed again by 0 unexpected failures in `go test`/integration
 runs).
 
-**Left un-migrated, by scope decision, not a blocker**: 21 of the ~85
-`api` test packages (mostly `api/integration/*`) still fail to `go vet`
-(compile) — every failure is one of miss-classes 1–2 above, just not
-hand-fixed this round given the volume (199 files still contained
-`Set[A-Z]`/`Clear[A-Z]`/`AddXIDs`-shaped text after the rewriter pass,
-against 283 files the rewriter *did* successfully migrate in `api/integration`
-alone). All packages this task's brief actually requires to run —
-`models`, `workers`, `api/resolvers`, `api/scim`, `api/crexiimport`,
-`api/cmd/generate`, `api/hubspot_email_recipients`, `api/hubspot_email_stats`,
-`api/testharness`, and the integration packages `chatter`, `office`,
-`pinned`, `ringcentral`, `soft_delete`, `timeline`, `ent_resolvers`, and
-`contact` — are clean and passing. `contact` stood in for the brief's
+**Left un-migrated at task time — since closed by a follow-up pass**: 21
+of the ~85 `api` test packages (mostly `api/integration/*`) still failed to
+`go vet` (compile) when this task's report was written — every failure was
+one of miss-classes 1–2 above, just not hand-fixed in the first pass given
+the volume (199 files still contained `Set[A-Z]`/`Clear[A-Z]`/`AddXIDs`-shaped
+text after the rewriter pass, against 283 files the rewriter *did*
+successfully migrate in `api/integration` alone). The post-review follow-up
+pass (42 files) fixed all 21, plus one additional broken package it found
+(`api/cmd/go_migrations/migrations`) and one miss-class-4 site
+(call-expression receiver in `escrow_trs_hook_integration_test.go`) —
+`go vet ./...` is now clean across all three gemini modules, and two of the
+previously-broken write-heavy packages pass their full suites
+(`transaction` 117/117, `escrow` 158/158). The plan's Task 5 test list itself names four items (models+workers
+suites, `-run OnConflict`, `ent_resolvers`, one mutation-heavy integration
+package) — all satisfied. Beyond that, the packages actually exercised and
+clean this round: `models`, `workers`, `api/resolvers`, `api/scim`,
+`api/crexiimport`, `api/cmd/generate`, `api/hubspot_email_recipients`,
+`api/hubspot_email_stats`, `api/testharness`, and the integration packages
+`chatter`, `office`, `pinned`, `ringcentral`, `soft_delete`, `timeline`,
+`ent_resolvers`, and `contact`. `contact` stood in for the brief's
 "contact or transaction" write-heavy pick since `api/integration/transaction`
 is one of the 21 still-broken packages (`transaction_total_outstanding_integration_test.go`,
 miss-class 1). Broken package list: `app`, `app_data`, `box`, `commission`,
@@ -780,13 +806,13 @@ discovered here:
 
 - `go vet ./...` (build + `_test.go` type-check) clean in `models/` (all
   packages) and `workers/` (root + `jobs`, including every `_test.go`).
-- `go vet` clean in the specific `api` packages this task's tests exercise:
-  `resolvers`, `scim`, `crexiimport`, `cmd/generate`,
-  `hubspot_email_recipients`, `hubspot_email_stats`, `testharness`, and
-  integration packages `chatter`, `office`, `pinned`, `ringcentral`,
-  `soft_delete`, `timeline`, `ent_resolvers`, `contact`. (21 other `api`
-  integration packages remain broken — see Migration above; not required by
-  this task's test list.)
+- `go vet` clean in the `api` packages exercised this round: `resolvers`,
+  `scim`, `crexiimport`, `cmd/generate`, `hubspot_email_recipients`,
+  `hubspot_email_stats`, `testharness`, and integration packages `chatter`,
+  `office`, `pinned`, `ringcentral`, `soft_delete`, `timeline`,
+  `ent_resolvers`, `contact`. (21 other `api` integration packages were
+  broken at the time of this task's report; the follow-up pass closed all
+  of them — see Migration and Concerns.)
 - `go test ./...` in `models/` — 27 tested packages, all pass.
 - `go test ./...` in `workers/` (root + `jobs`) — all pass, **but only under
   restricted parallelism** (`-p 2 -parallel 4`); the default unbounded
@@ -809,20 +835,21 @@ discovered here:
 
 ### Concerns / follow-ups for the user
 
-- **Clean-build wall-time delta (+62.4%) needs a quiet-machine
-  re-measurement** before treating it as a real regression from the
-  codegen change — this round ran the benchmark on a box with recent heavy
-  Docker/testcontainers/Postgres load from the test phase, unlike 2a's
-  later quiet-machine recheck. Generation-time (+19.9%) and both RSS
-  numbers (flat/-2.5%) are more plausibly real and small.
-- **21 `api/integration/*` test packages left broken** (listed above,
-  under Migration) — same two miss classes as everything else this round,
-  just not hand-fixed given the volume (199 files still had leftover
-  builder-setter text after the rewriter pass). None of them are on this
-  task's required test list, but a follow-up pass mechanically applying the
-  same two fixes (conditional-reassignment-after-declaration,
-  shadow-rename-or-alias-import) across the remaining files would close
-  the gap — there's no new pattern to discover, just volume.
+- **Quiet-machine re-measurement: done** (third pass, table above). The
+  first-pass +62.4% clean-build figure was indeed load; the settled numbers
+  are gen +12.1% and build +14.2% vs the 2a quiet baseline, RSS flat. The
+  build delta showed the same direction across all three runs so is
+  partially real; a fully-idle box (containers stopped) would be needed to
+  pin it more precisely, and the gen-wall figure remains inflated by the
+  local-replace from-source artifact 2a documented.
+- **The 21 broken `api/integration/*` packages: closed.** A post-review
+  follow-up pass (42 files) applied the same documented miss-class fixes
+  across all 21, plus one extra broken package it found
+  (`api/cmd/go_migrations/migrations`). `go vet ./...` is now clean in all
+  three gemini modules; `transaction` (117/117) and `escrow` (158/158)
+  pass their full suites; a `gofmt` sweep over all 637 changed
+  non-generated files is clean, and the two mid-chain-comment artifacts
+  the review flagged were hand-tidied (gofmt does not normalize those).
 - **The rewriter's cross-sibling-closure shadowing guard** (flagged by 2a
   as needing real block-scope tracking before 2b trusted it at scale) did
   not produce any *rewriter* corruption this round — 0 ambiguity refusals,
@@ -835,8 +862,9 @@ discovered here:
   for the *false-shadowing* case 2a found, but this round found no evidence
   it under-fired.
 - Remaining: gemini-side changes (11 template fixes incl. one supporting
-  `extension.go` change, 467 rewriter-migrated files, and the hand-fixed
-  miss-class sites documented above) are intentionally left uncommitted in
-  `gemini/.worktrees/codegen-reduction` for user review and commit. Nothing
-  was committed in gemini or contrib by this task — only this results
-  document was committed, in the fork worktree.
+  `extension.go` change, 467 rewriter-migrated files, the hand-fixed
+  miss-class sites documented above, and the 42-file follow-up pass) are
+  intentionally left uncommitted in `gemini/.worktrees/codegen-reduction`
+  for user review and commit — 656 changed files, +6,859/−15,132 lines in
+  the worktree total. Nothing was committed in gemini or contrib by this
+  stage — only this results document, in the fork worktree.
