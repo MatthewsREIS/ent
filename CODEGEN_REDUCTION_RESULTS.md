@@ -1484,6 +1484,37 @@ secondary signal that repeatedly overstated its reach this stage.
   shape. The arithmetic backs the call: full erasure would have needed
   roughly 8 typed closures per arm to save ~2,600 lines total — more
   generated complexity introduced than removed.
+- **`gqlinput` (lever C) is driven by struct tags, not Go-name inference.**
+  The walker reads a `mutate:"<op>:<name>"` tag off each field rather than
+  deriving the descriptor's snake_case field/edge name from the Go field
+  name. The round trip is lossy on real gemini fields —
+  `ZoomInfoCompanyID` -> `zoom_info_company_id`, `SfObject` -> `sf_object`
+  — and a wrong guess would write to the wrong column silently, with no
+  compile-time or test-time signal unless that exact field happened to be
+  covered. Tags cost zero generated lines (they attach to struct fields
+  the generator already emits), a deliberate trade of a slightly noisier
+  generated struct for eliminating a whole class of silent data
+  corruption. Documented at the top of
+  `entgql/gqlinput/gqlinput.go`. This is also why `gqlinput` has no
+  `gqlwhere`-style eager `Warm` hook (Ruling R15): `gqlwhere` binds a
+  WhereInput struct from one template against `F`/`E` handles from a
+  *different* template, so the two sides can drift and only a runtime
+  check catches it; `gqlinput`'s tag and its field are emitted on the same
+  template line and structurally cannot drift, so a `Warm` guard there
+  would have cost ~260 generated lines to protect against a bug class that
+  cannot occur.
+- **`gqlpage`'s `Ops[Q, T, ID]` (lever B) is a struct of closures, not an
+  interface constraint on `*XQuery`.** The pager needs
+  `query.Ctx.Fields`/`query.Ctx.AppendFieldOnce`, and `Ctx` is a struct
+  *field* on the generated query type, not a method — no Go interface can
+  reach a field. The alternatives were adding a method to the ent fork
+  itself (out of scope: this stage was contrib-only) or threading the
+  accessors as closures, hence `Ops.Fields`/`Ops.AppendField`/
+  `Ops.ClearFields`. Verified against `Ops` in `entgql/gqlpage/page.go`
+  and its emission in `entgql/template/pagination_subpkg.tmpl`. This is
+  the reason every entity still carries a ~14-line `Ops` literal — a
+  visible, easy-to-mistake-for-avoidable chunk of lever B's residual LOC
+  that a plain interface constraint could not have removed.
 
 ### Known limitations
 
