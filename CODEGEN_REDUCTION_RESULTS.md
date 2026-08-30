@@ -1619,6 +1619,96 @@ addressed with no new Critical/Important breakage.
   this task — the regen that produced the 860,126 LOC figure and the test
   results above lives uncommitted in
   `gemini/.worktrees/codegen-reduction`, for user review and commit.
-  Nothing was committed in contrib beyond the 14 commits
+  Nothing was committed in contrib beyond the 21 commits
   (`72a92819..56233d55`) already listed above — only this results
   document, in the fork worktree.
+
+---
+
+## Appendix: Stage 4 decision record
+
+The stage was executed with a per-task ledger that was deleted at completion,
+per the subagent-driven-development process. Two parts of it have lasting
+value and are reproduced here: the rulings made without the user present, and
+the full triage of minor findings that were deferred rather than fixed.
+
+### Rulings made during stage 4
+
+Eighteen decisions were taken by the controller mid-flight rather than
+blocking on the user. Each is recorded with its cost if wrong. Four (R7, R9,
+R10, R11) corrected defects in the plan or spec itself rather than in an
+implementation.
+
+| # | Ruling | Cost if wrong |
+|---|---|---|
+| R1 | `gqlpage.Connection[T,ID].Build` takes `toCursor func(*T) entgql.Cursor[ID]` and `reverse bool`, not `*Pager[Q,T,ID]`; `Pager` gains exported `ToCursor` and `Reverse()`. The plan's signature referenced a type parameter the receiver does not have and could not compile. | Compile error at the call sites; caught immediately. |
+| R2 | `gqlinput.Mutator` declares `SetField`/`AppendField` with `ent.Value`, not `any`, importing `entgo.io/ent`. `ent.Value` is a defined type (`ent.go:265`), so `any` does not satisfy the interface. | Compile error at Task 7; immediately visible. |
+| R3 | Task 5 emits the per-entity `Ops` var **exported** as `<Node>Ops`, so the sibling `gqledges` package can reach it. | One extra exported symbol per entity in generated code. |
+| R4 | `gqlcollect.Edge.PaginateArgs`/`Paginate` are fully type-erased (`any`); the plan referenced an `*Args` type it never defined, and the concrete per-entity struct stays generated. | Task 9 would need a typed variant; contained to lever D. |
+| R5 | `gqlpage.Expr(expr)` **overrides** the term builder passed to `Column`; the template keeps passing the handle's `Order` value in both cases for uniformity. | A dead argument for expression-backed fields; no behavior impact. |
+| R6 | Task 12 was permitted a migration-only change to `tools/handlerewrite` in the ent fork despite the otherwise-strict no-fork-Go-changes constraint. (Ultimately unused — no fork code changed.) | A larger fork PR than advertised; visible in the diff. |
+| R7 | Contrib's own test suite was **already red at base** `72a92819` — `TestNodeEntityTemplateExecution` asserted `todo.ID(id)`, a construct contrib's own commit `bf63065e` had replaced. The per-task gate became "no NEW failures against that one known failure" until Task 11 fixed the assertion. | A real regression could hide behind the baseline; mitigated by naming the single expected failure exactly. |
+| R8 | `gqlwhere.Registry` gains a chainable `Warm(prototype any) *Registry[P]`, appended to the registry var initializer Task 2 already emits, so binding mismatches panic at init rather than on the first live request. Costs zero generated lines. | Per-entity init cost at startup, and a startup panic where there would have been a request-time panic. |
+| R9 | The plan's before/after parity procedure (a throwaway `git worktree add` of gemini) is **not viable** — `models/gen/` is gitignored with zero tracked files, so a fresh worktree contains no generated code at all. Replaced with capture-before-regen. | Parity evidence is a captured-output diff rather than a two-tree diff; equally strong for SQL text, weaker for files the harness never exercises. |
+| R10 | **Controller error, corrected.** The Task 3 dispatch demanded exact parity with the generated `UnmarshalGQL` error text while quoting upstream entgql's generic string. The fork emits entity-qualified text in both branches. | A user-visible GraphQL error string across 157 entity types loses its entity name. |
+| R11 | **Critical.** `PaginateLimit` had silently dropped the `MaxPageSize` cap, which the plan's mandated signature had nowhere to hold. Signature became `PaginateLimit(first, last *int, max int)` with `max <= 0` meaning no cap, plus `Ops.MaxPageSize`. | Signature churn if wrong; if missed, unbounded `SELECT` on unparameterised connection queries, unclamped `first`, and `LimitPerRow` skipped on nested edges. |
+| R12 | `gqlpage.WithOrder` must skip nil elements and `NewPager` must fall back to `ops.Default` on an empty list. The edge template calls `WithXOrder(orderBy)` unconditionally, and `orderBy` is nil whenever a query omits `orderBy` — the common case. | A nil order silently becomes the default, which is exactly the old single-order behavior. |
+| R13 | The `gqledges` build break from R1's arity change was fixed immediately, minimally, rather than deferred to Task 10 — four subsequent tasks gated on `go build ./...` being clean and would otherwise have been unable to detect their own regressions. | One trivial call-site edit redone by Task 10. |
+| R14 | Two coverage gaps (multi-field `ApplyCursors` parity; no template-execution test for the 798-line `pagination_subpkg.tmpl`) entered a fix round rather than being deferred, because Tasks 9-11 would inherit the same blindness. | ~15 minutes proving something already correct. |
+| R15 | **Declined** a reviewer's suggestion to add a `gqlwhere`-style `Warm` hook to `gqlinput`. R8's rationale does not transfer: `gqlwhere` binds a struct from one template against handles from another and can drift, whereas `gqlinput`'s tag and its field are emitted on the same template line and structurally cannot. Would have cost ~260 generated lines. | A malformed tag panics on first `Mutate` rather than at startup; reachable only by hand-editing generated output. |
+| R16 | Accepted that relay-connection arms are **genuinely non-uniform** (M2M-join vs FK-group-by fork, positional `TotalCount` slot, `LimitPerRow` column flip) and recalibrated lever D from ~30k to ~24.8k. Full erasure would have needed ~8 typed closures per arm to save ~2,600 lines. | ~2,600 lines left uncut in exchange for not forcing the stage's most intricate abstraction. |
+| R17 | `task test-integration -- <pkg>` does **not** filter by package — the `--` args are go test flags. A bare package name runs the whole `./integration/...` tree (~1,548 spurious failures observed). Refined further in Task 13: `-run` matches *test names*, so a package name matches zero tests. | A wasted full-suite run per occurrence. |
+| R18 | Re-measured the benchmarks with the three-pass protocol **precisely because the deltas were small** — a few-percent delta is the regime where run-to-run noise dominates, so n=1 cannot distinguish "no change" from noise. | ~15 minutes of machine time. **Changed two conclusions** (see below). |
+
+R18 is worth isolating: the first single-pass run reported a −5.5% clean-build
+memory improvement. Three passes showed a spread of 5.7%, wider than the
+delta — so that "win" was inside its own noise band and does not exist. The
+same protocol confirmed the +3.5% build-wall regression as real (spread 1.3%,
+well below the delta) rather than an artifact of the borderline load reading
+it was first measured under. Without it, this document would have claimed a
+memory improvement that is not there.
+
+### Deferred-minor triage
+
+The final whole-branch review triaged every minor finding deferred during the
+stage. Two were escalated to Important and fixed in the fix wave (the
+mixed-ID cursor defect and `gqledge`'s process-global mask, recorded above as
+I-1 and I-2). The remainder were judged safe to leave, and are listed here so
+the judgement is inspectable rather than lost.
+
+**`gqlwhere`**
+- New files lack the Apache-2.0 header every other `entgql/*.go` carries — 30-second fix, matters only if upstreamed.
+- No test exercises the `Predicates` splice path (the fix wave later added prologue validation covering its shape).
+- No test triggers a `NewRegistry`-time panic on a malformed handle method; that path is init-time and any consumer's first build would catch it.
+- The nested-error leaf asymmetry is verified indirectly rather than by a direct `!errors.Is` assertion; the mechanism (pointer identity plus `Unwrap`) is unambiguous.
+- `Warm` does not nil-check `reflect.TypeOf(prototype)`; reachable only by hand-editing generated code.
+- `Filter` returns `(q, err)` where the old code returned `(nil, err)` on a genuine error; any correct caller checks `err` first and the branch is near-unreachable.
+- `P()` on a nil receiver returns the empty sentinel instead of nil-deref panicking — a strict improvement.
+
+**`gqlpage`**
+- Both `UnmarshalGQL` error branches derive the entity name from `reflect.TypeFor[T]().Name()` rather than the template's `nodePaginationNames`; these coincide for every gemini entity, and both branches share one mechanism so they cannot disagree.
+- `lookup[T,ID]`'s unchecked type assertion would panic on a mismatched `ID` pairing — which would be a compile error upstream.
+- `OrderExpr`'s empty-selection guard is untested; both branches are no-ops when `Fields` is empty.
+- Dead recorder fields in the test fake, and no assertion that `ops.Limit` receives `PaginateLimit`'s result; `PaginateLimit` itself is covered.
+- `WithOrder` accumulates where the old single-order option assigned, making two calls first-wins rather than last-wins. Unreachable from generated call sites, but a silent semantic flip if hand-called.
+- `pageInfoField` from the old shared template has no runtime counterpart — verified inert by grepping gemini's `entsearch` templates for it; the relay arms get it from the collection runtime instead.
+- `val, _ := f.Value(v)` swallows the error inside `cursor()` — confirmed to be **exact parity**: the old generated `toCursor` emitted `cv, _ := r.Value(...)` verbatim. Not a new swallow.
+
+**`gqlinput`**
+- `Mutate`'s pointer-input branch is dead today (the generated `Mutate` has a value receiver); five lines of harmless generality carried over from `gqlwhere`'s pattern, where it is genuinely needed.
+- One test's name promises edge-ID coverage it did not originally assert (since corrected in the fix round).
+
+**`gqlcollect`**
+- An edge/field GraphQL-name collision was previously a **compile error** (duplicate `switch` case label) and became last-wins in the map-based table. Documented in the generated output at the time, and the fix wave later restored the static guarantee with a panic in `Spec.index()` for zero generated lines.
+- The `fieldSeen` capacity hint uses `len(spec.Fields)` where the template used `len(pkg.Columns)` — allocation size only.
+- An early line-count table double-counted 179 FK-column blocks. **Do not quote the figure 3,048**; the reconciled numbers are 2,869 pure scalar arms and 3,183 total field entries.
+
+**`gqledge` / node resolvers**
+- A test called `RegisterMaskNotFound(nil)` without `t.Cleanup`, safe only because no test in the file runs in parallel. Moot after the fix wave deleted the registrar entirely.
+- The node template's new assertions check call-site substrings rather than closure bodies; the parity diff and generated output confirm the full shape.
+
+**Templates and process**
+- A dead `{{ $entityName := $.EntityName }}` variable in `mutation_input_sibling.tmpl`, pre-existing and untouched.
+- `gofmt` struct-literal alignment differs between entities with and without `EdgeTermColumns` — cosmetic, in generated output.
+- The B-2 collection registration was merged into the same `init()` as the `Spec` assignment rather than kept separate; verified inert, since nothing invokes the registered function during `init()`.
+- One task report appended its parity correction as a new section rather than annotating the original over-broad claim in place. The accurate scope is the later section; the earlier "byte-identical across every SQL string" phrasing predates the multi-field cursor evidence and should not be quoted.
