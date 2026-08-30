@@ -1283,3 +1283,311 @@ against gemini where applicable:
   15,209 deletions(-) per `git diff --stat`. Nothing
   was committed in gemini or contrib by this stage — only this results
   document, in the fork worktree.
+
+## Stage 4: Generic entgql (where/pagination/mutation-input/collection/edges)
+
+Replaced five families of per-entity `entgql`-generated method bodies with
+generic runtime packages driven by reflection or a descriptor table, while
+keeping the per-entity *types* (`XWhereInput`, `XOrder`, `XPaginateArgs`,
+mutation input structs) generated, since gqlgen binds GraphQL input/output
+shapes to concrete Go types:
+
+- **Lever A — `gqlwhere`**: per-entity `WhereInput.P()`/`Filter()` bodies
+  become a reflection walker (`gqlwhere.Registry[P]`) driven off the
+  `F`/`E` handle structs stage 2 introduced, plus a `.Warm(prototype)` call
+  in each generated registry initializer that eagerly resolves and caches
+  the struct-field/op binding at process start instead of on first request.
+- **Lever B — `gqlpage`**: per-entity `Paginate`/`Connection`/`Pager`/
+  `ApplyOrder`/`ApplyCursors`/`OrderExpr` bodies become generic
+  `gqlpage.Ops[Q,T,ID]`/`Connection[T,ID]`/`Pager[Q,T,ID]`; per-entity
+  `XOrder`/`XOrderField` become type aliases to a generic `Order[T,ID]`/
+  `OrderField[T,ID]` instantiation, built from a small per-entity
+  `OrderField` registration table (`gqlpage.Column`/`Computed`/`Register`).
+  `MaxPageSize` (the `_maxPageSize`/clamp pair the old codegen enforced) is
+  threaded through explicitly as an `Ops` field and a `PaginateLimit`
+  parameter rather than assumed.
+- **Lever C — `gqlinput`**: per-entity `Mutate()` bodies become a
+  struct-tag-driven walker (`gqlinput.Mutate(input, Mutator)`, tag
+  `mutate:"<op>:<name>"`) over `*entbuilder.Mutation[T,I]`. Deliberately
+  reproduces an upstream quirk found while migrating: the generated
+  `fa` (append) case guards on one struct field but assigns the value of
+  the field declared immediately before it, matched by pairing on
+  declaration order rather than "fixing" the discrepancy.
+- **Lever D — `gqlcollect`**: `collectField` switches become a
+  descriptor table (`gqlcollect.Spec`/`Edge`/`Field`) with type-erased
+  `Paginate`/`PaginateArgs` functions; the per-entity `xPaginateArgs`
+  struct stays generated (it unmarshals into per-entity `Order`/
+  `WhereInput` types gqlgen must bind to). The 43 relay-connection arms
+  turned out non-uniform across entities (see Deviations) and stay
+  generated, reached through a one-line `gqlcollect.Custom` escape hatch
+  in the descriptor table rather than being forced into the generic shape.
+- **Lever E — `gqledge` + node resolvers**: per-entity edge-resolver
+  (`Resolve*`) and Relay node-resolver (`noderOf`/`nodersOf`) bodies become
+  thin per-entity closures over `gqledge.One`/`Many`/`Conn` and shared
+  `gen/gql_node.go` helpers.
+
+Measured the same way as stages 1-3: against `gemini`, this fork's largest
+real-world consumer, in `gemini/.worktrees/codegen-reduction`. Contrib is
+where the code landed (branch `feat/stage4-entgql` off `72a92819`, 13
+commits `72a92819..6db9937f` plus a 14th post-review fix-wave commit
+`56233d55`); nothing is committed in gemini by this stage, same as stages
+2-3.
+
+### Benchmark commands
+
+Same three entrypoints as stage 3:
+
+```bash
+# LOC
+cd models && find gen -name '*.go' -print0 | xargs -0 cat | wc -l
+
+# generation time + peak RSS
+MREIS_CODEGEN_ALLOW_WATCHER=1 task generate-go   # from api/
+
+# clean build time + peak RSS
+go clean -cache && /usr/bin/time -v go build ./...   # in models/
+```
+
+### Per-lever LOC deltas
+
+| Lever | What it replaced | Delta |
+|---|---|---|
+| A — `gqlwhere` | per-entity `WhereInput.P()` bodies via a reflection walker | -67,826 |
+| B — `gqlpage` | pagination: generic `OrderField`/`Connection`/`Pager`/`Paginate`; per-entity types became aliases to generic instantiations | -71,612 |
+| C — `gqlinput` | `Mutate()` bodies via a struct-tag-driven walker | -24,048 |
+| D — `gqlcollect` | `collectField` switches via a descriptor table | -21,749 |
+| E — `gqledge` + node resolvers | per-entity edge and node resolver bodies | -4,201 |
+| Final fix wave | deleted `gqledges` `init()` (see Deviations) | -5 |
+
+**Total: 1,049,567 -> 860,126 = -189,441 (-18.05%).** Cumulative across all
+four stages: **2,035,883 -> 860,126 = -1,175,757 (-57.75%)**.
+
+### Results
+
+Baseline is stage 3's settled numbers (LOC 1,049,567; gen 106.3s/3.0GB;
+build 67.0s/~3.45GB), same gemini worktree lineage. Measured with the
+three-pass protocol — median of three passes, box gated below 1-minute
+load average 1.0 before each pass — because the first single-pass reading
+landed within a few percent of baseline on both timed metrics, which is
+exactly the regime where run-to-run noise can hide or manufacture a
+result; see Measurement history below for why the single-pass numbers were
+not trusted as-is.
+
+| Metric | Before | After (median) | Spread | Verdict |
+|---|---|---|---|---|
+| Generated LOC | 1,049,567 | 860,126 | deterministic | -18.05% |
+| Generation wall | 106.3s | 105.62s | 1.1% | -0.6%, no measurable change |
+| Generation peak RSS | 3.0GB | 3.1GB | 3.2% (resolution-limited) | +3.3%, within rounding |
+| Clean build wall | 67.0s | 69.35s | 1.3% | **+3.5%, real and reproducible** |
+| Clean build peak RSS | ~3.45GB | 3.269GB | 5.7% | -5.2%, **inside noise, not a win** |
+
+**This contradicts the spec's predicted -60-80% build time and memory**,
+and it underperforms stage 3 (gen -15.6%, build -8.1%). Stage 4 bought a
+large LOC/maintainability win but no compile-time win, and a small, real,
+reproducible clean-build slowdown.
+
+**Cause, per the final whole-branch review's analysis**: the import graph
+actually got *narrower* this stage, not wider — so the regression is not
+import-graph bloat. It's generic-instantiation count. `gqlcollect.Unique`/
+`Named` and `gqledge.One`/`Many` are generic per **edge**, not per entity —
+roughly 306 entities x ~10 edges produces several thousand distinct
+instantiations, and Go elaborates each generic body once per instantiation
+per importing package. Trading ~40 lines of straight-line per-entity code
+for one generic call site is a net compiler loss even when it's a large
+reader win.
+
+**Unmeasured cost, also named by the final review**: incremental builds
+are now more coupled. A one-line edit to any of the five runtime packages
+(`gqlwhere`, `gqlpage`, `gqlinput`, `gqlcollect`, `gqledge`) invalidates
+all ~306 entity subpackages that import it, where a template edit
+previously invalidated only whatever it regenerated. Nobody measured this
+directly — it wasn't in scope for the benchmark task — but for daily
+developer experience it may matter more than the clean-build number above.
+
+Measurement history: a first single-pass reading (gen -0.2%/+3.3% RSS,
+build +3.1%/-5.5% RSS) looked like noise given the magnitudes, but a
+few-percent delta is exactly the case that most needs repetition, not the
+case exempt from it — n=1 cannot distinguish "no change" from noise on a
+result this small, and this was the stage's headline performance claim.
+The load gate was also tightened from <2.0 to <1.0 for the re-measurement.
+The three-pass re-measurement changed two conclusions: the +3.5% clean
+build wall-time regression is confirmed real (delta exceeds the pass-to-
+pass spread), and the apparent -5.5% clean-build RSS "improvement" from
+the first pass is not real (the spread exceeds the delta) — without the
+three-pass protocol this document would have reported a memory win that
+does not exist. Generation peak RSS is separately capped at 0.1GB rounding
+resolution by the profiling script (`profile.sh` deletes its raw
+`time -v` tmpfile in a trap), so its 3.2% spread is a lower bound, not the
+true spread.
+
+### Test coverage: two measured findings
+
+These surfaced during the stage rather than being anticipated, and are the
+most transferable lessons of the four stages so far — worth their own
+subsection because they change how much weight the "test suite is green"
+claims elsewhere in this document should carry:
+
+- **Only 2 of 286 `ent_resolvers` integration tests reach a relay-connection
+  arm** (lever D). Measured, not estimated: made `gqlcollect.Custom`'s arm
+  body panic and re-ran the suite — 283 pass, 2 fail, 1 skip.
+  `TestNestedOfficeOfficeUserWhereFilterMatchesTopLevel` and
+  `TestNestedProposalMarketingCollateralsWhereFilterMatchesTopLevel` are
+  the two, and neither exercises an M2M arm (15 of the 43 arms are M2M).
+- **Gemini's `Query.node`/`nodes` resolvers never reach `byID`/`byIDs` at
+  runtime** (lever E), because no `WithNodeType` is configured anywhere in
+  gemini. `api/resolvers/ent_query.resolvers.go` calls `Noder`/`Noders`
+  with zero options, so every call falls through to the default
+  `"cannot resolve noder (%v) without its type"` error, and
+  `node_interface_integration_test.go` asserts on exactly that string. The
+  286-test suite therefore validates the stable error path, never the real
+  `noderOf`/`nodersOf` execution this lever rewrote.
+
+Consequence: for both levers, mechanical generated-old-vs-generated-new
+parity (byte-identical diffs across every relay arm and every node
+resolver, captured before/after regen) was the primary evidence that the
+rewrite was correct — not the integration test suite. A green suite on
+this codebase means considerably less than it appears to; it is a weak
+secondary signal that repeatedly overstated its reach this stage.
+
+### Deviations from the spec and plan
+
+- **The spec estimated -130-150k LOC for stage 4.** The measured
+  addressable surface, once the five levers were actually scoped and
+  built, was larger: the stage delivered -189,441, about 26-46% above the
+  spec's estimate.
+- **Lever D's own estimate was revised mid-stage.** The plan's ~-30k
+  projection for `gqlcollect` was revised down to ~-24.8k after Task 8
+  measured the relay-arm non-uniformity (below), and the lever delivered
+  -21,749 — a further ~12% short of even the revised estimate. The
+  shortfall is per-entity `xPaginateArgs` structs (~8,700 lines across 157
+  entities) that unmarshal into per-entity `Order`/`WhereInput` types and
+  therefore cannot be type-erased, plus ~3,050 lines of per-entity
+  `Spec`/`init()` scaffolding (the `Spec` var had to move into `init()`
+  because a cross-entity `Spec -> collectField -> Spec` reference is a
+  variable-initialization cycle Go rejects for 40+ entities).
+- **Lever E estimated ~-10k, delivered -4,201.** Judged inherent by
+  review, not a shortfall in execution: each edge needs a distinct query
+  closure (`Only`/`All`/an entity-specific `Query` call) that cannot be
+  hoisted into the shared `gqledge` package without that package importing
+  generated code — the same constraint that forces `MaskNotFound` to be
+  passed as a parameter rather than looked up generically. 3-6 lines per
+  edge is a floor in Go, not a shortfall; the ~-10k estimate assumed a
+  one-liner the language does not permit here.
+- **Relay-connection arms are not uniform across entities and stay
+  generated.** `AppendLoadTotal` forks between an M2M-join query shape and
+  an FK-group-by shape (15 of the 43 relay arms are M2M), the
+  `TotalCount[i]` slot is positional per arm, and `LimitPerRow`'s target
+  column flips to an indexed PK constant under the M2M shape. These three
+  differences make the arms genuinely non-uniform, not just verbose, so
+  they enter the lever D descriptor table through a one-line
+  `gqlcollect.Custom` escape hatch rather than being forced into a shared
+  shape. The arithmetic backs the call: full erasure would have needed
+  roughly 8 typed closures per arm to save ~2,600 lines total — more
+  generated complexity introduced than removed.
+
+### Known limitations
+
+- **Mixed-ID and `UnmarshalGQL` template branches are exercised by
+  nothing.** No entity in gemini, and no live contrib fixture, has a
+  mixed-ID type (the kind `todopulid`-style fixtures exist to exercise
+  upstream) or needs the `UnmarshalGQL` branch; both were relocated
+  verbatim into the new closures and are logically preserved but
+  empirically untested by any build this stage ran. This is not
+  hypothetical: the final whole-branch review found a real defect in
+  exactly this area — mixed-ID cursors had silently lost `marshalID()` (a
+  panic on the first paginated query for any mixed-ID entity) — which was
+  fixed in the post-review wave, but the surrounding branches remain
+  untested by anything that actually builds today.
+- **`whereinputs` eager init costs +20ms startup and +11.9MB heap** (lever
+  A's `.Warm()` call, now running for all ~306 entities in one
+  `package whereinputs`, so every binary in every module pays the full
+  cost to use one input type). Measured via two probe binaries differing
+  only in whether they import `gen/whereinputs` — mean of 25 runs, but
+  **variance was not recorded**, so treat the timing figure as
+  approximate; the magnitude is independently supported by the mechanism
+  regardless (`Warm` plans only the prototype's own struct, not its
+  nested neighbours, which is why the actual cost came in far under the
+  review's 100-300ms/10-25MB estimate).
+- **Generation peak RSS is capped at 0.1GB rounding resolution** by the
+  profiling script (`profile.sh` parses and deletes the raw `time -v`
+  tmpfile), which is why the 3.2% generation-RSS spread reported above is
+  a lower bound rather than a true measurement of run-to-run variance.
+
+Note on a figure that appeared mid-stage and was corrected: an early
+lever-D estimate cited "3,048" pure-scalar field arms; that number was
+found to double-count 179 FK-column blocks. The reconciled figures are
+**2,869 pure scalar arms and 3,183 total field-table entries** (2,869
+scalar + 157 id + 157 `__typename`).
+
+### Test results
+
+- Contrib: zero test failures across all 10 packages at `6db9937f`
+  (`entgo.io/contrib/entgql`'s one pre-existing baseline failure —
+  `TestNodeEntityTemplateExecution` asserting stale `todo.ID(id)` text a
+  prior stage's own commit had already replaced — was fixed as part of
+  lever E). The final-review fix wave's re-review found no new
+  Critical/Important breakage at `56233d55`.
+- Gemini: models `go test ./...` 27/27 packages pass; `workers` 2/2;
+  `task test-integration -- -run OnConflict -count=1` 47/47;
+  `ent_resolvers` 285 pass + 1 pre-existing skip (286 total, same count as
+  every prior stage); `transaction` 117/117; `contact` 109/109; `chatter`
+  66/66; `box` 89/89. No regressions, no bisection needed. What these
+  suites do and do not establish is qualified above (Test coverage).
+
+### Final whole-branch review and fix wave
+
+An OPUS review over the full contrib diff (`72a92819..6db9937f`, 13
+commits, 7,218 lines, 5 passes) found no Critical findings, 3 Important, 7
+Minor, and triaged 18 of the ~20 deferred minors from individual task
+reviews as fine to leave; 2 were escalated to Important:
+
+- **I-1**: mixed-ID cursors had lost `marshalID()` (see Known limitations
+  above) — fixed, and the fix let the implementer delete `OrderField.Cursor`
+  outright; they also found and fixed an additional parity bug it had been
+  masking (the default ID order was emitting a non-nil cursor `Value`,
+  harmless on gemini but genuinely wrong on a mixed-ID graph).
+- **I-2**: `gqledge`'s `MaskNotFound` was a single mutable process global —
+  the only one across all five new packages — so a binary linking two
+  generated ent schemas would have the second schema's `init()` silently
+  overwrite the first's masking configuration. Fixed by passing the mask
+  as a parameter instead; the global, its registrar, and the now-moot
+  "unregistered" test were all deleted, making the fix smaller than the
+  workaround it replaced.
+- **I-3**: the `whereinputs` eager-init cost (Known limitations above) was
+  unmeasured; measured and closed in the same wave.
+
+The fix wave landed as a single commit (`56233d55`), dropping LOC from
+860,131 to 860,126 (the deleted `gqledges` `init()`), with discriminating
+tests for every fix (each fails/panics against the pre-fix code). A scoped
+re-review — the one re-review this process allows — found all findings
+addressed with no new Critical/Important breakage.
+
+### Concerns / follow-ups for the user
+
+- **Clean-build wall-time regression (+3.5%) is real, confirmed over three
+  passes, and unresolved.** It is a structural consequence of moving
+  per-entity straight-line code into per-edge generic instantiations
+  (thousands of them, elaborated once per importing package by the Go
+  compiler), not a bug to fix within this stage's scope.
+- **Incremental-build coupling was named but not measured.** Whoever picks
+  this up next should benchmark a one-line change to one of the five
+  runtime packages against a one-line template edit under the old codegen,
+  since the final review judged this may matter more day-to-day than the
+  clean-build number.
+- **Contrib's own `internal/todo*` test fixtures predate stage 1** and
+  don't exercise `entfield`/`wherehelpers`, so contrib's own generated-code
+  test suite never validated these templates directly — gemini's regen was
+  the real gate throughout the stage. A mixed-ID fixture (`todopulid`-style)
+  could not have been regenerated against this branch before the I-1 fix
+  landed; it can now, but nothing in this stage's evidence chain actually
+  did so.
+- **The mixed-ID/`UnmarshalGQL` branches remain empirically untested** (see
+  Known limitations) — worth a synthetic contrib fixture before the next
+  consumer relies on either path.
+- Remaining: as with every prior stage, nothing is committed in gemini by
+  this task — the regen that produced the 860,126 LOC figure and the test
+  results above lives uncommitted in
+  `gemini/.worktrees/codegen-reduction`, for user review and commit.
+  Nothing was committed in contrib beyond the 14 commits
+  (`72a92819..56233d55`) already listed above — only this results
+  document, in the fork worktree.
