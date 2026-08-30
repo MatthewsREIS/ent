@@ -1394,7 +1394,10 @@ roughly 306 entities x ~10 edges produces several thousand distinct
 instantiations, and Go elaborates each generic body once per instantiation
 per importing package. Trading ~40 lines of straight-line per-entity code
 for one generic call site is a net compiler loss even when it's a large
-reader win.
+reader win. **(Partially superseded: a 2026-08-30 actiongraph
+investigation — see "Appendix: why build time never improved" — found
+this explains only the +3.5% regression, not the absent -60-80%; the
+build was critical-path-bound all along.)**
 
 **Unmeasured cost, also named by the final review**: incremental builds
 are now more coupled. A one-line edit to any of the five runtime packages
@@ -1712,3 +1715,80 @@ the judgement is inspectable rather than lost.
 - `gofmt` struct-literal alignment differs between entities with and without `EdgeTermColumns` — cosmetic, in generated output.
 - The B-2 collection registration was merged into the same `init()` as the `Spec` assignment rather than kept separate; verified inert, since nothing invokes the registered function during `init()`.
 - One task report appended its parity correction as a new section rather than annotating the original over-broad claim in place. The accurate scope is the later section; the earlier "byte-identical across every SQL string" phrasing predates the multi-field cursor evidence and should not be quoted.
+
+## Appendix: why build time never improved (2026-08-30 investigation)
+
+Post-stage-4 investigation of the project-wide build-time question: the
+spec predicted -60-80% clean-build wall, the measured trail across stages
+is ~62s → 63.8s → ~73s → 67.0s → 69.35s — flat-to-worse while generated
+LOC fell 57.75%. This section answers *why*, from instrumentation rather
+than inference, and partially supersedes the stage-4 Results section's
+causal paragraph (which attributed the gap to generic-instantiation count
+alone — that explains the +3.5% stage-4 regression, not the missing
+-60-80%).
+
+### Method
+
+One clean build (`go clean -cache && go build ./...` in `models/`) with
+`-debug-actiongraph`, aggregated per action; per-package compiler phase
+breakdowns via `-gcflags=<pkg>=-bench=`; generic-instantiation counts via
+`go tool nm` shape-symbol census on the package export archives. Single
+run on a box carrying ~8 cores of unrelated load — absolute node times are
+inflated ~15% over the settled 69.35s baseline (this run: 80.6s wall), but
+chain *structure* and ordering are load-independent, which is what the
+question needed. Attribution run, not a benchmark; no delta below should
+be quoted as a settled number.
+
+### Finding 1: the clean build is critical-path-bound, not work-bound
+
+The build did 250.6 CPU-seconds of work but averaged only ~3x parallelism
+on a 32-core box. Walking the actiongraph back from the last-finishing
+action, one serial chain accounts for ~72s of the 80.6s wall (89%):
+
+```
+gen/internal 6.7s → [182 entity subpackages, 32-wide, all done by t=23s]
+→ gen/edges 11.5s → gen/gqledges 6.2s → gen (root) 11.1s
+→ fieldsecurity 5.6s → clients/rls 4.3s → txutil 4.3s
+→ models/schema 11.4s → gen/runtime 0.4s → enttest 4.3s
+```
+
+### Finding 2: every stage's LOC cuts landed off the critical path
+
+The 182 entity subpackages — where essentially all deleted code lived —
+sum to 89 CPU-seconds but compile fully parallel inside a 23-second window
+that is *shadowed* by the serial spine. Cutting their code cuts
+CPU-seconds, not wall-clock. This is the whole answer to the headline
+question: the spec modeled build time as proportional to function bodies
+compiled, which is true of CPU-seconds and was never true of wall time
+for this dependency shape.
+
+### Finding 3: the spine's cost is largely LOC-independent
+
+Compiler phase benches on the three 11s hubs show ~46-50% `compilefuncs`
+(backend), with the front end dominated by loading export data for ~183
+imports: `gqledges` parses its 10,717 lines at 8,959 lines/s where
+`gen/edges` parses 110,685 lines at 68,117 lines/s — the throughput gap
+is import loading, not parsing. The backend half of the stage-4 hubs is
+generic-instantiation elaboration: `gqledges` carries 53,904 shape-symbol
+references and `gqlcollections` 68,165, dominated by `gqlpage.OrderField`/
+`Order` and `gqledge.Many`/`One` — per-edge, as the stage-4 analysis
+suspected. Stage 4's +3.5% is precisely these two instantiation-heavy
+hubs sitting on the spine; the per-entity savings that were supposed to
+pay for them were shadowed (Finding 2).
+
+### What would actually move wall time (not acted on)
+
+1. **Shorten the spine, not the entities.** The three ~11s nodes are
+   `gen/edges` (110k lines, waits on all entity subpackages), `gen` root
+   (waits on `gqledges`), and `models/schema`. One second off the spine is
+   one second off the build; one second off an entity subpackage is
+   nothing.
+2. **The `gen → fieldsecurity → clients/rls → txutil → schema` sub-chain
+   is 25.6s of spine and is gemini application code**, outside the fork
+   entirely — `models/schema` importing those packages pushes an 11.4s
+   compile behind everything else. Possibly the cheapest single win.
+3. De-genericizing the per-edge instantiation sites (`OrderField` etc.)
+   only shrinks the two ~6s spine nodes — real but smaller than 1-2.
+
+Artifacts (session-scratch, not committed): `actiongraph.json`, `agg.py`,
+`critpath.py`, `bench-*.txt`.
