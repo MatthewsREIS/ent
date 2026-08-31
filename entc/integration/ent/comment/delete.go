@@ -7,104 +7,25 @@
 package comment
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // CommentDelete is the builder for deleting a Comment entity.
-type CommentDelete struct {
-	Config
-	hooks     []Hook
-	mutation  *CommentMutation
-	modifiers []func(*sql.DeleteBuilder)
-}
+type CommentDelete = entbuilder.Delete[Comment, int]
+
+// CommentDeleteOne is the builder for deleting a single Comment entity.
+type CommentDeleteOne = entbuilder.DeleteOne[Comment, int]
 
 // NewCommentDelete returns a new CommentDelete initialized with the given config, hooks, and mutation.
 func NewCommentDelete(c Config, hooks []Hook, mutation *CommentMutation) *CommentDelete {
-	return &CommentDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the CommentDelete builder.
-func (_d *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *CommentDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*CommentMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *CommentDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
-func (_d *CommentDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *CommentDelete {
-	_d.modifiers = append(_d.modifiers, modifiers...)
-	return _d
-}
-
-func (_d *CommentDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	_spec.AddModifiers(_d.modifiers...)
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// CommentDeleteOne is the builder for deleting a single Comment entity.
-type CommentDeleteOne struct {
-	_d *CommentDelete
+	return entbuilder.NewDelete[Comment, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewCommentDeleteOne returns a new CommentDeleteOne wrapping the given CommentDelete.
 func NewCommentDeleteOne(d *CommentDelete) *CommentDeleteOne {
-	return &CommentDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the CommentDelete builder.
-func (_d *CommentDeleteOne) Where(ps ...predicate.Comment) *CommentDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *CommentDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *CommentDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/config/ent/predicate"
 )
@@ -33,14 +34,43 @@ var userDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Name",
 			Nillable: true,
+			Column:   "name",
+			SQLType:  field.TypeString,
 		},
 		"label": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Label",
 			Nillable: true,
+			Column:   "label",
+			SQLType:  field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "Users",
+	TableColumns: []string{
+		"user_id",
+		"name",
+		"label",
+	},
+	IDColumn:  "user_id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "label",
+			Name:        "label",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

@@ -125,13 +125,13 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	if value, ok := entbuilder.GetField[*url.URL](_c.mutation, "binary"); ok {
 		vv, err := ValueScanner.Binary.Value(value)
 		if err != nil {
 			return nil, nil, err
 		}
 		_spec.SetField(FieldBinary, field.TypeString, vv)
-		_node.Binary = value
 	}
 	if value, ok := entbuilder.GetField[*url.URL](_c.mutation, "binary_bytes"); ok {
 		vv, err := ValueScanner.BinaryBytes.Value(value)
@@ -139,7 +139,6 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 			return nil, nil, err
 		}
 		_spec.SetField(FieldBinaryBytes, field.TypeBytes, vv)
-		_node.BinaryBytes = value
 	}
 	if value, ok := entbuilder.GetField[*url.URL](_c.mutation, "binary_optional"); ok {
 		vv, err := ValueScanner.BinaryOptional.Value(value)
@@ -147,7 +146,6 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 			return nil, nil, err
 		}
 		_spec.SetField(FieldBinaryOptional, field.TypeString, vv)
-		_node.BinaryOptional = value
 	}
 	if value, ok := entbuilder.GetField[*big.Int](_c.mutation, "text"); ok {
 		vv, err := ValueScanner.Text.Value(value)
@@ -155,7 +153,6 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 			return nil, nil, err
 		}
 		_spec.SetField(FieldText, field.TypeString, vv)
-		_node.Text = value
 	}
 	if value, ok := entbuilder.GetField[*big.Int](_c.mutation, "text_optional"); ok {
 		vv, err := ValueScanner.TextOptional.Value(value)
@@ -163,7 +160,6 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 			return nil, nil, err
 		}
 		_spec.SetField(FieldTextOptional, field.TypeString, vv)
-		_node.TextOptional = value
 	}
 	if value, ok := entbuilder.GetField[string](_c.mutation, "base64"); ok {
 		vv, err := ValueScanner.Base64.Value(value)
@@ -171,7 +167,6 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 			return nil, nil, err
 		}
 		_spec.SetField(FieldBase64, field.TypeString, vv)
-		_node.Base64 = value
 	}
 	if value, ok := entbuilder.GetField[string](_c.mutation, "custom"); ok {
 		vv, err := ValueScanner.Custom.Value(value)
@@ -179,7 +174,6 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 			return nil, nil, err
 		}
 		_spec.SetField(FieldCustom, field.TypeString, vv)
-		_node.Custom = value
 	}
 	if value, ok := entbuilder.GetField[string](_c.mutation, "custom_optional"); ok {
 		vv, err := ValueScanner.CustomOptional.Value(value)
@@ -187,7 +181,6 @@ func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, e
 			return nil, nil, err
 		}
 		_spec.SetField(FieldCustomOptional, field.TypeString, vv)
-		_node.CustomOptional = value
 	}
 	return _node, _spec, nil
 }

@@ -10,9 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -99,23 +97,7 @@ func (_u *FriendshipUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "weight"); ok {
-		_spec.SetField(FieldWeight, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("weight"); ok {
-		value := added.(int)
-		_spec.AddField(FieldWeight, field.TypeInt, value)
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -232,23 +214,7 @@ func (_u *FriendshipUpdateOne) sqlSave(ctx context.Context) (_node *Friendship, 
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "weight"); ok {
-		_spec.SetField(FieldWeight, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("weight"); ok {
-		value := added.(int)
-		_spec.AddField(FieldWeight, field.TypeInt, value)
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "created_at"); ok {
-		_spec.SetField(FieldCreatedAt, field.TypeTime, value)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Friendship{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

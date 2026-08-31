@@ -32,44 +32,7 @@ type {{ plural $.Name }} = internal.{{ plural $.Name }}
 
 	// String implements the fmt.Stringer.
 	func ({{ $receiver }} *{{ $.Name }}) String() string {
-		var builder strings.Builder
-		builder.WriteString("{{ $.Name }}(")
-		{{- if $.HasOneFieldID }}
-			builder.WriteString(fmt.Sprintf("id=%v{{ if $.Fields }}, {{ end }}", {{ $receiver }}.ID))
-		{{- end }}
-		{{- range $i, $f := $.Fields }}
-			{{- if ne $i 0 }}
-				builder.WriteString(", ")
-			{{- end }}
-			{{- if $f.Sensitive }}
-				builder.WriteString("{{ $f.Name }}={{ print "<sensitive>" }}")
-			{{- else }}
-				{{- $sf := printf "%s.%s" $receiver $f.StructField }}
-				{{- if $f.Nillable }}
-					if v := {{ $sf }}; v != nil {
-						builder.WriteString("{{ $f.Name }}=")
-						{{- if and $f.IsTime (not $f.HasGoType) }}
-							builder.WriteString(v.Format(time.ANSIC))
-						{{- else if and $f.IsString (not $f.HasGoType) }}
-							builder.WriteString(*v)
-						{{- else }}
-							builder.WriteString(fmt.Sprintf("%v", *v))
-						{{- end }}
-					}
-				{{- else }}
-					builder.WriteString("{{ $f.Name }}=")
-					{{- if and $f.IsTime (not $f.HasGoType) }}
-						builder.WriteString({{ $sf }}.Format(time.ANSIC))
-					{{- else if and $f.IsString (not $f.HasGoType) }}
-						builder.WriteString({{ $sf }})
-					{{- else }}
-						builder.WriteString(fmt.Sprintf("%v", {{ $sf }}))
-					{{- end }}
-				{{- end }}
-			{{- end }}
-		{{- end }}
-		builder.WriteByte(')')
-		return builder.String()
+		return entbuilder.FormatEntity({{ $.Package }}Descriptor, {{ $receiver }})
 	}
 {{ end }}
 

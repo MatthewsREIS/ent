@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Post is the model entity for the Post schema.
@@ -64,52 +62,15 @@ func (e PostEdges) AuthorOrErr() (*User, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Post) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id", "author_id":
-			values[i] = new(sql.NullInt64)
-		case "text":
-			values[i] = new(sql.NullString)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(postDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Post fields.
 func (_m *Post) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "text":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field text", values[i])
-			} else if value.Valid {
-				_m.Text = value.String
-			}
-		case "author_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field author_id", values[i])
-			} else if value.Valid {
-				_m.AuthorID = new(int)
-				*_m.AuthorID = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(postDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Post.
@@ -131,18 +92,7 @@ func (_m *Post) Unwrap() *Post {
 
 // String implements the fmt.Stringer.
 func (_m *Post) String() string {
-	var builder strings.Builder
-	builder.WriteString("Post(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("text=")
-	builder.WriteString(_m.Text)
-	builder.WriteString(", ")
-	if v := _m.AuthorID; v != nil {
-		builder.WriteString("author_id=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(postDescriptor, _m)
 }
 
 // Posts is a parsable slice of Post.

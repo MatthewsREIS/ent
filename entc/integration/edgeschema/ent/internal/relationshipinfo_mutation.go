@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -29,11 +30,34 @@ var relationshipinfoDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"text": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Text",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Text",
+			Column:  "text",
+			SQLType: field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "relationship_infos",
+	TableColumns: []string{
+		"id",
+		"text",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "text",
+			Name:        "text",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"text": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewRelationshipInfoMutation creates a new mutation for the RelationshipInfo entity.
 func NewRelationshipInfoMutation(c Config, op Op, opts ...RelationshipInfoMutationOption) *RelationshipInfoMutation {

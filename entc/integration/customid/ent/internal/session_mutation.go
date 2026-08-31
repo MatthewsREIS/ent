@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -32,10 +34,41 @@ var sessionDescriptor = &entbuilder.Descriptor{
 	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"device": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Device",
-			TargetIDType: reflect.TypeFor[schema.ID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Device",
+			TargetIDType:    reflect.TypeFor[schema.ID](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "sessions",
+			StorageColumns:  []string{"device_sessions"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeBytes,
+		},
+	},
+	Table: "sessions",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:   "id",
+	IDSQLType:  field.TypeBytes,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "device_sessions",
+			GoName:      "SetDeviceSessions",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[schema.ID](),
+			SQLType:     field.TypeBytes,
+		},
+	},
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"device": {
+			Target:         "Device",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "sessions",
+			StorageColumns: []string{"device_sessions"},
 		},
 	}}
 

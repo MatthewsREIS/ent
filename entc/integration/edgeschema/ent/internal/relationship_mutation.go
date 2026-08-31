@@ -9,7 +9,9 @@ package internal
 import (
 	"reflect"
 
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 )
 
 // RelationshipMutation is an alias for entbuilder.Mutation parameterised by Relationship.
@@ -27,27 +29,115 @@ var relationshipDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Weight",
 			Numeric: true,
+			Column:  "weight",
+			SQLType: field.TypeInt,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "relationships",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 		"relative": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "relative_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "relative_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "relationships",
+			StorageColumns:  []string{"relative_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "RelativeID",
 		},
 		"info": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "RelationshipInfo",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "info_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "RelationshipInfo",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "info_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "relationships",
+			StorageColumns:  []string{"info_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "InfoID",
 		},
+	},
+	Table: "relationships",
+	TableColumns: []string{
+		"weight",
+		"user_id",
+		"relative_id",
+		"info_id",
+	},
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "weight",
+			Name:        "weight",
+			StructIndex: 1,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "relative_id",
+			Name:        "relative_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "info_id",
+			Name:        "info_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"weight":      field.TypeInt,
+		"user_id":     field.TypeInt,
+		"relative_id": field.TypeInt,
+		"info_id":     field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "relationships",
+			StorageColumns: []string{"user_id"},
+		},
+		"relative": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "relationships",
+			StorageColumns: []string{"relative_id"},
+		},
+		"info": {
+			Target:         "RelationshipInfo",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "relationships",
+			StorageColumns: []string{"info_id"},
+		},
+	},
+	CompositeID: []entbuilder.IDColumnSpec{
+		{Column: "user_id", SQLType: field.TypeInt},
+		{Column: "relative_id", SQLType: field.TypeInt},
 	}}
 
 // NewRelationshipMutation creates a new mutation for the Relationship entity.

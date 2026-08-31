@@ -294,17 +294,22 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 
 	groupUpdate, err := os.ReadFile(filepath.Join(target, "group", "update.go"))
 	require.NoError(t, err)
-	require.Truef(
-		t,
-		strings.Count(string(groupUpdate), "edge.Schema = _u.Config.SchemaConfig().UserGroups") >= 3,
-		"expected schema hook to be applied for clear/remove/add edge mutations, got:\n%s",
-		groupUpdate,
-	)
+	// Task 3: sqlSave's per-field/per-edge unroll (including the 3x
+	// `edge.Schema = _u.Config.SchemaConfig().UserGroups` — one per
+	// clear/remove/add edge mutation) collapsed into a single
+	// entbuilder.ApplyUpdateSpec call; schema resolution for every edge is
+	// now generic, driven by internal.SchemaOf(_u.Config) reflecting on
+	// EdgeSpec.SchemaKey (see runtime/entbuilder/sqlspec.go), not emitted
+	// per edge as a literal string in generated code.
+	require.Contains(t, string(groupUpdate), "entbuilder.ApplyUpdateSpec(_u.mutation, _spec, internal.SchemaOf(_u.Config), nil)")
+	require.NotContains(t, string(groupUpdate), "edge.Schema = _u.Config.SchemaConfig().UserGroups")
 	require.NotContains(t, string(groupUpdate), "edge.Schema = _u.schemaConfig.UserGroups")
 
 	// PR 6: WithGroups moved from a method on *UserQuery to the
-	// root-facade free function WithUserGroups; ClearUsers stays a
-	// method on *GroupUpdate inside the group sub-package.
+	// root-facade free function WithUserGroups. Task 3: ClearUsers (the
+	// generated builder method) is gone — edge clearing now goes through
+	// the entfield handle (group.E.Users.Clear()), migrated by the
+	// handlerewrite -chains tool at every non-generated call site.
 	testFile := filepath.Join(target, "schemaconfig_compile_test.go")
 	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
 
@@ -316,7 +321,7 @@ import (
 
 func TestGeneratedSchemaConfigDescriptorPathsCompile(t *testing.T) {
 	_ = WithUserGroups
-	_ = (*group.GroupUpdate).ClearUsers
+	_ = group.E.Users.Clear
 }
 `), 0644))
 

@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,22 +32,88 @@ var attachedfileDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"attach_time": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "AttachTime",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "AttachTime",
+			Column:  "attach_time",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"fi": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "File",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "f_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "File",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "f_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "attached_files",
+			StorageColumns:  []string{"f_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "FID",
 		},
 		"proc": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Process",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "proc_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Process",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "proc_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "attached_files",
+			StorageColumns:  []string{"proc_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "ProcID",
+		},
+	},
+	Table: "attached_files",
+	TableColumns: []string{
+		"id",
+		"attach_time",
+		"f_id",
+		"proc_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "attach_time",
+			Name:        "attach_time",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "f_id",
+			Name:        "f_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "proc_id",
+			Name:        "proc_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"attach_time": field.TypeTime,
+		"f_id":        field.TypeInt,
+		"proc_id":     field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"fi": {
+			Target:         "File",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "attached_files",
+			StorageColumns: []string{"f_id"},
+		},
+		"proc": {
+			Target:         "Process",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "attached_files",
+			StorageColumns: []string{"proc_id"},
 		},
 	}}
 

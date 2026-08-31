@@ -10,9 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -51,18 +49,6 @@ func (_u *TweetTagUpdate) With(as ...entfield.Assignment) *TweetTagUpdate {
 // Mutation returns the TweetTagMutation object of the builder.
 func (_u *TweetTagUpdate) Mutation() *TweetTagMutation {
 	return _u.mutation
-}
-
-// ClearTag clears the "tag" edge to the Tag entity.
-func (_u *TweetTagUpdate) ClearTag() *TweetTagUpdate {
-	_ = _u.mutation.ClearEdge("tag")
-	return _u
-}
-
-// ClearTweet clears the "tweet" edge to the Tweet entity.
-func (_u *TweetTagUpdate) ClearTweet() *TweetTagUpdate {
-	_ = _u.mutation.ClearEdge("tweet")
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -111,74 +97,7 @@ func (_u *TweetTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "added_at"); ok {
-		_spec.SetField(FieldAddedAt, field.TypeTime, value)
-	}
-	if _u.mutation.EdgeCleared("tag") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TagTable,
-			Columns: []string{TagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("tag"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TagTable,
-			Columns: []string{TagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("tweet") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TweetTable,
-			Columns: []string{TweetColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("tweet"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TweetTable,
-			Columns: []string{TweetColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -217,18 +136,6 @@ func (_u *TweetTagUpdateOne) With(as ...entfield.Assignment) *TweetTagUpdateOne 
 // Mutation returns the TweetTagMutation object of the builder.
 func (_u *TweetTagUpdateOne) Mutation() *TweetTagMutation {
 	return _u.mutation
-}
-
-// ClearTag clears the "tag" edge to the Tag entity.
-func (_u *TweetTagUpdateOne) ClearTag() *TweetTagUpdateOne {
-	_ = _u.mutation.ClearEdge("tag")
-	return _u
-}
-
-// ClearTweet clears the "tweet" edge to the Tweet entity.
-func (_u *TweetTagUpdateOne) ClearTweet() *TweetTagUpdateOne {
-	_ = _u.mutation.ClearEdge("tweet")
-	return _u
 }
 
 // Where appends a list predicates to the TweetTagUpdate builder.
@@ -307,74 +214,7 @@ func (_u *TweetTagUpdateOne) sqlSave(ctx context.Context) (_node *TweetTag, err 
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "added_at"); ok {
-		_spec.SetField(FieldAddedAt, field.TypeTime, value)
-	}
-	if _u.mutation.EdgeCleared("tag") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TagTable,
-			Columns: []string{TagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("tag"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TagTable,
-			Columns: []string{TagColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("tweet") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TweetTable,
-			Columns: []string{TweetColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("tweet"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TweetTable,
-			Columns: []string{TweetColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &TweetTag{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

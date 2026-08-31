@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,15 +32,49 @@ var processDescriptor = &entbuilder.Descriptor{
 	Fields: map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"files": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "File",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "File",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "attached_files",
+			StorageColumns:  []string{"proc_id", "f_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"attached_files": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "AttachedFile",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "AttachedFile",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "attached_files",
+			StorageColumns:  []string{"proc_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "processes",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	ScanFields:  []entbuilder.FieldSpec{},
+	FKColumns:   []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"files": {
+			Target:         "File",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "attached_files",
+			StorageColumns: []string{"proc_id", "f_id"},
+		},
+		"attached_files": {
+			Target:         "AttachedFile",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "attached_files",
+			StorageColumns: []string{"proc_id"},
 		},
 	}}
 

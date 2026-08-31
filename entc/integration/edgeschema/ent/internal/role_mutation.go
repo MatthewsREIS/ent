@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,20 +32,74 @@ var roleDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 		"created_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreatedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "CreatedAt",
+			Column:  "created_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "role_users",
+			StorageColumns:  []string{"user_id", "role_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "roles",
+	TableColumns: []string{
+		"id",
+		"name",
+		"created_at",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "created_at",
+			Name:        "created_at",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"name":       field.TypeString,
+		"created_at": field.TypeTime,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"user_id", "role_id"},
+		},
+		"roles_users": {
+			Target:         "RoleUser",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"role_id"},
 		},
 	}}
 

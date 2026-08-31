@@ -7,96 +7,26 @@
 package tweettag
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // TweetTagDelete is the builder for deleting a TweetTag entity.
-type TweetTagDelete struct {
-	Config
-	hooks    []Hook
-	mutation *TweetTagMutation
-}
+type TweetTagDelete = entbuilder.Delete[TweetTag, uuid.UUID]
+
+// TweetTagDeleteOne is the builder for deleting a single TweetTag entity.
+type TweetTagDeleteOne = entbuilder.DeleteOne[TweetTag, uuid.UUID]
 
 // NewTweetTagDelete returns a new TweetTagDelete initialized with the given config, hooks, and mutation.
 func NewTweetTagDelete(c Config, hooks []Hook, mutation *TweetTagMutation) *TweetTagDelete {
-	return &TweetTagDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the TweetTagDelete builder.
-func (_d *TweetTagDelete) Where(ps ...predicate.TweetTag) *TweetTagDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *TweetTagDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*TweetTagMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *TweetTagDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *TweetTagDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// TweetTagDeleteOne is the builder for deleting a single TweetTag entity.
-type TweetTagDeleteOne struct {
-	_d *TweetTagDelete
+	return entbuilder.NewDelete[TweetTag, uuid.UUID](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewTweetTagDeleteOne returns a new TweetTagDeleteOne wrapping the given TweetTagDelete.
 func NewTweetTagDeleteOne(d *TweetTagDelete) *TweetTagDeleteOne {
-	return &TweetTagDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the TweetTagDelete builder.
-func (_d *TweetTagDeleteOne) Where(ps ...predicate.TweetTag) *TweetTagDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *TweetTagDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *TweetTagDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

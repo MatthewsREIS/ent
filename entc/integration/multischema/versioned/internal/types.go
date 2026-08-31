@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"log"
 
+	"reflect"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -522,6 +524,23 @@ func (s *Selector) BoolX(ctx context.Context) bool {
 		panic(err)
 	}
 	return v
+}
+
+// SchemaOf returns a schemaOf resolver over c's SchemaConfig, for
+// ApplyUpdateSpec/ApplyCreateSpec's per-entity/per-edge Schema resolution
+// (see runtime/entbuilder.Descriptor.SchemaKey / EdgeSpec.SchemaKey — both
+// hold a SchemaConfig struct-field name, resolved here by reflection since
+// entbuilder can't import the generated SchemaConfig type).
+func SchemaOf(c Config) func(string) string {
+	sc := c.SchemaConfig()
+	rv := reflect.ValueOf(sc)
+	return func(key string) string {
+		f := rv.FieldByName(key)
+		if !f.IsValid() {
+			panic("internal: unknown SchemaConfig field " + key + " for " + rv.Type().String())
+		}
+		return f.String()
+	}
 }
 
 // Operation types.

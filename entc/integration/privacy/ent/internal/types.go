@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -527,6 +528,22 @@ func (s *Selector) BoolX(ctx context.Context) bool {
 		panic(err)
 	}
 	return v
+}
+
+// SchemaGraph holds the runtime schema graph for entql predicate evaluation,
+// built once from every entity's descriptor — the shared replacement for
+// what used to be a per-entity schemaGraph literal (a real self node plus a
+// stub node per distinct edge-target type) in each entity's shared.go.
+var SchemaGraph = entbuilder.BuildSchemaGraph([]*entbuilder.Descriptor{
+	taskDescriptor,
+	teamDescriptor,
+	userDescriptor,
+})
+
+// NodeIndex returns the index of the node with the given type name in
+// SchemaGraph.Nodes, or -1 if not found.
+func NodeIndex(typ string) int {
+	return entbuilder.NodeIndex(SchemaGraph, typ)
 }
 
 // Operation types.

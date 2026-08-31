@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 )
@@ -29,18 +31,52 @@ var postDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"text": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Text",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Text",
+			Column:  "text",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"author": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "author_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "author_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "posts",
+			StorageColumns:  []string{"author_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "AuthorID",
 		},
-	}}
+	},
+	Table: "posts",
+	TableColumns: []string{
+		"id",
+		"text",
+		"author_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "text",
+			Name:        "text",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "author_id",
+			Name:        "author_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+			Nillable:    true,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewPostMutation creates a new mutation for the Post entity.
 func NewPostMutation(c Config, op Op, opts ...PostMutationOption) *PostMutation {

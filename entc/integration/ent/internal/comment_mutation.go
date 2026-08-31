@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
@@ -33,35 +34,114 @@ var commentDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "UniqueInt",
 			Numeric: true,
+			Column:  "unique_int",
+			SQLType: field.TypeInt,
 		},
 		"unique_float": {
 			Type:    reflect.TypeFor[float64](),
 			GoName:  "UniqueFloat",
 			Numeric: true,
+			Column:  "unique_float",
+			SQLType: field.TypeFloat64,
 		},
 		"nillable_int": {
 			Type:     reflect.TypeFor[int](),
 			GoName:   "NillableInt",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "nillable_int",
+			SQLType:  field.TypeInt,
 		},
 		"table": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Table",
 			Nillable: true,
+			Column:   "table",
+			SQLType:  field.TypeString,
 		},
 		"dir": {
 			Type:     reflect.TypeFor[schemadir.Dir](),
 			GoName:   "Dir",
 			Nillable: true,
+			Column:   "dir",
+			SQLType:  field.TypeJSON,
 		},
 		"client": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Client",
 			Nillable: true,
+			Column:   "client",
+			SQLType:  field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "comments",
+	TableColumns: []string{
+		"id",
+		"unique_int",
+		"unique_float",
+		"nillable_int",
+		"table",
+		"dir",
+		"client",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "unique_int",
+			Name:        "unique_int",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "unique_float",
+			Name:        "unique_float",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[float64](),
+			SQLType:     field.TypeFloat64,
+		},
+		{
+			Column:      "nillable_int",
+			Name:        "nillable_int",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+			Nillable:    true,
+		},
+		{
+			Column:      "table",
+			Name:        "table",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "dir",
+			Name:        "dir",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[schemadir.Dir](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "client",
+			Name:        "client",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"unique_int":   field.TypeInt,
+		"unique_float": field.TypeFloat64,
+		"nillable_int": field.TypeInt,
+		"table":        field.TypeString,
+		"dir":          field.TypeJSON,
+		"client":       field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewCommentMutation creates a new mutation for the Comment entity.
 func NewCommentMutation(c Config, op Op, opts ...CommentMutationOption) *CommentMutation {

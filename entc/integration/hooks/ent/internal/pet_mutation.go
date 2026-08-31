@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/hooks/ent/predicate"
 )
@@ -33,19 +35,61 @@ var petDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "DeleteTime",
 			Nillable: true,
+			Column:   "delete_time",
+			SQLType:  field.TypeTime,
 		},
 		"name": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Name",
 			Nillable: true,
+			Column:   "name",
+			SQLType:  field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "pets",
+			StorageColumns:  []string{"user_pets"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "pets",
+	TableColumns: []string{
+		"id",
+		"delete_time",
+		"name",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "delete_time",
+			Name:        "delete_time",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_pets",
+			GoName:      "SetUserPets",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
 		},
 	}}
 

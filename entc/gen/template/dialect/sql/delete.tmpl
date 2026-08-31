@@ -4,50 +4,43 @@ This source code is licensed under the Apache 2.0 license found
 in the LICENSE file in the root directory of this source tree.
 */}}
 
-{{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
 
-{{/* Additional fields for the delete builder. */}}
-{{ define "dialect/sql/delete/fields" }}
-	{{- with $tmpls := matchTemplate "dialect/sql/delete/fields/additional/*" }}
-		{{- range $tmpl := $tmpls }}
-			{{- xtemplate $tmpl $ }}
-		{{- end }}
-	{{- end }}
-{{- end }}
-
+{{/* dialect/sql/delete collapses the delete/delete-one builders onto the
+generic entbuilder.Delete[T, I]/DeleteOne[T, I] (mirrors the "sql/upsert"
+feature's UpsertOne[ID] alias, see dialect/sql/feature/upsert.tmpl) — the
+struct/Where/Exec/ExecX/Modify method set lives once in runtime/entbuilder,
+not once per entity. This is the same cross-entity type-collapse deviation
+recorded for stage 1's upsert aliases (every entity sharing a Go ID type
+shares one Delete[T, I] instantiation); it also means the "delete/additional/*"
+and "dialect/sql/delete/*" extension-template hooks the old per-entity
+sqlExec supported no longer apply here — a type alias can't gain extension
+methods. Non-SQL dialects (gremlin) are untouched: they still render the
+per-entity struct in builder/delete.tmpl and keep those hooks. */}}
 {{ define "dialect/sql/delete" }}
-{{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := $.Scope.Receiver }}
-{{ $mutation := print $receiver ".mutation" }}
+{{ $builder := $.DeleteName }}
+{{ $onebuilder := $.DeleteOneName }}
+{{ $idType := "any" }}{{ if $.HasOneFieldID }}{{ $idType = print $.ID.Type }}{{ end }}
 
-{{- /* Allow adding methods to the delete-builder by ent extensions or user templates.*/}}
-{{- with $tmpls := matchTemplate "dialect/sql/delete/additional/*" }}
-	{{- range $tmpl := $tmpls }}
-		{{- xtemplate $tmpl $ }}
-	{{- end }}
-{{- end }}
+// {{ $builder }} is the builder for deleting a {{ $.Name }} entity.
+type {{ $builder }} = entbuilder.Delete[{{ $.Name }}, {{ $idType }}]
 
-func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec({{ $.PackageQualifier }}Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.PackageQualifier }}{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
-	{{- /* Allow mutating the sqlgraph.DeleteSpec by ent extensions or user templates.*/}}
-	{{- with $tmpls := matchTemplate "dialect/sql/delete/spec/*" }}
-		{{- range $tmpl := $tmpls }}
-			{{- xtemplate $tmpl $ }}
-		{{- end }}
-	{{- end }}
-	if ps := {{ $mutation }}.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, {{ $receiver}}.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	{{ $mutation }}.SetDone()
-	return affected, err
+// {{ $onebuilder }} is the builder for deleting a single {{ $.Name }} entity.
+type {{ $onebuilder }} = entbuilder.DeleteOne[{{ $.Name }}, {{ $idType }}]
+
+// New{{ $builder }} returns a new {{ $builder }} initialized with the given config, hooks, and mutation.
+func New{{ $builder }}(c Config, hooks []Hook, mutation *{{ $.MutationName }}) *{{ $builder }} {
+	return entbuilder.NewDelete[{{ $.Name }}, {{ $idType }}](c.Drv, hooks, mutation,
+		{{ if $.FeatureEnabled "sql/schemaconfig" }}internal.SchemaOf(c){{ else }}nil{{ end }},
+		{{ if $.FeatureEnabled "sql/schemaconfig" }}func(ctx context.Context) context.Context {
+			return internal.NewSchemaConfigContext(ctx, c.SchemaConfig())
+		}{{ else }}nil{{ end }},
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
+// New{{ $onebuilder }} returns a new {{ $onebuilder }} wrapping the given {{ $builder }}.
+func New{{ $onebuilder }}(d *{{ $builder }}) *{{ $onebuilder }} {
+	return entbuilder.NewDeleteOne(d, {{ $.PackageQualifier }}Label, func(label string) error { return &NotFoundError{Label: label} })
+}
 {{ end }}

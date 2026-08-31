@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 )
@@ -33,15 +35,39 @@ var blogDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Oid",
 			Numeric: true,
+			Column:  "oid",
+			SQLType: field.TypeInt,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"admins": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "users",
+			StorageColumns:  []string{"blog_admins"},
+			TargetIDColumn:  "oid",
+			TargetIDSQLType: field.TypeInt,
 		},
-	}}
+	},
+	Table: "blogs",
+	TableColumns: []string{
+		"id",
+		"oid",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "oid",
+			Name:        "oid",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewBlogMutation creates a new mutation for the Blog entity.
 func NewBlogMutation(c Config, op Op, opts ...BlogMutationOption) *BlogMutation {

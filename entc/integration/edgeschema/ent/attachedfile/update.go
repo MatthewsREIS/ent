@@ -10,9 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -51,18 +49,6 @@ func (_u *AttachedFileUpdate) With(as ...entfield.Assignment) *AttachedFileUpdat
 // Mutation returns the AttachedFileMutation object of the builder.
 func (_u *AttachedFileUpdate) Mutation() *AttachedFileMutation {
 	return _u.mutation
-}
-
-// ClearFi clears the "fi" edge to the File entity.
-func (_u *AttachedFileUpdate) ClearFi() *AttachedFileUpdate {
-	_ = _u.mutation.ClearEdge("fi")
-	return _u
-}
-
-// ClearProc clears the "proc" edge to the Process entity.
-func (_u *AttachedFileUpdate) ClearProc() *AttachedFileUpdate {
-	_ = _u.mutation.ClearEdge("proc")
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -111,74 +97,7 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (_node int, err error
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "attach_time"); ok {
-		_spec.SetField(FieldAttachTime, field.TypeTime, value)
-	}
-	if _u.mutation.EdgeCleared("fi") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   FiTable,
-			Columns: []string{FiColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("fi"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   FiTable,
-			Columns: []string{FiColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("proc") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ProcTable,
-			Columns: []string{ProcColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("proc"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ProcTable,
-			Columns: []string{ProcColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -217,18 +136,6 @@ func (_u *AttachedFileUpdateOne) With(as ...entfield.Assignment) *AttachedFileUp
 // Mutation returns the AttachedFileMutation object of the builder.
 func (_u *AttachedFileUpdateOne) Mutation() *AttachedFileMutation {
 	return _u.mutation
-}
-
-// ClearFi clears the "fi" edge to the File entity.
-func (_u *AttachedFileUpdateOne) ClearFi() *AttachedFileUpdateOne {
-	_ = _u.mutation.ClearEdge("fi")
-	return _u
-}
-
-// ClearProc clears the "proc" edge to the Process entity.
-func (_u *AttachedFileUpdateOne) ClearProc() *AttachedFileUpdateOne {
-	_ = _u.mutation.ClearEdge("proc")
-	return _u
 }
 
 // Where appends a list predicates to the AttachedFileUpdate builder.
@@ -307,74 +214,7 @@ func (_u *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFi
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "attach_time"); ok {
-		_spec.SetField(FieldAttachTime, field.TypeTime, value)
-	}
-	if _u.mutation.EdgeCleared("fi") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   FiTable,
-			Columns: []string{FiColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("fi"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   FiTable,
-			Columns: []string{FiColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("proc") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ProcTable,
-			Columns: []string{ProcColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("proc"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   ProcTable,
-			Columns: []string{ProcColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &AttachedFile{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

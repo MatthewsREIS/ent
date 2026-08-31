@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -32,51 +30,15 @@ type MixinID struct {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*MixinID) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "some_field", "mixin_field":
-			values[i] = new(sql.NullString)
-		case "id":
-			values[i] = new(uuid.UUID)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(mixinidDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the MixinID fields.
 func (_m *MixinID) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				_m.ID = *value
-			}
-		case "some_field":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field some_field", values[i])
-			} else if value.Valid {
-				_m.SomeField = value.String
-			}
-		case "mixin_field":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field mixin_field", values[i])
-			} else if value.Valid {
-				_m.MixinField = value.String
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(mixinidDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the MixinID.
@@ -98,16 +60,7 @@ func (_m *MixinID) Unwrap() *MixinID {
 
 // String implements the fmt.Stringer.
 func (_m *MixinID) String() string {
-	var builder strings.Builder
-	builder.WriteString("MixinID(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("some_field=")
-	builder.WriteString(_m.SomeField)
-	builder.WriteString(", ")
-	builder.WriteString("mixin_field=")
-	builder.WriteString(_m.MixinField)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(mixinidDescriptor, _m)
 }
 
 // MixinIDs is a parsable slice of MixinID.

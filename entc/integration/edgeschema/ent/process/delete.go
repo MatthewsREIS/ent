@@ -7,96 +7,25 @@
 package process
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // ProcessDelete is the builder for deleting a Process entity.
-type ProcessDelete struct {
-	Config
-	hooks    []Hook
-	mutation *ProcessMutation
-}
+type ProcessDelete = entbuilder.Delete[Process, int]
+
+// ProcessDeleteOne is the builder for deleting a single Process entity.
+type ProcessDeleteOne = entbuilder.DeleteOne[Process, int]
 
 // NewProcessDelete returns a new ProcessDelete initialized with the given config, hooks, and mutation.
 func NewProcessDelete(c Config, hooks []Hook, mutation *ProcessMutation) *ProcessDelete {
-	return &ProcessDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the ProcessDelete builder.
-func (_d *ProcessDelete) Where(ps ...predicate.Process) *ProcessDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *ProcessDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*ProcessMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *ProcessDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *ProcessDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// ProcessDeleteOne is the builder for deleting a single Process entity.
-type ProcessDeleteOne struct {
-	_d *ProcessDelete
+	return entbuilder.NewDelete[Process, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewProcessDeleteOne returns a new ProcessDeleteOne wrapping the given ProcessDelete.
 func NewProcessDeleteOne(d *ProcessDelete) *ProcessDeleteOne {
-	return &ProcessDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the ProcessDelete builder.
-func (_d *ProcessDeleteOne) Where(ps ...predicate.Process) *ProcessDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *ProcessDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *ProcessDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

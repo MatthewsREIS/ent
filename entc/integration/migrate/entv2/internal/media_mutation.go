@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 )
@@ -32,19 +33,58 @@ var mediaDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Source",
 			Nillable: true,
+			Column:   "source",
+			SQLType:  field.TypeString,
 		},
 		"source_uri": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "SourceURI",
 			Nillable: true,
+			Column:   "source_uri",
+			SQLType:  field.TypeString,
 		},
 		"text": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Text",
 			Nillable: true,
+			Column:   "text",
+			SQLType:  field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "media",
+	TableColumns: []string{
+		"id",
+		"source",
+		"source_uri",
+		"text",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "source",
+			Name:        "source",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "source_uri",
+			Name:        "source_uri",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "text",
+			Name:        "text",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewMediaMutation creates a new mutation for the Media entity.
 func NewMediaMutation(c Config, op Op, opts ...MediaMutationOption) *MediaMutation {

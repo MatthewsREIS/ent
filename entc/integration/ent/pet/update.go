@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -18,7 +17,6 @@ import (
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // PetUpdate is the builder for updating Pet entities.
@@ -53,18 +51,6 @@ func (_u *PetUpdate) With(as ...entfield.Assignment) *PetUpdate {
 // Mutation returns the PetMutation object of the builder.
 func (_u *PetUpdate) Mutation() *PetMutation {
 	return _u.mutation
-}
-
-// ClearTeam clears the "team" edge to the User entity.
-func (_u *PetUpdate) ClearTeam() *PetUpdate {
-	_ = _u.mutation.ClearEdge("team")
-	return _u
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdate) ClearOwner() *PetUpdate {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -105,102 +91,7 @@ func (_u *PetUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PetUpdate 
 
 func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[float64](_u.mutation, "age"); ok {
-		_spec.SetField(FieldAge, field.TypeFloat64, value)
-	}
-	if added, ok := _u.mutation.AddedField("age"); ok {
-		value := added.(float64)
-		_spec.AddField(FieldAge, field.TypeFloat64, value)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if value, ok := entbuilder.GetField[uuid.UUID](_u.mutation, "uuid"); ok {
-		_spec.SetField(FieldUUID, field.TypeUUID, value)
-	}
-	if _u.mutation.FieldCleared("uuid") {
-		_spec.ClearField(FieldUUID, field.TypeUUID)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "nickname"); ok {
-		_spec.SetField(FieldNickname, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("nickname") {
-		_spec.ClearField(FieldNickname, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[bool](_u.mutation, "trained"); ok {
-		_spec.SetField(FieldTrained, field.TypeBool, value)
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "optional_time"); ok {
-		_spec.SetField(FieldOptionalTime, field.TypeTime, value)
-	}
-	if _u.mutation.FieldCleared("optional_time") {
-		_spec.ClearField(FieldOptionalTime, field.TypeTime)
-	}
-	if _u.mutation.EdgeCleared("team") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   TeamTable,
-			Columns: []string{TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("team"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   TeamTable,
-			Columns: []string{TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("owner") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -241,18 +132,6 @@ func (_u *PetUpdateOne) With(as ...entfield.Assignment) *PetUpdateOne {
 // Mutation returns the PetMutation object of the builder.
 func (_u *PetUpdateOne) Mutation() *PetMutation {
 	return _u.mutation
-}
-
-// ClearTeam clears the "team" edge to the User entity.
-func (_u *PetUpdateOne) ClearTeam() *PetUpdateOne {
-	_ = _u.mutation.ClearEdge("team")
-	return _u
-}
-
-// ClearOwner clears the "owner" edge to the User entity.
-func (_u *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	_ = _u.mutation.ClearEdge("owner")
-	return _u
 }
 
 // Where appends a list predicates to the PetUpdate builder.
@@ -323,102 +202,7 @@ func (_u *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[float64](_u.mutation, "age"); ok {
-		_spec.SetField(FieldAge, field.TypeFloat64, value)
-	}
-	if added, ok := _u.mutation.AddedField("age"); ok {
-		value := added.(float64)
-		_spec.AddField(FieldAge, field.TypeFloat64, value)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if value, ok := entbuilder.GetField[uuid.UUID](_u.mutation, "uuid"); ok {
-		_spec.SetField(FieldUUID, field.TypeUUID, value)
-	}
-	if _u.mutation.FieldCleared("uuid") {
-		_spec.ClearField(FieldUUID, field.TypeUUID)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "nickname"); ok {
-		_spec.SetField(FieldNickname, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("nickname") {
-		_spec.ClearField(FieldNickname, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[bool](_u.mutation, "trained"); ok {
-		_spec.SetField(FieldTrained, field.TypeBool, value)
-	}
-	if value, ok := entbuilder.GetField[time.Time](_u.mutation, "optional_time"); ok {
-		_spec.SetField(FieldOptionalTime, field.TypeTime, value)
-	}
-	if _u.mutation.FieldCleared("optional_time") {
-		_spec.ClearField(FieldOptionalTime, field.TypeTime)
-	}
-	if _u.mutation.EdgeCleared("team") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   TeamTable,
-			Columns: []string{TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("team"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   TeamTable,
-			Columns: []string{TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if _u.mutation.EdgeCleared("owner") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Pet{Config: _u.Config}
 	_spec.Assign = _node.AssignValues

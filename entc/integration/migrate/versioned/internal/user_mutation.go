@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/versioned/predicate"
 )
@@ -32,18 +33,57 @@ var userDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int32](),
 			GoName:  "Age",
 			Numeric: true,
+			Column:  "age",
+			SQLType: field.TypeInt32,
 		},
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 		"address": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Address",
 			Nillable: true,
+			Column:   "address",
+			SQLType:  field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "versioned_users",
+	TableColumns: []string{
+		"id",
+		"age",
+		"name",
+		"address",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "age",
+			Name:        "age",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int32](),
+			SQLType:     field.TypeInt32,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "address",
+			Name:        "address",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewUserMutation creates a new mutation for the User entity.
 func NewUserMutation(c Config, op Op, opts ...UserMutationOption) *UserMutation {

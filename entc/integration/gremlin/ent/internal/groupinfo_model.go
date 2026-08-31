@@ -7,14 +7,12 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // GroupInfo is the model entity for the GroupInfo schema.
@@ -63,51 +61,15 @@ func (e GroupInfoEdges) GroupsOrErr() ([]*Group, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*GroupInfo) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "max_users":
-			values[i] = new(sql.NullInt64)
-		case "id", "desc":
-			values[i] = new(sql.NullString)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(groupinfoDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the GroupInfo fields.
 func (_m *GroupInfo) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
-			}
-		case "desc":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field desc", values[i])
-			} else if value.Valid {
-				_m.Desc = value.String
-			}
-		case "max_users":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field max_users", values[i])
-			} else if value.Valid {
-				_m.MaxUsers = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(groupinfoDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the GroupInfo.
@@ -129,16 +91,7 @@ func (_m *GroupInfo) Unwrap() *GroupInfo {
 
 // String implements the fmt.Stringer.
 func (_m *GroupInfo) String() string {
-	var builder strings.Builder
-	builder.WriteString("GroupInfo(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("desc=")
-	builder.WriteString(_m.Desc)
-	builder.WriteString(", ")
-	builder.WriteString("max_users=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MaxUsers))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(groupinfoDescriptor, _m)
 }
 
 // GroupInfos is a parsable slice of GroupInfo.

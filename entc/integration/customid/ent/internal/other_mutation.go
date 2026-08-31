@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
@@ -30,7 +31,17 @@ var otherDescriptor = &entbuilder.Descriptor{
 	IDType:  reflect.TypeFor[sid.ID](),
 	IDField: "id",
 	Fields:  map[string]entbuilder.FieldSpec{},
-	Edges:   map[string]entbuilder.EdgeSpec{}}
+	Edges:   map[string]entbuilder.EdgeSpec{},
+	Table:   "others",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:    "id",
+	IDSQLType:   field.TypeOther,
+	ScanFields:  []entbuilder.FieldSpec{},
+	FKColumns:   []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{},
+	GraphEdges:  map[string]entbuilder.EdgeSpec{}}
 
 // NewOtherMutation creates a new mutation for the Other entity.
 func NewOtherMutation(c Config, op Op, opts ...OtherMutationOption) *OtherMutation {

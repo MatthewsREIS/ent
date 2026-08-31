@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 )
@@ -28,7 +29,15 @@ var groupDescriptor = &entbuilder.Descriptor{
 	Name:   "Group",
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{},
-	Edges:  map[string]entbuilder.EdgeSpec{}}
+	Edges:  map[string]entbuilder.EdgeSpec{},
+	Table:  "groups",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:   "id",
+	IDSQLType:  field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns:  []entbuilder.FieldSpec{}}
 
 // NewGroupMutation creates a new mutation for the Group entity.
 func NewGroupMutation(c Config, op Op, opts ...GroupMutationOption) *GroupMutation {

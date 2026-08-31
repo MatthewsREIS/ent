@@ -110,61 +110,7 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[task.Priority](_u.mutation, "priority"); ok {
-		_spec.SetField(FieldPriority, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("priority"); ok {
-		value := added.(task.Priority)
-		_spec.AddField(FieldPriority, field.TypeInt, value)
-	}
-	if value, ok := entbuilder.GetField[map[string]task.Priority](_u.mutation, "priorities"); ok {
-		_spec.SetField(FieldPriorities, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("priorities") {
-		_spec.ClearField(FieldPriorities, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("name") {
-		_spec.ClearField(FieldName, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "owner"); ok {
-		_spec.SetField(FieldOwner, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("owner") {
-		_spec.ClearField(FieldOwner, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "order"); ok {
-		_spec.SetField(FieldOrder, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("order"); ok {
-		value := added.(int)
-		_spec.AddField(FieldOrder, field.TypeInt, value)
-	}
-	if _u.mutation.FieldCleared("order") {
-		_spec.ClearField(FieldOrder, field.TypeInt)
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "order_option"); ok {
-		_spec.SetField(FieldOrderOption, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("order_option"); ok {
-		value := added.(int)
-		_spec.AddField(FieldOrderOption, field.TypeInt, value)
-	}
-	if _u.mutation.FieldCleared("order_option") {
-		_spec.ClearField(FieldOrderOption, field.TypeInt)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "op"); ok {
-		_spec.SetField(FieldOp, field.TypeString, value)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -293,61 +239,7 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[task.Priority](_u.mutation, "priority"); ok {
-		_spec.SetField(FieldPriority, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("priority"); ok {
-		value := added.(task.Priority)
-		_spec.AddField(FieldPriority, field.TypeInt, value)
-	}
-	if value, ok := entbuilder.GetField[map[string]task.Priority](_u.mutation, "priorities"); ok {
-		_spec.SetField(FieldPriorities, field.TypeJSON, value)
-	}
-	if _u.mutation.FieldCleared("priorities") {
-		_spec.ClearField(FieldPriorities, field.TypeJSON)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("name") {
-		_spec.ClearField(FieldName, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "owner"); ok {
-		_spec.SetField(FieldOwner, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("owner") {
-		_spec.ClearField(FieldOwner, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "order"); ok {
-		_spec.SetField(FieldOrder, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("order"); ok {
-		value := added.(int)
-		_spec.AddField(FieldOrder, field.TypeInt, value)
-	}
-	if _u.mutation.FieldCleared("order") {
-		_spec.ClearField(FieldOrder, field.TypeInt)
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "order_option"); ok {
-		_spec.SetField(FieldOrderOption, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("order_option"); ok {
-		value := added.(int)
-		_spec.AddField(FieldOrderOption, field.TypeInt, value)
-	}
-	if _u.mutation.FieldCleared("order_option") {
-		_spec.ClearField(FieldOrderOption, field.TypeInt)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "op"); ok {
-		_spec.SetField(FieldOp, field.TypeString, value)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Task{Config: _u.Config}
 	_spec.Assign = _node.AssignValues

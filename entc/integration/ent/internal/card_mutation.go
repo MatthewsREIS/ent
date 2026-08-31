@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -33,39 +35,139 @@ var cardDescriptor = &entbuilder.Descriptor{
 			Type:      reflect.TypeFor[time.Time](),
 			GoName:    "CreateTime",
 			Immutable: true,
+			Column:    "create_time",
+			SQLType:   field.TypeTime,
 		},
 		"update_time": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "UpdateTime",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "UpdateTime",
+			Column:  "update_time",
+			SQLType: field.TypeTime,
 		},
 		"balance": {
 			Type:    reflect.TypeFor[float64](),
 			GoName:  "Balance",
 			Numeric: true,
+			Column:  "balance",
+			SQLType: field.TypeFloat64,
 		},
 		"number": {
 			Type:      reflect.TypeFor[string](),
 			GoName:    "Number",
 			Immutable: true,
+			Column:    "number",
+			SQLType:   field.TypeString,
 		},
 		"name": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Name",
 			Nillable: true,
+			Column:   "name",
+			SQLType:  field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "cards",
+			StorageColumns:  []string{"user_card"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"spec": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Spec",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "Spec",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "spec_card",
+			StorageColumns:  []string{"spec_id", "card_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "cards",
+	TableColumns: []string{
+		"id",
+		"create_time",
+		"update_time",
+		"balance",
+		"number",
+		"name",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "create_time",
+			Name:        "create_time",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "update_time",
+			Name:        "update_time",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "balance",
+			Name:        "balance",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[float64](),
+			SQLType:     field.TypeFloat64,
+		},
+		{
+			Column:      "number",
+			Name:        "number",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_card",
+			GoName:      "SetUserCard",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	GraphFields: map[string]field.Type{
+		"create_time": field.TypeTime,
+		"update_time": field.TypeTime,
+		"balance":     field.TypeFloat64,
+		"number":      field.TypeString,
+		"name":        field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"owner": {
+			Target:         "User",
+			Rel:            sqlgraph.O2O,
+			Inverse:        true,
+			StorageTable:   "cards",
+			StorageColumns: []string{"user_card"},
+		},
+		"spec": {
+			Target:         "Spec",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "spec_card",
+			StorageColumns: []string{"spec_id", "card_id"},
 		},
 	}}
 

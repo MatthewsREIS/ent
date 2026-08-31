@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -34,24 +36,91 @@ var nodeDescriptor = &entbuilder.Descriptor{
 			GoName:   "Value",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "value",
+			SQLType:  field.TypeInt,
 		},
 		"updated_at": {
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "UpdatedAt",
 			Nillable: true,
+			Column:   "updated_at",
+			SQLType:  field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"prev": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Node",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Node",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "nodes",
+			StorageColumns:  []string{"node_next"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"next": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Node",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Node",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "nodes",
+			StorageColumns:  []string{"node_next"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "nodes",
+	TableColumns: []string{
+		"id",
+		"value",
+		"updated_at",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "value",
+			Name:        "value",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "updated_at",
+			Name:        "updated_at",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+			Nillable:    true,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "node_next",
+			GoName:      "SetNodeNext",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	GraphFields: map[string]field.Type{
+		"value":      field.TypeInt,
+		"updated_at": field.TypeTime,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"prev": {
+			Target:         "Node",
+			Rel:            sqlgraph.O2O,
+			Inverse:        true,
+			StorageTable:   "nodes",
+			StorageColumns: []string{"node_next"},
+		},
+		"next": {
+			Target:         "Node",
+			Rel:            sqlgraph.O2O,
+			StorageTable:   "nodes",
+			StorageColumns: []string{"node_next"},
 		},
 	}}
 

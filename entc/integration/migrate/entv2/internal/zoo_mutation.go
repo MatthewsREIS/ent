@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 )
@@ -29,7 +30,15 @@ var zooDescriptor = &entbuilder.Descriptor{
 	IDType:  reflect.TypeFor[int](),
 	IDField: "id",
 	Fields:  map[string]entbuilder.FieldSpec{},
-	Edges:   map[string]entbuilder.EdgeSpec{}}
+	Edges:   map[string]entbuilder.EdgeSpec{},
+	Table:   "zoos",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:   "id",
+	IDSQLType:  field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns:  []entbuilder.FieldSpec{}}
 
 // NewZooMutation creates a new mutation for the Zoo entity.
 func NewZooMutation(c Config, op Op, opts ...ZooMutationOption) *ZooMutation {

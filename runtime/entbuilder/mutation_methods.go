@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -333,6 +334,9 @@ func (m *Mutation[T, I]) AppendField(name string, value ent.Value) error {
 	if err := m.checkImmutable(spec, name); err != nil {
 		return err
 	}
+	if spec.Type.Kind() != reflect.Slice && spec.Type.Kind() != reflect.Array {
+		return fmt.Errorf("entbuilder: %s field %s does not support append (not a slice)", m.desc.Name, name)
+	}
 	if value != nil && reflect.TypeOf(value) != spec.Type {
 		return fmt.Errorf("unexpected type %T for field %s (want %s)", value, name, spec.Type)
 	}
@@ -448,7 +452,11 @@ func (m *Mutation[T, I]) EdgeID(edge string) (any, bool) {
 	return nil, false
 }
 
-// EdgeIDs returns all neighbor IDs on the edge.
+// EdgeIDs returns all neighbor IDs on the edge, in a stable order (sorted by
+// each ID's fmt.Sprint form). m.edges[edge] is a set (map[any]struct{}), so
+// without sorting, the VALUES row order of an M2M join-table INSERT would
+// vary per call — the same nondeterminism-of-statement-text failure mode as
+// ApplyUpdateSpec/ApplyCreateSpec's field/edge map iteration (see sqlspec.go).
 func (m *Mutation[T, I]) EdgeIDs(edge string) []any {
 	if m.edges == nil || m.edges[edge] == nil {
 		return nil
@@ -457,10 +465,12 @@ func (m *Mutation[T, I]) EdgeIDs(edge string) []any {
 	for id := range m.edges[edge] {
 		out = append(out, id)
 	}
+	sortByString(out)
 	return out
 }
 
-// RemovedEdgeIDs returns all neighbor IDs marked as removed from the edge.
+// RemovedEdgeIDs returns all neighbor IDs marked as removed from the edge,
+// in a stable order. See EdgeIDs.
 func (m *Mutation[T, I]) RemovedEdgeIDs(edge string) []any {
 	if m.removedEdges == nil || m.removedEdges[edge] == nil {
 		return nil
@@ -469,7 +479,18 @@ func (m *Mutation[T, I]) RemovedEdgeIDs(edge string) []any {
 	for id := range m.removedEdges[edge] {
 		out = append(out, id)
 	}
+	sortByString(out)
 	return out
+}
+
+// sortByString sorts ids in place by their fmt.Sprint representation. Good
+// enough for statement stability (the goal — not a meaningful ordering of
+// the IDs themselves), and works across every ID type (int, string,
+// uuid.UUID, ...) without a type switch.
+func sortByString(ids []any) {
+	sort.Slice(ids, func(i, j int) bool {
+		return fmt.Sprint(ids[i]) < fmt.Sprint(ids[j])
+	})
 }
 
 // ClearEdge marks the edge as cleared.

@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -30,9 +32,31 @@ var specDescriptor = &entbuilder.Descriptor{
 	Fields: map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"card": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Card",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Card",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "spec_card",
+			StorageColumns:  []string{"spec_id", "card_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "specs",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	ScanFields:  []entbuilder.FieldSpec{},
+	FKColumns:   []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"card": {
+			Target:         "Card",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "spec_card",
+			StorageColumns: []string{"spec_id", "card_id"},
 		},
 	}}
 

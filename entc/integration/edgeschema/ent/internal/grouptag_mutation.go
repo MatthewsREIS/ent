@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,16 +32,71 @@ var grouptagDescriptor = &entbuilder.Descriptor{
 	Fields: map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"tag": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Tag",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "tag_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Tag",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "tag_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "group_tags",
+			StorageColumns:  []string{"tag_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "TagID",
 		},
 		"group": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Group",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "group_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Group",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "group_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "group_tags",
+			StorageColumns:  []string{"group_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "GroupID",
+		},
+	},
+	Table: "group_tags",
+	TableColumns: []string{
+		"id",
+		"tag_id",
+		"group_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "tag_id",
+			Name:        "tag_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "group_id",
+			Name:        "group_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"tag_id":   field.TypeInt,
+		"group_id": field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"tag": {
+			Target:         "Tag",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "group_tags",
+			StorageColumns: []string{"tag_id"},
+		},
+		"group": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "group_tags",
+			StorageColumns: []string{"group_id"},
 		},
 	}}
 

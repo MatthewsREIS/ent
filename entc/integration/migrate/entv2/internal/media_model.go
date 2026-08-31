@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Comment that appears in both the schema and the generated code
@@ -33,57 +31,15 @@ type Media struct {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Media) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			values[i] = new(sql.NullInt64)
-		case "source", "source_uri", "text":
-			values[i] = new(sql.NullString)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(mediaDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Media fields.
 func (_m *Media) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "source":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field source", values[i])
-			} else if value.Valid {
-				_m.Source = value.String
-			}
-		case "source_uri":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field source_uri", values[i])
-			} else if value.Valid {
-				_m.SourceURI = value.String
-			}
-		case "text":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field text", values[i])
-			} else if value.Valid {
-				_m.Text = value.String
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(mediaDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Media.
@@ -105,19 +61,7 @@ func (_m *Media) Unwrap() *Media {
 
 // String implements the fmt.Stringer.
 func (_m *Media) String() string {
-	var builder strings.Builder
-	builder.WriteString("Media(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("source=")
-	builder.WriteString(_m.Source)
-	builder.WriteString(", ")
-	builder.WriteString("source_uri=")
-	builder.WriteString(_m.SourceURI)
-	builder.WriteString(", ")
-	builder.WriteString("text=")
-	builder.WriteString(_m.Text)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(mediaDescriptor, _m)
 }
 
 // MediaSlice is a parsable slice of Media.

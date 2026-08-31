@@ -7,96 +7,25 @@
 package media
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // MediaDelete is the builder for deleting a Media entity.
-type MediaDelete struct {
-	Config
-	hooks    []Hook
-	mutation *MediaMutation
-}
+type MediaDelete = entbuilder.Delete[Media, int]
+
+// MediaDeleteOne is the builder for deleting a single Media entity.
+type MediaDeleteOne = entbuilder.DeleteOne[Media, int]
 
 // NewMediaDelete returns a new MediaDelete initialized with the given config, hooks, and mutation.
 func NewMediaDelete(c Config, hooks []Hook, mutation *MediaMutation) *MediaDelete {
-	return &MediaDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the MediaDelete builder.
-func (_d *MediaDelete) Where(ps ...predicate.Media) *MediaDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *MediaDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*MediaMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *MediaDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *MediaDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// MediaDeleteOne is the builder for deleting a single Media entity.
-type MediaDeleteOne struct {
-	_d *MediaDelete
+	return entbuilder.NewDelete[Media, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewMediaDeleteOne returns a new MediaDeleteOne wrapping the given MediaDelete.
 func NewMediaDeleteOne(d *MediaDelete) *MediaDeleteOne {
-	return &MediaDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the MediaDelete builder.
-func (_d *MediaDeleteOne) Where(ps ...predicate.Media) *MediaDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *MediaDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *MediaDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

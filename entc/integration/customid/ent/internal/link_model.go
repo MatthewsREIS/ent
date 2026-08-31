@@ -7,16 +7,13 @@
 package internal
 
 import (
-	"encoding/json"
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Link is the model entity for the Link schema.
@@ -32,47 +29,15 @@ type Link struct {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Link) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "link_information":
-			values[i] = new([]byte)
-		case "id":
-			values[i] = new(uuidc.UUIDC)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(linkDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Link fields.
 func (_m *Link) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*uuidc.UUIDC); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				_m.ID = *value
-			}
-		case "link_information":
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field link_information", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &_m.LinkInformation); err != nil {
-					return fmt.Errorf("unmarshal field link_information: %w", err)
-				}
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(linkDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Link.
@@ -94,13 +59,7 @@ func (_m *Link) Unwrap() *Link {
 
 // String implements the fmt.Stringer.
 func (_m *Link) String() string {
-	var builder strings.Builder
-	builder.WriteString("Link(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("link_information=")
-	builder.WriteString(fmt.Sprintf("%v", _m.LinkInformation))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(linkDescriptor, _m)
 }
 
 // Links is a parsable slice of Link.

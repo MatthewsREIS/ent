@@ -10,7 +10,9 @@ import (
 	"reflect"
 	"time"
 
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 )
 
 // RoleUserMutation is an alias for entbuilder.Mutation parameterised by RoleUser.
@@ -25,23 +27,90 @@ var roleuserDescriptor = &entbuilder.Descriptor{
 	Name: "RoleUser",
 	Fields: map[string]entbuilder.FieldSpec{
 		"created_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreatedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "CreatedAt",
+			Column:  "created_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"role": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Role",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "role_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Role",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "role_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "role_users",
+			StorageColumns:  []string{"role_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "RoleID",
 		},
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "role_users",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
+	},
+	Table: "role_users",
+	TableColumns: []string{
+		"created_at",
+		"role_id",
+		"user_id",
+	},
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "created_at",
+			Name:        "created_at",
+			StructIndex: 1,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "role_id",
+			Name:        "role_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"created_at": field.TypeTime,
+		"role_id":    field.TypeInt,
+		"user_id":    field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"role": {
+			Target:         "Role",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"role_id"},
+		},
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "role_users",
+			StorageColumns: []string{"user_id"},
+		},
+	},
+	CompositeID: []entbuilder.IDColumnSpec{
+		{Column: "user_id", SQLType: field.TypeInt},
+		{Column: "role_id", SQLType: field.TypeInt},
 	}}
 
 // NewRoleUserMutation creates a new mutation for the RoleUser entity.

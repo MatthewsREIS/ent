@@ -10,7 +10,9 @@ import (
 	"reflect"
 	"time"
 
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 )
 
 // TweetLikeMutation is an alias for entbuilder.Mutation parameterised by TweetLike.
@@ -25,23 +27,90 @@ var tweetlikeDescriptor = &entbuilder.Descriptor{
 	Name: "TweetLike",
 	Fields: map[string]entbuilder.FieldSpec{
 		"liked_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "LikedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "LikedAt",
+			Column:  "liked_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"tweet": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Tweet",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "tweet_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Tweet",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "tweet_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "tweet_likes",
+			StorageColumns:  []string{"tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "TweetID",
 		},
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "tweet_likes",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
+	},
+	Table: "tweet_likes",
+	TableColumns: []string{
+		"liked_at",
+		"user_id",
+		"tweet_id",
+	},
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "liked_at",
+			Name:        "liked_at",
+			StructIndex: 1,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "tweet_id",
+			Name:        "tweet_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"liked_at": field.TypeTime,
+		"user_id":  field.TypeInt,
+		"tweet_id": field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"tweet": {
+			Target:         "Tweet",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"tweet_id"},
+		},
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"user_id"},
+		},
+	},
+	CompositeID: []entbuilder.IDColumnSpec{
+		{Column: "user_id", SQLType: field.TypeInt},
+		{Column: "tweet_id", SQLType: field.TypeInt},
 	}}
 
 // NewTweetLikeMutation creates a new mutation for the TweetLike entity.

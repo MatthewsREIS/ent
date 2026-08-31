@@ -8,6 +8,8 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ define "internal/mutation" }}
 
+{{ $n := $ }}
+
 {{ with extend $ "Package" "internal" }}
 	{{ template "header" . }}
 {{ end }}
@@ -19,6 +21,10 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	{{- if eq $n.Storage.Name "sql" }}
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
+	{{- end }}
 
 	"{{ $.Config.Package }}/predicate"
 	{{- /* Import field types, but skip entity sub-packages to avoid cycles (enums defined in internal). */ -}}
@@ -35,7 +41,6 @@ import (
 	{{- end }}
 )
 
-{{ $n := $ }}
 {{ $mutation := $n.MutationName }}
 
 {{- /* IDType: the second type parameter on entbuilder.Mutation[T, I]. For
@@ -73,6 +78,13 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- if $f.Immutable }}
 			Immutable: true,
 			{{- end }}
+			{{- if eq $n.Storage.Name "sql" }}
+			Column:  {{ $f.StorageKey | printf "%q" }},
+			SQLType: field.{{ $f.Type.ConstName }},
+			{{- if $f.HasValueScanner }}
+			HasValueScanner: true,
+			{{- end }}
+			{{- end }}
 		},
 		{{- end }}
 	},
@@ -91,9 +103,148 @@ var {{ $n.Package }}Descriptor = &entbuilder.Descriptor{
 			{{- if $e.Immutable }}
 			Immutable: true,
 			{{- end }}
+			{{- if eq $n.Storage.Name "sql" }}
+			Rel:            sqlgraph.{{ $e.Rel.Type }},
+			StorageTable:   {{ $e.Rel.Table | printf "%q" }},
+			StorageColumns: []string{ {{- range $i, $c := $e.Rel.Columns }}{{ if $i }}, {{ end }}{{ $c | printf "%q" }}{{- end }} },
+			{{- if $e.Bidi }}
+			Bidi: true,
+			{{- end }}
+			TargetIDColumn:  {{ $e.Type.ID.StorageKey | printf "%q" }},
+			TargetIDSQLType: field.{{ $e.Type.ID.Type.ConstName }},
+			{{- if $e.OwnFK }}
+			{{- /* Mirrors create.tmpl's $e.OwnFK node-assignment guard verbatim
+			      (InSubPackage is always true in this fork's codegen — see
+			      entc/gen/graph.go's typeScope construction — so only that
+			      branch is ever reachable). */}}
+			{{- $fk := $e.ForeignKey }}
+			{{- if eq (pascal $fk.StructField) $fk.StructField }}
+			NodeField: {{ $fk.StructField | printf "%q" }},
+			{{- end }}
+			{{- end }}
+			{{- if $n.FeatureEnabled "sql/schemaconfig" }}
+			{{- /* Mirrors schemaconfig.tmpl's "dialect/sql/defedge/spec/schemaconfig"
+			      $schema derivation verbatim — the literal SchemaConfig struct-field
+			      name resolved at runtime by schemaOf(desc.Edges[name].SchemaKey). */}}
+			{{- $schema := $e.Type.Name }}
+			{{- if $e.OwnFK }}
+				{{- $schema = $n.Name }}
+			{{- else if $e.M2M }}
+				{{- if $e.Through }}
+					{{- $schema = $e.Through.Name }}
+				{{- else if $e.Inverse }}
+					{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
+				{{- else }}
+					{{- $schema = print $n.Name $e.StructField }}
+				{{- end }}
+			{{- end }}
+			SchemaKey: {{ $schema | printf "%q" }},
+			{{- end }}
+			{{- end }}
 		},
 		{{- end }}
 	},
+	{{- if eq $n.Storage.Name "sql" }}
+	Table: {{ $n.Table | printf "%q" }},
+	TableColumns: []string{
+		{{- with $n.HasOneFieldID }}
+		{{ $n.ID.StorageKey | printf "%q" }},
+		{{- end }}
+		{{- range $f := $n.Fields }}
+		{{- if not $f.IsDeprecated }}
+		{{ $f.StorageKey | printf "%q" }},
+		{{- end }}
+		{{- end }}
+	},
+	{{- with $n.HasOneFieldID }}
+	IDColumn:  {{ $n.ID.StorageKey | printf "%q" }},
+	IDSQLType: field.{{ $n.ID.Type.ConstName }},
+	{{- end }}
+	{{- /* Struct-index bases mirror internal_model.tmpl's struct emission
+	      order exactly: Config is always field 0, a single-field ID (when
+	      present) is always field 1, then $n.Fields in order, then Edges
+	      (one field, if any), then $n.UnexportedForeignKeys in order. */}}
+	{{- $structBase := 1 }}{{ if $n.HasOneFieldID }}{{ $structBase = 2 }}{{ end }}
+	ScanFields: []entbuilder.FieldSpec{
+		{{- /* Deliberately ranges $n.Fields (every schema field, in struct
+		      order), not $n.MutationFields: Fields above excludes a field
+		      an edge exclusively owns (IsEdgeField), but the struct still
+		      holds it as a plain exported field (e.g. edge-schema
+		      Relationship.UserID) that ScanTargets/AssignRow/FormatEntity
+		      must still cover. See Descriptor.ScanFields' doc comment. */}}
+		{{- range $i, $f := $n.Fields }}
+		{
+			Column:      {{ $f.StorageKey | printf "%q" }},
+			Name:        {{ $f.Name | printf "%q" }},
+			StructIndex: {{ add $structBase $i }},
+			Type:        reflect.TypeFor[{{ if and ($f.IsEnum) (not $f.HasGoType) }}{{ $n.Name }}{{ trimPackage $f.Type.String $n.Package }}{{ else }}{{ $f.Type }}{{ end }}](),
+			SQLType:     field.{{ $f.Type.ConstName }},
+			{{- if $f.Nillable }}
+			Nillable: true,
+			{{- end }}
+			{{- if $f.Sensitive }}
+			Sensitive: true,
+			{{- end }}
+			{{- if $f.HasValueScanner }}
+			HasValueScanner: true,
+			ScanValue: func() any { return {{ $n.Name }}ValueScanner.{{ $f.StructField }}.ScanValue() },
+			FromValue: func(v any) (any, error) { return {{ $n.Name }}ValueScanner.{{ $f.StructField }}.FromValue(v) },
+			{{- end }}
+		},
+		{{- end }}
+	},
+	{{- $fkBase := add $structBase (len $n.Fields) }}{{ if $n.Edges }}{{ $fkBase = add $fkBase 1 }}{{ end }}
+	FKColumns: []entbuilder.FieldSpec{
+		{{- range $i, $fk := $n.UnexportedForeignKeys }}
+		{{- $f := $fk.Field }}
+		{
+			Column:      {{ $f.StorageKey | printf "%q" }},
+			GoName:      {{ printf "Set%s" (pascal $fk.StructField) | printf "%q" }},
+			StructIndex: {{ add $fkBase $i }},
+			Type:        reflect.TypeFor[{{ $f.Type }}](),
+			SQLType:     field.{{ $f.Type.ConstName }},
+		},
+		{{- end }}
+	},
+	{{- if $n.FeatureEnabled "sql/schemaconfig" }}
+	SchemaKey: {{ $n.Name | printf "%q" }},
+	{{- end }}
+	{{- if $n.FeatureEnabled "entql" }}
+	{{- /* GraphFields/GraphEdges/CompositeID feed BuildSchemaGraph (the
+	      shared entql schema graph in internal/types.go) — a superset of
+	      Fields/Edges above, which are scoped to what mutation Set/Add/
+	      Clear needs. See runtime/entbuilder.Descriptor's doc comments on
+	      these three fields for exactly what/why each one adds. */}}
+	GraphFields: map[string]field.Type{
+		{{- range $f := $n.Fields }}
+		{{ $f.StorageKey | printf "%q" }}: field.{{ $f.Type.ConstName }},
+		{{- end }}
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		{{- range $e := $n.Edges }}
+		{{ $e.Name | printf "%q" }}: {
+			Target: {{ $e.Type.Name | printf "%q" }},
+			Rel:    sqlgraph.{{ $e.Rel.Type }},
+			{{- if $e.Inverse }}
+			Inverse: true,
+			{{- end }}
+			StorageTable:   {{ $e.Rel.Table | printf "%q" }},
+			StorageColumns: []string{ {{- range $i, $c := $e.Rel.Columns }}{{ if $i }}, {{ end }}{{ $c | printf "%q" }}{{- end }} },
+			{{- if $e.Bidi }}
+			Bidi: true,
+			{{- end }}
+		},
+		{{- end }}
+	},
+	{{- if not $n.HasOneFieldID }}
+	CompositeID: []entbuilder.IDColumnSpec{
+		{{- range $id := $n.EdgeSchema.ID }}
+		{Column: {{ $id.StorageKey | printf "%q" }}, SQLType: field.{{ $id.Type.ConstName }}},
+		{{- end }}
+	},
+	{{- end }}
+	{{- end }}
+	{{- end }}
 	{{- /* OldValueFn / IDsFn intentionally omitted: the entity client (e.g. *ent.Client.Task)
 	      that owns Get/Query is not reachable from internal.Config. Per-mutation closures wired
 	      via With{{ $n.Name }}ID / With{{ $n.Name }}IDsFunc supply the same plumbing through

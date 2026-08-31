@@ -10,14 +10,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // PetCreate is the builder for creating a Pet entity.
@@ -129,62 +127,7 @@ func (_c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := entbuilder.GetField[float64](_c.mutation, "age"); ok {
-		_spec.SetField(FieldAge, field.TypeFloat64, value)
-		_node.Age = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "uuid"); ok {
-		_spec.SetField(FieldUUID, field.TypeUUID, value)
-		_node.UUID = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "nickname"); ok {
-		_spec.SetField(FieldNickname, field.TypeString, value)
-		_node.Nickname = value
-	}
-	if value, ok := entbuilder.GetField[bool](_c.mutation, "trained"); ok {
-		_spec.SetField(FieldTrained, field.TypeBool, value)
-		_node.Trained = value
-	}
-	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "optional_time"); ok {
-		_spec.SetField(FieldOptionalTime, field.TypeTime, value)
-		_node.OptionalTime = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "team"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   TeamTable,
-			Columns: []string{TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

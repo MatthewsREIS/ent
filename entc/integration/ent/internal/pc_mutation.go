@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -28,7 +29,17 @@ var pcDescriptor = &entbuilder.Descriptor{
 	Name:   "PC",
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{},
-	Edges:  map[string]entbuilder.EdgeSpec{}}
+	Edges:  map[string]entbuilder.EdgeSpec{},
+	Table:  "pcs",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	ScanFields:  []entbuilder.FieldSpec{},
+	FKColumns:   []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{},
+	GraphEdges:  map[string]entbuilder.EdgeSpec{}}
 
 // NewPCMutation creates a new mutation for the PC entity.
 func NewPCMutation(c Config, op Op, opts ...PCMutationOption) *PCMutation {

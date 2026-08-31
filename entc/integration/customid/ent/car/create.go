@@ -129,34 +129,7 @@ func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := entbuilder.GetField[float64](_c.mutation, "before_id"); ok {
-		_spec.SetField(FieldBeforeID, field.TypeFloat64, value)
-		_node.BeforeID = value
-	}
-	if value, ok := entbuilder.GetField[float64](_c.mutation, "after_id"); ok {
-		_spec.SetField(FieldAfterID, field.TypeFloat64, value)
-		_node.AfterID = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "model"); ok {
-		_spec.SetField(FieldModel, field.TypeString, value)
-		_node.Model = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[string](_c.mutation, "owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

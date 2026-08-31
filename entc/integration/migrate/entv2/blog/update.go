@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -52,18 +51,6 @@ func (_u *BlogUpdate) Mutation() *BlogMutation {
 	return _u.mutation
 }
 
-// ClearAdmins clears all "admins" edges to the User entity.
-func (_u *BlogUpdate) ClearAdmins() *BlogUpdate {
-	_ = _u.mutation.ClearEdge("admins")
-	return _u
-}
-
-// RemoveAdminIDs removes the "admins" edge to User entities by IDs.
-func (_u *BlogUpdate) RemoveAdminIDs(ids ...int) *BlogUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("admins", entbuilder.ToAny(ids)...)
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *BlogUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -96,65 +83,7 @@ func (_u *BlogUpdate) ExecX(ctx context.Context) {
 
 func (_u *BlogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "oid"); ok {
-		_spec.SetField(FieldOid, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("oid"); ok {
-		value := added.(int)
-		_spec.AddField(FieldOid, field.TypeInt, value)
-	}
-	if _u.mutation.EdgeCleared("admins") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   AdminsTable,
-			Columns: []string{AdminsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("oid", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("admins"); len(nodes) > 0 && !_u.mutation.EdgeCleared("admins") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   AdminsTable,
-			Columns: []string{AdminsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("oid", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("admins"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   AdminsTable,
-			Columns: []string{AdminsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("oid", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -193,18 +122,6 @@ func (_u *BlogUpdateOne) With(as ...entfield.Assignment) *BlogUpdateOne {
 // Mutation returns the BlogMutation object of the builder.
 func (_u *BlogUpdateOne) Mutation() *BlogMutation {
 	return _u.mutation
-}
-
-// ClearAdmins clears all "admins" edges to the User entity.
-func (_u *BlogUpdateOne) ClearAdmins() *BlogUpdateOne {
-	_ = _u.mutation.ClearEdge("admins")
-	return _u
-}
-
-// RemoveAdminIDs removes the "admins" edge to User entities by IDs.
-func (_u *BlogUpdateOne) RemoveAdminIDs(ids ...int) *BlogUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("admins", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the BlogUpdate builder.
@@ -269,65 +186,7 @@ func (_u *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[int](_u.mutation, "oid"); ok {
-		_spec.SetField(FieldOid, field.TypeInt, value)
-	}
-	if added, ok := _u.mutation.AddedField("oid"); ok {
-		value := added.(int)
-		_spec.AddField(FieldOid, field.TypeInt, value)
-	}
-	if _u.mutation.EdgeCleared("admins") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   AdminsTable,
-			Columns: []string{AdminsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("oid", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("admins"); len(nodes) > 0 && !_u.mutation.EdgeCleared("admins") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   AdminsTable,
-			Columns: []string{AdminsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("oid", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("admins"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   AdminsTable,
-			Columns: []string{AdminsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("oid", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Blog{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

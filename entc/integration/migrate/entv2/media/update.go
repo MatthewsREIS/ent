@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
@@ -84,31 +83,7 @@ func (_u *MediaUpdate) ExecX(ctx context.Context) {
 
 func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "source"); ok {
-		_spec.SetField(FieldSource, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("source") {
-		_spec.ClearField(FieldSource, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "source_uri"); ok {
-		_spec.SetField(FieldSourceURI, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("source_uri") {
-		_spec.ClearField(FieldSourceURI, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("text") {
-		_spec.ClearField(FieldText, field.TypeString)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{Label: Label}
@@ -211,31 +186,7 @@ func (_u *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error)
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "source"); ok {
-		_spec.SetField(FieldSource, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("source") {
-		_spec.ClearField(FieldSource, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "source_uri"); ok {
-		_spec.SetField(FieldSourceURI, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("source_uri") {
-		_spec.ClearField(FieldSourceURI, field.TypeString)
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "text"); ok {
-		_spec.SetField(FieldText, field.TypeString, value)
-	}
-	if _u.mutation.FieldCleared("text") {
-		_spec.ClearField(FieldText, field.TypeString)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_node = &Media{Config: _u.Config}
 	_spec.Assign = _node.AssignValues
 	_spec.ScanValues = _node.ScanValues

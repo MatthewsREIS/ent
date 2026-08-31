@@ -7,96 +7,25 @@
 package relationshipinfo
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // RelationshipInfoDelete is the builder for deleting a RelationshipInfo entity.
-type RelationshipInfoDelete struct {
-	Config
-	hooks    []Hook
-	mutation *RelationshipInfoMutation
-}
+type RelationshipInfoDelete = entbuilder.Delete[RelationshipInfo, int]
+
+// RelationshipInfoDeleteOne is the builder for deleting a single RelationshipInfo entity.
+type RelationshipInfoDeleteOne = entbuilder.DeleteOne[RelationshipInfo, int]
 
 // NewRelationshipInfoDelete returns a new RelationshipInfoDelete initialized with the given config, hooks, and mutation.
 func NewRelationshipInfoDelete(c Config, hooks []Hook, mutation *RelationshipInfoMutation) *RelationshipInfoDelete {
-	return &RelationshipInfoDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the RelationshipInfoDelete builder.
-func (_d *RelationshipInfoDelete) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *RelationshipInfoDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*RelationshipInfoMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *RelationshipInfoDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *RelationshipInfoDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// RelationshipInfoDeleteOne is the builder for deleting a single RelationshipInfo entity.
-type RelationshipInfoDeleteOne struct {
-	_d *RelationshipInfoDelete
+	return entbuilder.NewDelete[RelationshipInfo, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewRelationshipInfoDeleteOne returns a new RelationshipInfoDeleteOne wrapping the given RelationshipInfoDelete.
 func NewRelationshipInfoDeleteOne(d *RelationshipInfoDelete) *RelationshipInfoDeleteOne {
-	return &RelationshipInfoDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the RelationshipInfoDelete builder.
-func (_d *RelationshipInfoDeleteOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *RelationshipInfoDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *RelationshipInfoDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

@@ -7,14 +7,12 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Session is the model entity for the Session schema.
@@ -62,46 +60,15 @@ func (e SessionEdges) DeviceOrErr() (*Device, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Session) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			values[i] = new(schema.ID)
-		case "device_sessions": // device_sessions
-			values[i] = &sql.NullScanner{S: new(schema.ID)}
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(sessionDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Session fields.
 func (_m *Session) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*schema.ID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				_m.ID = *value
-			}
-		case "device_sessions":
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field device_sessions", values[i])
-			} else if value.Valid {
-				_m.device_sessions = new(schema.ID)
-				*_m.device_sessions = *value.S.(*schema.ID)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(sessionDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Session.
@@ -133,11 +100,7 @@ func (_m *Session) Unwrap() *Session {
 
 // String implements the fmt.Stringer.
 func (_m *Session) String() string {
-	var builder strings.Builder
-	builder.WriteString("Session(")
-	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(sessionDescriptor, _m)
 }
 
 // Sessions is a parsable slice of Session.

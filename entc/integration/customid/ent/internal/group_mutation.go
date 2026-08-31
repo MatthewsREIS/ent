@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 )
@@ -31,9 +33,31 @@ var groupDescriptor = &entbuilder.Descriptor{
 	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"users": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "group_users",
+			StorageColumns:  []string{"group_id", "user_id"},
+			TargetIDColumn:  "oid",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "groups",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:    "id",
+	IDSQLType:   field.TypeInt,
+	ScanFields:  []entbuilder.FieldSpec{},
+	FKColumns:   []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"users": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "group_users",
+			StorageColumns: []string{"group_id", "user_id"},
 		},
 	}}
 

@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 )
@@ -32,57 +33,156 @@ var conversionDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Name",
 			Nillable: true,
+			Column:   "name",
+			SQLType:  field.TypeString,
 		},
 		"int8_to_string": {
 			Type:     reflect.TypeFor[int8](),
 			GoName:   "Int8ToString",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "int8_to_string",
+			SQLType:  field.TypeInt8,
 		},
 		"uint8_to_string": {
 			Type:     reflect.TypeFor[uint8](),
 			GoName:   "Uint8ToString",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "uint8_to_string",
+			SQLType:  field.TypeUint8,
 		},
 		"int16_to_string": {
 			Type:     reflect.TypeFor[int16](),
 			GoName:   "Int16ToString",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "int16_to_string",
+			SQLType:  field.TypeInt16,
 		},
 		"uint16_to_string": {
 			Type:     reflect.TypeFor[uint16](),
 			GoName:   "Uint16ToString",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "uint16_to_string",
+			SQLType:  field.TypeUint16,
 		},
 		"int32_to_string": {
 			Type:     reflect.TypeFor[int32](),
 			GoName:   "Int32ToString",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "int32_to_string",
+			SQLType:  field.TypeInt32,
 		},
 		"uint32_to_string": {
 			Type:     reflect.TypeFor[uint32](),
 			GoName:   "Uint32ToString",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "uint32_to_string",
+			SQLType:  field.TypeUint32,
 		},
 		"int64_to_string": {
 			Type:     reflect.TypeFor[int64](),
 			GoName:   "Int64ToString",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "int64_to_string",
+			SQLType:  field.TypeInt64,
 		},
 		"uint64_to_string": {
 			Type:     reflect.TypeFor[uint64](),
 			GoName:   "Uint64ToString",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "uint64_to_string",
+			SQLType:  field.TypeUint64,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "conversions",
+	TableColumns: []string{
+		"id",
+		"name",
+		"int8_to_string",
+		"uint8_to_string",
+		"int16_to_string",
+		"uint16_to_string",
+		"int32_to_string",
+		"uint32_to_string",
+		"int64_to_string",
+		"uint64_to_string",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "int8_to_string",
+			Name:        "int8_to_string",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int8](),
+			SQLType:     field.TypeInt8,
+		},
+		{
+			Column:      "uint8_to_string",
+			Name:        "uint8_to_string",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[uint8](),
+			SQLType:     field.TypeUint8,
+		},
+		{
+			Column:      "int16_to_string",
+			Name:        "int16_to_string",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[int16](),
+			SQLType:     field.TypeInt16,
+		},
+		{
+			Column:      "uint16_to_string",
+			Name:        "uint16_to_string",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[uint16](),
+			SQLType:     field.TypeUint16,
+		},
+		{
+			Column:      "int32_to_string",
+			Name:        "int32_to_string",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[int32](),
+			SQLType:     field.TypeInt32,
+		},
+		{
+			Column:      "uint32_to_string",
+			Name:        "uint32_to_string",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[uint32](),
+			SQLType:     field.TypeUint32,
+		},
+		{
+			Column:      "int64_to_string",
+			Name:        "int64_to_string",
+			StructIndex: 9,
+			Type:        reflect.TypeFor[int64](),
+			SQLType:     field.TypeInt64,
+		},
+		{
+			Column:      "uint64_to_string",
+			Name:        "uint64_to_string",
+			StructIndex: 10,
+			Type:        reflect.TypeFor[uint64](),
+			SQLType:     field.TypeUint64,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewConversionMutation creates a new mutation for the Conversion entity.
 func NewConversionMutation(c Config, op Op, opts ...ConversionMutationOption) *ConversionMutation {

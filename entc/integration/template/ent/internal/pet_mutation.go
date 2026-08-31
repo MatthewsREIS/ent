@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/template/ent/predicate"
 )
@@ -33,19 +35,62 @@ var petDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Age",
 			Numeric: true,
+			Column:  "age",
+			SQLType: field.TypeInt,
 		},
 		"licensed_at": {
 			Type:     reflect.TypeFor[time.Time](),
 			GoName:   "LicensedAt",
 			Nillable: true,
+			Column:   "licensed_at",
+			SQLType:  field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "pets",
+			StorageColumns:  []string{"user_pets"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "pets",
+	TableColumns: []string{
+		"id",
+		"age",
+		"licensed_at",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "age",
+			Name:        "age",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "licensed_at",
+			Name:        "licensed_at",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+			Nillable:    true,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_pets",
+			GoName:      "SetUserPets",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
 		},
 	}}
 

@@ -7,96 +7,26 @@
 package intsid
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // IntSIDDelete is the builder for deleting a IntSID entity.
-type IntSIDDelete struct {
-	Config
-	hooks    []Hook
-	mutation *IntSIDMutation
-}
+type IntSIDDelete = entbuilder.Delete[IntSID, sid.ID]
+
+// IntSIDDeleteOne is the builder for deleting a single IntSID entity.
+type IntSIDDeleteOne = entbuilder.DeleteOne[IntSID, sid.ID]
 
 // NewIntSIDDelete returns a new IntSIDDelete initialized with the given config, hooks, and mutation.
 func NewIntSIDDelete(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSIDDelete {
-	return &IntSIDDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the IntSIDDelete builder.
-func (_d *IntSIDDelete) Where(ps ...predicate.IntSID) *IntSIDDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *IntSIDDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*IntSIDMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *IntSIDDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *IntSIDDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt64))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// IntSIDDeleteOne is the builder for deleting a single IntSID entity.
-type IntSIDDeleteOne struct {
-	_d *IntSIDDelete
+	return entbuilder.NewDelete[IntSID, sid.ID](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewIntSIDDeleteOne returns a new IntSIDDeleteOne wrapping the given IntSIDDelete.
 func NewIntSIDDeleteOne(d *IntSIDDelete) *IntSIDDeleteOne {
-	return &IntSIDDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the IntSIDDelete builder.
-func (_d *IntSIDDeleteOne) Where(ps ...predicate.IntSID) *IntSIDDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *IntSIDDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *IntSIDDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

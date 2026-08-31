@@ -13,6 +13,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/entc/integration/ent/schema/task"
@@ -34,46 +35,146 @@ var enttaskDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[task.Priority](),
 			GoName:  "Priority",
 			Numeric: true,
+			Column:  "priority",
+			SQLType: field.TypeInt,
 		},
 		"priorities": {
 			Type:     reflect.TypeFor[map[string]task.Priority](),
 			GoName:   "Priorities",
 			Nillable: true,
+			Column:   "priorities",
+			SQLType:  field.TypeJSON,
 		},
 		"created_at": {
 			Type:      reflect.TypeFor[time.Time](),
 			GoName:    "CreatedAt",
 			Nillable:  true,
 			Immutable: true,
+			Column:    "created_at",
+			SQLType:   field.TypeTime,
 		},
 		"name": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Name",
 			Nillable: true,
+			Column:   "name",
+			SQLType:  field.TypeString,
 		},
 		"owner": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Owner",
 			Nillable: true,
+			Column:   "owner",
+			SQLType:  field.TypeString,
 		},
 		"order": {
 			Type:     reflect.TypeFor[int](),
 			GoName:   "Order",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "order",
+			SQLType:  field.TypeInt,
 		},
 		"order_option": {
 			Type:     reflect.TypeFor[int](),
 			GoName:   "OrderOption",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "order_option",
+			SQLType:  field.TypeInt,
 		},
 		"op": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Op",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Op",
+			Column:  "op",
+			SQLType: field.TypeString,
 		},
 	},
-	Edges: map[string]entbuilder.EdgeSpec{}}
+	Edges: map[string]entbuilder.EdgeSpec{},
+	Table: "tasks",
+	TableColumns: []string{
+		"id",
+		"priority",
+		"priorities",
+		"created_at",
+		"owner",
+		"order",
+		"order_option",
+		"op",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "priority",
+			Name:        "priority",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[task.Priority](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "priorities",
+			Name:        "priorities",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[map[string]task.Priority](),
+			SQLType:     field.TypeJSON,
+		},
+		{
+			Column:      "created_at",
+			Name:        "created_at",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+			Nillable:    true,
+		},
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "owner",
+			Name:        "owner",
+			StructIndex: 6,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "order",
+			Name:        "order",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "order_option",
+			Name:        "order_option",
+			StructIndex: 8,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "op",
+			Name:        "op",
+			StructIndex: 9,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"priority":     field.TypeInt,
+		"priorities":   field.TypeJSON,
+		"created_at":   field.TypeTime,
+		"name":         field.TypeString,
+		"owner":        field.TypeString,
+		"order":        field.TypeInt,
+		"order_option": field.TypeInt,
+		"op":           field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{}}
 
 // NewTaskMutation creates a new mutation for the Task entity.
 func NewTaskMutation(c Config, op Op, opts ...TaskMutationOption) *TaskMutation {

@@ -7,15 +7,14 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Group is the model entity for the Group schema.
@@ -105,74 +104,15 @@ func (e GroupEdges) InfoOrErr() (*GroupInfo, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Group) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "active":
-			values[i] = new(sql.NullBool)
-		case "max_users":
-			values[i] = new(sql.NullInt64)
-		case "id", "type", "name":
-			values[i] = new(sql.NullString)
-		case "expire":
-			values[i] = new(sql.NullTime)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(groupDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
 func (_m *Group) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
-			}
-		case "active":
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field active", values[i])
-			} else if value.Valid {
-				_m.Active = value.Bool
-			}
-		case "expire":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field expire", values[i])
-			} else if value.Valid {
-				_m.Expire = value.Time
-			}
-		case "type":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field type", values[i])
-			} else if value.Valid {
-				_m.Type = new(string)
-				*_m.Type = value.String
-			}
-		case "max_users":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field max_users", values[i])
-			} else if value.Valid {
-				_m.MaxUsers = int(value.Int64)
-			}
-		case "name":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(groupDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Group.
@@ -194,27 +134,7 @@ func (_m *Group) Unwrap() *Group {
 
 // String implements the fmt.Stringer.
 func (_m *Group) String() string {
-	var builder strings.Builder
-	builder.WriteString("Group(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("active=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Active))
-	builder.WriteString(", ")
-	builder.WriteString("expire=")
-	builder.WriteString(_m.Expire.Format(time.ANSIC))
-	builder.WriteString(", ")
-	if v := _m.Type; v != nil {
-		builder.WriteString("type=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
-	builder.WriteString("max_users=")
-	builder.WriteString(fmt.Sprintf("%v", _m.MaxUsers))
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(groupDescriptor, _m)
 }
 
 // Groups is a parsable slice of Group.

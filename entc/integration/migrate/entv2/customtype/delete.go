@@ -7,96 +7,25 @@
 package customtype
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // CustomTypeDelete is the builder for deleting a CustomType entity.
-type CustomTypeDelete struct {
-	Config
-	hooks    []Hook
-	mutation *CustomTypeMutation
-}
+type CustomTypeDelete = entbuilder.Delete[CustomType, int]
+
+// CustomTypeDeleteOne is the builder for deleting a single CustomType entity.
+type CustomTypeDeleteOne = entbuilder.DeleteOne[CustomType, int]
 
 // NewCustomTypeDelete returns a new CustomTypeDelete initialized with the given config, hooks, and mutation.
 func NewCustomTypeDelete(c Config, hooks []Hook, mutation *CustomTypeMutation) *CustomTypeDelete {
-	return &CustomTypeDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the CustomTypeDelete builder.
-func (_d *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*CustomTypeMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *CustomTypeDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *CustomTypeDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// CustomTypeDeleteOne is the builder for deleting a single CustomType entity.
-type CustomTypeDeleteOne struct {
-	_d *CustomTypeDelete
+	return entbuilder.NewDelete[CustomType, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewCustomTypeDeleteOne returns a new CustomTypeDeleteOne wrapping the given CustomTypeDelete.
 func NewCustomTypeDeleteOne(d *CustomTypeDelete) *CustomTypeDeleteOne {
-	return &CustomTypeDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the CustomTypeDelete builder.
-func (_d *CustomTypeDeleteOne) Where(ps ...predicate.CustomType) *CustomTypeDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *CustomTypeDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *CustomTypeDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

@@ -7,96 +7,25 @@
 package zoo
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/migrate/entv2/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // ZooDelete is the builder for deleting a Zoo entity.
-type ZooDelete struct {
-	Config
-	hooks    []Hook
-	mutation *ZooMutation
-}
+type ZooDelete = entbuilder.Delete[Zoo, int]
+
+// ZooDeleteOne is the builder for deleting a single Zoo entity.
+type ZooDeleteOne = entbuilder.DeleteOne[Zoo, int]
 
 // NewZooDelete returns a new ZooDelete initialized with the given config, hooks, and mutation.
 func NewZooDelete(c Config, hooks []Hook, mutation *ZooMutation) *ZooDelete {
-	return &ZooDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the ZooDelete builder.
-func (_d *ZooDelete) Where(ps ...predicate.Zoo) *ZooDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *ZooDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*ZooMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *ZooDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *ZooDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// ZooDeleteOne is the builder for deleting a single Zoo entity.
-type ZooDeleteOne struct {
-	_d *ZooDelete
+	return entbuilder.NewDelete[Zoo, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewZooDeleteOne returns a new ZooDeleteOne wrapping the given ZooDelete.
 func NewZooDeleteOne(d *ZooDelete) *ZooDeleteOne {
-	return &ZooDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the ZooDelete builder.
-func (_d *ZooDeleteOne) Where(ps ...predicate.Zoo) *ZooDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *ZooDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *ZooDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

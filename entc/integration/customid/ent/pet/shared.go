@@ -12,8 +12,6 @@ import (
 	"reflect"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/internal"
 )
@@ -158,112 +156,9 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 	return nil
 }
 
-// schemaGraph holds this entity's schema for entql predicate evaluation.
-// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
-// string literals (sibling sub-packages cannot be imported from a leaf).
-// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
-// join table, including the SQL "FROM <target_table>" sub-selects emitted
-// by HasNeighborsWith. Cross-edge entql field predicates against sibling
-// entity columns are out of scope at the sub-package boundary; generated
-// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
-// closures directly to the SQL selector and never reads stub.Fields.
-var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 3)}
-	graph.Nodes[0] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table:   Table,
-			Columns: Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeString,
-				Column: FieldID,
-			},
-		},
-		Type:   "Pet",
-		Fields: map[string]*sqlgraph.FieldSpec{},
-	}
-	graph.Nodes[1] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table: "users",
-			Columns: []string{
-				"oid",
-			},
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: "oid",
-			},
-		},
-		Type:   "User",
-		Fields: map[string]*sqlgraph.FieldSpec{},
-	}
-	graph.Nodes[2] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table: "cars",
-			Columns: []string{
-				"id",
-				"before_id",
-				"after_id",
-				"model",
-			},
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: "id",
-			},
-		},
-		Type: "Car",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			"before_id": {Type: field.TypeFloat64, Column: "before_id"},
-			"after_id":  {Type: field.TypeFloat64, Column: "after_id"},
-			"model":     {Type: field.TypeString, Column: "model"},
-		},
-	}
-	graph.MustAddE(
-		"owner",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-		},
-		"Pet",
-		"User",
-	)
-	graph.MustAddE(
-		"cars",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   CarsTable,
-			Columns: []string{CarsColumn},
-			Bidi:    false,
-		},
-		"Pet",
-		"Car",
-	)
-	graph.MustAddE(
-		"friends",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   FriendsTable,
-			Columns: FriendsPrimaryKey,
-			Bidi:    true,
-		},
-		"Pet",
-		"Pet",
-	)
-	graph.MustAddE(
-		"best_friend",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   BestFriendTable,
-			Columns: []string{BestFriendColumn},
-			Bidi:    true,
-		},
-		"Pet",
-		"Pet",
-	)
-	return graph
-}()
+// schemaGraph holds the runtime schema for entql predicate evaluation. It's
+// one shared *sqlgraph.Schema built once from every entity's descriptor
+// (internal.SchemaGraph) — every entity aliases it under this name so the
+// entql template (dialect/sql/entql_type.tmpl) doesn't need to know the
+// difference between this and the pre-Task-2 per-entity literal it replaces.
+var schemaGraph = internal.SchemaGraph

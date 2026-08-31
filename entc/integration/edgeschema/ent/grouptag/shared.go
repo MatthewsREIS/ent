@@ -12,8 +12,6 @@ import (
 	"reflect"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/internal"
 )
@@ -158,90 +156,9 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 	return nil
 }
 
-// schemaGraph holds this entity's schema for entql predicate evaluation.
-// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
-// string literals (sibling sub-packages cannot be imported from a leaf).
-// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
-// join table, including the SQL "FROM <target_table>" sub-selects emitted
-// by HasNeighborsWith. Cross-edge entql field predicates against sibling
-// entity columns are out of scope at the sub-package boundary; generated
-// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
-// closures directly to the SQL selector and never reads stub.Fields.
-var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 3)}
-	graph.Nodes[0] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table:   Table,
-			Columns: Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: FieldID,
-			},
-		},
-		Type: "GroupTag",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			FieldTagID:   {Type: field.TypeInt, Column: FieldTagID},
-			FieldGroupID: {Type: field.TypeInt, Column: FieldGroupID},
-		},
-	}
-	graph.Nodes[1] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table: "tags",
-			Columns: []string{
-				"id",
-				"value",
-			},
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: "id",
-			},
-		},
-		Type: "Tag",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			"value": {Type: field.TypeString, Column: "value"},
-		},
-	}
-	graph.Nodes[2] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table: "groups",
-			Columns: []string{
-				"id",
-				"name",
-			},
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: "id",
-			},
-		},
-		Type: "Group",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			"name": {Type: field.TypeString, Column: "name"},
-		},
-	}
-	graph.MustAddE(
-		"tag",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   TagTable,
-			Columns: []string{TagColumn},
-			Bidi:    false,
-		},
-		"GroupTag",
-		"Tag",
-	)
-	graph.MustAddE(
-		"group",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   GroupTable,
-			Columns: []string{GroupColumn},
-			Bidi:    false,
-		},
-		"GroupTag",
-		"Group",
-	)
-	return graph
-}()
+// schemaGraph holds the runtime schema for entql predicate evaluation. It's
+// one shared *sqlgraph.Schema built once from every entity's descriptor
+// (internal.SchemaGraph) — every entity aliases it under this name so the
+// entql template (dialect/sql/entql_type.tmpl) doesn't need to know the
+// difference between this and the pre-Task-2 per-entity literal it replaces.
+var schemaGraph = internal.SchemaGraph

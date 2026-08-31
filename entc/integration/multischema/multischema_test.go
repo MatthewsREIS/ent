@@ -126,7 +126,7 @@ func TestMySQL(t *testing.T) {
 	require.True(t, exist)
 	exist = client.Pet.QueryOwner(pedro).ExistX(ctx)
 	require.True(t, exist)
-	pedro = client.Pet.UpdateOne(pedro).ClearOwner().SaveX(ctx)
+	pedro = client.Pet.UpdateOne(pedro).With(pet.E.Owner.Clear()).SaveX(ctx)
 	exist = client.Pet.QueryOwner(pedro).ExistX(ctx)
 	require.False(t, exist)
 
@@ -243,7 +243,7 @@ func TestVersionedMigration(t *testing.T) {
 	require.True(t, exist)
 	exist = client.Pet.QueryOwner(pedro).ExistX(ctx)
 	require.True(t, exist)
-	pedro = client.Pet.UpdateOne(pedro).ClearOwner().SaveX(ctx)
+	pedro = client.Pet.UpdateOne(pedro).With(pet.E.Owner.Clear()).SaveX(ctx)
 	exist = client.Pet.QueryOwner(pedro).ExistX(ctx)
 	require.False(t, exist)
 

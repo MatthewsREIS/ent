@@ -10,7 +10,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -131,86 +130,7 @@ func (_c *FileCreate) createSpec() (*File, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := entbuilder.GetField[int](_c.mutation, "set_id"); ok {
-		_spec.SetField(FieldSetID, field.TypeInt, value)
-		_node.SetID = value
-	}
-	if value, ok := entbuilder.GetField[int](_c.mutation, "size"); ok {
-		_spec.SetField(FieldSize, field.TypeInt, value)
-		_node.Size = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "user"); ok {
-		_spec.SetField(FieldUser, field.TypeString, value)
-		_node.User = &value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "group"); ok {
-		_spec.SetField(FieldGroup, field.TypeString, value)
-		_node.Group = value
-	}
-	if value, ok := entbuilder.GetField[bool](_c.mutation, "op"); ok {
-		_spec.SetField(FieldOp, field.TypeBool, value)
-		_node.Op = value
-	}
-	if value, ok := entbuilder.GetField[int](_c.mutation, "field_id"); ok {
-		_spec.SetField(FieldFieldID, field.TypeInt, value)
-		_node.FieldID = value
-	}
-	if value, ok := entbuilder.GetField[time.Time](_c.mutation, "create_time"); ok {
-		_spec.SetField(FieldCreateTime, field.TypeTime, value)
-		_node.CreateTime = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "type"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   TypeTable,
-			Columns: []string{TypeColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "field"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   FieldTable,
-			Columns: []string{FieldColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

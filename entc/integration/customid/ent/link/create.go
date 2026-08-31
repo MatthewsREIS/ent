@@ -132,10 +132,7 @@ func (_c *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := entbuilder.GetField[map[string]schema.LinkInformation](_c.mutation, "link_information"); ok {
-		_spec.SetField(FieldLinkInformation, field.TypeJSON, value)
-		_node.LinkInformation = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

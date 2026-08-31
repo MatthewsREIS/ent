@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
@@ -32,15 +34,59 @@ var intsidDescriptor = &entbuilder.Descriptor{
 	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "IntSID",
-			TargetIDType: reflect.TypeFor[sid.ID](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "IntSID",
+			TargetIDType:    reflect.TypeFor[sid.ID](),
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "int_si_ds",
+			StorageColumns:  []string{"int_sid_parent"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt64,
 		},
 		"children": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "IntSID",
-			TargetIDType: reflect.TypeFor[sid.ID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "IntSID",
+			TargetIDType:    reflect.TypeFor[sid.ID](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "int_si_ds",
+			StorageColumns:  []string{"int_sid_parent"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt64,
+		},
+	},
+	Table: "int_si_ds",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:   "id",
+	IDSQLType:  field.TypeInt64,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "int_sid_parent",
+			GoName:      "SetIntSidParent",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[sid.ID](),
+			SQLType:     field.TypeInt64,
+		},
+	},
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"parent": {
+			Target:         "IntSID",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "int_si_ds",
+			StorageColumns: []string{"int_sid_parent"},
+			Bidi:           true,
+		},
+		"children": {
+			Target:         "IntSID",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "int_si_ds",
+			StorageColumns: []string{"int_sid_parent"},
 		},
 	}}
 

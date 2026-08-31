@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 	"github.com/google/uuid"
@@ -30,35 +32,123 @@ var taskDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"title": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Title",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Title",
+			Column:  "title",
+			SQLType: field.TypeString,
 		},
 		"description": {
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Description",
 			Nillable: true,
+			Column:   "description",
+			SQLType:  field.TypeString,
 		},
 		"status": {
-			Type:   reflect.TypeFor[TaskStatus](),
-			GoName: "Status",
+			Type:    reflect.TypeFor[TaskStatus](),
+			GoName:  "Status",
+			Column:  "status",
+			SQLType: field.TypeEnum,
 		},
 		"uuid": {
 			Type:     reflect.TypeFor[uuid.UUID](),
 			GoName:   "UUID",
 			Nillable: true,
+			Column:   "uuid",
+			SQLType:  field.TypeUUID,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"teams": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Team",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Team",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "task_teams",
+			StorageColumns:  []string{"task_id", "team_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "tasks",
+			StorageColumns:  []string{"user_tasks"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "tasks",
+	TableColumns: []string{
+		"id",
+		"title",
+		"description",
+		"status",
+		"uuid",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "title",
+			Name:        "title",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "description",
+			Name:        "description",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "status",
+			Name:        "status",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[TaskStatus](),
+			SQLType:     field.TypeEnum,
+		},
+		{
+			Column:      "uuid",
+			Name:        "uuid",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_tasks",
+			GoName:      "SetUserTasks",
+			StructIndex: 7,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	GraphFields: map[string]field.Type{
+		"title":       field.TypeString,
+		"description": field.TypeString,
+		"status":      field.TypeEnum,
+		"uuid":        field.TypeUUID,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"teams": {
+			Target:         "Team",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "task_teams",
+			StorageColumns: []string{"task_id", "team_id"},
+		},
+		"owner": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "tasks",
+			StorageColumns: []string{"user_tasks"},
 		},
 	}}
 

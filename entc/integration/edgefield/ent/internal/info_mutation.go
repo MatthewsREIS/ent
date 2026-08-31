@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"encoding/json"
 
@@ -32,17 +34,42 @@ var infoDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"content": {
-			Type:   reflect.TypeFor[json.RawMessage](),
-			GoName: "Content",
+			Type:    reflect.TypeFor[json.RawMessage](),
+			GoName:  "Content",
+			Column:  "content",
+			SQLType: field.TypeJSON,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "infos",
+			StorageColumns:  []string{"id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "ID",
 		},
-	}}
+	},
+	Table: "infos",
+	TableColumns: []string{
+		"id",
+		"content",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "content",
+			Name:        "content",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[json.RawMessage](),
+			SQLType:     field.TypeJSON,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewInfoMutation creates a new mutation for the Info entity.
 func NewInfoMutation(c Config, op Op, opts ...InfoMutationOption) *InfoMutation {

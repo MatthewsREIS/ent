@@ -106,16 +106,7 @@ func (_u *ParentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[bool](_u.mutation, "by_adoption"); ok {
-		_spec.SetField(FieldByAdoption, field.TypeBool, value)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, internal.SchemaOf(_u.Config), nil)
 	schemaConfig := _u.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Parent
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
@@ -243,16 +234,7 @@ func (_u *ParentUpdateOne) sqlSave(ctx context.Context) (_node *Parent, err erro
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[bool](_u.mutation, "by_adoption"); ok {
-		_spec.SetField(FieldByAdoption, field.TypeBool, value)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, internal.SchemaOf(_u.Config), nil)
 	schemaConfig := _u.Config.SchemaConfig()
 	_spec.Node.Schema = schemaConfig.Parent
 	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)

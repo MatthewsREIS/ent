@@ -7,14 +7,13 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -79,51 +78,15 @@ func (e BlobLinkEdges) LinkOrErr() (*Blob, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*BlobLink) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "created_at":
-			values[i] = new(sql.NullTime)
-		case "blob_id", "link_id":
-			values[i] = new(uuid.UUID)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(bloblinkDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the BlobLink fields.
 func (_m *BlobLink) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "created_at":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				_m.CreatedAt = value.Time
-			}
-		case "blob_id":
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field blob_id", values[i])
-			} else if value != nil {
-				_m.BlobID = *value
-			}
-		case "link_id":
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field link_id", values[i])
-			} else if value != nil {
-				_m.LinkID = *value
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(bloblinkDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the BlobLink.
@@ -145,18 +108,7 @@ func (_m *BlobLink) Unwrap() *BlobLink {
 
 // String implements the fmt.Stringer.
 func (_m *BlobLink) String() string {
-	var builder strings.Builder
-	builder.WriteString("BlobLink(")
-	builder.WriteString("created_at=")
-	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("blob_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.BlobID))
-	builder.WriteString(", ")
-	builder.WriteString("link_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.LinkID))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(bloblinkDescriptor, _m)
 }
 
 // BlobLinks is a parsable slice of BlobLink.

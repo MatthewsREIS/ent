@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
@@ -30,40 +32,131 @@ var tweetDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"text": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Text",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Text",
+			Column:  "text",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"liked_users": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "tweet_likes",
+			StorageColumns:  []string{"user_id", "tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"user": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "user_tweets",
+			StorageColumns:  []string{"user_id", "tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"tags": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Tag",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "Tag",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "tweet_tags",
+			StorageColumns:  []string{"tag_id", "tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"tweet_user": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "UserTweet",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "UserTweet",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "user_tweets",
+			StorageColumns:  []string{"tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"tweet_tags": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "TweetTag",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "TweetTag",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "tweet_tags",
+			StorageColumns:  []string{"tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
+		},
+	},
+	Table: "tweets",
+	TableColumns: []string{
+		"id",
+		"text",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "text",
+			Name:        "text",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"text": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"liked_users": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"user_id", "tweet_id"},
+		},
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "user_tweets",
+			StorageColumns: []string{"user_id", "tweet_id"},
+		},
+		"tags": {
+			Target:         "Tag",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tag_id", "tweet_id"},
+		},
+		"likes": {
+			Target:         "TweetLike",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "tweet_likes",
+			StorageColumns: []string{"tweet_id"},
+		},
+		"tweet_user": {
+			Target:         "UserTweet",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "user_tweets",
+			StorageColumns: []string{"tweet_id"},
+		},
+		"tweet_tags": {
+			Target:         "TweetTag",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tweet_id"},
 		},
 	}}
 

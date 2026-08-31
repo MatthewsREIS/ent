@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/migrate/entv1/predicate"
 )
@@ -30,10 +32,31 @@ var carDescriptor = &entbuilder.Descriptor{
 	Fields: map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"owner": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "Car",
+			StorageColumns:  []string{"user_car"},
+			TargetIDColumn:  "oid",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "Car",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:   "id",
+	IDSQLType:  field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_car",
+			GoName:      "SetUserCar",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
 		},
 	}}
 

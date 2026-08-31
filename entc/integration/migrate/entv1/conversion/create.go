@@ -101,42 +101,7 @@ func (_c *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 		_node = &Conversion{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := entbuilder.GetField[string](_c.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-		_node.Name = value
-	}
-	if value, ok := entbuilder.GetField[int8](_c.mutation, "int8_to_string"); ok {
-		_spec.SetField(FieldInt8ToString, field.TypeInt8, value)
-		_node.Int8ToString = value
-	}
-	if value, ok := entbuilder.GetField[uint8](_c.mutation, "uint8_to_string"); ok {
-		_spec.SetField(FieldUint8ToString, field.TypeUint8, value)
-		_node.Uint8ToString = value
-	}
-	if value, ok := entbuilder.GetField[int16](_c.mutation, "int16_to_string"); ok {
-		_spec.SetField(FieldInt16ToString, field.TypeInt16, value)
-		_node.Int16ToString = value
-	}
-	if value, ok := entbuilder.GetField[uint16](_c.mutation, "uint16_to_string"); ok {
-		_spec.SetField(FieldUint16ToString, field.TypeUint16, value)
-		_node.Uint16ToString = value
-	}
-	if value, ok := entbuilder.GetField[int32](_c.mutation, "int32_to_string"); ok {
-		_spec.SetField(FieldInt32ToString, field.TypeInt32, value)
-		_node.Int32ToString = value
-	}
-	if value, ok := entbuilder.GetField[uint32](_c.mutation, "uint32_to_string"); ok {
-		_spec.SetField(FieldUint32ToString, field.TypeUint32, value)
-		_node.Uint32ToString = value
-	}
-	if value, ok := entbuilder.GetField[int64](_c.mutation, "int64_to_string"); ok {
-		_spec.SetField(FieldInt64ToString, field.TypeInt64, value)
-		_node.Int64ToString = value
-	}
-	if value, ok := entbuilder.GetField[uint64](_c.mutation, "uint64_to_string"); ok {
-		_spec.SetField(FieldUint64ToString, field.TypeUint64, value)
-		_node.Uint64ToString = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

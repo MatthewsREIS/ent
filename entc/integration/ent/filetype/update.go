@@ -53,18 +53,6 @@ func (_u *FileTypeUpdate) Mutation() *FileTypeMutation {
 	return _u.mutation
 }
 
-// ClearFiles clears all "files" edges to the File entity.
-func (_u *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
-	_ = _u.mutation.ClearEdge("files")
-	return _u
-}
-
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (_u *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -121,67 +109,7 @@ func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(Table, Columns, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if value, ok := entbuilder.GetField[Type](_u.mutation, "type"); ok {
-		_spec.SetField(FieldType, field.TypeEnum, value)
-	}
-	if value, ok := entbuilder.GetField[State](_u.mutation, "state"); ok {
-		_spec.SetField(FieldState, field.TypeEnum, value)
-	}
-	if _u.mutation.EdgeCleared("files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: []string{FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: []string{FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: []string{FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.Drv, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -222,18 +150,6 @@ func (_u *FileTypeUpdateOne) With(as ...entfield.Assignment) *FileTypeUpdateOne 
 // Mutation returns the FileTypeMutation object of the builder.
 func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation {
 	return _u.mutation
-}
-
-// ClearFiles clears all "files" edges to the File entity.
-func (_u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
-	_ = _u.mutation.ClearEdge("files")
-	return _u
-}
-
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (_u *FileTypeUpdateOne) RemoveFileIDs(ids ...int) *FileTypeUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("files", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.
@@ -322,67 +238,7 @@ func (_u *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, err 
 			}
 		}
 	}
-	if ps := _u.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	if value, ok := entbuilder.GetField[string](_u.mutation, "name"); ok {
-		_spec.SetField(FieldName, field.TypeString, value)
-	}
-	if value, ok := entbuilder.GetField[Type](_u.mutation, "type"); ok {
-		_spec.SetField(FieldType, field.TypeEnum, value)
-	}
-	if value, ok := entbuilder.GetField[State](_u.mutation, "state"); ok {
-		_spec.SetField(FieldState, field.TypeEnum, value)
-	}
-	if _u.mutation.EdgeCleared("files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: []string{FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.RemovedEdgeIDs("files"); len(nodes) > 0 && !_u.mutation.EdgeCleared("files") {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: []string{FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := _u.mutation.EdgeIDs("files"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   FilesTable,
-			Columns: []string{FilesColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
+	entbuilder.ApplyUpdateSpec(_u.mutation, _spec, nil, nil)
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &FileType{Config: _u.Config}
 	_spec.Assign = _node.AssignValues

@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -33,26 +35,103 @@ var friendshipDescriptor = &entbuilder.Descriptor{
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Weight",
 			Numeric: true,
+			Column:  "weight",
+			SQLType: field.TypeInt,
 		},
 		"created_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "CreatedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "CreatedAt",
+			Column:  "created_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "friendships",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 		"friend": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "friend_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "friend_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "friendships",
+			StorageColumns:  []string{"friend_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "FriendID",
+		},
+	},
+	Table: "friendships",
+	TableColumns: []string{
+		"id",
+		"weight",
+		"created_at",
+		"user_id",
+		"friend_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "weight",
+			Name:        "weight",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "created_at",
+			Name:        "created_at",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "friend_id",
+			Name:        "friend_id",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"weight":     field.TypeInt,
+		"created_at": field.TypeTime,
+		"user_id":    field.TypeInt,
+		"friend_id":  field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "friendships",
+			StorageColumns: []string{"user_id"},
+		},
+		"friend": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "friendships",
+			StorageColumns: []string{"friend_id"},
 		},
 	}}
 

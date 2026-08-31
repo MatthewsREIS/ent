@@ -8,14 +8,11 @@ package user
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/json/ent/schema"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
@@ -137,58 +134,7 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node = &User{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := entbuilder.GetField[*schema.T](_c.mutation, "t"); ok {
-		_spec.SetField(FieldT, field.TypeJSON, value)
-		_node.T = value
-	}
-	if value, ok := entbuilder.GetField[*url.URL](_c.mutation, "url"); ok {
-		_spec.SetField(FieldURL, field.TypeJSON, value)
-		_node.URL = value
-	}
-	if value, ok := entbuilder.GetField[[]*url.URL](_c.mutation, "URLs"); ok {
-		_spec.SetField(FieldURLs, field.TypeJSON, value)
-		_node.URLs = value
-	}
-	if value, ok := entbuilder.GetField[json.RawMessage](_c.mutation, "raw"); ok {
-		_spec.SetField(FieldRaw, field.TypeJSON, value)
-		_node.Raw = value
-	}
-	if value, ok := entbuilder.GetField[[]http.Dir](_c.mutation, "dirs"); ok {
-		_spec.SetField(FieldDirs, field.TypeJSON, value)
-		_node.Dirs = value
-	}
-	if value, ok := entbuilder.GetField[[]int](_c.mutation, "ints"); ok {
-		_spec.SetField(FieldInts, field.TypeJSON, value)
-		_node.Ints = value
-	}
-	if value, ok := entbuilder.GetField[[]float64](_c.mutation, "floats"); ok {
-		_spec.SetField(FieldFloats, field.TypeJSON, value)
-		_node.Floats = value
-	}
-	if value, ok := entbuilder.GetField[[]string](_c.mutation, "strings"); ok {
-		_spec.SetField(FieldStrings, field.TypeJSON, value)
-		_node.Strings = value
-	}
-	if value, ok := entbuilder.GetField[[]int](_c.mutation, "ints_validate"); ok {
-		_spec.SetField(FieldIntsValidate, field.TypeJSON, value)
-		_node.IntsValidate = value
-	}
-	if value, ok := entbuilder.GetField[[]float64](_c.mutation, "floats_validate"); ok {
-		_spec.SetField(FieldFloatsValidate, field.TypeJSON, value)
-		_node.FloatsValidate = value
-	}
-	if value, ok := entbuilder.GetField[[]string](_c.mutation, "strings_validate"); ok {
-		_spec.SetField(FieldStringsValidate, field.TypeJSON, value)
-		_node.StringsValidate = value
-	}
-	if value, ok := entbuilder.GetField[schema.Addr](_c.mutation, "addr"); ok {
-		_spec.SetField(FieldAddr, field.TypeJSON, value)
-		_node.Addr = value
-	}
-	if value, ok := entbuilder.GetField[any](_c.mutation, "unknown"); ok {
-		_spec.SetField(FieldUnknown, field.TypeJSON, value)
-		_node.Unknown = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

@@ -54,18 +54,6 @@ func (_u *NodeUpdate) Mutation() *NodeMutation {
 	return _u.mutation
 }
 
-// ClearPrev clears the "prev" edge to the Node entity.
-func (_u *NodeUpdate) ClearPrev() *NodeUpdate {
-	_ = _u.mutation.ClearEdge("prev")
-	return _u
-}
-
-// ClearNext clears the "next" edge to the Node entity.
-func (_u *NodeUpdate) ClearNext() *NodeUpdate {
-	_ = _u.mutation.ClearEdge("next")
-	return _u
-}
-
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (_u *NodeUpdate) Save(ctx context.Context) (int, error) {
 	if _u.err != nil {
@@ -216,18 +204,6 @@ func (_u *NodeUpdateOne) With(as ...entfield.Assignment) *NodeUpdateOne {
 // Mutation returns the NodeMutation object of the builder.
 func (_u *NodeUpdateOne) Mutation() *NodeMutation {
 	return _u.mutation
-}
-
-// ClearPrev clears the "prev" edge to the Node entity.
-func (_u *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
-	_ = _u.mutation.ClearEdge("prev")
-	return _u
-}
-
-// ClearNext clears the "next" edge to the Node entity.
-func (_u *NodeUpdateOne) ClearNext() *NodeUpdateOne {
-	_ = _u.mutation.ClearEdge("next")
-	return _u
 }
 
 // Where appends a list predicates to the NodeUpdate builder.

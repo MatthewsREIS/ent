@@ -12,8 +12,6 @@ import (
 	"reflect"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/internal"
 )
@@ -158,112 +156,9 @@ func scanWithInterceptors[Q1 ent.Query, Q2 interface {
 	return nil
 }
 
-// schemaGraph holds this entity's schema for entql predicate evaluation.
-// Node 0 is the full self-node; subsequent nodes are stubs for edge targets
-// — they carry the target's Type name, Table, Columns, and ID NodeSpec as
-// string literals (sibling sub-packages cannot be imported from a leaf).
-// The stubs are sufficient for entql.HasEdge / HasEdgeWith dispatch on the
-// join table, including the SQL "FROM <target_table>" sub-selects emitted
-// by HasNeighborsWith. Cross-edge entql field predicates against sibling
-// entity columns are out of scope at the sub-package boundary; generated
-// WhereHasXWith uses sqlgraph.WrapFunc, which applies sibling predicate
-// closures directly to the SQL selector and never reads stub.Fields.
-var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 3)}
-	graph.Nodes[0] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table:   Table,
-			Columns: Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: FieldID,
-			},
-		},
-		Type: "Card",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			FieldCreateTime: {Type: field.TypeTime, Column: FieldCreateTime},
-			FieldUpdateTime: {Type: field.TypeTime, Column: FieldUpdateTime},
-			FieldBalance:    {Type: field.TypeFloat64, Column: FieldBalance},
-			FieldNumber:     {Type: field.TypeString, Column: FieldNumber},
-			FieldName:       {Type: field.TypeString, Column: FieldName},
-		},
-	}
-	graph.Nodes[1] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table: "users",
-			Columns: []string{
-				"id",
-				"optional_int",
-				"age",
-				"name",
-				"last",
-				"nickname",
-				"address",
-				"phone",
-				"password",
-				"role",
-				"employment",
-				"sso_cert",
-				"files_count",
-			},
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: "id",
-			},
-		},
-		Type: "User",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			"optional_int": {Type: field.TypeInt, Column: "optional_int"},
-			"age":          {Type: field.TypeInt, Column: "age"},
-			"name":         {Type: field.TypeString, Column: "name"},
-			"last":         {Type: field.TypeString, Column: "last"},
-			"nickname":     {Type: field.TypeString, Column: "nickname"},
-			"address":      {Type: field.TypeString, Column: "address"},
-			"phone":        {Type: field.TypeString, Column: "phone"},
-			"password":     {Type: field.TypeString, Column: "password"},
-			"role":         {Type: field.TypeEnum, Column: "role"},
-			"employment":   {Type: field.TypeEnum, Column: "employment"},
-			"sso_cert":     {Type: field.TypeString, Column: "sso_cert"},
-			"files_count":  {Type: field.TypeInt, Column: "files_count"},
-		},
-	}
-	graph.Nodes[2] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
-			Table: "specs",
-			Columns: []string{
-				"id",
-			},
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: "id",
-			},
-		},
-		Type:   "Spec",
-		Fields: map[string]*sqlgraph.FieldSpec{},
-	}
-	graph.MustAddE(
-		"owner",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-		},
-		"Card",
-		"User",
-	)
-	graph.MustAddE(
-		"spec",
-		&sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   SpecTable,
-			Columns: SpecPrimaryKey,
-			Bidi:    false,
-		},
-		"Card",
-		"Spec",
-	)
-	return graph
-}()
+// schemaGraph holds the runtime schema for entql predicate evaluation. It's
+// one shared *sqlgraph.Schema built once from every entity's descriptor
+// (internal.SchemaGraph) — every entity aliases it under this name so the
+// entql template (dialect/sql/entql_type.tmpl) doesn't need to know the
+// difference between this and the pre-Task-2 per-entity literal it replaces.
+var schemaGraph = internal.SchemaGraph

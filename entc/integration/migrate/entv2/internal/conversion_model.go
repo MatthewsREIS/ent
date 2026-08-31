@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // Conversion is the model entity for the Conversion schema.
@@ -45,93 +43,15 @@ type Conversion struct {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Conversion) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			values[i] = new(sql.NullInt64)
-		case "name", "int8_to_string", "uint8_to_string", "int16_to_string", "uint16_to_string", "int32_to_string", "uint32_to_string", "int64_to_string", "uint64_to_string":
-			values[i] = new(sql.NullString)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(conversionDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Conversion fields.
 func (_m *Conversion) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "name":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		case "int8_to_string":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field int8_to_string", values[i])
-			} else if value.Valid {
-				_m.Int8ToString = value.String
-			}
-		case "uint8_to_string":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field uint8_to_string", values[i])
-			} else if value.Valid {
-				_m.Uint8ToString = value.String
-			}
-		case "int16_to_string":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field int16_to_string", values[i])
-			} else if value.Valid {
-				_m.Int16ToString = value.String
-			}
-		case "uint16_to_string":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field uint16_to_string", values[i])
-			} else if value.Valid {
-				_m.Uint16ToString = value.String
-			}
-		case "int32_to_string":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field int32_to_string", values[i])
-			} else if value.Valid {
-				_m.Int32ToString = value.String
-			}
-		case "uint32_to_string":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field uint32_to_string", values[i])
-			} else if value.Valid {
-				_m.Uint32ToString = value.String
-			}
-		case "int64_to_string":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field int64_to_string", values[i])
-			} else if value.Valid {
-				_m.Int64ToString = value.String
-			}
-		case "uint64_to_string":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field uint64_to_string", values[i])
-			} else if value.Valid {
-				_m.Uint64ToString = value.String
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(conversionDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Conversion.
@@ -153,37 +73,7 @@ func (_m *Conversion) Unwrap() *Conversion {
 
 // String implements the fmt.Stringer.
 func (_m *Conversion) String() string {
-	var builder strings.Builder
-	builder.WriteString("Conversion(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	builder.WriteString("int8_to_string=")
-	builder.WriteString(_m.Int8ToString)
-	builder.WriteString(", ")
-	builder.WriteString("uint8_to_string=")
-	builder.WriteString(_m.Uint8ToString)
-	builder.WriteString(", ")
-	builder.WriteString("int16_to_string=")
-	builder.WriteString(_m.Int16ToString)
-	builder.WriteString(", ")
-	builder.WriteString("uint16_to_string=")
-	builder.WriteString(_m.Uint16ToString)
-	builder.WriteString(", ")
-	builder.WriteString("int32_to_string=")
-	builder.WriteString(_m.Int32ToString)
-	builder.WriteString(", ")
-	builder.WriteString("uint32_to_string=")
-	builder.WriteString(_m.Uint32ToString)
-	builder.WriteString(", ")
-	builder.WriteString("int64_to_string=")
-	builder.WriteString(_m.Int64ToString)
-	builder.WriteString(", ")
-	builder.WriteString("uint64_to_string=")
-	builder.WriteString(_m.Uint64ToString)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(conversionDescriptor, _m)
 }
 
 // Conversions is a parsable slice of Conversion.

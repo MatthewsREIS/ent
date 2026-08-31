@@ -13,7 +13,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	schemadir "entgo.io/ent/entc/integration/ent/schema/dir"
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
@@ -112,30 +111,7 @@ func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = _c.conflict
-	if value, ok := entbuilder.GetField[int](_c.mutation, "unique_int"); ok {
-		_spec.SetField(FieldUniqueInt, field.TypeInt, value)
-		_node.UniqueInt = value
-	}
-	if value, ok := entbuilder.GetField[float64](_c.mutation, "unique_float"); ok {
-		_spec.SetField(FieldUniqueFloat, field.TypeFloat64, value)
-		_node.UniqueFloat = value
-	}
-	if value, ok := entbuilder.GetField[int](_c.mutation, "nillable_int"); ok {
-		_spec.SetField(FieldNillableInt, field.TypeInt, value)
-		_node.NillableInt = &value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "table"); ok {
-		_spec.SetField(FieldTable, field.TypeString, value)
-		_node.Table = value
-	}
-	if value, ok := entbuilder.GetField[schemadir.Dir](_c.mutation, "dir"); ok {
-		_spec.SetField(FieldDir, field.TypeJSON, value)
-		_node.Dir = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "client"); ok {
-		_spec.SetField(FieldClient, field.TypeString, value)
-		_node.Client = value
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

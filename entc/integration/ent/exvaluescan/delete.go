@@ -7,104 +7,25 @@
 package exvaluescan
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // ExValueScanDelete is the builder for deleting a ExValueScan entity.
-type ExValueScanDelete struct {
-	Config
-	hooks     []Hook
-	mutation  *ExValueScanMutation
-	modifiers []func(*sql.DeleteBuilder)
-}
+type ExValueScanDelete = entbuilder.Delete[ExValueScan, int]
+
+// ExValueScanDeleteOne is the builder for deleting a single ExValueScan entity.
+type ExValueScanDeleteOne = entbuilder.DeleteOne[ExValueScan, int]
 
 // NewExValueScanDelete returns a new ExValueScanDelete initialized with the given config, hooks, and mutation.
 func NewExValueScanDelete(c Config, hooks []Hook, mutation *ExValueScanMutation) *ExValueScanDelete {
-	return &ExValueScanDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the ExValueScanDelete builder.
-func (_d *ExValueScanDelete) Where(ps ...predicate.ExValueScan) *ExValueScanDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *ExValueScanDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*ExValueScanMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *ExValueScanDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
-func (_d *ExValueScanDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ExValueScanDelete {
-	_d.modifiers = append(_d.modifiers, modifiers...)
-	return _d
-}
-
-func (_d *ExValueScanDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	_spec.AddModifiers(_d.modifiers...)
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// ExValueScanDeleteOne is the builder for deleting a single ExValueScan entity.
-type ExValueScanDeleteOne struct {
-	_d *ExValueScanDelete
+	return entbuilder.NewDelete[ExValueScan, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewExValueScanDeleteOne returns a new ExValueScanDeleteOne wrapping the given ExValueScanDelete.
 func NewExValueScanDeleteOne(d *ExValueScanDelete) *ExValueScanDeleteOne {
-	return &ExValueScanDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the ExValueScanDelete builder.
-func (_d *ExValueScanDeleteOne) Where(ps ...predicate.ExValueScan) *ExValueScanDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *ExValueScanDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *ExValueScanDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

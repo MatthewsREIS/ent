@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/ent/predicate"
 )
@@ -29,23 +31,80 @@ var filetypeDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"name": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Name",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Name",
+			Column:  "name",
+			SQLType: field.TypeString,
 		},
 		"type": {
-			Type:   reflect.TypeFor[FileTypeType](),
-			GoName: "Type",
+			Type:    reflect.TypeFor[FileTypeType](),
+			GoName:  "Type",
+			Column:  "type",
+			SQLType: field.TypeEnum,
 		},
 		"state": {
-			Type:   reflect.TypeFor[FileTypeState](),
-			GoName: "State",
+			Type:    reflect.TypeFor[FileTypeState](),
+			GoName:  "State",
+			Column:  "state",
+			SQLType: field.TypeEnum,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"files": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "File",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "File",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "files",
+			StorageColumns:  []string{"file_type_files"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "file_types",
+	TableColumns: []string{
+		"id",
+		"name",
+		"type",
+		"state",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "type",
+			Name:        "type",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[FileTypeType](),
+			SQLType:     field.TypeEnum,
+		},
+		{
+			Column:      "state",
+			Name:        "state",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[FileTypeState](),
+			SQLType:     field.TypeEnum,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"name":  field.TypeString,
+		"type":  field.TypeEnum,
+		"state": field.TypeEnum,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"files": {
+			Target:         "File",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "files",
+			StorageColumns: []string{"file_type_files"},
 		},
 	}}
 

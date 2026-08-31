@@ -7,96 +7,25 @@
 package user
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/cascadelete/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // UserDelete is the builder for deleting a User entity.
-type UserDelete struct {
-	Config
-	hooks    []Hook
-	mutation *UserMutation
-}
+type UserDelete = entbuilder.Delete[User, int]
+
+// UserDeleteOne is the builder for deleting a single User entity.
+type UserDeleteOne = entbuilder.DeleteOne[User, int]
 
 // NewUserDelete returns a new UserDelete initialized with the given config, hooks, and mutation.
 func NewUserDelete(c Config, hooks []Hook, mutation *UserMutation) *UserDelete {
-	return &UserDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the UserDelete builder.
-func (_d *UserDelete) Where(ps ...predicate.User) *UserDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *UserDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*UserMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *UserDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *UserDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// UserDeleteOne is the builder for deleting a single User entity.
-type UserDeleteOne struct {
-	_d *UserDelete
+	return entbuilder.NewDelete[User, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewUserDeleteOne returns a new UserDeleteOne wrapping the given UserDelete.
 func NewUserDeleteOne(d *UserDelete) *UserDeleteOne {
-	return &UserDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the UserDelete builder.
-func (_d *UserDeleteOne) Where(ps ...predicate.User) *UserDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *UserDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *UserDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

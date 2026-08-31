@@ -7,96 +7,26 @@
 package other
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // OtherDelete is the builder for deleting a Other entity.
-type OtherDelete struct {
-	Config
-	hooks    []Hook
-	mutation *OtherMutation
-}
+type OtherDelete = entbuilder.Delete[Other, sid.ID]
+
+// OtherDeleteOne is the builder for deleting a single Other entity.
+type OtherDeleteOne = entbuilder.DeleteOne[Other, sid.ID]
 
 // NewOtherDelete returns a new OtherDelete initialized with the given config, hooks, and mutation.
 func NewOtherDelete(c Config, hooks []Hook, mutation *OtherMutation) *OtherDelete {
-	return &OtherDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the OtherDelete builder.
-func (_d *OtherDelete) Where(ps ...predicate.Other) *OtherDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *OtherDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*OtherMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *OtherDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *OtherDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeOther))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// OtherDeleteOne is the builder for deleting a single Other entity.
-type OtherDeleteOne struct {
-	_d *OtherDelete
+	return entbuilder.NewDelete[Other, sid.ID](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewOtherDeleteOne returns a new OtherDeleteOne wrapping the given OtherDelete.
 func NewOtherDeleteOne(d *OtherDelete) *OtherDeleteOne {
-	return &OtherDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the OtherDelete builder.
-func (_d *OtherDeleteOne) Where(ps ...predicate.Other) *OtherDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *OtherDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *OtherDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

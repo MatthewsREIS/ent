@@ -7,13 +7,11 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -62,45 +60,15 @@ func (e CarEdges) RentalsOrErr() ([]*Rental, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*Car) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "number":
-			values[i] = new(sql.NullString)
-		case "id":
-			values[i] = new(uuid.UUID)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(carDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Car fields.
 func (_m *Car) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				_m.ID = *value
-			}
-		case "number":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field number", values[i])
-			} else if value.Valid {
-				_m.Number = value.String
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(carDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Car.
@@ -122,13 +90,7 @@ func (_m *Car) Unwrap() *Car {
 
 // String implements the fmt.Stringer.
 func (_m *Car) String() string {
-	var builder strings.Builder
-	builder.WriteString("Car(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("number=")
-	builder.WriteString(_m.Number)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(carDescriptor, _m)
 }
 
 // NamedRentals returns the Rentals named value or an error if the edge was not

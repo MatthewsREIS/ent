@@ -7,96 +7,26 @@
 package blob
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // BlobDelete is the builder for deleting a Blob entity.
-type BlobDelete struct {
-	Config
-	hooks    []Hook
-	mutation *BlobMutation
-}
+type BlobDelete = entbuilder.Delete[Blob, uuid.UUID]
+
+// BlobDeleteOne is the builder for deleting a single Blob entity.
+type BlobDeleteOne = entbuilder.DeleteOne[Blob, uuid.UUID]
 
 // NewBlobDelete returns a new BlobDelete initialized with the given config, hooks, and mutation.
 func NewBlobDelete(c Config, hooks []Hook, mutation *BlobMutation) *BlobDelete {
-	return &BlobDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the BlobDelete builder.
-func (_d *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *BlobDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*BlobMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *BlobDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *BlobDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeUUID))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// BlobDeleteOne is the builder for deleting a single Blob entity.
-type BlobDeleteOne struct {
-	_d *BlobDelete
+	return entbuilder.NewDelete[Blob, uuid.UUID](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewBlobDeleteOne returns a new BlobDeleteOne wrapping the given BlobDelete.
 func NewBlobDeleteOne(d *BlobDelete) *BlobDeleteOne {
-	return &BlobDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the BlobDelete builder.
-func (_d *BlobDeleteOne) Where(ps ...predicate.Blob) *BlobDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *BlobDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *BlobDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

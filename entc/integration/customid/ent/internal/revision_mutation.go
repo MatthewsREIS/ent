@@ -12,6 +12,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 )
@@ -29,7 +30,17 @@ var revisionDescriptor = &entbuilder.Descriptor{
 	IDType:  reflect.TypeFor[string](),
 	IDField: "id",
 	Fields:  map[string]entbuilder.FieldSpec{},
-	Edges:   map[string]entbuilder.EdgeSpec{}}
+	Edges:   map[string]entbuilder.EdgeSpec{},
+	Table:   "revisions",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:    "id",
+	IDSQLType:   field.TypeString,
+	ScanFields:  []entbuilder.FieldSpec{},
+	FKColumns:   []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{},
+	GraphEdges:  map[string]entbuilder.EdgeSpec{}}
 
 // NewRevisionMutation creates a new mutation for the Revision entity.
 func NewRevisionMutation(c Config, op Op, opts ...RevisionMutationOption) *RevisionMutation {

@@ -7,14 +7,13 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // TweetLike is the model entity for the TweetLike schema.
@@ -78,51 +77,15 @@ func (e TweetLikeEdges) UserOrErr() (*User, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*TweetLike) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "user_id", "tweet_id":
-			values[i] = new(sql.NullInt64)
-		case "liked_at":
-			values[i] = new(sql.NullTime)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(tweetlikeDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the TweetLike fields.
 func (_m *TweetLike) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "liked_at":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field liked_at", values[i])
-			} else if value.Valid {
-				_m.LikedAt = value.Time
-			}
-		case "user_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field user_id", values[i])
-			} else if value.Valid {
-				_m.UserID = int(value.Int64)
-			}
-		case "tweet_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field tweet_id", values[i])
-			} else if value.Valid {
-				_m.TweetID = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(tweetlikeDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the TweetLike.
@@ -144,18 +107,7 @@ func (_m *TweetLike) Unwrap() *TweetLike {
 
 // String implements the fmt.Stringer.
 func (_m *TweetLike) String() string {
-	var builder strings.Builder
-	builder.WriteString("TweetLike(")
-	builder.WriteString("liked_at=")
-	builder.WriteString(_m.LikedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
-	builder.WriteString(", ")
-	builder.WriteString("tweet_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.TweetID))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(tweetlikeDescriptor, _m)
 }
 
 // TweetLikes is a parsable slice of TweetLike.

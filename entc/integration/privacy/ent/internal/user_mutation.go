@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 )
@@ -32,24 +34,81 @@ var userDescriptor = &entbuilder.Descriptor{
 			Type:      reflect.TypeFor[string](),
 			GoName:    "Name",
 			Immutable: true,
+			Column:    "name",
+			SQLType:   field.TypeString,
 		},
 		"age": {
 			Type:     reflect.TypeFor[uint](),
 			GoName:   "Age",
 			Nillable: true,
 			Numeric:  true,
+			Column:   "age",
+			SQLType:  field.TypeUint,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"teams": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Team",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Team",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "user_teams",
+			StorageColumns:  []string{"user_id", "team_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"tasks": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Task",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Task",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "tasks",
+			StorageColumns:  []string{"user_tasks"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "users",
+	TableColumns: []string{
+		"id",
+		"name",
+		"age",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "name",
+			Name:        "name",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+		{
+			Column:      "age",
+			Name:        "age",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[uint](),
+			SQLType:     field.TypeUint,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"name": field.TypeString,
+		"age":  field.TypeUint,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"teams": {
+			Target:         "Team",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "user_teams",
+			StorageColumns: []string{"user_id", "team_id"},
+		},
+		"tasks": {
+			Target:         "Task",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "tasks",
+			StorageColumns: []string{"user_tasks"},
 		},
 	}}
 

@@ -7,9 +7,6 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
 	"math/big"
@@ -17,6 +14,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/schema/field"
 )
 
@@ -58,101 +56,15 @@ type ExValueScan struct {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*ExValueScan) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			values[i] = new(sql.NullInt64)
-		case "binary":
-			values[i] = ExValueScanValueScanner.Binary.ScanValue()
-		case "binary_bytes":
-			values[i] = ExValueScanValueScanner.BinaryBytes.ScanValue()
-		case "binary_optional":
-			values[i] = ExValueScanValueScanner.BinaryOptional.ScanValue()
-		case "text":
-			values[i] = ExValueScanValueScanner.Text.ScanValue()
-		case "text_optional":
-			values[i] = ExValueScanValueScanner.TextOptional.ScanValue()
-		case "base64":
-			values[i] = ExValueScanValueScanner.Base64.ScanValue()
-		case "custom":
-			values[i] = ExValueScanValueScanner.Custom.ScanValue()
-		case "custom_optional":
-			values[i] = ExValueScanValueScanner.CustomOptional.ScanValue()
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(exvaluescanDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the ExValueScan fields.
 func (_m *ExValueScan) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			_m.ID = int(value.Int64)
-		case "binary":
-			if value, err := ExValueScanValueScanner.Binary.FromValue(values[i]); err != nil {
-				return err
-			} else {
-				_m.Binary = value
-			}
-		case "binary_bytes":
-			if value, err := ExValueScanValueScanner.BinaryBytes.FromValue(values[i]); err != nil {
-				return err
-			} else {
-				_m.BinaryBytes = value
-			}
-		case "binary_optional":
-			if value, err := ExValueScanValueScanner.BinaryOptional.FromValue(values[i]); err != nil {
-				return err
-			} else {
-				_m.BinaryOptional = value
-			}
-		case "text":
-			if value, err := ExValueScanValueScanner.Text.FromValue(values[i]); err != nil {
-				return err
-			} else {
-				_m.Text = value
-			}
-		case "text_optional":
-			if value, err := ExValueScanValueScanner.TextOptional.FromValue(values[i]); err != nil {
-				return err
-			} else {
-				_m.TextOptional = value
-			}
-		case "base64":
-			if value, err := ExValueScanValueScanner.Base64.FromValue(values[i]); err != nil {
-				return err
-			} else {
-				_m.Base64 = value
-			}
-		case "custom":
-			if value, err := ExValueScanValueScanner.Custom.FromValue(values[i]); err != nil {
-				return err
-			} else {
-				_m.Custom = value
-			}
-		case "custom_optional":
-			if value, err := ExValueScanValueScanner.CustomOptional.FromValue(values[i]); err != nil {
-				return err
-			} else {
-				_m.CustomOptional = value
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(exvaluescanDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the ExValueScan.
@@ -174,34 +86,7 @@ func (_m *ExValueScan) Unwrap() *ExValueScan {
 
 // String implements the fmt.Stringer.
 func (_m *ExValueScan) String() string {
-	var builder strings.Builder
-	builder.WriteString("ExValueScan(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("binary=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Binary))
-	builder.WriteString(", ")
-	builder.WriteString("binary_bytes=")
-	builder.WriteString(fmt.Sprintf("%v", _m.BinaryBytes))
-	builder.WriteString(", ")
-	builder.WriteString("binary_optional=")
-	builder.WriteString(fmt.Sprintf("%v", _m.BinaryOptional))
-	builder.WriteString(", ")
-	builder.WriteString("text=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Text))
-	builder.WriteString(", ")
-	builder.WriteString("text_optional=")
-	builder.WriteString(fmt.Sprintf("%v", _m.TextOptional))
-	builder.WriteString(", ")
-	builder.WriteString("base64=")
-	builder.WriteString(_m.Base64)
-	builder.WriteString(", ")
-	builder.WriteString("custom=")
-	builder.WriteString(_m.Custom)
-	builder.WriteString(", ")
-	builder.WriteString("custom_optional=")
-	builder.WriteString(_m.CustomOptional)
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(exvaluescanDescriptor, _m)
 }
 
 // ExValueScans is a parsable slice of ExValueScan.

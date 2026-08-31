@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
 	"github.com/google/uuid"
@@ -31,28 +33,75 @@ var rentalDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"date": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "Date",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "Date",
+			Column:  "date",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
-			Field:        "user_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Field:           "user_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "rentals",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 		"car": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Car",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
-			Inverse:      true,
-			Field:        "car_id",
-			Immutable:    true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Car",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Inverse:         true,
+			Field:           "car_id",
+			Immutable:       true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "rentals",
+			StorageColumns:  []string{"car_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
+			NodeField:       "CarID",
 		},
-	}}
+	},
+	Table: "rentals",
+	TableColumns: []string{
+		"id",
+		"date",
+		"user_id",
+		"car_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "date",
+			Name:        "date",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "car_id",
+			Name:        "car_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{}}
 
 // NewRentalMutation creates a new mutation for the Rental entity.
 func NewRentalMutation(c Config, op Op, opts ...RentalMutationOption) *RentalMutation {

@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -34,19 +36,74 @@ var noteDescriptor = &entbuilder.Descriptor{
 			Type:     reflect.TypeFor[string](),
 			GoName:   "Text",
 			Nillable: true,
+			Column:   "text",
+			SQLType:  field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Note",
-			TargetIDType: reflect.TypeFor[schema.NoteID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Note",
+			TargetIDType:    reflect.TypeFor[schema.NoteID](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "notes",
+			StorageColumns:  []string{"note_children"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
 		},
 		"children": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Note",
-			TargetIDType: reflect.TypeFor[schema.NoteID](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Note",
+			TargetIDType:    reflect.TypeFor[schema.NoteID](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "notes",
+			StorageColumns:  []string{"note_children"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
+		},
+	},
+	Table: "notes",
+	TableColumns: []string{
+		"id",
+		"text",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeString,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "text",
+			Name:        "text",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "note_children",
+			GoName:      "SetNoteChildren",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[schema.NoteID](),
+			SQLType:     field.TypeString,
+		},
+	},
+	GraphFields: map[string]field.Type{
+		"text": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"parent": {
+			Target:         "Note",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "notes",
+			StorageColumns: []string{"note_children"},
+		},
+		"children": {
+			Target:         "Note",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "notes",
+			StorageColumns: []string{"note_children"},
 		},
 	}}
 

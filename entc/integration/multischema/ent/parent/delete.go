@@ -9,106 +9,28 @@ package parent
 import (
 	"context"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
-	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // ParentDelete is the builder for deleting a Parent entity.
-type ParentDelete struct {
-	Config
-	hooks     []Hook
-	mutation  *ParentMutation
-	modifiers []func(*sql.DeleteBuilder)
-}
+type ParentDelete = entbuilder.Delete[Parent, int]
+
+// ParentDeleteOne is the builder for deleting a single Parent entity.
+type ParentDeleteOne = entbuilder.DeleteOne[Parent, int]
 
 // NewParentDelete returns a new ParentDelete initialized with the given config, hooks, and mutation.
 func NewParentDelete(c Config, hooks []Hook, mutation *ParentMutation) *ParentDelete {
-	return &ParentDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the ParentDelete builder.
-func (_d *ParentDelete) Where(ps ...predicate.Parent) *ParentDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *ParentDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*ParentMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *ParentDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-// Modify adds a statement modifier for attaching custom logic to the DELETE statement.
-func (_d *ParentDelete) Modify(modifiers ...func(d *sql.DeleteBuilder)) *ParentDelete {
-	_d.modifiers = append(_d.modifiers, modifiers...)
-	return _d
-}
-
-func (_d *ParentDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	schemaConfig := _d.Config.SchemaConfig()
-	_spec.Node.Schema = schemaConfig.Parent
-	ctx = internal.NewSchemaConfigContext(ctx, schemaConfig)
-	_spec.AddModifiers(_d.modifiers...)
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// ParentDeleteOne is the builder for deleting a single Parent entity.
-type ParentDeleteOne struct {
-	_d *ParentDelete
+	return entbuilder.NewDelete[Parent, int](c.Drv, hooks, mutation,
+		internal.SchemaOf(c),
+		func(ctx context.Context) context.Context {
+			return internal.NewSchemaConfigContext(ctx, c.SchemaConfig())
+		},
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewParentDeleteOne returns a new ParentDeleteOne wrapping the given ParentDelete.
 func NewParentDeleteOne(d *ParentDelete) *ParentDeleteOne {
-	return &ParentDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the ParentDelete builder.
-func (_d *ParentDeleteOne) Where(ps ...predicate.Parent) *ParentDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *ParentDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *ParentDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
@@ -31,15 +33,50 @@ var accountDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"email": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Email",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Email",
+			Column:  "email",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"token": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Token",
-			TargetIDType: reflect.TypeFor[sid.ID](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Token",
+			TargetIDType:    reflect.TypeFor[sid.ID](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "tokens",
+			StorageColumns:  []string{"account_token"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeOther,
+		},
+	},
+	Table: "accounts",
+	TableColumns: []string{
+		"id",
+		"email",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeOther,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "email",
+			Name:        "email",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"email": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"token": {
+			Target:         "Token",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "tokens",
+			StorageColumns: []string{"account_token"},
 		},
 	}}
 

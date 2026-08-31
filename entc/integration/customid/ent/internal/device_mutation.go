@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
@@ -32,14 +34,55 @@ var deviceDescriptor = &entbuilder.Descriptor{
 	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"active_session": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Session",
-			TargetIDType: reflect.TypeFor[schema.ID](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Session",
+			TargetIDType:    reflect.TypeFor[schema.ID](),
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "devices",
+			StorageColumns:  []string{"device_active_session"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeBytes,
 		},
 		"sessions": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Session",
-			TargetIDType: reflect.TypeFor[schema.ID](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Session",
+			TargetIDType:    reflect.TypeFor[schema.ID](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "sessions",
+			StorageColumns:  []string{"device_sessions"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeBytes,
+		},
+	},
+	Table: "devices",
+	TableColumns: []string{
+		"id",
+	},
+	IDColumn:   "id",
+	IDSQLType:  field.TypeBytes,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "device_active_session",
+			GoName:      "SetDeviceActiveSession",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[schema.ID](),
+			SQLType:     field.TypeBytes,
+		},
+	},
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"active_session": {
+			Target:         "Session",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "devices",
+			StorageColumns: []string{"device_active_session"},
+		},
+		"sessions": {
+			Target:         "Session",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "sessions",
+			StorageColumns: []string{"device_sessions"},
 		},
 	}}
 

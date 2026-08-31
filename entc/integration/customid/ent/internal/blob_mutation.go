@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"github.com/google/uuid"
@@ -31,25 +33,101 @@ var blobDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"uuid": {
-			Type:   reflect.TypeFor[uuid.UUID](),
-			GoName: "UUID",
+			Type:    reflect.TypeFor[uuid.UUID](),
+			GoName:  "UUID",
+			Column:  "uuid",
+			SQLType: field.TypeUUID,
 		},
 		"count": {
 			Type:    reflect.TypeFor[int](),
 			GoName:  "Count",
 			Numeric: true,
+			Column:  "count",
+			SQLType: field.TypeInt,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Blob",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Blob",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Rel:             sqlgraph.O2O,
+			StorageTable:    "blobs",
+			StorageColumns:  []string{"blob_parent"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
 		},
 		"links": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Blob",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Blob",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "blob_links",
+			StorageColumns:  []string{"blob_id", "link_id"},
+			Bidi:            true,
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
+		},
+	},
+	Table: "blobs",
+	TableColumns: []string{
+		"id",
+		"uuid",
+		"count",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeUUID,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "uuid",
+			Name:        "uuid",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+		{
+			Column:      "count",
+			Name:        "count",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "blob_parent",
+			GoName:      "SetBlobParent",
+			StructIndex: 5,
+			Type:        reflect.TypeFor[uuid.UUID](),
+			SQLType:     field.TypeUUID,
+		},
+	},
+	GraphFields: map[string]field.Type{
+		"uuid":  field.TypeUUID,
+		"count": field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"parent": {
+			Target:         "Blob",
+			Rel:            sqlgraph.O2O,
+			StorageTable:   "blobs",
+			StorageColumns: []string{"blob_parent"},
+			Bidi:           true,
+		},
+		"links": {
+			Target:         "Blob",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "blob_links",
+			StorageColumns: []string{"blob_id", "link_id"},
+			Bidi:           true,
+		},
+		"blob_links": {
+			Target:         "BlobLink",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "blob_links",
+			StorageColumns: []string{"blob_id"},
 		},
 	}}
 

@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
 )
@@ -30,22 +32,88 @@ var usergroupDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"joined_at": {
-			Type:   reflect.TypeFor[time.Time](),
-			GoName: "JoinedAt",
+			Type:    reflect.TypeFor[time.Time](),
+			GoName:  "JoinedAt",
+			Column:  "joined_at",
+			SQLType: field.TypeTime,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"user": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "user_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "user_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "user_groups",
+			StorageColumns:  []string{"user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "UserID",
 		},
 		"group": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Group",
-			TargetIDType: reflect.TypeFor[int](),
-			Field:        "group_id",
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Group",
+			TargetIDType:    reflect.TypeFor[int](),
+			Field:           "group_id",
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "user_groups",
+			StorageColumns:  []string{"group_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+			NodeField:       "GroupID",
+		},
+	},
+	Table: "user_groups",
+	TableColumns: []string{
+		"id",
+		"joined_at",
+		"user_id",
+		"group_id",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "joined_at",
+			Name:        "joined_at",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[time.Time](),
+			SQLType:     field.TypeTime,
+		},
+		{
+			Column:      "user_id",
+			Name:        "user_id",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+		{
+			Column:      "group_id",
+			Name:        "group_id",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"joined_at": field.TypeTime,
+		"user_id":   field.TypeInt,
+		"group_id":  field.TypeInt,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"user": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "user_groups",
+			StorageColumns: []string{"user_id"},
+		},
+		"group": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2O,
+			StorageTable:   "user_groups",
+			StorageColumns: []string{"group_id"},
 		},
 	}}
 

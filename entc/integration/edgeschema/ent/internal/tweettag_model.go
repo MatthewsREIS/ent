@@ -7,14 +7,13 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 	"github.com/google/uuid"
 )
 
@@ -81,59 +80,15 @@ func (e TweetTagEdges) TweetOrErr() (*Tweet, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*TweetTag) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "tag_id", "tweet_id":
-			values[i] = new(sql.NullInt64)
-		case "added_at":
-			values[i] = new(sql.NullTime)
-		case "id":
-			values[i] = new(uuid.UUID)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(tweettagDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the TweetTag fields.
 func (_m *TweetTag) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				_m.ID = *value
-			}
-		case "added_at":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field added_at", values[i])
-			} else if value.Valid {
-				_m.AddedAt = value.Time
-			}
-		case "tag_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field tag_id", values[i])
-			} else if value.Valid {
-				_m.TagID = int(value.Int64)
-			}
-		case "tweet_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field tweet_id", values[i])
-			} else if value.Valid {
-				_m.TweetID = int(value.Int64)
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(tweettagDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the TweetTag.
@@ -155,19 +110,7 @@ func (_m *TweetTag) Unwrap() *TweetTag {
 
 // String implements the fmt.Stringer.
 func (_m *TweetTag) String() string {
-	var builder strings.Builder
-	builder.WriteString("TweetTag(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("added_at=")
-	builder.WriteString(_m.AddedAt.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("tag_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.TagID))
-	builder.WriteString(", ")
-	builder.WriteString("tweet_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.TweetID))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(tweettagDescriptor, _m)
 }
 
 // TweetTags is a parsable slice of TweetTag.

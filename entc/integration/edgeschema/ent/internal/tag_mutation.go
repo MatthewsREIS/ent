@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
@@ -30,32 +32,102 @@ var tagDescriptor = &entbuilder.Descriptor{
 	IDType: reflect.TypeFor[int](),
 	Fields: map[string]entbuilder.FieldSpec{
 		"value": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Value",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Value",
+			Column:  "value",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"tweets": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Tweet",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Tweet",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "tweet_tags",
+			StorageColumns:  []string{"tag_id", "tweet_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"groups": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Group",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.M2M,
+			Target:          "Group",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "group_tags",
+			StorageColumns:  []string{"tag_id", "group_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"tweet_tags": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "TweetTag",
-			TargetIDType: reflect.TypeFor[uuid.UUID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "TweetTag",
+			TargetIDType:    reflect.TypeFor[uuid.UUID](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "tweet_tags",
+			StorageColumns:  []string{"tag_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeUUID,
 		},
 		"group_tags": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "GroupTag",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2M,
+			Target:          "GroupTag",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "group_tags",
+			StorageColumns:  []string{"tag_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
+		},
+	},
+	Table: "tags",
+	TableColumns: []string{
+		"id",
+		"value",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "value",
+			Name:        "value",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{},
+	GraphFields: map[string]field.Type{
+		"value": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"tweets": {
+			Target:         "Tweet",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tag_id", "tweet_id"},
+		},
+		"groups": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2M,
+			StorageTable:   "group_tags",
+			StorageColumns: []string{"tag_id", "group_id"},
+		},
+		"tweet_tags": {
+			Target:         "TweetTag",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "tweet_tags",
+			StorageColumns: []string{"tag_id"},
+		},
+		"group_tags": {
+			Target:         "GroupTag",
+			Rel:            sqlgraph.O2M,
+			Inverse:        true,
+			StorageTable:   "group_tags",
+			StorageColumns: []string{"tag_id"},
 		},
 	}}
 

@@ -7,96 +7,25 @@
 package team
 
 import (
-	"context"
-
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/privacy/ent/predicate"
 	"entgo.io/ent/runtime/entbuilder"
-	"entgo.io/ent/schema/field"
 )
 
 // TeamDelete is the builder for deleting a Team entity.
-type TeamDelete struct {
-	Config
-	hooks    []Hook
-	mutation *TeamMutation
-}
+type TeamDelete = entbuilder.Delete[Team, int]
+
+// TeamDeleteOne is the builder for deleting a single Team entity.
+type TeamDeleteOne = entbuilder.DeleteOne[Team, int]
 
 // NewTeamDelete returns a new TeamDelete initialized with the given config, hooks, and mutation.
 func NewTeamDelete(c Config, hooks []Hook, mutation *TeamMutation) *TeamDelete {
-	return &TeamDelete{Config: c, hooks: hooks, mutation: mutation}
-}
-
-// Where appends a list predicates to the TeamDelete builder.
-func (_d *TeamDelete) Where(ps ...predicate.Team) *TeamDelete {
-	_d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query and returns how many vertices were deleted.
-func (_d *TeamDelete) Exec(ctx context.Context) (int, error) {
-	return entbuilder.RunDelete(ctx, &entbuilder.DeleteState[*TeamMutation]{Hooks: _d.hooks, Mutation: _d.mutation}, _d.sqlExec)
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *TeamDelete) ExecX(ctx context.Context) int {
-	n, err := _d.Exec(ctx)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}
-
-func (_d *TeamDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
-	if ps := _d.mutation.MutationPredicates(); len(ps) > 0 {
-		_spec.Predicate = func(selector *sql.Selector) {
-			for i := range ps {
-				ps[i](selector)
-			}
-		}
-	}
-	affected, err := sqlgraph.DeleteNodes(ctx, _d.Drv, _spec)
-	if err != nil && sqlgraph.IsConstraintError(err) {
-		err = &ConstraintError{Msg: err.Error(), Wrap: err}
-	}
-	_d.mutation.SetDone()
-	return affected, err
-}
-
-// TeamDeleteOne is the builder for deleting a single Team entity.
-type TeamDeleteOne struct {
-	_d *TeamDelete
+	return entbuilder.NewDelete[Team, int](c.Drv, hooks, mutation,
+		nil,
+		nil,
+		func(msg string, wrap error) error { return &ConstraintError{Msg: msg, Wrap: wrap} },
+	)
 }
 
 // NewTeamDeleteOne returns a new TeamDeleteOne wrapping the given TeamDelete.
 func NewTeamDeleteOne(d *TeamDelete) *TeamDeleteOne {
-	return &TeamDeleteOne{_d: d}
-}
-
-// Where appends a list predicates to the TeamDelete builder.
-func (_d *TeamDeleteOne) Where(ps ...predicate.Team) *TeamDeleteOne {
-	_d._d.mutation.WhereP(ps...)
-	return _d
-}
-
-// Exec executes the deletion query.
-func (_d *TeamDeleteOne) Exec(ctx context.Context) error {
-	n, err := _d._d.Exec(ctx)
-	switch {
-	case err != nil:
-		return err
-	case n == 0:
-		return &NotFoundError{Label: Label}
-	default:
-		return nil
-	}
-}
-
-// ExecX is like Exec, but panics if an error occurs.
-func (_d *TeamDeleteOne) ExecX(ctx context.Context) {
-	if err := _d.Exec(ctx); err != nil {
-		panic(err)
-	}
+	return entbuilder.NewDeleteOne(d, Label, func(label string) error { return &NotFoundError{Label: label} })
 }

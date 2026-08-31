@@ -7,15 +7,14 @@
 package internal
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	// Guardrail: internal model package must remain import-cycle safe and must not import
 	// generated root query/client packages (alias direction is root -> internal only).
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/gremlin"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entbuilder"
 )
 
 // File is the model entity for the File schema.
@@ -102,92 +101,15 @@ func (e FileEdges) FieldOrErr() ([]*FieldType, error) {
 
 // ScanValues returns the types for scanning values from sql.Rows.
 func (*File) ScanValues(columns []string) ([]any, error) {
-	values := make([]any, len(columns))
-	for i := range columns {
-		switch columns[i] {
-		case "op":
-			values[i] = new(sql.NullBool)
-		case "set_id", "fsize", "field_id":
-			values[i] = new(sql.NullInt64)
-		case "id", "name", "user", "group":
-			values[i] = new(sql.NullString)
-		case "create_time":
-			values[i] = new(sql.NullTime)
-		default:
-			values[i] = new(sql.UnknownType)
-		}
-	}
-	return values, nil
+	return entbuilder.ScanTargets(fileDescriptor, columns)
 }
 
 // AssignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the File fields.
 func (_m *File) AssignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
-	}
-	for i := range columns {
-		switch columns[i] {
-		case "id":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				_m.ID = value.String
-			}
-		case "set_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field set_id", values[i])
-			} else if value.Valid {
-				_m.SetID = int(value.Int64)
-			}
-		case "fsize":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field size", values[i])
-			} else if value.Valid {
-				_m.Size = int(value.Int64)
-			}
-		case "name":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				_m.Name = value.String
-			}
-		case "user":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field user", values[i])
-			} else if value.Valid {
-				_m.User = new(string)
-				*_m.User = value.String
-			}
-		case "group":
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field group", values[i])
-			} else if value.Valid {
-				_m.Group = value.String
-			}
-		case "op":
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field op", values[i])
-			} else if value.Valid {
-				_m.Op = value.Bool
-			}
-		case "field_id":
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field field_id", values[i])
-			} else if value.Valid {
-				_m.FieldID = int(value.Int64)
-			}
-		case "create_time":
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field create_time", values[i])
-			} else if value.Valid {
-				_m.CreateTime = value.Time
-			}
-		default:
-			_m.selectValues.Set(columns[i], values[i])
-		}
-	}
-	return nil
+	return entbuilder.AssignRow(fileDescriptor, _m, columns, values, func(c string, v any) {
+		_m.selectValues.Set(c, v)
+	})
 }
 
 // Value returns the ent.Value that was dynamically selected and assigned to the File.
@@ -209,36 +131,7 @@ func (_m *File) Unwrap() *File {
 
 // String implements the fmt.Stringer.
 func (_m *File) String() string {
-	var builder strings.Builder
-	builder.WriteString("File(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
-	builder.WriteString("set_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.SetID))
-	builder.WriteString(", ")
-	builder.WriteString("size=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Size))
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(_m.Name)
-	builder.WriteString(", ")
-	if v := _m.User; v != nil {
-		builder.WriteString("user=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
-	builder.WriteString("group=")
-	builder.WriteString(_m.Group)
-	builder.WriteString(", ")
-	builder.WriteString("op=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Op))
-	builder.WriteString(", ")
-	builder.WriteString("field_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.FieldID))
-	builder.WriteString(", ")
-	builder.WriteString("create_time=")
-	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
-	builder.WriteByte(')')
-	return builder.String()
+	return entbuilder.FormatEntity(fileDescriptor, _m)
 }
 
 // Files is a parsable slice of File.

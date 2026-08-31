@@ -15,7 +15,6 @@ import (
 	"entgo.io/ent/dialect/gremlin/graph/dsl/__"
 	"entgo.io/ent/dialect/gremlin/graph/dsl/g"
 	"entgo.io/ent/entc/integration/gremlin/ent/predicate"
-	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 )
 
@@ -50,18 +49,6 @@ func (_u *SpecUpdate) With(as ...entfield.Assignment) *SpecUpdate {
 // Mutation returns the SpecMutation object of the builder.
 func (_u *SpecUpdate) Mutation() *SpecMutation {
 	return _u.mutation
-}
-
-// ClearCard clears all "card" edges to the Card entity.
-func (_u *SpecUpdate) ClearCard() *SpecUpdate {
-	_ = _u.mutation.ClearEdge("card")
-	return _u
-}
-
-// RemoveCardIDs removes the "card" edge to Card entities by IDs.
-func (_u *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
-	_ = _u.mutation.RemoveEdgeIDs("card", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -156,18 +143,6 @@ func (_u *SpecUpdateOne) With(as ...entfield.Assignment) *SpecUpdateOne {
 // Mutation returns the SpecMutation object of the builder.
 func (_u *SpecUpdateOne) Mutation() *SpecMutation {
 	return _u.mutation
-}
-
-// ClearCard clears all "card" edges to the Card entity.
-func (_u *SpecUpdateOne) ClearCard() *SpecUpdateOne {
-	_ = _u.mutation.ClearEdge("card")
-	return _u
-}
-
-// RemoveCardIDs removes the "card" edge to Card entities by IDs.
-func (_u *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
-	_ = _u.mutation.RemoveEdgeIDs("card", entbuilder.ToAny(ids)...)
-	return _u
 }
 
 // Where appends a list predicates to the SpecUpdate builder.

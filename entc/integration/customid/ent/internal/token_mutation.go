@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
@@ -31,16 +33,60 @@ var tokenDescriptor = &entbuilder.Descriptor{
 	IDField: "id",
 	Fields: map[string]entbuilder.FieldSpec{
 		"body": {
-			Type:   reflect.TypeFor[string](),
-			GoName: "Body",
+			Type:    reflect.TypeFor[string](),
+			GoName:  "Body",
+			Column:  "body",
+			SQLType: field.TypeString,
 		},
 	},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"account": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "Account",
-			TargetIDType: reflect.TypeFor[sid.ID](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "Account",
+			TargetIDType:    reflect.TypeFor[sid.ID](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "tokens",
+			StorageColumns:  []string{"account_token"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeOther,
+		},
+	},
+	Table: "tokens",
+	TableColumns: []string{
+		"id",
+		"body",
+	},
+	IDColumn:  "id",
+	IDSQLType: field.TypeOther,
+	ScanFields: []entbuilder.FieldSpec{
+		{
+			Column:      "body",
+			Name:        "body",
+			StructIndex: 2,
+			Type:        reflect.TypeFor[string](),
+			SQLType:     field.TypeString,
+		},
+	},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "account_token",
+			GoName:      "SetAccountToken",
+			StructIndex: 4,
+			Type:        reflect.TypeFor[sid.ID](),
+			SQLType:     field.TypeOther,
+		},
+	},
+	GraphFields: map[string]field.Type{
+		"body": field.TypeString,
+	},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"account": {
+			Target:         "Account",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "tokens",
+			StorageColumns: []string{"account_token"},
 		},
 	}}
 

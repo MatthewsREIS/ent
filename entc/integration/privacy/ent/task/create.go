@@ -15,7 +15,6 @@ import (
 	"entgo.io/ent/runtime/entbuilder"
 	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -131,54 +130,7 @@ func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		_node = &Task{Config: _c.Config}
 		_spec = sqlgraph.NewCreateSpec(Table, sqlgraph.NewFieldSpec(FieldID, field.TypeInt))
 	)
-	if value, ok := entbuilder.GetField[string](_c.mutation, "title"); ok {
-		_spec.SetField(FieldTitle, field.TypeString, value)
-		_node.Title = value
-	}
-	if value, ok := entbuilder.GetField[string](_c.mutation, "description"); ok {
-		_spec.SetField(FieldDescription, field.TypeString, value)
-		_node.Description = value
-	}
-	if value, ok := entbuilder.GetField[Status](_c.mutation, "status"); ok {
-		_spec.SetField(FieldStatus, field.TypeEnum, value)
-		_node.Status = value
-	}
-	if value, ok := entbuilder.GetField[uuid.UUID](_c.mutation, "uuid"); ok {
-		_spec.SetField(FieldUUID, field.TypeUUID, value)
-		_node.UUID = value
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "teams"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   TeamsTable,
-			Columns: TeamsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := entbuilder.EdgeIDsAs[int](_c.mutation, "owner"); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   OwnerTable,
-			Columns: []string{OwnerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec("id", field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
+	entbuilder.ApplyCreateSpec(_c.mutation, _node, _spec, nil, nil)
 	return _node, _spec
 }
 

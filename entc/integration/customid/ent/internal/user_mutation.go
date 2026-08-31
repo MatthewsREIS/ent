@@ -11,7 +11,9 @@ import (
 	"reflect"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/runtime/entbuilder"
+	"entgo.io/ent/schema/field"
 
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 )
@@ -31,26 +33,91 @@ var userDescriptor = &entbuilder.Descriptor{
 	Fields:  map[string]entbuilder.FieldSpec{},
 	Edges: map[string]entbuilder.EdgeSpec{
 		"groups": {
-			Cardinality:  entbuilder.M2M,
-			Target:       "Group",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.M2M,
+			Target:          "Group",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2M,
+			StorageTable:    "group_users",
+			StorageColumns:  []string{"group_id", "user_id"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"parent": {
-			Cardinality:  entbuilder.O2OUnique,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
-			Inverse:      true,
+			Cardinality:     entbuilder.O2OUnique,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Inverse:         true,
+			Rel:             sqlgraph.M2O,
+			StorageTable:    "users",
+			StorageColumns:  []string{"user_children"},
+			TargetIDColumn:  "oid",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"children": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "User",
-			TargetIDType: reflect.TypeFor[int](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "User",
+			TargetIDType:    reflect.TypeFor[int](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "users",
+			StorageColumns:  []string{"user_children"},
+			TargetIDColumn:  "oid",
+			TargetIDSQLType: field.TypeInt,
 		},
 		"pets": {
-			Cardinality:  entbuilder.O2M,
-			Target:       "Pet",
-			TargetIDType: reflect.TypeFor[string](),
+			Cardinality:     entbuilder.O2M,
+			Target:          "Pet",
+			TargetIDType:    reflect.TypeFor[string](),
+			Rel:             sqlgraph.O2M,
+			StorageTable:    "pets",
+			StorageColumns:  []string{"user_pets"},
+			TargetIDColumn:  "id",
+			TargetIDSQLType: field.TypeString,
+		},
+	},
+	Table: "users",
+	TableColumns: []string{
+		"oid",
+	},
+	IDColumn:   "oid",
+	IDSQLType:  field.TypeInt,
+	ScanFields: []entbuilder.FieldSpec{},
+	FKColumns: []entbuilder.FieldSpec{
+		{
+			Column:      "user_children",
+			GoName:      "SetUserChildren",
+			StructIndex: 3,
+			Type:        reflect.TypeFor[int](),
+			SQLType:     field.TypeInt,
+		},
+	},
+	GraphFields: map[string]field.Type{},
+	GraphEdges: map[string]entbuilder.EdgeSpec{
+		"groups": {
+			Target:         "Group",
+			Rel:            sqlgraph.M2M,
+			Inverse:        true,
+			StorageTable:   "group_users",
+			StorageColumns: []string{"group_id", "user_id"},
+		},
+		"parent": {
+			Target:         "User",
+			Rel:            sqlgraph.M2O,
+			Inverse:        true,
+			StorageTable:   "users",
+			StorageColumns: []string{"user_children"},
+		},
+		"children": {
+			Target:         "User",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "users",
+			StorageColumns: []string{"user_children"},
+		},
+		"pets": {
+			Target:         "Pet",
+			Rel:            sqlgraph.O2M,
+			StorageTable:   "pets",
+			StorageColumns: []string{"user_pets"},
 		},
 	}}
 
