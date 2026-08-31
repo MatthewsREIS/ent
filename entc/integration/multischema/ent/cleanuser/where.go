@@ -12,16 +12,16 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the CleanUser type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the CleanUser type.
+var Field = struct {
 	// Name is the handle for the "name" field.
 	Name entfield.String[string]
 }{
 	Name: entfield.NewString[string](FieldName, "name"),
 }
 
-// E holds typed edge handles for every edge of the CleanUser type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the CleanUser type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

@@ -40,7 +40,7 @@ func (_u *FriendshipUpdate) Where(ps ...predicate.Friendship) *FriendshipUpdate 
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FriendshipUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *FriendshipUpdate) With(as ...entfield.Assignment) *FriendshipUpdate {
 	if _u.err == nil {
@@ -138,7 +138,7 @@ func NewFriendshipUpdateOne(c Config, hooks []Hook, mutation *FriendshipMutation
 	return &FriendshipUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FriendshipUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *FriendshipUpdateOne) With(as ...entfield.Assignment) *FriendshipUpdateOne {
 	if _u.err == nil {

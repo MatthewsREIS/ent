@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Blob type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Blob type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[uuid.UUID]
 	// UUID is the handle for the "uuid" field.
@@ -27,8 +27,8 @@ var F = struct {
 	Count: entfield.NewNumber[int](FieldCount, "count"),
 }
 
-// E holds typed edge handles for every edge of the Blob type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Blob type.
+var Edge = struct {
 	// Parent is the handle for the "parent" edge.
 	Parent entfield.Edge[predicate.Blob, uuid.UUID]
 	// Links is the handle for the "links" edge.

@@ -12,16 +12,16 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Group type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Group type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 }{
 	ID: entfield.NewNumber[int](FieldID, "id"),
 }
 
-// E holds typed edge handles for every edge of the Group type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Group type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

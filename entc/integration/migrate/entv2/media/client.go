@@ -99,7 +99,7 @@ func (c *MediaClient) DeleteOne(_m *Media) *MediaDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MediaClient) DeleteOneID(id int) *MediaDeleteOne {
 	mutation := NewMediaMutation(c.Config, OpDeleteOne, WithMediaID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewMediaDeleteOne(NewMediaDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *MediaClient) Query() *MediaQuery {
 
 // Get returns a Media entity by its id.
 func (c *MediaClient) Get(ctx context.Context, id int) (*Media, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

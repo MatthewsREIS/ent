@@ -33,7 +33,7 @@ func NewTagCreate(c Config, hooks []Hook, mutation *TagMutation) *TagCreate {
 	return &TagCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TagCreate builder. The first error from as is recorded and returned by Save.
 func (_c *TagCreate) With(as ...entfield.Assignment) *TagCreate {
 	if _c.err == nil {

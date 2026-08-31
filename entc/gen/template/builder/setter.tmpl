@@ -19,7 +19,7 @@ With too, since *entbuilder.Mutation[T, I] satisfies entfield.Mutable
 regardless of storage.
 */}}
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the {{ $builder }} builder. The first error from as is recorded and returned by Save.
 func ({{ $receiver }} *{{ $builder }}) With(as ...entfield.Assignment) *{{ $builder }} {
 	if {{ $receiver }}.err == nil {

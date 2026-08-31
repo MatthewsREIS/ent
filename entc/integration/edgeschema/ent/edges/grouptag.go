@@ -34,7 +34,7 @@ func LoadGroupTagTag(ctx context.Context, query *tag.TagQuery, nodes []*grouptag
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(tag.F.ID.In(ids...))
+	query.Where(tag.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func LoadGroupTagGroup(ctx context.Context, query *group.GroupQuery, nodes []*gr
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(group.F.ID.In(ids...))
+	query.Where(group.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

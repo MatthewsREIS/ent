@@ -33,7 +33,7 @@ func NewGroupCreate(c Config, hooks []Hook, mutation *GroupMutation) *GroupCreat
 	return &GroupCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the GroupCreate builder. The first error from as is recorded and returned by Save.
 func (_c *GroupCreate) With(as ...entfield.Assignment) *GroupCreate {
 	if _c.err == nil {

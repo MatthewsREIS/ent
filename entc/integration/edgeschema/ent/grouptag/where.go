@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the GroupTag type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the GroupTag type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// TagID is the handle for the "tag_id" field (backs the "tag" edge).
@@ -26,8 +26,8 @@ var F = struct {
 	GroupID: entfield.NewEdgeField[int](FieldGroupID, "group"),
 }
 
-// E holds typed edge handles for every edge of the GroupTag type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the GroupTag type.
+var Edge = struct {
 	// Tag is the handle for the "tag" edge.
 	Tag entfield.Edge[predicate.Tag, int]
 	// Group is the handle for the "group" edge.

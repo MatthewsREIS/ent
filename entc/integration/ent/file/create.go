@@ -32,7 +32,7 @@ func NewFileCreate(c Config, hooks []Hook, mutation *FileMutation) *FileCreate {
 	return &FileCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FileCreate builder. The first error from as is recorded and returned by Save.
 func (_c *FileCreate) With(as ...entfield.Assignment) *FileCreate {
 	if _c.err == nil {

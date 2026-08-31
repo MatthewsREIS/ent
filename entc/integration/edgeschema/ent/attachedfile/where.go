@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the AttachedFile type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the AttachedFile type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// AttachTime is the handle for the "attach_time" field.
@@ -29,8 +29,8 @@ var F = struct {
 	ProcID:     entfield.NewEdgeField[int](FieldProcID, "proc"),
 }
 
-// E holds typed edge handles for every edge of the AttachedFile type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the AttachedFile type.
+var Edge = struct {
 	// Fi is the handle for the "fi" edge.
 	Fi entfield.Edge[predicate.File, int]
 	// Proc is the handle for the "proc" edge.

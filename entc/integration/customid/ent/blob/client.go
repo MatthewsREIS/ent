@@ -100,7 +100,7 @@ func (c *BlobClient) DeleteOne(_m *Blob) *BlobDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *BlobClient) DeleteOneID(id uuid.UUID) *BlobDeleteOne {
 	mutation := NewBlobMutation(c.Config, OpDeleteOne, WithBlobID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewBlobDeleteOne(NewBlobDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *BlobClient) Query() *BlobQuery {
 
 // Get returns a Blob entity by its id.
 func (c *BlobClient) Get(ctx context.Context, id uuid.UUID) (*Blob, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

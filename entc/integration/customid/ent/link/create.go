@@ -34,7 +34,7 @@ func NewLinkCreate(c Config, hooks []Hook, mutation *LinkMutation) *LinkCreate {
 	return &LinkCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the LinkCreate builder. The first error from as is recorded and returned by Save.
 func (_c *LinkCreate) With(as ...entfield.Assignment) *LinkCreate {
 	if _c.err == nil {

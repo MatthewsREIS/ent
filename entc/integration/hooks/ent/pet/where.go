@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Pet type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Pet type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// DeleteTime is the handle for the "delete_time" field.
@@ -26,8 +26,8 @@ var F = struct {
 	Name:       entfield.NewString[string](FieldName, "name"),
 }
 
-// E holds typed edge handles for every edge of the Pet type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Pet type.
+var Edge = struct {
 	// Owner is the handle for the "owner" edge.
 	Owner entfield.Edge[predicate.User, int]
 }{

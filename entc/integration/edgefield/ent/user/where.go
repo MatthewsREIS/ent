@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the User type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the User type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// ParentID is the handle for the "parent_id" field (backs the "parent" edge).
@@ -26,8 +26,8 @@ var F = struct {
 	SpouseID: entfield.NewEdgeField[int](FieldSpouseID, "spouse"),
 }
 
-// E holds typed edge handles for every edge of the User type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the User type.
+var Edge = struct {
 	// Pets is the handle for the "pets" edge.
 	Pets entfield.Edge[predicate.Pet, int]
 	// Parent is the handle for the "parent" edge.

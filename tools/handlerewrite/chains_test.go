@@ -116,7 +116,7 @@ func mustNotContain(t *testing.T, got, want string) {
 func TestChainsSingleSetter(t *testing.T) {
 	got, changed := runChains(t, chainsManifest, chainsPrefixes, "single_setter.go")
 	mustContainChanged(t, changed, "usage/single_setter.go")
-	mustContain(t, got, `client.Escrow.Create().With(escrow.F.Name.Set("x"))`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Field.Name.Set("x"))`)
 	mustContain(t, got, `"example.com/chainsmod/gen/escrow"`)
 	mustNotContain(t, got, `.SetName(`)
 }
@@ -124,7 +124,7 @@ func TestChainsSingleSetter(t *testing.T) {
 func TestChainsLongChainFoldsToOneWith(t *testing.T) {
 	got, changed := runChains(t, chainsManifest, chainsPrefixes, "long_chain.go")
 	mustContainChanged(t, changed, "usage/long_chain.go")
-	mustContain(t, got, `client.Escrow.Create().With(escrow.F.Name.Set("x"), escrow.F.Bio.Set("y"), escrow.F.Score.Set(5))`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Field.Name.Set("x"), escrow.Field.Bio.Set("y"), escrow.Field.Score.Set(5))`)
 	if strings.Count(got, ".With(") != 1 {
 		t.Errorf("want exactly one .With( call in a folded chain, got:\n%s", got)
 	}
@@ -133,7 +133,7 @@ func TestChainsLongChainFoldsToOneWith(t *testing.T) {
 func TestChainsInterruptedByWhereKeepsTwoWiths(t *testing.T) {
 	got, changed := runChains(t, chainsManifest, chainsPrefixes, "chain_where.go")
 	mustContainChanged(t, changed, "usage/chain_where.go")
-	mustContain(t, got, `client.Escrow.Update().With(escrow.F.Name.Set("x")).Where().With(escrow.F.Bio.Set("y")).Save(ctx)`)
+	mustContain(t, got, `client.Escrow.Update().With(escrow.Field.Name.Set("x")).Where().With(escrow.Field.Bio.Set("y")).Save(ctx)`)
 	if strings.Count(got, ".With(") != 2 {
 		t.Errorf("want exactly two .With( calls (fold broken by Where), got:\n%s", got)
 	}
@@ -142,23 +142,23 @@ func TestChainsInterruptedByWhereKeepsTwoWiths(t *testing.T) {
 func TestChainsSetNillable(t *testing.T) {
 	got, changed := runChains(t, chainsManifest, chainsPrefixes, "set_nillable.go")
 	mustContainChanged(t, changed, "usage/set_nillable.go")
-	mustContain(t, got, `client.Escrow.Create().With(escrow.F.Name.SetNillable(name))`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Field.Name.SetNillable(name))`)
 	mustNotContain(t, got, `.SetNillableName(`)
 }
 
 func TestChainsEdgeForms(t *testing.T) {
 	got, changed := runChains(t, chainsManifest, chainsPrefixes, "edge_forms.go")
 	mustContainChanged(t, changed, "usage/edge_forms.go")
-	mustContain(t, got, `client.Escrow.UpdateOneID(1).With(escrow.E.Status.SetID(2))`)
-	mustContain(t, got, `client.Escrow.Create().With(escrow.E.Status.SetNillableID(statusID))`)
+	mustContain(t, got, `client.Escrow.UpdateOneID(1).With(escrow.Edge.Status.SetID(2))`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Edge.Status.SetNillableID(statusID))`)
 	// Old methods AddParcelIDs/RemoveParcelIDs use the singularized
 	// "Parcel" (matching real entc codegen); the manifest's "Parcels" key
 	// (and E.Parcels handle) stays plural throughout.
-	mustContain(t, got, `client.Escrow.Create().With(escrow.E.Parcels.AddIDs(1, 2))`)
-	mustContain(t, got, `client.Escrow.Update().With(escrow.E.Parcels.RemoveIDs(1, 2)).Save(ctx)`)
-	mustContain(t, got, `client.Escrow.UpdateOneID(1).With(escrow.F.Bio.Clear())`)
-	mustContain(t, got, `client.Escrow.Update().With(escrow.E.Parcels.Clear())`)
-	mustContain(t, got, `client.Escrow.Create().With(escrow.F.Score.Add(5), escrow.F.Tags.Append([]string{"x"}))`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Edge.Parcels.AddIDs(1, 2))`)
+	mustContain(t, got, `client.Escrow.Update().With(escrow.Edge.Parcels.RemoveIDs(1, 2)).Save(ctx)`)
+	mustContain(t, got, `client.Escrow.UpdateOneID(1).With(escrow.Field.Bio.Clear())`)
+	mustContain(t, got, `client.Escrow.Update().With(escrow.Edge.Parcels.Clear())`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Field.Score.Add(5), escrow.Field.Tags.Append([]string{"x"}))`)
 }
 
 func TestChainsNonManifestBuilderUntouched(t *testing.T) {
@@ -186,7 +186,7 @@ func TestChainsShadowedVariableHandledCorrectly(t *testing.T) {
 	mustContain(t, got, `func paramShadow(escrow *notEscrow) {`)
 	// ...and the sibling function's legitimate chain still rewrites,
 	// despite the file-wide name collision — types mode doesn't care.
-	mustContain(t, got, `client.Escrow.Create().With(escrow.F.Name.Set("x"))`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Field.Name.Set("x"))`)
 }
 
 // ambiguousManifest gives "escrow" both a field "StatusID" and a unique
@@ -233,7 +233,7 @@ var importAliasManifest = Manifest{
 func TestChainsImportInsertionReusesExistingAlias(t *testing.T) {
 	got, changed := runChains(t, importAliasManifest, chainsPrefixes, "import_alias.go")
 	mustContainChanged(t, changed, "usage/import_alias.go")
-	mustContain(t, got, `client.Escrow.Create().With(esc.F.Name.Set("x"))`)
+	mustContain(t, got, `client.Escrow.Create().With(esc.Field.Name.Set("x"))`)
 	// Only one import of the escrow path — no duplicate added alongside
 	// the existing aliased one.
 	if n := strings.Count(got, `"example.com/chainsmod/gen/escrow"`); n != 1 {
@@ -253,7 +253,7 @@ func TestChainsImportInsertionReusesExistingAlias(t *testing.T) {
 func TestChainsLoadsTestFiles_AndFoldsThroughDeletedSetters(t *testing.T) {
 	got, changed := runChains(t, voucherManifest, chainsPrefixes, "deleted_setters_test.go")
 	mustContainChanged(t, changed, "usage/deleted_setters_test.go")
-	mustContain(t, got, `client.Voucher.Create().With(voucher.F.Title.Set("x"), voucher.F.Desc.Set("y"), voucher.F.Price.Set(5))`)
+	mustContain(t, got, `client.Voucher.Create().With(voucher.Field.Title.Set("x"), voucher.Field.Desc.Set("y"), voucher.Field.Price.Set(5))`)
 	if strings.Count(got, ".With(") != 1 {
 		t.Errorf("want exactly one .With( call (all three links folded), got:\n%s", got)
 	}
@@ -270,7 +270,7 @@ func TestChainsLoadsTestFiles_AndFoldsThroughDeletedSetters(t *testing.T) {
 func TestChainsVariadicSpreadPreserved(t *testing.T) {
 	got, changed := runChains(t, chainsManifest, chainsPrefixes, "variadic_spread.go")
 	mustContainChanged(t, changed, "usage/variadic_spread.go")
-	mustContain(t, got, `client.Escrow.Create().With(escrow.E.Parcels.AddIDs(ids...))`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Edge.Parcels.AddIDs(ids...))`)
 	mustNotContain(t, got, `AddIDs(ids)`)
 }
 
@@ -283,7 +283,7 @@ func TestChainsVariadicSpreadPreserved(t *testing.T) {
 func TestChainsFuncLiteralArgumentRewritten(t *testing.T) {
 	got, changed := runChains(t, chainsManifest, chainsPrefixes, "func_literal.go")
 	mustContainChanged(t, changed, "usage/func_literal.go")
-	mustContain(t, got, `client.Escrow.Create().With(escrow.F.Name.Set("x"))`)
+	mustContain(t, got, `client.Escrow.Create().With(escrow.Field.Name.Set("x"))`)
 	mustNotContain(t, got, `.SetName(`)
 }
 

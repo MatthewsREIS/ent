@@ -31,7 +31,7 @@ func NewPCCreate(c Config, hooks []Hook, mutation *PCMutation) *PCCreate {
 	return &PCCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the PCCreate builder. The first error from as is recorded and returned by Save.
 func (_c *PCCreate) With(as ...entfield.Assignment) *PCCreate {
 	if _c.err == nil {

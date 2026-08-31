@@ -40,7 +40,7 @@ func (_u *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the LicenseUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *LicenseUpdate) With(as ...entfield.Assignment) *LicenseUpdate {
 	if _u.err == nil {
@@ -130,7 +130,7 @@ func NewLicenseUpdateOne(c Config, hooks []Hook, mutation *LicenseMutation) *Lic
 	return &LicenseUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the LicenseUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *LicenseUpdateOne) With(as ...entfield.Assignment) *LicenseUpdateOne {
 	if _u.err == nil {

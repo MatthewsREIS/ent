@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Task type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Task type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Title is the handle for the "title" field.
@@ -33,8 +33,8 @@ var F = struct {
 	UUID:        entfield.NewValue[uuid.UUID](FieldUUID, "uuid"),
 }
 
-// E holds typed edge handles for every edge of the Task type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Task type.
+var Edge = struct {
 	// Teams is the handle for the "teams" edge.
 	Teams entfield.Edge[predicate.Team, int]
 	// Owner is the handle for the "owner" edge.

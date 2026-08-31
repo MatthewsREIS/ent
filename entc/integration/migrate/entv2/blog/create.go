@@ -31,7 +31,7 @@ func NewBlogCreate(c Config, hooks []Hook, mutation *BlogMutation) *BlogCreate {
 	return &BlogCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the BlogCreate builder. The first error from as is recorded and returned by Save.
 func (_c *BlogCreate) With(as ...entfield.Assignment) *BlogCreate {
 	if _c.err == nil {

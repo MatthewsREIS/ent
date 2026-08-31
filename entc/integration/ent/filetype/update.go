@@ -39,7 +39,7 @@ func (_u *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FileTypeUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *FileTypeUpdate) With(as ...entfield.Assignment) *FileTypeUpdate {
 	if _u.err == nil {
@@ -138,7 +138,7 @@ func NewFileTypeUpdateOne(c Config, hooks []Hook, mutation *FileTypeMutation) *F
 	return &FileTypeUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FileTypeUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *FileTypeUpdateOne) With(as ...entfield.Assignment) *FileTypeUpdateOne {
 	if _u.err == nil {

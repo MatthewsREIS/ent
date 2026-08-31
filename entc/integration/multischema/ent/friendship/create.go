@@ -32,7 +32,7 @@ func NewFriendshipCreate(c Config, hooks []Hook, mutation *FriendshipMutation) *
 	return &FriendshipCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FriendshipCreate builder. The first error from as is recorded and returned by Save.
 func (_c *FriendshipCreate) With(as ...entfield.Assignment) *FriendshipCreate {
 	if _c.err == nil {

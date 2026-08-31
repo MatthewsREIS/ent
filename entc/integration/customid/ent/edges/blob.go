@@ -39,7 +39,7 @@ func LoadBlobParent(ctx context.Context, query *blob.BlobQuery, nodes []*blob.Bl
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(blob.F.ID.In(ids...))
+	query.Where(blob.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

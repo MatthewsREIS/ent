@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Metadata type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Metadata type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Age is the handle for the "age" field.
@@ -26,8 +26,8 @@ var F = struct {
 	ParentID: entfield.NewEdgeField[int](FieldParentID, "parent"),
 }
 
-// E holds typed edge handles for every edge of the Metadata type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Metadata type.
+var Edge = struct {
 	// User is the handle for the "user" edge.
 	User entfield.Edge[predicate.User, int]
 	// Children is the handle for the "children" edge.

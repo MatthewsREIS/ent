@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the License type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the License type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// CreateTime is the handle for the "create_time" field.
@@ -26,8 +26,8 @@ var F = struct {
 	UpdateTime: entfield.NewTime(FieldUpdateTime, "update_time"),
 }
 
-// E holds typed edge handles for every edge of the License type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the License type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

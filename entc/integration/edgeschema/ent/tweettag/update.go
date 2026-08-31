@@ -37,7 +37,7 @@ func (_u *TweetTagUpdate) Where(ps ...predicate.TweetTag) *TweetTagUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TweetTagUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *TweetTagUpdate) With(as ...entfield.Assignment) *TweetTagUpdate {
 	if _u.err == nil {
@@ -124,7 +124,7 @@ func NewTweetTagUpdateOne(c Config, hooks []Hook, mutation *TweetTagMutation) *T
 	return &TweetTagUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TweetTagUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *TweetTagUpdateOne) With(as ...entfield.Assignment) *TweetTagUpdateOne {
 	if _u.err == nil {

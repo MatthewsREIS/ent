@@ -14,8 +14,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Info type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Info type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Content is the handle for the "content" field.
@@ -25,8 +25,8 @@ var F = struct {
 	Content: entfield.NewJSON[json.RawMessage]("content"),
 }
 
-// E holds typed edge handles for every edge of the Info type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Info type.
+var Edge = struct {
 	// User is the handle for the "user" edge.
 	User entfield.Edge[predicate.User, int]
 }{

@@ -39,7 +39,7 @@ func (_u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the PCUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *PCUpdate) With(as ...entfield.Assignment) *PCUpdate {
 	if _u.err == nil {
@@ -120,7 +120,7 @@ func NewPCUpdateOne(c Config, hooks []Hook, mutation *PCMutation) *PCUpdateOne {
 	return &PCUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the PCUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *PCUpdateOne) With(as ...entfield.Assignment) *PCUpdateOne {
 	if _u.err == nil {

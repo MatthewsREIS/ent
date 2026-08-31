@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Rental type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Rental type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Date is the handle for the "date" field.
@@ -30,8 +30,8 @@ var F = struct {
 	CarID:  entfield.NewEdgeField[uuid.UUID](FieldCarID, "car"),
 }
 
-// E holds typed edge handles for every edge of the Rental type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Rental type.
+var Edge = struct {
 	// User is the handle for the "user" edge.
 	User entfield.Edge[predicate.User, int]
 	// Car is the handle for the "car" edge.

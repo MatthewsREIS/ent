@@ -37,7 +37,7 @@ func (_u *RelationshipInfoUpdate) Where(ps ...predicate.RelationshipInfo) *Relat
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RelationshipInfoUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *RelationshipInfoUpdate) With(as ...entfield.Assignment) *RelationshipInfoUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewRelationshipInfoUpdateOne(c Config, hooks []Hook, mutation *Relationship
 	return &RelationshipInfoUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RelationshipInfoUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *RelationshipInfoUpdateOne) With(as ...entfield.Assignment) *RelationshipInfoUpdateOne {
 	if _u.err == nil {

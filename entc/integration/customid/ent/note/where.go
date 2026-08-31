@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Note type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Note type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.String[schema.NoteID]
 	// Text is the handle for the "text" field.
@@ -24,8 +24,8 @@ var F = struct {
 	Text: entfield.NewString[string](FieldText, "text"),
 }
 
-// E holds typed edge handles for every edge of the Note type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Note type.
+var Edge = struct {
 	// Parent is the handle for the "parent" edge.
 	Parent entfield.Edge[predicate.Note, schema.NoteID]
 	// Children is the handle for the "children" edge.

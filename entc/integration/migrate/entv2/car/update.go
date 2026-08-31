@@ -37,7 +37,7 @@ func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CarUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *CarUpdate) With(as ...entfield.Assignment) *CarUpdate {
 	if _u.err == nil {
@@ -121,7 +121,7 @@ func NewCarUpdateOne(c Config, hooks []Hook, mutation *CarMutation) *CarUpdateOn
 	return &CarUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CarUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *CarUpdateOne) With(as ...entfield.Assignment) *CarUpdateOne {
 	if _u.err == nil {

@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the FileType type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the FileType type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Name is the handle for the "name" field.
@@ -29,8 +29,8 @@ var F = struct {
 	State: entfield.NewEnum[State](FieldState, "state"),
 }
 
-// E holds typed edge handles for every edge of the FileType type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the FileType type.
+var Edge = struct {
 	// Files is the handle for the "files" edge.
 	Files entfield.Edge[predicate.File, int]
 }{

@@ -99,7 +99,7 @@ func (c *InfoClient) DeleteOne(_m *Info) *InfoDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *InfoClient) DeleteOneID(id int) *InfoDeleteOne {
 	mutation := NewInfoMutation(c.Config, OpDeleteOne, WithInfoID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewInfoDeleteOne(NewInfoDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *InfoClient) Query() *InfoQuery {
 
 // Get returns a Info entity by its id.
 func (c *InfoClient) Get(ctx context.Context, id int) (*Info, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

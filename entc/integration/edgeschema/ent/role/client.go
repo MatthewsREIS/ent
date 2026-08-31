@@ -99,7 +99,7 @@ func (c *RoleClient) DeleteOne(_m *Role) *RoleDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
 	mutation := NewRoleMutation(c.Config, OpDeleteOne, WithRoleID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewRoleDeleteOne(NewRoleDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *RoleClient) Query() *RoleQuery {
 
 // Get returns a Role entity by its id.
 func (c *RoleClient) Get(ctx context.Context, id int) (*Role, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

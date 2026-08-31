@@ -99,7 +99,7 @@ func (c *RentalClient) DeleteOne(_m *Rental) *RentalDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RentalClient) DeleteOneID(id int) *RentalDeleteOne {
 	mutation := NewRentalMutation(c.Config, OpDeleteOne, WithRentalID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewRentalDeleteOne(NewRentalDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *RentalClient) Query() *RentalQuery {
 
 // Get returns a Rental entity by its id.
 func (c *RentalClient) Get(ctx context.Context, id int) (*Rental, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

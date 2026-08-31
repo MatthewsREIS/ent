@@ -100,7 +100,7 @@ func (c *DocClient) DeleteOne(_m *Doc) *DocDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *DocClient) DeleteOneID(id schema.DocID) *DocDeleteOne {
 	mutation := NewDocMutation(c.Config, OpDeleteOne, WithDocID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewDocDeleteOne(NewDocDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *DocClient) Query() *DocQuery {
 
 // Get returns a Doc entity by its id.
 func (c *DocClient) Get(ctx context.Context, id schema.DocID) (*Doc, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

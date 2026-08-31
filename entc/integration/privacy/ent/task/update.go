@@ -37,7 +37,7 @@ func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TaskUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *TaskUpdate) With(as ...entfield.Assignment) *TaskUpdate {
 	if _u.err == nil {
@@ -128,7 +128,7 @@ func NewTaskUpdateOne(c Config, hooks []Hook, mutation *TaskMutation) *TaskUpdat
 	return &TaskUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TaskUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *TaskUpdateOne) With(as ...entfield.Assignment) *TaskUpdateOne {
 	if _u.err == nil {

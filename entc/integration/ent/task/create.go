@@ -34,7 +34,7 @@ func NewTaskCreate(c Config, hooks []Hook, mutation *TaskMutation) *TaskCreate {
 	return &TaskCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TaskCreate builder. The first error from as is recorded and returned by Save.
 func (_c *TaskCreate) With(as ...entfield.Assignment) *TaskCreate {
 	if _c.err == nil {

@@ -129,28 +129,28 @@ func decomposeAll(sel string, e PkgEntry) []reading {
 			continue
 		}
 		if isField(e, field) {
-			add("F", field, o)
+			add("Field", field, o)
 		}
 	}
 	// Has<Edge>() / Has<Edge>With(preds...)
 	if rest, ok := strings.CutPrefix(sel, "Has"); ok && rest != "" {
 		if edge, ok := strings.CutSuffix(rest, "With"); ok && edge != "" && isEdge(e, edge) {
-			add("E", edge, "HasWith")
+			add("Edge", edge, "HasWith")
 		}
 		if isEdge(e, rest) {
-			add("E", rest, "Has")
+			add("Edge", rest, "Has")
 		}
 	}
 	// By<Field>(opts...) / By<Edge>Count(opts...) / By<Edge>(term, terms...)
 	if rest, ok := strings.CutPrefix(sel, "By"); ok && rest != "" {
 		if isField(e, rest) {
-			add("F", rest, "Order")
+			add("Field", rest, "Order")
 		}
 		if edge, ok := strings.CutSuffix(rest, "Count"); ok && edge != "" && isEdge(e, edge) {
-			add("E", edge, "OrderByCount")
+			add("Edge", edge, "OrderByCount")
 		}
 		if isEdge(e, rest) {
-			add("E", rest, "OrderBy")
+			add("Edge", rest, "OrderBy")
 		}
 	}
 	// Bare equality: pkg.Name(v) / pkg.ID(v). Excludes fields listed in
@@ -159,7 +159,7 @@ func decomposeAll(sel string, e PkgEntry) []reading {
 	// so a bare pkg.Name there is something else (an enum type reference,
 	// the reserved identifier itself, ...), not a predicate call.
 	if isField(e, sel) && !e.NoBareEQ[sel] {
-		add("F", sel, "EQ")
+		add("Field", sel, "EQ")
 	}
 	return rs
 }

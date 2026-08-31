@@ -37,7 +37,7 @@ func (_u *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the LinkUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *LinkUpdate) With(as ...entfield.Assignment) *LinkUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewLinkUpdateOne(c Config, hooks []Hook, mutation *LinkMutation) *LinkUpdat
 	return &LinkUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the LinkUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *LinkUpdateOne) With(as ...entfield.Assignment) *LinkUpdateOne {
 	if _u.err == nil {

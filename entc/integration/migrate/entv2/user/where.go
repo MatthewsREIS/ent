@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the User type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the User type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// MixedString is the handle for the "mixed_string" field.
@@ -83,8 +83,8 @@ var F = struct {
 	DropOptional: entfield.NewString[string](FieldDropOptional, "drop_optional"),
 }
 
-// E holds typed edge handles for every edge of the User type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the User type.
+var Edge = struct {
 	// Car is the handle for the "car" edge.
 	Car entfield.Edge[predicate.Car, int]
 	// Pets is the handle for the "pets" edge.

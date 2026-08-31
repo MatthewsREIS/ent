@@ -34,7 +34,7 @@ func NewRoleCreate(c Config, hooks []Hook, mutation *RoleMutation) *RoleCreate {
 	return &RoleCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RoleCreate builder. The first error from as is recorded and returned by Save.
 func (_c *RoleCreate) With(as ...entfield.Assignment) *RoleCreate {
 	if _c.err == nil {

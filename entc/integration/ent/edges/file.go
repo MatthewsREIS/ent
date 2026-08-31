@@ -40,7 +40,7 @@ func LoadFileOwner(ctx context.Context, query *user.UserQuery, nodes []*file.Fil
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.F.ID.In(ids...))
+	query.Where(user.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -130,7 +130,7 @@ func LoadFileType(ctx context.Context, query *filetype.FileTypeQuery, nodes []*f
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(filetype.F.ID.In(ids...))
+	query.Where(filetype.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

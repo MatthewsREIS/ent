@@ -31,7 +31,7 @@ func NewAPICreate(c Config, hooks []Hook, mutation *APIMutation) *APICreate {
 	return &APICreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the APICreate builder. The first error from as is recorded and returned by Save.
 func (_c *APICreate) With(as ...entfield.Assignment) *APICreate {
 	if _c.err == nil {

@@ -31,7 +31,7 @@ func NewRelationshipCreate(c Config, hooks []Hook, mutation *RelationshipMutatio
 	return &RelationshipCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RelationshipCreate builder. The first error from as is recorded and returned by Save.
 func (_c *RelationshipCreate) With(as ...entfield.Assignment) *RelationshipCreate {
 	if _c.err == nil {

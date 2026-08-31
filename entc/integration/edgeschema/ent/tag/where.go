@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Tag type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Tag type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Value is the handle for the "value" field.
@@ -24,8 +24,8 @@ var F = struct {
 	Value: entfield.NewString[string](FieldValue, "value"),
 }
 
-// E holds typed edge handles for every edge of the Tag type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Tag type.
+var Edge = struct {
 	// Tweets is the handle for the "tweets" edge.
 	Tweets entfield.Edge[predicate.Tweet, int]
 	// Groups is the handle for the "groups" edge.

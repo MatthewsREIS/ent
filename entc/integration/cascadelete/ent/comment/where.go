@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Comment type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Comment type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Text is the handle for the "text" field.
@@ -26,8 +26,8 @@ var F = struct {
 	PostID: entfield.NewEdgeField[int](FieldPostID, "post"),
 }
 
-// E holds typed edge handles for every edge of the Comment type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Comment type.
+var Edge = struct {
 	// Post is the handle for the "post" edge.
 	Post entfield.Edge[predicate.Post, int]
 }{

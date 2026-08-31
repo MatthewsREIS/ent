@@ -36,7 +36,7 @@ func NewFieldTypeCreate(c Config, hooks []Hook, mutation *FieldTypeMutation) *Fi
 	return &FieldTypeCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FieldTypeCreate builder. The first error from as is recorded and returned by Save.
 func (_c *FieldTypeCreate) With(as ...entfield.Assignment) *FieldTypeCreate {
 	if _c.err == nil {

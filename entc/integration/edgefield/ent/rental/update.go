@@ -37,7 +37,7 @@ func (_u *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RentalUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *RentalUpdate) With(as ...entfield.Assignment) *RentalUpdate {
 	if _u.err == nil {
@@ -124,7 +124,7 @@ func NewRentalUpdateOne(c Config, hooks []Hook, mutation *RentalMutation) *Renta
 	return &RentalUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RentalUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *RentalUpdateOne) With(as ...entfield.Assignment) *RentalUpdateOne {
 	if _u.err == nil {

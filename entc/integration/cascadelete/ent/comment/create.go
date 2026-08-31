@@ -30,7 +30,7 @@ func NewCommentCreate(c Config, hooks []Hook, mutation *CommentMutation) *Commen
 	return &CommentCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CommentCreate builder. The first error from as is recorded and returned by Save.
 func (_c *CommentCreate) With(as ...entfield.Assignment) *CommentCreate {
 	if _c.err == nil {

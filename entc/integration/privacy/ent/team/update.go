@@ -37,7 +37,7 @@ func (_u *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TeamUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *TeamUpdate) With(as ...entfield.Assignment) *TeamUpdate {
 	if _u.err == nil {
@@ -123,7 +123,7 @@ func NewTeamUpdateOne(c Config, hooks []Hook, mutation *TeamMutation) *TeamUpdat
 	return &TeamUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TeamUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *TeamUpdateOne) With(as ...entfield.Assignment) *TeamUpdateOne {
 	if _u.err == nil {

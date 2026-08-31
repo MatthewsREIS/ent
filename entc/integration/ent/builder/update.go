@@ -39,7 +39,7 @@ func (_u *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the BuilderUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *BuilderUpdate) With(as ...entfield.Assignment) *BuilderUpdate {
 	if _u.err == nil {
@@ -120,7 +120,7 @@ func NewBuilderUpdateOne(c Config, hooks []Hook, mutation *BuilderMutation) *Bui
 	return &BuilderUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the BuilderUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *BuilderUpdateOne) With(as ...entfield.Assignment) *BuilderUpdateOne {
 	if _u.err == nil {

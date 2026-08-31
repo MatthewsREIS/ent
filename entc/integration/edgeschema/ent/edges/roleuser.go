@@ -34,7 +34,7 @@ func LoadRoleUserRole(ctx context.Context, query *role.RoleQuery, nodes []*roleu
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(role.F.ID.In(ids...))
+	query.Where(role.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func LoadRoleUserUser(ctx context.Context, query *user.UserQuery, nodes []*roleu
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.F.ID.In(ids...))
+	query.Where(user.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

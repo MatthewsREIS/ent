@@ -32,7 +32,7 @@ func NewProcessCreate(c Config, hooks []Hook, mutation *ProcessMutation) *Proces
 	return &ProcessCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ProcessCreate builder. The first error from as is recorded and returned by Save.
 func (_c *ProcessCreate) With(as ...entfield.Assignment) *ProcessCreate {
 	if _c.err == nil {

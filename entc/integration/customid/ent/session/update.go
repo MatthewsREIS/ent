@@ -37,7 +37,7 @@ func (_u *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the SessionUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *SessionUpdate) With(as ...entfield.Assignment) *SessionUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewSessionUpdateOne(c Config, hooks []Hook, mutation *SessionMutation) *Ses
 	return &SessionUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the SessionUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *SessionUpdateOne) With(as ...entfield.Assignment) *SessionUpdateOne {
 	if _u.err == nil {

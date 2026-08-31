@@ -34,7 +34,7 @@ func LoadTweetLikeTweet(ctx context.Context, query *tweet.TweetQuery, nodes []*t
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(tweet.F.ID.In(ids...))
+	query.Where(tweet.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func LoadTweetLikeUser(ctx context.Context, query *user.UserQuery, nodes []*twee
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.F.ID.In(ids...))
+	query.Where(user.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

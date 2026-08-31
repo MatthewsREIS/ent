@@ -34,7 +34,7 @@ func LoadAttachedFileFi(ctx context.Context, query *file.FileQuery, nodes []*att
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(file.F.ID.In(ids...))
+	query.Where(file.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func LoadAttachedFileProc(ctx context.Context, query *process.ProcessQuery, node
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(process.F.ID.In(ids...))
+	query.Where(process.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

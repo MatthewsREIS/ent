@@ -13,16 +13,16 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Device type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Device type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[schema.ID]
 }{
 	ID: entfield.NewValue[schema.ID](FieldID, "id"),
 }
 
-// E holds typed edge handles for every edge of the Device type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Device type.
+var Edge = struct {
 	// ActiveSession is the handle for the "active_session" edge.
 	ActiveSession entfield.Edge[predicate.Session, schema.ID]
 	// Sessions is the handle for the "sessions" edge.

@@ -36,29 +36,29 @@ func TestSQLiteEdgeSchemaFriendshipImmutableEdges(t *testing.T) {
 	ctx := context.Background()
 	require.NoError(t, client.Schema.Create(ctx, migrate.WithGlobalUniqueID(true)))
 
-	a8m := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
-	nat := client.User.Create().With(user.F.Name.Set("nati")).SaveX(ctx)
-	other := client.User.Create().With(user.F.Name.Set("other")).SaveX(ctx)
+	a8m := client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
+	nat := client.User.Create().With(user.Field.Name.Set("nati")).SaveX(ctx)
+	other := client.User.Create().With(user.Field.Name.Set("other")).SaveX(ctx)
 
 	f := client.Friendship.Create().
-		With(friendship.E.User.SetID(a8m.ID), friendship.E.Friend.SetID(nat.ID)).
+		With(friendship.Edge.User.SetID(a8m.ID), friendship.Edge.Friend.SetID(nat.ID)).
 		SaveX(ctx)
 	require.Equal(t, a8m.ID, f.UserID)
 	require.Equal(t, nat.ID, f.FriendID)
 
 	// E.<Edge>.SetID on an immutable edge must error at Save, not silently
 	// no-op.
-	err = client.Friendship.UpdateOneID(f.ID).With(friendship.E.User.SetID(other.ID)).Exec(ctx)
+	err = client.Friendship.UpdateOneID(f.ID).With(friendship.Edge.User.SetID(other.ID)).Exec(ctx)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "immutable")
 
 	// F.<EdgeField>.Set routes through the same SetEdgeID guard.
-	err = client.Friendship.UpdateOneID(f.ID).With(friendship.F.UserID.Set(other.ID)).Exec(ctx)
+	err = client.Friendship.UpdateOneID(f.ID).With(friendship.Field.UserID.Set(other.ID)).Exec(ctx)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "immutable")
 
 	// E.<Edge>.Clear on an immutable edge must error too.
-	err = client.Friendship.UpdateOneID(f.ID).With(friendship.E.Friend.Clear()).Exec(ctx)
+	err = client.Friendship.UpdateOneID(f.ID).With(friendship.Edge.Friend.Clear()).Exec(ctx)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "immutable")
 

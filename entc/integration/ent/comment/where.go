@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Comment type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Comment type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// UniqueInt is the handle for the "unique_int" field.
@@ -39,8 +39,8 @@ var F = struct {
 	Client:      entfield.NewString[string](FieldClient, "client"),
 }
 
-// E holds typed edge handles for every edge of the Comment type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Comment type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

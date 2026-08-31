@@ -100,7 +100,7 @@ func (c *NoteClient) DeleteOne(_m *Note) *NoteDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *NoteClient) DeleteOneID(id schema.NoteID) *NoteDeleteOne {
 	mutation := NewNoteMutation(c.Config, OpDeleteOne, WithNoteID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewNoteDeleteOne(NewNoteDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *NoteClient) Query() *NoteQuery {
 
 // Get returns a Note entity by its id.
 func (c *NoteClient) Get(ctx context.Context, id schema.NoteID) (*Note, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

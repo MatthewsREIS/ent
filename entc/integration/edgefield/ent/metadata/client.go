@@ -99,7 +99,7 @@ func (c *MetadataClient) DeleteOne(_m *Metadata) *MetadataDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MetadataClient) DeleteOneID(id int) *MetadataDeleteOne {
 	mutation := NewMetadataMutation(c.Config, OpDeleteOne, WithMetadataID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewMetadataDeleteOne(NewMetadataDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *MetadataClient) Query() *MetadataQuery {
 
 // Get returns a Metadata entity by its id.
 func (c *MetadataClient) Get(ctx context.Context, id int) (*Metadata, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

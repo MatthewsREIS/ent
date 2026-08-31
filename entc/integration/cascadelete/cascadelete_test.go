@@ -26,13 +26,13 @@ func TestCascadeDelete(t *testing.T) {
 	author := client.User.Create().SaveX(ctx)
 	posts := client.Post.CreateBulk(
 		client.Post.Create(),
-		client.Post.Create().With(post.F.AuthorID.Set(author.ID)),
-		client.Post.Create().With(post.F.AuthorID.Set(author.ID)),
+		client.Post.Create().With(post.Field.AuthorID.Set(author.ID)),
+		client.Post.Create().With(post.Field.AuthorID.Set(author.ID)),
 	).SaveX(ctx)
 	comments := client.Comment.CreateBulk(
-		client.Comment.Create().With(comment.F.Text.Set("Go"), comment.F.PostID.Set(posts[0].ID)),
-		client.Comment.Create().With(comment.F.Text.Set("Ent"), comment.F.PostID.Set(posts[1].ID)),
-		client.Comment.Create().With(comment.F.Text.Set("GraphQL"), comment.F.PostID.Set(posts[1].ID)),
+		client.Comment.Create().With(comment.Field.Text.Set("Go"), comment.Field.PostID.Set(posts[0].ID)),
+		client.Comment.Create().With(comment.Field.Text.Set("Ent"), comment.Field.PostID.Set(posts[1].ID)),
+		client.Comment.Create().With(comment.Field.Text.Set("GraphQL"), comment.Field.PostID.Set(posts[1].ID)),
 	).SaveX(ctx)
 
 	t.Log("Delete the author with its 2 posts and their comments")

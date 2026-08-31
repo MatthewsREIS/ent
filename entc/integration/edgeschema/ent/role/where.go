@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Role type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Role type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Name is the handle for the "name" field.
@@ -26,8 +26,8 @@ var F = struct {
 	CreatedAt: entfield.NewTime(FieldCreatedAt, "created_at"),
 }
 
-// E holds typed edge handles for every edge of the Role type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Role type.
+var Edge = struct {
 	// User is the handle for the "user" edge.
 	User entfield.Edge[predicate.User, int]
 	// RolesUsers is the handle for the "roles_users" edge.

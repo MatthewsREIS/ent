@@ -19,8 +19,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the FieldType type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the FieldType type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Int is the handle for the "int" field.
@@ -222,8 +222,8 @@ var F = struct {
 	PasswordOther:         entfield.NewValue[schema.Password](FieldPasswordOther, "password_other"),
 }
 
-// E holds typed edge handles for every edge of the FieldType type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the FieldType type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

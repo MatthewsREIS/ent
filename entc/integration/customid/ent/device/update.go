@@ -37,7 +37,7 @@ func (_u *DeviceUpdate) Where(ps ...predicate.Device) *DeviceUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the DeviceUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *DeviceUpdate) With(as ...entfield.Assignment) *DeviceUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewDeviceUpdateOne(c Config, hooks []Hook, mutation *DeviceMutation) *Devic
 	return &DeviceUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the DeviceUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *DeviceUpdateOne) With(as ...entfield.Assignment) *DeviceUpdateOne {
 	if _u.err == nil {

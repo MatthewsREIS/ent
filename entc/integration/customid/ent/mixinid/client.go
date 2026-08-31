@@ -100,7 +100,7 @@ func (c *MixinIDClient) DeleteOne(_m *MixinID) *MixinIDDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MixinIDClient) DeleteOneID(id uuid.UUID) *MixinIDDeleteOne {
 	mutation := NewMixinIDMutation(c.Config, OpDeleteOne, WithMixinIDID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewMixinIDDeleteOne(NewMixinIDDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *MixinIDClient) Query() *MixinIDQuery {
 
 // Get returns a MixinID entity by its id.
 func (c *MixinIDClient) Get(ctx context.Context, id uuid.UUID) (*MixinID, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

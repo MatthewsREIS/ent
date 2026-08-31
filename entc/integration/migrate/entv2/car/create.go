@@ -30,7 +30,7 @@ func NewCarCreate(c Config, hooks []Hook, mutation *CarMutation) *CarCreate {
 	return &CarCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CarCreate builder. The first error from as is recorded and returned by Save.
 func (_c *CarCreate) With(as ...entfield.Assignment) *CarCreate {
 	if _c.err == nil {

@@ -100,7 +100,7 @@ func (c *TweetTagClient) DeleteOne(_m *TweetTag) *TweetTagDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TweetTagClient) DeleteOneID(id uuid.UUID) *TweetTagDeleteOne {
 	mutation := NewTweetTagMutation(c.Config, OpDeleteOne, WithTweetTagID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewTweetTagDeleteOne(NewTweetTagDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *TweetTagClient) Query() *TweetTagQuery {
 
 // Get returns a TweetTag entity by its id.
 func (c *TweetTagClient) Get(ctx context.Context, id uuid.UUID) (*TweetTag, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

@@ -33,7 +33,7 @@ func NewLicenseCreate(c Config, hooks []Hook, mutation *LicenseMutation) *Licens
 	return &LicenseCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the LicenseCreate builder. The first error from as is recorded and returned by Save.
 func (_c *LicenseCreate) With(as ...entfield.Assignment) *LicenseCreate {
 	if _c.err == nil {

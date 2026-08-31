@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the CustomType type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the CustomType type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Custom is the handle for the "custom" field.
@@ -29,8 +29,8 @@ var F = struct {
 	Tz3:    entfield.NewTime(FieldTz3, "tz3"),
 }
 
-// E holds typed edge handles for every edge of the CustomType type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the CustomType type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

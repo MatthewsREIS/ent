@@ -99,7 +99,7 @@ func (c *GroupTagClient) DeleteOne(_m *GroupTag) *GroupTagDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupTagClient) DeleteOneID(id int) *GroupTagDeleteOne {
 	mutation := NewGroupTagMutation(c.Config, OpDeleteOne, WithGroupTagID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewGroupTagDeleteOne(NewGroupTagDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *GroupTagClient) Query() *GroupTagQuery {
 
 // Get returns a GroupTag entity by its id.
 func (c *GroupTagClient) Get(ctx context.Context, id int) (*GroupTag, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
