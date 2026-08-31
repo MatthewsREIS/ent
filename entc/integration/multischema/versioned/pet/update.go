@@ -40,7 +40,7 @@ func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the PetUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *PetUpdate) With(as ...entfield.Assignment) *PetUpdate {
 	if _u.err == nil {
@@ -124,7 +124,7 @@ func NewPetUpdateOne(c Config, hooks []Hook, mutation *PetMutation) *PetUpdateOn
 	return &PetUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the PetUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *PetUpdateOne) With(as ...entfield.Assignment) *PetUpdateOne {
 	if _u.err == nil {

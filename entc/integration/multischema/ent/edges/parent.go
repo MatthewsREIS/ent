@@ -33,7 +33,7 @@ func LoadParentChild(ctx context.Context, query *user.UserQuery, nodes []*parent
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.F.ID.In(ids...))
+	query.Where(user.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func LoadParentParent(ctx context.Context, query *user.UserQuery, nodes []*paren
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.F.ID.In(ids...))
+	query.Where(user.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

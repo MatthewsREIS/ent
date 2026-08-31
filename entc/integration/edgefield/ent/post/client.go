@@ -99,7 +99,7 @@ func (c *PostClient) DeleteOne(_m *Post) *PostDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
 	mutation := NewPostMutation(c.Config, OpDeleteOne, WithPostID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewPostDeleteOne(NewPostDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *PostClient) Query() *PostQuery {
 
 // Get returns a Post entity by its id.
 func (c *PostClient) Get(ctx context.Context, id int) (*Post, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

@@ -308,7 +308,7 @@ func TestGraph_Gen_SQLSchemaConfigHooksInDescriptorPaths(t *testing.T) {
 	// PR 6: WithGroups moved from a method on *UserQuery to the
 	// root-facade free function WithUserGroups. Task 3: ClearUsers (the
 	// generated builder method) is gone — edge clearing now goes through
-	// the entfield handle (group.E.Users.Clear()), migrated by the
+	// the entfield handle (group.Edge.Users.Clear()), migrated by the
 	// handlerewrite -chains tool at every non-generated call site.
 	testFile := filepath.Join(target, "schemaconfig_compile_test.go")
 	require.NoError(t, os.WriteFile(testFile, []byte(`package ent
@@ -321,7 +321,7 @@ import (
 
 func TestGeneratedSchemaConfigDescriptorPathsCompile(t *testing.T) {
 	_ = WithUserGroups
-	_ = group.E.Users.Clear
+	_ = group.Edge.Users.Clear
 }
 `), 0644))
 

@@ -530,7 +530,7 @@ func LoadGroupInfo(ctx context.Context, query *groupinfo.GroupInfoQuery, nodes [
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(groupinfo.F.ID.In(ids...))
+	query.Where(groupinfo.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

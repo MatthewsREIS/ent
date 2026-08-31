@@ -33,7 +33,7 @@ func LoadCommentPost(ctx context.Context, query *post.PostQuery, nodes []*commen
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(post.F.ID.In(ids...))
+	query.Where(post.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

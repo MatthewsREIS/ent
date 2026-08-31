@@ -99,7 +99,7 @@ func (c *AttachedFileClient) DeleteOne(_m *AttachedFile) *AttachedFileDeleteOne 
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *AttachedFileClient) DeleteOneID(id int) *AttachedFileDeleteOne {
 	mutation := NewAttachedFileMutation(c.Config, OpDeleteOne, WithAttachedFileID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewAttachedFileDeleteOne(NewAttachedFileDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *AttachedFileClient) Query() *AttachedFileQuery {
 
 // Get returns a AttachedFile entity by its id.
 func (c *AttachedFileClient) Get(ctx context.Context, id int) (*AttachedFile, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

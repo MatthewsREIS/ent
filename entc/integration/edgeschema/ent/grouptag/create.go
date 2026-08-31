@@ -32,7 +32,7 @@ func NewGroupTagCreate(c Config, hooks []Hook, mutation *GroupTagMutation) *Grou
 	return &GroupTagCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the GroupTagCreate builder. The first error from as is recorded and returned by Save.
 func (_c *GroupTagCreate) With(as ...entfield.Assignment) *GroupTagCreate {
 	if _c.err == nil {

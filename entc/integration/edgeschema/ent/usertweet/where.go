@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the UserTweet type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the UserTweet type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// CreatedAt is the handle for the "created_at" field.
@@ -29,8 +29,8 @@ var F = struct {
 	TweetID:   entfield.NewEdgeField[int](FieldTweetID, "tweet"),
 }
 
-// E holds typed edge handles for every edge of the UserTweet type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the UserTweet type.
+var Edge = struct {
 	// User is the handle for the "user" edge.
 	User entfield.Edge[predicate.User, int]
 	// Tweet is the handle for the "tweet" edge.

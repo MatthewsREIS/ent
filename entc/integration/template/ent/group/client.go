@@ -99,7 +99,7 @@ func (c *GroupClient) DeleteOne(_m *Group) *GroupDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	mutation := NewGroupMutation(c.Config, OpDeleteOne, WithGroupID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewGroupDeleteOne(NewGroupDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *GroupClient) Query() *GroupQuery {
 
 // Get returns a Group entity by its id.
 func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

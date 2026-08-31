@@ -27,7 +27,7 @@ import (
 // setterReading is one decomposition of a builder method name against a
 // manifest entity's setters table: "call <Handle>.<Name>.<Op>(args...)".
 type setterReading struct {
-	handle string // "F" or "E"
+	handle string // "Field" or "Edge"
 	name   string // the field/edge's PascalCase name
 	op     string // the handle method to call: Set, SetNillable, Add, ...
 }
@@ -68,23 +68,23 @@ func decomposeSetter(method string, setters map[string]SetterEntry) []setterRead
 		case "field", "edgefield":
 			switch {
 			case method == "Set"+name:
-				cands = append(cands, setterReading{"F", name, "Set"})
+				cands = append(cands, setterReading{"Field", name, "Set"})
 			case e.Nillable && method == "SetNillable"+name:
-				cands = append(cands, setterReading{"F", name, "SetNillable"})
+				cands = append(cands, setterReading{"Field", name, "SetNillable"})
 			case e.Kind == "field" && e.CanAdd && method == "Add"+name:
-				cands = append(cands, setterReading{"F", name, "Add"})
+				cands = append(cands, setterReading{"Field", name, "Add"})
 			case e.Kind == "field" && e.CanAppend && method == "Append"+name:
-				cands = append(cands, setterReading{"F", name, "Append"})
+				cands = append(cands, setterReading{"Field", name, "Append"})
 			case method == "Clear"+name:
-				cands = append(cands, setterReading{"F", name, "Clear"})
+				cands = append(cands, setterReading{"Field", name, "Clear"})
 			}
 		case "edge":
 			if e.Unique {
 				switch {
 				case method == "Set"+name+"ID":
-					cands = append(cands, setterReading{"E", name, "SetID"})
+					cands = append(cands, setterReading{"Edge", name, "SetID"})
 				case e.Nillable && method == "SetNillable"+name+"ID":
-					cands = append(cands, setterReading{"E", name, "SetNillableID"})
+					cands = append(cands, setterReading{"Edge", name, "SetNillableID"})
 				}
 			} else {
 				base := e.MethodBase
@@ -93,13 +93,13 @@ func decomposeSetter(method string, setters map[string]SetterEntry) []setterRead
 				}
 				switch {
 				case method == "Add"+base+"IDs":
-					cands = append(cands, setterReading{"E", name, "AddIDs"})
+					cands = append(cands, setterReading{"Edge", name, "AddIDs"})
 				case method == "Remove"+base+"IDs":
-					cands = append(cands, setterReading{"E", name, "RemoveIDs"})
+					cands = append(cands, setterReading{"Edge", name, "RemoveIDs"})
 				}
 			}
 			if method == "Clear"+name {
-				cands = append(cands, setterReading{"E", name, "Clear"})
+				cands = append(cands, setterReading{"Edge", name, "Clear"})
 			}
 		}
 	}

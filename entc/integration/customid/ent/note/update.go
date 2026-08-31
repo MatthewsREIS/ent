@@ -37,7 +37,7 @@ func (_u *NoteUpdate) Where(ps ...predicate.Note) *NoteUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the NoteUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *NoteUpdate) With(as ...entfield.Assignment) *NoteUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewNoteUpdateOne(c Config, hooks []Hook, mutation *NoteMutation) *NoteUpdat
 	return &NoteUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the NoteUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *NoteUpdateOne) With(as ...entfield.Assignment) *NoteUpdateOne {
 	if _u.err == nil {

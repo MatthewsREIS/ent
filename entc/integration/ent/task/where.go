@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Task type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Task type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Priority is the handle for the "priority" field.
@@ -45,8 +45,8 @@ var F = struct {
 	Op:          entfield.NewString[string](FieldOp, "op"),
 }
 
-// E holds typed edge handles for every edge of the Task type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Task type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Node type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Node type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Value is the handle for the "value" field.
@@ -26,8 +26,8 @@ var F = struct {
 	PrevID: entfield.NewEdgeField[int](FieldPrevID, "prev"),
 }
 
-// E holds typed edge handles for every edge of the Node type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Node type.
+var Edge = struct {
 	// Prev is the handle for the "prev" edge.
 	Prev entfield.Edge[predicate.Node, int]
 	// Next is the handle for the "next" edge.

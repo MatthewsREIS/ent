@@ -35,7 +35,7 @@ func NewTweetCreate(c Config, hooks []Hook, mutation *TweetMutation) *TweetCreat
 	return &TweetCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TweetCreate builder. The first error from as is recorded and returned by Save.
 func (_c *TweetCreate) With(as ...entfield.Assignment) *TweetCreate {
 	if _c.err == nil {

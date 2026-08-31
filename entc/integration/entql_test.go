@@ -22,8 +22,8 @@ func EntQL(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
 
-	a8m := client.User.Create().With(user.F.Name.Set("a8m"), user.F.Age.Set(30)).SaveX(ctx)
-	nati := client.User.Create().With(user.F.Name.Set("nati"), user.F.Age.Set(30), user.E.Friends.AddIDs(a8m.ID)).SaveX(ctx)
+	a8m := client.User.Create().With(user.Field.Name.Set("a8m"), user.Field.Age.Set(30)).SaveX(ctx)
+	nati := client.User.Create().With(user.Field.Name.Set("nati"), user.Field.Age.Set(30), user.Edge.Friends.AddIDs(a8m.ID)).SaveX(ctx)
 
 	uq := client.User.Query()
 	uq.Filter().Where(entql.HasEdge("friends"))
@@ -39,8 +39,8 @@ func EntQL(t *testing.T, client *ent.Client) {
 	require.Equal(nati.ID, uq.OnlyIDX(ctx))
 
 	u1, u2 := uuid.New(), uuid.New()
-	xabi := client.Pet.Create().With(pet.F.Name.Set("xabi"), pet.E.Owner.SetID(a8m.ID), pet.F.UUID.Set(u1)).SaveX(ctx)
-	luna := client.Pet.Create().With(pet.F.Name.Set("luna"), pet.E.Owner.SetID(nati.ID), pet.F.UUID.Set(u2)).SaveX(ctx)
+	xabi := client.Pet.Create().With(pet.Field.Name.Set("xabi"), pet.Edge.Owner.SetID(a8m.ID), pet.Field.UUID.Set(u1)).SaveX(ctx)
+	luna := client.Pet.Create().With(pet.Field.Name.Set("luna"), pet.Edge.Owner.SetID(nati.ID), pet.Field.UUID.Set(u2)).SaveX(ctx)
 	uq = client.User.Query()
 	uq.Filter().Where(
 		entql.And(
@@ -75,13 +75,13 @@ func EntQL(t *testing.T, client *ent.Client) {
 	require.Equal([]int{luna.ID, xabi.ID}, pq.Order(ent.Asc(pet.FieldName)).IDsX(ctx))
 
 	pq = client.Pet.Query()
-	pq.Where(pet.F.Name.EQ(luna.Name)).Filter().WhereID(entql.IntEQ(luna.ID))
+	pq.Where(pet.Field.Name.EQ(luna.Name)).Filter().WhereID(entql.IntEQ(luna.ID))
 	require.Equal(luna.ID, pq.Order(ent.Asc(pet.FieldName)).OnlyIDX(ctx))
 	pq = client.Pet.Query()
-	pq.Where(pet.F.Name.EQ(luna.Name)).Filter().WhereID(entql.IntEQ(xabi.ID))
+	pq.Where(pet.Field.Name.EQ(luna.Name)).Filter().WhereID(entql.IntEQ(xabi.ID))
 	require.False(pq.ExistX(ctx))
 
-	update := client.User.Update().With(user.F.Role.Set(user.RoleAdmin)).Where(user.F.Name.EQ(a8m.Name))
+	update := client.User.Update().With(user.Field.Role.Set(user.RoleAdmin)).Where(user.Field.Name.EQ(a8m.Name))
 	updated := update.SaveX(ctx)
 	require.Equal(1, updated)
 	uq = client.User.Query()

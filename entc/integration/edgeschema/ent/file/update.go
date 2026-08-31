@@ -37,7 +37,7 @@ func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FileUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *FileUpdate) With(as ...entfield.Assignment) *FileUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewFileUpdateOne(c Config, hooks []Hook, mutation *FileMutation) *FileUpdat
 	return &FileUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the FileUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *FileUpdateOne) With(as ...entfield.Assignment) *FileUpdateOne {
 	if _u.err == nil {

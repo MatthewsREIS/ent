@@ -37,7 +37,7 @@ func (_u *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the MediaUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *MediaUpdate) With(as ...entfield.Assignment) *MediaUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewMediaUpdateOne(c Config, hooks []Hook, mutation *MediaMutation) *MediaUp
 	return &MediaUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the MediaUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *MediaUpdateOne) With(as ...entfield.Assignment) *MediaUpdateOne {
 	if _u.err == nil {

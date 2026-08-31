@@ -33,9 +33,9 @@ func TestSchemaHooks(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1", enttest.WithMigrateOptions(migrate.WithGlobalUniqueID(true)))
 	defer client.Close()
-	err := client.Card.Create().With(card.F.Number.Set("123")).Exec(ctx)
+	err := client.Card.Create().With(card.Field.Number.Set("123")).Exec(ctx)
 	require.EqualError(t, err, "card number is too short", "error is returned from hook")
-	crd := client.Card.Create().With(card.F.Number.Set("1234")).SaveX(ctx)
+	crd := client.Card.Create().With(card.Field.Number.Set("1234")).SaveX(ctx)
 	require.Equal(t, "unknown", crd.Name, "name was set by hook")
 	client.Card.Use(func(next ent.Mutator) ent.Mutator {
 		return hook.CardFunc(func(ctx context.Context, m *ent.CardMutation) (ent.Value, error) {
@@ -44,13 +44,13 @@ func TestSchemaHooks(t *testing.T) {
 			return next.Mutate(ctx, m)
 		})
 	})
-	client.Card.Create().With(card.F.Number.Set("1234")).SaveX(ctx)
+	client.Card.Create().With(card.Field.Number.Set("1234")).SaveX(ctx)
 	err = client.Card.Update().Exec(ctx)
 	require.EqualError(t, err, "OpUpdate operation is not allowed")
 
-	err = client.User.Update().With(user.F.Password.Set("pass")).Exec(ctx)
+	err = client.User.Update().With(user.Field.Password.Set("pass")).Exec(ctx)
 	require.EqualError(t, err, "password cannot be edited on update-many")
-	err = client.User.Update().With(user.F.Password.Clear()).Exec(ctx)
+	err = client.User.Update().With(user.Field.Password.Clear()).Exec(ctx)
 	require.EqualError(t, err, "password cannot be edited on update-many")
 }
 
@@ -65,12 +65,12 @@ func TestRuntimeHooks(t *testing.T) {
 			return next.Mutate(ctx, m)
 		})
 	})
-	client.Card.Create().With(card.F.Number.Set("1234")).SaveX(ctx)
-	client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
+	client.Card.Create().With(card.Field.Number.Set("1234")).SaveX(ctx)
+	client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
 	require.Equal(t, 2, calls)
 	client = client.Debug()
-	client.Card.Create().With(card.F.Number.Set("1234")).SaveX(ctx)
-	client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
+	client.Card.Create().With(card.Field.Number.Set("1234")).SaveX(ctx)
+	client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
 	require.Equal(t, 4, calls, "debug client should keep the same hooks")
 }
 
@@ -91,7 +91,7 @@ func TestRuntimeChain(t *testing.T) {
 		})
 	}
 	client.User.Use(chain.Hook())
-	client.User.Create().With(user.F.Name.Set("alexsn")).SaveX(ctx)
+	client.User.Create().With(user.Field.Name.Set("alexsn")).SaveX(ctx)
 	require.Len(t, values, 5)
 	require.True(t, sort.IntsAreSorted(values))
 }
@@ -108,8 +108,8 @@ func TestMutationClient(t *testing.T) {
 			return next.Mutate(ctx, m)
 		})
 	})
-	a8m := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
-	crd := client.Card.Create().With(card.F.Number.Set("1234"), card.E.Owner.SetID(a8m.ID)).SaveX(ctx)
+	a8m := client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
+	crd := client.Card.Create().With(card.Field.Number.Set("1234"), card.Edge.Owner.SetID(a8m.ID)).SaveX(ctx)
 	require.Equal(t, a8m.Name, crd.Name)
 }
 
@@ -126,7 +126,7 @@ func TestMutatorClient(t *testing.T) {
 						op = ent.OpUpdateOne
 					}
 					// Ensure card was not expired before.
-					m.WhereP(card.F.ExpiredAt.IsNil())
+					m.WhereP(card.Field.ExpiredAt.IsNil())
 					// Count the number of affected records.
 					ids, err := m.IDs(ctx)
 					if err != nil {
@@ -152,14 +152,14 @@ func TestMutatorClient(t *testing.T) {
 			ent.OpDelete|ent.OpDeleteOne,
 		),
 	)
-	c1 := client.Card.Create().With(card.F.Number.Set("1234")).SaveX(ctx)
+	c1 := client.Card.Create().With(card.Field.Number.Set("1234")).SaveX(ctx)
 	client.Card.DeleteOne(c1).ExecX(ctx)
 	expired := client.Card.Query().OnlyX(ctx)
 	require.False(t, expired.ExpiredAt.IsZero())
 
-	client.Card.Create().With(card.F.Number.Set("4567")).ExecX(ctx)
-	client.Card.Create().With(card.F.Number.Set("7890")).ExecX(ctx)
-	client.Card.Delete().Where(card.F.Number.EQ("4567")).ExecX(ctx)
+	client.Card.Create().With(card.Field.Number.Set("4567")).ExecX(ctx)
+	client.Card.Create().With(card.Field.Number.Set("7890")).ExecX(ctx)
+	client.Card.Delete().Where(card.Field.Number.EQ("4567")).ExecX(ctx)
 	cards := client.Card.Query().Order(ent.Asc(card.FieldNumber)).AllX(ctx)
 	require.Len(t, cards, 3)
 	require.True(t, cards[0].ExpiredAt.Equal(expired.ExpiredAt), "expired field should not be updated")
@@ -167,7 +167,7 @@ func TestMutatorClient(t *testing.T) {
 	require.True(t, cards[2].ExpiredAt.IsZero())
 
 	client.Card.Delete().ExecX(ctx)
-	require.False(t, client.Card.Query().Where(card.F.ExpiredAt.IsNil()).ExistX(ctx))
+	require.False(t, client.Card.Query().Where(card.Field.ExpiredAt.IsNil()).ExistX(ctx))
 }
 
 func TestMutationTx(t *testing.T) {
@@ -189,8 +189,8 @@ func TestMutationTx(t *testing.T) {
 	tx, err := client.Tx(ctx)
 	require.NoError(t, err)
 	txCtx := ent.NewTxContext(ctx, tx)
-	a8m := tx.User.Create().With(user.F.Name.Set("a8m")).SaveX(txCtx)
-	crd, err := tx.Card.Create().With(card.F.Number.Set("1234"), card.E.Owner.SetID(a8m.ID)).Save(txCtx)
+	a8m := tx.User.Create().With(user.Field.Name.Set("a8m")).SaveX(txCtx)
+	crd, err := tx.Card.Create().With(card.Field.Number.Set("1234"), card.Edge.Owner.SetID(a8m.ID)).Save(txCtx)
 	require.EqualError(t, err, "rolled back")
 	require.Nil(t, crd)
 	_, err = tx.Card.Query().All(txCtx)
@@ -210,13 +210,13 @@ func TestDeletion(t *testing.T) {
 			if !ok {
 				return nil, fmt.Errorf("missing id")
 			}
-			ent.NewCardClient(*m.Config.(*ent.Config)).Delete().Where(card.E.Owner.HasWith(user.F.ID.EQ(id))).ExecX(ctx)
+			ent.NewCardClient(*m.Config.(*ent.Config)).Delete().Where(card.Edge.Owner.HasWith(user.Field.ID.EQ(id))).ExecX(ctx)
 			return next.Mutate(ctx, m)
 		})
 	})
-	a8m := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
+	a8m := client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
 	for i := 0; i < 5; i++ {
-		client.Card.Create().With(card.F.Number.Set(fmt.Sprintf("card-%d", i)), card.E.Owner.SetID(a8m.ID)).SaveX(ctx)
+		client.Card.Create().With(card.Field.Number.Set(fmt.Sprintf("card-%d", i)), card.Edge.Owner.SetID(a8m.ID)).SaveX(ctx)
 	}
 	client.User.DeleteOne(a8m).ExecX(ctx)
 	require.Zero(t, client.User.Query().CountX(ctx))
@@ -244,12 +244,12 @@ func TestMutationIDs(t *testing.T) {
 		),
 	)
 	for i := 0; i < 5; i++ {
-		owner := client.User.Create().With(user.F.Name.Set(fmt.Sprintf("owner-%d", i))).SaveX(ctx)
-		client.Card.Create().With(card.F.Number.Set(fmt.Sprintf("card-%d", i)), card.E.Owner.SetID(owner.ID)).ExecX(ctx)
+		owner := client.User.Create().With(user.Field.Name.Set(fmt.Sprintf("owner-%d", i))).SaveX(ctx)
+		client.Card.Create().With(card.Field.Number.Set(fmt.Sprintf("card-%d", i)), card.Edge.Owner.SetID(owner.ID)).ExecX(ctx)
 	}
 	for i := 0; i < 5; i++ {
-		p := user.And(user.F.Name.EQ(fmt.Sprintf("owner-%d", i)), user.E.Cards.HasWith(card.F.Number.EQ(fmt.Sprintf("card-%d", i))))
-		client.User.Update().With(user.F.Version.Add(1)).Where(p).ExecX(ctx)
+		p := user.And(user.Field.Name.EQ(fmt.Sprintf("owner-%d", i)), user.Edge.Cards.HasWith(card.Field.Number.EQ(fmt.Sprintf("card-%d", i))))
+		client.User.Update().With(user.Field.Version.Add(1)).Where(p).ExecX(ctx)
 		client.User.Delete().Where(p).ExecX(ctx)
 	}
 }
@@ -274,8 +274,8 @@ func TestPostCreation(t *testing.T) {
 			return value, nil
 		})
 	}, ent.OpCreate))
-	client.Card.Create().With(card.F.Number.Set("12345"), card.F.Name.Set("a8m")).SaveX(ctx)
-	client.Card.CreateBulk(client.Card.Create().With(card.F.Number.Set("12345"))).SaveX(ctx)
+	client.Card.Create().With(card.Field.Number.Set("12345"), card.Field.Name.Set("a8m")).SaveX(ctx)
+	client.Card.CreateBulk(client.Card.Create().With(card.Field.Number.Set("12345"))).SaveX(ctx)
 	cards := client.Card.CreateBulk(client.Card.Create()).SaveX(ctx)
 	require.Len(t, cards, 1)
 	require.Equal(t, "unknown", cards[0].Number)
@@ -297,13 +297,13 @@ func TestUpdateAfterCreation(t *testing.T) {
 			require.Equal(t, 1, existingUser.Version, "version does not match the original value")
 
 			// After the user was created, return its updated version (a new object).
-			newUser := ent.NewUserClient(*m.Config.(*ent.Config)).UpdateOne(existingUser).With(user.F.Version.Set(2)).
+			newUser := ent.NewUserClient(*m.Config.(*ent.Config)).UpdateOne(existingUser).With(user.Field.Version.Set(2)).
 				SaveX(ctx)
 			return newUser, nil
 		})
 	}, ent.OpCreate))
 
-	u := client.User.Create().With(user.F.Name.Set("a8m"), user.F.Version.Set(1)).SaveX(ctx)
+	u := client.User.Create().With(user.Field.Name.Set("a8m"), user.Field.Version.Set(1)).SaveX(ctx)
 	require.Equal(t, 2, u.Version, "version mutation in hook should have propagated back to call site")
 }
 
@@ -325,15 +325,15 @@ func TestUpdateAfterUpdateOne(t *testing.T) {
 			// After the user was created, return its updated version (a new object).  Don't use UpdateOne because it
 			// will cause recursive calls to this hook.
 			ent.NewUserClient(*m.Config.(*ent.Config)).Update().
-				Where(user.F.ID.EQ(u.ID)).With(user.F.Version.Set(3)).
+				Where(user.Field.ID.EQ(u.ID)).With(user.Field.Version.Set(3)).
 				SaveX(ctx)
 
 			return ent.NewUserClient(*m.Config.(*ent.Config)).Get(ctx, u.ID)
 		})
 	}, ent.OpUpdateOne))
 
-	u := client.User.Create().With(user.F.Name.Set("a8m"), user.F.Version.Set(1)).SaveX(ctx)
-	u = client.User.UpdateOne(u).With(user.F.Version.Set(2)).SaveX(ctx)
+	u := client.User.Create().With(user.Field.Name.Set("a8m"), user.Field.Version.Set(1)).SaveX(ctx)
+	u = client.User.UpdateOne(u).With(user.Field.Version.Set(2)).SaveX(ctx)
 
 	require.Equal(t, 3, u.Version, "version mutation in hook should have propagated back to call site")
 }
@@ -353,8 +353,8 @@ func TestOldValues(t *testing.T) {
 			return value, nil
 		})
 	}, ent.OpUpdateOne))
-	crd := client.Card.Create().With(card.F.Number.Set("1234"), card.F.Name.Set("a8m")).SaveX(ctx)
-	client.Card.UpdateOneID(crd.ID).With(card.F.Name.Set("a8m")).SaveX(ctx)
+	crd := client.Card.Create().With(card.Field.Number.Set("1234"), card.Field.Name.Set("a8m")).SaveX(ctx)
+	client.Card.UpdateOneID(crd.ID).With(card.Field.Name.Set("a8m")).SaveX(ctx)
 
 	// A typed hook.
 	client.User.Use(hook.On(func(next ent.Mutator) ent.Mutator {
@@ -417,11 +417,11 @@ func TestOldValues(t *testing.T) {
 			return value, nil
 		})
 	}, ^ent.OpUpdateOne))
-	a8m := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
+	a8m := client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
 	require.Equal(t, "a8m", a8m.Name)
-	err := client.User.UpdateOne(a8m).With(user.F.Name.Set("Ariel"), user.F.Version.Set(a8m.Version)).Exec(ctx)
+	err := client.User.UpdateOne(a8m).With(user.Field.Name.Set("Ariel"), user.Field.Version.Set(a8m.Version)).Exec(ctx)
 	require.EqualError(t, err, "version field must be incremented by 1")
-	a8m = client.User.UpdateOne(a8m).With(user.F.Name.Set("Ariel"), user.F.Version.Set(a8m.Version+1)).SaveX(ctx)
+	a8m = client.User.UpdateOne(a8m).With(user.Field.Name.Set("Ariel"), user.Field.Version.Set(a8m.Version+1)).SaveX(ctx)
 	require.Equal(t, "Ariel", a8m.Name)
 }
 
@@ -452,13 +452,13 @@ func TestConditions(t *testing.T) {
 	}, hook.HasAddedFields(user.FieldWorth)))
 
 	ctx := context.Background()
-	crd := client.Card.Create().With(card.F.Number.Set("9876")).SaveX(ctx)
-	crd = client.Card.UpdateOne(crd).With(card.F.Name.Set("alexsn")).SaveX(ctx)
-	crd = client.Card.UpdateOne(crd).With(card.F.Name.Clear()).SaveX(ctx)
+	crd := client.Card.Create().With(card.Field.Number.Set("9876")).SaveX(ctx)
+	crd = client.Card.UpdateOne(crd).With(card.Field.Name.Set("alexsn")).SaveX(ctx)
+	crd = client.Card.UpdateOne(crd).With(card.Field.Name.Clear()).SaveX(ctx)
 	client.Card.DeleteOne(crd).ExecX(ctx)
 
-	alexsn := client.User.Create().With(user.F.Name.Set("alexsn")).SaveX(ctx)
-	client.User.Update().Where(user.F.ID.EQ(alexsn.ID)).With(user.F.Worth.Add(100)).SaveX(ctx)
+	alexsn := client.User.Create().With(user.Field.Name.Set("alexsn")).SaveX(ctx)
+	client.User.Update().Where(user.Field.ID.EQ(alexsn.ID)).With(user.Field.Worth.Add(100)).SaveX(ctx)
 	client.User.DeleteOne(alexsn).ExecX(ctx)
 }
 
@@ -486,7 +486,7 @@ func TestRuntimeTx(t *testing.T) {
 	ctx := context.Background()
 	tx, err := client.Tx(ctx)
 	require.NoError(t, err)
-	tx.Card.Create().With(card.F.Number.Set("9876")).ExecX(ctx)
+	tx.Card.Create().With(card.Field.Number.Set("9876")).ExecX(ctx)
 	require.EqualError(t, tx.Commit(), "fail")
 	require.Zero(t, client.Card.Query().CountX(ctx), "database is empty")
 }
@@ -546,8 +546,8 @@ func TestInterceptor_Sanity(t *testing.T) {
 			calls  int
 			client = enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 			users  = client.User.CreateBulk(
-				client.User.Create().With(user.F.Name.Set("a8m")),
-				client.User.Create().With(user.F.Name.Set("nati")),
+				client.User.Create().With(user.Field.Name.Set("a8m")),
+				client.User.Create().With(user.Field.Name.Set("nati")),
 			).SaveX(ctx)
 		)
 		defer client.Close()
@@ -567,7 +567,7 @@ func TestInterceptor_Sanity(t *testing.T) {
 			}),
 			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
 				calls++
-				query.WhereP(user.F.ID.EQ(users[0].ID))
+				query.WhereP(user.Field.ID.EQ(users[0].ID))
 				return nil
 			}),
 		)
@@ -595,14 +595,14 @@ func TestInterceptor_Sanity(t *testing.T) {
 			}),
 			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
 				calls++
-				query.WhereP(card.F.Name.NEQ("a8m"))
+				query.WhereP(card.Field.Name.NEQ("a8m"))
 				return nil
 			}),
 		)
 		client.Card.CreateBulk(
-			client.Card.Create().With(card.F.Name.Set("a8m"), card.F.Number.Set("1234")),
-			client.Card.Create().With(card.F.Name.Set("a8m"), card.F.Number.Set("5678")),
-			client.Card.Create().With(card.F.Name.Set("nati"), card.F.Number.Set("9876")),
+			client.Card.Create().With(card.Field.Name.Set("a8m"), card.Field.Number.Set("1234")),
+			client.Card.Create().With(card.Field.Name.Set("a8m"), card.Field.Number.Set("5678")),
+			client.Card.Create().With(card.Field.Name.Set("nati"), card.Field.Number.Set("9876")),
 		).ExecX(ctx)
 		var vs []n2c
 		require.NoError(t, client.Card.Query().GroupBy(user.FieldName).Aggregate(ent.Count()).Scan(ctx, &vs))
@@ -642,12 +642,12 @@ func TestSoftDelete(t *testing.T) {
 	defer client.Close()
 	ctx := ent.NewContext(context.Background(), client)
 
-	a8m := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
+	a8m := client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
 	pets := client.Pet.CreateBulk(
-		client.Pet.Create().With(pet.F.Name.Set("a"), pet.E.Owner.SetID(a8m.ID)),
-		client.Pet.Create().With(pet.F.Name.Set("b"), pet.E.Owner.SetID(a8m.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("a"), pet.Edge.Owner.SetID(a8m.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("b"), pet.Edge.Owner.SetID(a8m.ID)),
 		// Set delete_time manually.
-		client.Pet.Create().With(pet.F.Name.Set("c"), pet.E.Owner.SetID(a8m.ID), pet.F.DeleteTime.Set(time.Now())),
+		client.Pet.Create().With(pet.Field.Name.Set("c"), pet.Edge.Owner.SetID(a8m.ID), pet.Field.DeleteTime.Set(time.Now())),
 	).SaveX(ctx)
 	require.Equal(t, []int{pets[0].ID, pets[1].ID}, client.Pet.Query().Order(ent.Asc(pet.FieldID)).IDsX(ctx))
 
@@ -668,9 +668,9 @@ func TestSoftDelete(t *testing.T) {
 	require.Len(t, client.Pet.Query().AllX(schema.SkipSoftDelete(ctx)), 3)
 
 	client.Pet.CreateBulk(
-		client.Pet.Create().With(pet.F.Name.Set("d")),
-		client.Pet.Create().With(pet.F.Name.Set("d")),
-		client.Pet.Create().With(pet.F.Name.Set("d")),
+		client.Pet.Create().With(pet.Field.Name.Set("d")),
+		client.Pet.Create().With(pet.Field.Name.Set("d")),
+		client.Pet.Create().With(pet.Field.Name.Set("d")),
 	).ExecX(ctx)
 
 	// Select entities through the interceptor.
@@ -706,10 +706,10 @@ func TestTraverseUnique(t *testing.T) {
 	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
 
-	a8m := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
+	a8m := client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
 	client.Pet.CreateBulk(
-		client.Pet.Create().With(pet.F.Name.Set("a"), pet.E.Owner.SetID(a8m.ID)),
-		client.Pet.Create().With(pet.F.Name.Set("b"), pet.E.Owner.SetID(a8m.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("a"), pet.Edge.Owner.SetID(a8m.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("b"), pet.Edge.Owner.SetID(a8m.ID)),
 	).ExecX(ctx)
 	require.Equal(t, 1, ent.QueryPetOwnerFromQuery(client.Pet.Query()).CountX(ctx))
 
@@ -734,8 +734,8 @@ func TestSharedInterceptor(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
-	client.User.Create().With(user.F.Name.Set("a8m")).ExecX(ctx)
-	client.User.Create().With(user.F.Name.Set("nati")).ExecX(ctx)
+	client.User.Create().With(user.Field.Name.Set("a8m")).ExecX(ctx)
+	client.User.Create().With(user.Field.Name.Set("nati")).ExecX(ctx)
 	require.Len(t, client.User.Query().AllX(ctx), 2)
 	client.Intercept(SharedLimiter(intercept.NewQuery, 1))
 	require.Len(t, client.User.Query().AllX(ctx), 1)
@@ -765,11 +765,11 @@ func TestTypedTraverser(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
-	a8m, nat := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx), client.User.Create().With(user.F.Name.Set("nati"), user.F.Active.Set(false)).SaveX(ctx)
+	a8m, nat := client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx), client.User.Create().With(user.Field.Name.Set("nati"), user.Field.Active.Set(false)).SaveX(ctx)
 	client.Pet.CreateBulk(
-		client.Pet.Create().With(pet.F.Name.Set("a"), pet.E.Owner.SetID(a8m.ID)),
-		client.Pet.Create().With(pet.F.Name.Set("b"), pet.E.Owner.SetID(a8m.ID)),
-		client.Pet.Create().With(pet.F.Name.Set("c"), pet.E.Owner.SetID(nat.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("a"), pet.Edge.Owner.SetID(a8m.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("b"), pet.Edge.Owner.SetID(a8m.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("c"), pet.Edge.Owner.SetID(nat.ID)),
 	).ExecX(ctx)
 
 	// Get all pets of all users.
@@ -780,7 +780,7 @@ func TestTypedTraverser(t *testing.T) {
 	// Add an interceptor that filters out inactive users.
 	client.User.Intercept(
 		intercept.TraverseUser(func(ctx context.Context, q *ent.UserQuery) error {
-			q.Where(user.F.Active.EQ(true))
+			q.Where(user.Field.Active.EQ(true))
 			return nil
 		}),
 	)
@@ -795,8 +795,8 @@ func TestLimitInterceptor(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
-	client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx)
-	client.User.Create().With(user.F.Name.Set("nati")).SaveX(ctx)
+	client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx)
+	client.User.Create().With(user.Field.Name.Set("nati")).SaveX(ctx)
 	require.Len(t, client.User.Query().AllX(ctx), 2)
 	client.Intercept(
 		intercept.Func(func(ctx context.Context, q intercept.Query) error {
@@ -811,11 +811,11 @@ func TestFilterTraverseFunc(t *testing.T) {
 	ctx := context.Background()
 	client := enttest.Open(t, dialect.SQLite, "file:ent?mode=memory&_fk=1")
 	defer client.Close()
-	a8m, nat := client.User.Create().With(user.F.Name.Set("a8m")).SaveX(ctx), client.User.Create().With(user.F.Name.Set("nati"), user.F.Active.Set(false)).SaveX(ctx)
+	a8m, nat := client.User.Create().With(user.Field.Name.Set("a8m")).SaveX(ctx), client.User.Create().With(user.Field.Name.Set("nati"), user.Field.Active.Set(false)).SaveX(ctx)
 	client.Pet.CreateBulk(
-		client.Pet.Create().With(pet.F.Name.Set("a"), pet.E.Owner.SetID(a8m.ID)),
-		client.Pet.Create().With(pet.F.Name.Set("b"), pet.E.Owner.SetID(a8m.ID)),
-		client.Pet.Create().With(pet.F.Name.Set("c"), pet.E.Owner.SetID(nat.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("a"), pet.Edge.Owner.SetID(a8m.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("b"), pet.Edge.Owner.SetID(a8m.ID)),
+		client.Pet.Create().With(pet.Field.Name.Set("c"), pet.Edge.Owner.SetID(nat.ID)),
 	).ExecX(ctx)
 	// Get all pets of all users.
 	if n := ent.QueryUserPetsFromQuery(client.User.Query()).CountX(ctx); n != 3 {

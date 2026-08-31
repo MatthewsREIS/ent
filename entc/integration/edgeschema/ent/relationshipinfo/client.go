@@ -99,7 +99,7 @@ func (c *RelationshipInfoClient) DeleteOne(_m *RelationshipInfo) *RelationshipIn
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RelationshipInfoClient) DeleteOneID(id int) *RelationshipInfoDeleteOne {
 	mutation := NewRelationshipInfoMutation(c.Config, OpDeleteOne, WithRelationshipInfoID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewRelationshipInfoDeleteOne(NewRelationshipInfoDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *RelationshipInfoClient) Query() *RelationshipInfoQuery {
 
 // Get returns a RelationshipInfo entity by its id.
 func (c *RelationshipInfoClient) Get(ctx context.Context, id int) (*RelationshipInfo, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the GroupInfo type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the GroupInfo type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Desc is the handle for the "desc" field.
@@ -26,8 +26,8 @@ var F = struct {
 	MaxUsers: entfield.NewNumber[int](FieldMaxUsers, "max_users"),
 }
 
-// E holds typed edge handles for every edge of the GroupInfo type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the GroupInfo type.
+var Edge = struct {
 	// Groups is the handle for the "groups" edge.
 	Groups entfield.Edge[predicate.Group, int]
 }{

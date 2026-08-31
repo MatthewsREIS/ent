@@ -99,7 +99,7 @@ func (c *NodeClient) DeleteOne(_m *Node) *NodeDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	mutation := NewNodeMutation(c.Config, OpDeleteOne, WithNodeID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewNodeDeleteOne(NewNodeDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *NodeClient) Query() *NodeQuery {
 
 // Get returns a Node entity by its id.
 func (c *NodeClient) Get(ctx context.Context, id int) (*Node, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

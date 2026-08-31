@@ -40,7 +40,7 @@ func (_u *ParentUpdate) Where(ps ...predicate.Parent) *ParentUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ParentUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *ParentUpdate) With(as ...entfield.Assignment) *ParentUpdate {
 	if _u.err == nil {
@@ -138,7 +138,7 @@ func NewParentUpdateOne(c Config, hooks []Hook, mutation *ParentMutation) *Paren
 	return &ParentUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ParentUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *ParentUpdateOne) With(as ...entfield.Assignment) *ParentUpdateOne {
 	if _u.err == nil {

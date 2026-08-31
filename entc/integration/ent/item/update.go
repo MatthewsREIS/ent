@@ -39,7 +39,7 @@ func (_u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ItemUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *ItemUpdate) With(as ...entfield.Assignment) *ItemUpdate {
 	if _u.err == nil {
@@ -133,7 +133,7 @@ func NewItemUpdateOne(c Config, hooks []Hook, mutation *ItemMutation) *ItemUpdat
 	return &ItemUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ItemUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *ItemUpdateOne) With(as ...entfield.Assignment) *ItemUpdateOne {
 	if _u.err == nil {

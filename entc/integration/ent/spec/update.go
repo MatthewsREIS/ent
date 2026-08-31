@@ -39,7 +39,7 @@ func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the SpecUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *SpecUpdate) With(as ...entfield.Assignment) *SpecUpdate {
 	if _u.err == nil {
@@ -120,7 +120,7 @@ func NewSpecUpdateOne(c Config, hooks []Hook, mutation *SpecMutation) *SpecUpdat
 	return &SpecUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the SpecUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *SpecUpdateOne) With(as ...entfield.Assignment) *SpecUpdateOne {
 	if _u.err == nil {

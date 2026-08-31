@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Friendship type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Friendship type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Weight is the handle for the "weight" field.
@@ -32,8 +32,8 @@ var F = struct {
 	FriendID:  entfield.NewEdgeField[int](FieldFriendID, "friend"),
 }
 
-// E holds typed edge handles for every edge of the Friendship type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Friendship type.
+var Edge = struct {
 	// User is the handle for the "user" edge.
 	User entfield.Edge[predicate.User, int]
 	// Friend is the handle for the "friend" edge.

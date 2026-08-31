@@ -37,7 +37,7 @@ func (_u *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate 
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CustomTypeUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *CustomTypeUpdate) With(as ...entfield.Assignment) *CustomTypeUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewCustomTypeUpdateOne(c Config, hooks []Hook, mutation *CustomTypeMutation
 	return &CustomTypeUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CustomTypeUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *CustomTypeUpdateOne) With(as ...entfield.Assignment) *CustomTypeUpdateOne {
 	if _u.err == nil {

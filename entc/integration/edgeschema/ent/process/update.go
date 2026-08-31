@@ -38,7 +38,7 @@ func (_u *ProcessUpdate) Where(ps ...predicate.Process) *ProcessUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ProcessUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *ProcessUpdate) With(as ...entfield.Assignment) *ProcessUpdate {
 	if _u.err == nil {
@@ -118,7 +118,7 @@ func NewProcessUpdateOne(c Config, hooks []Hook, mutation *ProcessMutation) *Pro
 	return &ProcessUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ProcessUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *ProcessUpdateOne) With(as ...entfield.Assignment) *ProcessUpdateOne {
 	if _u.err == nil {

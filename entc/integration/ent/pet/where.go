@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Pet type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Pet type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Age is the handle for the "age" field.
@@ -39,8 +39,8 @@ var F = struct {
 	OptionalTime: entfield.NewTime(FieldOptionalTime, "optional_time"),
 }
 
-// E holds typed edge handles for every edge of the Pet type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Pet type.
+var Edge = struct {
 	// Team is the handle for the "team" edge.
 	Team entfield.Edge[predicate.User, int]
 	// Owner is the handle for the "owner" edge.

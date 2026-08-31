@@ -99,7 +99,7 @@ func (c *LicenseClient) DeleteOne(_m *License) *LicenseDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *LicenseClient) DeleteOneID(id int) *LicenseDeleteOne {
 	mutation := NewLicenseMutation(c.Config, OpDeleteOne, WithLicenseID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewLicenseDeleteOne(NewLicenseDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *LicenseClient) Query() *LicenseQuery {
 
 // Get returns a License entity by its id.
 func (c *LicenseClient) Get(ctx context.Context, id int) (*License, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

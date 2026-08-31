@@ -37,7 +37,7 @@ func (_u *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TokenUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *TokenUpdate) With(as ...entfield.Assignment) *TokenUpdate {
 	if _u.err == nil {
@@ -126,7 +126,7 @@ func NewTokenUpdateOne(c Config, hooks []Hook, mutation *TokenMutation) *TokenUp
 	return &TokenUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the TokenUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *TokenUpdateOne) With(as ...entfield.Assignment) *TokenUpdateOne {
 	if _u.err == nil {

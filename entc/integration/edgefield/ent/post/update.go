@@ -37,7 +37,7 @@ func (_u *PostUpdate) Where(ps ...predicate.Post) *PostUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the PostUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *PostUpdate) With(as ...entfield.Assignment) *PostUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewPostUpdateOne(c Config, hooks []Hook, mutation *PostMutation) *PostUpdat
 	return &PostUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the PostUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *PostUpdateOne) With(as ...entfield.Assignment) *PostUpdateOne {
 	if _u.err == nil {

@@ -99,7 +99,7 @@ func (c *PCClient) DeleteOne(_m *PC) *PCDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *PCClient) DeleteOneID(id int) *PCDeleteOne {
 	mutation := NewPCMutation(c.Config, OpDeleteOne, WithPCID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewPCDeleteOne(NewPCDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *PCClient) Query() *PCQuery {
 
 // Get returns a PC entity by its id.
 func (c *PCClient) Get(ctx context.Context, id int) (*PC, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

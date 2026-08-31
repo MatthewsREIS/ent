@@ -99,7 +99,7 @@ func (c *FieldTypeClient) DeleteOne(_m *FieldType) *FieldTypeDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FieldTypeClient) DeleteOneID(id int) *FieldTypeDeleteOne {
 	mutation := NewFieldTypeMutation(c.Config, OpDeleteOne, WithFieldTypeID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewFieldTypeDeleteOne(NewFieldTypeDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *FieldTypeClient) Query() *FieldTypeQuery {
 
 // Get returns a FieldType entity by its id.
 func (c *FieldTypeClient) Get(ctx context.Context, id int) (*FieldType, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

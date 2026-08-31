@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the MixinID type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the MixinID type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[uuid.UUID]
 	// SomeField is the handle for the "some_field" field.
@@ -27,8 +27,8 @@ var F = struct {
 	MixinField: entfield.NewString[string](FieldMixinField, "mixin_field"),
 }
 
-// E holds typed edge handles for every edge of the MixinID type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the MixinID type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

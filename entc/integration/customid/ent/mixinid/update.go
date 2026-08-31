@@ -37,7 +37,7 @@ func (_u *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the MixinIDUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *MixinIDUpdate) With(as ...entfield.Assignment) *MixinIDUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewMixinIDUpdateOne(c Config, hooks []Hook, mutation *MixinIDMutation) *Mix
 	return &MixinIDUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the MixinIDUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *MixinIDUpdateOne) With(as ...entfield.Assignment) *MixinIDUpdateOne {
 	if _u.err == nil {

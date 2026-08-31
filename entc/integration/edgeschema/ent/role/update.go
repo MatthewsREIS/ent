@@ -38,7 +38,7 @@ func (_u *RoleUpdate) Where(ps ...predicate.Role) *RoleUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RoleUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *RoleUpdate) With(as ...entfield.Assignment) *RoleUpdate {
 	if _u.err == nil {
@@ -118,7 +118,7 @@ func NewRoleUpdateOne(c Config, hooks []Hook, mutation *RoleMutation) *RoleUpdat
 	return &RoleUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RoleUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *RoleUpdateOne) With(as ...entfield.Assignment) *RoleUpdateOne {
 	if _u.err == nil {

@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Account type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Account type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[sid.ID]
 	// Email is the handle for the "email" field.
@@ -24,8 +24,8 @@ var F = struct {
 	Email: entfield.NewString[string](FieldEmail, "email"),
 }
 
-// E holds typed edge handles for every edge of the Account type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Account type.
+var Edge = struct {
 	// Token is the handle for the "token" edge.
 	Token entfield.Edge[predicate.Token, sid.ID]
 }{

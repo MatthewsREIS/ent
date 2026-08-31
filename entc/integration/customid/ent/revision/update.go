@@ -37,7 +37,7 @@ func (_u *RevisionUpdate) Where(ps ...predicate.Revision) *RevisionUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RevisionUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *RevisionUpdate) With(as ...entfield.Assignment) *RevisionUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewRevisionUpdateOne(c Config, hooks []Hook, mutation *RevisionMutation) *R
 	return &RevisionUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the RevisionUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *RevisionUpdateOne) With(as ...entfield.Assignment) *RevisionUpdateOne {
 	if _u.err == nil {

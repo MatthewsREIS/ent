@@ -217,9 +217,9 @@ func TestSQLite(t *testing.T) {
 	)
 
 	SanityV2(t, drv.Dialect(), client)
-	u := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("x"), user.F.Nickname.Set("x'"), user.F.Phone.Set("y")).SaveX(ctx)
-	idRange(t, client.Blog.Create().With(blog.F.Oid.Set(1)).SaveX(ctx).ID, 0, 1<<32)
-	idRange(t, client.Car.Create().With(car.E.Owner.SetID(u.ID)).SaveX(ctx).ID, 1<<32-1, 2<<32)
+	u := client.User.Create().With(user.Field.Age.Set(1), user.Field.Name.Set("x"), user.Field.Nickname.Set("x'"), user.Field.Phone.Set("y")).SaveX(ctx)
+	idRange(t, client.Blog.Create().With(blog.Field.Oid.Set(1)).SaveX(ctx).ID, 0, 1<<32)
+	idRange(t, client.Car.Create().With(car.Edge.Owner.SetID(u.ID)).SaveX(ctx).ID, 1<<32-1, 2<<32)
 	idRange(t, client.Conversion.Create().SaveX(ctx).ID, 2<<32-1, 3<<32)
 	idRange(t, client.CustomType.Create().SaveX(ctx).ID, 3<<32-1, 4<<32)
 	idRange(t, client.Group.Create().SaveX(ctx).ID, 4<<32-1, 5<<32)
@@ -489,8 +489,8 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	SanityV2(t, dialect, clientv2)
 	clientv2.Conversion.CreateBulk(clientv2.Conversion.Create(), clientv2.Conversion.Create(), clientv2.Conversion.Create()).ExecX(ctx)
 
-	u := clientv2.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("foo"), user.F.Nickname.Set("nick_foo"), user.F.Phone.Set("phone")).SaveX(ctx)
-	idRange(t, clientv2.Car.Create().With(car.E.Owner.SetID(u.ID)).SaveX(ctx).ID, 0, 1<<32)
+	u := clientv2.User.Create().With(user.Field.Age.Set(1), user.Field.Name.Set("foo"), user.Field.Nickname.Set("nick_foo"), user.Field.Phone.Set("phone")).SaveX(ctx)
+	idRange(t, clientv2.Car.Create().With(car.Edge.Owner.SetID(u.ID)).SaveX(ctx).ID, 0, 1<<32)
 	idRange(t, clientv2.Conversion.Create().SaveX(ctx).ID, 1<<32-1, 2<<32)
 	// Since "users" created in the migration of v1, it will occupy the range of 1<<32-1 ... 2<<32-1,
 	// even though they are ordered differently in the migration of v2 (groups, pets, users).
@@ -504,45 +504,45 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	ContainsFold(t, clientv2)
 
 	// "renamed" field was renamed to "new_name".
-	exist := clientv2.User.Query().Where(user.F.NewName.EQ("renamed")).ExistX(ctx)
+	exist := clientv2.User.Query().Where(user.Field.NewName.EQ("renamed")).ExistX(ctx)
 	require.True(t, exist, "expect renamed column to have previous values")
 }
 
 func SanityV1(t *testing.T, dbdialect string, client *entv1.Client) {
 	ctx := context.Background()
-	u := client.User.Create().With(userv1.F.Age.Set(1), userv1.F.Name.Set("foo"), userv1.F.Nickname.Set("nick_foo"), userv1.F.Renamed.Set("renamed")).SaveX(ctx)
+	u := client.User.Create().With(userv1.Field.Age.Set(1), userv1.Field.Name.Set("foo"), userv1.Field.Nickname.Set("nick_foo"), userv1.Field.Renamed.Set("renamed")).SaveX(ctx)
 	require.EqualValues(t, 1, u.Age)
 	require.Equal(t, "foo", u.Name)
 
-	err := client.User.Create().With(userv1.F.Age.Set(2), userv1.F.Name.Set("foobarbazqux")).Exec(ctx)
+	err := client.User.Create().With(userv1.Field.Age.Set(2), userv1.Field.Name.Set("foobarbazqux")).Exec(ctx)
 	require.Error(t, err, "name is limited to 10 chars")
 
 	// Unique index on (name, address).
-	client.User.Create().With(userv1.F.Age.Set(3), userv1.F.Name.Set("foo"), userv1.F.Nickname.Set("nick_foo_2"), userv1.F.Address.Set("tlv"), userv1.F.State.Set(userv1.StateLoggedIn)).SaveX(ctx)
-	err = client.User.Create().With(userv1.F.Age.Set(4), userv1.F.Name.Set("foo"), userv1.F.Address.Set("tlv")).Exec(ctx)
+	client.User.Create().With(userv1.Field.Age.Set(3), userv1.Field.Name.Set("foo"), userv1.Field.Nickname.Set("nick_foo_2"), userv1.Field.Address.Set("tlv"), userv1.Field.State.Set(userv1.StateLoggedIn)).SaveX(ctx)
+	err = client.User.Create().With(userv1.Field.Age.Set(4), userv1.Field.Name.Set("foo"), userv1.Field.Address.Set("tlv")).Exec(ctx)
 	require.Error(t, err)
 
 	// Blob type limited to 255.
-	u = client.User.UpdateOne(u).With(userv1.F.Blob.Set([]byte("hello"))).SaveX(ctx)
+	u = client.User.UpdateOne(u).With(userv1.Field.Blob.Set([]byte("hello"))).SaveX(ctx)
 	require.Equal(t, "hello", string(u.Blob))
-	err = client.User.UpdateOne(u).With(userv1.F.Blob.Set(make([]byte, 256))).Exec(ctx)
+	err = client.User.UpdateOne(u).With(userv1.Field.Blob.Set(make([]byte, 256))).Exec(ctx)
 	require.True(t, strings.Contains(t.Name(), "Postgres") || err != nil, "blob should be limited on SQLite and MySQL")
 
 	// Invalid enum value.
-	err = client.User.Create().With(userv1.F.Age.Set(1), userv1.F.Name.Set("bar"), userv1.F.Nickname.Set("nick_bar"), userv1.F.State.Set("unknown")).Exec(ctx)
+	err = client.User.Create().With(userv1.Field.Age.Set(1), userv1.Field.Name.Set("bar"), userv1.Field.Nickname.Set("nick_bar"), userv1.Field.State.Set("unknown")).Exec(ctx)
 	require.Error(t, err)
 
 	// Conversions
-	client.Conversion.Create().With(conversionv1.F.Name.Set("zero"), conversionv1.F.Int8ToString.Set(0), conversionv1.F.Uint8ToString.Set(0), conversionv1.F.Int16ToString.Set(0), conversionv1.F.Uint16ToString.Set(0), conversionv1.F.Int32ToString.Set(0), conversionv1.F.Uint32ToString.Set(0), conversionv1.F.Int64ToString.Set(0), conversionv1.F.Uint64ToString.Set(0)).
+	client.Conversion.Create().With(conversionv1.Field.Name.Set("zero"), conversionv1.Field.Int8ToString.Set(0), conversionv1.Field.Uint8ToString.Set(0), conversionv1.Field.Int16ToString.Set(0), conversionv1.Field.Uint16ToString.Set(0), conversionv1.Field.Int32ToString.Set(0), conversionv1.Field.Uint32ToString.Set(0), conversionv1.Field.Int64ToString.Set(0), conversionv1.Field.Uint64ToString.Set(0)).
 		SaveX(ctx)
 
-	client.Conversion.Create().With(conversionv1.F.Name.Set("min"), conversionv1.F.Int8ToString.Set(math.MinInt8), conversionv1.F.Uint8ToString.Set(0), conversionv1.F.Int16ToString.Set(math.MinInt16), conversionv1.F.Uint16ToString.Set(0), conversionv1.F.Int32ToString.Set(math.MinInt32), conversionv1.F.Uint32ToString.Set(0), conversionv1.F.Int64ToString.Set(math.MinInt64), conversionv1.F.Uint64ToString.Set(0)).
+	client.Conversion.Create().With(conversionv1.Field.Name.Set("min"), conversionv1.Field.Int8ToString.Set(math.MinInt8), conversionv1.Field.Uint8ToString.Set(0), conversionv1.Field.Int16ToString.Set(math.MinInt16), conversionv1.Field.Uint16ToString.Set(0), conversionv1.Field.Int32ToString.Set(math.MinInt32), conversionv1.Field.Uint32ToString.Set(0), conversionv1.Field.Int64ToString.Set(math.MinInt64), conversionv1.Field.Uint64ToString.Set(0)).
 		SaveX(ctx)
 
-	creator := client.Conversion.Create().With(conversionv1.F.Name.Set("max"), conversionv1.F.Int8ToString.Set(math.MaxInt8), conversionv1.F.Uint8ToString.Set(math.MaxUint8), conversionv1.F.Int16ToString.Set(math.MaxInt16), conversionv1.F.Uint16ToString.Set(math.MaxUint16), conversionv1.F.Int32ToString.Set(math.MaxInt32), conversionv1.F.Uint32ToString.Set(math.MaxUint32), conversionv1.F.Int64ToString.Set(math.MaxInt64), conversionv1.F.Uint64ToString.Set(math.MaxUint64))
+	creator := client.Conversion.Create().With(conversionv1.Field.Name.Set("max"), conversionv1.Field.Int8ToString.Set(math.MaxInt8), conversionv1.Field.Uint8ToString.Set(math.MaxUint8), conversionv1.Field.Int16ToString.Set(math.MaxInt16), conversionv1.Field.Uint16ToString.Set(math.MaxUint16), conversionv1.Field.Int32ToString.Set(math.MaxInt32), conversionv1.Field.Uint32ToString.Set(math.MaxUint32), conversionv1.Field.Int64ToString.Set(math.MaxInt64), conversionv1.Field.Uint64ToString.Set(math.MaxUint64))
 	if dbdialect == dialect.Postgres {
 		// Postgres does not support unsigned types.
-		creator.With(conversionv1.F.Int8ToString.Set(math.MaxInt8), conversionv1.F.Uint8ToString.Set(math.MaxInt8), conversionv1.F.Uint16ToString.Set(math.MaxInt16), conversionv1.F.Uint32ToString.Set(math.MaxInt32), conversionv1.F.Uint32ToString.Set(math.MaxInt32), conversionv1.F.Uint64ToString.Set(math.MaxInt64))
+		creator.With(conversionv1.Field.Int8ToString.Set(math.MaxInt8), conversionv1.Field.Uint8ToString.Set(math.MaxInt8), conversionv1.Field.Uint16ToString.Set(math.MaxInt16), conversionv1.Field.Uint32ToString.Set(math.MaxInt32), conversionv1.Field.Uint32ToString.Set(math.MaxInt32), conversionv1.Field.Uint64ToString.Set(math.MaxInt64))
 	}
 	creator.SaveX(ctx)
 }
@@ -559,24 +559,24 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 			require.False(t, users[i].CreatedAt.IsZero(), "default 'CURRENT_TIMESTAMP' should fill previous rows")
 		}
 	}
-	u := client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("bar"), user.F.Nickname.Set("nick_bar"), user.F.Phone.Set("100"), user.F.Buffer.Set([]byte("{}")), user.F.State.Set(user.StateLoggedOut)).SaveX(ctx)
+	u := client.User.Create().With(user.Field.Age.Set(1), user.Field.Name.Set("bar"), user.Field.Nickname.Set("nick_bar"), user.Field.Phone.Set("100"), user.Field.Buffer.Set([]byte("{}")), user.Field.State.Set(user.StateLoggedOut)).SaveX(ctx)
 	require.Equal(t, 1, u.Age)
 	require.Equal(t, "bar", u.Name)
 	require.Equal(t, []byte("{}"), u.Buffer)
-	u = client.User.UpdateOne(u).With(user.F.Buffer.Set([]byte("[]"))).SaveX(ctx)
+	u = client.User.UpdateOne(u).With(user.Field.Buffer.Set([]byte("[]"))).SaveX(ctx)
 	require.Equal(t, []byte("[]"), u.Buffer)
 	require.Equal(t, user.StateLoggedOut, u.State)
 
-	err := client.User.UpdateOne(u).With(user.F.State.Set(user.State("boring"))).Exec(ctx)
+	err := client.User.UpdateOne(u).With(user.Field.State.Set(user.State("boring"))).Exec(ctx)
 	require.Error(t, err, "invalid enum value")
-	u = client.User.UpdateOne(u).With(user.F.State.Set(user.StateOnline)).SaveX(ctx)
+	u = client.User.UpdateOne(u).With(user.Field.State.Set(user.StateOnline)).SaveX(ctx)
 	require.Equal(t, user.StateOnline, u.State)
 
-	err = client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("foobarbazqux"), user.F.Nickname.Set("nick_bar"), user.F.Phone.Set("200")).Exec(ctx)
+	err = client.User.Create().With(user.Field.Age.Set(1), user.Field.Name.Set("foobarbazqux"), user.Field.Nickname.Set("nick_bar"), user.Field.Phone.Set("200")).Exec(ctx)
 	require.NoError(t, err, "name is not limited to 10 chars and nickname is not unique")
 
 	// New unique index was added to (age, phone).
-	err = client.User.Create().With(user.F.Age.Set(1), user.F.Name.Set("foo"), user.F.Phone.Set("200"), user.F.Nickname.Set("nick_bar")).Exec(ctx)
+	err = client.User.Create().With(user.Field.Age.Set(1), user.Field.Name.Set("foo"), user.Field.Phone.Set("200"), user.Field.Nickname.Set("nick_bar")).Exec(ctx)
 	require.Error(t, err)
 	require.True(t, entv2.IsConstraintError(err))
 
@@ -584,17 +584,17 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	require.Equal(
 		t,
 		client.User.Query().CountX(ctx),
-		client.User.Query().Where(user.F.Title.EQ(user.DefaultTitle)).CountX(ctx),
+		client.User.Query().Where(user.Field.Title.EQ(user.DefaultTitle)).CountX(ctx),
 	)
 
 	// Blob type was extended.
-	u, err = client.User.UpdateOne(u).With(user.F.Blob.Set(make([]byte, 256)), user.F.State.Set(user.StateLoggedOut)).Save(ctx)
+	u, err = client.User.UpdateOne(u).With(user.Field.Blob.Set(make([]byte, 256)), user.Field.State.Set(user.StateLoggedOut)).Save(ctx)
 	require.NoError(t, err, "data type blob was extended in v2")
 	require.Equal(t, make([]byte, 256), u.Blob)
 
 	if dbdialect != dialect.SQLite {
 		// Conversions
-		zero := client.Conversion.Query().Where(conversion.F.Name.EQ("zero")).OnlyX(ctx)
+		zero := client.Conversion.Query().Where(conversion.Field.Name.EQ("zero")).OnlyX(ctx)
 		require.Equal(t, strconv.Itoa(0), zero.Int8ToString)
 		require.Equal(t, strconv.Itoa(0), zero.Uint8ToString)
 		require.Equal(t, strconv.Itoa(0), zero.Int16ToString)
@@ -604,7 +604,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 		require.Equal(t, strconv.Itoa(0), zero.Int64ToString)
 		require.Equal(t, strconv.Itoa(0), zero.Uint64ToString)
 
-		min := client.Conversion.Query().Where(conversion.F.Name.EQ("min")).OnlyX(ctx)
+		min := client.Conversion.Query().Where(conversion.Field.Name.EQ("min")).OnlyX(ctx)
 		require.Equal(t, strconv.Itoa(math.MinInt8), min.Int8ToString)
 		require.Equal(t, strconv.Itoa(0), min.Uint8ToString)
 		require.Equal(t, strconv.Itoa(math.MinInt16), min.Int16ToString)
@@ -614,7 +614,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 		require.Equal(t, strconv.Itoa(math.MinInt64), min.Int64ToString)
 		require.Equal(t, strconv.Itoa(0), min.Uint64ToString)
 
-		max := client.Conversion.Query().Where(conversion.F.Name.EQ("max")).OnlyX(ctx)
+		max := client.Conversion.Query().Where(conversion.Field.Name.EQ("max")).OnlyX(ctx)
 		require.Equal(t, strconv.Itoa(math.MaxInt8), max.Int8ToString)
 		require.Equal(t, strconv.Itoa(math.MaxInt16), max.Int16ToString)
 		require.Equal(t, strconv.Itoa(math.MaxInt32), max.Int32ToString)
@@ -637,9 +637,9 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 func CheckConstraint(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing check constraints")
-	err := client.Media.Create().With(media.F.Text.Set("boring")).Exec(ctx)
+	err := client.Media.Create().With(media.Field.Text.Set("boring")).Exec(ctx)
 	require.Error(t, err)
-	err = client.Media.Create().With(media.F.SourceURI.Set("entgo.io")).Exec(ctx)
+	err = client.Media.Create().With(media.Field.SourceURI.Set("entgo.io")).Exec(ctx)
 	require.Error(t, err)
 }
 
@@ -661,18 +661,18 @@ func NicknameSearch(t *testing.T, client *entv2.Client) {
 func EqualFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing equal-fold on sql specific dialects")
-	client.User.Create().With(user.F.Age.Set(37), user.F.Name.Set("Alex"), user.F.Nickname.Set("alexsn"), user.F.Phone.Set("123456789")).SaveX(ctx)
-	require.False(t, client.User.Query().Where(user.F.Name.EQ("alex")).ExistX(ctx))
-	require.True(t, client.User.Query().Where(user.F.Name.EqualFold("alex")).ExistX(ctx))
+	client.User.Create().With(user.Field.Age.Set(37), user.Field.Name.Set("Alex"), user.Field.Nickname.Set("alexsn"), user.Field.Phone.Set("123456789")).SaveX(ctx)
+	require.False(t, client.User.Query().Where(user.Field.Name.EQ("alex")).ExistX(ctx))
+	require.True(t, client.User.Query().Where(user.Field.Name.EqualFold("alex")).ExistX(ctx))
 }
 
 func ContainsFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing contains-fold on sql specific dialects")
-	client.User.Create().With(user.F.Age.Set(30), user.F.Name.Set("Mashraki"), user.F.Nickname.Set("a8m"), user.F.Phone.Set("102030")).SaveX(ctx)
-	require.Zero(t, client.User.Query().Where(user.F.Name.Contains("mash")).CountX(ctx))
-	require.Equal(t, 1, client.User.Query().Where(user.F.Name.ContainsFold("mash")).CountX(ctx))
-	require.Equal(t, 1, client.User.Query().Where(user.F.Name.ContainsFold("Raki")).CountX(ctx))
+	client.User.Create().With(user.Field.Age.Set(30), user.Field.Name.Set("Mashraki"), user.Field.Nickname.Set("a8m"), user.Field.Phone.Set("102030")).SaveX(ctx)
+	require.Zero(t, client.User.Query().Where(user.Field.Name.Contains("mash")).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(user.Field.Name.ContainsFold("mash")).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(user.Field.Name.ContainsFold("Raki")).CountX(ctx))
 }
 
 func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
@@ -829,8 +829,8 @@ func fillNulls(dbdialect string) schema.ApplyHook {
 			drv := sql.NewDriver(dbdialect, sql.Conn{ExecQuerier: conn.(*sql.Tx)})
 			client := entv2.NewClient(entv2.Driver(drv))
 			if err := client.User.
-				Update().With(user.F.DropOptional.Set("Unknown")).
-				Where(predicate.User(userv1.F.DropOptional.IsNil())).
+				Update().With(user.Field.DropOptional.Set("Unknown")).
+				Where(predicate.User(userv1.Field.DropOptional.IsNil())).
 				Exec(ctx); err != nil {
 				return fmt.Errorf("fix default values to uppercase: %w", err)
 			}

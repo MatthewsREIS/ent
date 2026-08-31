@@ -37,7 +37,7 @@ func (_u *ConversionUpdate) Where(ps ...predicate.Conversion) *ConversionUpdate 
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ConversionUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *ConversionUpdate) With(as ...entfield.Assignment) *ConversionUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewConversionUpdateOne(c Config, hooks []Hook, mutation *ConversionMutation
 	return &ConversionUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ConversionUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *ConversionUpdateOne) With(as ...entfield.Assignment) *ConversionUpdateOne {
 	if _u.err == nil {

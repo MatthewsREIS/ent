@@ -42,7 +42,7 @@ func opSuffixCases() []rewriteCase {
 			name:     "op_" + o.op,
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, fmt.Sprintf("escrow.Name%s(%s)", o.op, o.args)),
-			want:     wrap(escrowImport, fmt.Sprintf("escrow.F.Name.%s(%s)", o.op, o.args)),
+			want:     wrap(escrowImport, fmt.Sprintf("escrow.Field.Name.%s(%s)", o.op, o.args)),
 		})
 	}
 	return cases
@@ -99,7 +99,7 @@ func rangeShadow(xs []int) {
 }
 
 func clean() {
-	_ = escrow.F.Name.EQ("y")
+	_ = escrow.Field.Name.EQ("y")
 }
 `
 	return rewriteCase{name: "shadowing_is_per_function_and_conservative", manifest: escrowManifest, input: input, want: want}
@@ -111,43 +111,43 @@ func TestRewriteSource(t *testing.T) {
 			name:     "bare_equality",
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, `escrow.Name("x")`),
-			want:     wrap(escrowImport, `escrow.F.Name.EQ("x")`),
+			want:     wrap(escrowImport, `escrow.Field.Name.EQ("x")`),
 		},
 		{
 			name:     "id_bare",
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, `escrow.ID("x")`),
-			want:     wrap(escrowImport, `escrow.F.ID.EQ("x")`),
+			want:     wrap(escrowImport, `escrow.Field.ID.EQ("x")`),
 		},
 		{
 			name:     "id_op",
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, `escrow.IDGT(1)`),
-			want:     wrap(escrowImport, `escrow.F.ID.GT(1)`),
+			want:     wrap(escrowImport, `escrow.Field.ID.GT(1)`),
 		},
 		{
 			name:     "has_edge",
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, `escrow.HasParcels()`),
-			want:     wrap(escrowImport, `escrow.E.Parcels.Has()`),
+			want:     wrap(escrowImport, `escrow.Edge.Parcels.Has()`),
 		},
 		{
 			name:     "has_edge_with",
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, `escrow.HasParcelsWith(p1, p2)`),
-			want:     wrap(escrowImport, `escrow.E.Parcels.HasWith(p1, p2)`),
+			want:     wrap(escrowImport, `escrow.Edge.Parcels.HasWith(p1, p2)`),
 		},
 		{
 			name:     "by_field",
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, `escrow.ByStatus(asc)`),
-			want:     wrap(escrowImport, `escrow.F.Status.Order(asc)`),
+			want:     wrap(escrowImport, `escrow.Field.Status.Order(asc)`),
 		},
 		{
 			name:     "by_edge",
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, `escrow.ByParcels(t1, t2)`),
-			want:     wrap(escrowImport, `escrow.E.Parcels.OrderBy(t1, t2)`),
+			want:     wrap(escrowImport, `escrow.Edge.Parcels.OrderBy(t1, t2)`),
 		},
 		{
 			// Ambiguity direction 1: "ParcelsCount" is a field (edge
@@ -158,7 +158,7 @@ func TestRewriteSource(t *testing.T) {
 				Edges:  map[string]bool{},
 			}},
 			input: wrap(escrowImport, `escrow.ByParcelsCount(asc)`),
-			want:  wrap(escrowImport, `escrow.F.ParcelsCount.Order(asc)`),
+			want:  wrap(escrowImport, `escrow.Field.ParcelsCount.Order(asc)`),
 		},
 		{
 			// Ambiguity direction 2: "Parcels" is an edge (field
@@ -169,7 +169,7 @@ func TestRewriteSource(t *testing.T) {
 				Edges:  map[string]bool{"Parcels": true},
 			}},
 			input: wrap(escrowImport, `escrow.ByParcelsCount(asc)`),
-			want:  wrap(escrowImport, `escrow.E.Parcels.OrderByCount(asc)`),
+			want:  wrap(escrowImport, `escrow.Edge.Parcels.OrderByCount(asc)`),
 		},
 		{
 			// True ambiguity (not the direction-dependent cases above):
@@ -195,7 +195,7 @@ func TestRewriteSource(t *testing.T) {
 				Edges:  map[string]bool{"ContactListContacts": true},
 			}},
 			input: wrap(escrowImport, `escrow.HasContactListContacts()`),
-			want:  wrap(escrowImport, `escrow.E.ContactListContacts.Has()`),
+			want:  wrap(escrowImport, `escrow.Edge.ContactListContacts.Has()`),
 		},
 		{
 			name:     "value_position_method_value",
@@ -203,7 +203,7 @@ func TestRewriteSource(t *testing.T) {
 			input: wrap("\t\"example.com/gen/escrow\"\n\t\"example.com/wherehelpers\"\n",
 				`wherehelpers.AppendPtr(escrow.NameEQ)`),
 			want: wrap("\t\"example.com/gen/escrow\"\n\t\"example.com/wherehelpers\"\n",
-				`wherehelpers.AppendPtr(escrow.F.Name.EQ)`),
+				`wherehelpers.AppendPtr(escrow.Field.Name.EQ)`),
 		},
 		{
 			name: "aliased_import",
@@ -211,7 +211,7 @@ func TestRewriteSource(t *testing.T) {
 				"escrow": escrowManifest["escrow"],
 			},
 			input: wrap("\tesc \"example.com/gen/escrow\"\n", `esc.NameEQ("x")`),
-			want:  wrap("\tesc \"example.com/gen/escrow\"\n", `esc.F.Name.EQ("x")`),
+			want:  wrap("\tesc \"example.com/gen/escrow\"\n", `esc.Field.Name.EQ("x")`),
 		},
 		{
 			name:     "non_manifest_package_untouched",
@@ -219,13 +219,13 @@ func TestRewriteSource(t *testing.T) {
 			input: wrap("\t\"example.com/gen/escrow\"\n\t\"example.com/gen/other\"\n",
 				"escrow.NameEQ(\"x\")\n\tother.NameEQ(\"x\")"),
 			want: wrap("\t\"example.com/gen/escrow\"\n\t\"example.com/gen/other\"\n",
-				"escrow.F.Name.EQ(\"x\")\n\tother.NameEQ(\"x\")"),
+				"escrow.Field.Name.EQ(\"x\")\n\tother.NameEQ(\"x\")"),
 		},
 		{
 			name:     "and_or_not_untouched_but_args_rewritten",
 			manifest: escrowManifest,
 			input:    wrap(escrowImport, `escrow.And(escrow.NameEQ("a"), escrow.StatusEQ("b"))`),
-			want:     wrap(escrowImport, `escrow.And(escrow.F.Name.EQ("a"), escrow.F.Status.EQ("b"))`),
+			want:     wrap(escrowImport, `escrow.And(escrow.Field.Name.EQ("a"), escrow.Field.Status.EQ("b"))`),
 		},
 		{
 			name:     "no_match_left_untouched",
@@ -333,8 +333,8 @@ func TestIdempotent(t *testing.T) {
 func TestPkgPrefixCollision(t *testing.T) {
 	realImport := wrap("\t\"example.com/gen/escrow\"\n", `escrow.NameEQ("x")`)
 	otherImport := wrap("\t\"example.com/other/escrow\"\n", `escrow.NameEQ("x")`)
-	wantRewritten := wrap("\t\"example.com/gen/escrow\"\n", `escrow.F.Name.EQ("x")`)
-	otherRewritten := wrap("\t\"example.com/other/escrow\"\n", `escrow.F.Name.EQ("x")`)
+	wantRewritten := wrap("\t\"example.com/gen/escrow\"\n", `escrow.Field.Name.EQ("x")`)
+	otherRewritten := wrap("\t\"example.com/other/escrow\"\n", `escrow.Field.Name.EQ("x")`)
 
 	t.Run("no_prefix_both_resolve_by_basename", func(t *testing.T) {
 		got, changed, err := RewriteSource("real.go", []byte(realImport), escrowManifest, nil)

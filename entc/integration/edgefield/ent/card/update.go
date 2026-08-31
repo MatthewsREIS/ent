@@ -37,7 +37,7 @@ func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CardUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *CardUpdate) With(as ...entfield.Assignment) *CardUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewCardUpdateOne(c Config, hooks []Hook, mutation *CardMutation) *CardUpdat
 	return &CardUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CardUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *CardUpdateOne) With(as ...entfield.Assignment) *CardUpdateOne {
 	if _u.err == nil {

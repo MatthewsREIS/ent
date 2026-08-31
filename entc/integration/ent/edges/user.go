@@ -1345,7 +1345,7 @@ func LoadUserSpouse(ctx context.Context, query *user.UserQuery, nodes []*user.Us
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.F.ID.In(ids...))
+	query.Where(user.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -1578,7 +1578,7 @@ func LoadUserParent(ctx context.Context, query *user.UserQuery, nodes []*user.Us
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.F.ID.In(ids...))
+	query.Where(user.Field.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

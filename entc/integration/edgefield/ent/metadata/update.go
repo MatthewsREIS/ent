@@ -37,7 +37,7 @@ func (_u *MetadataUpdate) Where(ps ...predicate.Metadata) *MetadataUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the MetadataUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *MetadataUpdate) With(as ...entfield.Assignment) *MetadataUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewMetadataUpdateOne(c Config, hooks []Hook, mutation *MetadataMutation) *M
 	return &MetadataUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the MetadataUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *MetadataUpdateOne) With(as ...entfield.Assignment) *MetadataUpdateOne {
 	if _u.err == nil {

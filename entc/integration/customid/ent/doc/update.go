@@ -37,7 +37,7 @@ func (_u *DocUpdate) Where(ps ...predicate.Doc) *DocUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the DocUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *DocUpdate) With(as ...entfield.Assignment) *DocUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewDocUpdateOne(c Config, hooks []Hook, mutation *DocMutation) *DocUpdateOn
 	return &DocUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the DocUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *DocUpdateOne) With(as ...entfield.Assignment) *DocUpdateOne {
 	if _u.err == nil {

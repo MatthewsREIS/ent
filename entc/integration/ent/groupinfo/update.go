@@ -39,7 +39,7 @@ func (_u *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the GroupInfoUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *GroupInfoUpdate) With(as ...entfield.Assignment) *GroupInfoUpdate {
 	if _u.err == nil {
@@ -120,7 +120,7 @@ func NewGroupInfoUpdateOne(c Config, hooks []Hook, mutation *GroupInfoMutation) 
 	return &GroupInfoUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the GroupInfoUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *GroupInfoUpdateOne) With(as ...entfield.Assignment) *GroupInfoUpdateOne {
 	if _u.err == nil {

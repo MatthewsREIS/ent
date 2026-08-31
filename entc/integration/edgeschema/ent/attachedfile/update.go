@@ -37,7 +37,7 @@ func (_u *AttachedFileUpdate) Where(ps ...predicate.AttachedFile) *AttachedFileU
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the AttachedFileUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *AttachedFileUpdate) With(as ...entfield.Assignment) *AttachedFileUpdate {
 	if _u.err == nil {
@@ -124,7 +124,7 @@ func NewAttachedFileUpdateOne(c Config, hooks []Hook, mutation *AttachedFileMuta
 	return &AttachedFileUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the AttachedFileUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *AttachedFileUpdateOne) With(as ...entfield.Assignment) *AttachedFileUpdateOne {
 	if _u.err == nil {

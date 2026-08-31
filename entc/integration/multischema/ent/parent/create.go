@@ -31,7 +31,7 @@ func NewParentCreate(c Config, hooks []Hook, mutation *ParentMutation) *ParentCr
 	return &ParentCreate{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the ParentCreate builder. The first error from as is recorded and returned by Save.
 func (_c *ParentCreate) With(as ...entfield.Assignment) *ParentCreate {
 	if _c.err == nil {

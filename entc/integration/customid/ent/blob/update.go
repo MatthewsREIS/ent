@@ -38,7 +38,7 @@ func (_u *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the BlobUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *BlobUpdate) With(as ...entfield.Assignment) *BlobUpdate {
 	if _u.err == nil {
@@ -118,7 +118,7 @@ func NewBlobUpdateOne(c Config, hooks []Hook, mutation *BlobMutation) *BlobUpdat
 	return &BlobUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the BlobUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *BlobUpdateOne) With(as ...entfield.Assignment) *BlobUpdateOne {
 	if _u.err == nil {

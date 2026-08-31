@@ -37,7 +37,7 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the UserUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *UserUpdate) With(as ...entfield.Assignment) *UserUpdate {
 	if _u.err == nil {
@@ -138,7 +138,7 @@ func NewUserUpdateOne(c Config, hooks []Hook, mutation *UserMutation) *UserUpdat
 	return &UserUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the UserUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *UserUpdateOne) With(as ...entfield.Assignment) *UserUpdateOne {
 	if _u.err == nil {

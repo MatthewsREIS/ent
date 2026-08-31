@@ -37,7 +37,7 @@ func (_u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the NodeUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *NodeUpdate) With(as ...entfield.Assignment) *NodeUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewNodeUpdateOne(c Config, hooks []Hook, mutation *NodeMutation) *NodeUpdat
 	return &NodeUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the NodeUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *NodeUpdateOne) With(as ...entfield.Assignment) *NodeUpdateOne {
 	if _u.err == nil {

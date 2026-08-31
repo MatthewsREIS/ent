@@ -39,7 +39,7 @@ func (_u *APIUpdate) Where(ps ...predicate.Api) *APIUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the APIUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *APIUpdate) With(as ...entfield.Assignment) *APIUpdate {
 	if _u.err == nil {
@@ -120,7 +120,7 @@ func NewAPIUpdateOne(c Config, hooks []Hook, mutation *APIMutation) *APIUpdateOn
 	return &APIUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the APIUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *APIUpdateOne) With(as ...entfield.Assignment) *APIUpdateOne {
 	if _u.err == nil {

@@ -39,7 +39,7 @@ func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CommentUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *CommentUpdate) With(as ...entfield.Assignment) *CommentUpdate {
 	if _u.err == nil {
@@ -120,7 +120,7 @@ func NewCommentUpdateOne(c Config, hooks []Hook, mutation *CommentMutation) *Com
 	return &CommentUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the CommentUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *CommentUpdateOne) With(as ...entfield.Assignment) *CommentUpdateOne {
 	if _u.err == nil {

@@ -12,16 +12,16 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Spec type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Spec type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 }{
 	ID: entfield.NewNumber[int](FieldID, "id"),
 }
 
-// E holds typed edge handles for every edge of the Spec type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Spec type.
+var Edge = struct {
 	// Card is the handle for the "card" edge.
 	Card entfield.Edge[predicate.Card, int]
 }{

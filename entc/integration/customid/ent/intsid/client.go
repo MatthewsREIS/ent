@@ -100,7 +100,7 @@ func (c *IntSIDClient) DeleteOne(_m *IntSID) *IntSIDDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *IntSIDClient) DeleteOneID(id sid.ID) *IntSIDDeleteOne {
 	mutation := NewIntSIDMutation(c.Config, OpDeleteOne, WithIntSIDID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewIntSIDDeleteOne(NewIntSIDDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *IntSIDClient) Query() *IntSIDQuery {
 
 // Get returns a IntSID entity by its id.
 func (c *IntSIDClient) Get(ctx context.Context, id sid.ID) (*IntSID, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

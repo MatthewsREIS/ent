@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Media type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Media type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Source is the handle for the "source" field.
@@ -29,8 +29,8 @@ var F = struct {
 	Text:      entfield.NewString[string](FieldText, "text"),
 }
 
-// E holds typed edge handles for every edge of the Media type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Media type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

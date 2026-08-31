@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Tweet type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Tweet type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// Text is the handle for the "text" field.
@@ -24,8 +24,8 @@ var F = struct {
 	Text: entfield.NewString[string](FieldText, "text"),
 }
 
-// E holds typed edge handles for every edge of the Tweet type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Tweet type.
+var Edge = struct {
 	// LikedUsers is the handle for the "liked_users" edge.
 	LikedUsers entfield.Edge[predicate.User, int]
 	// User is the handle for the "user" edge.

@@ -99,7 +99,7 @@ func (c *CommentClient) DeleteOne(_m *Comment) *CommentDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CommentClient) DeleteOneID(id int) *CommentDeleteOne {
 	mutation := NewCommentMutation(c.Config, OpDeleteOne, WithCommentID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewCommentDeleteOne(NewCommentDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *CommentClient) Query() *CommentQuery {
 
 // Get returns a Comment entity by its id.
 func (c *CommentClient) Get(ctx context.Context, id int) (*Comment, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

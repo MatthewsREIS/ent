@@ -14,8 +14,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Link type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Link type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Value[uuidc.UUIDC]
 	// LinkInformation is the handle for the "link_information" field.
@@ -25,8 +25,8 @@ var F = struct {
 	LinkInformation: entfield.NewJSON[map[string]schema.LinkInformation]("link_information"),
 }
 
-// E holds typed edge handles for every edge of the Link type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Link type.
+var Edge = struct {
 }{}
 
 // And groups predicates with the AND operator between them.

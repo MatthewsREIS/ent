@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// F holds typed predicate/order handles for every comparable field of the BlobLink type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the BlobLink type.
+var Field = struct {
 	// CreatedAt is the handle for the "created_at" field.
 	CreatedAt entfield.Time
 	// BlobID is the handle for the "blob_id" field (backs the "blob" edge).
@@ -27,8 +27,8 @@ var F = struct {
 	LinkID:    entfield.NewEdgeField[uuid.UUID](FieldLinkID, "link"),
 }
 
-// E holds typed edge handles for every edge of the BlobLink type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the BlobLink type.
+var Edge = struct {
 	// Blob is the handle for the "blob" edge.
 	Blob entfield.Edge[predicate.Blob, uuid.UUID]
 	// Link is the handle for the "link" edge.

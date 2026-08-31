@@ -100,7 +100,7 @@ func (c *OtherClient) DeleteOne(_m *Other) *OtherDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *OtherClient) DeleteOneID(id sid.ID) *OtherDeleteOne {
 	mutation := NewOtherMutation(c.Config, OpDeleteOne, WithOtherID(id, nil))
-	mutation.WhereP(F.ID.EQ(id))
+	mutation.WhereP(Field.ID.EQ(id))
 	return NewOtherDeleteOne(NewOtherDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *OtherClient) Query() *OtherQuery {
 
 // Get returns a Other entity by its id.
 func (c *OtherClient) Get(ctx context.Context, id sid.ID) (*Other, error) {
-	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
+	return c.Query().Where(Field.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

@@ -38,7 +38,7 @@ func (_u *BlobLinkUpdate) Where(ps ...predicate.BlobLink) *BlobLinkUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the BlobLinkUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *BlobLinkUpdate) With(as ...entfield.Assignment) *BlobLinkUpdate {
 	if _u.err == nil {
@@ -125,7 +125,7 @@ func NewBlobLinkUpdateOne(c Config, hooks []Hook, mutation *BlobLinkMutation) *B
 	return &BlobLinkUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the BlobLinkUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *BlobLinkUpdateOne) With(as ...entfield.Assignment) *BlobLinkUpdateOne {
 	if _u.err == nil {

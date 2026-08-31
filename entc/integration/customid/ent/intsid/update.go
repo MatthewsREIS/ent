@@ -37,7 +37,7 @@ func (_u *IntSIDUpdate) Where(ps ...predicate.IntSID) *IntSIDUpdate {
 	return _u
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the IntSIDUpdate builder. The first error from as is recorded and returned by Save.
 func (_u *IntSIDUpdate) With(as ...entfield.Assignment) *IntSIDUpdate {
 	if _u.err == nil {
@@ -110,7 +110,7 @@ func NewIntSIDUpdateOne(c Config, hooks []Hook, mutation *IntSIDMutation) *IntSI
 	return &IntSIDUpdateOne{Config: c, hooks: hooks, mutation: mutation}
 }
 
-// With applies field/edge handle assignments (F.<Field>.Set(...), E.<Edge>.SetID(...), ...)
+// With applies field/edge handle assignments (Field.<Field>.Set(...), Edge.<Edge>.SetID(...), ...)
 // to the IntSIDUpdateOne builder. The first error from as is recorded and returned by Save.
 func (_u *IntSIDUpdateOne) With(as ...entfield.Assignment) *IntSIDUpdateOne {
 	if _u.err == nil {

@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/runtime/entfield"
 )
 
-// F holds typed predicate/order handles for every comparable field of the Car type.
-var F = struct {
+// Field holds typed predicate/order handles for every comparable field of the Car type.
+var Field = struct {
 	// ID is the handle for the id field.
 	ID entfield.Number[int]
 	// BeforeID is the handle for the "before_id" field.
@@ -29,8 +29,8 @@ var F = struct {
 	Model:    entfield.NewString[string](FieldModel, "model"),
 }
 
-// E holds typed edge handles for every edge of the Car type.
-var E = struct {
+// Edge holds typed edge handles for every edge of the Car type.
+var Edge = struct {
 	// Owner is the handle for the "owner" edge.
 	Owner entfield.Edge[predicate.Pet, string]
 }{
