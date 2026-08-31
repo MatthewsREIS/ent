@@ -99,7 +99,7 @@ func (c *FriendshipClient) DeleteOne(_m *Friendship) *FriendshipDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FriendshipClient) DeleteOneID(id int) *FriendshipDeleteOne {
 	mutation := NewFriendshipMutation(c.Config, OpDeleteOne, WithFriendshipID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewFriendshipDeleteOne(NewFriendshipDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *FriendshipClient) Query() *FriendshipQuery {
 
 // Get returns a Friendship entity by its id.
 func (c *FriendshipClient) Get(ctx context.Context, id int) (*Friendship, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

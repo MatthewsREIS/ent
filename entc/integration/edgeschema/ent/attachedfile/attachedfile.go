@@ -9,8 +9,8 @@ package attachedfile
 import (
 	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -70,41 +70,8 @@ var (
 )
 
 // OrderOption defines the ordering options for the AttachedFile queries.
-type OrderOption func(*sql.Selector)
+type OrderOption = entfield.Order
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByAttachTime orders the results by the attach_time field.
-func ByAttachTime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAttachTime, opts...).ToFunc()
-}
-
-// ByFID orders the results by the f_id field.
-func ByFID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFID, opts...).ToFunc()
-}
-
-// ByProcID orders the results by the proc_id field.
-func ByProcID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProcID, opts...).ToFunc()
-}
-
-// ByFiField orders the results by fi field.
-func ByFiField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newFiStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByProcField orders the results by proc field.
-func ByProcField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newProcStep(), sql.OrderByField(field, opts...))
-	}
-}
 func newFiStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

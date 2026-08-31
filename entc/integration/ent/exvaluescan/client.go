@@ -99,7 +99,7 @@ func (c *ExValueScanClient) DeleteOne(_m *ExValueScan) *ExValueScanDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ExValueScanClient) DeleteOneID(id int) *ExValueScanDeleteOne {
 	mutation := NewExValueScanMutation(c.Config, OpDeleteOne, WithExValueScanID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewExValueScanDeleteOne(NewExValueScanDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *ExValueScanClient) Query() *ExValueScanQuery {
 
 // Get returns a ExValueScan entity by its id.
 func (c *ExValueScanClient) Get(ctx context.Context, id int) (*ExValueScan, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

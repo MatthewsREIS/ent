@@ -8,77 +8,24 @@ package info
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgefield/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id int) predicate.Info {
-	return predicate.Info(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Info type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Number[int]
+}{
+	ID: entfield.NewNumber[int](FieldID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Info {
-	return predicate.Info(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Info {
-	return predicate.Info(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Info {
-	return predicate.Info(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Info {
-	return predicate.Info(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Info {
-	return predicate.Info(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Info {
-	return predicate.Info(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Info {
-	return predicate.Info(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Info {
-	return predicate.Info(sql.FieldLTE(FieldID, id))
-}
-
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.Info {
-	return predicate.Info(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, UserTable, UserColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.Info {
-	return predicate.Info(
-		func(s *sql.Selector) {
-			step := newUserStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
+// E holds typed edge handles for every edge of the Info type.
+var E = struct {
+	// User is the handle for the "user" edge.
+	User entfield.Edge[predicate.User]
+}{
+	User: entfield.NewEdge[predicate.User](newUserStep),
 }
 
 // And groups predicates with the AND operator between them.

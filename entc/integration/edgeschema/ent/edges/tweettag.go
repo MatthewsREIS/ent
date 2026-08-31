@@ -34,7 +34,7 @@ func LoadTweetTagTag(ctx context.Context, query *tag.TagQuery, nodes []*tweettag
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(tag.IDIn(ids...))
+	query.Where(tag.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func LoadTweetTagTweet(ctx context.Context, query *tweet.TweetQuery, nodes []*tw
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(tweet.IDIn(ids...))
+	query.Where(tweet.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

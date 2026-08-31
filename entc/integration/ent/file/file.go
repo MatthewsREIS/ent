@@ -7,8 +7,8 @@
 package file
 
 import (
-	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -109,80 +109,8 @@ var (
 )
 
 // OrderOption defines the ordering options for the File queries.
-type OrderOption func(*sql.Selector)
+type OrderOption = entfield.Order
 
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// BySetID orders the results by the set_id field.
-func BySetID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSetID, opts...).ToFunc()
-}
-
-// BySize orders the results by the size field.
-func BySize(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSize, opts...).ToFunc()
-}
-
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByUser orders the results by the user field.
-func ByUser(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldUser, opts...).ToFunc()
-}
-
-// ByGroup orders the results by the group field.
-func ByGroup(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldGroup, opts...).ToFunc()
-}
-
-// ByOp orders the results by the op field.
-func ByOp(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOp, opts...).ToFunc()
-}
-
-// ByFieldID orders the results by the field_id field.
-func ByFieldID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFieldID, opts...).ToFunc()
-}
-
-// ByCreateTime orders the results by the create_time field.
-func ByCreateTime(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreateTime, opts...).ToFunc()
-}
-
-// ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByTypeField orders the results by type field.
-func ByTypeField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTypeStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByFieldCount orders the results by field count.
-func ByFieldCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newFieldStep(), opts...)
-	}
-}
-
-// ByField orders the results by field terms.
-func ByField(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newFieldStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newOwnerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),

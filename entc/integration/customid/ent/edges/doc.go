@@ -38,7 +38,7 @@ func LoadDocParent(ctx context.Context, query *doc.DocQuery, nodes []*doc.Doc) e
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(doc.IDIn(ids...))
+	query.Where(doc.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

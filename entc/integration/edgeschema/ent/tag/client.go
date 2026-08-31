@@ -99,7 +99,7 @@ func (c *TagClient) DeleteOne(_m *Tag) *TagDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
 	mutation := NewTagMutation(c.Config, OpDeleteOne, WithTagID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewTagDeleteOne(NewTagDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *TagClient) Query() *TagQuery {
 
 // Get returns a Tag entity by its id.
 func (c *TagClient) Get(ctx context.Context, id int) (*Tag, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

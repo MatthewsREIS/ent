@@ -99,7 +99,7 @@ func (c *TaskClient) DeleteOne(_m *Task) *TaskDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 	mutation := NewTaskMutation(c.Config, OpDeleteOne, WithTaskID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewTaskDeleteOne(NewTaskDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *TaskClient) Query() *TaskQuery {
 
 // Get returns a Task entity by its id.
 func (c *TaskClient) Get(ctx context.Context, id int) (*Task, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

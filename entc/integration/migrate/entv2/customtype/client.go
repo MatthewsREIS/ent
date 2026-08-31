@@ -99,7 +99,7 @@ func (c *CustomTypeClient) DeleteOne(_m *CustomType) *CustomTypeDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CustomTypeClient) DeleteOneID(id int) *CustomTypeDeleteOne {
 	mutation := NewCustomTypeMutation(c.Config, OpDeleteOne, WithCustomTypeID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewCustomTypeDeleteOne(NewCustomTypeDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *CustomTypeClient) Query() *CustomTypeQuery {
 
 // Get returns a CustomType entity by its id.
 func (c *CustomTypeClient) Get(ctx context.Context, id int) (*CustomType, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

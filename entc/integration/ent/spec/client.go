@@ -99,7 +99,7 @@ func (c *SpecClient) DeleteOne(_m *Spec) *SpecDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *SpecClient) DeleteOneID(id int) *SpecDeleteOne {
 	mutation := NewSpecMutation(c.Config, OpDeleteOne, WithSpecID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewSpecDeleteOne(NewSpecDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *SpecClient) Query() *SpecQuery {
 
 // Get returns a Spec entity by its id.
 func (c *SpecClient) Get(ctx context.Context, id int) (*Spec, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

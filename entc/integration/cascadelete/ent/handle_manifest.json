@@ -1,0 +1,29 @@
+{
+	"comment": {
+		"fields": {
+			"PostID": true,
+			"Text": true
+		},
+		"edges": {
+			"Post": true
+		}
+	},
+	"post": {
+		"fields": {
+			"AuthorID": true,
+			"Text": true
+		},
+		"edges": {
+			"Author": true,
+			"Comments": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Posts": true
+		}
+	}
+}

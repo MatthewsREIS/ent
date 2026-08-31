@@ -502,7 +502,7 @@ func V1ToV2(t *testing.T, dialect string, clientv1 *entv1.Client, clientv2 *entv
 	ContainsFold(t, clientv2)
 
 	// "renamed" field was renamed to "new_name".
-	exist := clientv2.User.Query().Where(user.NewName("renamed")).ExistX(ctx)
+	exist := clientv2.User.Query().Where(user.F.NewName.EQ("renamed")).ExistX(ctx)
 	require.True(t, exist, "expect renamed column to have previous values")
 }
 
@@ -614,7 +614,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 	require.Equal(
 		t,
 		client.User.Query().CountX(ctx),
-		client.User.Query().Where(user.Title(user.DefaultTitle)).CountX(ctx),
+		client.User.Query().Where(user.F.Title.EQ(user.DefaultTitle)).CountX(ctx),
 	)
 
 	// Blob type was extended.
@@ -624,7 +624,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 
 	if dbdialect != dialect.SQLite {
 		// Conversions
-		zero := client.Conversion.Query().Where(conversion.Name("zero")).OnlyX(ctx)
+		zero := client.Conversion.Query().Where(conversion.F.Name.EQ("zero")).OnlyX(ctx)
 		require.Equal(t, strconv.Itoa(0), zero.Int8ToString)
 		require.Equal(t, strconv.Itoa(0), zero.Uint8ToString)
 		require.Equal(t, strconv.Itoa(0), zero.Int16ToString)
@@ -634,7 +634,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 		require.Equal(t, strconv.Itoa(0), zero.Int64ToString)
 		require.Equal(t, strconv.Itoa(0), zero.Uint64ToString)
 
-		min := client.Conversion.Query().Where(conversion.Name("min")).OnlyX(ctx)
+		min := client.Conversion.Query().Where(conversion.F.Name.EQ("min")).OnlyX(ctx)
 		require.Equal(t, strconv.Itoa(math.MinInt8), min.Int8ToString)
 		require.Equal(t, strconv.Itoa(0), min.Uint8ToString)
 		require.Equal(t, strconv.Itoa(math.MinInt16), min.Int16ToString)
@@ -644,7 +644,7 @@ func SanityV2(t *testing.T, dbdialect string, client *entv2.Client) {
 		require.Equal(t, strconv.Itoa(math.MinInt64), min.Int64ToString)
 		require.Equal(t, strconv.Itoa(0), min.Uint64ToString)
 
-		max := client.Conversion.Query().Where(conversion.Name("max")).OnlyX(ctx)
+		max := client.Conversion.Query().Where(conversion.F.Name.EQ("max")).OnlyX(ctx)
 		require.Equal(t, strconv.Itoa(math.MaxInt8), max.Int8ToString)
 		require.Equal(t, strconv.Itoa(math.MaxInt16), max.Int16ToString)
 		require.Equal(t, strconv.Itoa(math.MaxInt32), max.Int32ToString)
@@ -692,17 +692,17 @@ func EqualFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing equal-fold on sql specific dialects")
 	client.User.Create().SetAge(37).SetName("Alex").SetNickname("alexsn").SetPhone("123456789").SaveX(ctx)
-	require.False(t, client.User.Query().Where(user.NameEQ("alex")).ExistX(ctx))
-	require.True(t, client.User.Query().Where(user.NameEqualFold("alex")).ExistX(ctx))
+	require.False(t, client.User.Query().Where(user.F.Name.EQ("alex")).ExistX(ctx))
+	require.True(t, client.User.Query().Where(user.F.Name.EqualFold("alex")).ExistX(ctx))
 }
 
 func ContainsFold(t *testing.T, client *entv2.Client) {
 	ctx := context.Background()
 	t.Log("testing contains-fold on sql specific dialects")
 	client.User.Create().SetAge(30).SetName("Mashraki").SetNickname("a8m").SetPhone("102030").SaveX(ctx)
-	require.Zero(t, client.User.Query().Where(user.NameContains("mash")).CountX(ctx))
-	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("mash")).CountX(ctx))
-	require.Equal(t, 1, client.User.Query().Where(user.NameContainsFold("Raki")).CountX(ctx))
+	require.Zero(t, client.User.Query().Where(user.F.Name.Contains("mash")).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(user.F.Name.ContainsFold("mash")).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(user.F.Name.ContainsFold("Raki")).CountX(ctx))
 }
 
 func TimePrecision(t *testing.T, drv *sql.Driver, query string) {
@@ -861,7 +861,7 @@ func fillNulls(dbdialect string) schema.ApplyHook {
 			if err := client.User.
 				Update().
 				SetDropOptional("Unknown").
-				Where(predicate.User(userv1.DropOptionalIsNil())).
+				Where(predicate.User(userv1.F.DropOptional.IsNil())).
 				Exec(ctx); err != nil {
 				return fmt.Errorf("fix default values to uppercase: %w", err)
 			}

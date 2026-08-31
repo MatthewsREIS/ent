@@ -1,0 +1,53 @@
+{
+	"car": {
+		"fields": {},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"conversion": {
+		"fields": {
+			"Int16ToString": true,
+			"Int32ToString": true,
+			"Int64ToString": true,
+			"Int8ToString": true,
+			"Name": true,
+			"Uint16ToString": true,
+			"Uint32ToString": true,
+			"Uint64ToString": true,
+			"Uint8ToString": true
+		},
+		"edges": {}
+	},
+	"customtype": {
+		"fields": {
+			"Custom": true
+		},
+		"edges": {}
+	},
+	"user": {
+		"fields": {
+			"Address": true,
+			"Age": true,
+			"Blob": true,
+			"Description": true,
+			"DropOptional": true,
+			"Name": true,
+			"Nickname": true,
+			"OldToken": true,
+			"Renamed": true,
+			"State": true,
+			"Status": true,
+			"Workplace": true
+		},
+		"edges": {
+			"Car": true,
+			"Children": true,
+			"Parent": true,
+			"Spouse": true
+		},
+		"noBareEQ": {
+			"State": true
+		}
+	}
+}

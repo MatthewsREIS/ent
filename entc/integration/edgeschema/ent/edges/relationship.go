@@ -34,7 +34,7 @@ func LoadRelationshipUser(ctx context.Context, query *user.UserQuery, nodes []*r
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(user.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func LoadRelationshipRelative(ctx context.Context, query *user.UserQuery, nodes 
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(user.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -186,7 +186,7 @@ func LoadRelationshipInfo(ctx context.Context, query *relationshipinfo.Relations
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(relationshipinfo.IDIn(ids...))
+	query.Where(relationshipinfo.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

@@ -37,7 +37,7 @@ func LoadTokenAccount(ctx context.Context, query *account.AccountQuery, nodes []
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(account.IDIn(ids...))
+	query.Where(account.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

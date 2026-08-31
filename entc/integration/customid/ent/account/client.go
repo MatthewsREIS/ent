@@ -100,7 +100,7 @@ func (c *AccountClient) DeleteOne(_m *Account) *AccountDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *AccountClient) DeleteOneID(id sid.ID) *AccountDeleteOne {
 	mutation := NewAccountMutation(c.Config, OpDeleteOne, WithAccountID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewAccountDeleteOne(NewAccountDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *AccountClient) Query() *AccountQuery {
 
 // Get returns a Account entity by its id.
 func (c *AccountClient) Get(ctx context.Context, id sid.ID) (*Account, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

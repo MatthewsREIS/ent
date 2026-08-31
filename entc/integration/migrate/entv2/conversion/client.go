@@ -99,7 +99,7 @@ func (c *ConversionClient) DeleteOne(_m *Conversion) *ConversionDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ConversionClient) DeleteOneID(id int) *ConversionDeleteOne {
 	mutation := NewConversionMutation(c.Config, OpDeleteOne, WithConversionID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewConversionDeleteOne(NewConversionDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *ConversionClient) Query() *ConversionQuery {
 
 // Get returns a Conversion entity by its id.
 func (c *ConversionClient) Get(ctx context.Context, id int) (*Conversion, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

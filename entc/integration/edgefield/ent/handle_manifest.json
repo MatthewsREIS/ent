@@ -1,0 +1,93 @@
+{
+	"car": {
+		"fields": {
+			"Number": true
+		},
+		"edges": {
+			"Rentals": true
+		}
+	},
+	"card": {
+		"fields": {
+			"Number": true,
+			"OwnerID": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"info": {
+		"fields": {},
+		"edges": {
+			"User": true
+		}
+	},
+	"metadata": {
+		"fields": {
+			"Age": true,
+			"ParentID": true
+		},
+		"edges": {
+			"Children": true,
+			"Parent": true,
+			"User": true
+		}
+	},
+	"node": {
+		"fields": {
+			"PrevID": true,
+			"Value": true
+		},
+		"edges": {
+			"Next": true,
+			"Prev": true
+		},
+		"noBareEQ": {
+			"Value": true
+		}
+	},
+	"pet": {
+		"fields": {
+			"OwnerID": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"post": {
+		"fields": {
+			"AuthorID": true,
+			"Text": true
+		},
+		"edges": {
+			"Author": true
+		}
+	},
+	"rental": {
+		"fields": {
+			"CarID": true,
+			"Date": true,
+			"UserID": true
+		},
+		"edges": {
+			"Car": true,
+			"User": true
+		}
+	},
+	"user": {
+		"fields": {
+			"ParentID": true,
+			"SpouseID": true
+		},
+		"edges": {
+			"Card": true,
+			"Children": true,
+			"Info": true,
+			"Metadata": true,
+			"Parent": true,
+			"Pets": true,
+			"Rentals": true,
+			"Spouse": true
+		}
+	}
+}

@@ -1,0 +1,191 @@
+{
+	"attachedfile": {
+		"fields": {
+			"AttachTime": true,
+			"FID": true,
+			"ProcID": true
+		},
+		"edges": {
+			"Fi": true,
+			"Proc": true
+		}
+	},
+	"file": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Processes": true
+		}
+	},
+	"friendship": {
+		"fields": {
+			"CreatedAt": true,
+			"FriendID": true,
+			"UserID": true,
+			"Weight": true
+		},
+		"edges": {
+			"Friend": true,
+			"User": true
+		}
+	},
+	"group": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"GroupTags": true,
+			"JoinedUsers": true,
+			"Tags": true,
+			"Users": true
+		}
+	},
+	"grouptag": {
+		"fields": {
+			"GroupID": true,
+			"TagID": true
+		},
+		"edges": {
+			"Group": true,
+			"Tag": true
+		}
+	},
+	"process": {
+		"fields": {},
+		"edges": {
+			"AttachedFiles": true,
+			"Files": true
+		}
+	},
+	"relationship": {
+		"fields": {
+			"InfoID": true,
+			"RelativeID": true,
+			"UserID": true,
+			"Weight": true
+		},
+		"edges": {
+			"Info": true,
+			"Relative": true,
+			"User": true
+		}
+	},
+	"relationshipinfo": {
+		"fields": {
+			"Text": true
+		},
+		"edges": {}
+	},
+	"role": {
+		"fields": {
+			"CreatedAt": true,
+			"Name": true
+		},
+		"edges": {
+			"RolesUsers": true,
+			"User": true
+		}
+	},
+	"roleuser": {
+		"fields": {
+			"CreatedAt": true,
+			"RoleID": true,
+			"UserID": true
+		},
+		"edges": {
+			"Role": true,
+			"User": true
+		}
+	},
+	"tag": {
+		"fields": {
+			"Value": true
+		},
+		"edges": {
+			"GroupTags": true,
+			"Groups": true,
+			"TweetTags": true,
+			"Tweets": true
+		},
+		"noBareEQ": {
+			"Value": true
+		}
+	},
+	"tweet": {
+		"fields": {
+			"Text": true
+		},
+		"edges": {
+			"LikedUsers": true,
+			"Likes": true,
+			"Tags": true,
+			"TweetTags": true,
+			"TweetUser": true,
+			"User": true
+		}
+	},
+	"tweetlike": {
+		"fields": {
+			"LikedAt": true,
+			"TweetID": true,
+			"UserID": true
+		},
+		"edges": {
+			"Tweet": true,
+			"User": true
+		}
+	},
+	"tweettag": {
+		"fields": {
+			"AddedAt": true,
+			"TagID": true,
+			"TweetID": true
+		},
+		"edges": {
+			"Tag": true,
+			"Tweet": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Friends": true,
+			"Friendships": true,
+			"Groups": true,
+			"JoinedGroups": true,
+			"LikedTweets": true,
+			"Likes": true,
+			"Relationship": true,
+			"Relatives": true,
+			"Roles": true,
+			"RolesUsers": true,
+			"Tweets": true,
+			"UserTweets": true
+		}
+	},
+	"usergroup": {
+		"fields": {
+			"GroupID": true,
+			"JoinedAt": true,
+			"UserID": true
+		},
+		"edges": {
+			"Group": true,
+			"User": true
+		}
+	},
+	"usertweet": {
+		"fields": {
+			"CreatedAt": true,
+			"TweetID": true,
+			"UserID": true
+		},
+		"edges": {
+			"Tweet": true,
+			"User": true
+		}
+	}
+}

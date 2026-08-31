@@ -75,13 +75,13 @@ func EntQL(t *testing.T, client *ent.Client) {
 	require.Equal([]int{luna.ID, xabi.ID}, pq.Order(ent.Asc(pet.FieldName)).IDsX(ctx))
 
 	pq = client.Pet.Query()
-	pq.Where(pet.Name(luna.Name)).Filter().WhereID(entql.IntEQ(luna.ID))
+	pq.Where(pet.F.Name.EQ(luna.Name)).Filter().WhereID(entql.IntEQ(luna.ID))
 	require.Equal(luna.ID, pq.Order(ent.Asc(pet.FieldName)).OnlyIDX(ctx))
 	pq = client.Pet.Query()
-	pq.Where(pet.Name(luna.Name)).Filter().WhereID(entql.IntEQ(xabi.ID))
+	pq.Where(pet.F.Name.EQ(luna.Name)).Filter().WhereID(entql.IntEQ(xabi.ID))
 	require.False(pq.ExistX(ctx))
 
-	update := client.User.Update().SetRole(user.RoleAdmin).Where(user.Name(a8m.Name))
+	update := client.User.Update().SetRole(user.RoleAdmin).Where(user.F.Name.EQ(a8m.Name))
 	updated := update.SaveX(ctx)
 	require.Equal(1, updated)
 	uq = client.User.Query()

@@ -1,0 +1,16 @@
+{
+	"group": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {}
+	},
+	"user": {
+		"fields": {
+			"Address": true,
+			"Age": true,
+			"Name": true
+		},
+		"edges": {}
+	}
+}

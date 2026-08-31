@@ -100,7 +100,7 @@ func (c *DeviceClient) DeleteOne(_m *Device) *DeviceDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *DeviceClient) DeleteOneID(id schema.ID) *DeviceDeleteOne {
 	mutation := NewDeviceMutation(c.Config, OpDeleteOne, WithDeviceID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewDeviceDeleteOne(NewDeviceDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -117,7 +117,7 @@ func (c *DeviceClient) Query() *DeviceQuery {
 
 // Get returns a Device entity by its id.
 func (c *DeviceClient) Get(ctx context.Context, id schema.ID) (*Device, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

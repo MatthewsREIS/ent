@@ -126,7 +126,7 @@ func TestMutatorClient(t *testing.T) {
 						op = ent.OpUpdateOne
 					}
 					// Ensure card was not expired before.
-					m.WhereP(card.ExpiredAtIsNil())
+					m.WhereP(card.F.ExpiredAt.IsNil())
 					// Count the number of affected records.
 					ids, err := m.IDs(ctx)
 					if err != nil {
@@ -159,7 +159,7 @@ func TestMutatorClient(t *testing.T) {
 
 	client.Card.Create().SetNumber("4567").ExecX(ctx)
 	client.Card.Create().SetNumber("7890").ExecX(ctx)
-	client.Card.Delete().Where(card.Number("4567")).ExecX(ctx)
+	client.Card.Delete().Where(card.F.Number.EQ("4567")).ExecX(ctx)
 	cards := client.Card.Query().Order(ent.Asc(card.FieldNumber)).AllX(ctx)
 	require.Len(t, cards, 3)
 	require.True(t, cards[0].ExpiredAt.Equal(expired.ExpiredAt), "expired field should not be updated")
@@ -167,7 +167,7 @@ func TestMutatorClient(t *testing.T) {
 	require.True(t, cards[2].ExpiredAt.IsZero())
 
 	client.Card.Delete().ExecX(ctx)
-	require.False(t, client.Card.Query().Where(card.ExpiredAtIsNil()).ExistX(ctx))
+	require.False(t, client.Card.Query().Where(card.F.ExpiredAt.IsNil()).ExistX(ctx))
 }
 
 func TestMutationTx(t *testing.T) {
@@ -210,7 +210,7 @@ func TestDeletion(t *testing.T) {
 			if !ok {
 				return nil, fmt.Errorf("missing id")
 			}
-			ent.NewCardClient(*m.Config.(*ent.Config)).Delete().Where(card.HasOwnerWith(user.ID(id))).ExecX(ctx)
+			ent.NewCardClient(*m.Config.(*ent.Config)).Delete().Where(card.E.Owner.HasWith(user.F.ID.EQ(id))).ExecX(ctx)
 			return next.Mutate(ctx, m)
 		})
 	})
@@ -248,7 +248,7 @@ func TestMutationIDs(t *testing.T) {
 		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwnerID(owner.ID).ExecX(ctx)
 	}
 	for i := 0; i < 5; i++ {
-		p := user.And(user.Name(fmt.Sprintf("owner-%d", i)), user.HasCardsWith(card.Number(fmt.Sprintf("card-%d", i))))
+		p := user.And(user.F.Name.EQ(fmt.Sprintf("owner-%d", i)), user.E.Cards.HasWith(card.F.Number.EQ(fmt.Sprintf("card-%d", i))))
 		client.User.Update().AddVersion(1).Where(p).ExecX(ctx)
 		client.User.Delete().Where(p).ExecX(ctx)
 	}
@@ -326,7 +326,7 @@ func TestUpdateAfterUpdateOne(t *testing.T) {
 			// After the user was created, return its updated version (a new object).  Don't use UpdateOne because it
 			// will cause recursive calls to this hook.
 			ent.NewUserClient(*m.Config.(*ent.Config)).Update().
-				Where(user.IDEQ(u.ID)).
+				Where(user.F.ID.EQ(u.ID)).
 				SetVersion(3).
 				SaveX(ctx)
 
@@ -460,7 +460,7 @@ func TestConditions(t *testing.T) {
 	client.Card.DeleteOne(crd).ExecX(ctx)
 
 	alexsn := client.User.Create().SetName("alexsn").SaveX(ctx)
-	client.User.Update().Where(user.ID(alexsn.ID)).AddWorth(100).SaveX(ctx)
+	client.User.Update().Where(user.F.ID.EQ(alexsn.ID)).AddWorth(100).SaveX(ctx)
 	client.User.DeleteOne(alexsn).ExecX(ctx)
 }
 
@@ -569,7 +569,7 @@ func TestInterceptor_Sanity(t *testing.T) {
 			}),
 			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
 				calls++
-				query.WhereP(user.ID(users[0].ID))
+				query.WhereP(user.F.ID.EQ(users[0].ID))
 				return nil
 			}),
 		)
@@ -597,7 +597,7 @@ func TestInterceptor_Sanity(t *testing.T) {
 			}),
 			intercept.TraverseFunc(func(ctx context.Context, query intercept.Query) error {
 				calls++
-				query.WhereP(card.NameNEQ("a8m"))
+				query.WhereP(card.F.Name.NEQ("a8m"))
 				return nil
 			}),
 		)
@@ -782,7 +782,7 @@ func TestTypedTraverser(t *testing.T) {
 	// Add an interceptor that filters out inactive users.
 	client.User.Intercept(
 		intercept.TraverseUser(func(ctx context.Context, q *ent.UserQuery) error {
-			q.Where(user.Active(true))
+			q.Where(user.F.Active.EQ(true))
 			return nil
 		}),
 	)

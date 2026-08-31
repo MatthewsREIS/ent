@@ -103,7 +103,7 @@ func FilterTeamRule() privacy.QueryRule {
 		if !ok {
 			return privacy.Denyf("unexpected filter type %T", f)
 		}
-		tf.WhereHasTeamsWith(team.NameIn(teams...))
+		tf.WhereHasTeamsWith(team.F.Name.In(teams...))
 		return privacy.Skip
 	})
 }
@@ -138,7 +138,7 @@ func DenyIfStatusChangedByOther() privacy.MutationRule {
 		if !ok {
 			return fmt.Errorf("missing task id")
 		}
-		owner, err := ent.NewUserClient(*m.Config.(*ent.Config)).Query().Where(user.HasTasksWith(task.ID(id))).Only(ctx)
+		owner, err := ent.NewUserClient(*m.Config.(*ent.Config)).Query().Where(user.E.Tasks.HasWith(task.F.ID.EQ(id))).Only(ctx)
 		if err != nil {
 			return err
 		}
@@ -170,10 +170,7 @@ func AllowIfViewerInTheSameTeam() privacy.MutationRule {
 		// Query should return an error if the viewer
 		// does not belong to the task namespace/team.
 		if _, err = ent.NewTaskClient(*m.Config.(*ent.Config)).Query().
-			Where(
-				task.ID(id),
-				task.HasTeamsWith(team.NameIn(teams...)),
-			).
+			Where(task.F.ID.EQ(id), task.E.Teams.HasWith(team.F.Name.In(teams...))).
 			Only(ctx); err != nil {
 			return err
 		}

@@ -37,7 +37,7 @@ func LoadNodePrev(ctx context.Context, query *node.NodeQuery, nodes []*node.Node
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(node.IDIn(ids...))
+	query.Where(node.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

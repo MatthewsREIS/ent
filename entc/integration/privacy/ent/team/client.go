@@ -99,7 +99,7 @@ func (c *TeamClient) DeleteOne(_m *Team) *TeamDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TeamClient) DeleteOneID(id int) *TeamDeleteOne {
 	mutation := NewTeamMutation(c.Config, OpDeleteOne, WithTeamID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewTeamDeleteOne(NewTeamDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *TeamClient) Query() *TeamQuery {
 
 // Get returns a Team entity by its id.
 func (c *TeamClient) Get(ctx context.Context, id int) (*Team, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

@@ -1,0 +1,12 @@
+{
+	"user": {
+		"fields": {
+			"Label": true,
+			"Name": true
+		},
+		"edges": {},
+		"noBareEQ": {
+			"Label": true
+		}
+	}
+}

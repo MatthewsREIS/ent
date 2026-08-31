@@ -124,11 +124,11 @@ func TestEdgeSchemaCompositeID(t *testing.T) {
 	require.Equal(t, 3, client.User.QueryLikes(a8m).CountX(ctx))
 	require.Equal(t, []int{tweets[0].ID, tweets[1].ID, tweets[2].ID}, client.User.QueryLikes(a8m).QueryTweet().IDsX(ctx))
 	for _, k := range []*ent.TweetLike{
-		client.User.QueryLikes(a8m).Where(tweetlike.LikedAt(ts)).OnlyX(ctx),
-		client.TweetLike.Query().Where(tweetlike.LikedAt(ts)).OnlyX(ctx),
-		client.Tweet.Query().QueryLikes().Where(tweetlike.LikedAt(ts)).OnlyX(ctx),
-		client.Tweet.Query().QueryLikes().Where(tweetlike.LikedAt(ts), tweetlike.HasUserWith(user.Name(a8m.Name))).OnlyX(ctx),
-		client.User.Query().QueryLikedTweets().QueryLikes().Where(tweetlike.LikedAt(ts), tweetlike.HasUserWith(user.Name(a8m.Name))).OnlyX(ctx),
+		client.User.QueryLikes(a8m).Where(tweetlike.F.LikedAt.EQ(ts)).OnlyX(ctx),
+		client.TweetLike.Query().Where(tweetlike.F.LikedAt.EQ(ts)).OnlyX(ctx),
+		client.Tweet.Query().QueryLikes().Where(tweetlike.F.LikedAt.EQ(ts)).OnlyX(ctx),
+		client.Tweet.Query().QueryLikes().Where(tweetlike.F.LikedAt.EQ(ts), tweetlike.E.User.HasWith(user.F.Name.EQ(a8m.Name))).OnlyX(ctx),
+		client.User.Query().QueryLikedTweets().QueryLikes().Where(tweetlike.F.LikedAt.EQ(ts), tweetlike.E.User.HasWith(user.F.Name.EQ(a8m.Name))).OnlyX(ctx),
 	} {
 		require.Equal(t, like.UserID, k.UserID)
 		require.Equal(t, like.TweetID, k.TweetID)
@@ -137,8 +137,8 @@ func TestEdgeSchemaCompositeID(t *testing.T) {
 	nat = client.User.UpdateOne(nat).AddLikedTweetIDs(like.TweetID).SaveX(ctx)
 	require.Equal(t, 2, client.User.QueryLikes(nat).CountX(ctx))
 	require.Equal(t, 5, client.TweetLike.Query().CountX(ctx))
-	require.Equal(t, 3, client.TweetLike.Query().Where(tweetlike.HasUserWith(user.Name(a8m.Name))).CountX(ctx))
-	require.Equal(t, 2, client.TweetLike.Query().Where(tweetlike.HasUserWith(user.Name(nat.Name))).CountX(ctx))
+	require.Equal(t, 3, client.TweetLike.Query().Where(tweetlike.E.User.HasWith(user.F.Name.EQ(a8m.Name))).CountX(ctx))
+	require.Equal(t, 2, client.TweetLike.Query().Where(tweetlike.E.User.HasWith(user.F.Name.EQ(nat.Name))).CountX(ctx))
 
 	var v []struct {
 		UserID int `sql:"user_id"`
@@ -211,7 +211,7 @@ func TestEdgeSchemaBidiWithID(t *testing.T) {
 	for _, f1 := range []*ent.Friendship{
 		client.User.QueryFriendships(a8m).OnlyX(ctx),
 		client.User.QueryFriendships(nat).QueryFriend().QueryFriendships().OnlyX(ctx),
-		client.Friendship.Query().Where(friendship.HasFriendWith(user.Name(nat.Name))).OnlyX(ctx),
+		client.Friendship.Query().Where(friendship.E.Friend.HasWith(user.F.Name.EQ(nat.Name))).OnlyX(ctx),
 	} {
 		require.Equal(t, friendship.DefaultWeight, f1.Weight)
 		require.False(t, f1.CreatedAt.IsZero())
@@ -271,9 +271,9 @@ func TestEdgeSchemaBidiCompositeID(t *testing.T) {
 		v,
 	)
 	for _, r := range []int{
-		client.User.QueryRelationship(u2).Where(relationship.RelativeID(u3.ID)).QueryRelative().OnlyIDX(ctx),
-		client.User.QueryRelatives(u1).QueryRelationship().Where(relationship.RelativeIDNEQ(u1.ID)).QueryRelative().OnlyIDX(ctx),
-		client.User.Query().Where(user.ID(u1.ID)).QueryRelatives().QueryRelationship().Where(relationship.RelativeIDNEQ(u1.ID)).QueryRelative().OnlyIDX(ctx),
+		client.User.QueryRelationship(u2).Where(relationship.F.RelativeID.EQ(u3.ID)).QueryRelative().OnlyIDX(ctx),
+		client.User.QueryRelatives(u1).QueryRelationship().Where(relationship.F.RelativeID.NEQ(u1.ID)).QueryRelative().OnlyIDX(ctx),
+		client.User.Query().Where(user.F.ID.EQ(u1.ID)).QueryRelatives().QueryRelationship().Where(relationship.F.RelativeID.NEQ(u1.ID)).QueryRelative().OnlyIDX(ctx),
 	} {
 		require.Equal(t, u3.ID, r)
 	}
@@ -281,7 +281,7 @@ func TestEdgeSchemaBidiCompositeID(t *testing.T) {
 	info := client.RelationshipInfo.Create().SetText("u1->u2").SaveX(ctx)
 	r1 := client.User.QueryRelationship(u1).OnlyX(ctx)
 	client.Relationship.UpdateOne(r1).SetInfoID(info.ID).ExecX(ctx)
-	r2 := client.User.Query().QueryRelationship().Where(relationship.HasInfo()).WithInfo().OnlyX(ctx)
+	r2 := client.User.Query().QueryRelationship().Where(relationship.E.Info.Has()).WithInfo().OnlyX(ctx)
 	require.Equal(t, r1.UserID, r2.UserID)
 	require.Equal(t, r1.RelativeID, r2.RelativeID)
 	require.Equal(t, info.ID, r2.Edges.Info.ID)
@@ -328,8 +328,8 @@ func TestEdgeSchemaEntQL(t *testing.T) {
 	a8m := client.User.Create().SetName("a8m").AddLikedTweetIDs(tweets[0].ID, tweets[1].ID).SaveX(ctx)
 
 	// Using the regular fluent API.
-	require.Equal(t, a8m.ID, client.User.Query().Where(user.HasLikes()).OnlyIDX(ctx))
-	require.Equal(t, nat.ID, client.User.Query().Where(user.Not(user.HasLikes())).OnlyIDX(ctx))
+	require.Equal(t, a8m.ID, client.User.Query().Where(user.E.Likes.Has()).OnlyIDX(ctx))
+	require.Equal(t, nat.ID, client.User.Query().Where(user.Not(user.E.Likes.Has())).OnlyIDX(ctx))
 
 	// Using EntQL.
 	q1, q2 := client.User.Query(), client.User.Query()
@@ -340,16 +340,16 @@ func TestEdgeSchemaEntQL(t *testing.T) {
 
 	client.User.UpdateOne(nat).AddLikedTweetIDs(tweets[0].ID).ExecX(ctx)
 	// Using the regular fluent API.
-	require.Equal(t, 2, client.User.Query().Where(user.HasLikesWith(tweetlike.TweetID(tweets[0].ID))).CountX(ctx))
-	require.Equal(t, 1, client.User.Query().Where(user.HasLikesWith(tweetlike.TweetID(tweets[1].ID))).CountX(ctx))
+	require.Equal(t, 2, client.User.Query().Where(user.E.Likes.HasWith(tweetlike.F.TweetID.EQ(tweets[0].ID))).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(user.E.Likes.HasWith(tweetlike.F.TweetID.EQ(tweets[1].ID))).CountX(ctx))
 	// Using EntQL.
 	q1, q2 = client.User.Query(), client.User.Query()
-	q1.Filter().WhereHasLikesWith(tweetlike.TweetID(tweets[0].ID))
+	q1.Filter().WhereHasLikesWith(tweetlike.F.TweetID.EQ(tweets[0].ID))
 	q2.Filter().Where(entql.HasEdgeWith("likes", entql.FieldEQ(tweetlike.FieldTweetID, tweets[0].ID)))
 	require.Equal(t, 2, q1.CountX(ctx))
 	require.Equal(t, 2, q2.CountX(ctx))
 	q1, q2 = client.User.Query(), client.User.Query()
-	q1.Filter().WhereHasLikesWith(tweetlike.TweetID(tweets[1].ID))
+	q1.Filter().WhereHasLikesWith(tweetlike.F.TweetID.EQ(tweets[1].ID))
 	q2.Filter().Where(entql.HasEdgeWith("likes", entql.FieldEQ(tweetlike.FieldTweetID, tweets[1].ID)))
 	require.Equal(t, 1, q1.CountX(ctx))
 	require.Equal(t, 1, q2.CountX(ctx))
@@ -358,14 +358,14 @@ func TestEdgeSchemaEntQL(t *testing.T) {
 	u2 := client.User.Create().SetName("u2").AddRelativeIDs(u1.ID).SaveX(ctx)
 	client.User.Create().SetName("u3").AddRelativeIDs(u2.ID).ExecX(ctx)
 	require.Equal(t, 4, client.Relationship.Query().CountX(ctx))
-	require.Zero(t, client.Relationship.Query().Where(relationship.HasInfo()).CountX(ctx))
+	require.Zero(t, client.Relationship.Query().Where(relationship.E.Info.Has()).CountX(ctx))
 	ri := client.RelationshipInfo.Create().SetText("parent").SaveX(ctx)
 	r := client.Relationship.Query().FirstX(ctx)
 	rl1 := client.Relationship.UpdateOne(r).SetInfoID(ri.ID).SaveX(ctx)
-	require.Equal(t, 1, client.Relationship.Query().Where(relationship.HasInfo()).CountX(ctx))
+	require.Equal(t, 1, client.Relationship.Query().Where(relationship.E.Info.Has()).CountX(ctx))
 	// Using EntQL.
 	q3 := client.Relationship.Query()
-	q3.Filter().WhereHasInfoWith(relationshipinfo.ID(ri.ID))
+	q3.Filter().WhereHasInfoWith(relationshipinfo.F.ID.EQ(ri.ID))
 	rl2 := q3.OnlyX(ctx)
 	require.Equal(t, rl1.UserID, rl2.UserID)
 	require.Equal(t, rl1.RelativeID, rl2.RelativeID)
@@ -407,5 +407,5 @@ func TestEdgeSchemaTypeMatching(t *testing.T) {
 	require.Equal(t, proc.ID, client.AttachedFile.QueryProc(af).OnlyIDX(ctx))
 	require.Equal(t, files[2].ID, client.AttachedFile.QueryFi(af).OnlyIDX(ctx))
 	require.Equal(t, []int{files[0].ID, files[1].ID, files[2].ID}, client.AttachedFile.Query().QueryFi().IDsX(ctx))
-	require.Equal(t, files[2].ID, client.AttachedFile.Query().QueryProc().QueryFiles().Where(file.Name(files[2].Name)).OnlyIDX(ctx))
+	require.Equal(t, files[2].ID, client.AttachedFile.Query().QueryProc().QueryFiles().Where(file.F.Name.EQ(files[2].Name)).OnlyIDX(ctx))
 }

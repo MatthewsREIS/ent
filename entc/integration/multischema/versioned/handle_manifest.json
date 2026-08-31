@@ -1,0 +1,44 @@
+{
+	"friendship": {
+		"fields": {
+			"CreatedAt": true,
+			"FriendID": true,
+			"UserID": true,
+			"Weight": true
+		},
+		"edges": {
+			"Friend": true,
+			"User": true
+		}
+	},
+	"group": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Users": true
+		}
+	},
+	"pet": {
+		"fields": {
+			"Name": true,
+			"OwnerID": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Followers": true,
+			"Following": true,
+			"Friends": true,
+			"Friendships": true,
+			"Groups": true,
+			"Pets": true
+		}
+	}
+}

@@ -99,7 +99,7 @@ func (c *UserTweetClient) DeleteOne(_m *UserTweet) *UserTweetDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserTweetClient) DeleteOneID(id int) *UserTweetDeleteOne {
 	mutation := NewUserTweetMutation(c.Config, OpDeleteOne, WithUserTweetID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewUserTweetDeleteOne(NewUserTweetDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *UserTweetClient) Query() *UserTweetQuery {
 
 // Get returns a UserTweet entity by its id.
 func (c *UserTweetClient) Get(ctx context.Context, id int) (*UserTweet, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

@@ -1,0 +1,36 @@
+{
+	"task": {
+		"fields": {
+			"Description": true,
+			"Status": true,
+			"Title": true,
+			"UUID": true
+		},
+		"edges": {
+			"Owner": true,
+			"Teams": true
+		},
+		"noBareEQ": {
+			"Status": true
+		}
+	},
+	"team": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Tasks": true,
+			"Users": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Age": true,
+			"Name": true
+		},
+		"edges": {
+			"Tasks": true,
+			"Teams": true
+		}
+	}
+}

@@ -128,7 +128,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.Equal(t, pedro.ID, client.User.QueryPets(a8m).OnlyIDX(ctx))
 	xabi := client.Pet.Create().SetID("xabi").AddFriendIDs(pedro.ID).SetBestFriendID(pedro.ID).SaveX(ctx)
 	require.Equal(t, "xabi", xabi.ID)
-	pedro = client.Pet.Query().Where(pet.HasOwnerWith(user.ID(a8m.ID))).OnlyX(ctx)
+	pedro = client.Pet.Query().Where(pet.E.Owner.HasWith(user.F.ID.EQ(a8m.ID))).OnlyX(ctx)
 	require.Equal(t, "pedro", pedro.ID)
 
 	pets := client.Pet.Query().WithFriends().WithBestFriend().Order(ent.Asc(pet.FieldID)).AllX(ctx)
@@ -193,7 +193,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 		).SaveX(ctx)
 		require.EqualValues(t, sid.ID("2"), children[0].ID)
 		require.EqualValues(t, sid.ID("3"), children[1].ID)
-		el := client.IntSID.Query().Where(intsid.ID(root.ID)).WithChildren().AllX(ctx)
+		el := client.IntSID.Query().Where(intsid.F.ID.EQ(root.ID)).WithChildren().AllX(ctx)
 		require.EqualValues(t, 1, len(el))
 		require.EqualValues(t, 2, len(el[0].Edges.Children))
 		cid := sid.ID("100")
@@ -244,7 +244,7 @@ func CustomID(t *testing.T, client *ent.Client) {
 		tk := client.Token.Create().SetAccountID(a.ID).SetBody("token").SaveX(ctx)
 		require.NotEmpty(t, tk.ID)
 
-		ta := client.Token.Query().Where(token.Body("token")).WithAccount().FirstX(ctx)
+		ta := client.Token.Query().Where(token.F.Body.EQ("token")).WithAccount().FirstX(ctx)
 		require.Equal(t, tk.ID, ta.ID)
 		require.NotNil(t, ta.Edges.Account)
 		require.Equal(t, a.ID, ta.Edges.Account.ID)

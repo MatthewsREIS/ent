@@ -99,7 +99,7 @@ func (c *RevisionClient) DeleteOne(_m *Revision) *RevisionDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RevisionClient) DeleteOneID(id string) *RevisionDeleteOne {
 	mutation := NewRevisionMutation(c.Config, OpDeleteOne, WithRevisionID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewRevisionDeleteOne(NewRevisionDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *RevisionClient) Query() *RevisionQuery {
 
 // Get returns a Revision entity by its id.
 func (c *RevisionClient) Get(ctx context.Context, id string) (*Revision, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

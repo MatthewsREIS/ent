@@ -7,7 +7,7 @@
 package revision
 
 import (
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -35,9 +35,4 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the Revision queries.
-type OrderOption func(*sql.Selector)
-
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
+type OrderOption = entfield.Order

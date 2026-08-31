@@ -10,52 +10,20 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
 	"entgo.io/ent/entc/integration/customid/sid"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Other type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Value[sid.ID]
+}{
+	ID: entfield.NewValue[sid.ID](FieldID),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id sid.ID) predicate.Other {
-	return predicate.Other(sql.FieldLTE(FieldID, id))
-}
+// E holds typed edge handles for every edge of the Other type.
+var E = struct {
+}{}
 
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Other) predicate.Other {

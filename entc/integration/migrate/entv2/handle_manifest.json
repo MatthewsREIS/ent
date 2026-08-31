@@ -1,0 +1,98 @@
+{
+	"blog": {
+		"fields": {
+			"Oid": true
+		},
+		"edges": {
+			"Admins": true
+		}
+	},
+	"car": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"conversion": {
+		"fields": {
+			"Int16ToString": true,
+			"Int32ToString": true,
+			"Int64ToString": true,
+			"Int8ToString": true,
+			"Name": true,
+			"Uint16ToString": true,
+			"Uint32ToString": true,
+			"Uint64ToString": true,
+			"Uint8ToString": true
+		},
+		"edges": {}
+	},
+	"customtype": {
+		"fields": {
+			"Custom": true,
+			"Tz0": true,
+			"Tz3": true
+		},
+		"edges": {}
+	},
+	"group": {
+		"fields": {},
+		"edges": {}
+	},
+	"media": {
+		"fields": {
+			"Source": true,
+			"SourceURI": true,
+			"Text": true
+		},
+		"edges": {}
+	},
+	"pet": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Active": true,
+			"Age": true,
+			"Blob": true,
+			"Buffer": true,
+			"CreatedAt": true,
+			"DefaultExpr": true,
+			"DefaultExprs": true,
+			"Description": true,
+			"DropOptional": true,
+			"MixedEnum": true,
+			"MixedString": true,
+			"Name": true,
+			"NewName": true,
+			"NewToken": true,
+			"Nickname": true,
+			"Phone": true,
+			"State": true,
+			"Status": true,
+			"Title": true,
+			"Workplace": true
+		},
+		"edges": {
+			"Car": true,
+			"Friends": true,
+			"Pets": true
+		},
+		"noBareEQ": {
+			"MixedEnum": true,
+			"State": true,
+			"Status": true
+		}
+	},
+	"zoo": {
+		"fields": {},
+		"edges": {}
+	}
+}

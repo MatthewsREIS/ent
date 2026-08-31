@@ -225,11 +225,11 @@ func Strings(t *testing.T, client *ent.Client) {
 	usr = client.User.UpdateOne(usr).SetStrings(str[:1]).SaveX(ctx)
 	require.Equal(t, str[:1], usr.Strings)
 	require.Equal(t, str[:1], client.User.GetX(ctx, usr.ID).Strings)
-	require.Equal(t, 1, client.User.Query().Where(user.StringsNotNil()).CountX(ctx))
+	require.Equal(t, 1, client.User.Query().Where(sql.FieldNotNull(user.FieldStrings)).CountX(ctx))
 	usr = client.User.UpdateOne(usr).ClearStrings().SaveX(ctx)
 	require.Empty(t, usr.Strings)
 	require.Empty(t, client.User.GetX(ctx, usr.ID).Strings)
-	require.Zero(t, client.User.Query().Where(user.StringsNotNil()).CountX(ctx))
+	require.Zero(t, client.User.Query().Where(sql.FieldNotNull(user.FieldStrings)).CountX(ctx))
 
 	t.Run("Modifier API", func(t *testing.T) {
 		// Append to an empty array.

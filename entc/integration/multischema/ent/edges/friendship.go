@@ -33,7 +33,7 @@ func LoadFriendshipUser(ctx context.Context, query *user.UserQuery, nodes []*fri
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(user.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func LoadFriendshipFriend(ctx context.Context, query *user.UserQuery, nodes []*f
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(user.IDIn(ids...))
+	query.Where(user.F.ID.In(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err

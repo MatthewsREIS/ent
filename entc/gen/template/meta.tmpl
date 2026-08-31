@@ -12,7 +12,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{ template "header" . }}
 {{ end }}
 
-{{ template "import" $ }}
+{{ with extend $ "MetaUsesEntfield" (eq $.Storage.Name "sql") }}
+	{{ template "import" . }}
+{{ end }}
 
 const (
 	// Label holds the string label denoting the {{ lower $.Name }} type in the database.
@@ -156,7 +158,11 @@ const (
 
 {{ $tmpl = printf "dialect/%s/meta/order" $.Storage }}
 // OrderOption defines the ordering options for the {{ $.Name }} queries.
-type OrderOption func({{ $.Config.Storage.Builder }})
+{{- if eq $.Storage.Name "sql" }}
+	type OrderOption = entfield.Order
+{{- else }}
+	type OrderOption func({{ $.Config.Storage.Builder }})
+{{- end }}
 {{ if hasTemplate $tmpl }}
 	{{ xtemplate $tmpl $ }}
 {{ end }}

@@ -99,7 +99,7 @@ func (c *BlogClient) DeleteOne(_m *Blog) *BlogDeleteOne {
 // DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *BlogClient) DeleteOneID(id int) *BlogDeleteOne {
 	mutation := NewBlogMutation(c.Config, OpDeleteOne, WithBlogID(id, nil))
-	mutation.WhereP(ID(id))
+	mutation.WhereP(F.ID.EQ(id))
 	return NewBlogDeleteOne(NewBlogDelete(c.Config, c.Hooks(), mutation))
 }
 
@@ -116,7 +116,7 @@ func (c *BlogClient) Query() *BlogQuery {
 
 // Get returns a Blog entity by its id.
 func (c *BlogClient) Get(ctx context.Context, id int) (*Blog, error) {
-	return c.Query().Where(ID(id)).Only(ctx)
+	return c.Query().Where(F.ID.EQ(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.

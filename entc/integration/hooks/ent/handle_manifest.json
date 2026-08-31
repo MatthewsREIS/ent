@@ -1,0 +1,38 @@
+{
+	"card": {
+		"fields": {
+			"CreatedAt": true,
+			"ExpiredAt": true,
+			"InHook": true,
+			"Name": true,
+			"Number": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"pet": {
+		"fields": {
+			"DeleteTime": true,
+			"Name": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Active": true,
+			"Name": true,
+			"Password": true,
+			"Version": true,
+			"Worth": true
+		},
+		"edges": {
+			"BestFriend": true,
+			"Cards": true,
+			"Friends": true,
+			"Pets": true
+		}
+	}
+}

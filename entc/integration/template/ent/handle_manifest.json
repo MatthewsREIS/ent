@@ -1,0 +1,26 @@
+{
+	"group": {
+		"fields": {
+			"MaxUsers": true
+		},
+		"edges": {}
+	},
+	"pet": {
+		"fields": {
+			"Age": true,
+			"LicensedAt": true
+		},
+		"edges": {
+			"Owner": true
+		}
+	},
+	"user": {
+		"fields": {
+			"Name": true
+		},
+		"edges": {
+			"Friends": true,
+			"Pets": true
+		}
+	}
+}

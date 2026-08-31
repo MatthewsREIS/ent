@@ -7,7 +7,7 @@
 package customtype
 
 import (
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entfield"
 )
 
 const (
@@ -38,14 +38,4 @@ func ValidColumn(column string) bool {
 }
 
 // OrderOption defines the ordering options for the CustomType queries.
-type OrderOption func(*sql.Selector)
-
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByCustom orders the results by the custom field.
-func ByCustom(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCustom, opts...).ToFunc()
-}
+type OrderOption = entfield.Order

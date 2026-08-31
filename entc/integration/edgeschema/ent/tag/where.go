@@ -8,214 +8,36 @@ package tag
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/edgeschema/ent/predicate"
+	"entgo.io/ent/runtime/entfield"
 )
 
-// ID filters vertices based on their ID field.
-func ID(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldEQ(FieldID, id))
+// F holds typed predicate/order handles for every comparable field of the Tag type.
+var F = struct {
+	// ID is the handle for the id field.
+	ID entfield.Number[int]
+	// Value is the handle for the "value" field.
+	Value entfield.String[string]
+}{
+	ID:    entfield.NewNumber[int](FieldID),
+	Value: entfield.NewString[string](FieldValue),
 }
 
-// IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldEQ(FieldID, id))
-}
-
-// IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldNEQ(FieldID, id))
-}
-
-// IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Tag {
-	return predicate.Tag(sql.FieldIn(FieldID, ids...))
-}
-
-// IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Tag {
-	return predicate.Tag(sql.FieldNotIn(FieldID, ids...))
-}
-
-// IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldGT(FieldID, id))
-}
-
-// IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldGTE(FieldID, id))
-}
-
-// IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldLT(FieldID, id))
-}
-
-// IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Tag {
-	return predicate.Tag(sql.FieldLTE(FieldID, id))
-}
-
-// ValueEQ applies the EQ predicate on the "value" field.
-func ValueEQ(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldEQ(FieldValue, v))
-}
-
-// ValueNEQ applies the NEQ predicate on the "value" field.
-func ValueNEQ(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldNEQ(FieldValue, v))
-}
-
-// ValueIn applies the In predicate on the "value" field.
-func ValueIn(vs ...string) predicate.Tag {
-	return predicate.Tag(sql.FieldIn(FieldValue, vs...))
-}
-
-// ValueNotIn applies the NotIn predicate on the "value" field.
-func ValueNotIn(vs ...string) predicate.Tag {
-	return predicate.Tag(sql.FieldNotIn(FieldValue, vs...))
-}
-
-// ValueGT applies the GT predicate on the "value" field.
-func ValueGT(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldGT(FieldValue, v))
-}
-
-// ValueGTE applies the GTE predicate on the "value" field.
-func ValueGTE(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldGTE(FieldValue, v))
-}
-
-// ValueLT applies the LT predicate on the "value" field.
-func ValueLT(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldLT(FieldValue, v))
-}
-
-// ValueLTE applies the LTE predicate on the "value" field.
-func ValueLTE(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldLTE(FieldValue, v))
-}
-
-// ValueContains applies the Contains predicate on the "value" field.
-func ValueContains(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldContains(FieldValue, v))
-}
-
-// ValueHasPrefix applies the HasPrefix predicate on the "value" field.
-func ValueHasPrefix(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldHasPrefix(FieldValue, v))
-}
-
-// ValueHasSuffix applies the HasSuffix predicate on the "value" field.
-func ValueHasSuffix(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldHasSuffix(FieldValue, v))
-}
-
-// ValueEqualFold applies the EqualFold predicate on the "value" field.
-func ValueEqualFold(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldEqualFold(FieldValue, v))
-}
-
-// ValueContainsFold applies the ContainsFold predicate on the "value" field.
-func ValueContainsFold(v string) predicate.Tag {
-	return predicate.Tag(sql.FieldContainsFold(FieldValue, v))
-}
-
-// HasTweets applies the HasEdge predicate on the "tweets" edge.
-func HasTweets() predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, TweetsTable, TweetsPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTweetsWith applies the HasEdge predicate on the "tweets" edge with a given conditions (other predicates).
-func HasTweetsWith(preds ...predicate.Tweet) predicate.Tag {
-	return predicate.Tag(
-		func(s *sql.Selector) {
-			step := newTweetsStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
-}
-
-// HasGroups applies the HasEdge predicate on the "groups" edge.
-func HasGroups() predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, GroupsTable, GroupsPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGroupsWith applies the HasEdge predicate on the "groups" edge with a given conditions (other predicates).
-func HasGroupsWith(preds ...predicate.Group) predicate.Tag {
-	return predicate.Tag(
-		func(s *sql.Selector) {
-			step := newGroupsStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
-}
-
-// HasTweetTags applies the HasEdge predicate on the "tweet_tags" edge.
-func HasTweetTags() predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TweetTagsTable, TweetTagsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTweetTagsWith applies the HasEdge predicate on the "tweet_tags" edge with a given conditions (other predicates).
-func HasTweetTagsWith(preds ...predicate.TweetTag) predicate.Tag {
-	return predicate.Tag(
-		func(s *sql.Selector) {
-			step := newTweetTagsStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
-}
-
-// HasGroupTags applies the HasEdge predicate on the "group_tags" edge.
-func HasGroupTags() predicate.Tag {
-	return predicate.Tag(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, GroupTagsTable, GroupTagsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasGroupTagsWith applies the HasEdge predicate on the "group_tags" edge with a given conditions (other predicates).
-func HasGroupTagsWith(preds ...predicate.GroupTag) predicate.Tag {
-	return predicate.Tag(
-		func(s *sql.Selector) {
-			step := newGroupTagsStep()
-			sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-				for _, p := range preds {
-					p(s)
-				}
-			})
-		})
+// E holds typed edge handles for every edge of the Tag type.
+var E = struct {
+	// Tweets is the handle for the "tweets" edge.
+	Tweets entfield.Edge[predicate.Tweet]
+	// Groups is the handle for the "groups" edge.
+	Groups entfield.Edge[predicate.Group]
+	// TweetTags is the handle for the "tweet_tags" edge.
+	TweetTags entfield.Edge[predicate.TweetTag]
+	// GroupTags is the handle for the "group_tags" edge.
+	GroupTags entfield.Edge[predicate.GroupTag]
+}{
+	Tweets:    entfield.NewEdge[predicate.Tweet](newTweetsStep),
+	Groups:    entfield.NewEdge[predicate.Group](newGroupsStep),
+	TweetTags: entfield.NewEdge[predicate.TweetTag](newTweetTagsStep),
+	GroupTags: entfield.NewEdge[predicate.GroupTag](newGroupTagsStep),
 }
 
 // And groups predicates with the AND operator between them.

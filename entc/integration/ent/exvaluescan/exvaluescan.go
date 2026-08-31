@@ -10,7 +10,7 @@ import (
 	"math/big"
 	"net/url"
 
-	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/runtime/entfield"
 	"entgo.io/ent/schema/field"
 )
 
@@ -77,46 +77,6 @@ var (
 )
 
 // OrderOption defines the ordering options for the ExValueScan queries.
-type OrderOption func(*sql.Selector)
-
-// ByID orders the results by the id field.
-func ByID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByBinary orders the results by the binary field.
-func ByBinary(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldBinary, opts...).ToFunc()
-}
-
-// ByBinaryOptional orders the results by the binary_optional field.
-func ByBinaryOptional(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldBinaryOptional, opts...).ToFunc()
-}
-
-// ByText orders the results by the text field.
-func ByText(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldText, opts...).ToFunc()
-}
-
-// ByTextOptional orders the results by the text_optional field.
-func ByTextOptional(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTextOptional, opts...).ToFunc()
-}
-
-// ByBase64 orders the results by the base64 field.
-func ByBase64(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldBase64, opts...).ToFunc()
-}
-
-// ByCustom orders the results by the custom field.
-func ByCustom(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCustom, opts...).ToFunc()
-}
-
-// ByCustomOptional orders the results by the custom_optional field.
-func ByCustomOptional(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCustomOptional, opts...).ToFunc()
-}
+type OrderOption = entfield.Order
 
 // comment from another template.
